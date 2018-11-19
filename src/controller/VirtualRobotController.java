@@ -1,0 +1,365 @@
+package controller;
+
+import hardware.*;
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.Group;
+import javafx.scene.Node;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.StackPane;
+import javafx.scene.shape.Circle;
+import opmode.LinearOpMode;
+import javafx.scene.control.Button;
+import opmodelist.OpModes;
+import teamcode.TestOpMode1;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+public class VirtualRobotController {
+
+    //User Interface
+    @FXML private Group bot;
+    @FXML private Button driverButton;
+    @FXML private ComboBox<String> cbxOpModes;
+    @FXML private TextArea txtTelemetry;
+    @FXML Circle joyStickLeftHandle;
+    @FXML Circle joyStickRightHandle;
+    @FXML StackPane joyStickLeftPane;
+    @FXML StackPane joyStickRightPane;
+    @FXML Button btnX;
+    @FXML Button btnY;
+    @FXML Button btnA;
+    @FXML Button btnB;
+
+    //Virtual Hardware
+    private static DCMotorImpl leftMotor = null;
+    private static DCMotorImpl rightMotor = null;
+    private static ColorSensorImpl colorSensor = null;
+    private static GyroSensorImpl gyro = null;
+    private static GamePad gamePad = new GamePad();
+
+    //OpMode Control
+    private static LinearOpMode opMode = null;
+    private static volatile boolean opModeInitialized = false;
+    private static volatile boolean opModeStarted = false;
+    Thread opModeThread = null;
+
+    //Virtual Robot Control Engine
+    ScheduledExecutorService executorService = null;
+    private final double TIMER_INTERVAL_MILLISECONDS = 33;
+
+    //Virtual Robot State
+    private static final double ROBOT_WIDTH = 65;
+    private static final double WHEEL_CIRCUMFERENCE = 62.8;
+    double leftTicks, rightTicks;
+    double robotX, robotY, robotHeadingRadians;
+
+    //Telemetry
+    private static volatile String telemetryText;
+    private static volatile boolean telemetryTextChanged = false;
+
+    public void initialize() {
+        initHardware();
+        updateRobotDisplay();
+        cbxOpModes.setItems(OpModes.opModes);
+        cbxOpModes.setValue(cbxOpModes.getItems().get(0));
+    }
+
+    @FXML
+    private void handleDriverButtonAction(ActionEvent event){
+        if (!opModeInitialized){
+            if (!initLinearOpMode()) return;
+            driverButton.setText("START");
+            opModeInitialized = true;
+            Runnable runOpMode = new Runnable() {
+                @Override
+                public void run() {
+                    runOpModeAndCleanUp();
+                }
+            };
+            opModeThread = new Thread(runOpMode);
+            opModeThread.setDaemon(true);
+            Runnable updateDisplay = new Runnable() {
+                @Override
+                public void run() {
+                    updateRobotDisplay();
+                    updateTelemetryDisplay();
+                }
+            };
+            Runnable singleCycle = new Runnable() {
+                @Override
+                public void run() {
+                    updateRobotState();
+                    Platform.runLater(updateDisplay);
+                }
+            };
+            executorService = Executors.newSingleThreadScheduledExecutor();
+            executorService.scheduleAtFixedRate(singleCycle, 0, 33, TimeUnit.MILLISECONDS);
+            opModeThread.start();
+        }
+        else if (!opModeStarted){
+            driverButton.setText("STOP");
+            opModeStarted = true;
+        }
+        else{
+            driverButton.setText("INIT");
+            opModeInitialized = false;
+            opModeStarted = false;
+            if (opModeThread.isAlive() && !opModeThread.isInterrupted()) opModeThread.interrupt();
+            if (!executorService.isShutdown()) executorService.shutdown();
+            try{
+                opModeThread.join(500);
+            } catch(InterruptedException exc) {
+                Thread.currentThread().interrupt();
+            }
+            if (opModeThread.isAlive()) System.out.println("OpMode Thread Failed to Terminate.");
+            leftMotor.setPower(0);
+            rightMotor.setPower(0);
+            resetGamePad();
+        }
+    }
+
+    private void runOpModeAndCleanUp(){
+        opMode.runOpMode();
+        leftMotor.setPower(0);
+        rightMotor.setPower(0);
+        if (!executorService.isShutdown()) executorService.shutdown();
+        opModeInitialized = false;
+        opModeStarted = false;
+        Platform.runLater(new Runnable() {
+            public void run() {
+                driverButton.setText("INIT");
+                resetGamePad();
+            }
+        });
+    }
+
+    @FXML
+    private void handleFieldMouseClick(MouseEvent arg){
+        if (opModeInitialized || opModeStarted) return;
+        if (arg.getButton() == MouseButton.PRIMARY) {
+            double displayX = arg.getX() - 37.5;
+            double displayY = arg.getY() - 37.5;
+            robotX = arg.getX() - 300.0;
+            robotY = 300.0 - arg.getY();
+            bot.setTranslateX(displayX);
+            bot.setTranslateY(displayY);
+        }
+        else if (arg.getButton() == MouseButton.SECONDARY){
+            double centerX = robotX + 300;
+            double centerY = 300 - robotY;
+            double displayAngleRads = Math.atan2(arg.getY() - centerY, arg.getX() - centerX);
+            double displayAngleDegrees = displayAngleRads * 180.0 / Math.PI;
+            robotHeadingRadians = -displayAngleRads;
+            bot.setRotate(displayAngleDegrees);
+        }
+    }
+
+    @FXML
+    private void handleJoystickDrag(MouseEvent arg){
+        if (!opModeInitialized || !opModeStarted) return;
+        float x = (float)Math.max(10, Math.min(110, arg.getX()));
+        float y = (float)Math.max(10, Math.min(110, arg.getY()));
+        if (arg.getSource() == joyStickLeftPane){
+            joyStickLeftHandle.setTranslateX(x-10);
+            joyStickLeftHandle.setTranslateY(y-10);
+            gamePad.left_stick_x = (x - 60.0f) / 50.0f;
+            gamePad.left_stick_y = (y - 60.0f) / 50.0f;
+        }
+        else if (arg.getSource() == joyStickRightPane){
+            joyStickRightHandle.setTranslateX(x-10);
+            joyStickRightHandle.setTranslateY(y-10);
+            gamePad.right_stick_x = (x - 60.0f) / 50.0f;
+            gamePad.right_stick_y = (y - 60.0f) / 50.0f;
+        }
+    }
+
+    @FXML
+    private void handleGamePadButtonMouseEvent(MouseEvent arg){
+        if (!opModeInitialized || !opModeStarted) return;
+        Button btn = (Button)arg.getSource();
+        boolean result = false;
+
+        if (arg.getEventType() == MouseEvent.MOUSE_EXITED || arg.getEventType() == MouseEvent.MOUSE_RELEASED) result = false;
+        else if (arg.getEventType() == MouseEvent.MOUSE_PRESSED) result = true;
+        else return;
+
+        if (btn == btnX) gamePad.x = result;
+        else if (btn == btnY) gamePad.y = result;
+        else if (btn == btnA) gamePad.a = result;
+        else if (btn == btnB) gamePad.b = result;
+    }
+
+    private void resetGamePad(){
+        gamePad.left_stick_y = 0;
+        gamePad.left_stick_x = 0;
+        gamePad.right_stick_x = 0;
+        gamePad.right_stick_y = 0;
+        gamePad.a = false;
+        gamePad.b = false;
+        gamePad.x = false;
+        gamePad.y = false;
+        joyStickLeftHandle.setTranslateX(50);
+        joyStickLeftHandle.setTranslateY(50);
+        joyStickRightHandle.setTranslateX(50);
+        joyStickRightHandle.setTranslateY(50);
+    }
+
+
+    private boolean initLinearOpMode(){
+        String opModeName = cbxOpModes.getValue();
+        opModeName = "teamcode." + opModeName;
+        try {
+            Class opModeClass = Class.forName(opModeName);
+            opMode = (LinearOpMode)opModeClass.newInstance();
+        } catch (Exception exc){
+            return false;
+        }
+        return true;
+    }
+
+    private void initHardware(){
+        leftMotor = new DCMotorImpl();
+        rightMotor = new DCMotorImpl();
+        colorSensor = new ColorSensorImpl();
+        gyro = new GyroSensorImpl();
+    }
+
+    private synchronized void updateRobotState(){
+        leftMotor.updatePosition(TIMER_INTERVAL_MILLISECONDS);
+        rightMotor.updatePosition(TIMER_INTERVAL_MILLISECONDS);
+        double newLeftTicks = leftMotor.getCurrentPositionDouble();
+        double newRightTicks = rightMotor.getCurrentPositionDouble();
+        double intervalLeftTicks = newLeftTicks - leftTicks;
+        double intervalRightTicks = newRightTicks - rightTicks;
+        leftTicks = newLeftTicks;
+        rightTicks = newRightTicks;
+        double leftWheelDist = -intervalLeftTicks * WHEEL_CIRCUMFERENCE / DCMotorImpl.TICKS_PER_ROTATION;
+        double rightWheelDist = intervalRightTicks * WHEEL_CIRCUMFERENCE / DCMotorImpl.TICKS_PER_ROTATION;
+        double distTraveled = (leftWheelDist + rightWheelDist) / 2.0;
+        double headingChange = (rightWheelDist - leftWheelDist) / ROBOT_WIDTH;
+        double deltaRobotX = distTraveled * Math.cos(robotHeadingRadians + headingChange / 2.0);
+        double deltaRobotY = distTraveled * Math.sin(robotHeadingRadians + headingChange / 2.0);
+        robotX += deltaRobotX;
+        robotY += deltaRobotY;
+        if (robotX > 262.5 && deltaRobotX > 0) robotX = 262.5;
+        else if (robotX < -262.5 && deltaRobotX < 0) robotX = -262.5;
+        if (robotY > 262.5 && deltaRobotY > 0) robotY = 262.5;
+        else if (robotY < -262.5 && deltaRobotY < 0) robotY = -262.5;
+        robotHeadingRadians += headingChange;
+        if (robotHeadingRadians > Math.PI) robotHeadingRadians -= 2.0 * Math.PI;
+        else if (robotHeadingRadians < -Math.PI) robotHeadingRadians += 2.0 * Math.PI;
+        gyro.updateHeading(robotHeadingRadians * 180.0 / Math.PI);
+        colorSensor.updateColor(128, 128, 128);
+    }
+
+    private synchronized void updateRobotDisplay(){
+        double displayX = 300 + robotX - 37.5;
+        double displayY = 300 - robotY - 37.5;
+        double displayAngle = -robotHeadingRadians * 180.0 / Math.PI;
+        bot.setTranslateX(displayX);
+        bot.setTranslateY(displayY);
+        bot.setRotate(displayAngle);
+    }
+
+    private void updateTelemetryDisplay(){
+        if (telemetryTextChanged && telemetryText != null) txtTelemetry.setText(telemetryText);
+        telemetryTextChanged = false;
+    }
+
+    private void timerCycle(){
+        updateRobotState();
+        updateRobotDisplay();
+    }
+
+    private class ColorSensorImpl implements ColorSensor {
+        private int red = 0;
+        private int green = 0;
+        private int blue = 0;
+        public synchronized int red(){ return red; }
+        public synchronized int green(){ return green; }
+        public synchronized int blue(){ return blue; }
+        synchronized void updateColor(int red, int green, int blue){
+            this.red = red;
+            this.green = green;
+            this. blue = blue;
+        }
+    }
+
+    private class GyroSensorImpl implements GyroSensor {
+        private boolean initialized = false;
+        private double heading = 0.0;
+        public synchronized void init(){ initialized = true; }
+        public synchronized double getHeading(){ return heading; }
+        synchronized void updateHeading(double heading){ this.heading = heading; }
+    }
+
+    private class DCMotorImpl implements DCMotor {
+        private static final double MAX_TICKS_PER_SEC = 2500.0;
+        private static final double TICKS_PER_ROTATION = 1120;
+        private DCMotor.RunMode mode = RunMode.RUN_WITHOUT_ENCODER;
+        private DCMotor.Direction direction = Direction.FORWARD;
+        private double power = 0.0;
+        private double position = 0.0;
+        public synchronized void setMode(DCMotor.RunMode mode){ this.mode = mode; }
+        public synchronized DCMotor.RunMode getMode(){ return mode; }
+        public synchronized void setDirection(DCMotor.Direction direction){ this.direction = direction; }
+        public synchronized DCMotor.Direction getDirection(){ return direction; }
+        public synchronized double getPower(){ return power; }
+        public synchronized void setPower(double power){ this.power = power; }
+        public synchronized int getCurrentPosition(){ return (int)Math.floor(position);}
+        public synchronized double getCurrentPositionDouble(){ return position; }
+        synchronized void updatePosition(double milliseconds){
+            double intervalTicks = power * MAX_TICKS_PER_SEC * milliseconds / 1000.0;
+            position = direction == Direction.FORWARD? position + intervalTicks :
+                    position - intervalTicks;
+        }
+    }
+
+    private static class HardwareMapImpl implements HardwareMap{
+        HardwareMapImpl(){
+            dcMotor.put("left_motor", leftMotor);
+            dcMotor.put("right_motor", rightMotor);
+            colorSensor.put("color_sensor",VirtualRobotController.colorSensor);
+            gyroSensor.put("gyro_sensor", gyro);
+        }
+    }
+
+    public static class LinearOpModeBase {
+        protected final HardwareMap hardwareMap;
+        protected final GamePad gamePad1;
+        protected final Telemetry telemetry;
+
+        public LinearOpModeBase(){
+            hardwareMap = new HardwareMapImpl();
+            gamePad1 = gamePad;
+            telemetry = new Telemetry();
+        }
+
+        protected void waitForStart(){
+            while (!opModeStarted) {
+                try{
+                    Thread.sleep(0);
+                } catch (InterruptedException exc){
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+            }
+            return;
+        }
+    }
+
+    public static class TelemetryBase {
+        protected void setText(String text) {
+            telemetryText = text;
+            telemetryTextChanged = true;
+        }
+    }
+
+}
