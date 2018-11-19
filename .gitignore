@@ -1,7 +1,2 @@
-.idea/vcs.xml
-.idea/workspace.xml
-.idea/usage.statistics.xml
-.idea/tasks.xml
 out/
 *.class
-*.iml
