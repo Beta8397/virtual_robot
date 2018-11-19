@@ -25,6 +25,8 @@ public class TestOpMode2 extends LinearOpMode {
                 left.setPower(0);
                 right.setPower(0);
             }
+            telemetry.addData("Heading", " %.1f", gyro.getHeading());
+            telemetry.update();
         }
         left.setPower(0);
         right.setPower(0);

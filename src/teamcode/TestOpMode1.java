@@ -1,5 +1,6 @@
 package teamcode;
 
+import hardware.ColorSensor;
 import hardware.DCMotor;
 import hardware.GyroSensor;
 import opmode.LinearOpMode;
@@ -12,6 +13,8 @@ public class TestOpMode1 extends LinearOpMode {
         DCMotor right = hardwareMap.dcMotor.get("right_motor");
         left.setDirection(DCMotor.Direction.REVERSE);
         GyroSensor gyro = hardwareMap.gyroSensor.get("gyro_sensor");
+        gyro.init();
+        ColorSensor colorSensor = hardwareMap.colorSensor.get("color_sensor");
         waitForStart();
         while (opModeIsActive()){
             if (gamePad1.a){
@@ -26,6 +29,8 @@ public class TestOpMode1 extends LinearOpMode {
                 left.setPower(0);
                 right.setPower(0);
             }
+            telemetry.addData("Color","R %d  G %d  B %d", colorSensor.red(), colorSensor.green(), colorSensor.blue());
+            telemetry.addData("Heading"," %.1f", gyro.getHeading());
             telemetry.update();
         }
         left.setPower(0);

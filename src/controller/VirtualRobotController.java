@@ -1,22 +1,24 @@
 package controller;
 
+import background.Background;
 import hardware.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelReader;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import opmode.LinearOpMode;
 import javafx.scene.control.Button;
 import opmodelist.OpModes;
-import teamcode.TestOpMode1;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -36,6 +38,7 @@ public class VirtualRobotController {
     @FXML Button btnY;
     @FXML Button btnA;
     @FXML Button btnB;
+    @FXML ImageView imgViewBackground;
 
     //Virtual Hardware
     private static DCMotorImpl leftMotor = null;
@@ -43,6 +46,10 @@ public class VirtualRobotController {
     private static ColorSensorImpl colorSensor = null;
     private static GyroSensorImpl gyro = null;
     private static GamePad gamePad = new GamePad();
+
+    //Background Image
+    private Image backgroundImage = Background.background;
+    private PixelReader pixelReader = backgroundImage.getPixelReader();
 
     //OpMode Control
     private static LinearOpMode opMode = null;
@@ -69,6 +76,7 @@ public class VirtualRobotController {
         updateRobotDisplay();
         cbxOpModes.setItems(OpModes.opModes);
         cbxOpModes.setValue(cbxOpModes.getItems().get(0));
+        imgViewBackground.setImage(backgroundImage);
     }
 
     @FXML
@@ -256,7 +264,22 @@ public class VirtualRobotController {
         if (robotHeadingRadians > Math.PI) robotHeadingRadians -= 2.0 * Math.PI;
         else if (robotHeadingRadians < -Math.PI) robotHeadingRadians += 2.0 * Math.PI;
         gyro.updateHeading(robotHeadingRadians * 180.0 / Math.PI);
-        colorSensor.updateColor(128, 128, 128);
+        int colorX = (int)(robotX + 300);
+        int colorY = (int)(300 - robotY);
+        double red = 0.0;
+        double green = 0.0;
+        double blue = 0.0;
+        for (int row = colorY-4; row < colorY+5; row++)
+            for (int col = colorX - 4; col < colorX+5; col++){
+                Color c = pixelReader.getColor(col, row);
+                red += c.getRed();
+                green += c.getGreen();
+                blue += c.getBlue();
+            }
+            red = Math.floor( red * 256.0 / 81.0 );
+            green = Math.floor( green * 256.0 / 81.0 );
+            blue = Math.floor( blue * 256.0 / 81.0 );
+        colorSensor.updateColor((int)red, (int)green, (int)blue);
     }
 
     private synchronized void updateRobotDisplay(){
@@ -294,9 +317,26 @@ public class VirtualRobotController {
 
     private class GyroSensorImpl implements GyroSensor {
         private boolean initialized = false;
+        private double initialHeading = 0.0;
         private double heading = 0.0;
-        public synchronized void init(){ initialized = true; }
-        public synchronized double getHeading(){ return heading; }
+        public synchronized void init(){
+            initialized = true;
+            initialHeading = robotHeadingRadians * 180.0 / Math.PI;
+        }
+        synchronized void deinit(){
+            initialized = false;
+            initialHeading = 0.0;
+            heading = 0.0;
+        }
+        public synchronized double getHeading(){
+            if (initialized){
+                double result = heading - initialHeading;
+                if (result < -180.0) result += 360.0;
+                else if (result > 180.0) result -= 360.0;
+                return result;
+            }
+            else return 0.0;
+        }
         synchronized void updateHeading(double heading){ this.heading = heading; }
     }
 
@@ -340,6 +380,7 @@ public class VirtualRobotController {
             hardwareMap = new HardwareMapImpl();
             gamePad1 = gamePad;
             telemetry = new Telemetry();
+            gyro.deinit();
         }
 
         protected void waitForStart(){

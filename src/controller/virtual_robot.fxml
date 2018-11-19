@@ -5,6 +5,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.TextArea?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -24,6 +25,7 @@
       <StackPane alignment="TOP_LEFT" maxHeight="600.0" maxWidth="600.0" minHeight="600.0" minWidth="600.0" onMouseClicked="#handleFieldMouseClick" prefHeight="600.0" prefWidth="600.0" BorderPane.alignment="CENTER">
          <children>
             <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#b0b0b0" height="600.0" stroke="BLACK" strokeType="INSIDE" width="600.0" />
+            <ImageView fx:id="imgViewBackground" fitHeight="600.0" fitWidth="600.0" pickOnBounds="true" preserveRatio="true" />
             <Group fx:id="bot" translateX="200.0" translateY="200.0">
                <children>
                   <Rectangle arcHeight="5.0" arcWidth="5.0" fill="YELLOW" height="75.0" stroke="BLACK" strokeType="INSIDE" width="75.0" />
