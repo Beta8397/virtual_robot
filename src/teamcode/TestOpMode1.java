@@ -31,6 +31,7 @@ public class TestOpMode1 extends LinearOpMode {
             }
             telemetry.addData("Color","R %d  G %d  B %d", colorSensor.red(), colorSensor.green(), colorSensor.blue());
             telemetry.addData("Heading"," %.1f", gyro.getHeading());
+            telemetry.addData("Encoders","Left %d  Right %d", left.getCurrentPosition(), right.getCurrentPosition());
             telemetry.update();
         }
         left.setPower(0);

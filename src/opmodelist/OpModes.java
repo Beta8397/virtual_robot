@@ -8,7 +8,7 @@ public class OpModes {
             FXCollections.observableArrayList(
 
                     "TestOpMode1",
-                    "TestOpMode2", "TestOpMode3"
+                    "TestOpMode2", "TestOpMode3", "LineFollow"
 
             );
 }

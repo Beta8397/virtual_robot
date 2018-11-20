@@ -152,10 +152,12 @@ public class VirtualRobotController {
     private void handleFieldMouseClick(MouseEvent arg){
         if (opModeInitialized || opModeStarted) return;
         if (arg.getButton() == MouseButton.PRIMARY) {
-            double displayX = arg.getX() - 37.5;
-            double displayY = arg.getY() - 37.5;
-            robotX = arg.getX() - 300.0;
-            robotY = 300.0 - arg.getY();
+            double argX = Math.max(37.5, Math.min(562.5, arg.getX()));
+            double argY = Math.max(37.5, Math.min(562.5, arg.getY()));
+            double displayX = argX - 37.5;
+            double displayY = argY - 37.5;
+            robotX = argX - 300.0;
+            robotY = 300.0 - argY;
             bot.setTranslateX(displayX);
             bot.setTranslateY(displayY);
         }
@@ -248,8 +250,10 @@ public class VirtualRobotController {
         double intervalRightTicks = newRightTicks - rightTicks;
         leftTicks = newLeftTicks;
         rightTicks = newRightTicks;
-        double leftWheelDist = -intervalLeftTicks * WHEEL_CIRCUMFERENCE / DCMotorImpl.TICKS_PER_ROTATION;
+        double leftWheelDist = intervalLeftTicks * WHEEL_CIRCUMFERENCE / DCMotorImpl.TICKS_PER_ROTATION;
+        if (leftMotor.getDirection() == DCMotor.Direction.FORWARD) leftWheelDist = -leftWheelDist;
         double rightWheelDist = intervalRightTicks * WHEEL_CIRCUMFERENCE / DCMotorImpl.TICKS_PER_ROTATION;
+        if (rightMotor.getDirection() == DCMotor.Direction.REVERSE) rightWheelDist = -rightWheelDist;
         double distTraveled = (leftWheelDist + rightWheelDist) / 2.0;
         double headingChange = (rightWheelDist - leftWheelDist) / ROBOT_WIDTH;
         double deltaRobotX = distTraveled * Math.cos(robotHeadingRadians + headingChange / 2.0);
@@ -277,8 +281,11 @@ public class VirtualRobotController {
                 blue += c.getBlue();
             }
             red = Math.floor( red * 256.0 / 81.0 );
+            if (red == 256) red = 255;
             green = Math.floor( green * 256.0 / 81.0 );
+            if (green == 256) green = 255;
             blue = Math.floor( blue * 256.0 / 81.0 );
+            if (blue == 256) blue = 255;
         colorSensor.updateColor((int)red, (int)green, (int)blue);
     }
 
@@ -356,9 +363,8 @@ public class VirtualRobotController {
         public synchronized int getCurrentPosition(){ return (int)Math.floor(position);}
         public synchronized double getCurrentPositionDouble(){ return position; }
         synchronized void updatePosition(double milliseconds){
-            double intervalTicks = power * MAX_TICKS_PER_SEC * milliseconds / 1000.0;
-            position = direction == Direction.FORWARD? position + intervalTicks :
-                    position - intervalTicks;
+            if (mode == RunMode.RUN_TO_POSITION || mode == RunMode.STOP_AND_RESET_ENCODER) return;
+            position += power * MAX_TICKS_PER_SEC * milliseconds / 1000.0;
         }
     }
 
