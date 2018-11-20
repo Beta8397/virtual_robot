@@ -6,13 +6,15 @@ import hardware.GyroSensor;
 import javafx.scene.paint.Color;
 import opmode.LinearOpMode;
 
+/**
+ * Example OpMode. Demonstrates autonomous proportionate line following.
+ */
 public class LineFollow extends LinearOpMode {
 
     public void runOpMode(){
         DCMotor left = hardwareMap.dcMotor.get("left_motor");
         DCMotor right = hardwareMap.dcMotor.get("right_motor");
         left.setDirection(DCMotor.Direction.REVERSE);
-        GyroSensor gyro = hardwareMap.gyroSensor.get("gyro_sensor");
         ColorSensor colorSensor = hardwareMap.colorSensor.get("color_sensor");
         waitForStart();
         double speed = 0.25;

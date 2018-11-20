@@ -17,15 +17,15 @@ An abridged approximation of the FTC SDK is provided.
 User-defined OpModes must be placed in the teamcode package, and must extend opmode.LinearOpMode. Each OpMode must be
 registered by placing its name in the opModes list in the opmodelist.OpModes class.
 
-The API for the simulator will soon be documented with a javadoc.
+The API for the simulator is documented with a javadoc.
 
 The LinearOpMode class in the simulator provides access to:
 
   a HardwareMap object, which in turn provides access to the two DCMotor objects ("left_motor" and "right_motor"),
   the gyro sensor ("gyro_sensor"), and the color sensor ("color_sensor");
-
+  
   a GamePad (implemented in the UI, not a physical gamepad), with a subset of standard gamepad function;
-
+  
   and, a Telemetry object.
 
 An approximation of the FTC SDK's ElapsedTime class is provided in the time package.

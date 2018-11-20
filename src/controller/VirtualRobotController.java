@@ -23,6 +23,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Controller class for the robot simulation.
+ */
 public class VirtualRobotController {
 
     //User Interface
@@ -354,7 +357,15 @@ public class VirtualRobotController {
         private DCMotor.Direction direction = Direction.FORWARD;
         private double power = 0.0;
         private double position = 0.0;
-        public synchronized void setMode(DCMotor.RunMode mode){ this.mode = mode; }
+
+        public synchronized void setMode(DCMotor.RunMode mode){
+            this.mode = mode;
+            if (mode == RunMode.STOP_AND_RESET_ENCODER){
+                power = 0.0;
+                position = 0.0;
+            }
+        }
+
         public synchronized DCMotor.RunMode getMode(){ return mode; }
         public synchronized void setDirection(DCMotor.Direction direction){ this.direction = direction; }
         public synchronized DCMotor.Direction getDirection(){ return direction; }
@@ -377,6 +388,10 @@ public class VirtualRobotController {
         }
     }
 
+
+    /**
+     * Base class for LinearOpMode.
+     */
     public static class LinearOpModeBase {
         protected final HardwareMap hardwareMap;
         protected final GamePad gamePad1;
@@ -389,6 +404,9 @@ public class VirtualRobotController {
             gyro.deinit();
         }
 
+        /**
+         * Pauses execution until the START button is pressed. Call this method after initialization code.
+         */
         protected void waitForStart(){
             while (!opModeStarted) {
                 try{

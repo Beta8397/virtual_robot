@@ -53,12 +53,12 @@
    <right>
       <VBox alignment="CENTER" BorderPane.alignment="CENTER">
          <children>
-            <ComboBox fx:id="cbxOpModes" prefWidth="175.0" />
+            <ComboBox fx:id="cbxOpModes" prefWidth="250.0" promptText="OpModes" />
             <Button fx:id="driverButton" alignment="CENTER" minWidth="75.0" mnemonicParsing="false" onAction="#handleDriverButtonAction" text="INIT">
                <VBox.margin>
                   <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                </VBox.margin></Button>
-            <TextArea fx:id="txtTelemetry" editable="false" prefHeight="200.0" prefWidth="175.0" />
+            <TextArea fx:id="txtTelemetry" editable="false" prefHeight="200.0" prefWidth="250.0" />
          </children>
       </VBox>
    </right>

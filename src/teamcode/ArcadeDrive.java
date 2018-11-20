@@ -4,13 +4,17 @@ import hardware.DCMotor;
 import hardware.GyroSensor;
 import opmode.LinearOpMode;
 
+/**
+ * Example OpMode. Controls robot using left joystick, with arcade drive.
+ */
 public class ArcadeDrive extends LinearOpMode {
 
     public void runOpMode(){
         DCMotor left = hardwareMap.dcMotor.get("left_motor");
         DCMotor right = hardwareMap.dcMotor.get("right_motor");
         left.setDirection(DCMotor.Direction.REVERSE);
-        GyroSensor gyro = hardwareMap.gyroSensor.get("gyro_sensor");
+        telemetry.addData("Press Start When Ready","");
+        telemetry.update();
         waitForStart();
         while (opModeIsActive()){
             float fwd = -gamePad1.left_stick_y;
