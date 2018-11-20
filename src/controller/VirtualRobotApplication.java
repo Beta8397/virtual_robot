@@ -18,6 +18,7 @@ public class VirtualRobotApplication extends Application {
         //Parent root = (BorderPane)FXMLLoader.load(getClass().getResource("virtual_robot.fxml"));
         primaryStage.setTitle("Virtual Robot");
         primaryStage.setScene(new Scene(root));
+        primaryStage.setResizable(false);
         primaryStage.show();
         controllerHandle = loader.getController();
     }

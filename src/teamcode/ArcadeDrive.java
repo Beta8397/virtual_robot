@@ -4,7 +4,7 @@ import hardware.DCMotor;
 import hardware.GyroSensor;
 import opmode.LinearOpMode;
 
-public class TestOpMode3 extends LinearOpMode {
+public class ArcadeDrive extends LinearOpMode {
 
     public void runOpMode(){
         DCMotor left = hardwareMap.dcMotor.get("left_motor");
