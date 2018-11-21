@@ -4,6 +4,7 @@
 <?import javafx.scene.Group?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
@@ -53,6 +54,11 @@
    <right>
       <VBox alignment="CENTER" BorderPane.alignment="CENTER">
          <children>
+            <Label alignment="CENTER" contentDisplay="CENTER" text="OpModes">
+               <VBox.margin>
+                  <Insets bottom="10.0" />
+               </VBox.margin>
+            </Label>
             <ComboBox fx:id="cbxOpModes" prefWidth="250.0" promptText="OpModes" />
             <Button fx:id="driverButton" alignment="CENTER" minWidth="75.0" mnemonicParsing="false" onAction="#handleDriverButtonAction" text="INIT">
                <VBox.margin>
@@ -122,7 +128,7 @@
                   </Button>
                </children>
                <HBox.margin>
-                  <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+                  <Insets bottom="10.0" left="20.0" right="200.0" top="10.0" />
                </HBox.margin>
             </GridPane>
          </children>
