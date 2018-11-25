@@ -16,6 +16,10 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.transform.Rotate;
+import javafx.scene.transform.Scale;
+import javafx.scene.transform.Translate;
 import opmode.LinearOpMode;
 import javafx.scene.control.Button;
 import opmodelist.OpModes;
@@ -29,7 +33,10 @@ import java.util.concurrent.TimeUnit;
 public class VirtualRobotController {
 
     //User Interface
+    @FXML private StackPane fieldPane;
+    @FXML ImageView imgViewBackground;
     @FXML private Group bot;
+    @FXML private Rectangle backServoSlider;
     @FXML private Button driverButton;
     @FXML private ComboBox<String> cbxOpModes;
     @FXML private TextArea txtTelemetry;
@@ -41,18 +48,20 @@ public class VirtualRobotController {
     @FXML Button btnY;
     @FXML Button btnA;
     @FXML Button btnB;
-    @FXML ImageView imgViewBackground;
 
     //Virtual Hardware
     private static DCMotorImpl leftMotor = null;
     private static DCMotorImpl rightMotor = null;
     private static ColorSensorImpl colorSensor = null;
     private static GyroSensorImpl gyro = null;
+    private static ServoImpl backServo = null;
     private static GamePad gamePad = new GamePad();
 
-    //Background Image
+    //Background Image and Field
     private Image backgroundImage = Background.background;
     private PixelReader pixelReader = backgroundImage.getPixelReader();
+    double fieldWidth;
+    private double halfFieldWidth;
 
     //OpMode Control
     private static LinearOpMode opMode = null;
@@ -65,8 +74,9 @@ public class VirtualRobotController {
     private final double TIMER_INTERVAL_MILLISECONDS = 33;
 
     //Virtual Robot State
-    private static final double ROBOT_WIDTH = 65;
-    private static final double WHEEL_CIRCUMFERENCE = 62.8;
+    private static double halfBotWidth;
+    private static double interWheelDistance;
+    private static double wheelCircumference;
     double leftTicks, rightTicks;
     double robotX, robotY, robotHeadingRadians;
 
@@ -76,11 +86,29 @@ public class VirtualRobotController {
 
     public void initialize() {
         initHardware();
-        updateRobotDisplay();
         cbxOpModes.setItems(OpModes.opModes);
         cbxOpModes.setValue(cbxOpModes.getItems().get(0));
         imgViewBackground.setImage(backgroundImage);
+        setupBot();
     }
+
+    private void setupBot(){
+        fieldWidth = fieldPane.getPrefWidth();
+        halfFieldWidth = fieldWidth / 2.0;
+        double botWidth = fieldWidth / 8.0;
+        halfBotWidth = botWidth / 2.0;
+        wheelCircumference = Math.PI * botWidth / 4.5;
+        interWheelDistance = botWidth * 8.0 / 9.0;
+
+        bot.getTransforms().add(new Translate(fieldWidth/2.0 - halfBotWidth, fieldWidth/2.0 - halfBotWidth));
+        bot.getTransforms().add(new Rotate(0, halfBotWidth, halfBotWidth));
+        bot.getTransforms().add(new Scale(botWidth/75.0, botWidth/75.0, 0, 0));
+
+        System.out.println("fieldWidth = " + fieldWidth);
+        System.out.println("botWidth = " + botWidth);
+
+    }
+
 
     @FXML
     private void handleDriverButtonAction(ActionEvent event){
@@ -155,22 +183,26 @@ public class VirtualRobotController {
     private void handleFieldMouseClick(MouseEvent arg){
         if (opModeInitialized || opModeStarted) return;
         if (arg.getButton() == MouseButton.PRIMARY) {
-            double argX = Math.max(37.5, Math.min(562.5, arg.getX()));
-            double argY = Math.max(37.5, Math.min(562.5, arg.getY()));
-            double displayX = argX - 37.5;
-            double displayY = argY - 37.5;
-            robotX = argX - 300.0;
-            robotY = 300.0 - argY;
-            bot.setTranslateX(displayX);
-            bot.setTranslateY(displayY);
+            double argX = Math.max(halfBotWidth, Math.min(fieldWidth - halfBotWidth, arg.getX()));
+            double argY = Math.max(halfBotWidth, Math.min(fieldWidth - halfBotWidth, arg.getY()));
+            double displayX = argX - halfBotWidth;
+            double displayY = argY - halfBotWidth;
+            robotX = argX - halfFieldWidth;
+            robotY = halfFieldWidth - argY;
+            Translate translate = (Translate)bot.getTransforms().get(0);
+            translate.setX(displayX);
+            translate.setY(displayY);
         }
         else if (arg.getButton() == MouseButton.SECONDARY){
-            double centerX = robotX + 300;
-            double centerY = 300 - robotY;
+            double centerX = robotX + halfFieldWidth;
+            double centerY = halfFieldWidth - robotY;
             double displayAngleRads = Math.atan2(arg.getY() - centerY, arg.getX() - centerX);
             double displayAngleDegrees = displayAngleRads * 180.0 / Math.PI;
             robotHeadingRadians = -displayAngleRads;
-            bot.setRotate(displayAngleDegrees);
+            ((Rotate)bot.getTransforms().get(1)).setAngle(displayAngleDegrees);
+            System.out.println("centerX = " + centerX + "  centerY = " + centerY);
+            System.out.println("clickX = " + arg.getX() + "  clickY = " + arg.getY());
+            System.out.println("displayAngleDegrees = " + displayAngleDegrees);
         }
     }
 
@@ -242,6 +274,7 @@ public class VirtualRobotController {
         rightMotor = new DCMotorImpl();
         colorSensor = new ColorSensorImpl();
         gyro = new GyroSensorImpl();
+        backServo = new ServoImpl();
     }
 
     private synchronized void updateRobotState(){
@@ -253,26 +286,26 @@ public class VirtualRobotController {
         double intervalRightTicks = newRightTicks - rightTicks;
         leftTicks = newLeftTicks;
         rightTicks = newRightTicks;
-        double leftWheelDist = intervalLeftTicks * WHEEL_CIRCUMFERENCE / DCMotorImpl.TICKS_PER_ROTATION;
+        double leftWheelDist = intervalLeftTicks * wheelCircumference / DCMotorImpl.TICKS_PER_ROTATION;
         if (leftMotor.getDirection() == DCMotor.Direction.FORWARD) leftWheelDist = -leftWheelDist;
-        double rightWheelDist = intervalRightTicks * WHEEL_CIRCUMFERENCE / DCMotorImpl.TICKS_PER_ROTATION;
+        double rightWheelDist = intervalRightTicks * wheelCircumference / DCMotorImpl.TICKS_PER_ROTATION;
         if (rightMotor.getDirection() == DCMotor.Direction.REVERSE) rightWheelDist = -rightWheelDist;
         double distTraveled = (leftWheelDist + rightWheelDist) / 2.0;
-        double headingChange = (rightWheelDist - leftWheelDist) / ROBOT_WIDTH;
+        double headingChange = (rightWheelDist - leftWheelDist) / interWheelDistance;
         double deltaRobotX = distTraveled * Math.cos(robotHeadingRadians + headingChange / 2.0);
         double deltaRobotY = distTraveled * Math.sin(robotHeadingRadians + headingChange / 2.0);
         robotX += deltaRobotX;
         robotY += deltaRobotY;
-        if (robotX > 262.5 && deltaRobotX > 0) robotX = 262.5;
-        else if (robotX < -262.5 && deltaRobotX < 0) robotX = -262.5;
-        if (robotY > 262.5 && deltaRobotY > 0) robotY = 262.5;
-        else if (robotY < -262.5 && deltaRobotY < 0) robotY = -262.5;
+        if (robotX >  (halfFieldWidth - halfBotWidth)) robotX = halfFieldWidth - halfBotWidth;
+        else if (robotX < (halfBotWidth - halfFieldWidth)) robotX = halfBotWidth - halfFieldWidth;
+        if (robotY > (halfFieldWidth - halfBotWidth)) robotY = halfFieldWidth - halfBotWidth;
+        else if (robotY < (halfBotWidth - halfFieldWidth)) robotY = halfBotWidth - halfFieldWidth;
         robotHeadingRadians += headingChange;
         if (robotHeadingRadians > Math.PI) robotHeadingRadians -= 2.0 * Math.PI;
         else if (robotHeadingRadians < -Math.PI) robotHeadingRadians += 2.0 * Math.PI;
         gyro.updateHeading(robotHeadingRadians * 180.0 / Math.PI);
-        int colorX = (int)(robotX + 300);
-        int colorY = (int)(300 - robotY);
+        int colorX = (int)(robotX + halfFieldWidth);
+        int colorY = (int)(halfFieldWidth - robotY);
         double red = 0.0;
         double green = 0.0;
         double blue = 0.0;
@@ -293,12 +326,14 @@ public class VirtualRobotController {
     }
 
     private synchronized void updateRobotDisplay(){
-        double displayX = 300 + robotX - 37.5;
-        double displayY = 300 - robotY - 37.5;
+        backServoSlider.setTranslateY(5.0 + 45.0 * backServo.getPosition());
+        double displayX = halfFieldWidth + robotX - halfBotWidth;
+        double displayY = halfFieldWidth - robotY - halfBotWidth;
         double displayAngle = -robotHeadingRadians * 180.0 / Math.PI;
-        bot.setTranslateX(displayX);
-        bot.setTranslateY(displayY);
-        bot.setRotate(displayAngle);
+        Translate translate = (Translate)bot.getTransforms().get(0);
+        translate.setX(displayX);
+        translate.setY(displayY);
+        ((Rotate)bot.getTransforms().get(1)).setAngle(displayAngle);
     }
 
     private void updateTelemetryDisplay(){
@@ -370,12 +405,28 @@ public class VirtualRobotController {
         public synchronized void setDirection(DCMotor.Direction direction){ this.direction = direction; }
         public synchronized DCMotor.Direction getDirection(){ return direction; }
         public synchronized double getPower(){ return power; }
-        public synchronized void setPower(double power){ this.power = power; }
+
+        public synchronized void setPower(double power){
+            this.power = Math.max(-1, Math.min(1, power));
+        }
+
         public synchronized int getCurrentPosition(){ return (int)Math.floor(position);}
         public synchronized double getCurrentPositionDouble(){ return position; }
         synchronized void updatePosition(double milliseconds){
             if (mode == RunMode.RUN_TO_POSITION || mode == RunMode.STOP_AND_RESET_ENCODER) return;
             position += power * MAX_TICKS_PER_SEC * milliseconds / 1000.0;
+        }
+    }
+
+    private class ServoImpl implements Servo{
+        private double position;
+
+        public synchronized void setPosition(double position) {
+            this.position = Math.max(0, Math.min(1, position));
+        }
+
+        public synchronized double getPosition(){
+            return position;
         }
     }
 
@@ -385,6 +436,7 @@ public class VirtualRobotController {
             dcMotor.put("right_motor", rightMotor);
             colorSensor.put("color_sensor",VirtualRobotController.colorSensor);
             gyroSensor.put("gyro_sensor", gyro);
+            servo.put("back_servo", backServo);
         }
     }
 

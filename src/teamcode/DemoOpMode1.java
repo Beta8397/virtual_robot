@@ -3,6 +3,7 @@ package teamcode;
 import hardware.ColorSensor;
 import hardware.DCMotor;
 import hardware.GyroSensor;
+import hardware.Servo;
 import opmode.LinearOpMode;
 import time.ElapsedTime;
 
@@ -17,6 +18,7 @@ public class DemoOpMode1 extends LinearOpMode {
         DCMotor right = hardwareMap.dcMotor.get("right_motor");
         left.setDirection(DCMotor.Direction.REVERSE);
         GyroSensor gyro = hardwareMap.gyroSensor.get("gyro_sensor");
+        Servo backServo = hardwareMap.servo.get("back_servo");
         gyro.init();
         ColorSensor colorSensor = hardwareMap.colorSensor.get("color_sensor");
         telemetry.addData("Press Start When Ready","");
@@ -35,7 +37,9 @@ public class DemoOpMode1 extends LinearOpMode {
                 left.setPower(0);
                 right.setPower(0);
             }
+            backServo.setPosition(0.5 - 0.5*gamePad1.left_stick_y);
             telemetry.addData("Press A to drive forward, \n B to rotate","");
+            telemetry.addData("Left Gamepad stick controls back servo","");
             telemetry.addData("Color","R %d  G %d  B %d", colorSensor.red(), colorSensor.green(), colorSensor.blue());
             telemetry.addData("Heading"," %.1f", gyro.getHeading());
             telemetry.addData("Encoders","Left %d  Right %d", left.getCurrentPosition(), right.getCurrentPosition());

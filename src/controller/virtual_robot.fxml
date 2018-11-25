@@ -23,11 +23,10 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.VirtualRobotController">
    <center>
-      <StackPane alignment="TOP_LEFT" maxHeight="600.0" maxWidth="600.0" minHeight="600.0" minWidth="600.0" onMouseClicked="#handleFieldMouseClick" prefHeight="600.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+      <StackPane fx:id="fieldPane" alignment="TOP_LEFT" maxHeight="600.0" maxWidth="600.0" minHeight="600.0" minWidth="600.0" onMouseClicked="#handleFieldMouseClick" prefHeight="600.0" prefWidth="600.0" BorderPane.alignment="CENTER">
          <children>
-            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#b0b0b0" height="600.0" stroke="BLACK" strokeType="INSIDE" width="600.0" />
             <ImageView fx:id="imgViewBackground" fitHeight="600.0" fitWidth="600.0" pickOnBounds="true" preserveRatio="true" />
-            <Group fx:id="bot" translateX="200.0" translateY="200.0">
+            <Group fx:id="bot">
                <children>
                   <Rectangle arcHeight="5.0" arcWidth="5.0" fill="YELLOW" height="75.0" stroke="BLACK" strokeType="INSIDE" width="75.0" />
                   <Rectangle arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="10.0" stroke="BLACK" strokeType="INSIDE" width="20.0" x="27.0" />
@@ -47,6 +46,7 @@
                            </stops>
                         </RadialGradient>
                      </fill></Circle>
+                  <Rectangle fx:id="backServoSlider" arcHeight="5.0" arcWidth="5.0" fill="MAGENTA" height="20.0" stroke="BLACK" strokeType="INSIDE" translateX="5.0" translateY="5.0" width="5.0" />
                </children>
             </Group>
          </children></StackPane>
