@@ -15,9 +15,9 @@ public class Telemetry extends VirtualRobotController.TelemetryBase {
 
     /**
      * Add data to telemetry (note-must call update() to cause the data to be displayed)
-     * @param caption
+     * @param caption The caption for this telemetry entry.
      * @param fmt Format string, for formatting the data.
-     * @param data
+     * @param data The data to be formatted by the format string.
      */
     public void addData(String caption, String fmt, Object... data){
         this.data.append(caption + ": ");
@@ -27,8 +27,8 @@ public class Telemetry extends VirtualRobotController.TelemetryBase {
 
     /**
      * Add single data object to telemetry, with a caption (note-must call update() to cause the data to be displayed)
-     * @param caption
-     * @param data
+     * @param caption The caption for this telemetry entry.
+     * @param data The data for this telemetry entry.
      */
     public void addData(String caption, Object data){
         this.data.append(caption + ":" + data.toString() + "\n");

@@ -20,14 +20,14 @@ public interface DCMotor {
 
     /**
      * Get the operation mode of the motor.
-     * @return
+     * @return Operation Mode
      */
     public RunMode getMode();
 
     /**
      * Set the DIRECTION of the motor (in this simulator, you would typically use REVERSE for the left motor and
      * FORWARD for the right motor).
-     * @param direction
+     * @param direction DIRECTION of the motor.
      */
     public void setDirection(Direction direction);
 

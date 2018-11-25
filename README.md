@@ -34,7 +34,8 @@ Several example OpModes are provided in the teamcode package, and are already re
 
 To use:
 
-  1. Write your Linear OpModes in the teamcode package, and register them in the opModeList.OpModes class.
+  1. Write your OpModes in the teamcode package, and register them in the opModeList.OpModes class. These must extend
+  the LinearOpMode class, and must include a runOpMode method.
   2. Run the application.
   3. Use the drop down box to select the desired OpMode.
   4. Prior to initialization, position the robot on the field by left-mouse-clicking the field (for robot position),
