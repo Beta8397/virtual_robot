@@ -69,7 +69,7 @@
       </VBox>
    </right>
    <bottom>
-      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+      <HBox alignment="CENTER" BorderPane.alignment="CENTER">
          <children>
             <StackPane fx:id="joyStickLeftPane" alignment="TOP_LEFT" maxHeight="120.0" maxWidth="120.0" minHeight="120.0" minWidth="120.0" onMouseDragged="#handleJoystickDrag" prefHeight="120.0" prefWidth="120.0">
                <children>
@@ -93,6 +93,9 @@
                   <Line endX="120.0" endY="60.0" startY="60.0" stroke="RED" StackPane.alignment="CENTER" />
                   <Circle fx:id="joyStickRightHandle" fill="LIME" radius="10.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" translateX="50.0" translateY="50.0" />
                </children>
+               <HBox.margin>
+                  <Insets bottom="5.0" top="5.0" />
+               </HBox.margin>
             </StackPane>
             <GridPane alignment="CENTER">
               <columnConstraints>
@@ -128,7 +131,7 @@
                   </Button>
                </children>
                <HBox.margin>
-                  <Insets bottom="10.0" left="20.0" right="200.0" top="10.0" />
+                  <Insets bottom="5.0" left="20.0" right="200.0" top="5.0" />
                </HBox.margin>
             </GridPane>
          </children>

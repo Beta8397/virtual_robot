@@ -10,14 +10,17 @@ also included. A purple slider on the back of the robot is controlled by a servo
 front of the robot.
 
 The field can be thought of as 12 feet wide. The field graphic (currently gray, with a pair of adjacent blue/red bands)
-is obtained from a 600x600 pixel bitmap (.bmp) image. The color sensor detects the field color beneath the center of the
-robot. The field graphic is easily changed by providing a different 600x600 .bmp image in the background.Background class.
-The .bmp image is in the background.bmp file in the src/virtual_robot.assets folder.
+is obtained from a bitmap (.bmp) image. The color sensor detects the field color beneath the center of the
+robot. The field graphic is easily changed by providing a different .bmp image in the background.Background class.
+The .bmp image is in the background.bmp file in the src/virtual_robot.assets folder. If a different .bmp image is used,
+it must be at least as wide and as tall as the field dimensions (currently 576 x 576 pixels to fit on the screen of
+most laptops).
 
 An abridged approximation of the FTC SDK is provided.
 
 User-defined OpModes must be placed in the teamcode package, and must extend opmode.LinearOpMode. Each OpMode must be
-registered by placing its name in the opModes list in the opmodelist.OpModes class.
+registered by placing its name in the opModes list in the opmodelist.OpModes class. Note that this way of registering
+OpModes differs from the @TeleOp and @Autonomous annotations of the FTC SDK.
 
 The API for the simulator is documented with a javadoc.
 
