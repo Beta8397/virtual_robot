@@ -12,7 +12,7 @@ front of the robot.
 The field can be thought of as 12 feet wide. The field graphic (currently gray, with a pair of adjacent blue/red bands)
 is obtained from a 600x600 pixel bitmap (.bmp) image. The color sensor detects the field color beneath the center of the
 robot. The field graphic is easily changed by providing a different 600x600 .bmp image in the background.Background class.
-The .bmp image is in the background.bmp file in the src/assets folder.
+The .bmp image is in the background.bmp file in the src/virtual_robot.assets folder.
 
 An abridged approximation of the FTC SDK is provided.
 

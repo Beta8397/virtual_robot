@@ -1,10 +1,10 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Main" type="Application" factoryName="Application">
-    <option name="MAIN_CLASS_NAME" value="controller.VirtualRobotApplication" />
+    <option name="MAIN_CLASS_NAME" value="virtual_robot.controller.VirtualRobotApplication" />
     <module name="virtual_robot" />
     <extension name="coverage">
       <pattern>
-        <option name="PATTERN" value="controller.*" />
+        <option name="PATTERN" value="virtual_robot.controller.*" />
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>

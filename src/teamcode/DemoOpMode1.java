@@ -1,11 +1,10 @@
 package teamcode;
 
-import hardware.ColorSensor;
-import hardware.DCMotor;
-import hardware.GyroSensor;
-import hardware.Servo;
-import opmode.LinearOpMode;
-import time.ElapsedTime;
+import virtual_robot.hardware.ColorSensor;
+import virtual_robot.hardware.DCMotor;
+import virtual_robot.hardware.GyroSensor;
+import virtual_robot.hardware.Servo;
+import virtual_robot.opmode.LinearOpMode;
 
 /**
  * Example OpMode. Demonstrates use of gyro, color sensor, encoders, and telemetry.

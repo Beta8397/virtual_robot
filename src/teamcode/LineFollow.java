@@ -1,10 +1,9 @@
 package teamcode;
 
-import hardware.ColorSensor;
-import hardware.DCMotor;
-import hardware.GyroSensor;
+import virtual_robot.hardware.ColorSensor;
+import virtual_robot.hardware.DCMotor;
 import javafx.scene.paint.Color;
-import opmode.LinearOpMode;
+import virtual_robot.opmode.LinearOpMode;
 
 /**
  * Example OpMode. Demonstrates autonomous proportionate line following.
