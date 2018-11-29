@@ -37,7 +37,7 @@ public class VirtualRobotController {
     @FXML private StackPane fieldPane;
     @FXML ImageView imgViewBackground;
     @FXML private Group bot;
-    @FXML private Rectangle backServoSlider;
+    @FXML private Rectangle backServoArm;
     @FXML private Button driverButton;
     @FXML private ComboBox<String> cbxOpModes;
     @FXML private TextArea txtTelemetry;
@@ -109,6 +109,8 @@ public class VirtualRobotController {
         halfBotWidth = botWidth / 2.0;
         wheelCircumference = Math.PI * botWidth / 4.5;
         interWheelDistance = botWidth * 8.0 / 9.0;
+
+        backServoArm.getTransforms().add(new Rotate(0, 37.5, 67.5));
 
         bot.getTransforms().add(new Translate(fieldWidth/2.0 - halfBotWidth, fieldWidth/2.0 - halfBotWidth));
         bot.getTransforms().add(new Rotate(0, halfBotWidth, halfBotWidth));
@@ -206,7 +208,7 @@ public class VirtualRobotController {
         else if (arg.getButton() == MouseButton.SECONDARY){
             double centerX = robotX + halfFieldWidth;
             double centerY = halfFieldWidth - robotY;
-            double displayAngleRads = Math.atan2(arg.getY() - centerY, arg.getX() - centerX);
+            double displayAngleRads = Math.atan2(arg.getX() - centerX, centerY - arg.getY());
             double displayAngleDegrees = displayAngleRads * 180.0 / Math.PI;
             robotHeadingRadians = -displayAngleRads;
             ((Rotate)bot.getTransforms().get(1)).setAngle(displayAngleDegrees);
@@ -302,8 +304,8 @@ public class VirtualRobotController {
         if (rightMotor.getDirection() == DCMotor.Direction.REVERSE) rightWheelDist = -rightWheelDist;
         double distTraveled = (leftWheelDist + rightWheelDist) / 2.0;
         double headingChange = (rightWheelDist - leftWheelDist) / interWheelDistance;
-        double deltaRobotX = distTraveled * Math.cos(robotHeadingRadians + headingChange / 2.0);
-        double deltaRobotY = distTraveled * Math.sin(robotHeadingRadians + headingChange / 2.0);
+        double deltaRobotX = -distTraveled * Math.sin(robotHeadingRadians + headingChange / 2.0);
+        double deltaRobotY = distTraveled * Math.cos(robotHeadingRadians + headingChange / 2.0);
         robotX += deltaRobotX;
         robotY += deltaRobotY;
         if (robotX >  (halfFieldWidth - halfBotWidth)) robotX = halfFieldWidth - halfBotWidth;
@@ -336,7 +338,7 @@ public class VirtualRobotController {
     }
 
     private synchronized void updateRobotDisplay(){
-        backServoSlider.setTranslateY(5.0 + 45.0 * backServo.getPosition());
+        ((Rotate)backServoArm.getTransforms().get(0)).setAngle(-180.0 * backServo.getPosition());
         double displayX = halfFieldWidth + robotX - halfBotWidth;
         double displayY = halfFieldWidth - robotY - halfBotWidth;
         double displayAngle = -robotHeadingRadians * 180.0 / Math.PI;

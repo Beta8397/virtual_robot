@@ -29,9 +29,9 @@
             <Group fx:id="bot">
                <children>
                   <Rectangle arcHeight="5.0" arcWidth="5.0" fill="YELLOW" height="75.0" stroke="BLACK" strokeType="INSIDE" width="75.0" />
-                  <Rectangle arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="10.0" stroke="BLACK" strokeType="INSIDE" width="20.0" x="27.0" />
-                  <Rectangle arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="10.0" stroke="BLACK" strokeType="INSIDE" width="20.0" x="27.0" y="65.0" />
-                  <Rectangle arcHeight="5.0" fill="LIME" height="10.0" stroke="BLACK" strokeType="INSIDE" width="10.0" x="65.0" y="32.0" />
+                  <Rectangle arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="20.0" stroke="BLACK" strokeType="INSIDE" width="10.0" y="27.0" />
+                  <Rectangle arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="20.0" stroke="BLACK" strokeType="INSIDE" width="10.0" x="65.0" y="27.0" />
+                  <Rectangle arcHeight="5.0" fill="LIME" height="10.0" stroke="BLACK" strokeType="INSIDE" width="10.0" x="32.5" />
                   <Circle centerX="37.0" centerY="37.0" radius="10.0" strokeType="INSIDE" strokeWidth="0.0">
                      <fill>
                         <RadialGradient centerX="0.4722222222222222" centerY="0.4666666666666667" radius="0.6046511627906976">
@@ -46,7 +46,7 @@
                            </stops>
                         </RadialGradient>
                      </fill></Circle>
-                  <Rectangle fx:id="backServoSlider" arcHeight="5.0" arcWidth="5.0" fill="MAGENTA" height="20.0" stroke="BLACK" strokeType="INSIDE" translateX="5.0" translateY="5.0" width="5.0" />
+                  <Rectangle fx:id="backServoArm" arcHeight="5.0" arcWidth="5.0" fill="MAGENTA" height="5.0" stroke="BLACK" strokeType="INSIDE" width="37.5" x="5.0" y="65.0" />
                </children>
             </Group>
          </children></StackPane>
