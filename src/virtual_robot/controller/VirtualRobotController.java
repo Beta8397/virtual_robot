@@ -360,7 +360,7 @@ public class VirtualRobotController {
         }
 
         public synchronized int getCurrentPosition(){ return (int)Math.floor(position);}
-        public synchronized double getCurrentPositionDouble(){ return position; }
+        synchronized double getCurrentPositionDouble(){ return position; }
         synchronized void updatePosition(double milliseconds){
             if (mode == RunMode.RUN_TO_POSITION || mode == RunMode.STOP_AND_RESET_ENCODER) return;
             position += power * MAX_TICKS_PER_SEC * milliseconds / 1000.0;
