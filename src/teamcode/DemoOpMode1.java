@@ -4,7 +4,7 @@ import virtual_robot.hardware.ColorSensor;
 import virtual_robot.hardware.DCMotor;
 import virtual_robot.hardware.GyroSensor;
 import virtual_robot.hardware.Servo;
-import virtual_robot.opmode.LinearOpMode;
+import virtual_robot.controller.LinearOpMode;
 
 /**
  * Example OpMode. Demonstrates use of gyro, color sensor, encoders, and telemetry.

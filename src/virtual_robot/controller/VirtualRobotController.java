@@ -1,29 +1,25 @@
 package virtual_robot.controller;
 
+import javafx.collections.FXCollections;
 import virtual_robot.background.Background;
 import virtual_robot.hardware.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.Group;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
-import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.transform.Rotate;
-import javafx.scene.transform.Scale;
-import javafx.scene.transform.Translate;
-import virtual_robot.opmode.LinearOpMode;
 import javafx.scene.control.Button;
 import opmodelist.OpModes;
+
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -36,8 +32,7 @@ public class VirtualRobotController {
     //User Interface
     @FXML private StackPane fieldPane;
     @FXML ImageView imgViewBackground;
-    @FXML private Group bot;
-    @FXML private Rectangle backServoArm;
+    @FXML private ComboBox<String> cbxConfig;
     @FXML private Button driverButton;
     @FXML private ComboBox<String> cbxOpModes;
     @FXML private TextArea txtTelemetry;
@@ -51,47 +46,38 @@ public class VirtualRobotController {
     @FXML Button btnB;
 
     //Virtual Hardware
-    private static DCMotorImpl leftMotor = null;
-    private static DCMotorImpl rightMotor = null;
-    private static ColorSensorImpl colorSensor = null;
-    private static GyroSensorImpl gyro = null;
-    private static ServoImpl backServo = null;
-    private static GamePad gamePad = new GamePad();
+    HardwareMapImpl hardwareMap = null;
+    VirtualBot bot = null;
+    private GamePad gamePad = new GamePad();
 
     //Background Image and Field
     private Image backgroundImage = Background.background;
     private PixelReader pixelReader = backgroundImage.getPixelReader();
+    double halfFieldWidth;
     double fieldWidth;
-    private double halfFieldWidth;
 
     //OpMode Control
-    private static LinearOpMode opMode = null;
-    private static volatile boolean opModeInitialized = false;
-    private static volatile boolean opModeStarted = false;
+    private LinearOpMode opMode = null;
+    private volatile boolean opModeInitialized = false;
+    private volatile boolean opModeStarted = false;
     Thread opModeThread = null;
 
     //Virtual Robot Control Engine
     ScheduledExecutorService executorService = null;
     private final double TIMER_INTERVAL_MILLISECONDS = 33;
 
-    //Virtual Robot State
-    private static double halfBotWidth;
-    private static double interWheelDistance;
-    private static double wheelCircumference;
-    double leftTicks, rightTicks;
-    double robotX, robotY, robotHeadingRadians;
-
     //Telemetry
-    private static volatile String telemetryText;
-    private static volatile boolean telemetryTextChanged = false;
+    private volatile String telemetryText;
+    private volatile boolean telemetryTextChanged = false;
 
     public void initialize() {
-        initHardware();
+        LinearOpMode.setVirtualRobotController(this);
         cbxOpModes.setItems(OpModes.opModes);
         cbxOpModes.setValue(cbxOpModes.getItems().get(0));
+        cbxConfig.setItems(FXCollections.observableArrayList("Two Wheel Bot", "Mechanum Bot"));
+        cbxConfig.setValue(cbxConfig.getItems().get(0));
         fieldWidth = fieldPane.getPrefWidth();
         halfFieldWidth = fieldWidth / 2.0;
-
         fieldPane.setPrefHeight(fieldWidth);
         fieldPane.setMinWidth(fieldWidth);
         fieldPane.setMaxWidth(fieldWidth);
@@ -101,24 +87,23 @@ public class VirtualRobotController {
         imgViewBackground.setFitHeight(fieldWidth);
         imgViewBackground.setViewport(new Rectangle2D(0, 0, fieldWidth, fieldWidth));
         imgViewBackground.setImage(backgroundImage);
-        setupBot();
+        setConfig(null);
+        initializeTelemetryTextArea();
     }
 
-    private void setupBot(){
-        double botWidth = fieldWidth / 8.0;
-        halfBotWidth = botWidth / 2.0;
-        wheelCircumference = Math.PI * botWidth / 4.5;
-        interWheelDistance = botWidth * 8.0 / 9.0;
-
-        backServoArm.getTransforms().add(new Rotate(0, 37.5, 67.5));
-
-        bot.getTransforms().add(new Translate(fieldWidth/2.0 - halfBotWidth, fieldWidth/2.0 - halfBotWidth));
-        bot.getTransforms().add(new Rotate(0, halfBotWidth, halfBotWidth));
-        bot.getTransforms().add(new Scale(botWidth/75.0, botWidth/75.0, 0, 0));
-
-        System.out.println("fieldWidth = " + fieldWidth);
-        System.out.println("botWidth = " + botWidth);
-
+    @FXML
+    private void setConfig(ActionEvent event){
+        if (opModeInitialized || opModeStarted) return;
+        if (bot != null) bot.removeFromDisplay(fieldPane);
+        if (cbxConfig.getValue().equals("Mechanum Bot")){
+            hardwareMap = new HardwareMapImpl(new String[]{"back_left_motor", "front_left_motor",
+                    "front_right_motor", "back_right_motor"});
+            bot = new MechanumBot(hardwareMap, fieldWidth, fieldPane);
+        } else {
+            hardwareMap = new HardwareMapImpl(new String[]{"left_motor", "right_motor"});
+            bot = new TwoWheelBot(hardwareMap, fieldWidth, fieldPane);
+        }
+        initializeTelemetryTextArea();
     }
 
 
@@ -126,8 +111,10 @@ public class VirtualRobotController {
     private void handleDriverButtonAction(ActionEvent event){
         if (!opModeInitialized){
             if (!initLinearOpMode()) return;
+            txtTelemetry.setText("");
             driverButton.setText("START");
             opModeInitialized = true;
+            cbxConfig.setDisable(true);
             Runnable runOpMode = new Runnable() {
                 @Override
                 public void run() {
@@ -139,14 +126,14 @@ public class VirtualRobotController {
             Runnable updateDisplay = new Runnable() {
                 @Override
                 public void run() {
-                    updateRobotDisplay();
+                    bot.updateDisplay();
                     updateTelemetryDisplay();
                 }
             };
             Runnable singleCycle = new Runnable() {
                 @Override
                 public void run() {
-                    updateRobotState();
+                    bot.updateStateAndSensors(TIMER_INTERVAL_MILLISECONDS);
                     Platform.runLater(updateDisplay);
                 }
             };
@@ -170,16 +157,16 @@ public class VirtualRobotController {
                 Thread.currentThread().interrupt();
             }
             if (opModeThread.isAlive()) System.out.println("OpMode Thread Failed to Terminate.");
-            leftMotor.setPower(0);
-            rightMotor.setPower(0);
+            bot.powerDownAndReset();
             resetGamePad();
+            initializeTelemetryTextArea();
+            cbxConfig.setDisable(false);
         }
     }
 
     private void runOpModeAndCleanUp(){
         opMode.runOpMode();
-        leftMotor.setPower(0);
-        rightMotor.setPower(0);
+        bot.powerDownAndReset();
         if (!executorService.isShutdown()) executorService.shutdown();
         opModeInitialized = false;
         opModeStarted = false;
@@ -187,6 +174,8 @@ public class VirtualRobotController {
             public void run() {
                 driverButton.setText("INIT");
                 resetGamePad();
+                initializeTelemetryTextArea();
+                cbxConfig.setDisable(false);
             }
         });
     }
@@ -194,28 +183,7 @@ public class VirtualRobotController {
     @FXML
     private void handleFieldMouseClick(MouseEvent arg){
         if (opModeInitialized || opModeStarted) return;
-        if (arg.getButton() == MouseButton.PRIMARY) {
-            double argX = Math.max(halfBotWidth, Math.min(fieldWidth - halfBotWidth, arg.getX()));
-            double argY = Math.max(halfBotWidth, Math.min(fieldWidth - halfBotWidth, arg.getY()));
-            double displayX = argX - halfBotWidth;
-            double displayY = argY - halfBotWidth;
-            robotX = argX - halfFieldWidth;
-            robotY = halfFieldWidth - argY;
-            Translate translate = (Translate)bot.getTransforms().get(0);
-            translate.setX(displayX);
-            translate.setY(displayY);
-        }
-        else if (arg.getButton() == MouseButton.SECONDARY){
-            double centerX = robotX + halfFieldWidth;
-            double centerY = halfFieldWidth - robotY;
-            double displayAngleRads = Math.atan2(arg.getX() - centerX, centerY - arg.getY());
-            double displayAngleDegrees = displayAngleRads * 180.0 / Math.PI;
-            robotHeadingRadians = -displayAngleRads;
-            ((Rotate)bot.getTransforms().get(1)).setAngle(displayAngleDegrees);
-            System.out.println("centerX = " + centerX + "  centerY = " + centerY);
-            System.out.println("clickX = " + arg.getX() + "  clickY = " + arg.getY());
-            System.out.println("displayAngleDegrees = " + displayAngleDegrees);
-        }
+        bot.positionWithMouseClick(arg);
     }
 
     @FXML
@@ -281,104 +249,73 @@ public class VirtualRobotController {
         return true;
     }
 
-    private void initHardware(){
-        leftMotor = new DCMotorImpl();
-        rightMotor = new DCMotorImpl();
-        colorSensor = new ColorSensorImpl();
-        gyro = new GyroSensorImpl();
-        backServo = new ServoImpl();
-    }
 
-    private synchronized void updateRobotState(){
-        leftMotor.updatePosition(TIMER_INTERVAL_MILLISECONDS);
-        rightMotor.updatePosition(TIMER_INTERVAL_MILLISECONDS);
-        double newLeftTicks = leftMotor.getCurrentPositionDouble();
-        double newRightTicks = rightMotor.getCurrentPositionDouble();
-        double intervalLeftTicks = newLeftTicks - leftTicks;
-        double intervalRightTicks = newRightTicks - rightTicks;
-        leftTicks = newLeftTicks;
-        rightTicks = newRightTicks;
-        double leftWheelDist = intervalLeftTicks * wheelCircumference / DCMotorImpl.TICKS_PER_ROTATION;
-        if (leftMotor.getDirection() == DCMotor.Direction.FORWARD) leftWheelDist = -leftWheelDist;
-        double rightWheelDist = intervalRightTicks * wheelCircumference / DCMotorImpl.TICKS_PER_ROTATION;
-        if (rightMotor.getDirection() == DCMotor.Direction.REVERSE) rightWheelDist = -rightWheelDist;
-        double distTraveled = (leftWheelDist + rightWheelDist) / 2.0;
-        double headingChange = (rightWheelDist - leftWheelDist) / interWheelDistance;
-        double deltaRobotX = -distTraveled * Math.sin(robotHeadingRadians + headingChange / 2.0);
-        double deltaRobotY = distTraveled * Math.cos(robotHeadingRadians + headingChange / 2.0);
-        robotX += deltaRobotX;
-        robotY += deltaRobotY;
-        if (robotX >  (halfFieldWidth - halfBotWidth)) robotX = halfFieldWidth - halfBotWidth;
-        else if (robotX < (halfBotWidth - halfFieldWidth)) robotX = halfBotWidth - halfFieldWidth;
-        if (robotY > (halfFieldWidth - halfBotWidth)) robotY = halfFieldWidth - halfBotWidth;
-        else if (robotY < (halfBotWidth - halfFieldWidth)) robotY = halfBotWidth - halfFieldWidth;
-        robotHeadingRadians += headingChange;
-        if (robotHeadingRadians > Math.PI) robotHeadingRadians -= 2.0 * Math.PI;
-        else if (robotHeadingRadians < -Math.PI) robotHeadingRadians += 2.0 * Math.PI;
-        gyro.updateHeading(robotHeadingRadians * 180.0 / Math.PI);
-        int colorX = (int)(robotX + halfFieldWidth);
-        int colorY = (int)(halfFieldWidth - robotY);
-        double red = 0.0;
-        double green = 0.0;
-        double blue = 0.0;
-        for (int row = colorY-4; row < colorY+5; row++)
-            for (int col = colorX - 4; col < colorX+5; col++){
-                Color c = pixelReader.getColor(col, row);
-                red += c.getRed();
-                green += c.getGreen();
-                blue += c.getBlue();
-            }
-            red = Math.floor( red * 256.0 / 81.0 );
-            if (red == 256) red = 255;
-            green = Math.floor( green * 256.0 / 81.0 );
-            if (green == 256) green = 255;
-            blue = Math.floor( blue * 256.0 / 81.0 );
-            if (blue == 256) blue = 255;
-        colorSensor.updateColor((int)red, (int)green, (int)blue);
-    }
-
-    private synchronized void updateRobotDisplay(){
-        ((Rotate)backServoArm.getTransforms().get(0)).setAngle(-180.0 * backServo.getPosition());
-        double displayX = halfFieldWidth + robotX - halfBotWidth;
-        double displayY = halfFieldWidth - robotY - halfBotWidth;
-        double displayAngle = -robotHeadingRadians * 180.0 / Math.PI;
-        Translate translate = (Translate)bot.getTransforms().get(0);
-        translate.setX(displayX);
-        translate.setY(displayY);
-        ((Rotate)bot.getTransforms().get(1)).setAngle(displayAngle);
-    }
 
     private void updateTelemetryDisplay(){
         if (telemetryTextChanged && telemetryText != null) txtTelemetry.setText(telemetryText);
         telemetryTextChanged = false;
     }
 
-    private void timerCycle(){
-        updateRobotState();
-        updateRobotDisplay();
+    private void initializeTelemetryTextArea(){
+        StringBuilder sb = new StringBuilder();
+        sb.append("Left-click to position bot.");
+        sb.append("\nRight-click to orient bot.");
+        sb.append("\n\nCONFIG");
+        sb.append("\n Motors:");
+        Set<String> motors = hardwareMap.dcMotor.keySet();
+        for (String motor: motors) sb.append("\n   " + motor);
+        sb.append("\n Servos:");
+        Set<String> servos = hardwareMap.servo.keySet();
+        for (String servo: servos) sb.append("\n   " + servo);
+        sb.append("\n Color Sensors:");
+        Set<String> colorSensors = hardwareMap.colorSensor.keySet();
+        for (String colorSensor: colorSensors) sb.append("\n   " + colorSensor);
+        sb.append("\n Gyro Sensors:");
+        Set<String> gyroSensors = hardwareMap.gyroSensor.keySet();
+        for (String gyroSensor: gyroSensors) sb.append("\n   " + gyroSensor);
+        txtTelemetry.setText(sb.toString());
     }
 
-    private class ColorSensorImpl implements ColorSensor {
+    public class ColorSensorImpl implements ColorSensor {
         private int red = 0;
         private int green = 0;
         private int blue = 0;
         public synchronized int red(){ return red; }
         public synchronized int green(){ return green; }
         public synchronized int blue(){ return blue; }
-        synchronized void updateColor(int red, int green, int blue){
-            this.red = red;
-            this.green = green;
-            this. blue = blue;
+
+        synchronized void updateColor(double x, double y){
+            int colorX = (int)(x + halfFieldWidth);
+            int colorY = (int)(halfFieldWidth - y);
+            double tempRed = 0.0;
+            double tempGreen = 0.0;
+            double tempBlue = 0.0;
+            for (int row = colorY-4; row < colorY+5; row++)
+                for (int col = colorX - 4; col < colorX+5; col++){
+                    Color c = pixelReader.getColor(col, row);
+                    tempRed += c.getRed();
+                    tempGreen += c.getGreen();
+                    tempBlue += c.getBlue();
+                }
+            tempRed = Math.floor( tempRed * 256.0 / 81.0 );
+            if (tempRed == 256) tempRed = 255;
+            tempGreen = Math.floor( tempGreen * 256.0 / 81.0 );
+            if (tempGreen == 256) tempGreen = 255;
+            tempBlue = Math.floor( tempBlue * 256.0 / 81.0 );
+            if (tempBlue == 256) tempBlue = 255;
+            red = (int)tempRed;
+            green = (int)tempGreen;
+            blue = (int)tempBlue;
         }
     }
 
-    private class GyroSensorImpl implements GyroSensor {
+    public class GyroSensorImpl implements GyroSensor {
         private boolean initialized = false;
         private double initialHeading = 0.0;
         private double heading = 0.0;
         public synchronized void init(){
             initialized = true;
-            initialHeading = robotHeadingRadians * 180.0 / Math.PI;
+            initialHeading = bot.getHeadingRadians() * 180.0 / Math.PI;
         }
         synchronized void deinit(){
             initialized = false;
@@ -397,9 +334,9 @@ public class VirtualRobotController {
         synchronized void updateHeading(double heading){ this.heading = heading; }
     }
 
-    private class DCMotorImpl implements DCMotor {
-        private static final double MAX_TICKS_PER_SEC = 2500.0;
-        private static final double TICKS_PER_ROTATION = 1120;
+    public class DCMotorImpl implements DCMotor {
+        public static final double MAX_TICKS_PER_SEC = 2500.0;
+        public static final double TICKS_PER_ROTATION = 1120;
         private DCMotor.RunMode mode = RunMode.RUN_WITHOUT_ENCODER;
         private DCMotor.Direction direction = Direction.FORWARD;
         private double power = 0.0;
@@ -430,7 +367,7 @@ public class VirtualRobotController {
         }
     }
 
-    private class ServoImpl implements Servo{
+    public class ServoImpl implements Servo{
         private double position;
 
         public synchronized void setPosition(double position) {
@@ -442,30 +379,47 @@ public class VirtualRobotController {
         }
     }
 
-    private static class HardwareMapImpl implements HardwareMap{
-        HardwareMapImpl(){
-            dcMotor.put("left_motor", leftMotor);
-            dcMotor.put("right_motor", rightMotor);
-            colorSensor.put("color_sensor",VirtualRobotController.colorSensor);
-            gyroSensor.put("gyro_sensor", gyro);
-            servo.put("back_servo", backServo);
+    public class HardwareMapImpl implements HardwareMap{
+
+        public HardwareMapImpl(){
+            dcMotor.clear();
+            dcMotor.put("left_motor", new DCMotorImpl());
+            dcMotor.put("right_motor", new DCMotorImpl());
+            colorSensor.clear();
+            colorSensor.put("color_sensor", new ColorSensorImpl());
+            gyroSensor.clear();
+            gyroSensor.put("gyro_sensor", new GyroSensorImpl());
+            servo.clear();
+            servo.put("back_servo", new ServoImpl());
         }
+
+        public HardwareMapImpl( String[] motors ){
+            dcMotor.clear();
+            if (motors != null) for (int i=0; i<motors.length; i++) dcMotor.put(motors[i], new DCMotorImpl());
+            colorSensor.clear();
+            colorSensor.put("color_sensor", new ColorSensorImpl());
+            gyroSensor.clear();
+            gyroSensor.put("gyro_sensor", new GyroSensorImpl());
+            servo.clear();
+            servo.put("back_servo", new ServoImpl());
+        }
+
+
     }
 
 
     /**
      * Base class for LinearOpMode.
      */
-    public static class LinearOpModeBase {
+    public class LinearOpModeBase {
         protected final HardwareMap hardwareMap;
         protected final GamePad gamePad1;
         protected final Telemetry telemetry;
 
         public LinearOpModeBase(){
-            hardwareMap = new HardwareMapImpl();
+            hardwareMap = VirtualRobotController.this.hardwareMap;
             gamePad1 = gamePad;
-            telemetry = new Telemetry();
-            gyro.deinit();
+            telemetry = new TelemetryImpl();
         }
 
         /**
@@ -484,11 +438,48 @@ public class VirtualRobotController {
         }
     }
 
-    public static class TelemetryBase {
-        protected void setText(String text) {
+    public class TelemetryImpl implements Telemetry {
+
+        public TelemetryImpl(){
+            update();
+        }
+
+        /**
+         * Add data to telemetry (note-must call update() to cause the data to be displayed)
+         * @param caption The caption for this telemetry entry.
+         * @param fmt Format string, for formatting the data.
+         * @param data The data to be formatted by the format string.
+         */
+        public void addData(String caption, String fmt, Object... data){
+            this.data.append(caption + ": ");
+            String s = String.format(fmt, data);
+            this.data.append(s + "\n");
+        }
+
+        /**
+         * Add single data object to telemetry, with a caption (note-must call update() to cause the data to be displayed)
+         * @param caption The caption for this telemetry entry.
+         * @param data The data for this telemetry entry.
+         */
+        public void addData(String caption, Object data){
+            this.data.append(caption + ":" + data.toString() + "\n");
+        }
+
+
+        /**
+         * Replace any data currently displayed on telemetry with all data that has been added since the previous call to
+         * update().
+         */
+        public void update(){
+            setText(data.toString());
+            data.setLength(0);
+        }
+
+        private void setText(String text){
             telemetryText = text;
             telemetryTextChanged = true;
         }
+
     }
 
 }

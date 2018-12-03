@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.Group?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
@@ -14,8 +13,6 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.paint.RadialGradient?>
-<?import javafx.scene.paint.Stop?>
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.shape.Line?>
 <?import javafx.scene.shape.Rectangle?>
@@ -26,37 +23,20 @@
       <StackPane fx:id="fieldPane" alignment="TOP_LEFT" maxHeight="0.0" maxWidth="0.0" minHeight="0.0" minWidth="0.0" onMouseClicked="#handleFieldMouseClick" prefHeight="0.0" prefWidth="576.0" BorderPane.alignment="CENTER">
          <children>
             <ImageView fx:id="imgViewBackground" pickOnBounds="true" preserveRatio="true" />
-            <Group fx:id="bot">
-               <children>
-                  <Rectangle arcHeight="5.0" arcWidth="5.0" fill="YELLOW" height="75.0" stroke="BLACK" strokeType="INSIDE" width="75.0" />
-                  <Rectangle arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="20.0" stroke="BLACK" strokeType="INSIDE" width="10.0" y="27.0" />
-                  <Rectangle arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="20.0" stroke="BLACK" strokeType="INSIDE" width="10.0" x="65.0" y="27.0" />
-                  <Rectangle arcHeight="5.0" fill="LIME" height="10.0" stroke="BLACK" strokeType="INSIDE" width="10.0" x="32.5" />
-                  <Circle centerX="37.0" centerY="37.0" radius="10.0" strokeType="INSIDE" strokeWidth="0.0">
-                     <fill>
-                        <RadialGradient centerX="0.4722222222222222" centerY="0.4666666666666667" radius="0.6046511627906976">
-                           <stops>
-                              <Stop color="#3900ff" />
-                              <Stop color="#ff00b6" offset="0.15649563534383953" />
-                              <Stop color="#ff1100" offset="0.32195757791207485" />
-                              <Stop color="#ffee00" offset="0.4880910060433701" />
-                              <Stop color="#18ff00" offset="0.675751471343366" />
-                              <Stop color="#00fffc" offset="0.8281391950073069" />
-                              <Stop color="WHITE" offset="1.0" />
-                           </stops>
-                        </RadialGradient>
-                     </fill></Circle>
-                  <Rectangle fx:id="backServoArm" arcHeight="5.0" arcWidth="5.0" fill="MAGENTA" height="5.0" stroke="BLACK" strokeType="INSIDE" width="37.5" x="5.0" y="65.0" />
-               </children>
-            </Group>
          </children></StackPane>
    </center>
    <right>
       <VBox alignment="CENTER" BorderPane.alignment="CENTER">
          <children>
+            <Label text="Configurations">
+               <VBox.margin>
+                  <Insets bottom="10.0" top="10.0" />
+               </VBox.margin>
+            </Label>
+            <ComboBox fx:id="cbxConfig" onAction="#setConfig" prefWidth="250.0" promptText="Configurations" />
             <Label alignment="CENTER" contentDisplay="CENTER" text="OpModes">
                <VBox.margin>
-                  <Insets bottom="10.0" />
+                  <Insets bottom="10.0" top="10.0" />
                </VBox.margin>
             </Label>
             <ComboBox fx:id="cbxOpModes" prefWidth="250.0" promptText="OpModes" />

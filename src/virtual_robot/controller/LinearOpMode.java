@@ -1,4 +1,4 @@
-package virtual_robot.opmode;
+package virtual_robot.controller;
 
 import virtual_robot.controller.VirtualRobotController;
 
@@ -6,6 +6,26 @@ import virtual_robot.controller.VirtualRobotController;
  * OpModes in this simulator must extend LinearOpMode.
  */
 public abstract class LinearOpMode extends VirtualRobotController.LinearOpModeBase {
+
+    /**
+     * Static reference to VirtualRobotController object, with getter and setter
+     */
+    private static VirtualRobotController virtualRobotController = null;
+
+    public static VirtualRobotController getVirtualRobotController() {
+        return virtualRobotController;
+    }
+
+    public static void setVirtualRobotController(VirtualRobotController controller) {
+        virtualRobotController = controller;
+    }
+
+    /**
+     * No-arg constructor -- requires that virtualRobotController be non-null
+     */
+    public LinearOpMode(){
+        virtualRobotController.super();
+    }
 
     /**
      * OpModes must override the abstract runOpMode() method.
