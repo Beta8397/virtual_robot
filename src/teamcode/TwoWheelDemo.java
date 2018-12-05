@@ -10,7 +10,7 @@ import virtual_robot.controller.LinearOpMode;
  * Example OpMode. Demonstrates use of gyro, color sensor, encoders, and telemetry.
  *
  */
-public class DemoOpMode1 extends LinearOpMode {
+public class TwoWheelDemo extends LinearOpMode {
 
     public void runOpMode(){
         DCMotor left = hardwareMap.dcMotor.get("left_motor");
@@ -26,18 +26,27 @@ public class DemoOpMode1 extends LinearOpMode {
         while (opModeIsActive()){
             if (gamePad1.a){
                 telemetry.addData("a pressed","");
-                left.setPower(.5);
-                right.setPower(.5);
+                left.setPower(-.5);
+                right.setPower(-.5);
+            } else if (gamePad1.y) {
+                telemetry.addData("y pressed", "");
+                left.setPower(0.5);
+                right.setPower(0.5);
             } else if (gamePad1.b){
                 telemetry.addData("b pressed", "");
-                left.setPower(-.5);
-                right.setPower(.5);
-            } else {
+                left.setPower(0.5);
+                right.setPower(-0.5);
+            } else if (gamePad1.x){
+                telemetry.addData("x pressed", "");
+                left.setPower(-0.5);
+                right.setPower(0.5);
+            }
+            else {
                 left.setPower(0);
                 right.setPower(0);
             }
             backServo.setPosition(0.5 - 0.5*gamePad1.left_stick_y);
-            telemetry.addData("Press A to drive forward, \n B to rotate","");
+            telemetry.addData("Press", "Y-fwd, A-rev, B-Rt, X-Lt");
             telemetry.addData("Left Gamepad stick controls back servo","");
             telemetry.addData("Color","R %d  G %d  B %d", colorSensor.red(), colorSensor.green(), colorSensor.blue());
             telemetry.addData("Heading"," %.1f", gyro.getHeading());

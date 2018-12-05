@@ -27,8 +27,8 @@ The API for the simulator is documented with a javadoc.
 
 The LinearOpMode class in the simulator provides access to:
 
-  1. A HardwareMap object, which in turn provides access to the DCMotor objects, the gyro sensor ("gyro_sensor"),
-     the servo ("back_servo"), and the color sensor ("color_sensor");
+  1. A HardwareMap object, which in turn provides access to the DCMotor objects, the gyro sensor,
+     the servo, and the color sensor;
   2. A GamePad (implemented in the UI, not a physical gamepad), with a subset of standard gamepad function;
   3. A Telemetry object.
 
@@ -38,13 +38,17 @@ Several example OpModes are provided in the teamcode package, and are already re
 
 To use:
 
-  1. Write your OpModes in the teamcode package, and register them in the opModeList.OpModes class. These must extend
-  the LinearOpMode class, and must include a runOpMode method.
-  2. Run the application.
-  3. Use Configuration dropdown box to select "Two Wheeled Bot" or "Mechanum Bot". The configuration will be displayed.
-  4. Use the Op Mode drop down box to select the desired OpMode.
-  5. Prior to initialization, position the robot on the field by left-mouse-clicking the field (for robot position),
-   and right-mouse-clicking (for robot orientation).
-  6. Use the INIT/START/STOP button as you would on the FTC Driver Station.
-  7. To use the virtual gamepad: mouse drag on the left and right joysticks; press the A,B,X,Y buttons.
+  1. Make sure you have the Java JDK installed on your PC. Also, install the free Community Edition of JetBrains
+     IntelliJ IDEA.
+  2. Download the virtual_robot .zip, and extract contents. Open the project in IntelliJ.
+  3. Write your OpModes in the teamcode package, and register them in the opModeList.OpModes class. These must extend
+     the LinearOpMode class, and must include a runOpMode method.
+  4. Run the application.
+  5. Use Configuration dropdown box to select "Two Wheeled Bot" or "Mechanum Bot". The configuration will be displayed.
+  6. Use the Op Mode drop down box to select the desired OpMode.
+  7. Prior to initialization, position the robot on the field by left-mouse-clicking the field (for robot position),
+     and right-mouse-clicking (for robot orientation).
+  8. Use the INIT/START/STOP button as you would on the FTC Driver Station.
+  9. To use the virtual gamepad: mouse drag on the left and right joysticks; press the A,B,X,Y buttons.
+  10. If desired use the sliders to introduce random and systematic motor error.
 

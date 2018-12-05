@@ -1,14 +1,15 @@
 package virtual_robot.controller;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.scene.control.*;
 import virtual_robot.background.Background;
 import virtual_robot.hardware.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
@@ -16,9 +17,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.control.Button;
 import opmodelist.OpModes;
-
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -35,6 +35,8 @@ public class VirtualRobotController {
     @FXML private ComboBox<String> cbxConfig;
     @FXML private Button driverButton;
     @FXML private ComboBox<String> cbxOpModes;
+    @FXML private Slider sldRandomMotorError;
+    @FXML private Slider sldSystematicMotorError;
     @FXML private TextArea txtTelemetry;
     @FXML Circle joyStickLeftHandle;
     @FXML Circle joyStickRightHandle;
@@ -46,21 +48,21 @@ public class VirtualRobotController {
     @FXML Button btnB;
 
     //Virtual Hardware
-    HardwareMapImpl hardwareMap = null;
-    VirtualBot bot = null;
+    private HardwareMapImpl hardwareMap = null;
+    private VirtualBot bot = null;
     private GamePad gamePad = new GamePad();
 
     //Background Image and Field
     private Image backgroundImage = Background.background;
     private PixelReader pixelReader = backgroundImage.getPixelReader();
-    double halfFieldWidth;
-    double fieldWidth;
+    private double halfFieldWidth;
+    private double fieldWidth;
 
     //OpMode Control
     private LinearOpMode opMode = null;
     private volatile boolean opModeInitialized = false;
     private volatile boolean opModeStarted = false;
-    Thread opModeThread = null;
+    private Thread opModeThread = null;
 
     //Virtual Robot Control Engine
     ScheduledExecutorService executorService = null;
@@ -69,6 +71,20 @@ public class VirtualRobotController {
     //Telemetry
     private volatile String telemetryText;
     private volatile boolean telemetryTextChanged = false;
+
+    //Random Number Generator
+    private Random random = new Random();
+
+    //Motor Error Slider Listener
+    private ChangeListener<Number> sliderChangeListener = new ChangeListener<Number>() {
+        @Override
+        public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+            for (DCMotorImpl motor: hardwareMap.dcMotor.values()) {
+                motor.setRandomErrorFrac(sldRandomMotorError.getValue());
+                motor.setSystematicErrorFrac(sldSystematicMotorError.getValue() * 2.0 * (0.5 - random.nextDouble()));
+            }
+        }
+    };
 
     public void initialize() {
         LinearOpMode.setVirtualRobotController(this);
@@ -89,6 +105,8 @@ public class VirtualRobotController {
         imgViewBackground.setImage(backgroundImage);
         setConfig(null);
         initializeTelemetryTextArea();
+        sldRandomMotorError.valueProperty().addListener(sliderChangeListener);
+        sldSystematicMotorError.valueProperty().addListener(sliderChangeListener);
     }
 
     @FXML
@@ -104,6 +122,7 @@ public class VirtualRobotController {
             bot = new TwoWheelBot(hardwareMap, fieldWidth, fieldPane);
         }
         initializeTelemetryTextArea();
+        sldRandomMotorError.setValue(0.0);
     }
 
 
@@ -209,7 +228,7 @@ public class VirtualRobotController {
     private void handleGamePadButtonMouseEvent(MouseEvent arg){
         if (!opModeInitialized || !opModeStarted) return;
         Button btn = (Button)arg.getSource();
-        boolean result = false;
+        boolean result;
 
         if (arg.getEventType() == MouseEvent.MOUSE_EXITED || arg.getEventType() == MouseEvent.MOUSE_RELEASED) result = false;
         else if (arg.getEventType() == MouseEvent.MOUSE_PRESSED) result = true;
@@ -341,6 +360,8 @@ public class VirtualRobotController {
         private DCMotor.Direction direction = Direction.FORWARD;
         private double power = 0.0;
         private double position = 0.0;
+        private double randomErrorFrac = 0.0;
+        private double systematicErrorFrac = 0.0;
 
         public synchronized void setMode(DCMotor.RunMode mode){
             this.mode = mode;
@@ -363,8 +384,16 @@ public class VirtualRobotController {
         synchronized double getCurrentPositionDouble(){ return position; }
         synchronized void updatePosition(double milliseconds){
             if (mode == RunMode.RUN_TO_POSITION || mode == RunMode.STOP_AND_RESET_ENCODER) return;
-            position += power * MAX_TICKS_PER_SEC * milliseconds / 1000.0;
+            double positionChange = power * MAX_TICKS_PER_SEC * milliseconds / 1000.0;
+            positionChange *= (1.0 + systematicErrorFrac + randomErrorFrac * random.nextGaussian());
+            position += positionChange;
         }
+
+        synchronized void setRandomErrorFrac(double rdmErrFrac){
+            randomErrorFrac = rdmErrFrac;
+        }
+        synchronized void setSystematicErrorFrac(double sysErrFrac) { systematicErrorFrac = sysErrFrac; }
+
     }
 
     public class ServoImpl implements Servo{
