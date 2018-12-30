@@ -17,7 +17,7 @@ public class MechanumBot extends VirtualBot {
     private double wheelCircumference;
     private double interWheelWidth;
     private double interWheelLength;
-    private double wlSum;
+    private double wlAverage;
 
     private double[][] tWR; //Transform from wheel motion to robot motion
 
@@ -36,7 +36,7 @@ public class MechanumBot extends VirtualBot {
         wheelCircumference = Math.PI * botWidth / 4.5;
         interWheelWidth = botWidth * 8.0 / 9.0;
         interWheelLength = botWidth * 7.0 / 9.0;
-        wlSum = interWheelLength + interWheelWidth;
+        wlAverage = (interWheelLength + interWheelWidth) / 2.0;
         setUpDisplayGroup("mechanum_bot.fxml", fieldPane);
         backServoArm = (Rectangle)displayGroup.getChildren().get(7);
         backServoArm.getTransforms().add(new Rotate(0, 37.5, 67.5));
@@ -44,7 +44,7 @@ public class MechanumBot extends VirtualBot {
         tWR = new double[][] {
                 {-0.25, 0.25, -0.25, 0.25},
                 {0.25, 0.25, 0.25, 0.25},
-                {-0.25/wlSum, -0.25/wlSum, 0.25/wlSum, 0.25/wlSum},
+                {-0.25/ wlAverage, -0.25/ wlAverage, 0.25/ wlAverage, 0.25/ wlAverage},
                 {-0.25, 0.25, 0.25, -0.25}
         };
     }
