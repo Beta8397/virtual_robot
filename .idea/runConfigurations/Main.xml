@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Main" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="virtual_robot.controller.VirtualRobotApplication" />
-    <module name="virtual_robot" />
+    <module name="Controller" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="virtual_robot.controller.*" />
