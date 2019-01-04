@@ -38,10 +38,12 @@ To use:
 
   1. Make sure you have the Java JDK installed on your PC. Also, install the free Community Edition of JetBrains
      IntelliJ IDEA.
-  2. Download the virtual_robot .zip, and extract contents. Open the project in IntelliJ.
+  2. Download the virtual_robot .zip, and extract contents. Open the project in IntelliJ. You'll see three modules in
+     the project (Controller, TeamCode, and virtual_robot) -- the only module you'll need to touch is TeamCode. It
+     contains the opmodelist and teamcode packages, as well as an assets directory.
   3. Write your OpModes in the teamcode package, and register them in the opModeList.OpModes class. These must extend
      the LinearOpMode class, and must include a runOpMode method.
-  4. Run the application.
+  4. Run the application (by clicking the green arrowhead at the toolbar).
   5. Use Configuration dropdown box to select "Two Wheeled Bot" or "Mechanum Bot". The configuration will be displayed.
   6. Use the Op Mode drop down box to select the desired OpMode.
   7. Prior to initialization, position the robot on the field by left-mouse-clicking the field (for robot position),
