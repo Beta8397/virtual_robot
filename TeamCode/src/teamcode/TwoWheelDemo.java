@@ -1,10 +1,8 @@
 package teamcode;
 
-import virtual_robot.hardware.ColorSensor;
-import virtual_robot.hardware.DCMotor;
-import virtual_robot.hardware.GyroSensor;
-import virtual_robot.hardware.Servo;
+import virtual_robot.hardware.*;
 import virtual_robot.controller.LinearOpMode;
+import virtual_robot.util.navigation.DistanceUnit;
 
 /**
  * Example OpMode. Demonstrates use of gyro, color sensor, encoders, and telemetry.
@@ -20,6 +18,10 @@ public class TwoWheelDemo extends LinearOpMode {
         Servo backServo = hardwareMap.servo.get("back_servo");
         gyro.init();
         ColorSensor colorSensor = hardwareMap.colorSensor.get("color_sensor");
+        DistanceSensor frontDistance = hardwareMap.get(DistanceSensor.class, "front_distance");
+        DistanceSensor leftDistance = hardwareMap.get(DistanceSensor.class, "left_distance");
+        DistanceSensor backDistance = hardwareMap.get(DistanceSensor.class, "back_distance");
+        DistanceSensor rightDistance = hardwareMap.get(DistanceSensor.class, "right_distance");
         telemetry.addData("Press Start When Ready","");
         telemetry.update();
         waitForStart();
@@ -51,6 +53,10 @@ public class TwoWheelDemo extends LinearOpMode {
             telemetry.addData("Color","R %d  G %d  B %d", colorSensor.red(), colorSensor.green(), colorSensor.blue());
             telemetry.addData("Heading"," %.1f", gyro.getHeading());
             telemetry.addData("Encoders","Left %d  Right %d", left.getCurrentPosition(), right.getCurrentPosition());
+            telemetry.addData("Distance", " Fr %.1f  Lt %.1f  Rt %.1f  Bk %.1f  ",
+                    frontDistance.getDistance(DistanceUnit.CM), leftDistance.getDistance(DistanceUnit.CM),
+                    rightDistance.getDistance(DistanceUnit.CM), backDistance.getDistance(DistanceUnit.CM)
+                    );
             telemetry.update();
         }
         left.setPower(0);

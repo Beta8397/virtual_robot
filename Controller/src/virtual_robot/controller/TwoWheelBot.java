@@ -5,6 +5,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Rotate;
 import virtual_robot.hardware.DCMotor;
 import virtual_robot.hardware.HardwareMap;
+import virtual_robot.util.navigation.AngleUtils;
 
 public class TwoWheelBot extends VirtualBot {
 
@@ -13,6 +14,7 @@ public class TwoWheelBot extends VirtualBot {
     private VirtualRobotController.GyroSensorImpl gyro = null;
     private VirtualRobotController.ColorSensorImpl colorSensor = null;
     private VirtualRobotController.ServoImpl servo = null;
+    private VirtualRobotController.DistanceSensorImpl[] distanceSensors = null;
 
     private Rectangle backServoArm = null;
     private double wheelCircumference;
@@ -22,10 +24,18 @@ public class TwoWheelBot extends VirtualBot {
 
     public TwoWheelBot(double fieldWidth, StackPane fieldPane){
         super(fieldWidth);
-        hardwareMap = VirtualRobotApplication.getControllerHandle().new HardwareMapImpl(new String[]
-                {"left_motor", "right_motor"});
+        hardwareMap = VirtualRobotApplication.getControllerHandle().new HardwareMapImpl(
+                new String[]{"left_motor", "right_motor"},
+                new String[]{"front_distance", "left_distance", "back_distance", "right_distance"}
+        );
         leftMotor = hardwareMap.dcMotor.get("left_motor");
         rightMotor = hardwareMap.dcMotor.get("right_motor");
+        distanceSensors = new VirtualRobotController.DistanceSensorImpl[]{
+                hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "front_distance"),
+                hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "left_distance"),
+                hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "back_distance"),
+                hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "right_distance")
+        };
         gyro = hardwareMap.gyroSensor.get("gyro_sensor");
         colorSensor = hardwareMap.colorSensor.get("color_sensor");
         servo = hardwareMap.servo.get("back_servo");
@@ -64,6 +74,12 @@ public class TwoWheelBot extends VirtualBot {
         else if (headingRadians < -Math.PI) headingRadians += 2.0 * Math.PI;
         gyro.updateHeading(headingRadians * 180.0 / Math.PI);
         colorSensor.updateColor(x, y);
+        final double piOver2 = Math.PI / 2.0;
+        for (int i = 0; i<4; i++){
+            double sensorHeading = AngleUtils.normalizeRadians(headingRadians + i * piOver2);
+            distanceSensors[i].updateDistance( x - halfBotWidth * Math.sin(sensorHeading),
+                    y + halfBotWidth * Math.cos(sensorHeading), sensorHeading);
+        }
     }
 
     public synchronized void updateDisplay(){

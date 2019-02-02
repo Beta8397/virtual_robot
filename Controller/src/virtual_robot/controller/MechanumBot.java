@@ -92,9 +92,6 @@ public class MechanumBot extends VirtualBot {
         y += dxR * sin + dyR * cos;
         headingRadians += headingChange;
 
-        sin = Math.sin(headingRadians);
-        cos = Math.cos(headingRadians);
-
         if (x >  (halfFieldWidth - halfBotWidth)) x = halfFieldWidth - halfBotWidth;
         else if (x < (halfBotWidth - halfFieldWidth)) x = halfBotWidth - halfFieldWidth;
         if (y > (halfFieldWidth - halfBotWidth)) y = halfFieldWidth - halfBotWidth;
