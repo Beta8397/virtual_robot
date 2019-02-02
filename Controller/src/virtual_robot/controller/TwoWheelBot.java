@@ -20,13 +20,15 @@ public class TwoWheelBot extends VirtualBot {
 
 
 
-    public TwoWheelBot(HardwareMap hwMap, double fieldWidth, StackPane fieldPane){
-        super(hwMap, fieldWidth);
-        leftMotor = hwMap.dcMotor.get("left_motor");
-        rightMotor = hwMap.dcMotor.get("right_motor");
-        gyro = hwMap.gyroSensor.get("gyro_sensor");
-        colorSensor = hwMap.colorSensor.get("color_sensor");
-        servo = hwMap.servo.get("back_servo");
+    public TwoWheelBot(double fieldWidth, StackPane fieldPane){
+        super(fieldWidth);
+        hardwareMap = VirtualRobotApplication.getControllerHandle().new HardwareMapImpl(new String[]
+                {"left_motor", "right_motor"});
+        leftMotor = hardwareMap.dcMotor.get("left_motor");
+        rightMotor = hardwareMap.dcMotor.get("right_motor");
+        gyro = hardwareMap.gyroSensor.get("gyro_sensor");
+        colorSensor = hardwareMap.colorSensor.get("color_sensor");
+        servo = hardwareMap.servo.get("back_servo");
         wheelCircumference = Math.PI * botWidth / 4.5;
         interWheelDistance = botWidth * 8.0 / 9.0;
         setUpDisplayGroup("two_wheel_bot.fxml", fieldPane);

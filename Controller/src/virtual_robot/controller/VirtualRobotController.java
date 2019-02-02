@@ -18,6 +18,9 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import opmodelist.OpModes;
+import virtual_robot.util.navigation.DistanceUnit;
+
+import java.util.HashMap;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -103,24 +106,20 @@ public class VirtualRobotController {
         imgViewBackground.setFitHeight(fieldWidth);
         imgViewBackground.setViewport(new Rectangle2D(0, 0, fieldWidth, fieldWidth));
         imgViewBackground.setImage(backgroundImage);
-        setConfig(null);
-        initializeTelemetryTextArea();
         sldRandomMotorError.valueProperty().addListener(sliderChangeListener);
         sldSystematicMotorError.valueProperty().addListener(sliderChangeListener);
     }
 
     @FXML
-    private void setConfig(ActionEvent event){
+    public void setConfig(ActionEvent event){
         if (opModeInitialized || opModeStarted) return;
         if (bot != null) bot.removeFromDisplay(fieldPane);
         if (cbxConfig.getValue().equals("Mechanum Bot")){
-            hardwareMap = new HardwareMapImpl(new String[]{"back_left_motor", "front_left_motor",
-                    "front_right_motor", "back_right_motor"});
-            bot = new MechanumBot(hardwareMap, fieldWidth, fieldPane);
+            bot = new MechanumBot(fieldWidth, fieldPane);
         } else {
-            hardwareMap = new HardwareMapImpl(new String[]{"left_motor", "right_motor"});
-            bot = new TwoWheelBot(hardwareMap, fieldWidth, fieldPane);
+            bot = new TwoWheelBot(fieldWidth, fieldPane);
         }
+        hardwareMap = bot.getHardwareMap();
         initializeTelemetryTextArea();
         sldRandomMotorError.setValue(0.0);
     }
@@ -292,6 +291,9 @@ public class VirtualRobotController {
         sb.append("\n Gyro Sensors:");
         Set<String> gyroSensors = hardwareMap.gyroSensor.keySet();
         for (String gyroSensor: gyroSensors) sb.append("\n   " + gyroSensor);
+        sb.append("\n Distance Sensors:");
+        Set<String> distanceSensors = hardwareMap.distanceSensorImpl.keySet();
+        for (String distance: distanceSensors) sb.append("\n   " + distance);
         txtTelemetry.setText(sb.toString());
     }
 
@@ -353,6 +355,56 @@ public class VirtualRobotController {
         synchronized void updateHeading(double heading){ this.heading = heading; }
     }
 
+    public class DistanceSensorImpl implements DistanceSensor {
+        private double distanceMM = distanceOutOfRange;
+        private static final double MIN_DISTANCE = 50; //mm
+        private static final double MAX_DISTANCE = 1000; //mm
+        private static final double MAX_OFFSET = 7.0 * Math.PI / 180.0;
+
+        public synchronized double getDistance(DistanceUnit distanceUnit){
+            double result;
+            if (distanceMM < MIN_DISTANCE) result = MIN_DISTANCE - 1.0;
+            else if (distanceMM > MAX_DISTANCE) result = distanceOutOfRange;
+            else result = distanceMM;
+            switch(distanceUnit){
+                case METER:
+                    return result / 1000.0;
+                case CM:
+                    return result / 10.0;
+                case MM:
+                    return result;
+                case INCH:
+                    return result / 25.4;
+                default:
+                    return result;
+            }
+        }
+
+        public synchronized void updateDistance(double x, double y, double headingRadians){
+            final double mmPerPixel = 144.0 * 25.4 / fieldWidth;
+            final double piOver2 = Math.PI / 2.0;
+            double temp = headingRadians / piOver2;
+            int side = (int)Math.round(temp); //-2, -1 ,0, 1, or 2 (2 and -2 both refer to the right side)
+            double offset = Math.abs(headingRadians - (side * Math.PI / 2.0));
+            if (offset > MAX_OFFSET) distanceMM = distanceOutOfRange;
+            else switch (side){
+                case 2:
+                case -2:
+                    distanceMM = (y + halfFieldWidth) * mmPerPixel;
+                    break;
+                case -1:
+                    distanceMM = (halfFieldWidth - x) * mmPerPixel;
+                    break;
+                case 0:
+                    distanceMM = (halfFieldWidth - y) * mmPerPixel;
+                    break;
+                case 1:
+                    distanceMM = (x + halfFieldWidth) * mmPerPixel;
+                    break;
+            }
+        }
+    }
+
     public class DCMotorImpl implements DCMotor {
         public static final double MAX_TICKS_PER_SEC = 2500.0;
         public static final double TICKS_PER_ROTATION = 1120;
@@ -410,6 +462,8 @@ public class VirtualRobotController {
 
     public class HardwareMapImpl implements HardwareMap{
 
+        private final HashMap<String, DistanceSensorImpl> distanceSensorImpl = new HashMap<>();
+
         public HardwareMapImpl(){
             dcMotor.clear();
             dcMotor.put("left_motor", new DCMotorImpl());
@@ -433,6 +487,23 @@ public class VirtualRobotController {
             servo.put("back_servo", new ServoImpl());
         }
 
+        public HardwareMapImpl( String[] motors, String[] distanceSensors ){
+            this(motors);
+            distanceSensorImpl.clear();
+            if (distanceSensors != null)
+                for (int i=0; i<distanceSensors.length; i++)
+                    distanceSensorImpl.put(distanceSensors[i], new DistanceSensorImpl());
+        }
+
+        @Override
+        public <T> T get(Class<? extends T> classOrInterface, String deviceName) {
+            if (classOrInterface.isAssignableFrom(DCMotorImpl.class)) return (T)dcMotor.get(deviceName);
+            else if (classOrInterface.isAssignableFrom(ColorSensorImpl.class)) return (T)colorSensor.get(deviceName);
+            else if (classOrInterface.isAssignableFrom(GyroSensorImpl.class)) return (T)gyroSensor.get(deviceName);
+            else if (classOrInterface.isAssignableFrom(ServoImpl.class)) return (T)servo.get(deviceName);
+            else if (classOrInterface.isAssignableFrom(DistanceSensorImpl.class)) return (T)distanceSensorImpl.get(deviceName);
+            else return null;
+        }
 
     }
 

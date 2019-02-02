@@ -2,7 +2,6 @@ package teamcode;
 
 import virtual_robot.hardware.DCMotor;
 import virtual_robot.controller.LinearOpMode;
-import virtual_robot.time.ElapsedTime;
 
 /**
  * Example OpMode. Controls robot using left joystick, with arcade drive.

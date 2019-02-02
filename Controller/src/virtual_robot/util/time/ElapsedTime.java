@@ -1,4 +1,4 @@
-package virtual_robot.time;
+package virtual_robot.util.time;
 
 /**
  * An approximation to the FTC ElapsedTime class

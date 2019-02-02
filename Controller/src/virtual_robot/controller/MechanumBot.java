@@ -5,6 +5,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Rotate;
 import virtual_robot.hardware.DCMotor;
 import virtual_robot.hardware.HardwareMap;
+import virtual_robot.util.navigation.AngleUtils;
 
 public class MechanumBot extends VirtualBot {
 
@@ -12,6 +13,7 @@ public class MechanumBot extends VirtualBot {
     private VirtualRobotController.GyroSensorImpl gyro = null;
     private VirtualRobotController.ColorSensorImpl colorSensor = null;
     private VirtualRobotController.ServoImpl servo = null;
+    private VirtualRobotController.DistanceSensorImpl[] distanceSensors = null;
 
     private Rectangle backServoArm = null;
     private double wheelCircumference;
@@ -22,17 +24,26 @@ public class MechanumBot extends VirtualBot {
     private double[][] tWR; //Transform from wheel motion to robot motion
 
 
-    public MechanumBot(HardwareMap hwMap, double fieldWidth, StackPane fieldPane) {
-        super(hwMap, fieldWidth);
+    public MechanumBot(double fieldWidth, StackPane fieldPane) {
+        super(fieldWidth);
+        hardwareMap = VirtualRobotApplication.getControllerHandle().new HardwareMapImpl( new String[]
+                {"back_left_motor", "front_left_motor", "front_right_motor", "back_right_motor"},
+                new String[] {"front_distance", "left_distance", "back_distance", "right_distance"});
         motors = new VirtualRobotController.DCMotorImpl[]{
-                hwMap.dcMotor.get("back_left_motor"),
-                hwMap.dcMotor.get("front_left_motor"),
-                hwMap.dcMotor.get("front_right_motor"),
-                hwMap.dcMotor.get("back_right_motor")
+                hardwareMap.dcMotor.get("back_left_motor"),
+                hardwareMap.dcMotor.get("front_left_motor"),
+                hardwareMap.dcMotor.get("front_right_motor"),
+                hardwareMap.dcMotor.get("back_right_motor")
         };
-        gyro = hwMap.gyroSensor.get("gyro_sensor");
-        colorSensor = hwMap.colorSensor.get("color_sensor");
-        servo = hwMap.servo.get("back_servo");
+        distanceSensors = new VirtualRobotController.DistanceSensorImpl[]{
+                hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "front_distance"),
+                hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "left_distance"),
+                hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "back_distance"),
+                hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "right_distance")
+        };
+        gyro = hardwareMap.gyroSensor.get("gyro_sensor");
+        colorSensor = hardwareMap.colorSensor.get("color_sensor");
+        servo = hardwareMap.servo.get("back_servo");
         wheelCircumference = Math.PI * botWidth / 4.5;
         interWheelWidth = botWidth * 8.0 / 9.0;
         interWheelLength = botWidth * 7.0 / 9.0;
@@ -81,14 +92,27 @@ public class MechanumBot extends VirtualBot {
         y += dxR * sin + dyR * cos;
         headingRadians += headingChange;
 
+        sin = Math.sin(headingRadians);
+        cos = Math.cos(headingRadians);
+
         if (x >  (halfFieldWidth - halfBotWidth)) x = halfFieldWidth - halfBotWidth;
         else if (x < (halfBotWidth - halfFieldWidth)) x = halfBotWidth - halfFieldWidth;
         if (y > (halfFieldWidth - halfBotWidth)) y = halfFieldWidth - halfBotWidth;
         else if (y < (halfBotWidth - halfFieldWidth)) y = halfBotWidth - halfFieldWidth;
+
         if (headingRadians > Math.PI) headingRadians -= 2.0 * Math.PI;
         else if (headingRadians < -Math.PI) headingRadians += 2.0 * Math.PI;
         gyro.updateHeading(headingRadians * 180.0 / Math.PI);
+
         colorSensor.updateColor(x, y);
+
+        final double piOver2 = Math.PI / 2.0;
+        for (int i = 0; i<4; i++){
+            double sensorHeading = AngleUtils.normalizeRadians(headingRadians + i * piOver2);
+            distanceSensors[i].updateDistance( x - halfBotWidth * Math.sin(sensorHeading),
+                    y + halfBotWidth * Math.cos(sensorHeading), sensorHeading);
+        }
+
     }
 
     public synchronized void updateDisplay(){

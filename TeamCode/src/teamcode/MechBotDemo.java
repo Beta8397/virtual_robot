@@ -2,10 +2,8 @@ package teamcode;
 
 import virtual_robot.controller.LinearOpMode;
 import virtual_robot.controller.VirtualRobotController;
-import virtual_robot.hardware.ColorSensor;
-import virtual_robot.hardware.DCMotor;
-import virtual_robot.hardware.GyroSensor;
-import virtual_robot.hardware.Servo;
+import virtual_robot.hardware.*;
+import virtual_robot.util.navigation.DistanceUnit;
 
 /**
  * Example OpMode. Demonstrates use of gyro, color sensor, encoders, and telemetry.
@@ -30,6 +28,10 @@ public class MechBotDemo extends LinearOpMode {
         m4.setMode(DCMotor.RunMode.RUN_USING_ENCODER);
         GyroSensor gyro = hardwareMap.gyroSensor.get("gyro_sensor");
         Servo backServo = hardwareMap.servo.get("back_servo");
+        DistanceSensor frontDistance = hardwareMap.get(DistanceSensor.class, "front_distance");
+        DistanceSensor leftDistance = hardwareMap.get(DistanceSensor.class, "left_distance");
+        DistanceSensor rightDistance = hardwareMap.get(DistanceSensor.class, "right_distance");
+        DistanceSensor backDistance = hardwareMap.get(DistanceSensor.class, "back_distance");
         gyro.init();
         ColorSensor colorSensor = hardwareMap.colorSensor.get("color_sensor");
         telemetry.addData("Press Start When Ready","");
@@ -60,6 +62,10 @@ public class MechBotDemo extends LinearOpMode {
             m4.setPower(p4);
             telemetry.addData("Color","R %d  G %d  B %d", colorSensor.red(), colorSensor.green(), colorSensor.blue());
             telemetry.addData("Heading"," %.1f", gyro.getHeading());
+            telemetry.addData("Front Distance", " %.1f", frontDistance.getDistance(DistanceUnit.CM));
+            telemetry.addData("Left Distance", " %.1f", leftDistance.getDistance(DistanceUnit.CM));
+            telemetry.addData("Right Distance", " %.1f", rightDistance.getDistance(DistanceUnit.CM));
+            telemetry.addData("Back Distance", " %.1f", backDistance.getDistance(DistanceUnit.CM));
             telemetry.addData("Encoders"," %d %d %d %d", m1.getCurrentPosition(), m2.getCurrentPosition(),
                     m3.getCurrentPosition(), m4.getCurrentPosition());
             telemetry.update();
