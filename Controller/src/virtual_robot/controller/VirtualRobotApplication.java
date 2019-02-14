@@ -35,6 +35,7 @@ public class VirtualRobotApplication extends Application {
         if (controllerHandle.executorService != null && !controllerHandle.executorService.isShutdown()) {
             controllerHandle.executorService.shutdown();
         }
+        controllerHandle.gamePad.release();
     }
 
     public static VirtualRobotController getControllerHandle(){return controllerHandle;}

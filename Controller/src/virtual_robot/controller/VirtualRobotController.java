@@ -41,19 +41,11 @@ public class VirtualRobotController {
     @FXML private Slider sldRandomMotorError;
     @FXML private Slider sldSystematicMotorError;
     @FXML private TextArea txtTelemetry;
-    @FXML Circle joyStickLeftHandle;
-    @FXML Circle joyStickRightHandle;
-    @FXML StackPane joyStickLeftPane;
-    @FXML StackPane joyStickRightPane;
-    @FXML Button btnX;
-    @FXML Button btnY;
-    @FXML Button btnA;
-    @FXML Button btnB;
 
     //Virtual Hardware
     private HardwareMapImpl hardwareMap = null;
     private VirtualBot bot = null;
-    private GamePad gamePad = new GamePad();
+    GamePad gamePad = new GamePad();
 
     //Background Image and Field
     private Image backgroundImage = Background.background;
@@ -151,6 +143,7 @@ public class VirtualRobotController {
             Runnable singleCycle = new Runnable() {
                 @Override
                 public void run() {
+                    gamePad.update();
                     bot.updateStateAndSensors(TIMER_INTERVAL_MILLISECONDS);
                     Platform.runLater(updateDisplay);
                 }
@@ -176,7 +169,6 @@ public class VirtualRobotController {
             }
             if (opModeThread.isAlive()) System.out.println("OpMode Thread Failed to Terminate.");
             bot.powerDownAndReset();
-            resetGamePad();
             initializeTelemetryTextArea();
             cbxConfig.setDisable(false);
         }
@@ -191,7 +183,7 @@ public class VirtualRobotController {
         Platform.runLater(new Runnable() {
             public void run() {
                 driverButton.setText("INIT");
-                resetGamePad();
+                //resetGamePad();
                 initializeTelemetryTextArea();
                 cbxConfig.setDisable(false);
             }
@@ -204,55 +196,6 @@ public class VirtualRobotController {
         bot.positionWithMouseClick(arg);
     }
 
-    @FXML
-    private void handleJoystickDrag(MouseEvent arg){
-        if (!opModeInitialized || !opModeStarted) return;
-        float x = (float)Math.max(10, Math.min(110, arg.getX()));
-        float y = (float)Math.max(10, Math.min(110, arg.getY()));
-        if (arg.getSource() == joyStickLeftPane){
-            joyStickLeftHandle.setTranslateX(x-10);
-            joyStickLeftHandle.setTranslateY(y-10);
-            gamePad.left_stick_x = (x - 60.0f) / 50.0f;
-            gamePad.left_stick_y = (y - 60.0f) / 50.0f;
-        }
-        else if (arg.getSource() == joyStickRightPane){
-            joyStickRightHandle.setTranslateX(x-10);
-            joyStickRightHandle.setTranslateY(y-10);
-            gamePad.right_stick_x = (x - 60.0f) / 50.0f;
-            gamePad.right_stick_y = (y - 60.0f) / 50.0f;
-        }
-    }
-
-    @FXML
-    private void handleGamePadButtonMouseEvent(MouseEvent arg){
-        if (!opModeInitialized || !opModeStarted) return;
-        Button btn = (Button)arg.getSource();
-        boolean result;
-
-        if (arg.getEventType() == MouseEvent.MOUSE_EXITED || arg.getEventType() == MouseEvent.MOUSE_RELEASED) result = false;
-        else if (arg.getEventType() == MouseEvent.MOUSE_PRESSED) result = true;
-        else return;
-
-        if (btn == btnX) gamePad.x = result;
-        else if (btn == btnY) gamePad.y = result;
-        else if (btn == btnA) gamePad.a = result;
-        else if (btn == btnB) gamePad.b = result;
-    }
-
-    private void resetGamePad(){
-        gamePad.left_stick_y = 0;
-        gamePad.left_stick_x = 0;
-        gamePad.right_stick_x = 0;
-        gamePad.right_stick_y = 0;
-        gamePad.a = false;
-        gamePad.b = false;
-        gamePad.x = false;
-        gamePad.y = false;
-        joyStickLeftHandle.setTranslateX(50);
-        joyStickLeftHandle.setTranslateY(50);
-        joyStickRightHandle.setTranslateX(50);
-        joyStickRightHandle.setTranslateY(50);
-    }
 
 
     private boolean initLinearOpMode(){
