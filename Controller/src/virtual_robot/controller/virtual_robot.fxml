@@ -8,20 +8,13 @@
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.shape.Circle?>
-<?import javafx.scene.shape.Line?>
-<?import javafx.scene.shape.Rectangle?>
-<?import javafx.scene.text.Font?>
 
 <BorderPane xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="virtual_robot.controller.VirtualRobotController">
    <center>
-      <StackPane fx:id="fieldPane" alignment="TOP_LEFT" maxHeight="0.0" maxWidth="0.0" minHeight="0.0" minWidth="0.0" onMouseClicked="#handleFieldMouseClick" prefHeight="0.0" prefWidth="576.0" BorderPane.alignment="CENTER">
+      <StackPane fx:id="fieldPane" alignment="TOP_LEFT" maxHeight="0.0" maxWidth="0.0" minHeight="0.0" minWidth="0.0" onMouseClicked="#handleFieldMouseClick" prefHeight="0.0" prefWidth="648.0" BorderPane.alignment="CENTER">
          <children>
             <ImageView fx:id="imgViewBackground" pickOnBounds="true" preserveRatio="true" />
          </children></StackPane>
@@ -45,101 +38,22 @@
                <VBox.margin>
                   <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                </VBox.margin></Button>
-            <TextArea fx:id="txtTelemetry" editable="false" prefHeight="200.0" prefWidth="250.0" />
+            <TextArea fx:id="txtTelemetry" editable="false" prefHeight="250.0" prefWidth="250.0" />
+            <Label text="Random Motor Error">
+               <VBox.margin>
+                  <Insets top="30.0" />
+               </VBox.margin>
+            </Label>
+            <Slider fx:id="sldRandomMotorError" blockIncrement="0.05" majorTickUnit="0.05" max="0.25" minorTickCount="0" />
+            <Label text="Systematic Motor Error" />
+            <Slider fx:id="sldSystematicMotorError" blockIncrement="0.02" majorTickUnit="0.02" max="0.1" minorTickCount="0" />
          </children>
       </VBox>
    </right>
+   <left>
+      <VBox prefHeight="200.0" prefWidth="15.0" BorderPane.alignment="CENTER" />
+   </left>
    <bottom>
-      <HBox alignment="CENTER" BorderPane.alignment="CENTER">
-         <children>
-            <StackPane fx:id="joyStickLeftPane" alignment="TOP_LEFT" maxHeight="120.0" maxWidth="120.0" minHeight="120.0" minWidth="120.0" onMouseDragged="#handleJoystickDrag" prefHeight="120.0" prefWidth="120.0">
-               <children>
-                  <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#404040" height="120.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="4.0" width="120.0">
-                     <StackPane.margin>
-                        <Insets />
-                     </StackPane.margin>
-                  </Rectangle>
-                  <Line endX="60.0" endY="120.0" startX="60.0" stroke="LIME" StackPane.alignment="CENTER" />
-                  <Line endX="120.0" endY="60.0" startY="60.0" stroke="LIME" StackPane.alignment="CENTER" />
-                  <Circle fx:id="joyStickLeftHandle" fill="RED" radius="10.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" translateX="50.0" translateY="50.0" />
-               </children>
-               <HBox.margin>
-                  <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
-               </HBox.margin>
-            </StackPane>
-            <StackPane fx:id="joyStickRightPane" alignment="TOP_LEFT" maxHeight="120.0" maxWidth="120.0" minHeight="120.0" minWidth="120.0" onMouseDragged="#handleJoystickDrag" prefHeight="120.0" prefWidth="120.0">
-               <children>
-                  <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#404040" height="120.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="4.0" width="120.0" />
-                  <Line endX="60.0" endY="120.0" startX="60.0" stroke="RED" StackPane.alignment="CENTER" />
-                  <Line endX="120.0" endY="60.0" startY="60.0" stroke="RED" StackPane.alignment="CENTER" />
-                  <Circle fx:id="joyStickRightHandle" fill="LIME" radius="10.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" translateX="50.0" translateY="50.0" />
-               </children>
-               <HBox.margin>
-                  <Insets bottom="5.0" top="5.0" />
-               </HBox.margin>
-            </StackPane>
-            <GridPane alignment="CENTER">
-              <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="40.0" />
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="40.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="40.0" />
-              </columnConstraints>
-              <rowConstraints>
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-              </rowConstraints>
-               <children>
-                  <Button fx:id="btnX" alignment="CENTER" mnemonicParsing="false" onMouseExited="#handleGamePadButtonMouseEvent" onMousePressed="#handleGamePadButtonMouseEvent" onMouseReleased="#handleGamePadButtonMouseEvent" text="X" GridPane.halignment="CENTER" GridPane.rowIndex="1">
-                     <font>
-                        <Font size="14.0" />
-                     </font>
-                  </Button>
-                  <Button fx:id="btnY" mnemonicParsing="false" onMouseExited="#handleGamePadButtonMouseEvent" onMousePressed="#handleGamePadButtonMouseEvent" onMouseReleased="#handleGamePadButtonMouseEvent" text="Y" GridPane.columnIndex="1" GridPane.halignment="CENTER">
-                     <font>
-                        <Font size="14.0" />
-                     </font>
-                  </Button>
-                  <Button fx:id="btnA" mnemonicParsing="false" onMouseExited="#handleGamePadButtonMouseEvent" onMousePressed="#handleGamePadButtonMouseEvent" onMouseReleased="#handleGamePadButtonMouseEvent" text="A" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2">
-                     <font>
-                        <Font size="14.0" />
-                     </font>
-                  </Button>
-                  <Button fx:id="btnB" alignment="CENTER" mnemonicParsing="false" onMouseExited="#handleGamePadButtonMouseEvent" onMousePressed="#handleGamePadButtonMouseEvent" onMouseReleased="#handleGamePadButtonMouseEvent" text="B" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1">
-                     <font>
-                        <Font size="14.0" />
-                     </font>
-                  </Button>
-               </children>
-               <HBox.margin>
-                  <Insets bottom="5.0" left="20.0" right="150.0" top="5.0" />
-               </HBox.margin>
-            </GridPane>
-            <VBox alignment="CENTER">
-               <children>
-                  <Label text="Random Motor Error">
-                     <VBox.margin>
-                        <Insets bottom="5.0" />
-                     </VBox.margin>
-                  </Label>
-                  <Slider fx:id="sldRandomMotorError" blockIncrement="0.05" majorTickUnit="0.05" max="0.25" minorTickCount="0">
-                     <VBox.margin>
-                        <Insets bottom="5.0" top="5.0" />
-                     </VBox.margin>
-                  </Slider>
-                  <Label text="Systematic Motor Error">
-                     <VBox.margin>
-                        <Insets bottom="5.0" top="5.0" />
-                     </VBox.margin>
-                  </Label>
-                  <Slider fx:id="sldSystematicMotorError" blockIncrement="0.02" majorTickUnit="0.02" max="0.1" minorTickCount="0">
-                     <VBox.margin>
-                        <Insets top="5.0" />
-                     </VBox.margin>
-                  </Slider>
-               </children>
-            </VBox>
-         </children>
-      </HBox>
+      <HBox prefHeight="15.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
    </bottom>
 </BorderPane>

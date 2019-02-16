@@ -11,11 +11,11 @@ downward-facing color sensor in the center of the robot. A gyro sensor is also i
 of the robot is controlled by a servo. Each robot also has distance sensors on the front, left, right and back sides.
 A small green rectangle indicates the front of the robot.
 
-The field can be thought of as 12 feet wide. The field graphic (currently gray, with a pair of adjacent blue/red bands)
+The field can be thought of as 12 feet wide. The field graphic (currently the Rover Ruckus field)
 is obtained from a bitmap (.bmp) image. The color sensor detects the field color beneath the center of the
 robot. The field graphic is easily changed by providing a different .bmp image in the background.Background class.
 The .bmp image is in the background.bmp file in the src/assets folder. If a different .bmp image is used,
-it must be at least as wide and as tall as the field dimensions (currently 576 x 576 pixels to fit on the screen of
+it must be at least as wide and as tall as the field dimensions (currently 648 x 648 pixels to fit on the screen of
 most laptops).
 
 An abridged approximation of the FTC SDK is provided.
@@ -28,7 +28,7 @@ The LinearOpMode class in the simulator provides access to:
 
   1. A HardwareMap object, which in turn provides access to the DCMotor objects, the gyro sensor,
      the servo, and the color sensor;
-  2. A GamePad (implemented in the UI, not a physical gamepad), with a subset of standard gamepad function;
+  2. A GamePad (actual hardware gamepad);
   3. A Telemetry object.
 
 An approximation of the FTC SDK's ElapsedTime class is provided in the time package.
@@ -44,12 +44,12 @@ To use:
      contains the opmodelist and teamcode packages, as well as an assets directory.
   3. Write your OpModes in the teamcode package, and register them in the opModeList.OpModes class. These must extend
      the LinearOpMode class, and must include a runOpMode method.
-  4. Run the application (by clicking the green arrowhead at the toolbar).
-  5. Use Configuration dropdown box to select "Two Wheeled Bot" or "Mechanum Bot". The configuration will be displayed.
-  6. Use the Op Mode drop down box to select the desired OpMode.
-  7. Prior to initialization, position the robot on the field by left-mouse-clicking the field (for robot position),
+  4. Make sure gamepad is plugged in to the computer.
+  5. Run the application (by clicking the green arrowhead at the toolbar).
+  6. Use Configuration dropdown box to select "Two Wheeled Bot" or "Mechanum Bot". The configuration will be displayed.
+  7. Use the Op Mode drop down box to select the desired OpMode.
+  8. Prior to initialization, position the robot on the field by left-mouse-clicking the field (for robot position),
      and right-mouse-clicking (for robot orientation).
-  8. Use the INIT/START/STOP button as you would on the FTC Driver Station.
-  9. To use the virtual gamepad: mouse drag on the left and right joysticks; press the A,B,X,Y buttons.
+  9. Use the INIT/START/STOP button as you would on the FTC Driver Station.
   10. If desired use the sliders to introduce random and systematic motor error.
 

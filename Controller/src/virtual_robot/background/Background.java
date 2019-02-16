@@ -9,5 +9,5 @@ public class Background {
     /**
      * The image object for the field.
      */
-    public static final Image background = new Image("/assets/ruckus_field.bmp");
+    public static final Image background = new Image("/assets/ruckus_field648.bmp");
 }
