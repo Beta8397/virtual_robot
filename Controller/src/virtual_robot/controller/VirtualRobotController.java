@@ -336,7 +336,7 @@ public class VirtualRobotController {
         private double heading = 0.0;
         public synchronized void init(){
             initialized = true;
-            initialHeading = bot.getHeadingRadians() * 180.0 / Math.PI;
+            heading = initialHeading = bot.getHeadingRadians() * 180.0 / Math.PI;
         }
         synchronized void deinit(){
             initialized = false;
