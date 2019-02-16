@@ -85,7 +85,7 @@ public class VirtualRobotController {
         LinearOpMode.setVirtualRobotController(this);
         cbxOpModes.setItems(OpModes.opModes);
         cbxOpModes.setValue(cbxOpModes.getItems().get(0));
-        cbxConfig.setItems(FXCollections.observableArrayList("Two Wheel Bot", "Mechanum Bot"));
+        cbxConfig.setItems(FXCollections.observableArrayList("Two Wheel Bot", "Mechanum Bot", "XDrive Bot"));
         cbxConfig.setValue(cbxConfig.getItems().get(0));
         fieldWidth = fieldPane.getPrefWidth();
         halfFieldWidth = fieldWidth / 2.0;
@@ -108,8 +108,10 @@ public class VirtualRobotController {
         if (bot != null) bot.removeFromDisplay(fieldPane);
         if (cbxConfig.getValue().equals("Mechanum Bot")){
             bot = new MechanumBot(fieldWidth, fieldPane);
-        } else {
+        } else if (cbxConfig.getValue().equals("Two Wheel Bot")){
             bot = new TwoWheelBot(fieldWidth, fieldPane);
+        } else {
+            bot = new XDriveBot(fieldWidth, fieldPane);
         }
         hardwareMap = bot.getHardwareMap();
         initializeTelemetryTextArea();

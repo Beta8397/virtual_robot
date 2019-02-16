@@ -3,13 +3,16 @@ A 2D simulator to help beginning Java programmers learn to program for FTC Robot
 This is a JavaFX application developed using the (free) IntelliJ IDEA Community Edition IDE. The repository can be downloaded
 and unzipped, then opened with IntelliJ.
 
-Two robot configurations are available: a simple two-wheeled robot, and a robot with four mechanum wheels.
-Each robot can be thought of as 18 inches wide. The distance between the centers of the right and left wheels
-is 16 inches. For the mechanum wheel bot, the distance between the centers of the front and back wheels is 14 inches,
-and the mechanum wheels (when viewed from the top) have an "X" configuration. Each motor has an encoder. There is a
-downward-facing color sensor in the center of the robot. A gyro sensor is also included. A purple arm on the back
-of the robot is controlled by a servo. Each robot also has distance sensors on the front, left, right and back sides.
-A small green rectangle indicates the front of the robot.
+Three robot configurations are available: a simple two-wheeled robot, a robot with four mechanum wheels, and an
+X-Drive robot with four OmniWheels mounted at 45 degrees at each corner of the robot.
+
+Each robot can be thought of as 18 inches wide.  For the two-wheel bot and mechanum wheel bot, the distance between
+the centers of the right and left wheels is 16 inches. For the mechanum wheel bot, the distance between the centers
+of the front and back wheels is 14 inches, and the mechanum wheels (when viewed from the top) have an "X" configuration.
+For the X-Drive bot, the distance between the centers of any two adjacent wheels is 14.5 inches. Each motor has an
+encoder. There is a downward-facing color sensor in the center of the robot. A gyro sensor is also included. A purple
+arm on the back of the robot is controlled by a servo. Each robot also has distance sensors on the front, left, right
+and back sides. A small green rectangle indicates the front of the robot.
 
 The field can be thought of as 12 feet wide. The field graphic (currently the Rover Ruckus field)
 is obtained from a bitmap (.bmp) image. The color sensor detects the field color beneath the center of the
