@@ -60,6 +60,8 @@ public class GamePad {
         right_bumper = state.rb;
         left_stick_button = state.leftStickClick;
         right_stick_button = state.rightStickClick;
+        left_trigger = state.leftTrigger;
+        right_trigger = state.rightTrigger;
     }
 
     public void release(){
