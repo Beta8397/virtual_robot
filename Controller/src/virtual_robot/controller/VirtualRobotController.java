@@ -481,6 +481,37 @@ public class VirtualRobotController {
             }
             return;
         }
+
+        /**
+         * Returns true IF: start button has been pressed AND there has been no request to stop.
+         *
+         * This method also gives other threads an opportunity to run.
+         *
+         * Any long-running loop (more than a few iterations) should include a call to this method.
+         *
+         * @return TRUE if STARTED AND NO request to terminate; FALSE if there is a request to terminate or if not started.
+         */
+        protected boolean opModeIsActive(){
+            if (Thread.currentThread().isInterrupted() || !opModeStarted) return false;
+            try{
+                Thread.sleep(0);
+            } catch (InterruptedException exc){
+                Thread.currentThread().interrupt();
+                return false;
+            }
+            return true;
+        }
+
+        /**
+         * Returns true if there has been request to stop op mode.
+         *
+         * @return TRUE if request to terminate; FALSE otherwise.
+         */
+        protected boolean isStopRequested(){
+            if (Thread.currentThread().isInterrupted()) return true;
+            return false;
+        }
+
     }
 
     public class TelemetryImpl implements Telemetry {

@@ -3,6 +3,7 @@ package teamcode;
 import virtual_robot.hardware.*;
 import virtual_robot.controller.LinearOpMode;
 import virtual_robot.util.navigation.DistanceUnit;
+import virtual_robot.util.time.ElapsedTime;
 
 /**
  * Example OpMode. Demonstrates use of gyro, color sensor, encoders, and telemetry.
@@ -22,9 +23,12 @@ public class TwoWheelDemo extends LinearOpMode {
         DistanceSensor leftDistance = hardwareMap.get(DistanceSensor.class, "left_distance");
         DistanceSensor backDistance = hardwareMap.get(DistanceSensor.class, "back_distance");
         DistanceSensor rightDistance = hardwareMap.get(DistanceSensor.class, "right_distance");
-        telemetry.addData("Press Start When Ready","");
+
+        telemetry.addData("Press Start to Continue","");
         telemetry.update();
+
         waitForStart();
+
         while (opModeIsActive()){
             if (gamePad1.a){
                 telemetry.addData("a pressed","");

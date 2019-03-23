@@ -6,7 +6,7 @@ import virtual_robot.controller.LinearOpMode;
 /**
  * Example OpMode. Controls robot using left joystick, with arcade drive.
  */
-public class ArcadeDrive extends LinearOpMode {
+public class TwoWheelArcadeDrive extends LinearOpMode {
 
     public void runOpMode(){
         DCMotor left = hardwareMap.dcMotor.get("left_motor");

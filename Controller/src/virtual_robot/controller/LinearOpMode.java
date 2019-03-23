@@ -48,25 +48,5 @@ public abstract class LinearOpMode extends VirtualRobotController.LinearOpModeBa
         return;
     }
 
-    /**
-     * Determines whether there has been a request to terminate execution of this OpMode (for example, clicking the "STOP"
-     * button would result in such a request).
-     *
-     * This method also gives other threads an opportunity to run.
-     *
-     * Any long-running loop (more than a few iterations) should include a call to this method.
-     *
-     * @return TRUE if NO request to terminate; FALSE if there is a request to terminate.
-     */
-    protected boolean opModeIsActive(){
-        if (Thread.currentThread().isInterrupted()) return false;
-        try{
-            Thread.sleep(0);
-        } catch (InterruptedException exc){
-            Thread.currentThread().interrupt();
-            return false;
-        }
-        return true;
-    }
 
 }

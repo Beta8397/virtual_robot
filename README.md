@@ -1,5 +1,13 @@
 A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
 
+RECENT CHANGES:
+  Uses real game pad (instead of the original "virtual" game pad.
+  Added an X-Drive robot configuration.
+  Tweaks to opModeIsActive() and addition of isStopRequested() to allow while() loop before START.
+  Added Color class with single static method: RGBtoHSV(red, green, blue, hsv).
+  Added distance sensors to all robot configurations to measure distance from walls.
+  Replaced LineFollow example opMode with MechBotAutoDemo, a line follower that actually works.
+
 This is a JavaFX application developed using the (free) IntelliJ IDEA Community Edition IDE. The repository can be downloaded
 and unzipped, then opened with IntelliJ.
 

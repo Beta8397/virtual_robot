@@ -15,7 +15,7 @@ public class OpModes {
     public static final ObservableList<String> opModes =
             FXCollections.observableArrayList(
 
-                    "TwoWheelDemo", "ArcadeDrive", "LineFollow", "MechBotDemo"
+                    "TwoWheelDemo", "TwoWheelArcadeDrive", "MechBotDemo", "MechBotAutoDemo"
 
             );
 }
