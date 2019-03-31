@@ -3,7 +3,7 @@ package virtual_robot.hardware;
 /**
  * DCMotor is an abridged version of the FTC DCMotor interface.
  */
-public interface DCMotor {
+public interface DCMotor extends HardwareDevice {
     public enum Direction {FORWARD, REVERSE}
 
     public enum RunMode {RUN_TO_POSITION, RUN_USING_ENCODER, RUN_WITHOUT_ENCODER, STOP_AND_RESET_ENCODER}
