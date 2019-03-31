@@ -43,7 +43,7 @@ public class VirtualRobotController {
     @FXML private TextArea txtTelemetry;
 
     //Virtual Hardware
-    private HardwareMapImpl hardwareMap = null;
+    private HardwareMap hardwareMap = null;
     private VirtualBot bot = null;
     GamePad gamePad = new GamePad();
 
@@ -74,9 +74,9 @@ public class VirtualRobotController {
     private ChangeListener<Number> sliderChangeListener = new ChangeListener<Number>() {
         @Override
         public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-            for (DCMotorImpl motor: hardwareMap.dcMotor.values()) {
-                motor.setRandomErrorFrac(sldRandomMotorError.getValue());
-                motor.setSystematicErrorFrac(sldSystematicMotorError.getValue() * 2.0 * (0.5 - random.nextDouble()));
+            for (DCMotor motor: hardwareMap.dcMotor) {
+                ((DCMotorImpl)motor).setRandomErrorFrac(sldRandomMotorError.getValue());
+                ((DCMotorImpl)motor).setSystematicErrorFrac(sldSystematicMotorError.getValue() * 2.0 * (0.5 - random.nextDouble()));
             }
         }
     };
@@ -116,6 +116,7 @@ public class VirtualRobotController {
         hardwareMap = bot.getHardwareMap();
         initializeTelemetryTextArea();
         sldRandomMotorError.setValue(0.0);
+        sldSystematicMotorError.setValue(0.0);
     }
 
 
@@ -237,7 +238,7 @@ public class VirtualRobotController {
         Set<String> gyroSensors = hardwareMap.gyroSensor.keySet();
         for (String gyroSensor: gyroSensors) sb.append("\n   " + gyroSensor);
         sb.append("\n Distance Sensors:");
-        Set<String> distanceSensors = hardwareMap.distanceSensorImpl.keySet();
+        Set<String> distanceSensors = hardwareMap.keySet(DistanceSensor.class);
         for (String distance: distanceSensors) sb.append("\n   " + distance);
         txtTelemetry.setText(sb.toString());
     }
@@ -403,53 +404,6 @@ public class VirtualRobotController {
         public synchronized double getPosition(){
             return position;
         }
-    }
-
-    public class HardwareMapImpl implements HardwareMap{
-
-        private final HashMap<String, DistanceSensorImpl> distanceSensorImpl = new HashMap<>();
-
-        public HardwareMapImpl(){
-            dcMotor.clear();
-            dcMotor.put("left_motor", new DCMotorImpl());
-            dcMotor.put("right_motor", new DCMotorImpl());
-            colorSensor.clear();
-            colorSensor.put("color_sensor", new ColorSensorImpl());
-            gyroSensor.clear();
-            gyroSensor.put("gyro_sensor", new GyroSensorImpl());
-            servo.clear();
-            servo.put("back_servo", new ServoImpl());
-        }
-
-        public HardwareMapImpl( String[] motors ){
-            dcMotor.clear();
-            if (motors != null) for (int i=0; i<motors.length; i++) dcMotor.put(motors[i], new DCMotorImpl());
-            colorSensor.clear();
-            colorSensor.put("color_sensor", new ColorSensorImpl());
-            gyroSensor.clear();
-            gyroSensor.put("gyro_sensor", new GyroSensorImpl());
-            servo.clear();
-            servo.put("back_servo", new ServoImpl());
-        }
-
-        public HardwareMapImpl( String[] motors, String[] distanceSensors ){
-            this(motors);
-            distanceSensorImpl.clear();
-            if (distanceSensors != null)
-                for (int i=0; i<distanceSensors.length; i++)
-                    distanceSensorImpl.put(distanceSensors[i], new DistanceSensorImpl());
-        }
-
-        @Override
-        public <T> T get(Class<? extends T> classOrInterface, String deviceName) {
-            if (classOrInterface.isAssignableFrom(DCMotorImpl.class)) return (T)dcMotor.get(deviceName);
-            else if (classOrInterface.isAssignableFrom(ColorSensorImpl.class)) return (T)colorSensor.get(deviceName);
-            else if (classOrInterface.isAssignableFrom(GyroSensorImpl.class)) return (T)gyroSensor.get(deviceName);
-            else if (classOrInterface.isAssignableFrom(ServoImpl.class)) return (T)servo.get(deviceName);
-            else if (classOrInterface.isAssignableFrom(DistanceSensorImpl.class)) return (T)distanceSensorImpl.get(deviceName);
-            else return null;
-        }
-
     }
 
 

@@ -12,7 +12,7 @@ import virtual_robot.hardware.HardwareMap;
 
 public abstract class VirtualBot {
 
-    protected VirtualRobotController.HardwareMapImpl hardwareMap;
+    protected HardwareMap hardwareMap;
 
     protected Group displayGroup = null;
 
@@ -26,6 +26,7 @@ public abstract class VirtualBot {
     protected double headingRadians = 0;
 
     public VirtualBot(double fieldWidth){
+        hardwareMap = createHardwareMap();
         this.fieldWidth = fieldWidth;
         halfFieldWidth = fieldWidth / 2.0;
         botWidth = fieldWidth / 8.0;
@@ -88,6 +89,8 @@ public abstract class VirtualBot {
         fieldPane.getChildren().remove(displayGroup);
     }
 
-    public VirtualRobotController.HardwareMapImpl getHardwareMap(){ return hardwareMap; }
+    public HardwareMap getHardwareMap(){ return hardwareMap; }
+
+    protected abstract HardwareMap createHardwareMap();
 
 }

@@ -1,9 +1,6 @@
 package virtual_robot.hardware;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * HardwareMap provides access to the virtual robot hardware
@@ -17,7 +14,9 @@ public class HardwareMap {
 
     private Map<String, List<HardwareDevice>> allDevicesMap = new HashMap<>(15);
 
-    public void put(String deviceName, HardwareDevice device){
+    private final Object lock = new Object();
+
+    public synchronized void put(String deviceName, HardwareDevice device){
         deviceName = deviceName.trim();
         List<HardwareDevice> list = allDevicesMap.get(deviceName);
         if (list == null){
@@ -39,7 +38,7 @@ public class HardwareMap {
         return result;
     }
 
-    private <T> T tryGet(Class<? extends T> classOrInterface, String deviceName){
+    private synchronized <T> T tryGet(Class<? extends T> classOrInterface, String deviceName){
         deviceName = deviceName.trim();
         List<HardwareDevice> list = allDevicesMap.get(deviceName);
         if (list != null) {
@@ -50,7 +49,18 @@ public class HardwareMap {
         return null;
     }
 
-    public class DeviceMapping<DEVICE_TYPE extends HardwareDevice>{
+    public synchronized <T> Set<String> keySet(Class<? extends T> classOrInterface){
+        Set<String> result = new HashSet<>();
+        for (String deviceName : allDevicesMap.keySet()){
+            for (HardwareDevice device : allDevicesMap.get(deviceName)){
+                result.add(deviceName);
+                break;
+            }
+        }
+        return result;
+    }
+
+    public class DeviceMapping<DEVICE_TYPE extends HardwareDevice> implements Iterable<DEVICE_TYPE>{
 
         private Map<String,DEVICE_TYPE> map = new HashMap<>();
         private Class<DEVICE_TYPE> deviceTypeClass;
@@ -59,7 +69,7 @@ public class HardwareMap {
             this.deviceTypeClass = deviceTypeClass;
         }
 
-        public DEVICE_TYPE get(String deviceName){
+        public synchronized DEVICE_TYPE get(String deviceName){
             deviceName = deviceName.trim();
             DEVICE_TYPE result = map.get(deviceName);
             if (result == null) throw new IllegalArgumentException(
@@ -68,10 +78,19 @@ public class HardwareMap {
             return result;
         }
 
-        public void put(String deviceName, DEVICE_TYPE device){
+        public synchronized void put(String deviceName, DEVICE_TYPE device){
             deviceName = deviceName.trim();
             map.put(deviceName, device);
         }
+
+        public synchronized Iterator<DEVICE_TYPE> iterator(){
+            return new ArrayList<>(map.values()).iterator();
+        }
+
+        public synchronized Set<String> keySet(){
+            return map.keySet();
+        }
+
     }
 
 }

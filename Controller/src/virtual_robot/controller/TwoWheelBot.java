@@ -46,6 +46,11 @@ public class TwoWheelBot extends VirtualBot {
         backServoArm.getTransforms().add(new Rotate(0, 37.5, 67.5));
     }
 
+    protected HardwareMap createHardwareMap(){
+        HardwareMap result = new HardwareMap();
+        hardwareMap.put("left_motor", new VirtualRobotController.DCMotorImpl());
+    }
+
     public synchronized void updateStateAndSensors(double millis){
         double leftTicks = leftMotor.getCurrentPositionDouble();
         double rightTicks = rightMotor.getCurrentPositionDouble();
