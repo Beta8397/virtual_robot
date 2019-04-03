@@ -3,7 +3,6 @@ package teamcode;
 import virtual_robot.hardware.*;
 import virtual_robot.controller.LinearOpMode;
 import virtual_robot.util.navigation.DistanceUnit;
-import virtual_robot.util.time.ElapsedTime;
 
 /**
  * Example OpMode. Demonstrates use of gyro, color sensor, encoders, and telemetry.
@@ -12,9 +11,9 @@ import virtual_robot.util.time.ElapsedTime;
 public class TwoWheelDemo extends LinearOpMode {
 
     public void runOpMode(){
-        DCMotor left = hardwareMap.dcMotor.get("left_motor");
-        DCMotor right = hardwareMap.dcMotor.get("right_motor");
-        left.setDirection(DCMotor.Direction.REVERSE);
+        DcMotor left = hardwareMap.dcMotor.get("left_motor");
+        DcMotor right = hardwareMap.dcMotor.get("right_motor");
+        left.setDirection(DcMotor.Direction.REVERSE);
         GyroSensor gyro = hardwareMap.gyroSensor.get("gyro_sensor");
         Servo backServo = hardwareMap.servo.get("back_servo");
         gyro.init();

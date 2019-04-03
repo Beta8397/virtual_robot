@@ -2,10 +2,11 @@ package teamcode;
 
 import virtual_robot.controller.LinearOpMode;
 import virtual_robot.hardware.*;
+import virtual_robot.hardware.bno055.BNO055IMU;
 import virtual_robot.util.color.Color;
-import virtual_robot.util.navigation.AngleUtils;
-import virtual_robot.util.navigation.DistanceUnit;
+import virtual_robot.util.navigation.*;
 import virtual_robot.util.time.ElapsedTime;
+import virtual_robot.util.navigation.AngleUtils;
 
 /**
  * Example Autonomous Opmode
@@ -19,26 +20,35 @@ import virtual_robot.util.time.ElapsedTime;
  */
 public class MechBotAutoDemo extends LinearOpMode {
 
-    DCMotor m1, m2, m3, m4;
-    GyroSensor gyro;
+    DcMotor m1, m2, m3, m4;
+    //GyroSensor gyro;
+    BNO055IMU imu;
     ColorSensor colorSensor;
     Servo backServo;
 
     public void runOpMode(){
+
         m1 = hardwareMap.dcMotor.get("back_left_motor");
         m2 = hardwareMap.dcMotor.get("front_left_motor");
         m3 = hardwareMap.dcMotor.get("front_right_motor");
         m4 = hardwareMap.dcMotor.get("back_right_motor");
-        m1.setDirection(DCMotor.Direction.REVERSE);
-        m2.setDirection(DCMotor.Direction.REVERSE);
-        m1.setMode(DCMotor.RunMode.RUN_USING_ENCODER);
-        m2.setMode(DCMotor.RunMode.RUN_USING_ENCODER);
-        m3.setMode(DCMotor.RunMode.RUN_USING_ENCODER);
-        m4.setMode(DCMotor.RunMode.RUN_USING_ENCODER);
-        gyro = hardwareMap.gyroSensor.get("gyro_sensor");;
-        gyro.init();
+        m1.setDirection(DcMotor.Direction.REVERSE);
+        m2.setDirection(DcMotor.Direction.REVERSE);
+        m1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        m2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        m3.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        m4.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        //gyro = hardwareMap.gyroSensor.get("gyro_sensor");
+        //gyro.init();
+
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        imu.initialize(new BNO055IMU.Parameters());
+
         colorSensor = hardwareMap.colorSensor.get("color_sensor");
         backServo = hardwareMap.servo.get("back_servo");
+
+        Orientation orientation;
 
         ElapsedTime waitTime = new ElapsedTime();
         while (!opModeIsActive() && !isStopRequested()) {
@@ -47,7 +57,14 @@ public class MechBotAutoDemo extends LinearOpMode {
         }
 
         //Turn 45 degrees.
-        while (opModeIsActive() && gyro.getHeading() < 45) setPower(0, 0, 0.5f);
+        setPower(0, 0, 0.5f);
+        //while (opModeIsActive() && gyro.getHeading() < 45) continue;
+        while (opModeIsActive()){
+            orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            System.out.println(orientation.firstAngle);
+            if (orientation.firstAngle >= 45) break;
+        }
+        setPower(0, 0, 0);
 
         float[] hsv = new float[3];
 
@@ -75,7 +92,14 @@ public class MechBotAutoDemo extends LinearOpMode {
             backServo.setPosition(0.333 * (currentHeading - 45.0f)/90.0f);
             telemetry.addData("Turning 90 degrees","");
             telemetry.update();
-            while (opModeIsActive() && AngleUtils.normalizeDegrees(gyro.getHeading() - currentHeading) < 90) continue;
+
+            //while (opModeIsActive() && AngleUtils.normalizeDegrees(gyro.getHeading() - currentHeading) < 90) continue;
+
+            while (opModeIsActive()){
+                orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+                if (AngleUtils.normalizeDegrees(orientation.firstAngle - currentHeading) >= 90) break;
+            }
+
             currentHeading = (float)AngleUtils.normalizeDegrees360(currentHeading + 90);
 
             //Follow outside edge of tape until color sensor has not seen tape for 0.5 seconds.

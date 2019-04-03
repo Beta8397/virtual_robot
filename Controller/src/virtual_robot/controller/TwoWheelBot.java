@@ -1,16 +1,15 @@
 package virtual_robot.controller;
 
-import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Rotate;
-import virtual_robot.hardware.DCMotor;
+import virtual_robot.hardware.DcMotor;
 import virtual_robot.hardware.HardwareMap;
 import virtual_robot.util.navigation.AngleUtils;
 
 public class TwoWheelBot extends VirtualBot {
 
-    private VirtualRobotController.DCMotorImpl leftMotor = null;
-    private VirtualRobotController.DCMotorImpl rightMotor = null;
+    private VirtualRobotController.DcMotorImpl leftMotor = null;
+    private VirtualRobotController.DcMotorImpl rightMotor = null;
     private VirtualRobotController.GyroSensorImpl gyro = null;
     private VirtualRobotController.ColorSensorImpl colorSensor = null;
     private VirtualRobotController.ServoImpl servo = null;
@@ -22,33 +21,34 @@ public class TwoWheelBot extends VirtualBot {
 
 
 
-    public TwoWheelBot(double fieldWidth, StackPane fieldPane){
-        super(fieldWidth);
-        hardwareMap = VirtualRobotApplication.getControllerHandle().new HardwareMapImpl(
-                new String[]{"left_motor", "right_motor"},
-                new String[]{"front_distance", "left_distance", "back_distance", "right_distance"}
-        );
-        leftMotor = hardwareMap.dcMotor.get("left_motor");
-        rightMotor = hardwareMap.dcMotor.get("right_motor");
+    public TwoWheelBot(VirtualRobotController controller){
+        super(controller, "two_wheel_bot.fxml");
+        leftMotor = (VirtualRobotController.DcMotorImpl)hardwareMap.dcMotor.get("left_motor");
+        rightMotor = (VirtualRobotController.DcMotorImpl)hardwareMap.dcMotor.get("right_motor");
         distanceSensors = new VirtualRobotController.DistanceSensorImpl[]{
                 hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "front_distance"),
                 hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "left_distance"),
                 hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "back_distance"),
                 hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "right_distance")
         };
-        gyro = hardwareMap.gyroSensor.get("gyro_sensor");
-        colorSensor = hardwareMap.colorSensor.get("color_sensor");
-        servo = hardwareMap.servo.get("back_servo");
+        gyro = (VirtualRobotController.GyroSensorImpl)hardwareMap.gyroSensor.get("gyro_sensor");
+        colorSensor = (VirtualRobotController.ColorSensorImpl)hardwareMap.colorSensor.get("color_sensor");
+        servo = (VirtualRobotController.ServoImpl)hardwareMap.servo.get("back_servo");
         wheelCircumference = Math.PI * botWidth / 4.5;
         interWheelDistance = botWidth * 8.0 / 9.0;
-        setUpDisplayGroup("two_wheel_bot.fxml", fieldPane);
         backServoArm = (Rectangle)displayGroup.getChildren().get(5);
         backServoArm.getTransforms().add(new Rotate(0, 37.5, 67.5));
     }
 
-    protected HardwareMap createHardwareMap(){
-        HardwareMap result = new HardwareMap();
-        hardwareMap.put("left_motor", new VirtualRobotController.DCMotorImpl());
+    protected void createHardwareMap(){
+        hardwareMap = new HardwareMap();
+        hardwareMap.put("left_motor", controller.new DcMotorImpl());
+        hardwareMap.put("right_motor", controller.new DcMotorImpl());
+        String[] distNames = new String[]{"front_distance", "left_distance", "back_distance", "right_distance"};
+        for (String name: distNames) hardwareMap.put(name, controller.new DistanceSensorImpl());
+        hardwareMap.put("gyro_sensor", controller.new GyroSensorImpl());
+        hardwareMap.put("color_sensor", controller.new ColorSensorImpl());
+        hardwareMap.put("back_servo", controller.new ServoImpl());
     }
 
     public synchronized void updateStateAndSensors(double millis){
@@ -60,10 +60,10 @@ public class TwoWheelBot extends VirtualBot {
         double newRightTicks = rightMotor.getCurrentPositionDouble();
         double intervalLeftTicks = newLeftTicks - leftTicks;
         double intervalRightTicks = newRightTicks - rightTicks;
-        double leftWheelDist = intervalLeftTicks * wheelCircumference / VirtualRobotController.DCMotorImpl.TICKS_PER_ROTATION;
-        if (leftMotor.getDirection() == DCMotor.Direction.FORWARD) leftWheelDist = -leftWheelDist;
-        double rightWheelDist = intervalRightTicks * wheelCircumference / VirtualRobotController.DCMotorImpl.TICKS_PER_ROTATION;
-        if (rightMotor.getDirection() == DCMotor.Direction.REVERSE) rightWheelDist = -rightWheelDist;
+        double leftWheelDist = intervalLeftTicks * wheelCircumference / VirtualRobotController.DcMotorImpl.TICKS_PER_ROTATION;
+        if (leftMotor.getDirection() == DcMotor.Direction.FORWARD) leftWheelDist = -leftWheelDist;
+        double rightWheelDist = intervalRightTicks * wheelCircumference / VirtualRobotController.DcMotorImpl.TICKS_PER_ROTATION;
+        if (rightMotor.getDirection() == DcMotor.Direction.REVERSE) rightWheelDist = -rightWheelDist;
         double distTraveled = (leftWheelDist + rightWheelDist) / 2.0;
         double headingChange = (rightWheelDist - leftWheelDist) / interWheelDistance;
         double deltaRobotX = -distTraveled * Math.sin(headingRadians + headingChange / 2.0);

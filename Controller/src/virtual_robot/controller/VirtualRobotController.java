@@ -16,11 +16,10 @@ import javafx.scene.image.PixelReader;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import opmodelist.OpModes;
+import virtual_robot.hardware.bno055.BNO055IMU;
 import virtual_robot.util.navigation.DistanceUnit;
 
-import java.util.HashMap;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -74,9 +73,9 @@ public class VirtualRobotController {
     private ChangeListener<Number> sliderChangeListener = new ChangeListener<Number>() {
         @Override
         public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-            for (DCMotor motor: hardwareMap.dcMotor) {
-                ((DCMotorImpl)motor).setRandomErrorFrac(sldRandomMotorError.getValue());
-                ((DCMotorImpl)motor).setSystematicErrorFrac(sldSystematicMotorError.getValue() * 2.0 * (0.5 - random.nextDouble()));
+            for (DcMotor motor: hardwareMap.dcMotor) {
+                ((DcMotorImpl)motor).setRandomErrorFrac(sldRandomMotorError.getValue());
+                ((DcMotorImpl)motor).setSystematicErrorFrac(sldSystematicMotorError.getValue() * 2.0 * (0.5 - random.nextDouble()));
             }
         }
     };
@@ -107,11 +106,11 @@ public class VirtualRobotController {
         if (opModeInitialized || opModeStarted) return;
         if (bot != null) bot.removeFromDisplay(fieldPane);
         if (cbxConfig.getValue().equals("Mechanum Bot")){
-            bot = new MechanumBot(fieldWidth, fieldPane);
+            bot = new MechanumBot(this);
         } else if (cbxConfig.getValue().equals("Two Wheel Bot")){
-            bot = new TwoWheelBot(fieldWidth, fieldPane);
+            bot = new TwoWheelBot(this);
         } else {
-            bot = new XDriveBot(fieldWidth, fieldPane);
+            bot = new XDriveBot(this);
         }
         hardwareMap = bot.getHardwareMap();
         initializeTelemetryTextArea();
@@ -119,6 +118,7 @@ public class VirtualRobotController {
         sldSystematicMotorError.setValue(0.0);
     }
 
+    public StackPane getFieldPane(){ return fieldPane; }
 
     @FXML
     private void handleDriverButtonAction(ActionEvent event){
@@ -225,21 +225,36 @@ public class VirtualRobotController {
         sb.append("Left-click to position bot.");
         sb.append("\nRight-click to orient bot.");
         sb.append("\n\nCONFIG");
-        sb.append("\n Motors:");
         Set<String> motors = hardwareMap.dcMotor.keySet();
-        for (String motor: motors) sb.append("\n   " + motor);
-        sb.append("\n Servos:");
+        if (!motors.isEmpty()) {
+            sb.append("\n Motors:");
+            for (String motor : motors) sb.append("\n   " + motor);
+        }
         Set<String> servos = hardwareMap.servo.keySet();
-        for (String servo: servos) sb.append("\n   " + servo);
-        sb.append("\n Color Sensors:");
+        if (!servos.isEmpty()) {
+            sb.append("\n Servos:");
+            for (String servo : servos) sb.append("\n   " + servo);
+        }
         Set<String> colorSensors = hardwareMap.colorSensor.keySet();
-        for (String colorSensor: colorSensors) sb.append("\n   " + colorSensor);
-        sb.append("\n Gyro Sensors:");
+        if (!colorSensors.isEmpty()) {
+            sb.append("\n Color Sensors:");
+            for (String colorSensor : colorSensors) sb.append("\n   " + colorSensor);
+        }
         Set<String> gyroSensors = hardwareMap.gyroSensor.keySet();
-        for (String gyroSensor: gyroSensors) sb.append("\n   " + gyroSensor);
-        sb.append("\n Distance Sensors:");
+        if (!gyroSensors.isEmpty()) {
+            sb.append("\n Gyro Sensors:");
+            for (String gyroSensor : gyroSensors) sb.append("\n   " + gyroSensor);
+        }
+        Set<String> bno055IMUs = hardwareMap.keySet(BNO055IMU.class);
+        if (!bno055IMUs.isEmpty()){
+            sb.append("\n BNO055IMU Sensors:");
+            for (String imuSensor : bno055IMUs) sb.append("\n   " + imuSensor);
+        }
         Set<String> distanceSensors = hardwareMap.keySet(DistanceSensor.class);
-        for (String distance: distanceSensors) sb.append("\n   " + distance);
+        if (!distanceSensors.isEmpty()) {
+            sb.append("\n Distance Sensors:");
+            for (String distance : distanceSensors) sb.append("\n   " + distance);
+        }
         txtTelemetry.setText(sb.toString());
     }
 
@@ -351,17 +366,17 @@ public class VirtualRobotController {
         }
     }
 
-    public class DCMotorImpl implements DCMotor {
+    public class DcMotorImpl implements DcMotor {
         public static final double MAX_TICKS_PER_SEC = 2500.0;
         public static final double TICKS_PER_ROTATION = 1120;
-        private DCMotor.RunMode mode = RunMode.RUN_WITHOUT_ENCODER;
-        private DCMotor.Direction direction = Direction.FORWARD;
+        private DcMotor.RunMode mode = RunMode.RUN_WITHOUT_ENCODER;
+        private DcMotor.Direction direction = Direction.FORWARD;
         private double power = 0.0;
         private double position = 0.0;
         private double randomErrorFrac = 0.0;
         private double systematicErrorFrac = 0.0;
 
-        public synchronized void setMode(DCMotor.RunMode mode){
+        public synchronized void setMode(DcMotor.RunMode mode){
             this.mode = mode;
             if (mode == RunMode.STOP_AND_RESET_ENCODER){
                 power = 0.0;
@@ -369,9 +384,9 @@ public class VirtualRobotController {
             }
         }
 
-        public synchronized DCMotor.RunMode getMode(){ return mode; }
-        public synchronized void setDirection(DCMotor.Direction direction){ this.direction = direction; }
-        public synchronized DCMotor.Direction getDirection(){ return direction; }
+        public synchronized DcMotor.RunMode getMode(){ return mode; }
+        public synchronized void setDirection(DcMotor.Direction direction){ this.direction = direction; }
+        public synchronized DcMotor.Direction getDirection(){ return direction; }
         public synchronized double getPower(){ return power; }
 
         public synchronized void setPower(double power){

@@ -16,6 +16,8 @@ public abstract class VirtualBot {
 
     protected Group displayGroup = null;
 
+    protected VirtualRobotController controller;
+    protected StackPane fieldPane;
     protected double fieldWidth;
     protected double halfFieldWidth;
     protected double halfBotWidth;
@@ -25,15 +27,18 @@ public abstract class VirtualBot {
     protected double y = 0;
     protected double headingRadians = 0;
 
-    public VirtualBot(double fieldWidth){
-        hardwareMap = createHardwareMap();
-        this.fieldWidth = fieldWidth;
+    public VirtualBot(VirtualRobotController controller, String fxmlResourceName){
+        this.controller = controller;
+        fieldPane = controller.getFieldPane();
+        createHardwareMap();
+        this.fieldWidth = fieldPane.getPrefWidth();
         halfFieldWidth = fieldWidth / 2.0;
         botWidth = fieldWidth / 8.0;
         halfBotWidth = botWidth / 2.0;
+        setUpDisplayGroup(fxmlResourceName);
     }
 
-    protected void setUpDisplayGroup(String fxmlResourceName, StackPane fieldPane){
+    protected void setUpDisplayGroup(String fxmlResourceName){
         try {
             displayGroup = (Group) FXMLLoader.load(getClass().getResource(fxmlResourceName));
         } catch(java.io.IOException Exc){
@@ -91,6 +96,6 @@ public abstract class VirtualBot {
 
     public HardwareMap getHardwareMap(){ return hardwareMap; }
 
-    protected abstract HardwareMap createHardwareMap();
+    protected abstract void createHardwareMap();
 
 }
