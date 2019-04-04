@@ -39,8 +39,6 @@ public class MechBotAutoDemo extends LinearOpMode {
         m3.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         m4.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        //gyro = hardwareMap.gyroSensor.get("gyro_sensor");
-        //gyro.init();
 
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(new BNO055IMU.Parameters());

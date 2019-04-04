@@ -4,12 +4,14 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Rotate;
 import virtual_robot.hardware.DcMotor;
 import virtual_robot.hardware.HardwareMap;
+import virtual_robot.hardware.bno055.BNO055IMUImpl;
 import virtual_robot.util.navigation.AngleUtils;
 
 public class XDriveBot extends VirtualBot {
 
     private VirtualRobotController.DcMotorImpl[] motors = null;
-    private VirtualRobotController.GyroSensorImpl gyro = null;
+    //private VirtualRobotController.GyroSensorImpl gyro = null;
+    private BNO055IMUImpl imu = null;
     private VirtualRobotController.ColorSensorImpl colorSensor = null;
     private VirtualRobotController.ServoImpl servo = null;
     private VirtualRobotController.DistanceSensorImpl[] distanceSensors = null;
@@ -35,7 +37,8 @@ public class XDriveBot extends VirtualBot {
                 hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "back_distance"),
                 hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "right_distance")
         };
-        gyro = (VirtualRobotController.GyroSensorImpl)hardwareMap.gyroSensor.get("gyro_sensor");
+        //gyro = (VirtualRobotController.GyroSensorImpl)hardwareMap.gyroSensor.get("gyro_sensor");
+        imu = hardwareMap.get(BNO055IMUImpl.class, "imu");
         colorSensor = (VirtualRobotController.ColorSensorImpl)hardwareMap.colorSensor.get("color_sensor");
         servo = (VirtualRobotController.ServoImpl)hardwareMap.servo.get("back_servo");
         wheelCircumference = Math.PI * botWidth / 4.5;
@@ -58,7 +61,8 @@ public class XDriveBot extends VirtualBot {
         for (String name: motorNames) hardwareMap.put(name, controller.new DcMotorImpl());
         String[] distNames = new String[]{"front_distance", "left_distance", "back_distance", "right_distance"};
         for (String name: distNames) hardwareMap.put(name, controller.new DistanceSensorImpl());
-        hardwareMap.put("gyro_sensor", controller.new GyroSensorImpl());
+        //hardwareMap.put("gyro_sensor", controller.new GyroSensorImpl());
+        hardwareMap.put("imu", new BNO055IMUImpl(this));
         hardwareMap.put("color_sensor", controller.new ColorSensorImpl());
         hardwareMap.put("back_servo", controller.new ServoImpl());
     }
@@ -102,7 +106,8 @@ public class XDriveBot extends VirtualBot {
 
         if (headingRadians > Math.PI) headingRadians -= 2.0 * Math.PI;
         else if (headingRadians < -Math.PI) headingRadians += 2.0 * Math.PI;
-        gyro.updateHeading(headingRadians * 180.0 / Math.PI);
+        //gyro.updateHeading(headingRadians * 180.0 / Math.PI);
+        imu.updateHeadingRadians(headingRadians);
 
         colorSensor.updateColor(x, y);
 
@@ -122,7 +127,8 @@ public class XDriveBot extends VirtualBot {
 
     public void powerDownAndReset(){
         for (int i=0; i<4; i++) motors[i].setPower(0);
-        gyro.deinit();
+        //gyro.deinit();
+        imu.close();
     }
 
 

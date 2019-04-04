@@ -1,12 +1,19 @@
 A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
 
-RECENT CHANGES:
-  Uses real game pad (instead of the original "virtual" game pad.
-  Added an X-Drive robot configuration.
-  Tweaks to opModeIsActive() and addition of isStopRequested() to allow while() loop before START.
-  Added Color class with single static method: RGBtoHSV(red, green, blue, hsv).
-  Added distance sensors to all robot configurations to measure distance from walls.
-  Replaced LineFollow example opMode with MechBotAutoDemo, a line follower that actually works.
+CHANGES 4/3/2019
+    1. Added BNO055IMU interface to simulate (in a limited way) coding for the IMU in the REV Expansion Hub.
+    2. The Mechanum Bot and X Drive Bot now have a BNO055IMU rather than the original gyro.
+    3. The Two-Wheel Bot still has the original gyro.
+    4. DCMotor interface renamed to DcMotor, in keeping the the FTC SDK.
+    5. New utility classes: enum AngleUnit, enum AxesOrder, enum AxesReference, class Orientation
+
+CHANGES 3/23/2019
+    1. Uses real game pad (instead of the original "virtual" game pad.
+    2. Added an X-Drive robot configuration.
+    3. Tweaks to opModeIsActive() and addition of isStopRequested() to allow while() loop before START.
+    4. Added Color class with single static method: RGBtoHSV(red, green, blue, hsv).
+    5. Added distance sensors to all robot configurations to measure distance from walls.
+    6. Replaced LineFollow example opMode with MechBotAutoDemo, a line follower that actually works.
 
 This is a JavaFX application developed using the (free) IntelliJ IDEA Community Edition IDE. The repository can be downloaded
 and unzipped, then opened with IntelliJ.

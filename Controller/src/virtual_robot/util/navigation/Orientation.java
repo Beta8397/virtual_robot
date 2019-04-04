@@ -1,5 +1,9 @@
 package virtual_robot.util.navigation;
 
+/**
+ * All the data, but none of the function, of the Orientation class in the FTC SDK
+ */
+
 public class Orientation {
 
     public final AxesReference axesReference;

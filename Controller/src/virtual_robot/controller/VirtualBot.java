@@ -68,14 +68,11 @@ public abstract class VirtualBot {
 
     public double getHeadingRadians(){ return headingRadians; }
 
-
     public void positionWithMouseClick(MouseEvent arg){
 
         if (arg.getButton() == MouseButton.PRIMARY) {
             double argX = Math.max(halfBotWidth, Math.min(fieldWidth - halfBotWidth, arg.getX()));
             double argY = Math.max(halfBotWidth, Math.min(fieldWidth - halfBotWidth, arg.getY()));
-            double displayX = argX - halfBotWidth;
-            double displayY = argY - halfBotWidth;
             x = argX - halfFieldWidth;
             y = halfFieldWidth - argY;
             updateDisplay();
@@ -84,7 +81,6 @@ public abstract class VirtualBot {
             double centerX = x + halfFieldWidth;
             double centerY = halfFieldWidth - y;
             double displayAngleRads = Math.atan2(arg.getX() - centerX, centerY - arg.getY());
-            double displayAngleDegrees = displayAngleRads * 180.0 / Math.PI;
             headingRadians = -displayAngleRads;
             updateDisplay();
         }
