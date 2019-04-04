@@ -16,11 +16,10 @@ import javafx.scene.image.PixelReader;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import opmodelist.OpModes;
+import virtual_robot.hardware.bno055.BNO055IMU;
 import virtual_robot.util.navigation.DistanceUnit;
 
-import java.util.HashMap;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -43,7 +42,7 @@ public class VirtualRobotController {
     @FXML private TextArea txtTelemetry;
 
     //Virtual Hardware
-    private HardwareMapImpl hardwareMap = null;
+    private HardwareMap hardwareMap = null;
     private VirtualBot bot = null;
     GamePad gamePad = new GamePad();
 
@@ -74,9 +73,9 @@ public class VirtualRobotController {
     private ChangeListener<Number> sliderChangeListener = new ChangeListener<Number>() {
         @Override
         public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-            for (DCMotorImpl motor: hardwareMap.dcMotor.values()) {
-                motor.setRandomErrorFrac(sldRandomMotorError.getValue());
-                motor.setSystematicErrorFrac(sldSystematicMotorError.getValue() * 2.0 * (0.5 - random.nextDouble()));
+            for (DcMotor motor: hardwareMap.dcMotor) {
+                ((DcMotorImpl)motor).setRandomErrorFrac(sldRandomMotorError.getValue());
+                ((DcMotorImpl)motor).setSystematicErrorFrac(sldSystematicMotorError.getValue() * 2.0 * (0.5 - random.nextDouble()));
             }
         }
     };
@@ -107,17 +106,19 @@ public class VirtualRobotController {
         if (opModeInitialized || opModeStarted) return;
         if (bot != null) bot.removeFromDisplay(fieldPane);
         if (cbxConfig.getValue().equals("Mechanum Bot")){
-            bot = new MechanumBot(fieldWidth, fieldPane);
+            bot = new MechanumBot(this);
         } else if (cbxConfig.getValue().equals("Two Wheel Bot")){
-            bot = new TwoWheelBot(fieldWidth, fieldPane);
+            bot = new TwoWheelBot(this);
         } else {
-            bot = new XDriveBot(fieldWidth, fieldPane);
+            bot = new XDriveBot(this);
         }
         hardwareMap = bot.getHardwareMap();
         initializeTelemetryTextArea();
         sldRandomMotorError.setValue(0.0);
+        sldSystematicMotorError.setValue(0.0);
     }
 
+    public StackPane getFieldPane(){ return fieldPane; }
 
     @FXML
     private void handleDriverButtonAction(ActionEvent event){
@@ -224,21 +225,36 @@ public class VirtualRobotController {
         sb.append("Left-click to position bot.");
         sb.append("\nRight-click to orient bot.");
         sb.append("\n\nCONFIG");
-        sb.append("\n Motors:");
         Set<String> motors = hardwareMap.dcMotor.keySet();
-        for (String motor: motors) sb.append("\n   " + motor);
-        sb.append("\n Servos:");
+        if (!motors.isEmpty()) {
+            sb.append("\n Motors:");
+            for (String motor : motors) sb.append("\n   " + motor);
+        }
         Set<String> servos = hardwareMap.servo.keySet();
-        for (String servo: servos) sb.append("\n   " + servo);
-        sb.append("\n Color Sensors:");
+        if (!servos.isEmpty()) {
+            sb.append("\n Servos:");
+            for (String servo : servos) sb.append("\n   " + servo);
+        }
         Set<String> colorSensors = hardwareMap.colorSensor.keySet();
-        for (String colorSensor: colorSensors) sb.append("\n   " + colorSensor);
-        sb.append("\n Gyro Sensors:");
+        if (!colorSensors.isEmpty()) {
+            sb.append("\n Color Sensors:");
+            for (String colorSensor : colorSensors) sb.append("\n   " + colorSensor);
+        }
         Set<String> gyroSensors = hardwareMap.gyroSensor.keySet();
-        for (String gyroSensor: gyroSensors) sb.append("\n   " + gyroSensor);
-        sb.append("\n Distance Sensors:");
-        Set<String> distanceSensors = hardwareMap.distanceSensorImpl.keySet();
-        for (String distance: distanceSensors) sb.append("\n   " + distance);
+        if (!gyroSensors.isEmpty()) {
+            sb.append("\n Gyro Sensors:");
+            for (String gyroSensor : gyroSensors) sb.append("\n   " + gyroSensor);
+        }
+        Set<String> bno055IMUs = hardwareMap.keySet(BNO055IMU.class);
+        if (!bno055IMUs.isEmpty()){
+            sb.append("\n BNO055IMU Sensors:");
+            for (String imuSensor : bno055IMUs) sb.append("\n   " + imuSensor);
+        }
+        Set<String> distanceSensors = hardwareMap.keySet(DistanceSensor.class);
+        if (!distanceSensors.isEmpty()) {
+            sb.append("\n Distance Sensors:");
+            for (String distance : distanceSensors) sb.append("\n   " + distance);
+        }
         txtTelemetry.setText(sb.toString());
     }
 
@@ -350,17 +366,17 @@ public class VirtualRobotController {
         }
     }
 
-    public class DCMotorImpl implements DCMotor {
+    public class DcMotorImpl implements DcMotor {
         public static final double MAX_TICKS_PER_SEC = 2500.0;
         public static final double TICKS_PER_ROTATION = 1120;
-        private DCMotor.RunMode mode = RunMode.RUN_WITHOUT_ENCODER;
-        private DCMotor.Direction direction = Direction.FORWARD;
+        private DcMotor.RunMode mode = RunMode.RUN_WITHOUT_ENCODER;
+        private DcMotor.Direction direction = Direction.FORWARD;
         private double power = 0.0;
         private double position = 0.0;
         private double randomErrorFrac = 0.0;
         private double systematicErrorFrac = 0.0;
 
-        public synchronized void setMode(DCMotor.RunMode mode){
+        public synchronized void setMode(DcMotor.RunMode mode){
             this.mode = mode;
             if (mode == RunMode.STOP_AND_RESET_ENCODER){
                 power = 0.0;
@@ -368,9 +384,9 @@ public class VirtualRobotController {
             }
         }
 
-        public synchronized DCMotor.RunMode getMode(){ return mode; }
-        public synchronized void setDirection(DCMotor.Direction direction){ this.direction = direction; }
-        public synchronized DCMotor.Direction getDirection(){ return direction; }
+        public synchronized DcMotor.RunMode getMode(){ return mode; }
+        public synchronized void setDirection(DcMotor.Direction direction){ this.direction = direction; }
+        public synchronized DcMotor.Direction getDirection(){ return direction; }
         public synchronized double getPower(){ return power; }
 
         public synchronized void setPower(double power){
@@ -403,53 +419,6 @@ public class VirtualRobotController {
         public synchronized double getPosition(){
             return position;
         }
-    }
-
-    public class HardwareMapImpl implements HardwareMap{
-
-        private final HashMap<String, DistanceSensorImpl> distanceSensorImpl = new HashMap<>();
-
-        public HardwareMapImpl(){
-            dcMotor.clear();
-            dcMotor.put("left_motor", new DCMotorImpl());
-            dcMotor.put("right_motor", new DCMotorImpl());
-            colorSensor.clear();
-            colorSensor.put("color_sensor", new ColorSensorImpl());
-            gyroSensor.clear();
-            gyroSensor.put("gyro_sensor", new GyroSensorImpl());
-            servo.clear();
-            servo.put("back_servo", new ServoImpl());
-        }
-
-        public HardwareMapImpl( String[] motors ){
-            dcMotor.clear();
-            if (motors != null) for (int i=0; i<motors.length; i++) dcMotor.put(motors[i], new DCMotorImpl());
-            colorSensor.clear();
-            colorSensor.put("color_sensor", new ColorSensorImpl());
-            gyroSensor.clear();
-            gyroSensor.put("gyro_sensor", new GyroSensorImpl());
-            servo.clear();
-            servo.put("back_servo", new ServoImpl());
-        }
-
-        public HardwareMapImpl( String[] motors, String[] distanceSensors ){
-            this(motors);
-            distanceSensorImpl.clear();
-            if (distanceSensors != null)
-                for (int i=0; i<distanceSensors.length; i++)
-                    distanceSensorImpl.put(distanceSensors[i], new DistanceSensorImpl());
-        }
-
-        @Override
-        public <T> T get(Class<? extends T> classOrInterface, String deviceName) {
-            if (classOrInterface.isAssignableFrom(DCMotorImpl.class)) return (T)dcMotor.get(deviceName);
-            else if (classOrInterface.isAssignableFrom(ColorSensorImpl.class)) return (T)colorSensor.get(deviceName);
-            else if (classOrInterface.isAssignableFrom(GyroSensorImpl.class)) return (T)gyroSensor.get(deviceName);
-            else if (classOrInterface.isAssignableFrom(ServoImpl.class)) return (T)servo.get(deviceName);
-            else if (classOrInterface.isAssignableFrom(DistanceSensorImpl.class)) return (T)distanceSensorImpl.get(deviceName);
-            else return null;
-        }
-
     }
 
 

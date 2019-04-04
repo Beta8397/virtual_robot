@@ -1,6 +1,6 @@
 package teamcode;
 
-import virtual_robot.hardware.DCMotor;
+import virtual_robot.hardware.DcMotor;
 import virtual_robot.controller.LinearOpMode;
 
 /**
@@ -9,9 +9,9 @@ import virtual_robot.controller.LinearOpMode;
 public class TwoWheelArcadeDrive extends LinearOpMode {
 
     public void runOpMode(){
-        DCMotor left = hardwareMap.dcMotor.get("left_motor");
-        DCMotor right = hardwareMap.dcMotor.get("right_motor");
-        left.setDirection(DCMotor.Direction.REVERSE);
+        DcMotor left = hardwareMap.dcMotor.get("left_motor");
+        DcMotor right = hardwareMap.dcMotor.get("right_motor");
+        left.setDirection(DcMotor.Direction.REVERSE);
         telemetry.addData("Press Start When Ready","");
         telemetry.update();
         waitForStart();

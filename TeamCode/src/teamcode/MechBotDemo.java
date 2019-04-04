@@ -1,9 +1,9 @@
 package teamcode;
 
 import virtual_robot.controller.LinearOpMode;
-import virtual_robot.controller.VirtualRobotController;
 import virtual_robot.hardware.*;
-import virtual_robot.util.navigation.DistanceUnit;
+import virtual_robot.hardware.bno055.BNO055IMU;
+import virtual_robot.util.navigation.*;
 
 /**
  * Example OpMode. Demonstrates use of gyro, color sensor, encoders, and telemetry.
@@ -12,27 +12,42 @@ import virtual_robot.util.navigation.DistanceUnit;
 public class MechBotDemo extends LinearOpMode {
 
     public void runOpMode(){
-        DCMotor m1 = hardwareMap.dcMotor.get("back_left_motor");
-        DCMotor m2 = hardwareMap.dcMotor.get("front_left_motor");
-        DCMotor m3 = hardwareMap.dcMotor.get("front_right_motor");
-        DCMotor m4 = hardwareMap.dcMotor.get("back_right_motor");
-        m1.setDirection(DCMotor.Direction.REVERSE);
-        m2.setDirection(DCMotor.Direction.REVERSE);
-        m1.setMode(DCMotor.RunMode.STOP_AND_RESET_ENCODER);
-        m2.setMode(DCMotor.RunMode.STOP_AND_RESET_ENCODER);
-        m3.setMode(DCMotor.RunMode.STOP_AND_RESET_ENCODER);
-        m4.setMode(DCMotor.RunMode.STOP_AND_RESET_ENCODER);
-        m1.setMode(DCMotor.RunMode.RUN_USING_ENCODER);
-        m2.setMode(DCMotor.RunMode.RUN_USING_ENCODER);
-        m3.setMode(DCMotor.RunMode.RUN_USING_ENCODER);
-        m4.setMode(DCMotor.RunMode.RUN_USING_ENCODER);
-        GyroSensor gyro = hardwareMap.gyroSensor.get("gyro_sensor");
+        DcMotor m1 = hardwareMap.dcMotor.get("back_left_motor");
+        DcMotor m2 = hardwareMap.dcMotor.get("front_left_motor");
+        DcMotor m3 = hardwareMap.dcMotor.get("front_right_motor");
+        DcMotor m4 = hardwareMap.dcMotor.get("back_right_motor");
+        m1.setDirection(DcMotor.Direction.REVERSE);
+        m2.setDirection(DcMotor.Direction.REVERSE);
+        m1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        m2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        m3.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        m4.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        m1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        m2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        m3.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        m4.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        //GyroSensor gyro = hardwareMap.gyroSensor.get("gyro_sensor");
+        BNO055IMU imu = hardwareMap.get(BNO055IMU.class, "imu");
+
         Servo backServo = hardwareMap.servo.get("back_servo");
         DistanceSensor frontDistance = hardwareMap.get(DistanceSensor.class, "front_distance");
         DistanceSensor leftDistance = hardwareMap.get(DistanceSensor.class, "left_distance");
         DistanceSensor rightDistance = hardwareMap.get(DistanceSensor.class, "right_distance");
         DistanceSensor backDistance = hardwareMap.get(DistanceSensor.class, "back_distance");
-        gyro.init();
+        //gyro.init();
+
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.accelerationIntegrationAlgorithm = null;
+        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters.calibrationData = null;
+        parameters.calibrationDataFile = "";
+        parameters.loggingEnabled = false;
+        parameters.loggingTag = "Who cares.";
+
+        imu.initialize(parameters);
+
         ColorSensor colorSensor = hardwareMap.colorSensor.get("color_sensor");
         telemetry.addData("Press Start When Ready","");
         telemetry.update();
@@ -61,7 +76,10 @@ public class MechBotDemo extends LinearOpMode {
             m3.setPower(p3);
             m4.setPower(p4);
             telemetry.addData("Color","R %d  G %d  B %d", colorSensor.red(), colorSensor.green(), colorSensor.blue());
-            telemetry.addData("Heading"," %.1f", gyro.getHeading());
+            //telemetry.addData("Heading"," %.1f", gyro.getHeading());
+            Orientation orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
+            telemetry.addData("Heading", " %.1f", orientation.firstAngle * 180.0 / Math.PI);
+
             telemetry.addData("Front Distance", " %.1f", frontDistance.getDistance(DistanceUnit.CM));
             telemetry.addData("Left Distance", " %.1f", leftDistance.getDistance(DistanceUnit.CM));
             telemetry.addData("Right Distance", " %.1f", rightDistance.getDistance(DistanceUnit.CM));

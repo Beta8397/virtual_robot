@@ -12,10 +12,12 @@ import virtual_robot.hardware.HardwareMap;
 
 public abstract class VirtualBot {
 
-    protected VirtualRobotController.HardwareMapImpl hardwareMap;
+    protected HardwareMap hardwareMap;
 
     protected Group displayGroup = null;
 
+    protected VirtualRobotController controller;
+    protected StackPane fieldPane;
     protected double fieldWidth;
     protected double halfFieldWidth;
     protected double halfBotWidth;
@@ -25,14 +27,18 @@ public abstract class VirtualBot {
     protected double y = 0;
     protected double headingRadians = 0;
 
-    public VirtualBot(double fieldWidth){
-        this.fieldWidth = fieldWidth;
+    public VirtualBot(VirtualRobotController controller, String fxmlResourceName){
+        this.controller = controller;
+        fieldPane = controller.getFieldPane();
+        createHardwareMap();
+        this.fieldWidth = fieldPane.getPrefWidth();
         halfFieldWidth = fieldWidth / 2.0;
         botWidth = fieldWidth / 8.0;
         halfBotWidth = botWidth / 2.0;
+        setUpDisplayGroup(fxmlResourceName);
     }
 
-    protected void setUpDisplayGroup(String fxmlResourceName, StackPane fieldPane){
+    protected void setUpDisplayGroup(String fxmlResourceName){
         try {
             displayGroup = (Group) FXMLLoader.load(getClass().getResource(fxmlResourceName));
         } catch(java.io.IOException Exc){
@@ -62,14 +68,11 @@ public abstract class VirtualBot {
 
     public double getHeadingRadians(){ return headingRadians; }
 
-
     public void positionWithMouseClick(MouseEvent arg){
 
         if (arg.getButton() == MouseButton.PRIMARY) {
             double argX = Math.max(halfBotWidth, Math.min(fieldWidth - halfBotWidth, arg.getX()));
             double argY = Math.max(halfBotWidth, Math.min(fieldWidth - halfBotWidth, arg.getY()));
-            double displayX = argX - halfBotWidth;
-            double displayY = argY - halfBotWidth;
             x = argX - halfFieldWidth;
             y = halfFieldWidth - argY;
             updateDisplay();
@@ -78,7 +81,6 @@ public abstract class VirtualBot {
             double centerX = x + halfFieldWidth;
             double centerY = halfFieldWidth - y;
             double displayAngleRads = Math.atan2(arg.getX() - centerX, centerY - arg.getY());
-            double displayAngleDegrees = displayAngleRads * 180.0 / Math.PI;
             headingRadians = -displayAngleRads;
             updateDisplay();
         }
@@ -88,6 +90,8 @@ public abstract class VirtualBot {
         fieldPane.getChildren().remove(displayGroup);
     }
 
-    public VirtualRobotController.HardwareMapImpl getHardwareMap(){ return hardwareMap; }
+    public HardwareMap getHardwareMap(){ return hardwareMap; }
+
+    protected abstract void createHardwareMap();
 
 }

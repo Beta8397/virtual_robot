@@ -4,7 +4,7 @@ package virtual_robot.hardware;
  * Represents a simple Gyro Sensor.
  * The sensor must be initialized prior to use.
  */
-public interface GyroSensor {
+public interface GyroSensor extends HardwareDevice {
     /**
      * Initialize the sensor.
      */

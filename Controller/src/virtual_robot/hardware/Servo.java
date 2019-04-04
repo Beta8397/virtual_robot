@@ -3,7 +3,7 @@ package virtual_robot.hardware;
 /**
  * Provides an subset of the functionality of the Servo interface in the FTC SDK.
  */
-public interface Servo {
+public interface Servo extends HardwareDevice {
     /**
      * Set servo position
      * @param position Must be between 0 and 1
