@@ -10,7 +10,7 @@ public class DcMotorImpl implements DcMotor {
     private RunMode mode = RunMode.RUN_WITHOUT_ENCODER;
     private Direction direction = Direction.FORWARD;
     private double power = 0.0;
-    private double position = 0.0;
+    private double actualPosition = 0.0;
     private double randomErrorFrac = 0.0;
     private double systematicErrorFrac = 0.0;
 
@@ -26,7 +26,7 @@ public class DcMotorImpl implements DcMotor {
         this.mode = mode;
         if (mode == RunMode.STOP_AND_RESET_ENCODER){
             power = 0.0;
-            position = 0.0;
+            actualPosition = 0.0;
         }
     }
 
@@ -39,13 +39,20 @@ public class DcMotorImpl implements DcMotor {
         this.power = Math.max(-1, Math.min(1, power));
     }
 
-    public synchronized int getCurrentPosition(){ return (int)Math.floor(position);}
-    public synchronized double getCurrentPositionDouble(){ return position; }
+    public synchronized int getCurrentPosition(){
+        int result = (int)Math.floor(actualPosition);
+        return MOTOR_TYPE.REVERSED? -result : result;
+    }
+
+    public synchronized double getActualPosition(){ return actualPosition; }
+
     public synchronized void updatePosition(double milliseconds){
         if (mode == RunMode.RUN_TO_POSITION || mode == RunMode.STOP_AND_RESET_ENCODER) return;
         double positionChange = power * MOTOR_TYPE.MAX_TICKS_PER_SECOND * milliseconds / 1000.0;
         positionChange *= (1.0 + systematicErrorFrac + randomErrorFrac * random.nextGaussian());
-        position += positionChange;
+        if (direction == Direction.FORWARD && MOTOR_TYPE.REVERSED ||
+                direction == Direction.REVERSE && !MOTOR_TYPE.REVERSED) positionChange = -positionChange;
+        actualPosition += positionChange;
     }
 
     public synchronized void setRandomErrorFrac(double rdmErrFrac){

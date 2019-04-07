@@ -65,7 +65,7 @@ public class MechanumBot extends VirtualBot {
         motorType = MotorType.Neverest40;
         hardwareMap = new HardwareMap();
         String[] motorNames = new String[] {"back_left_motor", "front_left_motor", "front_right_motor", "back_right_motor"};
-        for (String name: motorNames) hardwareMap.put(name, new DcMotorImpl());
+        for (String name: motorNames) hardwareMap.put(name, new DcMotorImpl(motorType));
         String[] distNames = new String[]{"front_distance", "left_distance", "back_distance", "right_distance"};
         for (String name: distNames) hardwareMap.put(name, controller.new DistanceSensorImpl());
         //hardwareMap.put("gyro_sensor", controller.new GyroSensorImpl());
@@ -75,16 +75,15 @@ public class MechanumBot extends VirtualBot {
     }
 
     public synchronized void updateStateAndSensors(double millis){
-        double[] intervalTicks = new double[4];
+        double[] deltaPos = new double[4];
         double[] w = new double[4];
 
         for (int i = 0; i < 4; i++) {
-            double ticks = motors[i].getCurrentPositionDouble();
+            double pos = motors[i].getActualPosition();
             motors[i].updatePosition(millis);
-            intervalTicks[i] = motors[i].getCurrentPositionDouble() - ticks;
-            w[i] = intervalTicks[i] * wheelCircumference / motorType.TICKS_PER_ROTATION;
-            if ((i < 2 && motors[i].getDirection() == DcMotor.Direction.FORWARD) ||
-                    (i >= 2 && motors[i].getDirection() == DcMotor.Direction.REVERSE)) w[i] = -w[i];
+            deltaPos[i] = motors[i].getActualPosition() - pos;
+            w[i] = deltaPos[i] * wheelCircumference / motorType.TICKS_PER_ROTATION;
+            if (i < 2) w[i] = -w[i];
         }
 
         double[] robotDeltaPos = new double[] {0,0,0,0};

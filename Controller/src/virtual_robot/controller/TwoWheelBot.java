@@ -46,8 +46,8 @@ public class TwoWheelBot extends VirtualBot {
     protected void createHardwareMap(){
         motorType = MotorType.Neverest40;
         hardwareMap = new HardwareMap();
-        hardwareMap.put("left_motor", new DcMotorImpl());
-        hardwareMap.put("right_motor", new DcMotorImpl());
+        hardwareMap.put("left_motor", new DcMotorImpl(motorType));
+        hardwareMap.put("right_motor", new DcMotorImpl(motorType));
         String[] distNames = new String[]{"front_distance", "left_distance", "back_distance", "right_distance"};
         for (String name: distNames) hardwareMap.put(name, controller.new DistanceSensorImpl());
         hardwareMap.put("gyro_sensor", controller.new GyroSensorImpl());
@@ -56,18 +56,16 @@ public class TwoWheelBot extends VirtualBot {
     }
 
     public synchronized void updateStateAndSensors(double millis){
-        double leftTicks = leftMotor.getCurrentPositionDouble();
-        double rightTicks = rightMotor.getCurrentPositionDouble();
+        double leftPos = leftMotor.getActualPosition();
+        double rightPos = rightMotor.getActualPosition();
         leftMotor.updatePosition(millis);
         rightMotor.updatePosition(millis);
-        double newLeftTicks = leftMotor.getCurrentPositionDouble();
-        double newRightTicks = rightMotor.getCurrentPositionDouble();
-        double intervalLeftTicks = newLeftTicks - leftTicks;
-        double intervalRightTicks = newRightTicks - rightTicks;
-        double leftWheelDist = intervalLeftTicks * wheelCircumference / motorType.TICKS_PER_ROTATION;
-        if (leftMotor.getDirection() == DcMotor.Direction.FORWARD) leftWheelDist = -leftWheelDist;
-        double rightWheelDist = intervalRightTicks * wheelCircumference / motorType.TICKS_PER_ROTATION;
-        if (rightMotor.getDirection() == DcMotor.Direction.REVERSE) rightWheelDist = -rightWheelDist;
+        double newLeftPos = leftMotor.getActualPosition();
+        double newRightPos = rightMotor.getActualPosition();
+        double deltaLeftPos = newLeftPos - leftPos;
+        double deltaRightPos = newRightPos - rightPos;
+        double leftWheelDist = -deltaLeftPos * wheelCircumference / motorType.TICKS_PER_ROTATION;
+        double rightWheelDist = deltaRightPos * wheelCircumference / motorType.TICKS_PER_ROTATION;
         double distTraveled = (leftWheelDist + rightWheelDist) / 2.0;
         double headingChange = (rightWheelDist - leftWheelDist) / interWheelDistance;
         double deltaRobotX = -distTraveled * Math.sin(headingRadians + headingChange / 2.0);
