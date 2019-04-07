@@ -59,7 +59,6 @@ public class MechBotAutoDemo extends LinearOpMode {
         //while (opModeIsActive() && gyro.getHeading() < 45) continue;
         while (opModeIsActive()){
             orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            System.out.println(orientation.firstAngle);
             if (orientation.firstAngle >= 45) break;
         }
         setPower(0, 0, 0);

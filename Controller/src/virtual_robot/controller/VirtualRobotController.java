@@ -18,6 +18,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import opmodelist.OpModes;
 import virtual_robot.hardware.bno055.BNO055IMU;
+import virtual_robot.hardware.dcmotor.DcMotorImpl;
 import virtual_robot.util.navigation.DistanceUnit;
 
 import java.util.Random;
@@ -364,49 +365,6 @@ public class VirtualRobotController {
                     break;
             }
         }
-    }
-
-    public class DcMotorImpl implements DcMotor {
-        public static final double MAX_TICKS_PER_SEC = 2500.0;
-        public static final double TICKS_PER_ROTATION = 1120;
-        private DcMotor.RunMode mode = RunMode.RUN_WITHOUT_ENCODER;
-        private DcMotor.Direction direction = Direction.FORWARD;
-        private double power = 0.0;
-        private double position = 0.0;
-        private double randomErrorFrac = 0.0;
-        private double systematicErrorFrac = 0.0;
-
-        public synchronized void setMode(DcMotor.RunMode mode){
-            this.mode = mode;
-            if (mode == RunMode.STOP_AND_RESET_ENCODER){
-                power = 0.0;
-                position = 0.0;
-            }
-        }
-
-        public synchronized DcMotor.RunMode getMode(){ return mode; }
-        public synchronized void setDirection(DcMotor.Direction direction){ this.direction = direction; }
-        public synchronized DcMotor.Direction getDirection(){ return direction; }
-        public synchronized double getPower(){ return power; }
-
-        public synchronized void setPower(double power){
-            this.power = Math.max(-1, Math.min(1, power));
-        }
-
-        public synchronized int getCurrentPosition(){ return (int)Math.floor(position);}
-        synchronized double getCurrentPositionDouble(){ return position; }
-        synchronized void updatePosition(double milliseconds){
-            if (mode == RunMode.RUN_TO_POSITION || mode == RunMode.STOP_AND_RESET_ENCODER) return;
-            double positionChange = power * MAX_TICKS_PER_SEC * milliseconds / 1000.0;
-            positionChange *= (1.0 + systematicErrorFrac + randomErrorFrac * random.nextGaussian());
-            position += positionChange;
-        }
-
-        synchronized void setRandomErrorFrac(double rdmErrFrac){
-            randomErrorFrac = rdmErrFrac;
-        }
-        synchronized void setSystematicErrorFrac(double sysErrFrac) { systematicErrorFrac = sysErrFrac; }
-
     }
 
     public class ServoImpl implements Servo{
