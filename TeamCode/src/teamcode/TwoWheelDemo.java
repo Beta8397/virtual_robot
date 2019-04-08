@@ -29,19 +29,19 @@ public class TwoWheelDemo extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()){
-            if (gamePad1.a){
+            if (gamepad1.a){
                 telemetry.addData("a pressed","");
                 left.setPower(-.5);
                 right.setPower(-.5);
-            } else if (gamePad1.y) {
+            } else if (gamepad1.y) {
                 telemetry.addData("y pressed", "");
                 left.setPower(0.5);
                 right.setPower(0.5);
-            } else if (gamePad1.b){
+            } else if (gamepad1.b){
                 telemetry.addData("b pressed", "");
                 left.setPower(0.5);
                 right.setPower(-0.5);
-            } else if (gamePad1.x){
+            } else if (gamepad1.x){
                 telemetry.addData("x pressed", "");
                 left.setPower(-0.5);
                 right.setPower(0.5);
@@ -50,7 +50,7 @@ public class TwoWheelDemo extends LinearOpMode {
                 left.setPower(0);
                 right.setPower(0);
             }
-            backServo.setPosition(0.5 - 0.5*gamePad1.left_stick_y);
+            backServo.setPosition(0.5 - 0.5* gamepad1.left_stick_y);
             telemetry.addData("Press", "Y-fwd, A-rev, B-Rt, X-Lt");
             telemetry.addData("Left Gamepad stick controls back servo","");
             telemetry.addData("Color","R %d  G %d  B %d", colorSensor.red(), colorSensor.green(), colorSensor.blue());

@@ -16,8 +16,8 @@ public class TwoWheelArcadeDrive extends LinearOpMode {
         telemetry.update();
         waitForStart();
         while (opModeIsActive()){
-            float fwd = -gamePad1.left_stick_y;
-            float steer = gamePad1.left_stick_x;
+            float fwd = -gamepad1.left_stick_y;
+            float steer = gamepad1.left_stick_x;
             left.setPower(.5 * fwd + .2 * steer);
             right.setPower(0.5 * fwd - .2 * steer);
             }

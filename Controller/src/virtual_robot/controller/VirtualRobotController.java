@@ -385,12 +385,12 @@ public class VirtualRobotController {
      */
     public class LinearOpModeBase {
         protected final HardwareMap hardwareMap;
-        protected final GamePad gamePad1;
+        protected final GamePad gamepad1;
         protected final Telemetry telemetry;
 
         public LinearOpModeBase(){
             hardwareMap = VirtualRobotController.this.hardwareMap;
-            gamePad1 = gamePad;
+            gamepad1 = gamePad;
             telemetry = new TelemetryImpl();
         }
 

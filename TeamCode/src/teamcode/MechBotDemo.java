@@ -53,11 +53,11 @@ public class MechBotDemo extends LinearOpMode {
         telemetry.update();
         waitForStart();
         while (opModeIsActive()){
-            double px = gamePad1.left_stick_x;
+            double px = gamepad1.left_stick_x;
             if (Math.abs(px) < 0.05) px = 0;
-            double py = -gamePad1.left_stick_y;
+            double py = -gamepad1.left_stick_y;
             if (Math.abs(py) < 0.05) py = 0;
-            double pa = -gamePad1.right_stick_x;
+            double pa = -gamepad1.right_stick_x;
             if (Math.abs(pa) < 0.05) pa = 0;
             double p1 = -px + py - pa;
             double p2 = px + py + -pa;

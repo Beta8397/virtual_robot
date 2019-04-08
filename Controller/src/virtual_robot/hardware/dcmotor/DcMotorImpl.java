@@ -41,7 +41,8 @@ public class DcMotorImpl implements DcMotor {
 
     public synchronized int getCurrentPosition(){
         int result = (int)Math.floor(actualPosition);
-        return MOTOR_TYPE.REVERSED? -result : result;
+        return direction == Direction.FORWARD && MOTOR_TYPE.REVERSED ||
+                direction == Direction.REVERSE && !MOTOR_TYPE.REVERSED ? -result : result;
     }
 
     public synchronized double getActualPosition(){ return actualPosition; }
