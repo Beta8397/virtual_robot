@@ -54,7 +54,7 @@ public class VirtualRobotController {
     private double fieldWidth;
 
     //OpMode Control
-    private LinearOpMode opMode = null;
+    private OpMode opMode = null;
     private volatile boolean opModeInitialized = false;
     private volatile boolean opModeStarted = false;
     private Thread opModeThread = null;
@@ -82,7 +82,7 @@ public class VirtualRobotController {
     };
 
     public void initialize() {
-        LinearOpMode.setVirtualRobotController(this);
+        OpMode.setVirtualRobotController(this);
         cbxOpModes.setItems(OpModes.opModes);
         cbxOpModes.setValue(cbxOpModes.getItems().get(0));
         cbxConfig.setItems(FXCollections.observableArrayList("Two Wheel Bot", "Mechanum Bot", "XDrive Bot"));
@@ -124,7 +124,7 @@ public class VirtualRobotController {
     @FXML
     private void handleDriverButtonAction(ActionEvent event){
         if (!opModeInitialized){
-            if (!initLinearOpMode()) return;
+            if (!initOpMode()) return;
             txtTelemetry.setText("");
             driverButton.setText("START");
             opModeInitialized = true;
@@ -179,7 +179,16 @@ public class VirtualRobotController {
     }
 
     private void runOpModeAndCleanUp(){
-        opMode.runOpMode();
+        opMode.init();
+        while (!opModeStarted) {
+            opMode.init_loop();
+        }
+        opMode.start();
+        while (opModeStarted) {
+            opMode.loop();
+        }
+        opMode.stop();
+
         bot.powerDownAndReset();
         if (!executorService.isShutdown()) executorService.shutdown();
         opModeInitialized = false;
@@ -201,13 +210,12 @@ public class VirtualRobotController {
     }
 
 
-
-    private boolean initLinearOpMode(){
+    private boolean initOpMode() {
         String opModeName = cbxOpModes.getValue();
         opModeName = "teamcode." + opModeName;
         try {
             Class opModeClass = Class.forName(opModeName);
-            opMode = (LinearOpMode)opModeClass.newInstance();
+            opMode = (OpMode) opModeClass.newInstance();
         } catch (Exception exc){
             return false;
         }
@@ -381,14 +389,14 @@ public class VirtualRobotController {
 
 
     /**
-     * Base class for LinearOpMode.
+     * Base class for OpMode.
      */
-    public class LinearOpModeBase {
+    public class OpModeBase {
         protected final HardwareMap hardwareMap;
         protected final GamePad gamepad1;
         protected final Telemetry telemetry;
 
-        public LinearOpModeBase(){
+        public OpModeBase() {
             hardwareMap = VirtualRobotController.this.hardwareMap;
             gamepad1 = gamePad;
             telemetry = new TelemetryImpl();
