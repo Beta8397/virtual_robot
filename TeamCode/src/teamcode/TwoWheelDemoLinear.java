@@ -8,7 +8,7 @@ import virtual_robot.util.navigation.DistanceUnit;
  * Example OpMode. Demonstrates use of gyro, color sensor, encoders, and telemetry.
  *
  */
-public class TwoWheelDemo extends LinearOpMode {
+public class TwoWheelDemoLinear extends LinearOpMode {
 
     public void runOpMode() {
         DcMotor left = hardwareMap.dcMotor.get("left_motor");
@@ -45,12 +45,16 @@ public class TwoWheelDemo extends LinearOpMode {
                 telemetry.addData("x pressed", "");
                 left.setPower(-0.5);
                 right.setPower(0.5);
-            } else if (gamepad1.dpad_down){
-                System.out.println("dpad_down");
-                throw new RuntimeException("RuntimeException for testing");
             } else {
                 left.setPower(0);
                 right.setPower(0);
+                if (gamepad1.dpad_down){
+                    System.out.println("dpad_down");
+                    throw new RuntimeException("RuntimeException for testing");
+                } else if (gamepad1.dpad_up){
+                    System.out.println("dpad_up");
+                    break;
+                }
             }
             backServo.setPosition(0.5 - 0.5* gamepad1.left_stick_y);
             telemetry.addData("Press", "Y-fwd, A-rev, B-Rt, X-Lt");

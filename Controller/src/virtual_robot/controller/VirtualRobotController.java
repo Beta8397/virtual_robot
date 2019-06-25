@@ -188,6 +188,9 @@ public class VirtualRobotController {
             //For regular opMode, run user-defined init_loop() method. For Linear opMode, init_loop checks whether
             //runOpMode has exited; if so, it interrupts the opModeThread.
             opMode.init_loop();
+            if (!(opMode instanceof LinearOpMode)){
+                opMode.internalPostInitLoop();
+            }
             Thread.yield();
         }
 
@@ -199,6 +202,9 @@ public class VirtualRobotController {
             //For regular opMode, run user-defined loop() method. For Linear opMode, loop() checks whether
             //runOpMode has exited; if so, it interrupts the opModeThread.
             opMode.loop();
+            if (!(opMode instanceof LinearOpMode)){
+                opMode.internalPostLoop();
+            }
             Thread.yield();
         }
 
