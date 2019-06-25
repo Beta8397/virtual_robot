@@ -1,7 +1,5 @@
 package virtual_robot.controller;
 
-import virtual_robot.controller.OpMode;
-
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -28,14 +26,12 @@ public abstract class LinearOpMode extends OpMode {
      */
     public synchronized void waitForStart() {
         while (!isStarted()) {
-            synchronized (this) {
                 try {
                     this.wait();
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     return;
                 }
-            }
         }
     }
 
@@ -43,15 +39,6 @@ public abstract class LinearOpMode extends OpMode {
     /**
      * Puts the current thread to sleep for a bit as it has nothing better to do. This allows other
      * threads in the system to run.
-     *
-     * <p>One can use this method when you have nothing better to do in your code as you await state
-     * managed by other threads to change. Calling idle() is entirely optional: it just helps make
-     * the system a little more responsive and a little more efficient.</p>
-     *
-     * <p>{@link #idle()} is conceptually related to waitOneFullHardwareCycle(), but makes no
-     * guarantees as to completing any particular number of hardware cycles, if any.</p>
-     *
-     * @see #opModeIsActive()
      */
     public final void idle() {
         // Otherwise, yield back our thread scheduling quantum and give other threads at
@@ -80,13 +67,8 @@ public abstract class LinearOpMode extends OpMode {
      * Answer as to whether this opMode is active and the robot should continue onwards. If the
      * opMode is not active, the OpMode should terminate at its earliest convenience.
      *
-     * <p>Note that internally this method calls {@link #idle()}</p>
-     *
      * @return whether the OpMode is currently active. If this returns false, you should
-     * break out of the loop in your {@link #runOpMode()} method and return to its caller.
-     * @see #runOpMode()
-     * @see #isStarted()
-     * @see #isStopRequested()
+     * break out of the loop in your runOpMode() method and return to its caller.
      */
     public final boolean opModeIsActive() {
         boolean isActive = !this.isStopRequested() && this.isStarted();
@@ -100,8 +82,6 @@ public abstract class LinearOpMode extends OpMode {
      * Has the opMode been started?
      *
      * @return whether this opMode has been started or not
-     * @see #opModeIsActive()
-     * @see #isStopRequested()
      */
     public final boolean isStarted() {
         return this.isStarted || Thread.currentThread().isInterrupted();
@@ -111,8 +91,6 @@ public abstract class LinearOpMode extends OpMode {
      * Has the the stopping of the opMode been requested?
      *
      * @return whether stopping opMode has been requested or not
-     * @see #opModeIsActive()
-     * @see #isStarted()
      */
     public final boolean isStopRequested() {
         return this.stopRequested || Thread.currentThread().isInterrupted();
@@ -161,6 +139,8 @@ public abstract class LinearOpMode extends OpMode {
 
     /**
      * From the non-linear OpMode; do not override
+     * This signals the runOpMode method that it should exit, by setting stopRequested to true. Then,
+     * it attempts to shut down the executorService.
      */
     @Override
     final public void stop() {
@@ -168,38 +148,52 @@ public abstract class LinearOpMode extends OpMode {
         // make isStopRequested() return true (and opModeIsActive() return false)
         stopRequested = true;
 
-        if (executorService != null) {  // paranoia
+        //This method may run twice; no need to shut down executorService if it's already terminated
+        if (executorService != null && !executorService.isTerminated()) {  // paranoia
 
             // interrupt the linear opMode and shutdown it's service thread
             executorService.shutdownNow();
 
-            /** Wait, forever, for the OpMode to stop. If this takes too long, then
-             * {@link OpModeManagerImpl#callActiveOpModeStop()} will catch that and take action */
             try {
-                String serviceName = "user linear op mode";
-                executorService.awaitTermination(100, TimeUnit.DAYS);
+                executorService.awaitTermination(1000, TimeUnit.MILLISECONDS);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
+            }
+
+            if (!executorService.isTerminated()){
+                System.out.println("Termination of executor service for runOpMode has timed out or been interrupted.");
+                System.out.println("Do all loops in the runOpMode method check opModeIsActive()?");
+            } else {
+                System.out.println("Executor service for runOpMode has terminated successfully.");
             }
         }
     }
 
     protected void handleLoop() {
-        // if there is a runtime exception in user code; throw it so the normal error
-        // reporting process can handle it
-        if (helper.hasRuntimeException()) {
-            throw helper.getRuntimeException();
+
+        //If runOpMode has exited, check for exceptions, shut down the executorService, then interrupt the opMode thread (currentThread)
+        if (helper.isFinished()) {
+            if (helper.hasException()){
+                System.out.println("Exception from runOpMode:");
+                System.out.println(helper.getException().getClass().getName());
+                System.out.println(helper.getException().getLocalizedMessage());
+            }
+            stop();
+            Thread.currentThread().interrupt();
         }
 
         synchronized (this) {
             this.notifyAll();
         }
+
+        System.out.println("handleLoop");
+
     }
 
     protected class LinearOpModeHelper implements Runnable {
 
-        protected RuntimeException exception = null;
-        protected boolean isShutdown = false;
+        protected Exception exception = null;
+        protected boolean isFinished = false;
 
         public LinearOpModeHelper() {
         }
@@ -210,41 +204,30 @@ public abstract class LinearOpMode extends OpMode {
                 @Override
                 public void run() {
                     exception = null;
-                    isShutdown = false;
+                    isFinished = false;
 
                     try {
                         LinearOpMode.this.runOpMode();
-                        requestOpModeStop();
-                    } catch (InterruptedException ie) {
-                        // InterruptedException, shutting down the op mode
-                        System.out.println("LinearOpMode received an InterruptedException; shutting down this linear op mode");
-                    } catch (CancellationException ie) {
-                        // In our system, CancellationExceptions are thrown when data was trying to be acquired, but
-                        // an interrupt occurred, and you're in the unfortunate situation that the data acquisition API
-                        // involved doesn't allow InterruptedExceptions to be thrown. You can't return (what data would
-                        // you return?), and so you have to throw a RuntimeException. CancellationException seems the
-                        // best choice.
-                        System.out.println("LinearOpMode received a CancellationException; shutting down this linear op mode");
-                    } catch (RuntimeException e) {
+                    } catch (Exception e) {
                         exception = e;
                     } finally {
                         // Do the necessary bookkeeping
-                        isShutdown = true;
+                        isFinished = true;
                     }
                 }
             });
         }
 
-        public boolean hasRuntimeException() {
+        public boolean hasException() {
             return (exception != null);
         }
 
-        public RuntimeException getRuntimeException() {
+        public Exception getException() {
             return exception;
         }
 
-        public boolean isShutdown() {
-            return isShutdown;
+        public boolean isFinished() {
+            return isFinished;
         }
     }
 

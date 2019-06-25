@@ -82,13 +82,7 @@ public abstract class OpMode extends VirtualRobotController.OpModeBase {
     }
 
     /**
-     * Requests that this OpMode be shut down if it the currently active opMode, much as if the stop
-     * button had been pressed on the driver station; if this is not the currently active OpMode,
-     * then this function has no effect. Note as part of this processing, the OpMode's {@link #stop()}
-     * method will be called, as that is part of the usual shutdown logic. Note that {@link #requestOpModeStop()}
-     * may be called from <em>any</em> thread.
-     *
-     * @see #stop()
+     * Do-nothing method
      */
     public final void requestOpModeStop() {
         stop();

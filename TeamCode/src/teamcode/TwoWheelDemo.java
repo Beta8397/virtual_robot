@@ -10,7 +10,7 @@ import virtual_robot.util.navigation.DistanceUnit;
  */
 public class TwoWheelDemo extends LinearOpMode {
 
-    public void runOpMode(){
+    public void runOpMode() {
         DcMotor left = hardwareMap.dcMotor.get("left_motor");
         DcMotor right = hardwareMap.dcMotor.get("right_motor");
         left.setDirection(DcMotor.Direction.REVERSE);
@@ -45,8 +45,10 @@ public class TwoWheelDemo extends LinearOpMode {
                 telemetry.addData("x pressed", "");
                 left.setPower(-0.5);
                 right.setPower(0.5);
-            }
-            else {
+            } else if (gamepad1.dpad_down){
+                System.out.println("dpad_down");
+                throw new RuntimeException("RuntimeException for testing");
+            } else {
                 left.setPower(0);
                 right.setPower(0);
             }
