@@ -188,6 +188,7 @@ public class VirtualRobotController {
             //For regular opMode, run user-defined init_loop() method. For Linear opMode, init_loop checks whether
             //runOpMode has exited; if so, it interrupts the opModeThread.
             opMode.init_loop();
+            //For regular op mode, update telemetry after each iteration of init_loop()
             if (!(opMode instanceof LinearOpMode)){
                 opMode.internalPostInitLoop();
             }
@@ -202,6 +203,7 @@ public class VirtualRobotController {
             //For regular opMode, run user-defined loop() method. For Linear opMode, loop() checks whether
             //runOpMode has exited; if so, it interrupts the opModeThread.
             opMode.loop();
+            //For regular op mode only, update telemetry after each execution of loop()
             if (!(opMode instanceof LinearOpMode)){
                 opMode.internalPostLoop();
             }
@@ -224,6 +226,8 @@ public class VirtualRobotController {
                 cbxConfig.setDisable(false);
             }
         });
+
+        System.out.println("Finished executing runOpModeAndCleanUp() on opModeThread.");
     }
 
     @FXML

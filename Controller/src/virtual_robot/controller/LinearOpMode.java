@@ -186,8 +186,6 @@ public abstract class LinearOpMode extends OpMode {
             this.notifyAll();
         }
 
-        System.out.println("handleLoop");
-
     }
 
     protected class LinearOpModeHelper implements Runnable {
