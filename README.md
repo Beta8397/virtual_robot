@@ -1,5 +1,8 @@
 A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
 
+CHANGES 6/25/2019
+    Contribution from Alan Smith (alan412): now supports "regular" op modes in addition to linear op modes.
+
 CHANGES 4/3/2019
     1. Added BNO055IMU interface to simulate (in a limited way) coding for the IMU in the REV Expansion Hub.
     2. The Mechanum Bot and X Drive Bot now have a BNO055IMU rather than the original gyro.
@@ -61,7 +64,8 @@ To use:
      the project (Controller, TeamCode, and virtual_robot) -- the only module you'll need to touch is TeamCode. It
      contains the opmodelist and teamcode packages, as well as an assets directory.
   3. Write your OpModes in the teamcode package, and register them in the opModeList.OpModes class. These must extend
-     the LinearOpMode class, and must include a runOpMode method.
+     the OpMode class (may either extend OpMode OR LinearOpMode). OpMode must provide init() and loop() methods;
+     LinearOpMode must provide runOpMode() method.
   4. Make sure gamepad is plugged in to the computer.
   5. Run the application (by clicking the green arrowhead at the toolbar).
   6. Use Configuration dropdown box to select "Two Wheeled Bot" or "Mechanum Bot". The configuration will be displayed.

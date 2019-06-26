@@ -54,7 +54,7 @@ public class VirtualRobotController {
     private double fieldWidth;
 
     //OpMode Control
-    private LinearOpMode opMode = null;
+    private OpMode opMode = null;
     private volatile boolean opModeInitialized = false;
     private volatile boolean opModeStarted = false;
     private Thread opModeThread = null;
@@ -82,7 +82,7 @@ public class VirtualRobotController {
     };
 
     public void initialize() {
-        LinearOpMode.setVirtualRobotController(this);
+        OpMode.setVirtualRobotController(this);
         cbxOpModes.setItems(OpModes.opModes);
         cbxOpModes.setValue(cbxOpModes.getItems().get(0));
         cbxConfig.setItems(FXCollections.observableArrayList("Two Wheel Bot", "Mechanum Bot", "XDrive Bot"));
@@ -124,7 +124,7 @@ public class VirtualRobotController {
     @FXML
     private void handleDriverButtonAction(ActionEvent event){
         if (!opModeInitialized){
-            if (!initLinearOpMode()) return;
+            if (!initOpMode()) return;
             txtTelemetry.setText("");
             driverButton.setText("START");
             opModeInitialized = true;
@@ -164,7 +164,7 @@ public class VirtualRobotController {
             driverButton.setText("INIT");
             opModeInitialized = false;
             opModeStarted = false;
-            if (opModeThread.isAlive() && !opModeThread.isInterrupted()) opModeThread.interrupt();
+            //if (opModeThread.isAlive() && !opModeThread.isInterrupted()) opModeThread.interrupt();
             if (!executorService.isShutdown()) executorService.shutdown();
             try{
                 opModeThread.join(500);
@@ -179,7 +179,41 @@ public class VirtualRobotController {
     }
 
     private void runOpModeAndCleanUp(){
-        opMode.runOpMode();
+
+        //For regular opMode, run user-defined init() method. For Linear opMode, init() starts the execution of
+        //runOpMode on a helper thread.
+        opMode.init();
+
+        while (!opModeStarted && !Thread.currentThread().isInterrupted()) {
+            //For regular opMode, run user-defined init_loop() method. For Linear opMode, init_loop checks whether
+            //runOpMode has exited; if so, it interrupts the opModeThread.
+            opMode.init_loop();
+            //For regular op mode, update telemetry after each iteration of init_loop()
+            if (!(opMode instanceof LinearOpMode)){
+                opMode.internalPostInitLoop();
+            }
+            Thread.yield();
+        }
+
+        //For regular opMode, run user-defined stop() method, if any. For Linear opMode, the start() method
+        //will allow waitForStart() to finish executing.
+        if (!Thread.currentThread().isInterrupted()) opMode.start();
+
+        while (opModeStarted && !Thread.currentThread().isInterrupted()) {
+            //For regular opMode, run user-defined loop() method. For Linear opMode, loop() checks whether
+            //runOpMode has exited; if so, it interrupts the opModeThread.
+            opMode.loop();
+            //For regular op mode only, update telemetry after each execution of loop()
+            if (!(opMode instanceof LinearOpMode)){
+                opMode.internalPostLoop();
+            }
+            Thread.yield();
+        }
+
+        //For regular opMode, run user-defined stop() method, if any. For Linear opMode, shut down the
+        //helper thread that runs runOpMode.
+        opMode.stop();
+
         bot.powerDownAndReset();
         if (!executorService.isShutdown()) executorService.shutdown();
         opModeInitialized = false;
@@ -192,6 +226,8 @@ public class VirtualRobotController {
                 cbxConfig.setDisable(false);
             }
         });
+
+        System.out.println("Finished executing runOpModeAndCleanUp() on opModeThread.");
     }
 
     @FXML
@@ -201,13 +237,12 @@ public class VirtualRobotController {
     }
 
 
-
-    private boolean initLinearOpMode(){
+    private boolean initOpMode() {
         String opModeName = cbxOpModes.getValue();
         opModeName = "teamcode." + opModeName;
         try {
             Class opModeClass = Class.forName(opModeName);
-            opMode = (LinearOpMode)opModeClass.newInstance();
+            opMode = (OpMode) opModeClass.newInstance();
         } catch (Exception exc){
             return false;
         }
@@ -381,64 +416,18 @@ public class VirtualRobotController {
 
 
     /**
-     * Base class for LinearOpMode.
+     * Base class for OpMode.
      */
-    public class LinearOpModeBase {
+    public class OpModeBase {
         protected final HardwareMap hardwareMap;
         protected final GamePad gamepad1;
         protected final Telemetry telemetry;
 
-        public LinearOpModeBase(){
+        public OpModeBase() {
             hardwareMap = VirtualRobotController.this.hardwareMap;
             gamepad1 = gamePad;
             telemetry = new TelemetryImpl();
         }
-
-        /**
-         * Pauses execution until the START button is pressed. Call this method after initialization code.
-         */
-        protected void waitForStart(){
-            while (!opModeStarted) {
-                try{
-                    Thread.sleep(0);
-                } catch (InterruptedException exc){
-                    Thread.currentThread().interrupt();
-                    return;
-                }
-            }
-            return;
-        }
-
-        /**
-         * Returns true IF: start button has been pressed AND there has been no request to stop.
-         *
-         * This method also gives other threads an opportunity to run.
-         *
-         * Any long-running loop (more than a few iterations) should include a call to this method.
-         *
-         * @return TRUE if STARTED AND NO request to terminate; FALSE if there is a request to terminate or if not started.
-         */
-        protected boolean opModeIsActive(){
-            if (Thread.currentThread().isInterrupted() || !opModeStarted) return false;
-            try{
-                Thread.sleep(0);
-            } catch (InterruptedException exc){
-                Thread.currentThread().interrupt();
-                return false;
-            }
-            return true;
-        }
-
-        /**
-         * Returns true if there has been request to stop op mode.
-         *
-         * @return TRUE if request to terminate; FALSE otherwise.
-         */
-        protected boolean isStopRequested(){
-            if (Thread.currentThread().isInterrupted()) return true;
-            return false;
-        }
-
     }
 
     public class TelemetryImpl implements Telemetry {
