@@ -40,11 +40,6 @@ public class Robot {
         double heading = getHeadingRadians();
 
         double modifiedTheta = theta - heading;
-        if (modifiedTheta < -Math.PI) {
-            modifiedTheta += 2 * Math.PI;
-        } else if (modifiedTheta > Math.PI) {
-            modifiedTheta -= 2 * Math.PI;
-        }
 
         //Convert theta and r back to a forward and strafe
         double forward = r * Math.cos(modifiedTheta);
