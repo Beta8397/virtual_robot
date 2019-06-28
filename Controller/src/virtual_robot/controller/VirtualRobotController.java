@@ -1,5 +1,7 @@
 package virtual_robot.controller;
 
+import com.studiohartman.jamepad.ControllerManager;
+import com.studiohartman.jamepad.ControllerState;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -23,6 +25,7 @@ import virtual_robot.util.navigation.DistanceUnit;
 
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -41,11 +44,16 @@ public class VirtualRobotController {
     @FXML private Slider sldRandomMotorError;
     @FXML private Slider sldSystematicMotorError;
     @FXML private TextArea txtTelemetry;
+    @FXML private CheckBox checkBoxGamePad1;
+    @FXML private CheckBox checkBoxGamePad2;
 
     //Virtual Hardware
     private HardwareMap hardwareMap = null;
     private VirtualBot bot = null;
-    GamePad gamePad = new GamePad();
+    GamePad gamePad1 = new GamePad();
+    GamePad gamePad2 = new GamePad();
+    GamePadHelper gamePadHelper = new GamePadHelper();
+    ScheduledExecutorService gamePadExecutorService = Executors.newSingleThreadScheduledExecutor();
 
     //Background Image and Field
     private Image backgroundImage = Background.background;
@@ -100,6 +108,11 @@ public class VirtualRobotController {
         imgViewBackground.setImage(backgroundImage);
         sldRandomMotorError.valueProperty().addListener(sliderChangeListener);
         sldSystematicMotorError.valueProperty().addListener(sliderChangeListener);
+        checkBoxGamePad1.setDisable(true);
+        checkBoxGamePad1.setStyle("-fx-opacity: 1");
+        checkBoxGamePad2.setDisable(true);
+        checkBoxGamePad2.setStyle("-fx-opacity: 1");
+        gamePadExecutorService.scheduleAtFixedRate(gamePadHelper, 0, 20, TimeUnit.MILLISECONDS);
     }
 
     @FXML
@@ -147,7 +160,6 @@ public class VirtualRobotController {
             Runnable singleCycle = new Runnable() {
                 @Override
                 public void run() {
-                    gamePad.update();
                     bot.updateStateAndSensors(TIMER_INTERVAL_MILLISECONDS);
                     Platform.runLater(updateDisplay);
                 }
@@ -421,11 +433,13 @@ public class VirtualRobotController {
     public class OpModeBase {
         protected final HardwareMap hardwareMap;
         protected final GamePad gamepad1;
+        protected final GamePad gamepad2;
         protected final Telemetry telemetry;
 
         public OpModeBase() {
             hardwareMap = VirtualRobotController.this.hardwareMap;
-            gamepad1 = gamePad;
+            gamepad1 = gamePad1;
+            gamepad2 = gamePad2;
             telemetry = new TelemetryImpl();
         }
     }
@@ -470,6 +484,92 @@ public class VirtualRobotController {
         private void setText(String text){
             telemetryText = text;
             telemetryTextChanged = true;
+        }
+
+    }
+
+    public class GamePadHelper implements  Runnable{
+
+        private int gamePad1Index = -1;
+        private int gamePad2Index = -1;
+
+        private boolean isConnected0 = true;
+        private boolean isConnected1 = true;
+
+        private boolean changingGamePadConfig = false;
+
+        private ControllerManager controller = null;
+
+        public GamePadHelper(){
+            controller = new ControllerManager(2);
+            controller.initSDLGamepad();
+        }
+
+        public void run(){
+            boolean connectionChanged = false;
+            boolean configChanged = false;
+
+            ControllerState state0 = controller.getState(0);
+            ControllerState state1 = controller.getState(1);
+
+            if (state0.isConnected != isConnected0 || state1.isConnected != isConnected1){
+                isConnected0 = state0.isConnected;
+                isConnected1 = state1.isConnected;
+                connectionChanged = true;
+                System.out.println("isConnected0 = " + isConnected0 + "  isConnected1 = " + isConnected1);
+            }
+
+            if (state0.start && (state0.a || state0.b) || state1.start && (state1.a || state1.b)) {
+                if (!changingGamePadConfig) {
+
+                    changingGamePadConfig = true;
+
+                    if (state0.start && state0.a) {
+                        gamePad1Index = 0;
+                        if (gamePad2Index == 0) gamePad2Index = -1;
+                    } else if (state0.start && state0.b) {
+                        gamePad2Index = 0;
+                        if (gamePad1Index == 0) gamePad1Index = -1;
+                    }
+
+                    if (state1.start && state1.a) {
+                        gamePad1Index = 1;
+                        if (gamePad2Index == 1) gamePad2Index = -1;
+                    } else if (state1.start && state1.b) {
+                        gamePad2Index = 1;
+                        if (gamePad1Index == 1) gamePad1Index = -1;
+                    }
+
+                    System.out.println("gamepad1 index = " + gamePad1Index + "   gamepad2 index = " + gamePad2Index);
+
+                    configChanged = true;
+                }
+            } else {
+                changingGamePadConfig = false;
+            }
+
+            if (configChanged || connectionChanged){
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        checkBoxGamePad1.setSelected(gamePad1Index == 0 && isConnected0 || gamePad1Index == 1 && isConnected1);
+                        checkBoxGamePad2.setSelected(gamePad2Index == 0 && isConnected0 || gamePad2Index == 1 && isConnected1);
+                    }
+                });
+            }
+
+
+            if (gamePad1Index == 0) gamePad1.update(state0);
+            else if (gamePad1Index == 1) gamePad1.update(state1);
+            else gamePad1.update(null);
+
+            if (gamePad2Index == 0) gamePad2.update(state0);
+            else if (gamePad2Index == 1) gamePad2.update(state1);
+            else gamePad2.update(null);
+        }
+
+        public void quit(){
+            controller.quitSDLGamepad();
         }
 
     }
