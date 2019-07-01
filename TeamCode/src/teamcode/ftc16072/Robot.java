@@ -1,4 +1,4 @@
-package teamcode;
+package teamcode.ftc16072;
 
 import virtual_robot.hardware.*;
 import virtual_robot.hardware.bno055.BNO055IMU;
