@@ -192,39 +192,57 @@ public class VirtualRobotController {
 
     private void runOpModeAndCleanUp(){
 
-        //For regular opMode, run user-defined init() method. For Linear opMode, init() starts the execution of
-        //runOpMode on a helper thread.
-        opMode.init();
+        try {
+            //For regular opMode, run user-defined init() method. For Linear opMode, init() starts the execution of
+            //runOpMode on a helper thread.
+            opMode.init();
 
-        while (!opModeStarted && !Thread.currentThread().isInterrupted()) {
-            //For regular opMode, run user-defined init_loop() method. For Linear opMode, init_loop checks whether
-            //runOpMode has exited; if so, it interrupts the opModeThread.
-            opMode.init_loop();
-            //For regular op mode, update telemetry after each iteration of init_loop()
-            if (!(opMode instanceof LinearOpMode)){
-                opMode.internalPostInitLoop();
+            while (!opModeStarted && !Thread.currentThread().isInterrupted()) {
+                //For regular opMode, run user-defined init_loop() method. For Linear opMode, init_loop checks whether
+                //runOpMode has exited; if so, it interrupts the opModeThread.
+                opMode.init_loop();
+                //For regular op mode, update telemetry after each iteration of init_loop()
+                if (!(opMode instanceof LinearOpMode)) {
+                    opMode.internalPostInitLoop();
+                }
+
+                try {
+                    Thread.sleep(0, 1);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+
             }
-            Thread.yield();
-        }
 
-        //For regular opMode, run user-defined stop() method, if any. For Linear opMode, the start() method
-        //will allow waitForStart() to finish executing.
-        if (!Thread.currentThread().isInterrupted()) opMode.start();
+            //For regular opMode, run user-defined stop() method, if any. For Linear opMode, the start() method
+            //will allow waitForStart() to finish executing.
+            if (!Thread.currentThread().isInterrupted()) opMode.start();
 
-        while (opModeStarted && !Thread.currentThread().isInterrupted()) {
-            //For regular opMode, run user-defined loop() method. For Linear opMode, loop() checks whether
-            //runOpMode has exited; if so, it interrupts the opModeThread.
-            opMode.loop();
-            //For regular op mode only, update telemetry after each execution of loop()
-            if (!(opMode instanceof LinearOpMode)){
-                opMode.internalPostLoop();
+            while (opModeStarted && !Thread.currentThread().isInterrupted()) {
+                //For regular opMode, run user-defined loop() method. For Linear opMode, loop() checks whether
+                //runOpMode has exited; if so, it interrupts the opModeThread.
+                opMode.loop();
+                //For regular op mode only, update telemetry after each execution of loop()
+                if (!(opMode instanceof LinearOpMode)) {
+                    opMode.internalPostLoop();
+                }
+
+                try {
+                    Thread.sleep(0, 1);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+
             }
-            Thread.yield();
-        }
 
-        //For regular opMode, run user-defined stop() method, if any. For Linear opMode, shut down the
-        //helper thread that runs runOpMode.
-        opMode.stop();
+            //For regular opMode, run user-defined stop() method, if any. For Linear opMode, shut down the
+            //helper thread that runs runOpMode.
+            opMode.stop();
+        } catch(Exception e){
+            System.out.println("Exception thrown by opModeThread.");
+            System.out.println(e.getClass().getName());
+            System.out.println(e.getLocalizedMessage());
+        }
 
         bot.powerDownAndReset();
         if (!executorService.isShutdown()) executorService.shutdown();

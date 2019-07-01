@@ -48,13 +48,6 @@ public class TwoWheelDemoLinear extends LinearOpMode {
             } else {
                 left.setPower(0);
                 right.setPower(0);
-                if (gamepad1.dpad_down){
-                    System.out.println("dpad_down");
-                    throw new RuntimeException("RuntimeException for testing");
-                } else if (gamepad1.dpad_up){
-                    System.out.println("dpad_up");
-                    break;
-                }
             }
             backServo.setPosition(0.5 - 0.5* gamepad1.left_stick_y);
             telemetry.addData("Press", "Y-fwd, A-rev, B-Rt, X-Lt");
