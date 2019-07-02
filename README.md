@@ -47,7 +47,7 @@ most laptops).
 
 An abridged approximation of the FTC SDK is provided.
 
-User-defined OpModes must be placed in the teamcode package, and must extend opmode.LinearOpMode. Each OpMode must be
+User-defined OpModes must be placed in the teamcode package, and must extend OpMode (or LinearOpMode). Each OpMode must be
 registered by placing its name in the opModes list in the opmodelist.OpModes class. Note that this way of registering
 OpModes differs from the @TeleOp and @Autonomous annotations of the FTC SDK.
 
