@@ -1,8 +1,10 @@
 A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
 
-CHANGES 6/27/2019
+CHANGES 7/01/2019
     Now supports two GamePads instead of just one. Use start-A and start-B to select gamepad1 and gamepad2, as
-    you would in the FTC SDK.
+    you would in the FTC SDK. Two op modes for Mechanum Bot contributed by FTC team 16072, including a nice
+    demonstration of field-centric drive using the IMU. These are in the teamcode.ftc16072 package. Look at the OpModes
+    class to see how to register op modes that are in a sub-package within teamcode.
 
 CHANGES 6/25/2019
     Contribution from Alan Smith (alan412): now supports "regular" op modes in addition to linear op modes.

@@ -24,6 +24,14 @@ public class Robot {
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
         return -angles.firstAngle;   // Not sure why this is negative, could be the simulator
 
+        /*
+        angles.firstAngle is the heading, measured COUNTER-CLOCKWISE, from the orientation the bot was in when the
+        op mode was started (by default, straight upward). In the driveFieldRelative method, the X axis is the robot's
+        starting forward direction and the Y axis is 90 degrees CLOCKWISE from the X axis. Likewise, in the
+        driveMechanum method, the strafe direction (robot-right) is 90 degrees CLOCKWISE from the forward direction.
+        It is these choices of coordinate systems that necessitate using the negative of angles.firstAngle.
+         */
+
     }
 
     double degreeFromRadians(double theta) {
