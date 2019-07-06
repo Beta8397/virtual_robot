@@ -1,11 +1,16 @@
 package teamcode;
 
+import virtual_robot.annotations.Disabled;
+import virtual_robot.annotations.TeleOp;
 import virtual_robot.hardware.DcMotor;
 import virtual_robot.controller.LinearOpMode;
 
 /**
  * Example OpMode. Controls robot using left joystick, with arcade drive.
  */
+
+//@Disabled
+@TeleOp(name = "two wheel arcade drive")
 public class TwoWheelArcadeDrive extends LinearOpMode {
 
     public void runOpMode(){

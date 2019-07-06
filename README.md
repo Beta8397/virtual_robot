@@ -1,10 +1,14 @@
 A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
 
+CHANGES 7/05/2019
+    Now uses @TeleOp, @Autonomous, and @Disabled class annotations to control the display of OpModes in the OpMode
+    combobox. For @TeleOp and @Autonomous, a name parameter must be specified. The group parameter is optional, and
+    only included for compatibility with the FTC SDK (it has no function).
+
 CHANGES 7/01/2019
     Now supports two GamePads instead of just one. Use start-A and start-B to select gamepad1 and gamepad2, as
     you would in the FTC SDK. Two op modes for Mechanum Bot contributed by FTC team 16072, including a nice
-    demonstration of field-centric drive using the IMU. These are in the teamcode.ftc16072 package. Look at the OpModes
-    class to see how to register op modes that are in a sub-package within teamcode.
+    demonstration of field-centric drive using the IMU. These are in the teamcode.ftc16072 package.
 
 CHANGES 6/25/2019
     Contribution from Alan Smith (alan412): now supports "regular" op modes in addition to linear op modes.
@@ -41,7 +45,7 @@ and back sides. A small green rectangle indicates the front of the robot.
 The field can be thought of as 12 feet wide. The field graphic (currently the Rover Ruckus field)
 is obtained from a bitmap (.bmp) image. The color sensor detects the field color beneath the center of the
 robot. The field graphic is easily changed by providing a different .bmp image in the background.Background class.
-The .bmp image is in the background.bmp file in the src/assets folder. If a different .bmp image is used,
+The .bmp image is in the background.bmp file in the src/virtual_robot.assets folder. If a different .bmp image is used,
 it must be at least as wide and as tall as the field dimensions (currently 648 x 648 pixels to fit on the screen of
 most laptops).
 
@@ -68,7 +72,7 @@ To use:
      IntelliJ IDEA.
   2. Download the virtual_robot .zip, and extract contents. Open the project in IntelliJ. You'll see three modules in
      the project (Controller, TeamCode, and virtual_robot) -- the only module you'll need to touch is TeamCode. It
-     contains the opmodelist and teamcode packages, as well as an assets directory.
+     contains the opmodelist and teamcode packages, as well as an virtual_robot.assets directory.
   3. Write your OpModes in the teamcode package, and register them in the opModeList.OpModes class. These must extend
      the OpMode class (may either extend OpMode OR LinearOpMode). OpMode must provide init() and loop() methods;
      LinearOpMode must provide runOpMode() method.

@@ -12,4 +12,15 @@ Copyright 2019 Team Beta
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   This product includes Jamepad software (Copyright 2016, William Hartman), to support gamepad use.
+   This product includes:
+
+   Jamepad software (Copyright 2016, William Hartman), to support gamepad use.
+
+   Guava: Google Core Libraries for Java (Copyright 2017, Google, Inc.), Licensed under Apache License, Version 2.0
+
+   Reflections Library for Java
+
+   Javassist software (Copyright 1999-2019, Shigeru Chiba), Licensed under Apache License, Version 2.0
+
+
+

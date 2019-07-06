@@ -1,7 +1,9 @@
 package teamcode.ftc16072;
 
+import virtual_robot.annotations.TeleOp;
 import virtual_robot.controller.OpMode;
 
+@TeleOp(name = "mechanum driving opmode")
 public class MecanumDrivingOpMode extends OpMode {
     private MecanumDrive mecanumDrive = new MecanumDrive();
 
