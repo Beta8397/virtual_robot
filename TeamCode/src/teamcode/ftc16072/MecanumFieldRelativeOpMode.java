@@ -3,7 +3,7 @@ package teamcode.ftc16072;
 import virtual_robot.annotations.TeleOp;
 import virtual_robot.controller.OpMode;
 
-@TeleOp(name = "mecanum field relative opmode")
+@TeleOp(name = "mecanum field relative opmode", group = "ftc16072")
 public class MecanumFieldRelativeOpMode extends OpMode {
     private Robot robot = new Robot();
 

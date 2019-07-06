@@ -9,7 +9,7 @@ import virtual_robot.util.navigation.DistanceUnit;
  * Example OpMode. Demonstrates use of gyro, color sensor, encoders, and telemetry.
  *
  */
-@TeleOp(name = "two wheel demo linear")
+@TeleOp(name = "two wheel demo linear", group = "TwoWheel")
 public class TwoWheelDemoLinear extends LinearOpMode {
 
     public void runOpMode() {

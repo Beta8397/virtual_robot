@@ -10,7 +10,7 @@ import virtual_robot.controller.LinearOpMode;
  */
 
 //@Disabled
-@TeleOp(name = "two wheel arcade drive")
+@TeleOp(name = "two wheel arcade drive", group = "TwoWheel")
 public class TwoWheelArcadeDrive extends LinearOpMode {
 
     public void runOpMode(){

@@ -20,7 +20,7 @@ import virtual_robot.util.navigation.AngleUtils;
  * Start with bot in center of lander, facing top of screen.
  *
  */
-@Autonomous(name = "mechbot auto demo")
+@Autonomous(name = "mechbot auto demo", group = "Mechanum")
 public class MechBotAutoDemo extends LinearOpMode {
 
     DcMotor m1, m2, m3, m4;

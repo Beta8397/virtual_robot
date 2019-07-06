@@ -29,6 +29,7 @@ import virtual_robot.hardware.dcmotor.DcMotorImpl;
 import virtual_robot.util.navigation.DistanceUnit;
 
 import java.lang.annotation.Annotation;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -101,7 +102,6 @@ public class VirtualRobotController {
     public void initialize() {
         OpMode.setVirtualRobotController(this);
         setupCbxOpModes();
-        cbxOpModes.setValue(cbxOpModes.getItems().get(0));
         cbxConfig.setItems(FXCollections.observableArrayList("Two Wheel Bot", "Mechanum Bot", "XDrive Bot"));
         cbxConfig.setValue(cbxConfig.getItems().get(0));
         fieldWidth = fieldPane.getPrefWidth();
@@ -135,6 +135,32 @@ public class VirtualRobotController {
                 nonDisabledOpModeClasses.add(c);
             }
         }
+
+        nonDisabledOpModeClasses.sort(new Comparator<Class<?>>() {
+            @Override
+            public int compare(Class<?> o1, Class<?> o2) {
+                String group1 = null;
+                Annotation a1 = o1.getAnnotation(TeleOp.class);
+                if (a1 != null) group1 = ((TeleOp)a1).group();
+                else{
+                    a1 = o1.getAnnotation(Autonomous.class);
+                    if (a1 != null) group1 = ((Autonomous)a1).group();
+                }
+
+                String group2 = null;
+                Annotation a2 = o2.getAnnotation(TeleOp.class);
+                if (a2 != null) group2 = ((TeleOp)a2).group();
+                else{
+                    a2 = o2.getAnnotation(Autonomous.class);
+                    if (a2 != null) group2 = ((Autonomous)a2).group();
+                }
+
+                if (group1 == null) return -1;
+                else if (group2 == null) return 1;
+                else return group1.compareToIgnoreCase(group2);
+            }
+        });
+
         cbxOpModes.setItems(nonDisabledOpModeClasses);
 
         cbxOpModes.setCellFactory(new Callback<ListView<Class<?>>, ListCell<Class<?>>>() {
@@ -149,10 +175,10 @@ public class VirtualRobotController {
                             return;
                         }
                         Annotation a = cl.getAnnotation(TeleOp.class);
-                        if (a != null) setText(((TeleOp)a).name());
+                        if (a != null) setText(((TeleOp)a).group() + ": " + ((TeleOp)a).name());
                         else {
                             a = cl.getAnnotation(Autonomous.class);
-                            if (a != null) setText(((Autonomous)a).name());
+                            if (a != null) setText(((Autonomous)a).group() + ": "  + ((Autonomous)a).name());
                             else setText("No Name");
                         }
 
@@ -179,6 +205,8 @@ public class VirtualRobotController {
                 }
             }
         });
+
+        cbxOpModes.setValue(cbxOpModes.getItems().get(0));
     }
 
 

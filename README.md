@@ -51,13 +51,12 @@ most laptops).
 
 An abridged approximation of the FTC SDK is provided.
 
-User-defined OpModes must be placed in the teamcode package, and must extend OpMode (or LinearOpMode). Each OpMode must be
-registered by placing its name in the opModes list in the opmodelist.OpModes class. Note that this way of registering
-OpModes differs from the @TeleOp and @Autonomous annotations of the FTC SDK.
+User-defined OpModes must be placed in the teamcode package, and must extend OpMode (or LinearOpMode). OpModes are
+registered by placing a @TeleOp or @Autonomous annotation immediately above the class declaration.
 
 The OpMode (and therefore LinearOpMode) class in the simulator provides access to:
 
-  1. A HardwareMap object, which in turn provides access to the DCMotor objects, the gyro sensor,
+  1. A HardwareMap object, which in turn provides access to the DCMotor objects, the gyro sensor, distance sensors,
      the servo, and the color sensor;
   2. Two GamePads(actual hardware gamepads);
   3. A Telemetry object.
@@ -73,8 +72,8 @@ To use:
   2. Download the virtual_robot .zip, and extract contents. Open the project in IntelliJ. You'll see three modules in
      the project (Controller, TeamCode, and virtual_robot) -- the only module you'll need to touch is TeamCode. It
      contains the opmodelist and teamcode packages, as well as an virtual_robot.assets directory.
-  3. Write your OpModes in the teamcode package, and register them in the opModeList.OpModes class. These must extend
-     the OpMode class (may either extend OpMode OR LinearOpMode). OpMode must provide init() and loop() methods;
+  3. Write your OpModes in the teamcode package; make sure to include a @TeleOp or @Autonomous annotation. These must
+    extend the OpMode class (may either extend OpMode OR LinearOpMode). OpMode must provide init() and loop() methods;
      LinearOpMode must provide runOpMode() method.
   4. Make sure at least one gamepad is plugged in to the computer.
   5. Run the application (by clicking the green arrowhead at the toolbar).
