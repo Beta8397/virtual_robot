@@ -44,7 +44,7 @@ public class GamePad {
         this.deadzone = deadzone;
     }
 
-    public float setWithDeadzone(float in) {
+    private float setWithDeadzone(float in) {
         if (Math.abs(in) > deadzone) {
             return in;
         }
