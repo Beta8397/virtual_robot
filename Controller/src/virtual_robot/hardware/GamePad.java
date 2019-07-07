@@ -30,7 +30,7 @@ public class GamePad {
     public volatile boolean right_stick_button = false;
     public volatile float left_trigger = 0;
     public volatile float right_trigger = 0;
-    public volatile float deadzone = (float) 0.0;
+    private volatile float deadzone = (float) 0.0;
 
     public void setJoystickDeadzone(float deadzone) {
         this.deadzone = deadzone;
