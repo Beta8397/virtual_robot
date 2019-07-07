@@ -30,6 +30,18 @@ public class GamePad {
     public volatile boolean right_stick_button = false;
     public volatile float left_trigger = 0;
     public volatile float right_trigger = 0;
+    private volatile float deadzone = (float) 0.0;
+
+    public void setJoystickDeadzone(float deadzone) {
+        this.deadzone = deadzone;
+    }
+
+    private float setWithDeadzone(float in) {
+        if (Math.abs(in) > deadzone) {
+            return in;
+        }
+        return (float) 0.0;
+    }
 
     public void update(ControllerState state){
         if (state != null){
@@ -37,10 +49,10 @@ public class GamePad {
         y = state.y;
         a = state.a;
         b = state.b;
-        left_stick_x = state.leftStickX;
-        left_stick_y = -state.leftStickY;
-        right_stick_x = state.rightStickX;
-        right_stick_y = -state.rightStickY;
+        left_stick_x = setWithDeadzone(state.leftStickX);
+        left_stick_y = setWithDeadzone(-state.leftStickY);
+        right_stick_x = setWithDeadzone(state.rightStickX);
+        right_stick_y = setWithDeadzone(-state.rightStickY);
         dpad_up = state.dpadUp;
         dpad_down = state.dpadDown;
         dpad_left = state.dpadLeft;
@@ -52,9 +64,9 @@ public class GamePad {
         right_bumper = state.rb;
         left_stick_button = state.leftStickClick;
         right_stick_button = state.rightStickClick;
-        left_trigger = state.leftTrigger;
-        right_trigger = state.rightTrigger;
-        } else {
+        left_trigger = setWithDeadzone(state.leftTrigger);
+        right_trigger = setWithDeadzone(state.rightTrigger);
+    } else {
             x = false;
             y = false;
             a = false;
