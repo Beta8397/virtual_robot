@@ -1,9 +1,9 @@
 A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
 
-CHANGES 7/05/2019
+CHANGES 7/06/2019
     Now uses @TeleOp, @Autonomous, and @Disabled class annotations to control the display of OpModes in the OpMode
     combobox. For @TeleOp and @Autonomous, a name parameter must be specified. The group parameter is optional (default
-    group is "default").
+    group is "default"). GamePad setJoystickDeadzone capability contributed by FTC team 16072.
 
 CHANGES 7/01/2019
     Now supports two GamePads instead of just one. Use start-A and start-B to select gamepad1 and gamepad2, as
