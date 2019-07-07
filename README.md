@@ -1,5 +1,11 @@
 A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
 
+CHANGES 7/01/2019
+    Now supports two GamePads instead of just one. Use start-A and start-B to select gamepad1 and gamepad2, as
+    you would in the FTC SDK. Two op modes for Mechanum Bot contributed by FTC team 16072, including a nice
+    demonstration of field-centric drive using the IMU. These are in the teamcode.ftc16072 package. Look at the OpModes
+    class to see how to register op modes that are in a sub-package within teamcode.
+
 CHANGES 6/25/2019
     Contribution from Alan Smith (alan412): now supports "regular" op modes in addition to linear op modes.
 
@@ -41,15 +47,15 @@ most laptops).
 
 An abridged approximation of the FTC SDK is provided.
 
-User-defined OpModes must be placed in the teamcode package, and must extend opmode.LinearOpMode. Each OpMode must be
+User-defined OpModes must be placed in the teamcode package, and must extend OpMode (or LinearOpMode). Each OpMode must be
 registered by placing its name in the opModes list in the opmodelist.OpModes class. Note that this way of registering
 OpModes differs from the @TeleOp and @Autonomous annotations of the FTC SDK.
 
-The LinearOpMode class in the simulator provides access to:
+The OpMode (and therefore LinearOpMode) class in the simulator provides access to:
 
   1. A HardwareMap object, which in turn provides access to the DCMotor objects, the gyro sensor,
      the servo, and the color sensor;
-  2. A GamePad (actual hardware gamepad);
+  2. Two GamePads(actual hardware gamepads);
   3. A Telemetry object.
 
 An approximation of the FTC SDK's ElapsedTime class is provided in the time package.
@@ -66,12 +72,13 @@ To use:
   3. Write your OpModes in the teamcode package, and register them in the opModeList.OpModes class. These must extend
      the OpMode class (may either extend OpMode OR LinearOpMode). OpMode must provide init() and loop() methods;
      LinearOpMode must provide runOpMode() method.
-  4. Make sure gamepad is plugged in to the computer.
+  4. Make sure at least one gamepad is plugged in to the computer.
   5. Run the application (by clicking the green arrowhead at the toolbar).
-  6. Use Configuration dropdown box to select "Two Wheeled Bot" or "Mechanum Bot". The configuration will be displayed.
-  7. Use the Op Mode drop down box to select the desired OpMode.
-  8. Prior to initialization, position the robot on the field by left-mouse-clicking the field (for robot position),
+  6. Press start-A or start-B on gamepad(s) to select which is gamepad1 vs. gamepad2.
+  7. Use Configuration dropdown box to select "Two Wheeled Bot" or "Mechanum Bot". The configuration will be displayed.
+  8. Use the Op Mode drop down box to select the desired OpMode.
+  9. Prior to initialization, position the robot on the field by left-mouse-clicking the field (for robot position),
      and right-mouse-clicking (for robot orientation).
-  9. Use the INIT/START/STOP button as you would on the FTC Driver Station.
-  10. If desired use the sliders to introduce random and systematic motor error.
+  10. Use the INIT/START/STOP button as you would on the FTC Driver Station.
+  11. If desired use the sliders to introduce random and systematic motor error.
 

@@ -1,6 +1,5 @@
 package virtual_robot.hardware;
 
-import com.studiohartman.jamepad.ControllerManager;
 import com.studiohartman.jamepad.ControllerState;
 
 /**
@@ -33,13 +32,6 @@ public class GamePad {
     public volatile float right_trigger = 0;
     public volatile float deadzone = (float) 0.0;
 
-    private ControllerManager controllers = new ControllerManager();
-
-    public GamePad(){
-        controllers.initSDLGamepad();
-        update();
-    }
-
     public void setJoystickDeadzone(float deadzone) {
         this.deadzone = deadzone;
     }
@@ -51,8 +43,8 @@ public class GamePad {
         return (float) 0.0;
     }
 
-    public void update(){
-        ControllerState state = controllers.getState(0);
+    public void update(ControllerState state){
+        if (state != null){
         x = state.x;
         y = state.y;
         a = state.a;
@@ -74,10 +66,29 @@ public class GamePad {
         right_stick_button = state.rightStickClick;
         left_trigger = setWithDeadzone(state.leftTrigger);
         right_trigger = setWithDeadzone(state.rightTrigger);
-    }
-
-    public void release(){
-        controllers.quitSDLGamepad();
+    } else {
+            x = false;
+            y = false;
+            a = false;
+            b = false;
+            left_stick_x = 0;
+            left_stick_y = 0;
+            right_stick_x = 0;
+            right_stick_y = 0;
+            dpad_up = false;
+            dpad_down = false;
+            dpad_left = false;
+            dpad_right = false;
+            back = false;
+            guide = false;
+            start = false;
+            left_bumper = false;
+            right_bumper = false;
+            left_stick_button = false;
+            right_stick_button = false;
+            left_trigger = 0;
+            right_trigger = 0;
+        }
     }
 
 }

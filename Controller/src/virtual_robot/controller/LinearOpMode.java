@@ -12,7 +12,7 @@ public abstract class LinearOpMode extends OpMode {
     private volatile boolean isStarted = false;
     private volatile boolean stopRequested = false;
     private LinearOpModeHelper helper = null;
-    private ExecutorService executorService = null;
+    private Thread runOpModeThread = null;
 
     /**
      * OpModes must override the abstract runOpMode() method.
@@ -43,7 +43,11 @@ public abstract class LinearOpMode extends OpMode {
     public final void idle() {
         // Otherwise, yield back our thread scheduling quantum and give other threads at
         // our priority level a chance to run
-        Thread.yield();
+        try{
+            Thread.sleep(0,1);
+        } catch(InterruptedException e){
+            Thread.currentThread().interrupt();
+        }
     }
 
 
@@ -101,12 +105,12 @@ public abstract class LinearOpMode extends OpMode {
      */
     @Override
     final public void init() {
-        this.executorService = Executors.newSingleThreadExecutor();
         this.helper = new LinearOpModeHelper();
+        this.runOpModeThread = new Thread(helper);
+        this.runOpModeThread.setDaemon(true);
         this.isStarted = false;
         this.stopRequested = false;
-
-        this.executorService.execute(helper);
+        this.runOpModeThread.start();
     }
 
     /**
@@ -148,25 +152,26 @@ public abstract class LinearOpMode extends OpMode {
         // make isStopRequested() return true (and opModeIsActive() return false)
         stopRequested = true;
 
-        //This method may run twice; no need to shut down executorService if it's already terminated
-        if (executorService != null && !executorService.isTerminated()) {  // paranoia
+        if (runOpModeThread != null){
 
-            // interrupt the linear opMode and shutdown it's service thread
-            executorService.shutdownNow();
+            //Interrupt the runOpMode thread if not yet interrupted
+            if (!runOpModeThread.isInterrupted()) runOpModeThread.interrupt();
 
-            try {
-                executorService.awaitTermination(1000, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException e) {
+            try{
+                runOpModeThread.join(1000);
+            } catch(InterruptedException e){
                 Thread.currentThread().interrupt();
             }
 
-            if (!executorService.isTerminated()){
-                System.out.println("Termination of executor service for runOpMode has timed out or been interrupted.");
+            if (runOpModeThread.isAlive()){
+                System.out.println("Termination of thread for runOpMode has timed out or been interrupted.");
                 System.out.println("Do all loops in the runOpMode method check opModeIsActive()?");
             } else {
-                System.out.println("Executor service for runOpMode has terminated successfully.");
+                runOpModeThread = null;
+                System.out.println("Thread for runOpMode has terminated successfully.");
             }
         }
+
     }
 
     protected void handleLoop() {
@@ -198,22 +203,18 @@ public abstract class LinearOpMode extends OpMode {
 
         @Override
         public void run() {
-            executorService.execute(new Runnable() {
-                @Override
-                public void run() {
-                    exception = null;
-                    isFinished = false;
+            exception = null;
+            isFinished = false;
 
-                    try {
-                        LinearOpMode.this.runOpMode();
-                    } catch (Exception e) {
-                        exception = e;
-                    } finally {
-                        // Do the necessary bookkeeping
-                        isFinished = true;
-                    }
-                }
-            });
+            try {
+                LinearOpMode.this.runOpMode();
+            } catch (Exception e) {
+                exception = e;
+            } finally {
+                // Do the necessary bookkeeping
+                isFinished = true;
+            }
+
         }
 
         public boolean hasException() {
