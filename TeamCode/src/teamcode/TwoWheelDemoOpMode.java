@@ -1,10 +1,12 @@
 package teamcode;
 
+import virtual_robot.annotations.TeleOp;
 import virtual_robot.controller.OpMode;
 import virtual_robot.hardware.*;
 import virtual_robot.util.navigation.DistanceUnit;
 import virtual_robot.util.time.ElapsedTime;
 
+@TeleOp(name = "two wheel demo opmode", group = "TwoWheel")
 public class TwoWheelDemoOpMode extends OpMode {
 
     private DcMotor left = null;

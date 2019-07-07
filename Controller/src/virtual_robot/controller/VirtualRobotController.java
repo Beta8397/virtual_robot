@@ -5,7 +5,13 @@ import com.studiohartman.jamepad.ControllerState;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.control.*;
+import javafx.util.Callback;
+import org.reflections.Reflections;
+import virtual_robot.annotations.Autonomous;
+import virtual_robot.annotations.Disabled;
+import virtual_robot.annotations.TeleOp;
 import virtual_robot.background.Background;
 import virtual_robot.hardware.*;
 import javafx.application.Platform;
@@ -18,14 +24,15 @@ import javafx.scene.image.PixelReader;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import opmodelist.OpModes;
 import virtual_robot.hardware.bno055.BNO055IMU;
 import virtual_robot.hardware.dcmotor.DcMotorImpl;
 import virtual_robot.util.navigation.DistanceUnit;
 
+import java.lang.annotation.Annotation;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -40,7 +47,7 @@ public class VirtualRobotController {
     @FXML ImageView imgViewBackground;
     @FXML private ComboBox<String> cbxConfig;
     @FXML private Button driverButton;
-    @FXML private ComboBox<String> cbxOpModes;
+    @FXML private ComboBox<Class<?>> cbxOpModes;
     @FXML private Slider sldRandomMotorError;
     @FXML private Slider sldSystematicMotorError;
     @FXML private TextArea txtTelemetry;
@@ -60,6 +67,9 @@ public class VirtualRobotController {
     private PixelReader pixelReader = backgroundImage.getPixelReader();
     private double halfFieldWidth;
     private double fieldWidth;
+
+    //Lists of OpMode classes and OpMode Names
+    private ObservableList<Class<?>> nonDisabledOpModeClasses = null;
 
     //OpMode Control
     private OpMode opMode = null;
@@ -91,8 +101,7 @@ public class VirtualRobotController {
 
     public void initialize() {
         OpMode.setVirtualRobotController(this);
-        cbxOpModes.setItems(OpModes.opModes);
-        cbxOpModes.setValue(cbxOpModes.getItems().get(0));
+        setupCbxOpModes();
         cbxConfig.setItems(FXCollections.observableArrayList("Two Wheel Bot", "Mechanum Bot", "XDrive Bot"));
         cbxConfig.setValue(cbxConfig.getItems().get(0));
         fieldWidth = fieldPane.getPrefWidth();
@@ -114,6 +123,92 @@ public class VirtualRobotController {
         checkBoxGamePad2.setStyle("-fx-opacity: 1");
         gamePadExecutorService.scheduleAtFixedRate(gamePadHelper, 0, 20, TimeUnit.MILLISECONDS);
     }
+
+    private void setupCbxOpModes(){
+        Reflections reflections = new Reflections(VirtualRobotApplication.class.getClassLoader());
+        Set<Class<?>> opModes = new HashSet<>();
+        opModes.addAll(reflections.getTypesAnnotatedWith(TeleOp.class));
+        opModes.addAll(reflections.getTypesAnnotatedWith(Autonomous.class));
+        nonDisabledOpModeClasses = FXCollections.observableArrayList();
+        for (Class<?> c : opModes){
+            if (c.getAnnotation(Disabled.class) == null && OpMode.class.isAssignableFrom(c)){
+                nonDisabledOpModeClasses.add(c);
+            }
+        }
+
+        nonDisabledOpModeClasses.sort(new Comparator<Class<?>>() {
+            @Override
+            public int compare(Class<?> o1, Class<?> o2) {
+                String group1 = null;
+                Annotation a1 = o1.getAnnotation(TeleOp.class);
+                if (a1 != null) group1 = ((TeleOp)a1).group();
+                else{
+                    a1 = o1.getAnnotation(Autonomous.class);
+                    if (a1 != null) group1 = ((Autonomous)a1).group();
+                }
+
+                String group2 = null;
+                Annotation a2 = o2.getAnnotation(TeleOp.class);
+                if (a2 != null) group2 = ((TeleOp)a2).group();
+                else{
+                    a2 = o2.getAnnotation(Autonomous.class);
+                    if (a2 != null) group2 = ((Autonomous)a2).group();
+                }
+
+                if (group1 == null) return -1;
+                else if (group2 == null) return 1;
+                else return group1.compareToIgnoreCase(group2);
+            }
+        });
+
+        cbxOpModes.setItems(nonDisabledOpModeClasses);
+
+        cbxOpModes.setCellFactory(new Callback<ListView<Class<?>>, ListCell<Class<?>>>() {
+            @Override
+            public ListCell<Class<?>> call(ListView<Class<?>> param) {
+                final ListCell<Class<?>> cell = new ListCell<Class<?>>(){
+                    @Override
+                    protected void updateItem(Class<?> cl, boolean bln){
+                        super.updateItem(cl, bln);
+                        if (cl == null){
+                            setText(null);
+                            return;
+                        }
+                        Annotation a = cl.getAnnotation(TeleOp.class);
+                        if (a != null) setText(((TeleOp)a).group() + ": " + ((TeleOp)a).name());
+                        else {
+                            a = cl.getAnnotation(Autonomous.class);
+                            if (a != null) setText(((Autonomous)a).group() + ": "  + ((Autonomous)a).name());
+                            else setText("No Name");
+                        }
+
+                    }
+                };
+                return cell;
+            }
+        });
+
+        cbxOpModes.setButtonCell(new ListCell<Class<?>>(){
+            @Override
+            protected void updateItem(Class<?> cl, boolean bln) {
+                super.updateItem(cl, bln);
+                if (cl == null) {
+                    setText(null);
+                    return;
+                }
+                Annotation a = cl.getAnnotation(TeleOp.class);
+                if (a != null) setText(((TeleOp) a).name());
+                else {
+                    a = cl.getAnnotation(Autonomous.class);
+                    if (a != null) setText(((Autonomous) a).name());
+                    else setText("No Name");
+                }
+            }
+        });
+
+        cbxOpModes.setValue(cbxOpModes.getItems().get(0));
+    }
+
 
     @FXML
     public void setConfig(ActionEvent event){
@@ -268,10 +363,8 @@ public class VirtualRobotController {
 
 
     private boolean initOpMode() {
-        String opModeName = cbxOpModes.getValue();
-        opModeName = "teamcode." + opModeName;
         try {
-            Class opModeClass = Class.forName(opModeName);
+            Class opModeClass = cbxOpModes.getValue();
             opMode = (OpMode) opModeClass.newInstance();
         } catch (Exception exc){
             return false;
