@@ -2,7 +2,6 @@ package virtual_robot.controller;
 
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Rotate;
-import virtual_robot.hardware.DcMotor;
 import virtual_robot.hardware.HardwareMap;
 import virtual_robot.hardware.dcmotor.DcMotorImpl;
 import virtual_robot.hardware.dcmotor.MotorType;
@@ -58,8 +57,8 @@ public class TwoWheelBot extends VirtualBot {
     public synchronized void updateStateAndSensors(double millis){
         double leftPos = leftMotor.getActualPosition();
         double rightPos = rightMotor.getActualPosition();
-        leftMotor.updatePosition(millis);
-        rightMotor.updatePosition(millis);
+        leftMotor.update(millis);
+        rightMotor.update(millis);
         double newLeftPos = leftMotor.getActualPosition();
         double newRightPos = rightMotor.getActualPosition();
         double deltaLeftPos = newLeftPos - leftPos;
@@ -95,8 +94,8 @@ public class TwoWheelBot extends VirtualBot {
     }
 
     public void powerDownAndReset(){
-        leftMotor.setPower(0);
-        rightMotor.setPower(0);
+        leftMotor.setPowerAndSpeed(0);
+        rightMotor.setPowerAndSpeed(0);
         gyro.deinit();
     }
 

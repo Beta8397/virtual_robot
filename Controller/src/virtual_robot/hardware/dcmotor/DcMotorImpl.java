@@ -1,5 +1,6 @@
 package virtual_robot.hardware.dcmotor;
 
+import virtual_robot.controller.VirtualRobotController;
 import virtual_robot.hardware.DcMotor;
 
 import java.util.Random;
@@ -9,10 +10,17 @@ public class DcMotorImpl implements DcMotor {
     private final Random random = new Random();
     private RunMode mode = RunMode.RUN_WITHOUT_ENCODER;
     private Direction direction = Direction.FORWARD;
+
+    //power is the requested speed, normalized to the -1 to +1 range
     private double power = 0.0;
+
+    //speed is the actual speed, normalized to the -1 to +1 range
+    private double speed = 0.0;
+
     private double actualPosition = 0.0;
     private double randomErrorFrac = 0.0;
     private double systematicErrorFrac = 0.0;
+    private double inertia;
 
     public DcMotorImpl(){
         MOTOR_TYPE = MotorType.Neverest40;
@@ -47,9 +55,11 @@ public class DcMotorImpl implements DcMotor {
 
     public synchronized double getActualPosition(){ return actualPosition; }
 
-    public synchronized void updatePosition(double milliseconds){
+    //Updates motor speed based on current speed, power, and inertia. Then, uses motor speed to update position.
+    public synchronized void update(double milliseconds){
         if (mode == RunMode.RUN_TO_POSITION || mode == RunMode.STOP_AND_RESET_ENCODER) return;
-        double positionChange = power * MOTOR_TYPE.MAX_TICKS_PER_SECOND * milliseconds / 1000.0;
+        speed = speed + (1.0 - inertia) * (power - speed);
+        double positionChange = speed * MOTOR_TYPE.MAX_TICKS_PER_SECOND * milliseconds / 1000.0;
         positionChange *= (1.0 + systematicErrorFrac + randomErrorFrac * random.nextGaussian());
         if (direction == Direction.FORWARD && MOTOR_TYPE.REVERSED ||
                 direction == Direction.REVERSE && !MOTOR_TYPE.REVERSED) positionChange = -positionChange;
@@ -60,5 +70,17 @@ public class DcMotorImpl implements DcMotor {
         randomErrorFrac = rdmErrFrac;
     }
     public synchronized void setSystematicErrorFrac(double sysErrFrac) { systematicErrorFrac = sysErrFrac; }
+    public synchronized void setInertia(double in){
+        if (in < 0) inertia = 0.0;
+        else if (in > 0.99) inertia = 0.99;
+        else inertia = in;
+    }
+
+    //For system programming only: It might be necessary to shut down and stop motors immediately, for example when
+    //powering down robot.
+    public synchronized void setPowerAndSpeed(double in){
+        power = in;
+        speed = in;
+    }
 
 }
