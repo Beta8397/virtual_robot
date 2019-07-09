@@ -93,12 +93,10 @@ public class VirtualRobotController {
     private ChangeListener<Number> sliderChangeListener = new ChangeListener<Number>() {
         @Override
         public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-            double sldInVal = sldMotorInertia.getValue();
-
             for (DcMotor motor: hardwareMap.dcMotor) {
                 ((DcMotorImpl)motor).setRandomErrorFrac(sldRandomMotorError.getValue());
                 ((DcMotorImpl)motor).setSystematicErrorFrac(sldSystematicMotorError.getValue() * 2.0 * (0.5 - random.nextDouble()));
-                ((DcMotorImpl)motor).setInertia(sldMotorInertia.getValue());
+                ((DcMotorImpl)motor).setInertia(1.0 - Math.pow(10.0, -sldMotorInertia.getValue()));
             }
         }
     };

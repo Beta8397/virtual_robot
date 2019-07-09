@@ -49,7 +49,7 @@
             <Label text="Systematic Motor Error" />
             <Slider fx:id="sldSystematicMotorError" blockIncrement="0.02" majorTickUnit="0.02" max="0.1" minorTickCount="0" />
             <Label text="Motor Inertia" />
-            <Slider fx:id="sldMotorInertia" blockIncrement="0.1" majorTickUnit="0.1" max="0.9" minorTickCount="0" />
+            <Slider fx:id="sldMotorInertia" blockIncrement="0.1" majorTickUnit="0.1" max="2.0" minorTickCount="0" />
             <HBox prefHeight="100.0" prefWidth="200.0">
                <children>
                   <CheckBox fx:id="checkBoxGamePad1" mnemonicParsing="false" text="GamePad1">
