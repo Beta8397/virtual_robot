@@ -78,9 +78,7 @@ public class MechanumBot extends VirtualBot {
         double[] w = new double[4];
 
         for (int i = 0; i < 4; i++) {
-            double pos = motors[i].getActualPosition();
-            motors[i].update(millis);
-            deltaPos[i] = motors[i].getActualPosition() - pos;
+            deltaPos[i] = motors[i].update(millis);
             w[i] = deltaPos[i] * wheelCircumference / motorType.TICKS_PER_ROTATION;
             if (i < 2) w[i] = -w[i];
         }
@@ -131,7 +129,7 @@ public class MechanumBot extends VirtualBot {
     }
 
     public void powerDownAndReset(){
-        for (int i=0; i<4; i++) motors[i].setPowerAndSpeed(0);
+        for (int i=0; i<4; i++) motors[i].stopAndReset();
         //gyro.deinit();
         imu.close();
     }

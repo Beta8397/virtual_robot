@@ -17,7 +17,12 @@ public class DcMotorImpl implements DcMotor {
     //speed is the actual speed, normalized to the -1 to +1 range
     private double speed = 0.0;
 
+    //actual position of motor
     private double actualPosition = 0.0;
+
+    //position to use as baseline for encoder tick calculation
+    private double encoderBasePosition = 0.0;
+
     private double randomErrorFrac = 0.0;
     private double systematicErrorFrac = 0.0;
     private double inertia;
@@ -34,7 +39,7 @@ public class DcMotorImpl implements DcMotor {
         this.mode = mode;
         if (mode == RunMode.STOP_AND_RESET_ENCODER){
             power = 0.0;
-            actualPosition = 0.0;
+            encoderBasePosition = actualPosition;
         }
     }
 
@@ -48,7 +53,7 @@ public class DcMotorImpl implements DcMotor {
     }
 
     public synchronized int getCurrentPosition(){
-        int result = (int)Math.floor(actualPosition);
+        int result = (int)Math.floor(actualPosition - encoderBasePosition);
         return direction == Direction.FORWARD && MOTOR_TYPE.REVERSED ||
                 direction == Direction.REVERSE && !MOTOR_TYPE.REVERSED ? -result : result;
     }
@@ -56,14 +61,16 @@ public class DcMotorImpl implements DcMotor {
     public synchronized double getActualPosition(){ return actualPosition; }
 
     //Updates motor speed based on current speed, power, and inertia. Then, uses motor speed to update position.
-    public synchronized void update(double milliseconds){
-        if (mode == RunMode.RUN_TO_POSITION || mode == RunMode.STOP_AND_RESET_ENCODER) return;
+    //Returns change in actual motor position
+    public synchronized double update(double milliseconds){
+        if (mode == RunMode.RUN_TO_POSITION || mode == RunMode.STOP_AND_RESET_ENCODER) return 0.0;
         speed = speed + (1.0 - inertia) * (power - speed);
         double positionChange = speed * MOTOR_TYPE.MAX_TICKS_PER_SECOND * milliseconds / 1000.0;
         positionChange *= (1.0 + systematicErrorFrac + randomErrorFrac * random.nextGaussian());
         if (direction == Direction.FORWARD && MOTOR_TYPE.REVERSED ||
                 direction == Direction.REVERSE && !MOTOR_TYPE.REVERSED) positionChange = -positionChange;
         actualPosition += positionChange;
+        return positionChange;
     }
 
     public synchronized void setRandomErrorFrac(double rdmErrFrac){
@@ -76,11 +83,13 @@ public class DcMotorImpl implements DcMotor {
         else inertia = in;
     }
 
-    //For system programming only: It might be necessary to shut down and stop motors immediately, for example when
-    //powering down robot.
-    public synchronized void setPowerAndSpeed(double in){
-        power = in;
-        speed = in;
+    //For system programming only: for stopping and resetting motor between op mode runs
+    public synchronized void stopAndReset(){
+        power = 0.0;
+        speed = 0.0;
+        actualPosition = 0.0;
+        encoderBasePosition = 0.0;
+        direction = Direction.FORWARD;
     }
 
 }
