@@ -50,6 +50,7 @@ public class VirtualRobotController {
     @FXML private ComboBox<Class<?>> cbxOpModes;
     @FXML private Slider sldRandomMotorError;
     @FXML private Slider sldSystematicMotorError;
+    @FXML private Slider sldMotorInertia;
     @FXML private TextArea txtTelemetry;
     @FXML private CheckBox checkBoxGamePad1;
     @FXML private CheckBox checkBoxGamePad2;
@@ -79,7 +80,7 @@ public class VirtualRobotController {
 
     //Virtual Robot Control Engine
     ScheduledExecutorService executorService = null;
-    private final double TIMER_INTERVAL_MILLISECONDS = 33;
+    public static final double TIMER_INTERVAL_MILLISECONDS = 33;
 
     //Telemetry
     private volatile String telemetryText;
@@ -95,6 +96,7 @@ public class VirtualRobotController {
             for (DcMotor motor: hardwareMap.dcMotor) {
                 ((DcMotorImpl)motor).setRandomErrorFrac(sldRandomMotorError.getValue());
                 ((DcMotorImpl)motor).setSystematicErrorFrac(sldSystematicMotorError.getValue() * 2.0 * (0.5 - random.nextDouble()));
+                ((DcMotorImpl)motor).setInertia(1.0 - Math.pow(10.0, -sldMotorInertia.getValue()));
             }
         }
     };
@@ -117,6 +119,7 @@ public class VirtualRobotController {
         imgViewBackground.setImage(backgroundImage);
         sldRandomMotorError.valueProperty().addListener(sliderChangeListener);
         sldSystematicMotorError.valueProperty().addListener(sliderChangeListener);
+        sldMotorInertia.valueProperty().addListener(sliderChangeListener);
         checkBoxGamePad1.setDisable(true);
         checkBoxGamePad1.setStyle("-fx-opacity: 1");
         checkBoxGamePad2.setDisable(true);
@@ -225,6 +228,7 @@ public class VirtualRobotController {
         initializeTelemetryTextArea();
         sldRandomMotorError.setValue(0.0);
         sldSystematicMotorError.setValue(0.0);
+        sldMotorInertia.setValue(0.0);
     }
 
     public StackPane getFieldPane(){ return fieldPane; }

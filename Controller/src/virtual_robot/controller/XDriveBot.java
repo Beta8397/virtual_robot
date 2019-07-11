@@ -2,7 +2,6 @@ package virtual_robot.controller;
 
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Rotate;
-import virtual_robot.hardware.DcMotor;
 import virtual_robot.hardware.HardwareMap;
 import virtual_robot.hardware.bno055.BNO055IMUImpl;
 import virtual_robot.hardware.dcmotor.DcMotorImpl;
@@ -76,9 +75,7 @@ public class XDriveBot extends VirtualBot {
         double[] w = new double[4];
 
         for (int i = 0; i < 4; i++) {
-            double pos = motors[i].getActualPosition();
-            motors[i].updatePosition(millis);
-            deltaPos[i] = motors[i].getActualPosition() - pos;
+            deltaPos[i] = motors[i].update(millis);
             w[i] = deltaPos[i] * wheelCircumference / motorType.TICKS_PER_ROTATION;
             if (i < 2) w[i] = -w[i];
         }
@@ -129,7 +126,7 @@ public class XDriveBot extends VirtualBot {
     }
 
     public void powerDownAndReset(){
-        for (int i=0; i<4; i++) motors[i].setPower(0);
+        for (int i=0; i<4; i++) motors[i].stopAndReset();
         //gyro.deinit();
         imu.close();
     }
