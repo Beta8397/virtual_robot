@@ -1,12 +1,13 @@
 package virtual_robot.controller;
 
+import com.qualcomm.robotcore.hardware.ServoImpl;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Rotate;
-import virtual_robot.hardware.HardwareMap;
-import virtual_robot.hardware.bno055.BNO055IMUImpl;
-import virtual_robot.hardware.dcmotor.DcMotorImpl;
-import virtual_robot.hardware.dcmotor.MotorType;
-import virtual_robot.util.navigation.AngleUtils;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.hardware.bosch.BNO055IMUImpl;
+import com.qualcomm.robotcore.hardware.DcMotorImpl;
+import com.qualcomm.robotcore.hardware.MotorType;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUtils;
 
 public class MechanumBot extends VirtualBot {
 
@@ -15,7 +16,7 @@ public class MechanumBot extends VirtualBot {
     //private VirtualRobotController.GyroSensorImpl gyro = null;
     private BNO055IMUImpl imu = null;
     private VirtualRobotController.ColorSensorImpl colorSensor = null;
-    private VirtualRobotController.ServoImpl servo = null;
+    private ServoImpl servo = null;
     private VirtualRobotController.DistanceSensorImpl[] distanceSensors = null;
 
     private Rectangle backServoArm = null;
@@ -44,7 +45,7 @@ public class MechanumBot extends VirtualBot {
         //gyro = (VirtualRobotController.GyroSensorImpl)hardwareMap.gyroSensor.get("gyro_sensor");
         imu = hardwareMap.get(BNO055IMUImpl.class, "imu");
         colorSensor = (VirtualRobotController.ColorSensorImpl)hardwareMap.colorSensor.get("color_sensor");
-        servo = (VirtualRobotController.ServoImpl)hardwareMap.servo.get("back_servo");
+        servo = (ServoImpl)hardwareMap.servo.get("back_servo");
         wheelCircumference = Math.PI * botWidth / 4.5;
         interWheelWidth = botWidth * 8.0 / 9.0;
         interWheelLength = botWidth * 7.0 / 9.0;
@@ -70,7 +71,7 @@ public class MechanumBot extends VirtualBot {
         //hardwareMap.put("gyro_sensor", controller.new GyroSensorImpl());
         hardwareMap.put("imu", new BNO055IMUImpl(this));
         hardwareMap.put("color_sensor", controller.new ColorSensorImpl());
-        hardwareMap.put("back_servo", controller.new ServoImpl());
+        hardwareMap.put("back_servo", new ServoImpl());
     }
 
     public synchronized void updateStateAndSensors(double millis){

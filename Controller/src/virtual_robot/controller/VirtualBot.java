@@ -8,7 +8,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
-import virtual_robot.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public abstract class VirtualBot {
 

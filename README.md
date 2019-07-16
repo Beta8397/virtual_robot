@@ -1,5 +1,10 @@
 A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
 
+CHANGES 7/10/2019
+    To improve plug and play with OpModes copied and pasted from Android Studio, multiple packages were renamed. In
+    addition, Continuous Rotation Servo capability was added. The XDrive Bot now has a CR Servo in the back rather
+    than a standard servo. The XDriveBotDemo op mode demonstrates the use of this servo, using gamepad2.
+
 CHANGES 7/06/2019
     Now uses @TeleOp, @Autonomous, and @Disabled class annotations to control the display of OpModes in the OpMode
     combobox. For @TeleOp and @Autonomous, a name parameter must be specified. The group parameter is optional (default
@@ -8,7 +13,7 @@ CHANGES 7/06/2019
 CHANGES 7/01/2019
     Now supports two GamePads instead of just one. Use start-A and start-B to select gamepad1 and gamepad2, as
     you would in the FTC SDK. Two op modes for Mechanum Bot contributed by FTC team 16072, including a nice
-    demonstration of field-centric drive using the IMU. These are in the teamcode.ftc16072 package.
+    demonstration of field-centric drive using the IMU. These are in the org.firstinspires.ftc.teamcode.ftc16072 package.
 
 CHANGES 6/25/2019
     Contribution from Alan Smith (alan412): now supports "regular" op modes in addition to linear op modes.
@@ -51,7 +56,7 @@ most laptops).
 
 An abridged approximation of the FTC SDK is provided.
 
-User-defined OpModes must be placed in the teamcode package, and must extend OpMode (or LinearOpMode). OpModes are
+User-defined OpModes must be placed in the org.firstinspires.ftc.teamcode package, and must extend OpMode (or LinearOpMode). OpModes are
 registered by placing a @TeleOp or @Autonomous annotation immediately above the class declaration.
 
 The OpMode (and therefore LinearOpMode) class in the simulator provides access to:
@@ -63,7 +68,7 @@ The OpMode (and therefore LinearOpMode) class in the simulator provides access t
 
 An approximation of the FTC SDK's ElapsedTime class is provided in the time package.
 
-Several example OpModes are provided in the teamcode package, and are already registered in the opModeList.OpModes class.
+Several example OpModes are provided in the org.firstinspires.ftc.teamcode package, and are already registered in the opModeList.OpModes class.
 
 To use:
 
@@ -71,8 +76,8 @@ To use:
      IntelliJ IDEA.
   2. Download the virtual_robot .zip, and extract contents. Open the project in IntelliJ. You'll see three modules in
      the project (Controller, TeamCode, and virtual_robot) -- the only module you'll need to touch is TeamCode. It
-     contains the opmodelist and teamcode packages, as well as an virtual_robot.assets directory.
-  3. Write your OpModes in the teamcode package; make sure to include a @TeleOp or @Autonomous annotation. These must
+     contains the opmodelist and org.firstinspires.ftc.teamcode packages, as well as an virtual_robot.assets directory.
+  3. Write your OpModes in the org.firstinspires.ftc.teamcode package; make sure to include a @TeleOp or @Autonomous annotation. These must
     extend the OpMode class (may either extend OpMode OR LinearOpMode). OpMode must provide init() and loop() methods;
      LinearOpMode must provide runOpMode() method.
   4. Make sure at least one gamepad is plugged in to the computer.

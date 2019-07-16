@@ -1,11 +1,12 @@
 package virtual_robot.controller;
 
+import com.qualcomm.robotcore.hardware.ServoImpl;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Rotate;
-import virtual_robot.hardware.HardwareMap;
-import virtual_robot.hardware.dcmotor.DcMotorImpl;
-import virtual_robot.hardware.dcmotor.MotorType;
-import virtual_robot.util.navigation.AngleUtils;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.DcMotorImpl;
+import com.qualcomm.robotcore.hardware.MotorType;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUtils;
 
 public class TwoWheelBot extends VirtualBot {
 
@@ -14,7 +15,7 @@ public class TwoWheelBot extends VirtualBot {
     private DcMotorImpl rightMotor = null;
     private VirtualRobotController.GyroSensorImpl gyro = null;
     private VirtualRobotController.ColorSensorImpl colorSensor = null;
-    private VirtualRobotController.ServoImpl servo = null;
+    private ServoImpl servo = null;
     private VirtualRobotController.DistanceSensorImpl[] distanceSensors = null;
 
     private Rectangle backServoArm = null;
@@ -35,7 +36,7 @@ public class TwoWheelBot extends VirtualBot {
         };
         gyro = (VirtualRobotController.GyroSensorImpl)hardwareMap.gyroSensor.get("gyro_sensor");
         colorSensor = (VirtualRobotController.ColorSensorImpl)hardwareMap.colorSensor.get("color_sensor");
-        servo = (VirtualRobotController.ServoImpl)hardwareMap.servo.get("back_servo");
+        servo = (ServoImpl)hardwareMap.servo.get("back_servo");
         wheelCircumference = Math.PI * botWidth / 4.5;
         interWheelDistance = botWidth * 8.0 / 9.0;
         backServoArm = (Rectangle)displayGroup.getChildren().get(5);
@@ -51,7 +52,7 @@ public class TwoWheelBot extends VirtualBot {
         for (String name: distNames) hardwareMap.put(name, controller.new DistanceSensorImpl());
         hardwareMap.put("gyro_sensor", controller.new GyroSensorImpl());
         hardwareMap.put("color_sensor", controller.new ColorSensorImpl());
-        hardwareMap.put("back_servo", controller.new ServoImpl());
+        hardwareMap.put("back_servo", new ServoImpl());
     }
 
     public synchronized void updateStateAndSensors(double millis){
