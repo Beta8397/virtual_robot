@@ -4,7 +4,7 @@
     <module name="Controller" />
     <extension name="coverage">
       <pattern>
-        <option name="PATTERN" value="virtual_robot.controller.*" />
+        <option name="PATTERN" value="com.qualcomm.robotcore.eventloop.opmode.*" />
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>

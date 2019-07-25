@@ -1,5 +1,7 @@
 package virtual_robot.controller;
 
+import com.qualcomm.robotcore.eventloop.opmode.*;
+import com.qualcomm.robotcore.hardware.*;
 import com.studiohartman.jamepad.ControllerManager;
 import com.studiohartman.jamepad.ControllerState;
 import javafx.beans.value.ChangeListener;
@@ -8,12 +10,9 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.util.Callback;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.reflections.Reflections;
-import virtual_robot.annotations.Autonomous;
-import virtual_robot.annotations.Disabled;
-import virtual_robot.annotations.TeleOp;
 import virtual_robot.background.Background;
-import virtual_robot.hardware.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -24,9 +23,9 @@ import javafx.scene.image.PixelReader;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import virtual_robot.hardware.bno055.BNO055IMU;
-import virtual_robot.hardware.dcmotor.DcMotorImpl;
-import virtual_robot.util.navigation.DistanceUnit;
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.hardware.DcMotorImpl;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import java.lang.annotation.Annotation;
 import java.util.Comparator;
@@ -398,6 +397,11 @@ public class VirtualRobotController {
             sb.append("\n Servos:");
             for (String servo : servos) sb.append("\n   " + servo);
         }
+        Set<String> crservos = hardwareMap.crservo.keySet();
+        if (!crservos.isEmpty()){
+            sb.append("\n CR Servos:");
+            for (String crservo : crservos) sb.append("\n   " + crservo);
+        }
         Set<String> colorSensors = hardwareMap.colorSensor.keySet();
         if (!colorSensors.isEmpty()) {
             sb.append("\n Color Sensors:");
@@ -526,18 +530,6 @@ public class VirtualRobotController {
                     distanceMM = (x + halfFieldWidth) * mmPerPixel;
                     break;
             }
-        }
-    }
-
-    public class ServoImpl implements Servo{
-        private double position;
-
-        public synchronized void setPosition(double position) {
-            this.position = Math.max(0, Math.min(1, position));
-        }
-
-        public synchronized double getPosition(){
-            return position;
         }
     }
 

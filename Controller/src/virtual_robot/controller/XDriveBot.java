@@ -1,12 +1,13 @@
 package virtual_robot.controller;
 
+import com.qualcomm.robotcore.hardware.CRServoImpl;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Rotate;
-import virtual_robot.hardware.HardwareMap;
-import virtual_robot.hardware.bno055.BNO055IMUImpl;
-import virtual_robot.hardware.dcmotor.DcMotorImpl;
-import virtual_robot.hardware.dcmotor.MotorType;
-import virtual_robot.util.navigation.AngleUtils;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.hardware.bosch.BNO055IMUImpl;
+import com.qualcomm.robotcore.hardware.DcMotorImpl;
+import com.qualcomm.robotcore.hardware.MotorType;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUtils;
 
 public class XDriveBot extends VirtualBot {
 
@@ -15,7 +16,7 @@ public class XDriveBot extends VirtualBot {
     //private VirtualRobotController.GyroSensorImpl gyro = null;
     private BNO055IMUImpl imu = null;
     private VirtualRobotController.ColorSensorImpl colorSensor = null;
-    private VirtualRobotController.ServoImpl servo = null;
+    private CRServoImpl crServo = null;
     private VirtualRobotController.DistanceSensorImpl[] distanceSensors = null;
 
     private Rectangle backServoArm = null;
@@ -42,7 +43,7 @@ public class XDriveBot extends VirtualBot {
         //gyro = (VirtualRobotController.GyroSensorImpl)hardwareMap.gyroSensor.get("gyro_sensor");
         imu = hardwareMap.get(BNO055IMUImpl.class, "imu");
         colorSensor = (VirtualRobotController.ColorSensorImpl)hardwareMap.colorSensor.get("color_sensor");
-        servo = (VirtualRobotController.ServoImpl)hardwareMap.servo.get("back_servo");
+        crServo = (CRServoImpl)hardwareMap.crservo.get("back_crservo");
         wheelCircumference = Math.PI * botWidth / 4.5;
         double sqrt2 = Math.sqrt(2);
         wheelBaseRadius = botWidth * (1.0/sqrt2 - 5.0/36.0);
@@ -67,7 +68,7 @@ public class XDriveBot extends VirtualBot {
         //hardwareMap.put("gyro_sensor", controller.new GyroSensorImpl());
         hardwareMap.put("imu", new BNO055IMUImpl(this));
         hardwareMap.put("color_sensor", controller.new ColorSensorImpl());
-        hardwareMap.put("back_servo", controller.new ServoImpl());
+        hardwareMap.put("back_crservo", new CRServoImpl(720));
     }
 
     public synchronized void updateStateAndSensors(double millis){
@@ -118,11 +119,13 @@ public class XDriveBot extends VirtualBot {
                     y + halfBotWidth * Math.cos(sensorHeading), sensorHeading);
         }
 
+        crServo.updatePositionDegrees(millis);
+
     }
 
     public synchronized void updateDisplay(){
         super.updateDisplay();
-        ((Rotate)backServoArm.getTransforms().get(0)).setAngle(-180.0 * servo.getPosition());
+        ((Rotate)backServoArm.getTransforms().get(0)).setAngle(-crServo.getPositionDegrees());
     }
 
     public void powerDownAndReset(){
