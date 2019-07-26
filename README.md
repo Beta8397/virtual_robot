@@ -5,6 +5,12 @@ CHANGES 7/10/2019
     addition, Continuous Rotation Servo capability was added. The XDrive Bot now has a CR Servo in the back rather
     than a standard servo. The XDriveBotDemo op mode demonstrates the use of this servo, using gamepad2.
 
+    NOTE: OpModes copied directly from Android Studio to Virtual Robot do not automatically compile when pasted into
+    Virtual Robot in IntelliJ, and won't show up in the OpModes dropdown box until they are compiled. Three different
+    methods to force compilation are: 1) Right click the file and select "Recompile"; 2) From the "Build" menu,
+    select "Rebuild Project"; or, 3) Make any change at all to the OpMode file (e.g., add a comment). Any one of these
+    methods is sufficient.
+
 CHANGES 7/06/2019
     Now uses @TeleOp, @Autonomous, and @Disabled class annotations to control the display of OpModes in the OpMode
     combobox. For @TeleOp and @Autonomous, a name parameter must be specified. The group parameter is optional (default
@@ -72,7 +78,7 @@ Several example OpModes are provided in the org.firstinspires.ftc.teamcode packa
 
 To use:
 
-  1. Make sure you have the Java JDK installed on your PC. Also, install the free Community Edition of JetBrains
+  1. Make sure you have the Java 8 JDK installed on your PC. Also, install the free Community Edition of JetBrains
      IntelliJ IDEA.
   2. Download the virtual_robot .zip, and extract contents. Open the project in IntelliJ. You'll see three modules in
      the project (Controller, TeamCode, and virtual_robot) -- the only module you'll need to touch is TeamCode. It
@@ -88,5 +94,5 @@ To use:
   9. Prior to initialization, position the robot on the field by left-mouse-clicking the field (for robot position),
      and right-mouse-clicking (for robot orientation).
   10. Use the INIT/START/STOP button as you would on the FTC Driver Station.
-  11. If desired use the sliders to introduce random and systematic motor error.
+  11. If desired use the sliders to introduce random and systematic motor error, and inertia.
 
