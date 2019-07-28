@@ -1,5 +1,8 @@
 package com.qualcomm.robotcore.hardware;
 
+/**
+ * Represents a simple DC Motor
+ */
 public interface DcMotorSimple extends HardwareDevice {
 
     /**

@@ -9,6 +9,9 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
+/**
+ * For internal use only. Main class for the JavaFX application.
+ */
 public class VirtualRobotApplication extends Application {
 
     private static VirtualRobotController controllerHandle;

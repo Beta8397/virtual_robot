@@ -4,6 +4,12 @@ import virtual_robot.controller.VirtualRobotController;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Virtual Robot's implementation of OpMode.
+ *
+ * Classes extending OpMode must define the "init" and "loop" methods.
+ * Optionally, "init_loop", "start", and "stop" methods may be overridden.
+ */
 public abstract class OpMode extends VirtualRobotController.OpModeBase {
     /**
      * number of seconds this op mode has been running, this is

@@ -1,19 +1,20 @@
 package virtual_robot.controller;
 
-import com.qualcomm.robotcore.hardware.ServoImpl;
+import com.qualcomm.robotcore.hardware.*;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Rotate;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.DcMotorImpl;
-import com.qualcomm.robotcore.hardware.MotorType;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUtils;
 
+/**
+ * For internal use only. Represents a robot with two standard wheels, color sensor, four distance sensors,
+ * a Gyro Sensor, and a Servo-controlled arm on the back.
+ */
 public class TwoWheelBot extends VirtualBot {
 
     private MotorType motorType;
     private DcMotorImpl leftMotor = null;
     private DcMotorImpl rightMotor = null;
-    private VirtualRobotController.GyroSensorImpl gyro = null;
+    private GyroSensorImpl gyro = null;
     private VirtualRobotController.ColorSensorImpl colorSensor = null;
     private ServoImpl servo = null;
     private VirtualRobotController.DistanceSensorImpl[] distanceSensors = null;
@@ -34,7 +35,7 @@ public class TwoWheelBot extends VirtualBot {
                 hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "back_distance"),
                 hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "right_distance")
         };
-        gyro = (VirtualRobotController.GyroSensorImpl)hardwareMap.gyroSensor.get("gyro_sensor");
+        gyro = (GyroSensorImpl)hardwareMap.gyroSensor.get("gyro_sensor");
         colorSensor = (VirtualRobotController.ColorSensorImpl)hardwareMap.colorSensor.get("color_sensor");
         servo = (ServoImpl)hardwareMap.servo.get("back_servo");
         wheelCircumference = Math.PI * botWidth / 4.5;
@@ -50,7 +51,7 @@ public class TwoWheelBot extends VirtualBot {
         hardwareMap.put("right_motor", new DcMotorImpl(motorType));
         String[] distNames = new String[]{"front_distance", "left_distance", "back_distance", "right_distance"};
         for (String name: distNames) hardwareMap.put(name, controller.new DistanceSensorImpl());
-        hardwareMap.put("gyro_sensor", controller.new GyroSensorImpl());
+        hardwareMap.put("gyro_sensor", new GyroSensorImpl(this));
         hardwareMap.put("color_sensor", controller.new ColorSensorImpl());
         hardwareMap.put("back_servo", new ServoImpl());
     }

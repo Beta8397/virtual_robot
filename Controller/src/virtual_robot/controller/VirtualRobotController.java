@@ -37,7 +37,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Controller class for the robot simulation.
+ * For internal use only. Controller class for the JavaFX application.
  */
 public class VirtualRobotController {
 
@@ -300,9 +300,8 @@ public class VirtualRobotController {
                 //runOpMode has exited; if so, it interrupts the opModeThread.
                 opMode.init_loop();
                 //For regular op mode, update telemetry after each iteration of init_loop()
-                if (!(opMode instanceof LinearOpMode)) {
-                    opMode.internalPostInitLoop();
-                }
+                //For linear op mode, do-nothing
+                opMode.internalPostInitLoop();
 
                 try {
                     Thread.sleep(0, 1);
@@ -321,9 +320,8 @@ public class VirtualRobotController {
                 //runOpMode has exited; if so, it interrupts the opModeThread.
                 opMode.loop();
                 //For regular op mode only, update telemetry after each execution of loop()
-                if (!(opMode instanceof LinearOpMode)) {
-                    opMode.internalPostLoop();
-                }
+                //For linear op mode, do-nothing
+                opMode.internalPostLoop();
 
                 try {
                     Thread.sleep(0, 1);
@@ -456,31 +454,6 @@ public class VirtualRobotController {
             green = (int)tempGreen;
             blue = (int)tempBlue;
         }
-    }
-
-    public class GyroSensorImpl implements GyroSensor {
-        private boolean initialized = false;
-        private double initialHeading = 0.0;
-        private double heading = 0.0;
-        public synchronized void init(){
-            initialized = true;
-            heading = initialHeading = bot.getHeadingRadians() * 180.0 / Math.PI;
-        }
-        synchronized void deinit(){
-            initialized = false;
-            initialHeading = 0.0;
-            heading = 0.0;
-        }
-        public synchronized double getHeading(){
-            if (initialized){
-                double result = heading - initialHeading;
-                if (result < -180.0) result += 360.0;
-                else if (result > 180.0) result -= 360.0;
-                return result;
-            }
-            else return 0.0;
-        }
-        synchronized void updateHeading(double heading){ this.heading = heading; }
     }
 
     public class DistanceSensorImpl implements DistanceSensor {

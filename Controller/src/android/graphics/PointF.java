@@ -1,5 +1,8 @@
 package android.graphics;
 
+/**
+ * PointF class to provide functionality similar to that found in android.graphics.PointF
+ */
 public class PointF {
 
     public float x = 0, y = 0;
