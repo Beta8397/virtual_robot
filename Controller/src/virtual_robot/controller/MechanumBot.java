@@ -9,6 +9,10 @@ import com.qualcomm.robotcore.hardware.DcMotorImpl;
 import com.qualcomm.robotcore.hardware.MotorType;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUtils;
 
+/**
+ * For internal use only. Represents a robot with four mechanum wheels, color sensor, four distance sensors,
+ * a BNO055IMU, and a Servo-controlled arm on the back.
+ */
 public class MechanumBot extends VirtualBot {
 
     MotorType motorType;

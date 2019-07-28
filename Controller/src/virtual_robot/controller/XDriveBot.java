@@ -9,6 +9,10 @@ import com.qualcomm.robotcore.hardware.DcMotorImpl;
 import com.qualcomm.robotcore.hardware.MotorType;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUtils;
 
+/**
+ * For internal use only. Represents a robot with four omni wheels, color sensor, four distance sensors,
+ * a BNO055IMU, and a Continuous Rotation Servo-controlled arm on the back.
+ */
 public class XDriveBot extends VirtualBot {
 
     MotorType motorType;

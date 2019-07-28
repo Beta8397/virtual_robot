@@ -10,6 +10,9 @@ import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+/**
+ * For internal use only. Abstract base class for all of the specific robot configurations.
+ */
 public abstract class VirtualBot {
 
     protected HardwareMap hardwareMap;

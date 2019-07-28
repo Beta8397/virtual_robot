@@ -1,7 +1,10 @@
 package com.qualcomm.robotcore.eventloop.opmode;
 
 /**
- * This is copied mostly from the FTC SDK 4.3
+ * Virtual Robot's implementation of LinearOpMode
+ *
+ * Classes extending LinearOpMode must define the "runOpMode" method. They cannot override
+ * "loop", "init", "init_loop", "start", or "stop".
  */
 public abstract class LinearOpMode extends OpMode {
     private volatile boolean isStarted = false;
@@ -188,6 +191,15 @@ public abstract class LinearOpMode extends OpMode {
 
     }
 
+    @Override
+    public final void internalPostInitLoop(){}
+
+    @Override
+    public final void internalPostLoop() {}
+
+    /**
+     * For internal use only.
+     */
     protected class LinearOpModeHelper implements Runnable {
 
         protected Exception exception = null;
