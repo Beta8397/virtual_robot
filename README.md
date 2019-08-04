@@ -1,5 +1,11 @@
 A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
 
+CHANGES 8/4/2019
+    To better approximate real robot behavior, latency of 175ms added to the standard gyro sensor (used only on the
+    Two-Wheel Bot). That is, updated values are available only every 175ms. The amount of latency can be changed
+    easily in the createHardwareMap method of the virtual_robot.controller.TwoWheelBot class. Will probably make a
+    similar change to the BNO055IMU soon.
+
 CHANGES 7/10/2019
     To improve plug and play with OpModes copied and pasted from Android Studio, multiple packages were renamed. In
     addition, Continuous Rotation Servo capability was added. The XDrive Bot now has a CR Servo in the back rather
@@ -51,7 +57,7 @@ of the front and back wheels is 14 inches, and the mechanum wheels (when viewed 
 For the X-Drive bot, the distance between the centers of any two adjacent wheels is 14.5 inches. Each motor has an
 encoder. There is a downward-facing color sensor in the center of the robot. A gyro sensor is also included. A purple
 arm on the back of the robot is controlled by a servo. Each robot also has distance sensors on the front, left, right
-and back sides. A small green rectangle indicates the front of the robot.
+and back sides. A small green rectangle indicates the front of the robot. Wheel diameters are all 4 inches.
 
 The field can be thought of as 12 feet wide. The field graphic (currently the Rover Ruckus field)
 is obtained from a bitmap (.bmp) image. The color sensor detects the field color beneath the center of the
