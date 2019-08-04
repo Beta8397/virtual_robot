@@ -11,12 +11,20 @@ public class GyroSensorImpl implements GyroSensor {
     private double initialHeading = 0.0;
     private double heading = 0.0;
 
+    private long latencyNanos = 0;
+    private long prevNanos = System.nanoTime();
+
     /**
      * For internal use only.
      * @param bot
      */
     public GyroSensorImpl(VirtualBot bot){
         this.bot = bot;
+    }
+
+    public GyroSensorImpl(VirtualBot bot, int latencyMillis){
+        this.bot = bot;
+        latencyNanos = latencyMillis * 1000000;
     }
 
     /**
@@ -54,5 +62,10 @@ public class GyroSensorImpl implements GyroSensor {
      * For internal use only.
      * @param heading
      */
-    public synchronized void updateHeading(double heading){ this.heading = heading; }
+    public synchronized void updateHeading(double heading){
+        long nanos = System.nanoTime();
+        if (nanos < (prevNanos + latencyNanos)) return;
+        this.heading = heading;
+        prevNanos = nanos;
+    }
 }
