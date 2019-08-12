@@ -73,7 +73,7 @@ public class MechanumBot extends VirtualBot {
         String[] distNames = new String[]{"front_distance", "left_distance", "back_distance", "right_distance"};
         for (String name: distNames) hardwareMap.put(name, controller.new DistanceSensorImpl());
         //hardwareMap.put("gyro_sensor", controller.new GyroSensorImpl());
-        hardwareMap.put("imu", new BNO055IMUImpl(this));
+        hardwareMap.put("imu", new BNO055IMUImpl(this, 175));
         hardwareMap.put("color_sensor", controller.new ColorSensorImpl());
         hardwareMap.put("back_servo", new ServoImpl());
     }

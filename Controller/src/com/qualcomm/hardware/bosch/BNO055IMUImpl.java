@@ -15,8 +15,16 @@ public class BNO055IMUImpl implements BNO055IMU {
     private double headingRadians = 0;
     private boolean initialized = false;
 
+    private long latencyNanos = 0;
+    private long prevNanos = System.nanoTime();
+
     public BNO055IMUImpl(VirtualBot bot){
         this.bot = bot;
+    }
+
+    public BNO055IMUImpl(VirtualBot bot, int latencyMillis){
+        this.bot = bot;
+        latencyNanos = latencyMillis * 1000000;
     }
 
     /**
@@ -118,6 +126,9 @@ public class BNO055IMUImpl implements BNO055IMU {
      * @param heading
      */
     public synchronized void updateHeadingRadians( double heading ){
+        long nanos = System.nanoTime();
+        if (nanos < (prevNanos + latencyNanos)) return;
         headingRadians = heading;
+        prevNanos = nanos;
     }
 }
