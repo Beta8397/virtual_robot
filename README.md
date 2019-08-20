@@ -1,5 +1,9 @@
 A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
 
+CHANGES 8/17/2019
+    RUN_TO_POSITION mode is now available for DcMotor, with setTargetPosition, getTargetPosition, and isBusy methods.
+    Added 175 ms of latency to the BNO055IMU.
+
 CHANGES 8/4/2019
     To better approximate real robot behavior, latency of 175ms added to the standard gyro sensor (used only on the
     Two-Wheel Bot). That is, updated values are available only every 175ms. The amount of latency can be changed
