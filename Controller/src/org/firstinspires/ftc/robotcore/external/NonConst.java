@@ -30,28 +30,25 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
 TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-package org.firstinspires.ftc.robotcore.external.navigation;
+package org.firstinspires.ftc.robotcore.external;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * {@link AxesReference} indicates whether we have intrinsic rotations, where the axes
- * move with the object that is rotating, or extrinsic rotations, where they remain fixed
- * in the world around the object.
- *
- * @see Orientation
- * @see AxesOrder
- * @see <a href="https://en.wikipedia.org/wiki/Euler_angles">Euler Angles</a>
+ * {@link NonConst} documents a method that performs its function by updating internal
+ * state of the method receiver. Documenting methods in this way helps programmers understand
+ * which methods examine the object and return results based on that examination but don't
+ * change the internal object state and which methods, by contrast, perform their function
+ * but updating or changing internal object state.
+ * @see Const
  */
-public enum AxesReference
+@Documented
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.CLASS)
+public @interface NonConst
     {
-    EXTRINSIC, INTRINSIC;
-
-    public AxesReference reverse()
-        {
-        switch (this)
-            {
-            default:
-            case EXTRINSIC: return INTRINSIC;
-            case INTRINSIC: return EXTRINSIC;
-            }
-        }
     }

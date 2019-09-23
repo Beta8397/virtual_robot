@@ -519,7 +519,7 @@ public class VirtualRobotController {
         public OpModeBase() {
             hardwareMap = VirtualRobotController.this.hardwareMap;
             gamepad1 = gamePad1;
-            gamepad2 = gamePad2;
+            this.gamepad2 = gamePad2;
             telemetry = new TelemetryImpl();
         }
     }

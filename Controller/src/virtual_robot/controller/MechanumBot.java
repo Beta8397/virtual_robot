@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.hardware.bosch.BNO055IMUImpl;
 import com.qualcomm.robotcore.hardware.DcMotorImpl;
 import com.qualcomm.robotcore.hardware.MotorType;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUtils;
+import virtual_robot.util.AngleUtils;
 
 /**
  * For internal use only. Represents a robot with four mechanum wheels, color sensor, four distance sensors,

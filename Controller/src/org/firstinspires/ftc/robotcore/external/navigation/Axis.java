@@ -33,25 +33,27 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.firstinspires.ftc.robotcore.external.navigation;
 
 /**
- * {@link AxesReference} indicates whether we have intrinsic rotations, where the axes
- * move with the object that is rotating, or extrinsic rotations, where they remain fixed
- * in the world around the object.
- *
- * @see Orientation
- * @see AxesOrder
- * @see <a href="https://en.wikipedia.org/wiki/Euler_angles">Euler Angles</a>
+ * {@link Axis} enumerates the common X,Y,Z three-dimensional orthogonal axes.
  */
-public enum AxesReference
+public enum Axis
     {
-    EXTRINSIC, INTRINSIC;
+        X(0),
+        Y(1),
+        Z(2),
+        UNKNOWN(-1);
 
-    public AxesReference reverse()
+    public int index;
+
+    Axis(int index) { this.index = index; }
+
+    public static Axis fromIndex(int index)
         {
-        switch (this)
+        switch (index)
             {
-            default:
-            case EXTRINSIC: return INTRINSIC;
-            case INTRINSIC: return EXTRINSIC;
+            case 0: return X;
+            case 1: return Y;
+            case 2: return Z;
+            default: return UNKNOWN;
             }
         }
     }
