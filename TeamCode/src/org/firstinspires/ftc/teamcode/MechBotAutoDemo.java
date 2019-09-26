@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -23,7 +24,10 @@ import virtual_robot.util.AngleUtils;
  *
  * Start with bot in center of lander, facing top of screen.
  *
+ * Disabling for now; it was designed to work with Rover Ruckus field
+ *
  */
+@Disabled
 @Autonomous(name = "mechbot auto demo", group = "Mechanum")
 public class MechBotAutoDemo extends LinearOpMode {
 
