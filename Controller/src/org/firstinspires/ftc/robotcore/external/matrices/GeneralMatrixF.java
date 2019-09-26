@@ -30,28 +30,46 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
 TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-package org.firstinspires.ftc.robotcore.external.navigation;
+package org.firstinspires.ftc.robotcore.external.matrices;
 
 /**
- * {@link AxesReference} indicates whether we have intrinsic rotations, where the axes
- * move with the object that is rotating, or extrinsic rotations, where they remain fixed
- * in the world around the object.
- *
- * @see Orientation
- * @see AxesOrder
- * @see <a href="https://en.wikipedia.org/wiki/Euler_angles">Euler Angles</a>
+ * A {@link GeneralMatrixF} is a concrete matrix implementation that is supported by
+ * a backing store consisting of an array of floats. The matrix is stored in row-major order.
  */
-public enum AxesReference
+public class GeneralMatrixF extends RowMajorMatrixF
     {
-    EXTRINSIC, INTRINSIC;
+    float[] data;
 
-    public AxesReference reverse()
+    public GeneralMatrixF(int numRows, int numCols)
         {
-        switch (this)
-            {
-            default:
-            case EXTRINSIC: return INTRINSIC;
-            case INTRINSIC: return EXTRINSIC;
-            }
+        super(numRows, numCols);
+        this.data = new float[numRows * numCols];
+        }
+
+    private GeneralMatrixF(int numRows, int numCols, int flag)
+        {
+        super(numRows, numCols);
+        }
+
+    public GeneralMatrixF(int numRows, int numCols, float[] data)
+        {
+        super(numRows, numCols);
+        if (data.length != numRows * numCols) throw dimensionsError(numRows, numCols);
+        this.data = data;
+        }
+
+    @Override public float[] getData()
+        {
+        return this.data;
+        }
+
+    @Override public MatrixF emptyMatrix(int numRows, int numCols)
+        {
+        return new GeneralMatrixF(numRows, numCols);
+        }
+
+    public GeneralMatrixF transposed()
+        {
+        return (GeneralMatrixF)super.transposed();
         }
     }

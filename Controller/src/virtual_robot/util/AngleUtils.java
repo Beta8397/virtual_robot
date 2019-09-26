@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.robotcore.external.navigation;
+package virtual_robot.util;
 
 /**
  * For internal use only. Static functions helpful for working with angles.

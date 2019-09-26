@@ -3,7 +3,7 @@ package virtual_robot.controller;
 import com.qualcomm.robotcore.hardware.*;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Rotate;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUtils;
+import virtual_robot.util.AngleUtils;
 
 /**
  * For internal use only. Represents a robot with two standard wheels, color sensor, four distance sensors,

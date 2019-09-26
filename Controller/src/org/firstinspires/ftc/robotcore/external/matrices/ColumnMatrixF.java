@@ -30,28 +30,33 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
 TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-package org.firstinspires.ftc.robotcore.external.navigation;
+package org.firstinspires.ftc.robotcore.external.matrices;
 
 /**
- * {@link AxesReference} indicates whether we have intrinsic rotations, where the axes
- * move with the object that is rotating, or extrinsic rotations, where they remain fixed
- * in the world around the object.
- *
- * @see Orientation
- * @see AxesOrder
- * @see <a href="https://en.wikipedia.org/wiki/Euler_angles">Euler Angles</a>
+ * A {@link ColumnMatrixF} is a matrix that converts a VectorF into a 1xn matrix
  */
-public enum AxesReference
+public class ColumnMatrixF extends MatrixF
     {
-    EXTRINSIC, INTRINSIC;
+    VectorF vector;
 
-    public AxesReference reverse()
+    public ColumnMatrixF(VectorF vector)
         {
-        switch (this)
-            {
-            default:
-            case EXTRINSIC: return INTRINSIC;
-            case INTRINSIC: return EXTRINSIC;
-            }
+        super(vector.length(), 1);
+        this.vector = vector;
+        }
+
+    @Override public float get(int row, int col)
+        {
+        return this.vector.get(row);
+        }
+
+    @Override public void put(int row, int col, float value)
+        {
+        this.vector.put(row, value);
+        }
+
+    @Override public MatrixF emptyMatrix(int numRows, int numCols)
+        {
+        return new GeneralMatrixF(numRows, numCols);
         }
     }

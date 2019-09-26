@@ -30,28 +30,28 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
 TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-package org.firstinspires.ftc.robotcore.external.navigation;
+package org.firstinspires.ftc.robotcore.external.matrices;
 
 /**
- * {@link AxesReference} indicates whether we have intrinsic rotations, where the axes
- * move with the object that is rotating, or extrinsic rotations, where they remain fixed
- * in the world around the object.
- *
- * @see Orientation
- * @see AxesOrder
- * @see <a href="https://en.wikipedia.org/wiki/Euler_angles">Euler Angles</a>
+ * A {@link RowMajorMatrixF} is a dense matrix whose entries are arranged in
+ * row-major order.
+ * @see <a href="https://en.wikipedia.org/wiki/Row-major_order">Row Major Order</a>
  */
-public enum AxesReference
+public abstract class RowMajorMatrixF extends DenseMatrixF
     {
-    EXTRINSIC, INTRINSIC;
-
-    public AxesReference reverse()
+    public RowMajorMatrixF(int nRows, int nCols)
         {
-        switch (this)
-            {
-            default:
-            case EXTRINSIC: return INTRINSIC;
-            case INTRINSIC: return EXTRINSIC;
-            }
+        super(nRows, nCols);
+        }
+
+    @Override
+    protected int indexFromRowCol(int row, int col)
+        {
+        return row * numCols + col;
+        }
+
+    @Override public VectorF toVector()
+        {
+        return new VectorF(this.getData());
         }
     }

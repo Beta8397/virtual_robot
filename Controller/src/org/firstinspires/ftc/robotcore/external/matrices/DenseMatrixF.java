@@ -30,28 +30,46 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
 TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-package org.firstinspires.ftc.robotcore.external.navigation;
+package org.firstinspires.ftc.robotcore.external.matrices;
 
 /**
- * {@link AxesReference} indicates whether we have intrinsic rotations, where the axes
- * move with the object that is rotating, or extrinsic rotations, where they remain fixed
- * in the world around the object.
+ * A {@link DenseMatrixF} is a matrix of floats whose storage is a contiguous float[] array. It may
+ * logically be ranged arranged either in row or column major order.
  *
- * @see Orientation
- * @see AxesOrder
- * @see <a href="https://en.wikipedia.org/wiki/Euler_angles">Euler Angles</a>
+ * @see MatrixF
+ * @see RowMajorMatrixF
+ * @see ColumnMajorMatrixF
+ * @see SliceMatrixF
  */
-public enum AxesReference
+public abstract class DenseMatrixF extends MatrixF
     {
-    EXTRINSIC, INTRINSIC;
-
-    public AxesReference reverse()
+    protected DenseMatrixF(int nRows, int nCols)
         {
-        switch (this)
-            {
-            default:
-            case EXTRINSIC: return INTRINSIC;
-            case INTRINSIC: return EXTRINSIC;
-            }
+        super(nRows, nCols);
         }
+
+    @Override public float get(int row, int col)
+        {
+        return getData()[indexFromRowCol(row, col)];
+        }
+
+    @Override public void put(int row, int col, float value)
+        {
+        getData()[indexFromRowCol(row, col)] = value;
+        }
+
+    /**
+     * Returns the contiguous array of floats which is the storage for this matrix
+     * @return the contiguous array of floats which is the storage for this matrix
+     */
+    public abstract float[] getData();
+
+    /**
+     * Given a row and column index into the matrix, returns the corresponding index
+     * into the underlying float[] array.
+     * @param row   the row whose index is desired
+     * @param col   the column whose index is desired
+     * @return the index of (row,col) in the data returned by {@link #getData()}
+     */
+    protected abstract int indexFromRowCol(int row, int col);
     }
