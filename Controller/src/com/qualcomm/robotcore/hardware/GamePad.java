@@ -1,6 +1,7 @@
 package com.qualcomm.robotcore.hardware;
 
 import com.studiohartman.jamepad.ControllerState;
+import virtual_robot.controller.VirtualGamePadController;
 
 /**
  * Represents the GamePad.
@@ -43,8 +44,31 @@ public class GamePad {
         return (float) 0.0;
     }
 
+    public void resetValues(){
+        x = false;
+        y = false;
+        a = false;
+        b = false;
+        left_stick_x = 0;
+        left_stick_y = 0;
+        right_stick_x = 0;
+        right_stick_y = 0;
+        dpad_up = false;
+        dpad_down = false;
+        dpad_left = false;
+        dpad_right = false;
+        back = false;
+        guide = false;
+        start = false;
+        left_bumper = false;
+        right_bumper = false;
+        left_stick_button = false;
+        right_stick_button = false;
+        left_trigger = 0;
+        right_trigger = 0;
+    }
+
     public void update(ControllerState state){
-        if (state != null){
         x = state.x;
         y = state.y;
         a = state.a;
@@ -66,29 +90,30 @@ public class GamePad {
         right_stick_button = state.rightStickClick;
         left_trigger = setWithDeadzone(state.leftTrigger);
         right_trigger = setWithDeadzone(state.rightTrigger);
-    } else {
-            x = false;
-            y = false;
-            a = false;
-            b = false;
-            left_stick_x = 0;
-            left_stick_y = 0;
-            right_stick_x = 0;
-            right_stick_y = 0;
-            dpad_up = false;
-            dpad_down = false;
-            dpad_left = false;
-            dpad_right = false;
-            back = false;
-            guide = false;
-            start = false;
-            left_bumper = false;
-            right_bumper = false;
-            left_stick_button = false;
-            right_stick_button = false;
-            left_trigger = 0;
-            right_trigger = 0;
-        }
+    }
+
+    public void update(VirtualGamePadController.ControllerState state){
+        x = state.x;
+        y = state.y;
+        a = state.a;
+        b = state.b;
+        left_stick_x = setWithDeadzone(state.leftStickX);
+        left_stick_y = setWithDeadzone(state.leftStickY);
+        right_stick_x = setWithDeadzone(state.rightStickX);
+        right_stick_y = setWithDeadzone(state.rightStickY);
+        dpad_up = false;
+        dpad_down = false;
+        dpad_left = false;
+        dpad_right = false;
+        back = false;
+        guide = false;
+        start = false;
+        left_bumper = false;
+        right_bumper = false;
+        left_stick_button = false;
+        right_stick_button = false;
+        left_trigger = 0;
+        right_trigger = 0;
     }
 
 }
