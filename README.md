@@ -1,5 +1,11 @@
 A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
 
+CHANGES 10/6/2019
+    Added the option of using "Virtual GamePad" instead of real GamePad. To do this, go to the Config.java class in the
+    virtual_robot.config package (within the Controller module), and assign "true" to the USE_VIRTUAL_GAMEPAD constant.
+    Other constants in this class include the field image (BACKGROUND) and the field width in pixels (FIELD_WIDTH). If
+    changing FIELD_WIDTH, need to supply a square bitmap (.bmp) field image that is FIELD_WIDTH pixels wide.
+
 CHANGES 8/17/2019
     RUN_TO_POSITION mode is now available for DcMotor, with setTargetPosition, getTargetPosition, and isBusy methods.
     Added 175 ms of latency to the BNO055IMU.
@@ -63,10 +69,10 @@ encoder. There is a downward-facing color sensor in the center of the robot. A g
 arm on the back of the robot is controlled by a servo. Each robot also has distance sensors on the front, left, right
 and back sides. A small green rectangle indicates the front of the robot. Wheel diameters are all 4 inches.
 
-The field can be thought of as 12 feet wide. The field graphic (currently the Rover Ruckus field)
+The field can be thought of as 12 feet wide. The field graphic (currently the Skystone field)
 is obtained from a bitmap (.bmp) image. The color sensor detects the field color beneath the center of the
-robot. The field graphic is easily changed by providing a different .bmp image in the background.Background class.
-The .bmp image is in the background.bmp file in the src/virtual_robot.assets folder. If a different .bmp image is used,
+robot. The field graphic is easily changed by providing a different .bmp image in the virtual_robot.config.Config class.
+The .bmp image is the skysone_field648.bmp file in the virtual_robot.assets folder. If a different .bmp image is used,
 it must be at least as wide and as tall as the field dimensions (currently 648 x 648 pixels to fit on the screen of
 most laptops).
 

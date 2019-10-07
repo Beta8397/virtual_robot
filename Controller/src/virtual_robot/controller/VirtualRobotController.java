@@ -8,11 +8,14 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.util.Callback;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.reflections.Reflections;
-import virtual_robot.background.Background;
+import virtual_robot.config.Config;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -27,6 +30,7 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotorImpl;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -53,17 +57,20 @@ public class VirtualRobotController {
     @FXML private TextArea txtTelemetry;
     @FXML private CheckBox checkBoxGamePad1;
     @FXML private CheckBox checkBoxGamePad2;
+    @FXML private BorderPane borderPane;
 
     //Virtual Hardware
     private HardwareMap hardwareMap = null;
     private VirtualBot bot = null;
     GamePad gamePad1 = new GamePad();
     GamePad gamePad2 = new GamePad();
-    GamePadHelper gamePadHelper = new GamePadHelper();
+    GamePadHelper gamePadHelper = null;
     ScheduledExecutorService gamePadExecutorService = Executors.newSingleThreadScheduledExecutor();
 
+    VirtualGamePadController virtualGamePadController = null;
+
     //Background Image and Field
-    private Image backgroundImage = Background.background;
+    private Image backgroundImage = Config.BACKGROUND;
     private PixelReader pixelReader = backgroundImage.getPixelReader();
     private double halfFieldWidth;
     private double fieldWidth;
@@ -100,13 +107,17 @@ public class VirtualRobotController {
         }
     };
 
+    boolean getOpModeInitialized(){ return opModeInitialized; }
+
     public void initialize() {
         OpMode.setVirtualRobotController(this);
         setupCbxOpModes();
         cbxConfig.setItems(FXCollections.observableArrayList("Two Wheel Bot", "Mechanum Bot", "XDrive Bot"));
         cbxConfig.setValue(cbxConfig.getItems().get(0));
-        fieldWidth = fieldPane.getPrefWidth();
+        //fieldWidth = fieldPane.getPrefWidth();
+        fieldWidth = Config.FIELD_WIDTH;
         halfFieldWidth = fieldWidth / 2.0;
+        fieldPane.setPrefWidth(fieldWidth);
         fieldPane.setPrefHeight(fieldWidth);
         fieldPane.setMinWidth(fieldWidth);
         fieldPane.setMaxWidth(fieldWidth);
@@ -119,10 +130,26 @@ public class VirtualRobotController {
         sldRandomMotorError.valueProperty().addListener(sliderChangeListener);
         sldSystematicMotorError.valueProperty().addListener(sliderChangeListener);
         sldMotorInertia.valueProperty().addListener(sliderChangeListener);
-        checkBoxGamePad1.setDisable(true);
-        checkBoxGamePad1.setStyle("-fx-opacity: 1");
-        checkBoxGamePad2.setDisable(true);
-        checkBoxGamePad2.setStyle("-fx-opacity: 1");
+        if (Config.USE_VIRTUAL_GAMEPAD){
+            checkBoxGamePad1.setVisible(false);
+            checkBoxGamePad2.setVisible(false);
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("virtual_gamepad.fxml"));
+            try{
+                HBox hbox = (HBox)loader.load();
+                virtualGamePadController = loader.getController();
+                virtualGamePadController.setVirtualRobotController(this);
+                borderPane.setBottom(hbox);
+            } catch (IOException e){
+                System.out.println("Virtual GamePad UI Failed to Load");
+            }
+            gamePadHelper = new VirtualGamePadHelper();
+        } else {
+            checkBoxGamePad1.setDisable(true);
+            checkBoxGamePad1.setStyle("-fx-opacity: 1");
+            checkBoxGamePad2.setDisable(true);
+            checkBoxGamePad2.setStyle("-fx-opacity: 1");
+            gamePadHelper = new RealGamePadHelper();
+        }
         gamePadExecutorService.scheduleAtFixedRate(gamePadHelper, 0, 20, TimeUnit.MILLISECONDS);
     }
 
@@ -283,6 +310,7 @@ public class VirtualRobotController {
             }
             if (opModeThread.isAlive()) System.out.println("OpMode Thread Failed to Terminate.");
             bot.powerDownAndReset();
+            if (Config.USE_VIRTUAL_GAMEPAD) virtualGamePadController.resetGamePad();
             initializeTelemetryTextArea();
             cbxConfig.setDisable(false);
         }
@@ -350,6 +378,7 @@ public class VirtualRobotController {
                 //resetGamePad();
                 initializeTelemetryTextArea();
                 cbxConfig.setDisable(false);
+                if (Config.USE_VIRTUAL_GAMEPAD) virtualGamePadController.resetGamePad();
             }
         });
 
@@ -568,7 +597,22 @@ public class VirtualRobotController {
 
     }
 
-    public class GamePadHelper implements  Runnable{
+    public interface GamePadHelper extends Runnable{
+        public void quit();
+    }
+
+    public class VirtualGamePadHelper implements GamePadHelper {
+
+        public void run() {
+            VirtualGamePadController.ControllerState state = virtualGamePadController.getState();
+            gamePad1.update(state);
+            gamePad2.resetValues();
+        }
+
+        public void quit(){}
+    }
+
+    public class RealGamePadHelper implements  GamePadHelper {
 
         private int gamePad1Index = -1;
         private int gamePad2Index = -1;
@@ -580,7 +624,7 @@ public class VirtualRobotController {
 
         private ControllerManager controller = null;
 
-        public GamePadHelper(){
+        public RealGamePadHelper(){
             controller = new ControllerManager(2);
             controller.initSDLGamepad();
         }
@@ -641,11 +685,11 @@ public class VirtualRobotController {
 
             if (gamePad1Index == 0) gamePad1.update(state0);
             else if (gamePad1Index == 1) gamePad1.update(state1);
-            else gamePad1.update(null);
+            else gamePad1.resetValues();
 
             if (gamePad2Index == 0) gamePad2.update(state0);
             else if (gamePad2Index == 1) gamePad2.update(state1);
-            else gamePad2.update(null);
+            else gamePad2.resetValues();
         }
 
         public void quit(){
