@@ -3,7 +3,7 @@ package android.graphics;
 import com.sun.javafx.util.Utils;
 
 /**
- * Provides an RGBtoHSV method with signature identical to that found in the android.graphics.Color class
+ * Provides an RGBToHSV method with signature identical to that found in the android.graphics.Color class
  */
 public class Color {
 
@@ -14,7 +14,7 @@ public class Color {
      * @param blue  blue (0..255)
      * @param hsv   Output array for return of hue (0..360), sat (0..1), and value (0..1)
      */
-    public static void RGBtoHSV(int red, int green, int blue, float[] hsv){
+    public static void RGBToHSV(int red, int green, int blue, float[] hsv){
         double[] temp = Utils.RGBtoHSB(red, green, blue);
         hsv[0] = (float)temp[0];
         hsv[1] = (float)temp[1];

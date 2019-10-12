@@ -79,13 +79,13 @@ public class MechBotAutoDemo extends LinearOpMode {
         //Drive forward until color sensor touches tape.
         setPower(0,0.5f,0);
         while (opModeIsActive()) {
-            Color.RGBtoHSV(colorSensor.red(), colorSensor.green(), colorSensor.blue(), hsv);
+            Color.RGBToHSV(colorSensor.red(), colorSensor.green(), colorSensor.blue(), hsv);
             if (hsv[1] > 0.75) break;
         }
 
         //Keep driving forward until color sensor is off of tape.
         while (opModeIsActive()) {
-            Color.RGBtoHSV(colorSensor.red(), colorSensor.green(), colorSensor.blue(), hsv);
+            Color.RGBToHSV(colorSensor.red(), colorSensor.green(), colorSensor.blue(), hsv);
             if (hsv[1] < 0.25) break;
         }
 
@@ -115,7 +115,7 @@ public class MechBotAutoDemo extends LinearOpMode {
             telemetry.update();
             et.reset();
             while (opModeIsActive() && et.seconds() < 0.5) {
-                Color.RGBtoHSV(colorSensor.red(), colorSensor.green(), colorSensor.blue(), hsv);
+                Color.RGBToHSV(colorSensor.red(), colorSensor.green(), colorSensor.blue(), hsv);
                 if (hsv[1] > 0.25) et.reset();
                 setPower( 2.0f * (hsv[1] - 0.5f), 0.5f, 0);
             }
