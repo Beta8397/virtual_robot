@@ -2,10 +2,12 @@ package org.firstinspires.ftc.teamcode.ftc16072;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @TeleOp(name = "mechanum driving opmode", group = "ftc16072")
 public class MecanumDrivingOpMode extends OpMode {
     private MecanumDrive mecanumDrive = new MecanumDrive();
+    private double[] distances;
 
     // Code to run ONCE when the driver hits INIT
     @Override
@@ -21,6 +23,9 @@ public class MecanumDrivingOpMode extends OpMode {
         double rotate = gamepad1.right_stick_x;
 
         mecanumDrive.driveMecanum(forward, strafe, rotate);
+        distances = mecanumDrive.getDistanceCm();
+        telemetry.addData("distance fwd", distances[0]);
+        telemetry.addData("distance right", distances[1]);
 
     }
 }
