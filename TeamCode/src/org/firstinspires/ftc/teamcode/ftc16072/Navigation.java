@@ -14,8 +14,8 @@ public class Navigation {
     static double ANGLE_TOLARANCE = AngleUnit.RADIANS.fromDegrees(1);
     static double KP_DISTANCE = 0.02;
     static double KP_ANGLE = 1;
-    MecanumDrive mecanumDrive = new MecanumDrive();
-    BNO055IMU imu;
+    private MecanumDrive mecanumDrive = new MecanumDrive();
+    private BNO055IMU imu;
     private RobotPosition lastSetPosition;
 
     void init(HardwareMap hwMap) {
@@ -85,7 +85,7 @@ public class Navigation {
     }
 
     public boolean rotateTo(double angle, AngleUnit angleUnit) {
-        double rotateSpeed = 0.0;
+        double rotateSpeed;
 
         double rotateDiff = angleUnit.toRadians(angle) - getHeading(AngleUnit.RADIANS);
         if (Math.abs(rotateDiff) <= ANGLE_TOLARANCE) {
@@ -109,7 +109,7 @@ public class Navigation {
         if ((Math.abs(xDiff) <= DISTANCE_TOLARANCE) &&
                 (Math.abs(yDiff) <= DISTANCE_TOLARANCE)) {
             mecanumDrive.driveMecanum(0, 0, 0);
-            setPosition(distanceUnit.toCm(x), distanceUnit.toCm(y), DistanceUnit.CM);
+            setPosition(estimatedPosition.getX(DistanceUnit.CM), estimatedPosition.getY(DistanceUnit.CM), DistanceUnit.CM);
             return true;
         }
         if (Math.abs(xDiff) > DISTANCE_TOLARANCE) {
@@ -118,8 +118,6 @@ public class Navigation {
         if (Math.abs(yDiff) > DISTANCE_TOLARANCE) {
             ySpeed = KP_DISTANCE * yDiff;
         }
-        System.out.printf("Diff: %.02f %.02f\n", yDiff, xDiff);
-        System.out.printf("--Speed: %.02f %.02f\n", ySpeed, xSpeed);
         driveFieldRelative(xSpeed, ySpeed, 0.0);
 
         return false;
