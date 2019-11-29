@@ -10,7 +10,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import java.util.Arrays;
 import java.util.List;
 
-@TeleOp(name = "QQ_AutoBase")
 abstract public class QQ_AutoBase extends OpMode {
     private Robot robot = new Robot();
 
