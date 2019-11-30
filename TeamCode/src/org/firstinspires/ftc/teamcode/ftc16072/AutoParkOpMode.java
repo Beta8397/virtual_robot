@@ -5,6 +5,12 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
+/**
+ * Autonomous Parking OpMode contributed by ftc16072.
+ * For red alliance: start with robot in square next to the blue depot, facing toward the building zone.
+ * For blue alliance: start with robot in square next to the blue building site, facing toward the loading zone.
+ */
+
 @TeleOp(name = "auto park opmode", group = "ftc16072")
 public class AutoParkOpMode extends OpMode {
     private Robot robot = new Robot();
