@@ -130,7 +130,7 @@ public class MechanumBot extends VirtualBot {
 
     public synchronized void updateDisplay(){
         super.updateDisplay();
-        ((Rotate)backServoArm.getTransforms().get(0)).setAngle(-180.0 * servo.getPosition());
+        ((Rotate)backServoArm.getTransforms().get(0)).setAngle(-180.0 * servo.getInternalPosition());
     }
 
     public void powerDownAndReset(){

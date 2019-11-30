@@ -1,60 +1,5 @@
 A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
 
-CHANGES 10/6/2019
-    Added the option of using "Virtual GamePad" instead of real GamePad. To do this, go to the Config.java class in the
-    virtual_robot.config package (within the Controller module), and assign "true" to the USE_VIRTUAL_GAMEPAD constant.
-    Other constants in this class include the field image (BACKGROUND) and the field width in pixels (FIELD_WIDTH). If
-    changing FIELD_WIDTH, need to supply a square bitmap (.bmp) field image that is FIELD_WIDTH pixels wide.
-
-CHANGES 8/17/2019
-    RUN_TO_POSITION mode is now available for DcMotor, with setTargetPosition, getTargetPosition, and isBusy methods.
-    Added 175 ms of latency to the BNO055IMU.
-
-CHANGES 8/4/2019
-    To better approximate real robot behavior, latency of 175ms added to the standard gyro sensor (used only on the
-    Two-Wheel Bot). That is, updated values are available only every 175ms. The amount of latency can be changed
-    easily in the createHardwareMap method of the virtual_robot.controller.TwoWheelBot class. Will probably make a
-    similar change to the BNO055IMU soon.
-
-CHANGES 7/10/2019
-    To improve plug and play with OpModes copied and pasted from Android Studio, multiple packages were renamed. In
-    addition, Continuous Rotation Servo capability was added. The XDrive Bot now has a CR Servo in the back rather
-    than a standard servo. The XDriveBotDemo op mode demonstrates the use of this servo, using gamepad2.
-
-    NOTE: OpModes copied directly from Android Studio to Virtual Robot do not automatically compile when pasted into
-    Virtual Robot in IntelliJ, and won't show up in the OpModes dropdown box until they are compiled. Three different
-    methods to force compilation are: 1) Right click the file and select "Recompile"; 2) From the "Build" menu,
-    select "Rebuild Project"; or, 3) Make any change at all to the OpMode file (e.g., add a comment). Any one of these
-    methods is sufficient.
-
-CHANGES 7/06/2019
-    Now uses @TeleOp, @Autonomous, and @Disabled class annotations to control the display of OpModes in the OpMode
-    combobox. For @TeleOp and @Autonomous, a name parameter must be specified. The group parameter is optional (default
-    group is "default"). GamePad setJoystickDeadzone capability contributed by FTC team 16072.
-
-CHANGES 7/01/2019
-    Now supports two GamePads instead of just one. Use start-A and start-B to select gamepad1 and gamepad2, as
-    you would in the FTC SDK. Two op modes for Mechanum Bot contributed by FTC team 16072, including a nice
-    demonstration of field-centric drive using the IMU. These are in the org.firstinspires.ftc.teamcode.ftc16072 package.
-
-CHANGES 6/25/2019
-    Contribution from Alan Smith (alan412): now supports "regular" op modes in addition to linear op modes.
-
-CHANGES 4/3/2019
-    1. Added BNO055IMU interface to simulate (in a limited way) coding for the IMU in the REV Expansion Hub.
-    2. The Mechanum Bot and X Drive Bot now have a BNO055IMU rather than the original gyro.
-    3. The Two-Wheel Bot still has the original gyro.
-    4. DCMotor interface renamed to DcMotor, in keeping the the FTC SDK.
-    5. New utility classes: enum AngleUnit, enum AxesOrder, enum AxesReference, class Orientation
-
-CHANGES 3/23/2019
-    1. Uses real game pad (instead of the original "virtual" game pad.
-    2. Added an X-Drive robot configuration.
-    3. Tweaks to opModeIsActive() and addition of isStopRequested() to allow while() loop before START.
-    4. Added Color class with single static method: RGBtoHSV(red, green, blue, hsv).
-    5. Added distance sensors to all robot configurations to measure distance from walls.
-    6. Replaced LineFollow example opMode with MechBotAutoDemo, a line follower that actually works.
-
 This is a JavaFX application developed using the (free) IntelliJ IDEA Community Edition IDE. The repository can be downloaded
 and unzipped, then opened with IntelliJ.
 
@@ -111,4 +56,66 @@ To use:
      and right-mouse-clicking (for robot orientation).
   10. Use the INIT/START/STOP button as you would on the FTC Driver Station.
   11. If desired use the sliders to introduce random and systematic motor error, and inertia.
+
+
+LOG OF CHANGES
+
+CHANGES 11/29/2019
+    Range class and additional op modes contributed by FTC Team 16072. Servo interface (and ServoImpl class)
+    enhanced with more features of the actual FTC SDK: ability to reverse direction and to scale position range.
+
+CHANGES 10/6/2019
+    Added the option of using "Virtual GamePad" instead of real GamePad. To do this, go to the Config.java class in the
+    virtual_robot.config package (within the Controller module), and assign "true" to the USE_VIRTUAL_GAMEPAD constant.
+    Other constants in this class include the field image (BACKGROUND) and the field width in pixels (FIELD_WIDTH). If
+    changing FIELD_WIDTH, need to supply a square bitmap (.bmp) field image that is FIELD_WIDTH pixels wide.
+
+CHANGES 8/17/2019
+    RUN_TO_POSITION mode is now available for DcMotor, with setTargetPosition, getTargetPosition, and isBusy methods.
+    Added 175 ms of latency to the BNO055IMU.
+
+CHANGES 8/4/2019
+    To better approximate real robot behavior, latency of 175ms added to the standard gyro sensor (used only on the
+    Two-Wheel Bot). That is, updated values are available only every 175ms. The amount of latency can be changed
+    easily in the createHardwareMap method of the virtual_robot.controller.TwoWheelBot class. Will probably make a
+    similar change to the BNO055IMU soon.
+
+CHANGES 7/10/2019
+    To improve plug and play with OpModes copied and pasted from Android Studio, multiple packages were renamed. In
+    addition, Continuous Rotation Servo capability was added. The XDrive Bot now has a CR Servo in the back rather
+    than a standard servo. The XDriveBotDemo op mode demonstrates the use of this servo, using gamepad2.
+
+    NOTE: OpModes copied directly from Android Studio to Virtual Robot do not automatically compile when pasted into
+    Virtual Robot in IntelliJ, and won't show up in the OpModes dropdown box until they are compiled. Three different
+    methods to force compilation are: 1) Right click the file and select "Recompile"; 2) From the "Build" menu,
+    select "Rebuild Project"; or, 3) Make any change at all to the OpMode file (e.g., add a comment). Any one of these
+    methods is sufficient.
+
+CHANGES 7/06/2019
+    Now uses @TeleOp, @Autonomous, and @Disabled class annotations to control the display of OpModes in the OpMode
+    combobox. For @TeleOp and @Autonomous, a name parameter must be specified. The group parameter is optional (default
+    group is "default"). GamePad setJoystickDeadzone capability contributed by FTC team 16072.
+
+CHANGES 7/01/2019
+    Now supports two GamePads instead of just one. Use start-A and start-B to select gamepad1 and gamepad2, as
+    you would in the FTC SDK. Two op modes for Mechanum Bot contributed by FTC team 16072, including a nice
+    demonstration of field-centric drive using the IMU. These are in the org.firstinspires.ftc.teamcode.ftc16072 package.
+
+CHANGES 6/25/2019
+    Contribution from Alan Smith (alan412): now supports "regular" op modes in addition to linear op modes.
+
+CHANGES 4/3/2019
+    1. Added BNO055IMU interface to simulate (in a limited way) coding for the IMU in the REV Expansion Hub.
+    2. The Mechanum Bot and X Drive Bot now have a BNO055IMU rather than the original gyro.
+    3. The Two-Wheel Bot still has the original gyro.
+    4. DCMotor interface renamed to DcMotor, in keeping the the FTC SDK.
+    5. New utility classes: enum AngleUnit, enum AxesOrder, enum AxesReference, class Orientation
+
+CHANGES 3/23/2019
+    1. Uses real game pad (instead of the original "virtual" game pad.
+    2. Added an X-Drive robot configuration.
+    3. Tweaks to opModeIsActive() and addition of isStopRequested() to allow while() loop before START.
+    4. Added Color class with single static method: RGBtoHSV(red, green, blue, hsv).
+    5. Added distance sensors to all robot configurations to measure distance from walls.
+    6. Replaced LineFollow example opMode with MechBotAutoDemo, a line follower that actually works.
 
