@@ -40,7 +40,7 @@ public class TwoWheelBot extends VirtualBot {
         servo = (ServoImpl)hardwareMap.servo.get("back_servo");
         wheelCircumference = Math.PI * botWidth / 4.5;
         interWheelDistance = botWidth * 8.0 / 9.0;
-        backServoArm = (Rectangle)displayGroup.getChildren().get(5);
+        backServoArm = (Rectangle)displayGroup.getChildren().get(6);
         backServoArm.getTransforms().add(new Rotate(0, 37.5, 67.5));
     }
 

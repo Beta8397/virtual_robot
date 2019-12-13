@@ -3,12 +3,14 @@ A 2D simulator to help beginning Java programmers learn to program for FTC Robot
 This is a JavaFX application developed using the (free) IntelliJ IDEA Community Edition IDE. The repository can be downloaded
 and unzipped, then opened with IntelliJ.
 
-Three robot configurations are available: a simple two-wheeled robot, a robot with four mechanum wheels, and an
-X-Drive robot with four OmniWheels mounted at 45 degrees at each corner of the robot.
+Four robot configurations are available: a simple two-wheeled robot, a robot with four mecanum wheels, an
+X-Drive robot with four OmniWheels mounted at 45 degrees at each corner of the robot, and an additional
+mecanum-wheeled configuration that has an extendable arm (DC motor-operated) with a grabber (Servo-operated)
+at the end.
 
-Each robot can be thought of as 18 inches wide.  For the two-wheel bot and mechanum wheel bot, the distance between
-the centers of the right and left wheels is 16 inches. For the mechanum wheel bot, the distance between the centers
-of the front and back wheels is 14 inches, and the mechanum wheels (when viewed from the top) have an "X" configuration.
+Each robot can be thought of as 18 inches wide.  For the two-wheel bot and mecanum wheel bot, the distance between
+the centers of the right and left wheels is 16 inches. For the mecanum wheel bot, the distance between the centers
+of the front and back wheels is 14 inches, and the mecanum wheels (when viewed from the top) have an "X" configuration.
 For the X-Drive bot, the distance between the centers of any two adjacent wheels is 14.5 inches. Each motor has an
 encoder. There is a downward-facing color sensor in the center of the robot. A gyro sensor is also included. A purple
 arm on the back of the robot is controlled by a servo. Each robot also has distance sensors on the front, left, right
@@ -50,7 +52,7 @@ To use:
   4. Make sure at least one gamepad is plugged in to the computer.
   5. Run the application (by clicking the green arrowhead at the toolbar).
   6. Press start-A or start-B on gamepad(s) to select which is gamepad1 vs. gamepad2.
-  7. Use Configuration dropdown box to select "Two Wheeled Bot" or "Mechanum Bot". The configuration will be displayed.
+  7. Use Configuration dropdown box to select a robot configuration. The configuration will be displayed.
   8. Use the Op Mode drop down box to select the desired OpMode.
   9. Prior to initialization, position the robot on the field by left-mouse-clicking the field (for robot position),
      and right-mouse-clicking (for robot orientation).
@@ -59,6 +61,12 @@ To use:
 
 
 LOG OF CHANGES
+
+CHANGES 12/12/2019
+    Changes made to all more versatile building of new robot configurations. A transparent robot base layer (equal in
+    width to the field) was added. This makes it possible for the robot to have accessories that extend well beyond
+    the chassis in all four directions. A new robot configuration, ArmBot, was added. It has an extensible arm with a
+    grabber at the end. The arm is DC Motor-operated. The grabber is Servo-operated. It is a mecanum-wheeled bot.
 
 CHANGES 11/29/2019
     Range class and additional op modes contributed by FTC Team 16072. Servo interface (and ServoImpl class)
@@ -98,7 +106,7 @@ CHANGES 7/06/2019
 
 CHANGES 7/01/2019
     Now supports two GamePads instead of just one. Use start-A and start-B to select gamepad1 and gamepad2, as
-    you would in the FTC SDK. Two op modes for Mechanum Bot contributed by FTC team 16072, including a nice
+    you would in the FTC SDK. Two op modes for Mecanum Bot contributed by FTC team 16072, including a nice
     demonstration of field-centric drive using the IMU. These are in the org.firstinspires.ftc.teamcode.ftc16072 package.
 
 CHANGES 6/25/2019
@@ -106,7 +114,7 @@ CHANGES 6/25/2019
 
 CHANGES 4/3/2019
     1. Added BNO055IMU interface to simulate (in a limited way) coding for the IMU in the REV Expansion Hub.
-    2. The Mechanum Bot and X Drive Bot now have a BNO055IMU rather than the original gyro.
+    2. The Mecanum Bot and X Drive Bot now have a BNO055IMU rather than the original gyro.
     3. The Two-Wheel Bot still has the original gyro.
     4. DCMotor interface renamed to DcMotor, in keeping the the FTC SDK.
     5. New utility classes: enum AngleUnit, enum AxesOrder, enum AxesReference, class Orientation

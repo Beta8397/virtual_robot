@@ -13,8 +13,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.*;
  * Example OpMode. Demonstrates use of gyro, color sensor, encoders, and telemetry.
  *
  */
-@TeleOp(name = "mechbot demo", group = "Mechanum")
-public class MechBotDemo extends LinearOpMode {
+@TeleOp(name = "arm bot demo", group = "ArmBot")
+public class ArmBotDemo extends LinearOpMode {
 
     public void runOpMode(){
         DcMotor m1 = hardwareMap.dcMotor.get("back_left_motor");
@@ -32,10 +32,12 @@ public class MechBotDemo extends LinearOpMode {
         m3.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         m4.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+        DcMotor arm = hardwareMap.dcMotor.get("arm_motor");
+        arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
         //GyroSensor gyro = hardwareMap.gyroSensor.get("gyro_sensor");
         BNO055IMU imu = hardwareMap.get(BNO055IMU.class, "imu");
-
-        Servo backServo = hardwareMap.servo.get("back_servo");
+        Servo handServo = hardwareMap.servo.get("hand_servo");
         DistanceSensor frontDistance = hardwareMap.get(DistanceSensor.class, "front_distance");
         DistanceSensor leftDistance = hardwareMap.get(DistanceSensor.class, "left_distance");
         DistanceSensor rightDistance = hardwareMap.get(DistanceSensor.class, "right_distance");
@@ -56,13 +58,14 @@ public class MechBotDemo extends LinearOpMode {
         ColorSensor colorSensor = hardwareMap.colorSensor.get("color_sensor");
         telemetry.addData("Press Start When Ready","");
         telemetry.update();
+
+        gamepad1.setJoystickDeadzone(0.05f);
+
         waitForStart();
         while (opModeIsActive()){
             double px = gamepad1.left_stick_x;
-            if (Math.abs(px) < 0.05) px = 0;
             double py = -gamepad1.left_stick_y;
-            if (Math.abs(py) < 0.05) py = 0;
-            double pa = -gamepad1.right_stick_x;
+            double pa = gamepad1.left_trigger - gamepad1.right_trigger;
             if (Math.abs(pa) < 0.05) pa = 0;
             double p1 = -px + py - pa;
             double p2 = px + py + -pa;
@@ -80,6 +83,9 @@ public class MechBotDemo extends LinearOpMode {
             m2.setPower(p2);
             m3.setPower(p3);
             m4.setPower(p4);
+            arm.setPower(-gamepad1.right_stick_y);
+            if (gamepad1.x) handServo.setPosition(1);
+            else if (gamepad1.b) handServo.setPosition(0);
             telemetry.addData("Color","R %d  G %d  B %d", colorSensor.red(), colorSensor.green(), colorSensor.blue());
             //telemetry.addData("Heading"," %.1f", gyro.getHeading());
             Orientation orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
