@@ -1,6 +1,7 @@
 package virtual_robot.controller;
 
 import com.qualcomm.robotcore.hardware.*;
+import javafx.fxml.FXML;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Rotate;
 import virtual_robot.util.AngleUtils;
@@ -8,7 +9,10 @@ import virtual_robot.util.AngleUtils;
 /**
  * For internal use only. Represents a robot with two standard wheels, color sensor, four distance sensors,
  * a Gyro Sensor, and a Servo-controlled arm on the back.
+ *
+ * TwoWheelBot is the controller class for the "two_wheel_bot.fxml" markup file.
  */
+@BotConfig(name = "Two Wheel Bot", filename = "two_wheel_bot")
 public class TwoWheelBot extends VirtualBot {
 
     private MotorType motorType;
@@ -19,14 +23,16 @@ public class TwoWheelBot extends VirtualBot {
     private ServoImpl servo = null;
     private VirtualRobotController.DistanceSensorImpl[] distanceSensors = null;
 
-    private Rectangle backServoArm = null;
+    //The backServoArm object is instantiated during loading via a fx:id property.
+    @FXML Rectangle backServoArm = null;
+
     private double wheelCircumference;
     private double interWheelDistance;
 
 
 
-    public TwoWheelBot(VirtualRobotController controller){
-        super(controller, "two_wheel_bot.fxml");
+    public TwoWheelBot(){
+        super();
         leftMotor = (DcMotorImpl)hardwareMap.dcMotor.get("left_motor");
         rightMotor = (DcMotorImpl)hardwareMap.dcMotor.get("right_motor");
         distanceSensors = new VirtualRobotController.DistanceSensorImpl[]{
@@ -40,7 +46,9 @@ public class TwoWheelBot extends VirtualBot {
         servo = (ServoImpl)hardwareMap.servo.get("back_servo");
         wheelCircumference = Math.PI * botWidth / 4.5;
         interWheelDistance = botWidth * 8.0 / 9.0;
-        backServoArm = (Rectangle)displayGroup.getChildren().get(6);
+    }
+
+    public void initialize(){
         backServoArm.getTransforms().add(new Rotate(0, 37.5, 67.5));
     }
 

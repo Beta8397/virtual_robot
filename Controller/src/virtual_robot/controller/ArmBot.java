@@ -5,8 +5,8 @@ import com.qualcomm.robotcore.hardware.DcMotorImpl;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.MotorType;
 import com.qualcomm.robotcore.hardware.ServoImpl;
+import javafx.fxml.FXML;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import virtual_robot.util.AngleUtils;
@@ -15,6 +15,7 @@ import virtual_robot.util.AngleUtils;
  * For internal use only. Represents a robot with four mechanum wheels, color sensor, four distance sensors,
  * a BNO055IMU, and an extensible arm with a grabber on the end.
  */
+@BotConfig(name = "Arm Bot", filename = "arm_bot")
 public class ArmBot extends VirtualBot {
 
     MotorType motorType;
@@ -26,10 +27,11 @@ public class ArmBot extends VirtualBot {
 
     private ServoImpl handServo = null;
 
-    private Rectangle arm = null;
-    private Rectangle hand = null;
-    private Rectangle leftFinger = null;
-    private Rectangle rightFinger = null;
+    @FXML private Rectangle arm;
+    @FXML private Rectangle hand;
+    @FXML private Rectangle leftFinger;
+    @FXML private Rectangle rightFinger;
+
     private double armScale = 1.0;
 
     private double wheelCircumference;
@@ -40,8 +42,8 @@ public class ArmBot extends VirtualBot {
     private double[][] tWR; //Transform from wheel motion to robot motion
 
 
-    public ArmBot(VirtualRobotController controller) {
-        super(controller, "arm_bot.fxml");
+    public ArmBot() {
+        super();
         motors = new DcMotorImpl[]{
                 (DcMotorImpl)hardwareMap.dcMotor.get("back_left_motor"),
                 (DcMotorImpl)hardwareMap.dcMotor.get("front_left_motor"),
@@ -68,17 +70,6 @@ public class ArmBot extends VirtualBot {
         interWheelLength = botWidth * 7.0 / 9.0;
         wlAverage = (interWheelLength + interWheelWidth) / 2.0;
 
-        arm = (Rectangle)displayGroup.getChildren().get(8);
-        arm.getTransforms().add(new Scale(1.0, 1.0, 37.5, 75.0));
-
-        hand = (Rectangle)displayGroup.getChildren().get(9);
-        hand.getTransforms().add(new Translate(0, 0));
-
-        leftFinger = (Rectangle)displayGroup.getChildren().get(10);
-        leftFinger.getTransforms().add(new Translate(0,0));
-
-        rightFinger = (Rectangle)displayGroup.getChildren().get(11);
-        rightFinger.getTransforms().add(new Translate(0,0));
 
         tWR = new double[][] {
                 {-0.25, 0.25, -0.25, 0.25},
@@ -86,6 +77,21 @@ public class ArmBot extends VirtualBot {
                 {-0.25/ wlAverage, -0.25/ wlAverage, 0.25/ wlAverage, 0.25/ wlAverage},
                 {-0.25, 0.25, 0.25, -0.25}
         };
+    }
+
+    public void initialize(){
+
+        //arm = (Rectangle)displayGroup.getChildren().get(8);
+        arm.getTransforms().add(new Scale(1.0, 1.0, 37.5, 75.0));
+
+        //hand = (Rectangle)displayGroup.getChildren().get(9);
+        hand.getTransforms().add(new Translate(0, 0));
+
+        //leftFinger = (Rectangle)displayGroup.getChildren().get(10);
+        leftFinger.getTransforms().add(new Translate(0,0));
+
+        //rightFinger = (Rectangle)displayGroup.getChildren().get(11);
+        rightFinger.getTransforms().add(new Translate(0,0));
     }
 
     protected void createHardwareMap(){

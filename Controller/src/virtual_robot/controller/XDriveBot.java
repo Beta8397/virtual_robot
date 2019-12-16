@@ -1,6 +1,7 @@
 package virtual_robot.controller;
 
 import com.qualcomm.robotcore.hardware.CRServoImpl;
+import javafx.fxml.FXML;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Rotate;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -12,7 +13,11 @@ import virtual_robot.util.AngleUtils;
 /**
  * For internal use only. Represents a robot with four omni wheels, color sensor, four distance sensors,
  * a BNO055IMU, and a Continuous Rotation Servo-controlled arm on the back.
+ *
+ * XDriveBot is the controller class for the "xdrive_bot.fxml" markup file.
+ *
  */
+@BotConfig(name = "XDrive Bot", filename = "xdrive_bot")
 public class XDriveBot extends VirtualBot {
 
     MotorType motorType;
@@ -23,15 +28,17 @@ public class XDriveBot extends VirtualBot {
     private CRServoImpl crServo = null;
     private VirtualRobotController.DistanceSensorImpl[] distanceSensors = null;
 
-    private Rectangle backServoArm = null;
+    // backServoArm is instantiated during loading via a fx:id property
+    @FXML private Rectangle backServoArm = null;
+
     private double wheelCircumference;
     private double wheelBaseRadius;
 
     private double[][] tWR; //Transform from wheel motion to robot motion
 
 
-    public XDriveBot(VirtualRobotController controller) {
-        super(controller, "xdrive_bot.fxml");
+    public XDriveBot() {
+        super();
         motors = new DcMotorImpl[]{
                 (DcMotorImpl)hardwareMap.dcMotor.get("back_left_motor"),
                 (DcMotorImpl)hardwareMap.dcMotor.get("front_left_motor"),
@@ -51,8 +58,6 @@ public class XDriveBot extends VirtualBot {
         wheelCircumference = Math.PI * botWidth / 4.5;
         double sqrt2 = Math.sqrt(2);
         wheelBaseRadius = botWidth * (1.0/sqrt2 - 5.0/36.0);
-        backServoArm = (Rectangle)displayGroup.getChildren().get(7);
-        backServoArm.getTransforms().add(new Rotate(0, 37.5, 67.5));
 
         tWR = new double[][] {
                 {-0.25*sqrt2, 0.25*sqrt2, -0.25*sqrt2, 0.25*sqrt2},
@@ -60,6 +65,11 @@ public class XDriveBot extends VirtualBot {
                 {-0.25/ wheelBaseRadius, -0.25/ wheelBaseRadius, 0.25/ wheelBaseRadius, 0.25/ wheelBaseRadius},
                 {-0.25, 0.25, 0.25, -0.25}
         };
+    }
+
+    public void initialize(){
+        //backServoArm = (Rectangle)displayGroup.getChildren().get(7);
+        backServoArm.getTransforms().add(new Rotate(0, 37.5, 67.5));
     }
 
     protected void createHardwareMap(){

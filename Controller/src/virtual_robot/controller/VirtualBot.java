@@ -21,11 +21,12 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
  */
 public abstract class VirtualBot {
 
+    protected static VirtualRobotController controller;
+
     protected HardwareMap hardwareMap;
 
     protected Group displayGroup = null;
 
-    protected VirtualRobotController controller;
     protected StackPane fieldPane;
     protected double fieldWidth;
     protected double halfFieldWidth;
@@ -36,15 +37,17 @@ public abstract class VirtualBot {
     protected double y = 0;
     protected double headingRadians = 0;
 
-    public VirtualBot(VirtualRobotController controller, String fxmlResourceName){
-        this.controller = controller;
+    public VirtualBot(){
         fieldPane = controller.getFieldPane();
         createHardwareMap();
         this.fieldWidth = fieldPane.getPrefWidth();
         halfFieldWidth = fieldWidth / 2.0;
         botWidth = fieldWidth / 8.0;
         halfBotWidth = botWidth / 2.0;
-        setUpDisplayGroup(fxmlResourceName);
+    }
+
+    static void setController(VirtualRobotController ctrl){
+        controller = ctrl;
     }
 
     /**
@@ -52,15 +55,10 @@ public abstract class VirtualBot {
      * a Group with a 75x75 rectangle (The chassis rectangle) as its lowest layer, and other robot components
      * on top of that rectangle.
      *
-     * @param fxmlResourceName Resource file for the virtual robot graphic
      */
-    protected void setUpDisplayGroup(String fxmlResourceName){
+    protected void setUpDisplayGroup(Group group){
 
-        try {
-            displayGroup = (Group) FXMLLoader.load(getClass().getResource(fxmlResourceName));
-        } catch(java.io.IOException Exc){
-            System.out.println("Could not load display group for two wheel bot.");
-        }
+        displayGroup = group;
 
         /*
            Create a transparent 600x600 rectangle to serve as the base layer of the robot. It will go
@@ -72,17 +70,18 @@ public abstract class VirtualBot {
         baseRect.setVisible(true);
 
         /*
-          Translate the 75x75 chassis rectangle and all other children by (300 - 37.5) in X and Y, so that the
+          Translate the display group by (300 - 37.5) in X and Y, so that the
           center of the chassis rectangle will be at the same location as the center of the 600x600 base
           rectangle.
          */
-        for (Node n: displayGroup.getChildren()){
-            n.setTranslateX(n.getTranslateX() + 300 - 37.5);
-            n.setTranslateY(n.getTranslateY() + 300 - 37.5);
-        }
 
-        // Add the 600x600 rectangle as the lowest item in the display Group, below the chassis rectangle.
-        displayGroup.getChildren().add(0, baseRect);
+        displayGroup.setTranslateX(displayGroup.getTranslateX() + 300 - 37.5);
+        displayGroup.setTranslateY(displayGroup.getTranslateY() + 300 - 37.5);
+
+        //Create a new display group with the 600x600 transparent rectangle as its base layer, and
+        //the original display group as its upper layer.
+
+        displayGroup = new Group(baseRect, displayGroup);
 
         /*
           Add transforms. They will be applied in the opposite order from the order in which they are added.

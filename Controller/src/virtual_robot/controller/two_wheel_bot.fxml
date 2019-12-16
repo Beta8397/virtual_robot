@@ -11,7 +11,7 @@
 <?import javafx.scene.paint.Stop?>
 
 <Group xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml">
+            xmlns:fx="http://javafx.com/fxml" fx:controller="virtual_robot.controller.TwoWheelBot">
     <children>
         <Rectangle arcHeight="5.0" arcWidth="5.0" fill="YELLOW" height="75.0" stroke="BLACK" strokeType="INSIDE" width="75.0" />
         <Rectangle arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="20.0" stroke="BLACK" strokeType="INSIDE" width="10.0" y="27.0" />
@@ -31,6 +31,6 @@
                     </stops>
                 </RadialGradient>
             </fill></Circle>
-        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="MAGENTA" height="5.0" stroke="BLACK" strokeType="INSIDE" width="37.5" x="5.0" y="65.0" />
+        <Rectangle fx:id="backServoArm" arcHeight="5.0" arcWidth="5.0" fill="MAGENTA" height="5.0" stroke="BLACK" strokeType="INSIDE" width="37.5" x="5.0" y="65.0" />
     </children>
 </Group>

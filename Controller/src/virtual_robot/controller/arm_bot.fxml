@@ -6,7 +6,7 @@
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.shape.Rectangle?>
 
-<Group xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1">
+<Group xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="virtual_robot.controller.ArmBot">
     <children>
         <Rectangle arcHeight="5.0" arcWidth="5.0" fill="YELLOW" height="75.0" stroke="BLACK" strokeType="INSIDE" width="75.0" />
         <Rectangle arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="20.0" stroke="BLACK" strokeType="INSIDE" width="10.0" y="55.0" />
@@ -28,9 +28,9 @@
                     </stops>
                 </RadialGradient>
             </fill></Circle>
-        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="MAGENTA" height="40.0" stroke="BLACK" strokeType="INSIDE" width="5.0" x="35.0" y="35.0" />
-        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="MAGENTA" height="5.0" stroke="BLACK" strokeType="INSIDE" width="30.0" x="22.5" y="35.0"/>
-        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="MAGENTA" height="20.0" stroke="BLACK" strokeType="INSIDE" width="5.0" x="22.5" y="20.0"/>
-        <Rectangle arcHeight="5.0"  arcWidth="5.0" fill="MAGENTA" height="20.0" stroke="BLACK" strokeType="INSIDE" width="5.0" x="47.5" y="20.0"/>
+        <Rectangle fx:id="arm" arcHeight="5.0" arcWidth="5.0" fill="MAGENTA" height="40.0" stroke="BLACK" strokeType="INSIDE" width="5.0" x="35.0" y="35.0" />
+        <Rectangle fx:id="hand" arcHeight="5.0" arcWidth="5.0" fill="MAGENTA" height="5.0" stroke="BLACK" strokeType="INSIDE" width="30.0" x="22.5" y="35.0"/>
+        <Rectangle fx:id="leftFinger" arcHeight="5.0" arcWidth="5.0" fill="MAGENTA" height="20.0" stroke="BLACK" strokeType="INSIDE" width="5.0" x="22.5" y="20.0"/>
+        <Rectangle fx:id="rightFinger" arcHeight="5.0" arcWidth="5.0" fill="MAGENTA" height="20.0" stroke="BLACK" strokeType="INSIDE" width="5.0" x="47.5" y="20.0"/>
     </children>
 </Group>

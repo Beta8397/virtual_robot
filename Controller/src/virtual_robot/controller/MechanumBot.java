@@ -1,6 +1,7 @@
 package virtual_robot.controller;
 
 import com.qualcomm.robotcore.hardware.ServoImpl;
+import javafx.fxml.FXML;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Rotate;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -12,7 +13,11 @@ import virtual_robot.util.AngleUtils;
 /**
  * For internal use only. Represents a robot with four mechanum wheels, color sensor, four distance sensors,
  * a BNO055IMU, and a Servo-controlled arm on the back.
+ *
+ * MechanumBot is the controller class for the "mechanum_bot.fxml" markup file.
+ *
  */
+@BotConfig(name = "Mechanum Bot", filename = "mechanum_bot")
 public class MechanumBot extends VirtualBot {
 
     MotorType motorType;
@@ -23,7 +28,9 @@ public class MechanumBot extends VirtualBot {
     private ServoImpl servo = null;
     private VirtualRobotController.DistanceSensorImpl[] distanceSensors = null;
 
-    private Rectangle backServoArm = null;
+    // backServoArm is instantiated during loading via a fx:id property.
+    @FXML Rectangle backServoArm = null;
+
     private double wheelCircumference;
     private double interWheelWidth;
     private double interWheelLength;
@@ -32,8 +39,8 @@ public class MechanumBot extends VirtualBot {
     private double[][] tWR; //Transform from wheel motion to robot motion
 
 
-    public MechanumBot(VirtualRobotController controller) {
-        super(controller, "mechanum_bot.fxml");
+    public MechanumBot(){
+        super();
         motors = new DcMotorImpl[]{
                 (DcMotorImpl)hardwareMap.dcMotor.get("back_left_motor"),
                 (DcMotorImpl)hardwareMap.dcMotor.get("front_left_motor"),
@@ -54,8 +61,6 @@ public class MechanumBot extends VirtualBot {
         interWheelWidth = botWidth * 8.0 / 9.0;
         interWheelLength = botWidth * 7.0 / 9.0;
         wlAverage = (interWheelLength + interWheelWidth) / 2.0;
-        backServoArm = (Rectangle)displayGroup.getChildren().get(8);
-        backServoArm.getTransforms().add(new Rotate(0, 37.5, 67.5));
 
         tWR = new double[][] {
                 {-0.25, 0.25, -0.25, 0.25},
@@ -63,6 +68,11 @@ public class MechanumBot extends VirtualBot {
                 {-0.25/ wlAverage, -0.25/ wlAverage, 0.25/ wlAverage, 0.25/ wlAverage},
                 {-0.25, 0.25, 0.25, -0.25}
         };
+    }
+
+    public void initialize(){
+        //backServoArm = (Rectangle)displayGroup.getChildren().get(8);
+        backServoArm.getTransforms().add(new Rotate(0, 37.5, 67.5));
     }
 
     protected void createHardwareMap(){
