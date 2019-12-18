@@ -5,15 +5,16 @@ and unzipped, then opened with IntelliJ.
 
 Four robot configurations are available: a simple two-wheeled robot, a robot with four mecanum wheels, an
 X-Drive robot with four OmniWheels mounted at 45 degrees at each corner of the robot, and an additional
-mecanum-wheeled configuration that has an extendable arm (DC motor-operated) with a grabber (Servo-operated)
-at the end.
+mecanum-wheeled configuration that has an extendable arm with a grabber at the end.
 
 Each robot can be thought of as 18 inches wide.  For the two-wheel bot and mecanum wheel bot, the distance between
 the centers of the right and left wheels is 16 inches. For the mecanum wheel bot, the distance between the centers
 of the front and back wheels is 14 inches, and the mecanum wheels (when viewed from the top) have an "X" configuration.
 For the X-Drive bot, the distance between the centers of any two adjacent wheels is 14.5 inches. Each motor has an
-encoder. There is a downward-facing color sensor in the center of the robot. A gyro sensor is also included. A purple
-arm on the back of the robot is controlled by a servo. Each robot also has distance sensors on the front, left, right
+encoder. There is a downward-facing color sensor in the center of the robot. A gyro sensor (or BNO055 imu) is also included.
+The ArmBot has an extendable arm (DcMotor operated) with a grabber (Servo-operated) at the end. The other robots
+have a simple rotating arm at the back. For the Mechanum bot and Two-Wheeled bot, the arm is controlled by a servo.
+For the X-Drive bot, the arm is controlled by a CR servo. Each robot also has distance sensors on the front, left, right
 and back sides. A small green rectangle indicates the front of the robot. Wheel diameters are all 4 inches.
 
 The field can be thought of as 12 feet wide. The field graphic (currently the Skystone field)
@@ -21,7 +22,8 @@ is obtained from a bitmap (.bmp) image. The color sensor detects the field color
 robot. The field graphic is easily changed by providing a different .bmp image in the virtual_robot.config.Config class.
 The .bmp image is the skysone_field648.bmp file in the virtual_robot.assets folder. If a different .bmp image is used,
 it must be at least as wide and as tall as the field dimensions (currently 648 x 648 pixels to fit on the screen of
-most laptops).
+most laptops). The Config class also allows selection between the use of "real" hardware gamepads versus a
+"virtual gamepad".
 
 An abridged approximation of the FTC SDK is provided.
 
@@ -32,12 +34,12 @@ The OpMode (and therefore LinearOpMode) class in the simulator provides access t
 
   1. A HardwareMap object, which in turn provides access to the DCMotor objects, the gyro sensor, distance sensors,
      the servo, and the color sensor;
-  2. Two GamePads(actual hardware gamepads);
+  2. Two GamePads(actual hardware gamepads, though there is an option to use a "virtual gamepad -- see Log of Changes below");
   3. A Telemetry object.
 
 An approximation of the FTC SDK's ElapsedTime class is provided in the time package.
 
-Several example OpModes are provided in the org.firstinspires.ftc.teamcode package, and are already registered in the opModeList.OpModes class.
+Several example OpModes are provided in the org.firstinspires.ftc.teamcode package.
 
 Some recent changes have simplified the process of creating new robot configurations (see  Log of Changes below).
 
@@ -47,7 +49,7 @@ To use:
      IntelliJ IDEA.
   2. Download the virtual_robot .zip, and extract contents. Open the project in IntelliJ. You'll see three modules in
      the project (Controller, TeamCode, and virtual_robot) -- the only module you'll need to touch is TeamCode. It
-     contains the opmodelist and org.firstinspires.ftc.teamcode packages, as well as an virtual_robot.assets directory.
+     contains the org.firstinspires.ftc.teamcode package.
   3. Write your OpModes in the org.firstinspires.ftc.teamcode package; make sure to include a @TeleOp or @Autonomous annotation. These must
     extend the OpMode class (may either extend OpMode OR LinearOpMode). OpMode must provide init() and loop() methods;
      LinearOpMode must provide runOpMode() method.
@@ -72,9 +74,10 @@ CHANGES 12/16/2019
     and the filename of its corresponding fxml file. The fxml file must have a Group object as its root, and must
     set the fx:controller attribute of that group to the name of the robot config class. Individual nodes
     in the group can be given fx:id attributes, which make them accessible in the robot config class by using
-    a @FXML annotation. See extensive comments in the virtual_robot.controller.VirtualBot and 
-    virtual_robot.controller.robots.classes.ArmBot classes and the virtual_robot.controller.robots.fxml.arm_bot.fxml
-    file for more explanation.
+    a @FXML annotation. The easiest way to create a new configuration is to copy, then modify, the ".java" and ".fxml"
+    files from an existing configuration (for example, MechanumBot.java and mechanum_bot.fxml). See extensive comments
+    in the virtual_robot.controller.VirtualBot and virtual_robot.controller.robots.classes.ArmBot classes and the
+    virtual_robot.controller.robots.fxml.arm_bot.fxml file for more explanation.
 
 CHANGES 12/12/2019
     Changes made to all more versatile building of new robot configurations. A transparent robot base layer (equal in

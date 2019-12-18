@@ -334,6 +334,7 @@ public class ArmBot extends VirtualBot {
         double servoPos = handServo.getInternalPosition();
         leftFingerTranslateTransform.setX(7.5 * servoPos);
         rightFingerTranslateTransform.setX(-7.5 * servoPos);
+
     }
 
     /**
