@@ -1,9 +1,12 @@
-package virtual_robot.controller;
+package virtual_robot.controller.robots.classes;
 
 import com.qualcomm.robotcore.hardware.*;
 import javafx.fxml.FXML;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Rotate;
+import virtual_robot.controller.BotConfig;
+import virtual_robot.controller.VirtualBot;
+import virtual_robot.controller.VirtualRobotController;
 import virtual_robot.util.AngleUtils;
 
 /**
@@ -12,8 +15,8 @@ import virtual_robot.util.AngleUtils;
  *
  * TwoWheelBot is the controller class for the "two_wheel_bot.fxml" markup file.
  */
-@BotConfig(name = "Two Wheel Bot", filename = "two_wheel_bot")
-public class TwoWheelBot extends VirtualBot {
+@BotConfig(name = "Circle Bot", filename = "circle_bot")
+public class CircleBot extends VirtualBot {
 
     private MotorType motorType;
     private DcMotorImpl leftMotor = null;
@@ -24,14 +27,14 @@ public class TwoWheelBot extends VirtualBot {
     private VirtualRobotController.DistanceSensorImpl[] distanceSensors = null;
 
     //The backServoArm object is instantiated during loading via a fx:id property.
-    @FXML Rectangle backServoArm = null;
+    @FXML Rectangle backServoArm;
 
     private double wheelCircumference;
     private double interWheelDistance;
 
 
 
-    public TwoWheelBot(){
+    public CircleBot(){
         super();
         leftMotor = (DcMotorImpl)hardwareMap.dcMotor.get("left_motor");
         rightMotor = (DcMotorImpl)hardwareMap.dcMotor.get("right_motor");

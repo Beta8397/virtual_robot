@@ -30,6 +30,8 @@ import javafx.scene.paint.Color;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotorImpl;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import virtual_robot.controller.robots.classes.MechanumBot;
+import virtual_robot.controller.robots.classes.TwoWheelBot;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -113,7 +115,6 @@ public class VirtualRobotController {
         VirtualBot.setController(this);
         setupCbxOpModes();
         setupCbxRobotConfigs();
-        cbxConfig.setValue(cbxConfig.getItems().get(0));
         fieldWidth = Config.FIELD_WIDTH;
         halfFieldWidth = fieldWidth / 2.0;
         fieldPane.setPrefWidth(fieldWidth);
@@ -153,7 +154,8 @@ public class VirtualRobotController {
     }
 
     private void setupCbxRobotConfigs(){
-        Reflections reflections = new Reflections(VirtualRobotApplication.class.getClassLoader());
+        //Reflections reflections = new Reflections(VirtualRobotApplication.class.getClassLoader());
+        Reflections reflections = new Reflections("virtual_robot.controller.robots.classes");
         Set<Class<?>> configClasses = new HashSet<>();
         configClasses.addAll(reflections.getTypesAnnotatedWith(BotConfig.class));
         ObservableList<Class<?>> validConfigClasses = FXCollections.observableArrayList();
@@ -162,6 +164,7 @@ public class VirtualRobotController {
                 validConfigClasses.add(c);
         }
         cbxConfig.setItems(validConfigClasses);
+        cbxConfig.setValue(MechanumBot.class);
 
         cbxConfig.setCellFactory(new Callback<ListView<Class<?>>, ListCell<Class<?>>>() {
             @Override
@@ -200,7 +203,7 @@ public class VirtualRobotController {
     public VirtualBot getVirtualBotInstance(Class<?> c){
         try {
             Annotation a = c.getAnnotation(BotConfig.class);
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(((BotConfig) a).filename() + ".fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/virtual_robot/controller/robots/fxml/" + ((BotConfig) a).filename() + ".fxml"));
             Group group = (Group) loader.load();
             VirtualBot bot = (VirtualBot) loader.getController();
             bot.setUpDisplayGroup(group);
@@ -213,7 +216,8 @@ public class VirtualRobotController {
     }
 
     private void setupCbxOpModes(){
-        Reflections reflections = new Reflections(VirtualRobotApplication.class.getClassLoader());
+        //Reflections reflections = new Reflections(VirtualRobotApplication.class.getClassLoader());
+        Reflections reflections = new Reflections("org.firstinspires.ftc.teamcode");
         Set<Class<?>> opModes = new HashSet<>();
         opModes.addAll(reflections.getTypesAnnotatedWith(TeleOp.class));
         opModes.addAll(reflections.getTypesAnnotatedWith(Autonomous.class));

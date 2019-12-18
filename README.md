@@ -39,6 +39,8 @@ An approximation of the FTC SDK's ElapsedTime class is provided in the time pack
 
 Several example OpModes are provided in the org.firstinspires.ftc.teamcode package, and are already registered in the opModeList.OpModes class.
 
+Some recent changes have simplified the process of creating new robot configurations (see  Log of Changes below).
+
 To use:
 
   1. Make sure you have the Java 8 JDK installed on your PC. Also, install the free Community Edition of JetBrains
@@ -61,6 +63,18 @@ To use:
 
 
 LOG OF CHANGES
+
+CHANGES 12/16/2019
+    Further changes to facilitate creation of new robot configurations. The robot configuration classes (e.g., 
+    MechanumBot) still extend VirtualBot. But now, these classes are also the JavaFX Controller classes for 
+    the fxml markup files that define the robot's graphical representation in the UI. The robot configuration class 
+    must have a @BotConfig annotation that indicates the name of this config (as it will be displayed to the user)
+    and the filename of its corresponding fxml file. The fxml file must have a Group object as its root, and must
+    set the fx:controller attribute of that group to the name of the robot config class. Individual nodes
+    in the group can be given fx:id attributes, which make them accessible in the robot config class by using
+    a @FXML annotation. See extensive comments in the virtual_robot.controller.VirtualBot and 
+    virtual_robot.controller.robots.classes.ArmBot classes and the virtual_robot.controller.robots.fxml.arm_bot.fxml
+    file for more explanation.
 
 CHANGES 12/12/2019
     Changes made to all more versatile building of new robot configurations. A transparent robot base layer (equal in
@@ -85,7 +99,7 @@ CHANGES 8/17/2019
 CHANGES 8/4/2019
     To better approximate real robot behavior, latency of 175ms added to the standard gyro sensor (used only on the
     Two-Wheel Bot). That is, updated values are available only every 175ms. The amount of latency can be changed
-    easily in the createHardwareMap method of the virtual_robot.controller.TwoWheelBot class. Will probably make a
+    easily in the createHardwareMap method of the virtual_robot.controller.robots.classes.TwoWheelBot class. Will probably make a
     similar change to the BNO055IMU soon.
 
 CHANGES 7/10/2019

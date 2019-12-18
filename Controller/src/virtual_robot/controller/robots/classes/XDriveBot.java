@@ -1,4 +1,4 @@
-package virtual_robot.controller;
+package virtual_robot.controller.robots.classes;
 
 import com.qualcomm.robotcore.hardware.CRServoImpl;
 import javafx.fxml.FXML;
@@ -8,6 +8,9 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.hardware.bosch.BNO055IMUImpl;
 import com.qualcomm.robotcore.hardware.DcMotorImpl;
 import com.qualcomm.robotcore.hardware.MotorType;
+import virtual_robot.controller.BotConfig;
+import virtual_robot.controller.VirtualBot;
+import virtual_robot.controller.VirtualRobotController;
 import virtual_robot.util.AngleUtils;
 
 /**
@@ -29,7 +32,7 @@ public class XDriveBot extends VirtualBot {
     private VirtualRobotController.DistanceSensorImpl[] distanceSensors = null;
 
     // backServoArm is instantiated during loading via a fx:id property
-    @FXML private Rectangle backServoArm = null;
+    @FXML private Rectangle backServoArm;
 
     private double wheelCircumference;
     private double wheelBaseRadius;

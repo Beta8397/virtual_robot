@@ -1,4 +1,4 @@
-package virtual_robot.controller;
+package virtual_robot.controller.robots.classes;
 
 import com.qualcomm.robotcore.hardware.ServoImpl;
 import javafx.fxml.FXML;
@@ -8,6 +8,9 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.hardware.bosch.BNO055IMUImpl;
 import com.qualcomm.robotcore.hardware.DcMotorImpl;
 import com.qualcomm.robotcore.hardware.MotorType;
+import virtual_robot.controller.BotConfig;
+import virtual_robot.controller.VirtualBot;
+import virtual_robot.controller.VirtualRobotController;
 import virtual_robot.util.AngleUtils;
 
 /**
@@ -29,7 +32,7 @@ public class MechanumBot extends VirtualBot {
     private VirtualRobotController.DistanceSensorImpl[] distanceSensors = null;
 
     // backServoArm is instantiated during loading via a fx:id property.
-    @FXML Rectangle backServoArm = null;
+    @FXML Rectangle backServoArm;
 
     private double wheelCircumference;
     private double interWheelWidth;
@@ -90,7 +93,6 @@ public class MechanumBot extends VirtualBot {
 
     public synchronized void updateStateAndSensors(double millis){
 
-        System.out.println("MechanumBot updateStateAndSensors");
         double[] deltaPos = new double[4];
         double[] w = new double[4];
 
@@ -126,12 +128,13 @@ public class MechanumBot extends VirtualBot {
 
         if (headingRadians > Math.PI) headingRadians -= 2.0 * Math.PI;
         else if (headingRadians < -Math.PI) headingRadians += 2.0 * Math.PI;
-        //gyro.updateHeading(headingRadians * 180.0 / Math.PI);
+
         imu.updateHeadingRadians(headingRadians);
 
         colorSensor.updateColor(x, y);
 
         final double piOver2 = Math.PI / 2.0;
+
         for (int i = 0; i<4; i++){
             double sensorHeading = AngleUtils.normalizeRadians(headingRadians + i * piOver2);
             distanceSensors[i].updateDistance( x - halfBotWidth * Math.sin(sensorHeading),

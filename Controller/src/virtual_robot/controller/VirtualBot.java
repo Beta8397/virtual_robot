@@ -17,7 +17,24 @@ import javafx.scene.transform.Translate;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 /**
- * For internal use only. Abstract base class for all of the specific robot configurations.
+ *   For internal use only. Abstract base class for all of the specific robot configurations.
+ *
+ *   A robot config class that extend VirtualBot must:
+ *
+ *   1) Provide a no-argument constructor whose first statement is super();
+ *   2) Be the controller class for an .fxml file that defines the graphical respresentation of the bot;
+ *   3) Provide a createHardwareMap() method;
+ *   4) Provide a public synchronized updateStateAndSensors(double millis) method;
+ *   5) Provide a public powerDownAndReset() method.
+ *
+ *   Optionally (and in most cases), it will also be necessary to:
+ *
+ *   1) Provide a public initialize() method for initialization of accessories whose appearance will change
+ *      as the robot operates.
+ *   2) Override the public synchronized updateDisplay() method to update the appearance of accessories.
+ *
+ *   The ArmBot class has detailed comments regarding the workings of these methods.
+ *
  */
 public abstract class VirtualBot {
 
@@ -97,10 +114,31 @@ public abstract class VirtualBot {
         fieldPane.getChildren().add(displayGroup);
     }
 
+    /**
+     *  Update the state of the robot. This includes the x, y, and headingRadians variables, as well other variables
+     *  that may need to be updated for a specific robot configuration.
+     *
+     *  Also, update the robot's sensors by calling the update.. methods of the sensors (e.g., the
+     *  updateDistance(...) method of the distance sensors).
+     *
+     *  updateStateAndSensors is called on a non-UI thread via an ExecutorService object. For that reason,
+     *  it SHOULD NOT make changes to the robot's graphical UI. Those changes should be made by
+     *  overriding the updateDisplay() method, which is run on the UI thread.
+     *
+     *  @param millis milliseconds since the previous update
+     */
     public abstract void updateStateAndSensors(double millis);
 
     /**
      *  Update the display based on the current x, y, and headingRadians of the robot.
+     *  This method is run on the UI thread via a call to Platform.runLater(...).
+     *
+     *  For most robot configurations, it will be necessary to override this method, so as to
+     *  implement graphical behavior that is specific to an individual robot configuration.
+     *
+     *  When overriding updateDisplay(), the first statement of the override method should
+     *  be: super.updateDisplay().
+     *
      */
     public synchronized void updateDisplay(){
         double displayX = x;
@@ -112,6 +150,9 @@ public abstract class VirtualBot {
         ((Rotate)displayGroup.getTransforms().get(1)).setAngle(displayAngle);
     }
 
+    /**
+     * Stop all motors; De-initialize or close other hardware (e.g. gyro/IMU) as appropriate.
+     */
     public abstract void powerDownAndReset();
 
     public double getHeadingRadians(){ return headingRadians; }
@@ -140,6 +181,10 @@ public abstract class VirtualBot {
 
     public HardwareMap getHardwareMap(){ return hardwareMap; }
 
+    /**
+     * Create the HardwareMap object for the specific robot configuration, and assign it to the
+     * hardwareMap variable.
+     */
     protected abstract void createHardwareMap();
 
 }
