@@ -321,19 +321,24 @@ public class ArmBot extends VirtualBot {
         super.updateDisplay();
 
         // Extend or retract the arm based on the value of armScale.
-        armScaleTransform.setY(armScale);
 
-        // Move the hand based on the position of armScale.
-        handTranslateTransform.setY(-40.0 * (armScale - 1.0));
+        if (Math.abs(armScale - armScaleTransform.getY()) > 0.001) {
+            armScaleTransform.setY(armScale);
 
-        // Move the fingers in the Y-direction based on the position of armScale.
-        leftFingerTranslateTransform.setY(-40.0 * (armScale - 1.0));
-        rightFingerTranslateTransform.setY(-40.0 * (armScale - 1.0));
+            // Move the hand based on the position of armScale.
+            handTranslateTransform.setY(-40.0 * (armScale - 1.0));
+
+            // Move the fingers in the Y-direction based on the position of armScale.
+            leftFingerTranslateTransform.setY(-40.0 * (armScale - 1.0));
+            rightFingerTranslateTransform.setY(-40.0 * (armScale - 1.0));
+        }
 
         // Mover fingers in the X-direction (i.e., open/close fingers) based on position of the handServo.
-        double servoPos = handServo.getInternalPosition();
-        leftFingerTranslateTransform.setX(7.5 * servoPos);
-        rightFingerTranslateTransform.setX(-7.5 * servoPos);
+        double fingerPos =  7.5 * handServo.getInternalPosition();
+        if (Math.abs(fingerPos - leftFingerTranslateTransform.getX()) > 0.001) {
+            leftFingerTranslateTransform.setX(fingerPos);
+            rightFingerTranslateTransform.setX(-fingerPos);
+        }
 
     }
 
