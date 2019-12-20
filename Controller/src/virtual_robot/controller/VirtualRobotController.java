@@ -9,6 +9,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Group;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -29,13 +30,13 @@ import javafx.scene.paint.Color;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotorImpl;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import virtual_robot.controller.robots.classes.MechanumBot;
+import virtual_robot.controller.robots.classes.TwoWheelBot;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
+import java.net.URL;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -48,7 +49,7 @@ public class VirtualRobotController {
     //User Interface
     @FXML private StackPane fieldPane;
     @FXML ImageView imgViewBackground;
-    @FXML private ComboBox<String> cbxConfig;
+    @FXML private ComboBox<Class<?>> cbxConfig;
     @FXML private Button driverButton;
     @FXML private ComboBox<Class<?>> cbxOpModes;
     @FXML private Slider sldRandomMotorError;
@@ -111,10 +112,9 @@ public class VirtualRobotController {
 
     public void initialize() {
         OpMode.setVirtualRobotController(this);
+        VirtualBot.setController(this);
         setupCbxOpModes();
-        cbxConfig.setItems(FXCollections.observableArrayList("Two Wheel Bot", "Mechanum Bot", "XDrive Bot"));
-        cbxConfig.setValue(cbxConfig.getItems().get(0));
-        //fieldWidth = fieldPane.getPrefWidth();
+        setupCbxRobotConfigs();
         fieldWidth = Config.FIELD_WIDTH;
         halfFieldWidth = fieldWidth / 2.0;
         fieldPane.setPrefWidth(fieldWidth);
@@ -153,8 +153,71 @@ public class VirtualRobotController {
         gamePadExecutorService.scheduleAtFixedRate(gamePadHelper, 0, 20, TimeUnit.MILLISECONDS);
     }
 
+    private void setupCbxRobotConfigs(){
+        //Reflections reflections = new Reflections(VirtualRobotApplication.class.getClassLoader());
+        Reflections reflections = new Reflections("virtual_robot.controller.robots.classes");
+        Set<Class<?>> configClasses = new HashSet<>();
+        configClasses.addAll(reflections.getTypesAnnotatedWith(BotConfig.class));
+        ObservableList<Class<?>> validConfigClasses = FXCollections.observableArrayList();
+        for (Class<?> c: configClasses){
+            if (!c.getAnnotation(BotConfig.class).disabled() && VirtualBot.class.isAssignableFrom(c))
+                validConfigClasses.add(c);
+        }
+        cbxConfig.setItems(validConfigClasses);
+        cbxConfig.setValue(MechanumBot.class);
+
+        cbxConfig.setCellFactory(new Callback<ListView<Class<?>>, ListCell<Class<?>>>() {
+            @Override
+            public ListCell<Class<?>> call(ListView<Class<?>> param) {
+                final ListCell<Class<?>> cell = new ListCell<Class<?>>(){
+                    @Override
+                    protected void updateItem(Class<?> cl, boolean bln){
+                        super.updateItem(cl, bln);
+                        if (cl == null){
+                            setText(null);
+                            return;
+                        }
+                        Annotation a = cl.getAnnotation(BotConfig.class);
+                        setText(((BotConfig)a).name());
+                    }
+                };
+                return cell;
+            }
+        });
+
+        cbxConfig.setButtonCell(new ListCell<Class<?>>(){
+            @Override
+            protected void updateItem(Class<?> cl, boolean bln) {
+                super.updateItem(cl, bln);
+                if (cl == null) {
+                    setText(null);
+                    return;
+                }
+                Annotation a = cl.getAnnotation(BotConfig.class);
+                setText(((BotConfig) a).name());
+            }
+        });
+    }
+
+
+    public VirtualBot getVirtualBotInstance(Class<?> c){
+        try {
+            Annotation a = c.getAnnotation(BotConfig.class);
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/virtual_robot/controller/robots/fxml/" + ((BotConfig) a).filename() + ".fxml"));
+            Group group = (Group) loader.load();
+            VirtualBot bot = (VirtualBot) loader.getController();
+            bot.setUpDisplayGroup(group);
+            return bot;
+        } catch (Exception e){
+            System.out.println("Unable to load robot configuration.");
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
+
     private void setupCbxOpModes(){
-        Reflections reflections = new Reflections(VirtualRobotApplication.class.getClassLoader());
+        //Reflections reflections = new Reflections(VirtualRobotApplication.class.getClassLoader());
+        Reflections reflections = new Reflections("org.firstinspires.ftc.teamcode");
         Set<Class<?>> opModes = new HashSet<>();
         opModes.addAll(reflections.getTypesAnnotatedWith(TeleOp.class));
         opModes.addAll(reflections.getTypesAnnotatedWith(Autonomous.class));
@@ -243,13 +306,8 @@ public class VirtualRobotController {
     public void setConfig(ActionEvent event){
         if (opModeInitialized || opModeStarted) return;
         if (bot != null) bot.removeFromDisplay(fieldPane);
-        if (cbxConfig.getValue().equals("Mechanum Bot")){
-            bot = new MechanumBot(this);
-        } else if (cbxConfig.getValue().equals("Two Wheel Bot")){
-            bot = new TwoWheelBot(this);
-        } else {
-            bot = new XDriveBot(this);
-        }
+        bot = getVirtualBotInstance(cbxConfig.getValue());
+        if (bot == null) System.out.println("Unable to get VirtualBot Object");
         hardwareMap = bot.getHardwareMap();
         initializeTelemetryTextArea();
         sldRandomMotorError.setValue(0.0);
@@ -460,7 +518,7 @@ public class VirtualRobotController {
         public synchronized int green(){ return green; }
         public synchronized int blue(){ return blue; }
 
-        synchronized void updateColor(double x, double y){
+        public synchronized void updateColor(double x, double y){
             int colorX = (int)(x + halfFieldWidth);
             int colorY = (int)(halfFieldWidth - y);
             double tempRed = 0.0;

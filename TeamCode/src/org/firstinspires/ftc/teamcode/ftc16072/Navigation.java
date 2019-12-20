@@ -30,7 +30,7 @@ public class Navigation {
         Orientation angles;
 
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, angleUnit);
-        return -angles.firstAngle;   // Not sure why this is negative, but philip guessed it :)
+        return angles.firstAngle;
 
     }
 
@@ -39,7 +39,7 @@ public class Navigation {
         double heading = getHeading(AngleUnit.RADIANS);
 
         drive.subtractAngle(heading);
-        mecanumDrive.driveMecanum(drive.getY(), drive.getX(), rotate);
+        mecanumDrive.driveMecanum(drive.getX(), -drive.getY(), rotate);
     }
 
     public void strafe(double speed) {
