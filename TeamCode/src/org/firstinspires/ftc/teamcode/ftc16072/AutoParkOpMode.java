@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.ftc16072;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -8,7 +9,7 @@ import org.firstinspires.ftc.teamcode.ftc16072.Util.RobotPosition;
 import java.util.Arrays;
 import java.util.List;
 
-@TeleOp(name = "Auto Park", group = "ftc16072")
+@Autonomous(name = "Park", group = "ftc16072")
 public class AutoParkOpMode extends QQ_AutoBase {
 
     private boolean startDepot = true;
@@ -43,10 +44,12 @@ public class AutoParkOpMode extends QQ_AutoBase {
     private RobotPosition getStartPosition() {
         double startX = 0;
         double startY = 0;
+        double heading = 0;
 
         if (startDepot && redAliance) {
             startX = 60;
             startY = -36;
+            heading = 180;
         }
         if (startDepot && !redAliance) {
             startX = -60;
@@ -59,15 +62,15 @@ public class AutoParkOpMode extends QQ_AutoBase {
         if (!startDepot && redAliance) {
             startX = 60;
             startY = 36;
+            heading = 180;
         }
-        return new RobotPosition(startX, startY, DistanceUnit.INCH, 0, AngleUnit.RADIANS);
+        return new RobotPosition(startX, startY, DistanceUnit.INCH, heading, AngleUnit.DEGREES);
 
     }
 
     List<QQ_AutoAction> getSteps() {
         QQ_ActionSetPosition startPosition =
-                new QQ_ActionSetPosition(getStartPosition().getX(DistanceUnit.INCH),
-                        getStartPosition().getY(DistanceUnit.INCH), DistanceUnit.INCH);
+                new QQ_ActionSetPosition(getStartPosition());
         if (redAliance) {
             if (startDepot && farPark) {
                 return Arrays.asList(
@@ -121,5 +124,4 @@ public class AutoParkOpMode extends QQ_AutoBase {
                 startPosition
         );
     }
-
 }
