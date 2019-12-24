@@ -346,6 +346,10 @@ public class VirtualRobotController {
             while (opModeStarted && !Thread.currentThread().isInterrupted()) {
                 //For regular opMode, run user-defined loop() method. For Linear opMode, loop() checks whether
                 //runOpMode has exited; if so, it interrupts the opModeThread.
+
+                // to keep the guarantee that this is updated
+                opMode.time = opMode.getRuntime();
+
                 opMode.loop();
                 //For regular op mode only, update telemetry after each execution of loop()
                 //For linear op mode, do-nothing
