@@ -75,6 +75,8 @@ public class AutoParkOpMode extends QQ_AutoBase {
             if (startDepot && farPark) {
                 return Arrays.asList(
                         startPosition,
+                        new QQ_ActionRotateTo(45, AngleUnit.DEGREES),
+                        new QQ_ActionDelayFor(1.0),
                         new QQ_ActionDriveTo(32, -36, DistanceUnit.INCH),
                         new QQ_ActionDriveTo(32, 0, DistanceUnit.INCH));
             }

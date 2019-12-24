@@ -49,12 +49,10 @@ public class Navigation {
     }
 
     public void driveFieldRelativeAngle(double x, double y, double angle) {
-        double delta = angle - getHeading(AngleUnit.RADIANS);
-        if (delta >= Math.PI) {
-            delta = delta - (2 * Math.PI);
-        } else if (delta <= -Math.PI) {
-            delta = delta + (2 * Math.PI);
-        }
+        double angle_in = angle - (Math.PI / 2);  // convert to robot coordinates
+
+        double delta = AngleUnit.normalizeRadians(getHeading(AngleUnit.RADIANS) - angle_in);
+
         double MAX_ROTATE = 0.7; //This is to shrink how fast we can rotate so we don't fly past the angle
         delta = Range.clip(delta, -MAX_ROTATE, MAX_ROTATE);
         driveFieldRelative(x, y, delta);
@@ -90,7 +88,7 @@ public class Navigation {
     public boolean rotateTo(double angle, AngleUnit angleUnit) {
         double rotateSpeed = 0.0;
 
-        double rotateDiff = angleUnit.toRadians(angle) - getHeading(AngleUnit.RADIANS);
+        double rotateDiff = AngleUnit.normalizeRadians(getHeading(AngleUnit.RADIANS) - angleUnit.toRadians(angle));
         if (Math.abs(rotateDiff) <= ANGLE_TOLARANCE) {
             mecanumDrive.driveMecanum(0, 0, 0);
             return true;
