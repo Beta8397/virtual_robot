@@ -1,4 +1,8 @@
-A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
+# A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
+
+**Note: a 3D version is now available here:** [virtual_robot_3D](https://github.com/Beta8397/virtual_robot_3D).
+But, JavaFX 3D Scenes are not supported by all hardware platforms, so the 3D version may or may not work on
+your system.
 
 This is a JavaFX application developed using the (free) IntelliJ IDEA Community Edition IDE. The repository can be downloaded
 and unzipped, then opened with IntelliJ.
