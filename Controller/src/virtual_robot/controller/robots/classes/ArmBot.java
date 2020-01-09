@@ -200,7 +200,7 @@ public class ArmBot extends VirtualBot {
         for (String name: distNames) hardwareMap.put(name, controller.new DistanceSensorImpl());
 
         //Add the BNO055IMUImpl sensor
-        hardwareMap.put("imu", new BNO055IMUImpl(this, 175));
+        hardwareMap.put("imu", new BNO055IMUImpl(this, 10));
 
         //Add the ColorSensorImpl sensor
         hardwareMap.put("color_sensor", controller.new ColorSensorImpl());
