@@ -1,6 +1,6 @@
 # A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
 
-**Note: a 3D version is now available here:** [virtual_robot_3D](https://github.com/Beta8397/virtual_robot_3D).
+**Note: a Physics-based 3D version is now available here:** [vr_physics](https://github.com/Beta8397/vr_physics).
 But, JavaFX 3D Scenes are not supported by all hardware platforms, so the 3D version may or may not work on
 your system.
 
