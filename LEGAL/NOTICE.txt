@@ -1,4 +1,4 @@
-Copyright 2019 Team Beta
+Virtual Robot, Copyright 2019 Team Beta
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ Copyright 2019 Team Beta
 
    Guava: Google Core Libraries for Java (Copyright 2017, Google, Inc.), Licensed under Apache License, Version 2.0
 
-   Reflections Library for Java
+   Reflections Library for Java (Copyright 2004, Sam Hocevar), Licensed under the Do What ******** You Want To License, Version 2
 
    Javassist software (Copyright 1999-2019, Shigeru Chiba), Licensed under Apache License, Version 2.0
 
