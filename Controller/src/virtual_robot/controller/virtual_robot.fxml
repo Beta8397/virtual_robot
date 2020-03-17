@@ -67,6 +67,15 @@
                   <Insets top="15.0" />
                </VBox.margin>
             </HBox>
+            <HBox prefHeight="100.0" prefWidth="200.0">
+               <children>
+                  <CheckBox fx:id="cbxShowPath" mnemonicParsing="false" onAction="#handleCbxShowPathAction" text="Show Path">
+                     <padding>
+                        <Insets left="10.0" top="15.0" />
+                     </padding>
+                  </CheckBox>
+               </children>
+            </HBox>
          </children>
       </VBox>
    </right>

@@ -13,6 +13,8 @@ import javafx.scene.Group;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.shape.Polyline;
+import javafx.scene.shape.Rectangle;
 import javafx.util.Callback;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.reflections.Reflections;
@@ -59,6 +61,7 @@ public class VirtualRobotController {
     @FXML private CheckBox checkBoxGamePad1;
     @FXML private CheckBox checkBoxGamePad2;
     @FXML private BorderPane borderPane;
+    @FXML private CheckBox cbxShowPath;
 
     //Virtual Hardware
     private HardwareMap hardwareMap = null;
@@ -75,6 +78,9 @@ public class VirtualRobotController {
     private PixelReader pixelReader = backgroundImage.getPixelReader();
     private double halfFieldWidth;
     private double fieldWidth;
+
+    //Path Drawing
+    Polyline pathLine;
 
     //Lists of OpMode classes and OpMode Names
     private ObservableList<Class<?>> nonDisabledOpModeClasses = null;
@@ -127,6 +133,13 @@ public class VirtualRobotController {
         imgViewBackground.setFitHeight(fieldWidth);
         imgViewBackground.setViewport(new Rectangle2D(0, 0, fieldWidth, fieldWidth));
         imgViewBackground.setImage(backgroundImage);
+        Rectangle pathRect = new Rectangle(fieldWidth, fieldWidth);
+        pathRect.setFill(Color.color(1,0,0,0));
+        pathLine = new Polyline();
+        pathLine.setStroke(Color.LAWNGREEN);
+        pathLine.setStrokeWidth(2);
+        pathLine.setVisible(false);
+        fieldPane.getChildren().addAll(new Group(pathRect, pathLine));
         sldRandomMotorError.valueProperty().addListener(sliderChangeListener);
         sldSystematicMotorError.valueProperty().addListener(sliderChangeListener);
         sldMotorInertia.valueProperty().addListener(sliderChangeListener);
@@ -321,6 +334,7 @@ public class VirtualRobotController {
     private void handleDriverButtonAction(ActionEvent event){
         if (!opModeInitialized){
             if (!initOpMode()) return;
+            pathLine.getPoints().clear();
             txtTelemetry.setText("");
             driverButton.setText("START");
             opModeInitialized = true;
@@ -337,6 +351,7 @@ public class VirtualRobotController {
                 @Override
                 public void run() {
                     bot.updateDisplay();
+                    pathLine.getPoints().addAll(halfFieldWidth + bot.x, halfFieldWidth - bot.y);
                     updateTelemetryDisplay();
                 }
             };
@@ -460,7 +475,11 @@ public class VirtualRobotController {
         return true;
     }
 
-
+    @FXML
+    private void handleCbxShowPathAction(ActionEvent event){
+        if (pathLine == null) return;
+        pathLine.setVisible(cbxShowPath.isSelected());
+    }
 
     private void updateTelemetryDisplay(){
         if (telemetryTextChanged && telemetryText != null) txtTelemetry.setText(telemetryText);
