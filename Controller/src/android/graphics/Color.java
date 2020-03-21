@@ -20,4 +20,16 @@ public class Color {
         hsv[1] = (float)temp[1];
         hsv[2] = (float)temp[2];
     }
+
+    public static int HSVToColor(float[] hsv){
+        double[] rgb = Utils.HSBtoRGB(hsv[0], hsv[1], hsv[2]);
+        int red = (int)Math.floor(256.0*rgb[0]);
+        if (red == 256) red = 255;
+        int green = (int)Math.floor(256.0*rgb[1]);
+        if (green == 256) green = 255;
+        int blue = (int)Math.floor(256.0*rgb[2]);
+        if (blue == 256) blue = 255;
+        int color = (red << 16 ) | (green << 8) | blue;
+        return color;
+    }
 }

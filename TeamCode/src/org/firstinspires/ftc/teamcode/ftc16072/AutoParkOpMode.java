@@ -7,7 +7,11 @@ import org.firstinspires.ftc.teamcode.ftc16072.Util.RobotPosition;
 
 import java.util.Arrays;
 import java.util.List;
-
+/**
+ * Autonomous Parking OpMode contributed by ftc16072.
+ * For red alliance: start with robot in square next to the blue depot, facing toward the building zone.
+ * For blue alliance: start with robot in square next to the blue building site, facing toward the loading zone.
+ */
 @Autonomous(name = "Park", group = "ftc16072")
 public class AutoParkOpMode extends QQ_AutoBase {
     List<QQ_AutoAction> getSteps() {

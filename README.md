@@ -1,4 +1,97 @@
-A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
+# A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
+
+**Note: a Physics-based 3D version is now available here:** [vr_physics](https://github.com/Beta8397/vr_physics).
+But, JavaFX 3D Scenes are not supported by all hardware platforms, so the 3D version may or may not work on
+your system.
+
+This is a JavaFX application developed using the (free) IntelliJ IDEA Community Edition IDE. The repository can be downloaded
+and unzipped, then opened with IntelliJ.
+
+Four robot configurations are available: a simple two-wheeled robot, a robot with four mecanum wheels, an
+X-Drive robot with four OmniWheels mounted at 45 degrees at each corner of the robot, and an additional
+mecanum-wheeled configuration that has an extendable arm with a grabber at the end.
+
+Each robot can be thought of as 18 inches wide.  For the two-wheel bot and mecanum wheel bot, the distance between
+the centers of the right and left wheels is 16 inches. For the mecanum wheel bot, the distance between the centers
+of the front and back wheels is 14 inches, and the mecanum wheels (when viewed from the top) have an "X" configuration.
+For the X-Drive bot, the distance between the centers of any two adjacent wheels is 14.5 inches. Each motor has an
+encoder. There is a downward-facing color sensor in the center of the robot. A gyro sensor (or BNO055 imu) is also included.
+The ArmBot has an extendable arm (DcMotor operated) with a grabber (Servo-operated) at the end. The other robots
+have a simple rotating arm at the back. For the Mechanum bot and Two-Wheeled bot, the arm is controlled by a servo.
+For the X-Drive bot, the arm is controlled by a CR servo. Each robot also has distance sensors on the front, left, right
+and back sides. A small green rectangle indicates the front of the robot. Wheel diameters are all 4 inches.
+
+The field can be thought of as 12 feet wide. The field graphic (currently the Skystone field)
+is obtained from a bitmap (.bmp) image. The color sensor detects the field color beneath the center of the
+robot. The field graphic is easily changed by providing a different .bmp image in the virtual_robot.config.Config class.
+The .bmp image is the skysone_field648.bmp file in the virtual_robot.assets folder. If a different .bmp image is used,
+it must be at least as wide and as tall as the field dimensions (currently 648 x 648 pixels to fit on the screen of
+most laptops). The Config class also allows selection between the use of "real" hardware gamepads versus a
+"virtual gamepad".
+
+An abridged approximation of the FTC SDK is provided.
+
+User-defined OpModes must be placed in the org.firstinspires.ftc.teamcode package, and must extend OpMode (or LinearOpMode). OpModes are
+registered by placing a @TeleOp or @Autonomous annotation immediately above the class declaration.
+
+The OpMode (and therefore LinearOpMode) class in the simulator provides access to:
+
+  1. A HardwareMap object, which in turn provides access to the DCMotor objects, the gyro sensor, distance sensors,
+     the servo, and the color sensor;
+  2. Two GamePads(actual hardware gamepads, though there is an option to use a "virtual gamepad -- see Log of Changes below");
+  3. A Telemetry object.
+
+An approximation of the FTC SDK's ElapsedTime class is provided in the time package.
+
+Several example OpModes are provided in the org.firstinspires.ftc.teamcode package.
+
+Some recent changes have simplified the process of creating new robot configurations (see  Log of Changes below).
+
+To use:
+
+  1. Make sure you have the Java 8 JDK installed on your PC. Also, install the free Community Edition of JetBrains
+     IntelliJ IDEA.
+  2. Download the virtual_robot .zip, and extract contents. Open the project in IntelliJ. You'll see three modules in
+     the project (Controller, TeamCode, and virtual_robot) -- the only module you'll need to touch is TeamCode. It
+     contains the org.firstinspires.ftc.teamcode package.
+  3. Write your OpModes in the org.firstinspires.ftc.teamcode package; make sure to include a @TeleOp or @Autonomous annotation. These must
+    extend the OpMode class (may either extend OpMode OR LinearOpMode). OpMode must provide init() and loop() methods;
+     LinearOpMode must provide runOpMode() method.
+  4. Make sure at least one gamepad is plugged in to the computer.
+  5. Run the application (by clicking the green arrowhead at the toolbar).
+  6. Press start-A or start-B on gamepad(s) to select which is gamepad1 vs. gamepad2.
+  7. Use Configuration dropdown box to select a robot configuration. The configuration will be displayed.
+  8. Use the Op Mode drop down box to select the desired OpMode.
+  9. Prior to initialization, position the robot on the field by left-mouse-clicking the field (for robot position),
+     and right-mouse-clicking (for robot orientation).
+  10. Use the INIT/START/STOP button as you would on the FTC Driver Station.
+  11. If desired use the sliders to introduce random and systematic motor error, and inertia.
+
+
+LOG OF CHANGES
+
+CHANGES 12/16/2019
+    Further changes to facilitate creation of new robot configurations. The robot configuration classes (e.g., 
+    MechanumBot) still extend VirtualBot. But now, these classes are also the JavaFX Controller classes for 
+    the fxml markup files that define the robot's graphical representation in the UI. The robot configuration class 
+    must have a @BotConfig annotation that indicates the name of this config (as it will be displayed to the user)
+    and the filename of its corresponding fxml file. The fxml file must have a Group object as its root, and must
+    set the fx:controller attribute of that group to the name of the robot config class. Individual nodes
+    in the group can be given fx:id attributes, which make them accessible in the robot config class by using
+    a @FXML annotation. The easiest way to create a new configuration is to copy, then modify, the ".java" and ".fxml"
+    files from an existing configuration (for example, MechanumBot.java and mechanum_bot.fxml). See extensive comments
+    in the virtual_robot.controller.VirtualBot and virtual_robot.controller.robots.classes.ArmBot classes and the
+    virtual_robot.controller.robots.fxml.arm_bot.fxml file for more explanation.
+
+CHANGES 12/12/2019
+    Changes made to all more versatile building of new robot configurations. A transparent robot base layer (equal in
+    width to the field) was added. This makes it possible for the robot to have accessories that extend well beyond
+    the chassis in all four directions. A new robot configuration, ArmBot, was added. It has an extensible arm with a
+    grabber at the end. The arm is DC Motor-operated. The grabber is Servo-operated. It is a mecanum-wheeled bot.
+
+CHANGES 11/29/2019
+    Range class and additional op modes contributed by FTC Team 16072. Servo interface (and ServoImpl class)
+    enhanced with more features of the actual FTC SDK: ability to reverse direction and to scale position range.
 
 CHANGES 10/6/2019
     Added the option of using "Virtual GamePad" instead of real GamePad. To do this, go to the Config.java class in the
@@ -13,7 +106,7 @@ CHANGES 8/17/2019
 CHANGES 8/4/2019
     To better approximate real robot behavior, latency of 175ms added to the standard gyro sensor (used only on the
     Two-Wheel Bot). That is, updated values are available only every 175ms. The amount of latency can be changed
-    easily in the createHardwareMap method of the virtual_robot.controller.TwoWheelBot class. Will probably make a
+    easily in the createHardwareMap method of the virtual_robot.controller.robots.classes.TwoWheelBot class. Will probably make a
     similar change to the BNO055IMU soon.
 
 CHANGES 7/10/2019
@@ -34,7 +127,7 @@ CHANGES 7/06/2019
 
 CHANGES 7/01/2019
     Now supports two GamePads instead of just one. Use start-A and start-B to select gamepad1 and gamepad2, as
-    you would in the FTC SDK. Two op modes for Mechanum Bot contributed by FTC team 16072, including a nice
+    you would in the FTC SDK. Two op modes for Mecanum Bot contributed by FTC team 16072, including a nice
     demonstration of field-centric drive using the IMU. These are in the org.firstinspires.ftc.teamcode.ftc16072 package.
 
 CHANGES 6/25/2019
@@ -42,7 +135,7 @@ CHANGES 6/25/2019
 
 CHANGES 4/3/2019
     1. Added BNO055IMU interface to simulate (in a limited way) coding for the IMU in the REV Expansion Hub.
-    2. The Mechanum Bot and X Drive Bot now have a BNO055IMU rather than the original gyro.
+    2. The Mecanum Bot and X Drive Bot now have a BNO055IMU rather than the original gyro.
     3. The Two-Wheel Bot still has the original gyro.
     4. DCMotor interface renamed to DcMotor, in keeping the the FTC SDK.
     5. New utility classes: enum AngleUnit, enum AxesOrder, enum AxesReference, class Orientation
@@ -54,61 +147,4 @@ CHANGES 3/23/2019
     4. Added Color class with single static method: RGBtoHSV(red, green, blue, hsv).
     5. Added distance sensors to all robot configurations to measure distance from walls.
     6. Replaced LineFollow example opMode with MechBotAutoDemo, a line follower that actually works.
-
-This is a JavaFX application developed using the (free) IntelliJ IDEA Community Edition IDE. The repository can be downloaded
-and unzipped, then opened with IntelliJ.
-
-Three robot configurations are available: a simple two-wheeled robot, a robot with four mechanum wheels, and an
-X-Drive robot with four OmniWheels mounted at 45 degrees at each corner of the robot.
-
-Each robot can be thought of as 18 inches wide.  For the two-wheel bot and mechanum wheel bot, the distance between
-the centers of the right and left wheels is 16 inches. For the mechanum wheel bot, the distance between the centers
-of the front and back wheels is 14 inches, and the mechanum wheels (when viewed from the top) have an "X" configuration.
-For the X-Drive bot, the distance between the centers of any two adjacent wheels is 14.5 inches. Each motor has an
-encoder. There is a downward-facing color sensor in the center of the robot. A gyro sensor is also included. A purple
-arm on the back of the robot is controlled by a servo. Each robot also has distance sensors on the front, left, right
-and back sides. A small green rectangle indicates the front of the robot. Wheel diameters are all 4 inches.
-
-The field can be thought of as 12 feet wide. The field graphic (currently the Skystone field)
-is obtained from a bitmap (.bmp) image. The color sensor detects the field color beneath the center of the
-robot. The field graphic is easily changed by providing a different .bmp image in the virtual_robot.config.Config class.
-The .bmp image is the skysone_field648.bmp file in the virtual_robot.assets folder. If a different .bmp image is used,
-it must be at least as wide and as tall as the field dimensions (currently 648 x 648 pixels to fit on the screen of
-most laptops).
-
-An abridged approximation of the FTC SDK is provided.
-
-User-defined OpModes must be placed in the org.firstinspires.ftc.teamcode package, and must extend OpMode (or LinearOpMode). OpModes are
-registered by placing a @TeleOp or @Autonomous annotation immediately above the class declaration.
-
-The OpMode (and therefore LinearOpMode) class in the simulator provides access to:
-
-  1. A HardwareMap object, which in turn provides access to the DCMotor objects, the gyro sensor, distance sensors,
-     the servo, and the color sensor;
-  2. Two GamePads(actual hardware gamepads);
-  3. A Telemetry object.
-
-An approximation of the FTC SDK's ElapsedTime class is provided in the time package.
-
-Several example OpModes are provided in the org.firstinspires.ftc.teamcode package, and are already registered in the opModeList.OpModes class.
-
-To use:
-
-  1. Make sure you have the Java 8 JDK installed on your PC. Also, install the free Community Edition of JetBrains
-     IntelliJ IDEA.
-  2. Download the virtual_robot .zip, and extract contents. Open the project in IntelliJ. You'll see three modules in
-     the project (Controller, TeamCode, and virtual_robot) -- the only module you'll need to touch is TeamCode. It
-     contains the opmodelist and org.firstinspires.ftc.teamcode packages, as well as an virtual_robot.assets directory.
-  3. Write your OpModes in the org.firstinspires.ftc.teamcode package; make sure to include a @TeleOp or @Autonomous annotation. These must
-    extend the OpMode class (may either extend OpMode OR LinearOpMode). OpMode must provide init() and loop() methods;
-     LinearOpMode must provide runOpMode() method.
-  4. Make sure at least one gamepad is plugged in to the computer.
-  5. Run the application (by clicking the green arrowhead at the toolbar).
-  6. Press start-A or start-B on gamepad(s) to select which is gamepad1 vs. gamepad2.
-  7. Use Configuration dropdown box to select "Two Wheeled Bot" or "Mechanum Bot". The configuration will be displayed.
-  8. Use the Op Mode drop down box to select the desired OpMode.
-  9. Prior to initialization, position the robot on the field by left-mouse-clicking the field (for robot position),
-     and right-mouse-clicking (for robot orientation).
-  10. Use the INIT/START/STOP button as you would on the FTC Driver Station.
-  11. If desired use the sliders to introduce random and systematic motor error, and inertia.
 

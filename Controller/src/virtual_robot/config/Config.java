@@ -3,14 +3,18 @@ package virtual_robot.config;
 import javafx.scene.image.Image;
 
 /**
- * Container class for the BACKGROUND image for the field.
+ * Class for configuring field (width and image), and gamepad (virtual vs. real)
  */
 public class Config {
 
-    //Width of Field (in pixels)
+    /**
+     *  Width of the field, in pixels
+     */
     public static final double FIELD_WIDTH = 648;
 
-    //Whether to use "Virtual Gamepad" (true -> Virtual gamepad, false -> Real gamepad)
+    /**
+     * Whether to use "Virtual Gamepad" (true -> Virtual gamepad, false -> Real gamepad)
+     */
     public static final boolean USE_VIRTUAL_GAMEPAD = false;
 
     /**
