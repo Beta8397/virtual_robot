@@ -5,7 +5,10 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import virtual_robot.util.AngleUtils;
 
-public class MecBot {
+/**
+ * Utility class that represents a robot with mecanum drive wheels and three "dead-wheel" encoders.
+ */
+public class EncBot {
 
     public final double WHEEL_DIAMETER = 4;
     public final double INTER_WHEEL_WIDTH = 16;

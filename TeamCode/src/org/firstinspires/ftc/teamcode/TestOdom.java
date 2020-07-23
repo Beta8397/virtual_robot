@@ -3,10 +3,13 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+/**
+ * TeleOp op mode to test odometry with three "dead-wheel" encoders.
+ */
 @TeleOp(name = "TestOdom", group = "OdomBot")
 public class TestOdom extends LinearOpMode {
 
-    MecBot bot = new MecBot();
+    EncBot bot = new EncBot();
     double[] pose;
 
     public void runOpMode(){
