@@ -1,7 +1,10 @@
 package virtual_robot.controller;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.Slider;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Circle;
@@ -16,6 +19,14 @@ public class VirtualGamePadController {
     @FXML Button btnY;
     @FXML Button btnA;
     @FXML Button btnB;
+    @FXML Button btnDU;
+    @FXML Button btnDL;
+    @FXML Button btnDR;
+    @FXML Button btnDD;
+    @FXML Button btnLB;
+    @FXML Button btnRB;
+    @FXML Slider sldLeft;
+    @FXML Slider sldRight;
 
     volatile float left_stick_x = 0;
     volatile float left_stick_y = 0;
@@ -25,8 +36,31 @@ public class VirtualGamePadController {
     volatile boolean yPressed = false;
     volatile boolean aPressed = false;
     volatile boolean bPressed = false;
+    volatile boolean dUPressed = false;
+    volatile boolean dLPressed = false;
+    volatile boolean dRPressed = false;
+    volatile boolean dDPressed = false;
+    volatile boolean lBPressed = false;
+    volatile boolean rBPressed = false;
+    volatile float leftTrigger = 0;
+    volatile float rightTrigger = 0;
+
 
     VirtualRobotController virtualRobotController = null;
+
+    ChangeListener<Number> sliderChangeListener = new ChangeListener<Number>() {
+        @Override
+        public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+            leftTrigger = (float)sldLeft.getValue();
+            rightTrigger = (float)sldRight.getValue();
+        }
+    };
+
+    public void initialize(){
+        System.out.println("Initializing virtual gamepad");
+        sldLeft.valueProperty().addListener(sliderChangeListener);
+        sldRight.valueProperty().addListener(sliderChangeListener);
+    }
 
     void setVirtualRobotController(VirtualRobotController vrController){
         virtualRobotController = vrController;
@@ -65,6 +99,12 @@ public class VirtualGamePadController {
         else if (btn == btnY) yPressed = result;
         else if (btn == btnA) aPressed = result;
         else if (btn == btnB) bPressed = result;
+        else if (btn == btnDU) dUPressed = result;
+        else if (btn == btnDL) dLPressed = result;
+        else if (btn == btnDR) dRPressed = result;
+        else if (btn == btnDD) dDPressed = result;
+        else if (btn == btnLB) lBPressed = result;
+        else if (btn == btnRB) rBPressed = result;
     }
 
     void resetGamePad(){
@@ -76,6 +116,16 @@ public class VirtualGamePadController {
         bPressed = false;
         xPressed = false;
         yPressed = false;
+        dUPressed = false;
+        dLPressed = false;
+        dRPressed = false;
+        dDPressed = false;
+        lBPressed = false;
+        rBPressed = false;
+        sldLeft.setValue(0);
+        sldRight.setValue(0);
+        leftTrigger = 0;
+        rightTrigger = 0;
         joyStickLeftHandle.setTranslateX(50);
         joyStickLeftHandle.setTranslateY(50);
         joyStickRightHandle.setTranslateX(50);
@@ -92,6 +142,14 @@ public class VirtualGamePadController {
         public final boolean b;
         public final boolean x;
         public final boolean y;
+        public final boolean dpad_up;
+        public final boolean dpad_left;
+        public final boolean dpad_right;
+        public final boolean dpad_down;
+        public final boolean left_bumper;
+        public final boolean right_bumper;
+        public final float left_trigger;
+        public final float right_trigger;
 
         public ControllerState(){
             leftStickX = VirtualGamePadController.this.left_stick_x;
@@ -102,6 +160,14 @@ public class VirtualGamePadController {
             b = VirtualGamePadController.this.bPressed;
             x = VirtualGamePadController.this.xPressed;
             y = VirtualGamePadController.this.yPressed;
+            dpad_up = VirtualGamePadController.this.dUPressed;
+            dpad_left = VirtualGamePadController.this.dLPressed;
+            dpad_right = VirtualGamePadController.this.dRPressed;
+            dpad_down = VirtualGamePadController.this.dDPressed;
+            left_bumper = VirtualGamePadController.this.lBPressed;
+            right_bumper = VirtualGamePadController.this.rBPressed;
+            left_trigger = VirtualGamePadController.this.leftTrigger;
+            right_trigger = VirtualGamePadController.this.rightTrigger;
         }
     }
 

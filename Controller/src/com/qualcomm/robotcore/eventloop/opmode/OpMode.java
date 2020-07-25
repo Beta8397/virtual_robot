@@ -181,7 +181,5 @@ public abstract class OpMode extends VirtualRobotController.OpModeBase {
     /**
      * automatically update telemetry in a non-linear opmode
      */
-    public void internalPostLoop() {
-        telemetry.update();
-    }
+    public void internalPostLoop() { telemetry.update(); }
 }
