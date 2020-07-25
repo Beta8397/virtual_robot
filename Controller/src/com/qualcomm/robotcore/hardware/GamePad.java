@@ -135,19 +135,19 @@ public class GamePad {
         left_stick_y = setWithDeadzone(state.leftStickY);
         right_stick_x = setWithDeadzone(state.rightStickX);
         right_stick_y = setWithDeadzone(state.rightStickY);
-        dpad_up = false;
-        dpad_down = false;
-        dpad_left = false;
-        dpad_right = false;
+        dpad_up = state.dpad_up;
+        dpad_down = state.dpad_down;
+        dpad_left = state.dpad_left;
+        dpad_right = state.dpad_right;
         back = false;
         guide = false;
         start = false;
-        left_bumper = false;
-        right_bumper = false;
+        left_bumper = state.left_bumper;
+        right_bumper = state.right_bumper;
         left_stick_button = false;
         right_stick_button = false;
-        left_trigger = 0;
-        right_trigger = 0;
+        left_trigger = state.left_trigger;
+        right_trigger = state.right_trigger;
     }
 
 }
