@@ -37,7 +37,7 @@
             <ComboBox fx:id="cbxOpModes" prefWidth="250.0" promptText="OpModes" />
             <Button fx:id="driverButton" alignment="CENTER" minWidth="75.0" mnemonicParsing="false" onAction="#handleDriverButtonAction" text="INIT">
                <VBox.margin>
-                  <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                  <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
                </VBox.margin></Button>
             <TextArea fx:id="txtTelemetry" editable="false" prefHeight="250.0" prefWidth="250.0" />
             <Label text="Random Motor Error">
@@ -67,7 +67,7 @@
                   <Insets top="15.0" />
                </VBox.margin>
             </HBox>
-            <HBox prefHeight="100.0" prefWidth="200.0">
+            <HBox prefWidth="200.0">
                <children>
                   <CheckBox fx:id="cbxShowPath" mnemonicParsing="false" onAction="#handleCbxShowPathAction" text="Show Path">
                      <padding>
