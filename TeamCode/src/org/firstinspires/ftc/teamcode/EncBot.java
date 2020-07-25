@@ -49,7 +49,8 @@ public class EncBot {
 
     public void resetOdometry(double x, double y, double headingRadians){
         pose[0] = x;
-        pose[1] = 1;
+        //oops
+        pose[1] = y;
         pose[2] = headingRadians;
         for (int i=0; i<3; i++) prevTicks[i] = encoders[i].getCurrentPosition();
     }
