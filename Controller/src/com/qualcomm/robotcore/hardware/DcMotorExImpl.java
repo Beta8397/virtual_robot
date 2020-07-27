@@ -3,106 +3,21 @@ package com.qualcomm.robotcore.hardware;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
-public class DeadWheelEncoder implements DcMotorEx {
+/**
+ * A very limited implementation of DcMotorEx.
+ *
+ * This is included to support existing Team Code that uses Bulk Cache Reads.
+ */
 
-    public final MotorType MOTOR_TYPE;
-
-    RunMode mode = RunMode.RUN_WITHOUT_ENCODER;
-
-    private Direction direction = Direction.FORWARD;
-
-    //actual position of motor
-    private double actualPosition = 0.0;
-
-    //velocity of motor
-    private double velocityRadiansPerSecond = 0.0;
-
-    //position to use as baseline for encoder tick calculation
-    private double encoderBasePosition = 0.0;
-
-    private double power = 0.0;
-
-    private int targetPosition = 0;
-
-    private ZeroPowerBehavior zeroPowerBehavior = ZeroPowerBehavior.BRAKE;
-
-    public DeadWheelEncoder(MotorType motorType) { MOTOR_TYPE = motorType; }
-
-    @Override
-    public synchronized void setMode(RunMode mode) {
-        this.mode = mode;
-        power = 0.0;
-        if (mode == RunMode.STOP_AND_RESET_ENCODER){
-            encoderBasePosition = actualPosition;
-        }
-    }
-
-    @Override
-    public synchronized RunMode getMode() {
-        return mode;
-    }
-
-    @Override
-    public synchronized int getCurrentPosition() {
-        int result = (int)Math.floor(actualPosition - encoderBasePosition);
-        return direction == Direction.FORWARD && MOTOR_TYPE.REVERSED ||
-                direction == Direction.REVERSE && !MOTOR_TYPE.REVERSED ? -result : result;
-    }
-
-    @Override
-    public synchronized void setTargetPosition(int pos) { targetPosition = pos; }
-
-    @Override
-    public synchronized int getTargetPosition() { return targetPosition; }
-
-    @Override
-    public synchronized boolean isBusy() {
-        return false;
-    }
-
-    @Override
-    public synchronized void setDirection(Direction direction) { this.direction = direction; }
-
-    @Override
-    public synchronized Direction getDirection() { return direction; }
-
-    @Override
-    public synchronized void setPower(double power) {
-        this.power = power;
-    }
-
-    @Override
-    public synchronized double getPower() {
-        return power;
-    }
+public class DcMotorExImpl extends DcMotorImpl implements DcMotorEx{
 
     /**
-     * Update position of the deadwheel encoder
-     * @param radians Incremental clockwise rotation of the dead wheel in radians
+     * For internal use only.
+     * @param motorType
      */
-    public synchronized void update( double radians, double milliseconds ){
-        final double TWO_PI = 2.0 * Math.PI;
-        double positionChange = radians * MOTOR_TYPE.TICKS_PER_ROTATION / TWO_PI;
-        double tempVelocity = radians / milliseconds * 1000.0;
-        if ((MOTOR_TYPE.REVERSED && direction == Direction.FORWARD) ||
-                (!MOTOR_TYPE.REVERSED && direction == Direction.REVERSE)) {
-            tempVelocity = -tempVelocity;
-        }
-        actualPosition += positionChange;
-        velocityRadiansPerSecond = tempVelocity;
+    public DcMotorExImpl(MotorType motorType){
+        super(motorType);
     }
-
-    //For internal use only: for stopping and resetting motor between op mode runs
-    public synchronized void stopAndReset(){
-        power = 0.0;
-        actualPosition = 0.0;
-        encoderBasePosition = 0.0;
-        direction = Direction.FORWARD;
-    }
-
-    public synchronized void setZeroPowerBehavior(ZeroPowerBehavior beh){ zeroPowerBehavior = beh; }
-    public synchronized ZeroPowerBehavior getZeroPowerBehavior() { return zeroPowerBehavior; }
-
 
     @Override
     public void setMotorEnable() {
@@ -147,14 +62,13 @@ public class DeadWheelEncoder implements DcMotorEx {
      */
     @Override
     public synchronized double getVelocity() {
-        return velocityRadiansPerSecond  * MOTOR_TYPE.TICKS_PER_ROTATION / (2.0 * Math.PI);
+        return getSpeed() * MOTOR_TYPE.MAX_TICKS_PER_SECOND;
     }
 
     @Override
     public synchronized double getVelocity(AngleUnit unit) {
-        double result = velocityRadiansPerSecond;
-        if (unit == AngleUnit.DEGREES) result *= 180.0 / Math.PI;
-        return result;
+        double unitsPerRotation = unit == AngleUnit.DEGREES? 360.0 : 2.0 * Math.PI;
+        return getVelocity() * unitsPerRotation / MOTOR_TYPE.TICKS_PER_ROTATION;
     }
 
     @Override
@@ -216,5 +130,4 @@ public class DeadWheelEncoder implements DcMotorEx {
     public boolean isOverCurrent() {
         return false;
     }
-
 }

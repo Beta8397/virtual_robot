@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import virtual_robot.util.AngleUtils;
@@ -20,8 +21,8 @@ public class EncBot {
     private final double ENCODER_WHEEL_CIRCUMFERENCE = Math.PI * 2.0;
     private final double ENCODER_WIDTH = 12.0;
 
-    public final DcMotor[] motors = new DcMotor[4]; //back_left, front_left, front_right, back_right
-    public final DcMotor[] encoders = new DcMotor[3]; //right, left, X
+    public final DcMotorEx[] motors = new DcMotorEx[4]; //back_left, front_left, front_right, back_right
+    public final DcMotorEx[] encoders = new DcMotorEx[3]; //right, left, X
 
     public int[] prevTicks = new int[3];
 
@@ -29,11 +30,11 @@ public class EncBot {
 
     public void init(HardwareMap hwMap){
         String[] motorNames =  new String[]{"back_left_motor", "front_left_motor", "front_right_motor", "back_right_motor"};
-        for (int i=0; i<4; i++) motors[i] = hwMap.dcMotor.get(motorNames[i]);
+        for (int i=0; i<4; i++) motors[i] = hwMap.get(DcMotorEx.class, motorNames[i]);
         motors[0].setDirection(DcMotorSimple.Direction.REVERSE);
         motors[1].setDirection(DcMotorSimple.Direction.REVERSE);
         String[] encoderNames = new String[]{"enc_right", "enc_left", "enc_x"};
-        for (int i=0; i<3; i++) encoders[i] = hwMap.dcMotor.get(encoderNames[i]);
+        for (int i=0; i<3; i++) encoders[i] = hwMap.get(DcMotorEx.class, encoderNames[i]);
     }
 
     public void setDrivePower(double px, double py, double pa){

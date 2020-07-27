@@ -22,7 +22,7 @@ public class EncoderBot extends VirtualBot {
 
     MotorType motorType;
     MotorType encoderMotorType;
-    private DcMotorImpl[] motors = null;
+    private DcMotorExImpl[] motors = null;
     //private VirtualRobotController.GyroSensorImpl gyro = null;
     private BNO055IMUImpl imu = null;
     private VirtualRobotController.ColorSensorImpl colorSensor = null;
@@ -64,11 +64,11 @@ public class EncoderBot extends VirtualBot {
 
     public EncoderBot(){
         super();
-        motors = new DcMotorImpl[]{
-                (DcMotorImpl)hardwareMap.dcMotor.get("back_left_motor"),
-                (DcMotorImpl)hardwareMap.dcMotor.get("front_left_motor"),
-                (DcMotorImpl)hardwareMap.dcMotor.get("front_right_motor"),
-                (DcMotorImpl)hardwareMap.dcMotor.get("back_right_motor")
+        motors = new DcMotorExImpl[]{
+                (DcMotorExImpl)hardwareMap.get(DcMotorEx.class,"back_left_motor"),
+                (DcMotorExImpl)hardwareMap.get(DcMotorEx.class,"front_left_motor"),
+                (DcMotorExImpl)hardwareMap.get(DcMotorEx.class,"front_right_motor"),
+                (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "back_right_motor")
         };
         distanceSensors = new VirtualRobotController.DistanceSensorImpl[]{
                 hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "front_distance"),
@@ -111,7 +111,7 @@ public class EncoderBot extends VirtualBot {
         encoderMotorType = MotorType.Neverest40;
         hardwareMap = new HardwareMap();
         String[] motorNames = new String[] {"back_left_motor", "front_left_motor", "front_right_motor", "back_right_motor"};
-        for (String name: motorNames) hardwareMap.put(name, new DcMotorImpl(motorType));
+        for (String name: motorNames) hardwareMap.put(name, new DcMotorExImpl(motorType));
         String[] distNames = new String[]{"front_distance", "left_distance", "back_distance", "right_distance"};
         for (String name: distNames) hardwareMap.put(name, controller.new DistanceSensorImpl());
         //hardwareMap.put("gyro_sensor", controller.new GyroSensorImpl());
@@ -180,9 +180,9 @@ public class EncoderBot extends VirtualBot {
         double xEncoderRadians = -(dxR - xEncoderY * headingChange) / encoderWheelRadius;
 
         //Update positions of the dead wheel encoders
-        rightEncoder.update(rightEncoderRadians);
-        leftEncoder.update(leftEncoderRadians);
-        xEncoder.update(xEncoderRadians);
+        rightEncoder.update(rightEncoderRadians, millis);
+        leftEncoder.update(leftEncoderRadians, millis);
+        xEncoder.update(xEncoderRadians, millis);
 
         colorSensor.updateColor(x, y);
 

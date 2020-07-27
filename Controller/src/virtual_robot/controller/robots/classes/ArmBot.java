@@ -1,10 +1,7 @@
 package virtual_robot.controller.robots.classes;
 
 import com.qualcomm.hardware.bosch.BNO055IMUImpl;
-import com.qualcomm.robotcore.hardware.DcMotorImpl;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.MotorType;
-import com.qualcomm.robotcore.hardware.ServoImpl;
+import com.qualcomm.robotcore.hardware.*;
 import javafx.fxml.FXML;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Scale;
@@ -41,8 +38,8 @@ public class ArmBot extends VirtualBot {
     DcMotorImpl methods (such as update()) that are intended for internal use, and are not part of the
     DcMotor interface. The drive motors are stored in an array of DcMotorImpl.
      */
-    private DcMotorImpl[] motors = null;
-    private DcMotorImpl armMotor = null;
+    private DcMotorExImpl[] motors = null;
+    private DcMotorExImpl armMotor = null;
 
     //The BNO055 IMU. Note use of the BNO055IMUImpl class, rather than the BNO055IMU interface.
     private BNO055IMUImpl imu = null;
@@ -108,14 +105,14 @@ public class ArmBot extends VirtualBot {
         super();
 
         //Instantiate the DC Motors using the HardwareMap object. Note the cast to DcMotorImpl.
-        motors = new DcMotorImpl[]{
-                (DcMotorImpl)hardwareMap.dcMotor.get("back_left_motor"),
-                (DcMotorImpl)hardwareMap.dcMotor.get("front_left_motor"),
-                (DcMotorImpl)hardwareMap.dcMotor.get("front_right_motor"),
-                (DcMotorImpl)hardwareMap.dcMotor.get("back_right_motor")
+        motors = new DcMotorExImpl[]{
+                (DcMotorExImpl)hardwareMap.get(DcMotorEx.class,"back_left_motor"),
+                (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "front_left_motor"),
+                (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "front_right_motor"),
+                (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "back_right_motor")
         };
 
-        armMotor = (DcMotorImpl)hardwareMap.dcMotor.get("arm_motor");
+        armMotor = (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "arm_motor");
 
         //Instantiate the four DistanceSensors
         distanceSensors = new VirtualRobotController.DistanceSensorImpl[]{
@@ -193,7 +190,7 @@ public class ArmBot extends VirtualBot {
 
         //Add the drive motors and arm motor using HardwareMap.put(...) method
         String[] motorNames = new String[] {"back_left_motor", "front_left_motor", "front_right_motor", "back_right_motor", "arm_motor"};
-        for (String name: motorNames) hardwareMap.put(name, new DcMotorImpl(motorType));
+        for (String name: motorNames) hardwareMap.put(name, new DcMotorExImpl(motorType));
 
         //Add the distance sensors
         String[] distNames = new String[]{"front_distance", "left_distance", "back_distance", "right_distance"};

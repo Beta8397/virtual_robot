@@ -15,7 +15,7 @@ public class DcMotorImpl implements DcMotor {
 
     private final Random random = new Random();
     private RunMode mode = RunMode.RUN_WITHOUT_ENCODER;
-    private Direction direction = Direction.FORWARD;
+    protected Direction direction = Direction.FORWARD;
 
     //power is the requested speed, normalized to the -1 to +1 range
     private double power = 0.0;
@@ -88,6 +88,12 @@ public class DcMotorImpl implements DcMotor {
     public synchronized void setPower(double power){
         this.power = Math.max(-1, Math.min(1, power));
     }
+
+    /**
+     * Get actual speed
+     * @return actual speed, in ticks per sec
+     */
+    protected synchronized double getSpeed(){ return speed; }
 
     /**
      * Get current position (as number of encoder ticks)

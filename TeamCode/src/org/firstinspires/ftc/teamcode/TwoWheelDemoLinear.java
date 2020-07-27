@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.hardware.*;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 /**
@@ -13,8 +14,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 public class TwoWheelDemoLinear extends LinearOpMode {
 
     public void runOpMode() {
-        DcMotor left = hardwareMap.dcMotor.get("left_motor");
-        DcMotor right = hardwareMap.dcMotor.get("right_motor");
+        DcMotorEx left = (DcMotorEx)hardwareMap.dcMotor.get("left_motor");
+        DcMotorEx right = (DcMotorEx)hardwareMap.dcMotor.get("right_motor");
         left.setDirection(DcMotor.Direction.REVERSE);
         GyroSensor gyro = hardwareMap.gyroSensor.get("gyro_sensor");
         Servo backServo = hardwareMap.servo.get("back_servo");
@@ -37,8 +38,8 @@ public class TwoWheelDemoLinear extends LinearOpMode {
                 right.setPower(-.5);
             } else if (gamepad1.y) {
                 telemetry.addData("y pressed", "");
-                left.setPower(0.5);
-                right.setPower(0.5);
+                left.setVelocity(401.8, AngleUnit.DEGREES);
+                right.setVelocity(401.8, AngleUnit.DEGREES);
             } else if (gamepad1.b){
                 telemetry.addData("b pressed", "");
                 left.setPower(0.5);
@@ -57,6 +58,8 @@ public class TwoWheelDemoLinear extends LinearOpMode {
             telemetry.addData("Color","R %d  G %d  B %d", colorSensor.red(), colorSensor.green(), colorSensor.blue());
             telemetry.addData("Heading"," %.1f", gyro.getHeading());
             telemetry.addData("Encoders","Left %d  Right %d", left.getCurrentPosition(), right.getCurrentPosition());
+            telemetry.addData("Vel, TPS", "Left %.0f  Right %.0f", left.getVelocity(), right.getVelocity());
+            telemetry.addData("Vel, DPS", "Left %.1f  Right %.1f", left.getVelocity(AngleUnit.DEGREES), right.getVelocity(AngleUnit.DEGREES));
             telemetry.addData("Distance", " Fr %.1f  Lt %.1f  Rt %.1f  Bk %.1f  ",
                     frontDistance.getDistance(DistanceUnit.CM), leftDistance.getDistance(DistanceUnit.CM),
                     rightDistance.getDistance(DistanceUnit.CM), backDistance.getDistance(DistanceUnit.CM)
