@@ -1,13 +1,10 @@
 package virtual_robot.controller.robots.classes;
 
-import com.qualcomm.robotcore.hardware.CRServoImpl;
+import com.qualcomm.robotcore.hardware.*;
 import javafx.fxml.FXML;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Rotate;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.hardware.bosch.BNO055IMUImpl;
-import com.qualcomm.robotcore.hardware.DcMotorImpl;
-import com.qualcomm.robotcore.hardware.MotorType;
 import virtual_robot.controller.BotConfig;
 import virtual_robot.controller.VirtualBot;
 import virtual_robot.controller.VirtualRobotController;
@@ -24,7 +21,7 @@ import virtual_robot.util.AngleUtils;
 public class XDriveBot extends VirtualBot {
 
     MotorType motorType;
-    private DcMotorImpl[] motors = null;
+    private DcMotorExImpl[] motors = null;
     //private VirtualRobotController.GyroSensorImpl gyro = null;
     private BNO055IMUImpl imu = null;
     private VirtualRobotController.ColorSensorImpl colorSensor = null;
@@ -42,11 +39,11 @@ public class XDriveBot extends VirtualBot {
 
     public XDriveBot() {
         super();
-        motors = new DcMotorImpl[]{
-                (DcMotorImpl)hardwareMap.dcMotor.get("back_left_motor"),
-                (DcMotorImpl)hardwareMap.dcMotor.get("front_left_motor"),
-                (DcMotorImpl)hardwareMap.dcMotor.get("front_right_motor"),
-                (DcMotorImpl)hardwareMap.dcMotor.get("back_right_motor")
+        motors = new DcMotorExImpl[]{
+                (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "back_left_motor"),
+                (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "front_left_motor"),
+                (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "front_right_motor"),
+                (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "back_right_motor")
         };
         distanceSensors = new VirtualRobotController.DistanceSensorImpl[]{
                 hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "front_distance"),
@@ -79,7 +76,7 @@ public class XDriveBot extends VirtualBot {
         motorType = MotorType.Neverest40;
         hardwareMap = new HardwareMap();
         String[] motorNames = new String[] {"back_left_motor", "front_left_motor", "front_right_motor", "back_right_motor"};
-        for (String name: motorNames) hardwareMap.put(name, new DcMotorImpl(motorType));
+        for (String name: motorNames) hardwareMap.put(name, new DcMotorExImpl(motorType));
         String[] distNames = new String[]{"front_distance", "left_distance", "back_distance", "right_distance"};
         for (String name: distNames) hardwareMap.put(name, controller.new DistanceSensorImpl());
         //hardwareMap.put("gyro_sensor", controller.new GyroSensorImpl());
