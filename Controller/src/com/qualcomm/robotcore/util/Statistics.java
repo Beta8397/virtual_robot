@@ -30,62 +30,111 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
 TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
-package org.firstinspires.ftc.robotcore.external.matrices;
+package com.qualcomm.robotcore.util;
 
 /**
- * A {@link SliceMatrixF} is a matrix whose implementation is a submatrix of some other matrix.
+ * This handy utility class supports the ongoing calculation of mean and variance of a
+ * series of numbers. This class is *not* thread-safe.
+ *
+ * @see <a href="http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#On-line_algorithm">Wikipedia</a>
  */
-public class SliceMatrixF extends MatrixF
-    {
+public class Statistics
+{
     //----------------------------------------------------------------------------------------------
     // State
     //----------------------------------------------------------------------------------------------
 
-    protected MatrixF matrix;
-    protected int     row;
-    protected int     col;
+    int    n;
+    double mean;
+    double m2;
 
     //----------------------------------------------------------------------------------------------
     // Construction
     //----------------------------------------------------------------------------------------------
 
-    /**
-     * Creates a {@link SliceMatrixF} based on the indicated matrix whose upper left corner is at
-     * (row, col) of that matrix and whose size is numRows x numCols.
-     * @param matrix    the matrix we are to take a slice of
-     * @param row       the row in matrix in which the slice is to begin
-     * @param col       the column in matrix in which the slice is to begin
-     * @param numRows   the number of rows that the slice should be
-     * @param numCols   the number of columns that the slice should be
-     */
-    public SliceMatrixF(MatrixF matrix, int row, int col, int numRows, int numCols)
-        {
-        super(numRows, numCols);
-        this.matrix = matrix;
-        this.row = row;
-        this.col = col;
-
-        if (row + numRows >= matrix.numRows) throw dimensionsError();
-        if (col + numCols >= matrix.numCols) throw dimensionsError();
-        }
+    public Statistics()
+    {
+        this.clear();
+    }
 
     //----------------------------------------------------------------------------------------------
     // Accessing
     //----------------------------------------------------------------------------------------------
 
-    @Override public float get(int row, int col)
-        {
-        return this.matrix.get(this.row + row, this.col + col);
-        }
-
-    @Override public void put(int row, int col, float value)
-        {
-        this.matrix.put(this.row + row, this.col + col, value);
-        }
-
-    @Override public MatrixF emptyMatrix(int numRows, int numCols)
-        {
-        return this.matrix.emptyMatrix(numRows, numCols);
-        }
+    /**
+     * Returns the current number of samples
+     * @return the number of samples
+     */
+    public int getCount()
+    {
+        return n;
     }
+
+    /**
+     * Returns the mean of the current set of samples
+     * @return the mean of the samples
+     */
+    public double getMean()
+    {
+        return mean;
+    }
+
+    /**
+     * Returns the sample variance of the current set of samples
+     * @return the variance of the samples
+     */
+    public double getVariance()
+    {
+        return m2 / (n - 1);
+    }
+
+    /**
+     * Returns the sample standard deviation of the current set of samples
+     * @return the standard deviation of the samples
+     */
+    public double getStandardDeviation()
+    {
+        return Math.sqrt(this.getVariance());
+    }
+
+    //----------------------------------------------------------------------------------------------
+    // Modifying
+    //----------------------------------------------------------------------------------------------
+
+    /**
+     * Resets the statistics to an empty state
+     */
+    public void clear()
+    {
+        n    = 0;
+        mean = 0;
+        m2   = 0;
+    }
+
+    /**
+     * Adds a new sample to the statistics
+     * @param x the sample to add
+     */
+    public void add(double x)
+    {
+        n = n + 1;
+        double delta = x - mean;
+        mean = mean + delta / n;
+        m2 = m2 + delta*(x - mean);
+    }
+
+    /**
+     * Removes a sample from the statistics
+     * @param x the sample to remove
+     */
+    public void remove(double x)
+    {
+        int nPrev = n-1;
+        double delta = x - mean;
+        double deltaPrev = n * delta / nPrev;
+        m2 = m2 - deltaPrev * delta;
+        mean = (mean * n - x) / nPrev;
+        n = nPrev;
+    }
+}
+

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2016 Robert Atkinson
+Copyright (c) 2018 Robert Atkinson
 
 All rights reserved.
 
@@ -30,29 +30,19 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
 TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
-package org.firstinspires.ftc.robotcore.external.matrices;
+package com.qualcomm.robotcore.hardware;
 
 /**
- * A {@link RowMajorMatrixF} is a dense matrix whose entries are arranged in
- * row-major order.
- * @see <a href="https://en.wikipedia.org/wiki/Row-major_order">Row Major Order</a>
+ * {@Link MotorControlAlgorithm} indicates the control algorithm variant to use with
+ * {@link DcMotor.RunMode#RUN_TO_POSITION} and {@link DcMotor.RunMode#RUN_USING_ENCODER}.
+ *
+ * @see DcMotorEx#setPIDFCoefficients(DcMotor.RunMode, PIDFCoefficients)
  */
-public abstract class RowMajorMatrixF extends DenseMatrixF
-    {
-    public RowMajorMatrixF(int nRows, int nCols)
-        {
-        super(nRows, nCols);
-        }
-
-    @Override
-    protected int indexFromRowCol(int row, int col)
-        {
-        return row * numCols + col;
-        }
-
-    @Override public VectorF toVector()
-        {
-        return new VectorF(this.getData());
-        }
-    }
+public enum MotorControlAlgorithm
+{
+    Unknown,
+    /** @deprecated Switch to {@link #PIDF} instead*/
+    @Deprecated
+    LegacyPID,
+    PIDF;
+}

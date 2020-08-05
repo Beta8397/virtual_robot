@@ -30,62 +30,102 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
 TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+package com.qualcomm.robotcore.util;
 
-package org.firstinspires.ftc.robotcore.external.matrices;
+import java.util.LinkedList;
+import java.util.Queue;
 
 /**
- * A {@link SliceMatrixF} is a matrix whose implementation is a submatrix of some other matrix.
+ * MovingStatistics keeps statistics on the most recent samples in a data set, automatically
+ * removing old samples as the size of the data exceeds a fixed capacity. This class is *not*
+ * thread-safe.
  */
-public class SliceMatrixF extends MatrixF
-    {
+public class MovingStatistics
+{
     //----------------------------------------------------------------------------------------------
     // State
     //----------------------------------------------------------------------------------------------
 
-    protected MatrixF matrix;
-    protected int     row;
-    protected int     col;
+    final Statistics      statistics;
+    final int             capacity;
+    final Queue<Double>   samples;
 
     //----------------------------------------------------------------------------------------------
     // Construction
     //----------------------------------------------------------------------------------------------
 
-    /**
-     * Creates a {@link SliceMatrixF} based on the indicated matrix whose upper left corner is at
-     * (row, col) of that matrix and whose size is numRows x numCols.
-     * @param matrix    the matrix we are to take a slice of
-     * @param row       the row in matrix in which the slice is to begin
-     * @param col       the column in matrix in which the slice is to begin
-     * @param numRows   the number of rows that the slice should be
-     * @param numCols   the number of columns that the slice should be
-     */
-    public SliceMatrixF(MatrixF matrix, int row, int col, int numRows, int numCols)
-        {
-        super(numRows, numCols);
-        this.matrix = matrix;
-        this.row = row;
-        this.col = col;
-
-        if (row + numRows >= matrix.numRows) throw dimensionsError();
-        if (col + numCols >= matrix.numCols) throw dimensionsError();
-        }
+    public MovingStatistics(int capacity)
+    {
+        if (capacity <= 0) throw new IllegalArgumentException("MovingStatistics capacity must be positive");
+        this.statistics = new Statistics();
+        this.capacity   = capacity;
+        this.samples    = new LinkedList<Double>();
+    }
 
     //----------------------------------------------------------------------------------------------
     // Accessing
     //----------------------------------------------------------------------------------------------
 
-    @Override public float get(int row, int col)
-        {
-        return this.matrix.get(this.row + row, this.col + col);
-        }
+    /**
+     * Returns the current number of samples
+     * @return the number of samples
+     */
+    public int getCount()
+    {
+        return this.statistics.getCount();
+    }
 
-    @Override public void put(int row, int col, float value)
-        {
-        this.matrix.put(this.row + row, this.col + col, value);
-        }
+    /**
+     * Returns the mean of the current set of samples
+     * @return the mean of the samples
+     */
+    public double getMean()
+    {
+        return this.statistics.getMean();
+    }
 
-    @Override public MatrixF emptyMatrix(int numRows, int numCols)
+    /**
+     * Returns the sample variance of the current set of samples
+     * @return the variance of the samples
+     */
+    public double getVariance()
+    {
+        return this.statistics.getVariance();
+    }
+
+    /**
+     * Returns the sample standard deviation of the current set of samples
+     * @return the standard deviation of the samples
+     */
+    public double getStandardDeviation()
+    {
+        return this.statistics.getStandardDeviation();
+    }
+
+    //----------------------------------------------------------------------------------------------
+    // Modifying
+    //----------------------------------------------------------------------------------------------
+
+    /**
+     * Resets the statistics to an empty state
+     */
+    public void clear()
+    {
+        this.statistics.clear();
+        this.samples.clear();
+    }
+
+    /**
+     * Adds a new sample to the statistics, possibly also removing the oldest.
+     * @param x the sample to add
+     */
+    public void add(double x)
+    {
+        this.statistics.add(x);
+        this.samples.add(x);
+        if (this.samples.size() > capacity)
         {
-        return this.matrix.emptyMatrix(numRows, numCols);
+            this.statistics.remove(this.samples.remove());
         }
     }
+}

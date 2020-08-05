@@ -31,28 +31,35 @@ TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package org.firstinspires.ftc.robotcore.external.matrices;
+/*
+Modified by FTC Team Beta for use in the Virtual Robot Simulator
+ */
+package com.qualcomm.robotcore.hardware;
 
 /**
- * A {@link RowMajorMatrixF} is a dense matrix whose entries are arranged in
- * row-major order.
- * @see <a href="https://en.wikipedia.org/wiki/Row-major_order">Row Major Order</a>
+ * {@link PIDCoefficients} conveys a set of configuration parameters for a PID algorithm.
+ * @see <a href="https://en.wikipedia.org/wiki/PID_controller">PID controller</a>
  */
-public abstract class RowMajorMatrixF extends DenseMatrixF
+public class PIDCoefficients
+{
+    public double p;
+    public double i;
+    public double d;
+
+    @Override public String toString()
     {
-    public RowMajorMatrixF(int nRows, int nCols)
-        {
-        super(nRows, nCols);
-        }
-
-    @Override
-    protected int indexFromRowCol(int row, int col)
-        {
-        return row * numCols + col;
-        }
-
-    @Override public VectorF toVector()
-        {
-        return new VectorF(this.getData());
-        }
+        return String.format("%s(p=%f i=%f d=%f)", getClass().getSimpleName(), p, i, d);
     }
+
+    public PIDCoefficients()
+    {
+        this.p = this.i = this.d = 0;
+    }
+
+    public PIDCoefficients(double p, double i, double d)
+    {
+        this.p = p;
+        this.i = i;
+        this.d = d;
+    }
+}

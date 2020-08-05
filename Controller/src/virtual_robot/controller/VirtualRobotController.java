@@ -537,9 +537,11 @@ public class VirtualRobotController {
         private int red = 0;
         private int green = 0;
         private int blue = 0;
+        private int alpha = 0;
         public synchronized int red(){ return red; }
         public synchronized int green(){ return green; }
         public synchronized int blue(){ return blue; }
+        public synchronized int alpha() { return alpha; }
 
         public synchronized void updateColor(double x, double y){
             int colorX = (int)(x + halfFieldWidth);
@@ -563,6 +565,7 @@ public class VirtualRobotController {
             red = (int)tempRed;
             green = (int)tempGreen;
             blue = (int)tempBlue;
+            alpha = Math.max(red, Math.max(green, blue));
         }
     }
 

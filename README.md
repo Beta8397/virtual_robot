@@ -1,25 +1,27 @@
 # A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
 
-**Note: a Physics-based 3D version is now available here:** [vr_physics](https://github.com/Beta8397/vr_physics).
-But, JavaFX 3D Scenes are not supported by all hardware platforms, so the 3D version may or may not work on
-your system.
+![](/readme_image.JPG)
 
 This is a JavaFX application developed using the (free) IntelliJ IDEA Community Edition IDE. The repository can be downloaded
 and unzipped, then opened with IntelliJ.
 
-Four robot configurations are available: a simple two-wheeled robot, a robot with four mecanum wheels, an
-X-Drive robot with four OmniWheels mounted at 45 degrees at each corner of the robot, and an additional
-mecanum-wheeled configuration that has an extendable arm with a grabber at the end.
+Five robot configurations are available: a simple two-wheeled robot, a robot with four mecanum wheels, an
+X-Drive robot with four OmniWheels mounted at 45 degrees at each corner of the robot, a mecanum-wheeled 
+configuration that has an extendable arm with a grabber at the end, and a mecanum-wheeled configuration with
+three "Dead-wheel" encoders for odometry.
 
-Each robot can be thought of as 18 inches wide.  For the two-wheel bot and mecanum wheel bot, the distance between
-the centers of the right and left wheels is 16 inches. For the mecanum wheel bot, the distance between the centers
+Each robot can be thought of as 18 inches wide.  For the two-wheel bot and mecanum wheel bots, the distance between
+the centers of the right and left wheels is 16 inches. For the mecanum wheel bots, the distance between the centers
 of the front and back wheels is 14 inches, and the mecanum wheels (when viewed from the top) have an "X" configuration.
 For the X-Drive bot, the distance between the centers of any two adjacent wheels is 14.5 inches. Each motor has an
 encoder. There is a downward-facing color sensor in the center of the robot. A gyro sensor (or BNO055 imu) is also included.
 The ArmBot has an extendable arm (DcMotor operated) with a grabber (Servo-operated) at the end. The other robots
 have a simple rotating arm at the back. For the Mechanum bot and Two-Wheeled bot, the arm is controlled by a servo.
 For the X-Drive bot, the arm is controlled by a CR servo. Each robot also has distance sensors on the front, left, right
-and back sides. A small green rectangle indicates the front of the robot. Wheel diameters are all 4 inches.
+and back sides. A small green rectangle indicates the front of the robot. Wheel diameters are all 4 inches. The bot 
+with "Dead-wheel" encoders ("EncoderBot") has three dead-wheel encoders; the forward-reverse encoder wheels are 
+mounted 6 inches to the right and left of center, while the X-direction (i.e., right-left) encoder wheel is
+mounted at the center. The dead-wheels are two inches in diameter.
 
 The field can be thought of as 12 feet wide. The field graphic (currently the Skystone field)
 is obtained from a bitmap (.bmp) image. The color sensor detects the field color beneath the center of the
@@ -69,6 +71,10 @@ To use:
 
 
 LOG OF CHANGES
+
+CHANGES 7/22/2020
+    Added "Dead-wheel" encoder capability, and a new robot configuration that has mecanum drive wheels and
+    three dead-wheel encoders. Also added a new op mode to demonstrate dead-wheel odometry.
 
 CHANGES 12/16/2019
     Further changes to facilitate creation of new robot configurations. The robot configuration classes (e.g., 
