@@ -2,14 +2,8 @@ package org.firstinspires.ftc.teamcode.ftc16072;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.matrices.ColumnMatrixF;
 import org.firstinspires.ftc.robotcore.external.matrices.GeneralMatrixF;
 import org.firstinspires.ftc.robotcore.external.matrices.MatrixF;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-
-import java.util.Arrays;
-import java.util.List;
 
 class MecanumDrive {
     private DcMotor frontLeft;
@@ -78,6 +72,7 @@ class MecanumDrive {
         setSpeeds(frontLeftSpeed, frontRightSpeed, backLeftSpeed, backRightSpeed);
     }
 
+    // Returns forward, strafe
     double[] getDistanceCm() {
         double[] distances = {0.0, 0.0};
 

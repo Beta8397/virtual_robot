@@ -9,14 +9,16 @@ import org.firstinspires.ftc.teamcode.ftc16072.Util.Polar;
 import org.firstinspires.ftc.teamcode.ftc16072.Util.RobotPosition;
 
 
+
 public class Navigation {
     static double DISTANCE_TOLARANCE = 2;
     static double ANGLE_TOLARANCE = AngleUnit.RADIANS.fromDegrees(1);
     static double KP_DISTANCE = 0.02;
     static double KP_ANGLE = 1;
-    MecanumDrive mecanumDrive = new MecanumDrive();
-    BNO055IMU imu;
+    private MecanumDrive mecanumDrive = new MecanumDrive();
+    private BNO055IMU imu;
     private RobotPosition lastSetPosition;
+    private double imuOffset = 0;
 
     void init(HardwareMap hwMap) {
         imu = hwMap.get(BNO055IMU.class, "imu");
@@ -29,9 +31,9 @@ public class Navigation {
     public double getHeading(AngleUnit angleUnit) {
         Orientation angles;
 
-        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, angleUnit);
-        return angles.firstAngle;
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
 
+        return angleUnit.fromRadians(angles.firstAngle + imuOffset);
     }
 
     public void driveFieldRelative(double x, double y, double rotate) {
@@ -39,7 +41,7 @@ public class Navigation {
         double heading = getHeading(AngleUnit.RADIANS);
 
         drive.subtractAngle(heading);
-        mecanumDrive.driveMecanum(drive.getX(), -drive.getY(), rotate);
+        mecanumDrive.driveMecanum(drive.getY(), drive.getX(), rotate);
     }
 
     public void strafe(double speed) {
@@ -47,12 +49,10 @@ public class Navigation {
     }
 
     public void driveFieldRelativeAngle(double x, double y, double angle) {
-        double delta = angle - getHeading(AngleUnit.RADIANS);
-        if (delta >= Math.PI) {
-            delta = delta - (2 * Math.PI);
-        } else if (delta <= -Math.PI) {
-            delta = delta + (2 * Math.PI);
-        }
+        double angle_in = angle - (Math.PI / 2);  // convert to robot coordinates
+
+        double delta = AngleUnit.normalizeRadians(getHeading(AngleUnit.RADIANS) - angle_in);
+
         double MAX_ROTATE = 0.7; //This is to shrink how fast we can rotate so we don't fly past the angle
         delta = Range.clip(delta, -MAX_ROTATE, MAX_ROTATE);
         driveFieldRelative(x, y, delta);
@@ -69,7 +69,8 @@ public class Navigation {
 
     public RobotPosition getEstimatedPosition() {
         double[] distanceDriven = mecanumDrive.getDistanceCm();
-        Polar translation = Polar.fromCartesian(distanceDriven[1], distanceDriven[0]);
+
+        Polar translation = Polar.fromCartesian(distanceDriven[0], -distanceDriven[1]);
         double rotate = getHeading(AngleUnit.RADIANS);
         translation.subtractAngle(-rotate);
 
@@ -87,7 +88,7 @@ public class Navigation {
     public boolean rotateTo(double angle, AngleUnit angleUnit) {
         double rotateSpeed = 0.0;
 
-        double rotateDiff = angleUnit.toRadians(angle) - getHeading(AngleUnit.RADIANS);
+        double rotateDiff = AngleUnit.normalizeRadians(getHeading(AngleUnit.RADIANS) - angleUnit.toRadians(angle));
         if (Math.abs(rotateDiff) <= ANGLE_TOLARANCE) {
             mecanumDrive.driveMecanum(0, 0, 0);
             return true;
@@ -103,13 +104,19 @@ public class Navigation {
         double xDiff = distanceUnit.toCm(x) - estimatedPosition.getX(DistanceUnit.CM);
         double yDiff = distanceUnit.toCm(y) - estimatedPosition.getY(DistanceUnit.CM);
 
+        System.out.printf("XDiff: %f (%f -> %f) yDiff: %f (%f -> %f) \n", xDiff,
+                estimatedPosition.getX(DistanceUnit.INCH), distanceUnit.toInches(x),
+                yDiff, estimatedPosition.getY(DistanceUnit.INCH), distanceUnit.toInches(y));
+
         double xSpeed = 0.0;
         double ySpeed = 0.0;
 
         if ((Math.abs(xDiff) <= DISTANCE_TOLARANCE) &&
                 (Math.abs(yDiff) <= DISTANCE_TOLARANCE)) {
             mecanumDrive.driveMecanum(0, 0, 0);
-            setPosition(distanceUnit.toCm(x), distanceUnit.toCm(y), DistanceUnit.CM);
+            setPosition(estimatedPosition.getX(DistanceUnit.CM),
+                    estimatedPosition.getY(DistanceUnit.CM),
+                    DistanceUnit.CM);
             return true;
         }
         if (Math.abs(xDiff) > DISTANCE_TOLARANCE) {
@@ -118,11 +125,16 @@ public class Navigation {
         if (Math.abs(yDiff) > DISTANCE_TOLARANCE) {
             ySpeed = KP_DISTANCE * yDiff;
         }
-        System.out.printf("Diff: %.02f %.02f\n", yDiff, xDiff);
-        System.out.printf("--Speed: %.02f %.02f\n", ySpeed, xSpeed);
-        driveFieldRelative(xSpeed, ySpeed, 0.0);
-
+        Polar drive = Polar.fromCartesian(xSpeed, ySpeed);
+        drive.subtractAngle(-Math.PI / 2);
+        System.out.printf("--Driving: %f %f\n", drive.getX(), drive.getY());
+        driveFieldRelative(drive.getX(), drive.getY(), 0.0);
         return false;
     }
 
+    public void resetIMU(double heading, AngleUnit angleUnit) {
+        double supposedHeading = angleUnit.toRadians(heading);
+        double currentHeading = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS).firstAngle;
+        imuOffset = supposedHeading - currentHeading;
+    }
 }
