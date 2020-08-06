@@ -582,18 +582,7 @@ public class VirtualRobotController {
             if (distanceMM < MIN_DISTANCE) result = MIN_DISTANCE - 1.0;
             else if (distanceMM > MAX_DISTANCE) result = distanceOutOfRange;
             else result = distanceMM;
-            switch(distanceUnit){
-                case METER:
-                    return result / 1000.0;
-                case CM:
-                    return result / 10.0;
-                case MM:
-                    return result;
-                case INCH:
-                    return result / 25.4;
-                default:
-                    return result;
-            }
+            return distanceUnit.fromMm(result);
         }
 
         public synchronized void updateDistance(double x, double y, double headingRadians){
