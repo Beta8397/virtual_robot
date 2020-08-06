@@ -397,6 +397,8 @@ public class VirtualRobotController {
             opMode.init();
 
             while (!opModeStarted && !Thread.currentThread().isInterrupted()) {
+                // to keep the guarantee that this is updated
+                opMode.time = opMode.getRuntime();
                 //For regular opMode, run user-defined init_loop() method. For Linear opMode, init_loop checks whether
                 //runOpMode has exited; if so, it interrupts the opModeThread.
                 opMode.init_loop();

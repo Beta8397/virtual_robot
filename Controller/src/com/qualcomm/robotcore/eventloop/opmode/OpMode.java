@@ -51,10 +51,10 @@ public abstract class OpMode extends VirtualRobotController.OpModeBase {
      * number of seconds this op mode has been running, this is
      * updated before every call to loop.
      */
-    public double time = 0.0;
+    public volatile double time = 0.0;
 
     // internal time tracking
-    private long startTime; // in nanoseconds
+    private volatile long startTime; // in nanoseconds
 
     /**
      * Static reference to VirtualRobotController object, with getter and setter

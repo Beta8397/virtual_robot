@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.ftc16072.Util.RobotPosition;
-import sun.jvm.hotspot.runtime.win32_amd64.Win32AMD64JavaThreadPDAccess;
+//import sun.jvm.hotspot.runtime.win32_amd64.Win32AMD64JavaThreadPDAccess;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -15,9 +15,13 @@ public class TestOdom extends LinearOpMode {
     public void runOpMode(){
         gamepad1.setJoystickDeadzone(0.05f);
         bot.init(hardwareMap);
-        waitForStart();
+        while(!opModeIsActive() && !isStopRequested()){
+            telemetry.addData("time", this.time);
+            telemetry.update();
+        }
         while (opModeIsActive()){
             pose = bot.updateOdometry();
+            telemetry.addData("time", this.time);
             telemetry.addData("POSE", "x = %.1f  y = %.1f  h = %.1f", pose[0], pose[1],
                     Math.toDegrees(pose[2]));
             telemetry.addData("Back Left", "T = %d  V = %.0f", bot.motors[0].getCurrentPosition(), bot.motors[0].getVelocity());
