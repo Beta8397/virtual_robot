@@ -351,7 +351,7 @@ public class VirtualRobotController {
                 @Override
                 public void run() {
                     bot.updateDisplay();
-                    pathLine.getPoints().addAll(halfFieldWidth + bot.x, halfFieldWidth - bot.y);
+                    pathLine.getPoints().addAll(halfFieldWidth + bot.getX(), halfFieldWidth - bot.getY());
                     updateTelemetryDisplay();
                 }
             };

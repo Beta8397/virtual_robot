@@ -155,9 +155,11 @@ public abstract class VirtualBot {
      */
     public abstract void powerDownAndReset();
 
-    public double getHeadingRadians(){ return headingRadians; }
+    public synchronized  double getX() { return x; }
+    public synchronized double getY() { return y; }
+    public synchronized double getHeadingRadians(){ return headingRadians; }
 
-    public void positionWithMouseClick(MouseEvent arg){
+    public synchronized void positionWithMouseClick(MouseEvent arg){
 
         if (arg.getButton() == MouseButton.PRIMARY) {
             double argX = Math.max(halfBotWidth, Math.min(fieldWidth - halfBotWidth, arg.getX()));
