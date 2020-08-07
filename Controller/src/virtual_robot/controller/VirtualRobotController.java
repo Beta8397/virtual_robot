@@ -33,11 +33,9 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotorImpl;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import virtual_robot.controller.robots.classes.MechanumBot;
-import virtual_robot.controller.robots.classes.TwoWheelBot;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.net.URL;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -414,7 +412,7 @@ public class VirtualRobotController {
 
             }
 
-            //For regular opMode, run user-defined stop() method, if any. For Linear opMode, the start() method
+            //For regular opMode, run user-defined start() method, if any. For Linear opMode, the start() method
             //will allow waitForStart() to finish executing.
             if (!Thread.currentThread().isInterrupted()) opMode.start();
 
