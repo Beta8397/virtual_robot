@@ -77,7 +77,14 @@ public class HardwareMap implements Iterable<HardwareDevice>{
      */
     private List<HardwareDevice> allDevicesList = new ArrayList<>();
 
-    private final Object lock = new Object();
+    /**
+     * INTERNAL USE ONLY!!!
+     * This is needed to prevent users from obtaining hardware references before the INIT button is pressed.
+     * i.e., references to hardware should be obtained in the opmode.init(), opmode.loop(), or linearopmode.runopmode()
+     * methods.
+     */
+    private boolean active = false;
+    public void setActive(boolean isActive){ active = isActive; }
 
     /**
      * Add a device to the HardwareMap
@@ -117,6 +124,10 @@ public class HardwareMap implements Iterable<HardwareDevice>{
 
 
     private synchronized <T> T tryGet(Class<? extends T> classOrInterface, String deviceName){
+        if (!active){
+            System.out.println("ERROR: Cannot obtain references to hardware before INIT button is pressed.");
+            return null;
+        }
         deviceName = deviceName.trim();
         List<HardwareDevice> list = allDevicesMap.get(deviceName);
         if (list != null) {
@@ -184,6 +195,10 @@ public class HardwareMap implements Iterable<HardwareDevice>{
          * @return
          */
         public synchronized DEVICE_TYPE get(String deviceName){
+            if (!active){
+                System.out.println("ERROR: Cannot obtain references to hardware before INIT button is pressed.");
+                return null;
+            }
             deviceName = deviceName.trim();
             DEVICE_TYPE result = map.get(deviceName);
             if (result == null) throw new IllegalArgumentException(

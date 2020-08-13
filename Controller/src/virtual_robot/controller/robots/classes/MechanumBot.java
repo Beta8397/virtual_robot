@@ -41,6 +41,7 @@ public class MechanumBot extends VirtualBot {
 
     public MechanumBot(){
         super();
+        hardwareMap.setActive(true);
         motors = new DcMotorExImpl[]{
                 (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "back_left_motor"),
                 (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "front_left_motor"),
@@ -68,6 +69,7 @@ public class MechanumBot extends VirtualBot {
                 {-0.25/ wlAverage, -0.25/ wlAverage, 0.25/ wlAverage, 0.25/ wlAverage},
                 {-0.25, 0.25, 0.25, -0.25}
         };
+        hardwareMap.setActive(false);
     }
 
     public void initialize(){

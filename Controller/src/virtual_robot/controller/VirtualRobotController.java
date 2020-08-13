@@ -380,6 +380,7 @@ public class VirtualRobotController {
                 Thread.currentThread().interrupt();
             }
             if (opModeThread.isAlive()) System.out.println("OpMode Thread Failed to Terminate.");
+            bot.getHardwareMap().setActive(false);
             bot.powerDownAndReset();
             if (Config.USE_VIRTUAL_GAMEPAD) virtualGamePadController.resetGamePad();
             initializeTelemetryTextArea();
@@ -390,6 +391,10 @@ public class VirtualRobotController {
     private void runOpModeAndCleanUp(){
 
         try {
+            //Activate the hardware map, so that calls to "get" on the hardware map itself, and on dcMotor, etc,
+            //will return hardware objects
+            bot.getHardwareMap().setActive(true);
+
             //For regular opMode, run user-defined init() method. For Linear opMode, init() starts the execution of
             //runOpMode on a helper thread.
             opMode.init();
@@ -445,6 +450,7 @@ public class VirtualRobotController {
             System.out.println(e.getLocalizedMessage());
         }
 
+        bot.getHardwareMap().setActive(false);
         bot.powerDownAndReset();
         if (!executorService.isShutdown()) executorService.shutdown();
         opModeInitialized = false;
