@@ -104,6 +104,9 @@ public class ArmBot extends VirtualBot {
         //createHardwareMap() method, so that a HardwareMap object will be available.
         super();
 
+        //Temporarily activate the hardware map to allow calls to "get"
+        hardwareMap.setActive(true);
+
         //Instantiate the DC Motors using the HardwareMap object. Note the cast to DcMotorImpl.
         motors = new DcMotorExImpl[]{
                 (DcMotorExImpl)hardwareMap.get(DcMotorEx.class,"back_left_motor"),
@@ -146,6 +149,10 @@ public class ArmBot extends VirtualBot {
                 {-0.25/ WIDTH_LENGTH_AVERAGE, -0.25/ WIDTH_LENGTH_AVERAGE, 0.25/ WIDTH_LENGTH_AVERAGE, 0.25/ WIDTH_LENGTH_AVERAGE},
                 {-0.25, 0.25, 0.25, -0.25}
         };
+
+        //Deactivate the hardwaremap to prevent users from accessing hardware until after INIT is pressed
+        hardwareMap.setActive(false);
+
     }
 
     /**

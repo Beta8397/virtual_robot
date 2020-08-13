@@ -36,6 +36,7 @@ public class TwoWheelBot extends VirtualBot {
 
     public TwoWheelBot(){
         super();
+        hardwareMap.setActive(true);
         leftMotor = (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "left_motor");
         rightMotor = (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "right_motor");
         distanceSensors = new VirtualRobotController.DistanceSensorImpl[]{
@@ -49,6 +50,7 @@ public class TwoWheelBot extends VirtualBot {
         servo = (ServoImpl)hardwareMap.servo.get("back_servo");
         wheelCircumference = Math.PI * botWidth / 4.5;
         interWheelDistance = botWidth * 8.0 / 9.0;
+        hardwareMap.setActive(false);
     }
 
     public void initialize(){
