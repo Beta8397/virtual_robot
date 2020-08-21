@@ -22,7 +22,9 @@
     <Group fx:id="propGroup" translateX="250.0" translateY="250.0">
         <children>
             <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="100.0" stroke="BLACK" strokeType="INSIDE" translateX="40.0" width="20.0" />
+            <!--
             <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="20.0" stroke="BLACK" strokeType="INSIDE" translateY="40.0" width="100.0" />
+            -->
             <Circle radius="8.0" stroke="BLACK" strokeType="INSIDE" translateX="50.0" translateY="50.0" />
         </children>
     </Group>

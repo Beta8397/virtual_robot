@@ -18,16 +18,12 @@ public class TestProgrammingBoard extends OpMode {
     DigitalChannel digitalChannel = null;
 
     ElapsedTime et = null;
-    double power = 0.2;
-    double servoPos = 0;
 
     public void init(){
         motor = hardwareMap.get(DcMotor.class, "motor");
-        motor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         servo = hardwareMap.get(Servo.class, "servo");
-        servoPos = 0;
-        servo.setPosition(servoPos);
+        servo.setPosition(0.5);
 
         colorSensor = hardwareMap.get(ColorSensor.class, "sensor_color_distance");
         analogInput = hardwareMap.get(AnalogInput.class, "pot");
@@ -50,14 +46,8 @@ public class TestProgrammingBoard extends OpMode {
     }
 
     public void loop(){
-        if (et.seconds() >= 2){
-            et.reset();
-            power *= -1;
-            servoPos = 1 - servoPos;
-        }
-
-        motor.setPower(power);
-        servo.setPosition(servoPos);
+        motor.setPower(-gamepad1.left_stick_y);
+        servo.setPosition(0.5*(gamepad1.right_stick_y + 1));
         Orientation orientation = imu.getAngularOrientation();
         telemetry.addData("Heading", "%.1f deg", orientation.firstAngle);
         telemetry.addData("Ticks", motor.getCurrentPosition());
