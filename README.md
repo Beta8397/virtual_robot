@@ -1,5 +1,8 @@
 # A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
 
+    New: Programming Board configuration to serve as a companion to the
+    book "Learn Java For FTC", by Alan Smith.
+
 ![](/readme_image.JPG)
 
 This is a JavaFX application developed using the (free) IntelliJ IDEA Community Edition IDE. The repository can be downloaded
@@ -30,6 +33,12 @@ The .bmp image is the skysone_field648.bmp file in the virtual_robot.assets fold
 it must be at least as wide and as tall as the field dimensions (currently 648 x 648 pixels to fit on the screen of
 most laptops). The Config class also allows selection between the use of "real" hardware gamepads versus a
 "virtual gamepad".
+
+In addition to the robot configurations described above, there is an additional configuration called
+"ProgrammingBoard". It is meant to emulate the programming board described in the book "Learn Java For FTC", by
+Alan Smith. It is a board with several hardware devices attached: DcMotor, Servo, Potentiometer, Touch Sensor,
+and a Color-Distance Sensor. It also has a BNO055 IMU. The board doesn't move around the field, but it can
+be rotated (to test the IMU) by dragging the board chassis.
 
 An abridged approximation of the FTC SDK is provided.
 
