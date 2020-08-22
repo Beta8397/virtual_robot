@@ -3,7 +3,7 @@
     New: Programming Board configuration to serve as a companion to the
     book "Learn Java For FTC", by Alan Smith.  
 
-The PDF can be [downloaded for free](https://github.com/alan412/LearnJavaForFTC) or you can purchase the paperback on [Amazon](https://www.amazon.com/dp/B08DBVKXLZ0).
+The PDF can be [downloaded for free](https://github.com/alan412/LearnJavaForFTC) or you can purchase the paperback on [Amazon](https://www.amazon.com/dp/B08DBVKXLZ).
     
 ![](/readme_image.JPG)
 
@@ -39,7 +39,7 @@ most laptops). The Config class also allows selection between the use of "real" 
 In addition to the robot configurations described above, there is an additional configuration called
 "ProgrammingBoard". It is meant to emulate the programming board described in the book "Learn Java For FTC", by
 Alan Smith.  (The PDF can be [downloaded for free](https://github.com/alan412/LearnJavaForFTC) or you can purchase 
-the paperback on [Amazon](https://www.amazon.com/dp/B08DBVKXLZ0).)
+the paperback on [Amazon](https://www.amazon.com/dp/B08DBVKXLZ).)
 It is a board with several hardware devices attached: DcMotor, Servo, Potentiometer, Touch Sensor,
 and a Color-Distance Sensor. It also has a BNO055 IMU. The board doesn't move around the field, but it can
 be rotated (to test the IMU) by dragging the board chassis.
@@ -88,7 +88,7 @@ LOG OF CHANGES
 CHANGES 8/22/2020  
     Added programming board configuration to serve as a companion for the book "Learn Java For FTC", by Alan Smith.
    
-The PDF can be [downloaded for free](https://github.com/alan412/LearnJavaForFTC) or you can purchase the paperback on [Amazon](https://www.amazon.com/dp/B08DBVKXLZ0).
+The PDF can be [downloaded for free](https://github.com/alan412/LearnJavaForFTC) or you can purchase the paperback on [Amazon](https://www.amazon.com/dp/B08DBVKXLZ).
                                                                                                    
 CHANGES 7/22/2020
     Added "Dead-wheel" encoder capability, and a new robot configuration that has mecanum drive wheels and
