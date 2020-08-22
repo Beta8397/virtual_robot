@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.*;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 @TeleOp(name = "TestProgrammingBoard", group = "Test")
@@ -16,6 +17,7 @@ public class TestProgrammingBoard extends OpMode {
     ColorSensor colorSensor = null;
     AnalogInput analogInput = null;
     DigitalChannel digitalChannel = null;
+    DistanceSensor distanceSensor = null;
 
     public void init(){
         motor = hardwareMap.get(DcMotor.class, "motor");
@@ -24,6 +26,7 @@ public class TestProgrammingBoard extends OpMode {
         servo.setPosition(0.5);
 
         colorSensor = hardwareMap.get(ColorSensor.class, "sensor_color_distance");
+        distanceSensor = hardwareMap.get(DistanceSensor.class, "sensor_color_distance");
         analogInput = hardwareMap.get(AnalogInput.class, "pot");
         digitalChannel = hardwareMap.get(DigitalChannel.class, "touch_sensor");
 
@@ -51,6 +54,7 @@ public class TestProgrammingBoard extends OpMode {
         telemetry.addData("Touch", !digitalChannel.getState());
         telemetry.addData("Color", "R: %d  G: %d  B: %d", colorSensor.red(),
                 colorSensor.green(), colorSensor.blue());
+        telemetry.addData("Distance (CM)", distanceSensor.getDistance(DistanceUnit.CM));
 
     }
 

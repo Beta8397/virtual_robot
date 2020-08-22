@@ -1,6 +1,6 @@
 package com.qualcomm.robotcore.hardware;
 
-public class PassiveColorSensor implements ColorSensor {
+public class PassiveColorSensorImpl implements ColorSensor {
 
     private int red = 0;
     private int green = 0;

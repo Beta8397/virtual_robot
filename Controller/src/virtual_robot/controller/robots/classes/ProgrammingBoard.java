@@ -21,7 +21,6 @@ import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import virtual_robot.controller.BotConfig;
 import virtual_robot.controller.VirtualBot;
-import virtual_robot.controller.VirtualRobotController;
 import virtual_robot.util.AngleUtils;
 
 /**
@@ -36,10 +35,11 @@ public class ProgrammingBoard extends VirtualBot {
     private MotorType motorType;
     private DcMotorExImpl motor = null;
     private BNO055IMUImpl imu = null;
-    private PassiveColorSensor colorSensor = null;
+    private PassiveColorSensorImpl colorSensor = null;
     private ServoImpl servo = null;
     private DigitalChannelImpl digitalChannel = null;
     private AnalogInput analogInput = null;
+    private PassiveDistanceSensorImpl distanceSensor = null;
 
     @FXML private Group propGroup;
     @FXML private Group servoArmGroup;
@@ -50,6 +50,7 @@ public class ProgrammingBoard extends VirtualBot {
     @FXML private Slider sldBlue;
     @FXML private Circle circleColor;
     @FXML private Rectangle rectBoard;
+    @FXML private Slider sldDist;
 
     private Rotate servoArmGroupRotate = new Rotate(0, 25, 25);
     private Rotate propGroupRotate = new Rotate(0, 50, 50);
@@ -90,10 +91,11 @@ public class ProgrammingBoard extends VirtualBot {
         hardwareMap.setActive(true);
         motor = (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "motor");
         imu = (BNO055IMUImpl) hardwareMap.get(BNO055IMU.class, "imu");
-        colorSensor = (PassiveColorSensor)hardwareMap.colorSensor.get("sensor_color_distance");
+        colorSensor = (PassiveColorSensorImpl)hardwareMap.colorSensor.get("sensor_color_distance");
         servo = (ServoImpl)hardwareMap.servo.get("servo");
         digitalChannel = (DigitalChannelImpl) hardwareMap.get(DigitalChannel.class, "touch_sensor");
         analogInput = hardwareMap.get(AnalogInput.class, "pot");
+        distanceSensor = (PassiveDistanceSensorImpl)hardwareMap.get(PassiveDistanceSensorImpl.class, "sensor_color_distance");
         hardwareMap.setActive(false);
         System.out.println("Exiting ProgrammingBoard constructor");
     }
@@ -116,10 +118,12 @@ public class ProgrammingBoard extends VirtualBot {
         hardwareMap = new HardwareMap();
         hardwareMap.put("motor", new DcMotorExImpl(motorType));
         hardwareMap.put("imu", new BNO055IMUImpl(this, 10));
-        hardwareMap.put("sensor_color_distance", new PassiveColorSensor());
+        hardwareMap.put("sensor_color_distance", new PassiveColorSensorImpl());
         hardwareMap.put("servo", new ServoImpl());
         hardwareMap.put("touch_sensor", new DigitalChannelImpl());
         hardwareMap.put("pot", new AnalogInput(5.0));
+        hardwareMap.put("sensor_color_distance", new PassiveDistanceSensorImpl(50, 250,
+                50, 250));
     }
 
     public synchronized void updateStateAndSensors(double millis){
@@ -129,6 +133,7 @@ public class ProgrammingBoard extends VirtualBot {
         imu.updateHeadingRadians(headingRadians);
         colorSensor.updateColor(red, green, blue);
         digitalChannel.update(!btnTouchPushed);
+        distanceSensor.update(sldDist.getValue());
     }
 
     public synchronized void updateDisplay(){

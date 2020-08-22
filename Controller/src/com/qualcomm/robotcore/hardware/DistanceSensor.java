@@ -44,7 +44,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  */
 public interface DistanceSensor extends HardwareDevice {
 
-    static final double distanceOutOfRange = 8200; //mm
+    static final double distanceOutOfRange = DistanceUnit.infinity;
 
     /**
      * Return distance of sensor from wall using specified distance unit
