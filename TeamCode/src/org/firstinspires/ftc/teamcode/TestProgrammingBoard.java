@@ -17,8 +17,6 @@ public class TestProgrammingBoard extends OpMode {
     AnalogInput analogInput = null;
     DigitalChannel digitalChannel = null;
 
-    ElapsedTime et = null;
-
     public void init(){
         motor = hardwareMap.get(DcMotor.class, "motor");
 
@@ -41,8 +39,6 @@ public class TestProgrammingBoard extends OpMode {
         parameters.loggingTag = "Who cares.";
 
         imu.initialize(parameters);
-
-        et = new ElapsedTime();
     }
 
     public void loop(){
