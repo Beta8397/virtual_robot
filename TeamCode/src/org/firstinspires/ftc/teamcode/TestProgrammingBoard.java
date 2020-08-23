@@ -4,7 +4,7 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.*;
-import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
@@ -42,6 +42,18 @@ public class TestProgrammingBoard extends OpMode {
         parameters.loggingTag = "Who cares.";
 
         imu.initialize(parameters);
+
+    }
+
+    @Override
+    public void init_loop(){
+        MotorConfigurationType motorConfigType = motor.getMotorType();
+        telemetry.addData("Motor", " MaxRPM = %.2f  MaxRPMFraction = %.2f", motorConfigType.getMaxRPM(),
+                motorConfigType.getAchieveableMaxRPMFraction());
+        telemetry.addData("Motor", " AchieveableMaxTicksPerSec = %.2f", motorConfigType.getAchieveableMaxTicksPerSecond());
+        telemetry.addData("Motor ", " Ticks/Rot = %.2f  gearing = %.2f", motorConfigType.getTicksPerRev(),
+                motorConfigType.getGearing());
+        telemetry.addData("Motor Orientation", motorConfigType.getOrientation());
     }
 
     public void loop(){
