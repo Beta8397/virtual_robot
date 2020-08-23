@@ -1,6 +1,7 @@
 package virtual_robot.controller.robots.classes;
 
 import com.qualcomm.robotcore.hardware.*;
+import com.qualcomm.robotcore.hardware.configuration.MotorType;
 import javafx.fxml.FXML;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Rotate;

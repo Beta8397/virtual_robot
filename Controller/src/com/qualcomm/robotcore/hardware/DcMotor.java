@@ -38,6 +38,7 @@ Modified by FTC Team Beta 8397 for use in the Virtual_Robot Simulator
 package com.qualcomm.robotcore.hardware;
 
 import com.qualcomm.robotcore.hardware.HardwareDevice;
+import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
 /**
  * DcMotor is an abridged version of the FTC DcMotor interface.
@@ -106,5 +107,11 @@ public interface DcMotor extends DcMotorSimple {
      * @return the current ZeroPowerBehavior of the DcMotor
      */
     public ZeroPowerBehavior getZeroPowerBehavior();
+
+    /**
+     * Get the MotorConfigurationType of the DcMotor
+     * @return the MotorConfigurationType
+     */
+    public MotorConfigurationType getMotorType();
 
 }

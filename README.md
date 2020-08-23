@@ -1,9 +1,8 @@
 # A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
 
-    New: Programming Board configuration to serve as a companion to the
-    book "Learn Java For FTC", by Alan Smith.  
-
-The PDF can be [downloaded for free](https://github.com/alan412/LearnJavaForFTC) or you can purchase the paperback on [Amazon](https://www.amazon.com/dp/B08DBVKXLZ).
+    New: Programming Board configuration to serve as a companion to the book "Learn Java For FTC", by Alan Smith.
+    The PDF can be [downloaded for free](https://github.com/alan412/LearnJavaForFTC) or you can purchase the
+    paperback on [Amazon](https://www.amazon.com/dp/B08DBVKXLZ).
     
 ![](/readme_image.JPG)
 
@@ -88,7 +87,8 @@ LOG OF CHANGES
 CHANGES 8/22/2020  
     Added programming board configuration to serve as a companion for the book "Learn Java For FTC", by Alan Smith.
    
-The PDF can be [downloaded for free](https://github.com/alan412/LearnJavaForFTC) or you can purchase the paperback on [Amazon](https://www.amazon.com/dp/B08DBVKXLZ).
+    The PDF can be [downloaded for free](https://github.com/alan412/LearnJavaForFTC) or you can purchase the paperback
+    on [Amazon](https://www.amazon.com/dp/B08DBVKXLZ).
                                                                                                    
 CHANGES 7/22/2020
     Added "Dead-wheel" encoder capability, and a new robot configuration that has mecanum drive wheels and

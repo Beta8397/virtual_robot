@@ -3,6 +3,7 @@ package virtual_robot.controller.robots.classes;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.BNO055IMUImpl;
 import com.qualcomm.robotcore.hardware.*;
+import com.qualcomm.robotcore.hardware.configuration.MotorType;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
