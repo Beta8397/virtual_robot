@@ -45,6 +45,7 @@ import virtual_robot.controller.VirtualRobotController;
  */
 public interface Telemetry {
 
+    //This is public, static, and final, by default
     StringBuilder data = new StringBuilder(200);
 
     /**

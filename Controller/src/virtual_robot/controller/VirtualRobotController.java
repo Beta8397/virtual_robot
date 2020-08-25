@@ -636,7 +636,8 @@ public class VirtualRobotController {
     public class TelemetryImpl implements Telemetry {
 
         public TelemetryImpl(){
-            update();
+            data.setLength(0);
+            setText(data.toString());
         }
 
         /**
@@ -657,17 +658,19 @@ public class VirtualRobotController {
          * @param data The data for this telemetry entry.
          */
         public void addData(String caption, Object data){
-            this.data.append(caption + ":" + data.toString() + "\n");
+            this.data.append(caption + ": " + data.toString() + "\n");
         }
 
 
         /**
          * Replace any data currently displayed on telemetry with all data that has been added since the previous call to
-         * update().
+         * update(). Note: if no data has been added, this method does nothing.
          */
         public void update(){
-            setText(data.toString());
-            data.setLength(0);
+            if (data.length() > 0) {
+                setText(data.toString());
+                data.setLength(0);
+            }
         }
 
         private void setText(String text){
