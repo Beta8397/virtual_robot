@@ -636,7 +636,8 @@ public class VirtualRobotController {
     public class TelemetryImpl implements Telemetry {
 
         public TelemetryImpl(){
-            update();
+            data.setLength(0);
+            setText(data.toString());
         }
 
         /**

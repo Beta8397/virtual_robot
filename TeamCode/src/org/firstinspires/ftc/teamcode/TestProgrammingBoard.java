@@ -43,10 +43,6 @@ public class TestProgrammingBoard extends OpMode {
 
         imu.initialize(parameters);
 
-    }
-
-    @Override
-    public void init_loop(){
         MotorConfigurationType motorConfigType = motor.getMotorType();
         telemetry.addData("Motor", " MaxRPM = %.2f  MaxRPMFraction = %.2f", motorConfigType.getMaxRPM(),
                 motorConfigType.getAchieveableMaxRPMFraction());
@@ -54,7 +50,9 @@ public class TestProgrammingBoard extends OpMode {
         telemetry.addData("Motor ", " Ticks/Rot = %.2f  gearing = %.2f", motorConfigType.getTicksPerRev(),
                 motorConfigType.getGearing());
         telemetry.addData("Motor Orientation", motorConfigType.getOrientation());
+
     }
+
 
     public void loop(){
         motor.setPower(-gamepad1.left_stick_y);
