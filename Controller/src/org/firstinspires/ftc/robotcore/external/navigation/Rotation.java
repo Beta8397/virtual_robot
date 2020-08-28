@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2016 Robert Atkinson
+Copyright (c) 2017 Robert Atkinson
 
 All rights reserved.
 
@@ -30,26 +30,13 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
 TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
-/*
-Modified by FTC Team Beta 8397 for use in the Virtual_Robot Simulator
- */
-
-package com.qualcomm.robotcore.hardware;
-
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+package org.firstinspires.ftc.robotcore.external.navigation;
 
 /**
- * Represents a distance sensor
+ * {@link Rotation} captures an angluar direction of movement
  */
-public interface DistanceSensor extends HardwareDevice {
-
-    static final double distanceOutOfRange = DistanceUnit.infinity;
-
-    /**
-     * Return distance of sensor from wall using specified distance unit
-     * @param distanceUnit
-     * @return distance
-     */
-    double getDistance(DistanceUnit distanceUnit);
+public enum Rotation
+{
+    CW,
+    CCW
 }

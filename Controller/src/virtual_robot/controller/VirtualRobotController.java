@@ -576,7 +576,8 @@ public class VirtualRobotController {
     }
 
     public class DistanceSensorImpl implements DistanceSensor {
-        private double distanceMM = distanceOutOfRange;
+        private final double readingWhenOutOfRangeMM = 8200;
+        private double distanceMM = readingWhenOutOfRangeMM;
         private static final double MIN_DISTANCE = 50; //mm
         private static final double MAX_DISTANCE = 1000; //mm
         private static final double MAX_OFFSET = 7.0 * Math.PI / 180.0;
@@ -584,7 +585,7 @@ public class VirtualRobotController {
         public synchronized double getDistance(DistanceUnit distanceUnit){
             double result;
             if (distanceMM < MIN_DISTANCE) result = MIN_DISTANCE - 1.0;
-            else if (distanceMM > MAX_DISTANCE) result = distanceOutOfRange;
+            else if (distanceMM > MAX_DISTANCE) result = readingWhenOutOfRangeMM;
             else result = distanceMM;
             return distanceUnit.fromMm(result);
         }
@@ -595,7 +596,7 @@ public class VirtualRobotController {
             double temp = headingRadians / piOver2;
             int side = (int)Math.round(temp); //-2, -1 ,0, 1, or 2 (2 and -2 both refer to the right side)
             double offset = Math.abs(headingRadians - (side * Math.PI / 2.0));
-            if (offset > MAX_OFFSET) distanceMM = distanceOutOfRange;
+            if (offset > MAX_OFFSET) distanceMM = readingWhenOutOfRangeMM;
             else switch (side){
                 case 2:
                 case -2:
@@ -635,7 +636,8 @@ public class VirtualRobotController {
     public class TelemetryImpl implements Telemetry {
 
         public TelemetryImpl(){
-            update();
+            data.setLength(0);
+            setText(data.toString());
         }
 
         /**
@@ -656,17 +658,19 @@ public class VirtualRobotController {
          * @param data The data for this telemetry entry.
          */
         public void addData(String caption, Object data){
-            this.data.append(caption + ":" + data.toString() + "\n");
+            this.data.append(caption + ": " + data.toString() + "\n");
         }
 
 
         /**
          * Replace any data currently displayed on telemetry with all data that has been added since the previous call to
-         * update().
+         * update(). Note: if no data has been added, this method does nothing.
          */
         public void update(){
-            setText(data.toString());
-            data.setLength(0);
+            if (data.length() > 0) {
+                setText(data.toString());
+                data.setLength(0);
+            }
         }
 
         private void setText(String text){

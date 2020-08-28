@@ -1,11 +1,14 @@
 package com.qualcomm.robotcore.hardware;
 
+import com.qualcomm.robotcore.hardware.configuration.MotorType;
+import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 public class DeadWheelEncoder implements DcMotorEx {
 
     public final MotorType MOTOR_TYPE;
+    private final MotorConfigurationType MOTOR_CONFIGURATION_TYPE;
 
     RunMode mode = RunMode.RUN_WITHOUT_ENCODER;
 
@@ -26,7 +29,10 @@ public class DeadWheelEncoder implements DcMotorEx {
 
     private ZeroPowerBehavior zeroPowerBehavior = ZeroPowerBehavior.BRAKE;
 
-    public DeadWheelEncoder(MotorType motorType) { MOTOR_TYPE = motorType; }
+    public DeadWheelEncoder(MotorType motorType) {
+        MOTOR_TYPE = motorType;
+        MOTOR_CONFIGURATION_TYPE = new MotorConfigurationType(motorType);
+    }
 
     @Override
     public synchronized void setMode(RunMode mode) {
@@ -215,6 +221,11 @@ public class DeadWheelEncoder implements DcMotorEx {
     @Override
     public boolean isOverCurrent() {
         return false;
+    }
+
+    @Override
+    public MotorConfigurationType getMotorType(){
+        return MOTOR_CONFIGURATION_TYPE;
     }
 
 }
