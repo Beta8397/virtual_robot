@@ -85,6 +85,12 @@ To use:
 
 LOG OF CHANGES
 
+CHANGES 8/29/2020
+    Added the ability to have the "virtual gamepad" triggers and joysticks "snap back" to zero when released. By
+    default, they will hold at current position when released. But, if the SHIFT or ALT key is being pressed, then when
+    these controls are released, they will return to zero. The default behavior can be changed by changing the value
+    of HOLD_CONTROLS_BY_DEFAULT in virtual_robot.config.Config.java.
+
 CHANGES 8/22/2020  
     Added programming board configuration to serve as a companion for the book "Learn Java For FTC", by Alan Smith.
    

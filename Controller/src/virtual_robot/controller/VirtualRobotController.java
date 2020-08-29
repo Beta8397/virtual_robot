@@ -11,6 +11,8 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.shape.Polyline;
@@ -33,6 +35,7 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotorImpl;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import virtual_robot.controller.robots.classes.MechanumBot;
+import virtual_robot.keyboard.KeyState;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -99,6 +102,9 @@ public class VirtualRobotController {
 
     //Random Number Generator
     private Random random = new Random();
+
+    //KeyState
+    private KeyState keyState = new KeyState();
 
     //Motor Error Slider Listener
     private ChangeListener<Number> sliderChangeListener = new ChangeListener<Number>() {
@@ -537,6 +543,19 @@ public class VirtualRobotController {
             for (String distance : distanceSensors) sb.append("\n   " + distance);
         }
         txtTelemetry.setText(sb.toString());
+    }
+
+    @FXML
+    private void handleKeyEvents(KeyEvent e){
+        if (e.getEventType() == KeyEvent.KEY_PRESSED){
+            keyState.set(e.getCode(), true);
+        } else if (e.getEventType() == KeyEvent.KEY_RELEASED){
+            keyState.set(e.getCode(), false);
+        }
+    }
+
+    public boolean getKeyState(KeyCode code){
+        return keyState.get(code);
     }
 
     public class ColorSensorImpl implements ColorSensor {
