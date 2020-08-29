@@ -23,11 +23,11 @@ public class Config {
     public static final Image BACKGROUND = new Image("/virtual_robot/assets/skystone_field648.bmp");
 
     /**
-     * If true, Virtual Gamepad joysticks (and eventually triggers) will stay in the position where they were
+     * If true, Virtual Gamepad joysticks and triggers will stay in the position where they were
      * released by default. If false, the default behavior will be to "snap back" to zero.
      *
-     * But, when one of these controls is being manipulated, pressing the SHIFT key will toggle between "locking"
-     * and "snapping back" behavior.
+     * But if the SHIFT or ALT key is down when the control is released, the behavior will be the opposite of the
+     * default behavior.
      */
     public static final boolean HOLD_CONTROLS_BY_DEFAULT = true;
 }
