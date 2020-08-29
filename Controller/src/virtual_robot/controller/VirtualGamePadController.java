@@ -5,9 +5,12 @@ import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Circle;
+import virtual_robot.config.Config;
 
 public class VirtualGamePadController {
 
@@ -27,6 +30,15 @@ public class VirtualGamePadController {
     @FXML Button btnRB;
     @FXML Slider sldLeft;
     @FXML Slider sldRight;
+
+    boolean leftStickActive = false;
+    boolean rightStickActive = false;
+    boolean leftTriggerActive = false;
+    boolean rightTriggerActive = false;
+    boolean leftStickLocked = Config.HOLD_CONTROLS_BY_DEFAULT;
+    boolean rightStickLocked = Config.HOLD_CONTROLS_BY_DEFAULT;
+    boolean leftTriggerLocked = Config.HOLD_CONTROLS_BY_DEFAULT;
+    boolean rightTriggerLocked = Config.HOLD_CONTROLS_BY_DEFAULT;
 
     volatile float left_stick_x = 0;
     volatile float left_stick_y = 0;
@@ -67,21 +79,77 @@ public class VirtualGamePadController {
     }
 
     @FXML
-    private void handleJoystickDrag(MouseEvent arg){
+    private void handleJoystickMouseEvent(MouseEvent arg){
         if (!virtualRobotController.getOpModeInitialized()) return;
-        float x = (float)Math.max(10, Math.min(110, arg.getX()));
-        float y = (float)Math.max(10, Math.min(110, arg.getY()));
-        if (arg.getSource() == joyStickLeftPane){
-            joyStickLeftHandle.setTranslateX(x-10);
-            joyStickLeftHandle.setTranslateY(y-10);
-            left_stick_x = (x - 60.0f) / 50.0f;
-            left_stick_y = (y - 60.0f) / 50.0f;
+        if (arg.getEventType() == MouseEvent.MOUSE_DRAGGED) {
+            float x = (float) Math.max(10, Math.min(110, arg.getX()));
+            float y = (float) Math.max(10, Math.min(110, arg.getY()));
+            if (arg.getSource() == joyStickLeftPane) {
+                joyStickLeftHandle.setTranslateX(x - 10);
+                joyStickLeftHandle.setTranslateY(y - 10);
+                left_stick_x = (x - 60.0f) / 50.0f;
+                left_stick_y = (y - 60.0f) / 50.0f;
+            } else if (arg.getSource() == joyStickRightPane) {
+                joyStickRightHandle.setTranslateX(x - 10);
+                joyStickRightHandle.setTranslateY(y - 10);
+                right_stick_x = (x - 60.0f) / 50.0f;
+                right_stick_y = (y - 60.0f) / 50.0f;
+            }
+        } else if (arg.getEventType() == MouseEvent.MOUSE_PRESSED){
+            if (arg.getSource() == joyStickLeftPane){
+                joyStickLeftPane.requestFocus();
+                leftStickActive = true;
+            } else if (arg.getSource() == joyStickRightPane){
+                joyStickRightPane.requestFocus();
+                rightStickActive = true;
+            }
+        } else if (arg.getEventType() == MouseEvent.MOUSE_RELEASED){
+            if (arg.getSource() == joyStickLeftPane){
+                if (!leftStickLocked) {
+                    joyStickLeftHandle.setTranslateX(50);
+                    joyStickLeftHandle.setTranslateY(50);
+                    left_stick_x = 0;
+                    left_stick_y = 0;
+                }
+                leftStickActive = false;
+                leftStickLocked = Config.HOLD_CONTROLS_BY_DEFAULT;
+            } else if (arg.getSource() == joyStickRightPane){
+                if (!rightStickLocked){
+                    joyStickRightHandle.setTranslateX(50);
+                    joyStickRightHandle.setTranslateY(50);
+                    right_stick_x = 0;
+                    right_stick_y = 0;
+                }
+                rightStickActive = false;
+                rightStickLocked = Config.HOLD_CONTROLS_BY_DEFAULT;
+            }
         }
-        else if (arg.getSource() == joyStickRightPane){
-            joyStickRightHandle.setTranslateX(x-10);
-            joyStickRightHandle.setTranslateY(y-10);
-            right_stick_x = (x - 60.0f) / 50.0f;
-            right_stick_y = (y - 60.0f) / 50.0f;
+    }
+
+    @FXML
+    public void handleTriggerMouseEvent(MouseEvent arg){
+        if (arg.getEventType() == MouseEvent.MOUSE_PRESSED){
+            if (arg.getSource() == sldLeft){
+                //sldLeft.requestFocus();
+                leftTriggerActive = true;
+            } else if (arg.getSource() == sldRight){
+                //sldRight.requestFocus();
+                rightTriggerActive = true;
+            }
+        } else if (arg.getEventType() == MouseEvent.MOUSE_RELEASED){
+            if (arg.getSource() == sldLeft){
+                if (!leftTriggerLocked) {
+                    sldLeft.setValue(0);
+                }
+                leftTriggerActive = false;
+                leftTriggerLocked = Config.HOLD_CONTROLS_BY_DEFAULT;
+            } else if (arg.getSource() == sldRight){
+                if (!rightTriggerLocked){
+                    sldRight.setValue(0);
+                }
+                rightTriggerActive = false;
+                rightTriggerLocked = Config.HOLD_CONTROLS_BY_DEFAULT;
+            }
         }
     }
 
@@ -130,6 +198,21 @@ public class VirtualGamePadController {
         joyStickLeftHandle.setTranslateY(50);
         joyStickRightHandle.setTranslateX(50);
         joyStickRightHandle.setTranslateY(50);
+    }
+
+    @FXML
+    public void handleKey(KeyEvent e){
+        if (e.getEventType() == KeyEvent.KEY_PRESSED && e.getCode() == KeyCode.SHIFT){
+            if (leftStickActive){
+                leftStickLocked = !leftStickLocked;
+            } else if (rightStickActive) {
+                rightStickLocked = !rightStickLocked;
+            } else if (leftTriggerActive){
+                leftTriggerLocked = !leftTriggerLocked;
+            } else if (rightTriggerActive){
+                rightTriggerLocked = !rightTriggerLocked;
+            }
+        }
     }
 
     public class ControllerState {
