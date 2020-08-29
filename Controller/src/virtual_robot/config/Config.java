@@ -15,7 +15,7 @@ public class Config {
     /**
      * Whether to use "Virtual Gamepad" (true -> Virtual gamepad, false -> Real gamepad)
      */
-    public static final boolean USE_VIRTUAL_GAMEPAD = true;
+    public static final boolean USE_VIRTUAL_GAMEPAD = false;
 
     /**
      * The image object for the field.
