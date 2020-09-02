@@ -542,6 +542,16 @@ public class VirtualRobotController {
             sb.append("\n Distance Sensors:");
             for (String distance : distanceSensors) sb.append("\n   " + distance);
         }
+        Set<String> digitalChannels = hardwareMap.keySet(DigitalChannel.class);
+        if (!digitalChannels.isEmpty()) {
+            sb.append("\n Digital Sensors:");
+            for (String digitalChannel : digitalChannels) sb.append("\n   " + digitalChannel);
+        }
+        Set<String> analogInputs = hardwareMap.keySet(AnalogInput.class);
+        if (!analogInputs.isEmpty()) {
+            sb.append("\n Analog Sensors:");
+            for (String analogInput : analogInputs) sb.append("\n   " + analogInput);
+        }
         txtTelemetry.setText(sb.toString());
     }
 
