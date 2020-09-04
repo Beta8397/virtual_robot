@@ -8,7 +8,7 @@ The PDF can be [downloaded for free](https://github.com/alan412/LearnJavaForFTC)
 ![](/readme_image.JPG)
 
 This is a JavaFX application developed using the (free) IntelliJ IDEA Community Edition IDE. The repository can be downloaded
-and unzipped, then opened with IntelliJ.
+and unzipped, then opened with IntelliJ. It can also be run using Android Studio (see this [video](https://www.youtube.com/watch?v=pmaT9Twbmao)).
 
 Five robot configurations are available: a simple two-wheeled robot, a robot with four mecanum wheels, an
 X-Drive robot with four OmniWheels mounted at 45 degrees at each corner of the robot, a mecanum-wheeled 
