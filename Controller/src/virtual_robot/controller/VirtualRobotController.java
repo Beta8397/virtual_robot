@@ -78,7 +78,9 @@ public class VirtualRobotController {
     private Image backgroundImage = Config.BACKGROUND;
     private PixelReader pixelReader = backgroundImage.getPixelReader();
     private double halfFieldWidth;
+    private double halfFieldHeight;
     private double fieldWidth;
+    private double fieldHeight;
 
     //Path Drawing
     Polyline pathLine;
@@ -126,19 +128,21 @@ public class VirtualRobotController {
         setupCbxOpModes();
         setupCbxRobotConfigs();
         fieldWidth = Config.FIELD_WIDTH;
+        fieldHeight = Config.FIELD_HEIGHT;
         halfFieldWidth = fieldWidth / 2.0;
+        halfFieldHeight = fieldHeight / 2.0;
         fieldPane.setPrefWidth(fieldWidth);
-        fieldPane.setPrefHeight(fieldWidth);
+        fieldPane.setPrefHeight(fieldHeight);
         fieldPane.setMinWidth(fieldWidth);
         fieldPane.setMaxWidth(fieldWidth);
-        fieldPane.setMinHeight(fieldWidth);
-        fieldPane.setMaxHeight(fieldWidth);
+        fieldPane.setMinHeight(fieldHeight);
+        fieldPane.setMaxHeight(fieldHeight);
         imgViewBackground.setFitWidth(fieldWidth);
-        imgViewBackground.setFitHeight(fieldWidth);
-        imgViewBackground.setViewport(new Rectangle2D(0, 0, fieldWidth, fieldWidth));
+        imgViewBackground.setFitHeight(fieldHeight);
+        imgViewBackground.setViewport(new Rectangle2D(0, 0, fieldWidth, fieldHeight));
         imgViewBackground.setImage(backgroundImage);
-        Rectangle pathRect = new Rectangle(fieldWidth, fieldWidth);
-        pathRect.setFill(Color.color(1,0,0,0));
+        Rectangle pathRect = new Rectangle(fieldWidth, fieldHeight);
+        pathRect.setFill(Color.color(1, 0, 0, 0));
         pathLine = new Polyline();
         pathLine.setStroke(Color.LAWNGREEN);
         pathLine.setStrokeWidth(2);
@@ -355,7 +359,7 @@ public class VirtualRobotController {
                 @Override
                 public void run() {
                     bot.updateDisplay();
-                    pathLine.getPoints().addAll(halfFieldWidth + bot.getX(), halfFieldWidth - bot.getY());
+                    pathLine.getPoints().addAll(halfFieldWidth + bot.getX(), halfFieldHeight - bot.getY());
                     updateTelemetryDisplay();
                 }
             };
@@ -579,8 +583,8 @@ public class VirtualRobotController {
         public synchronized int alpha() { return alpha; }
 
         public synchronized void updateColor(double x, double y){
-            int colorX = (int)(x + halfFieldWidth);
-            int colorY = (int)(halfFieldWidth - y);
+            int colorX = (int) (x + halfFieldWidth);
+            int colorY = (int) (halfFieldHeight - y);
             double tempRed = 0.0;
             double tempGreen = 0.0;
             double tempBlue = 0.0;
@@ -619,26 +623,27 @@ public class VirtualRobotController {
             return distanceUnit.fromMm(result);
         }
 
-        public synchronized void updateDistance(double x, double y, double headingRadians){
-            final double mmPerPixel = 144.0 * 25.4 / fieldWidth;
+        public synchronized void updateDistance(double x, double y, double headingRadians) {
+            final double mmPerPixel_x = DistanceUnit.MM.fromInches(Config.FIELD_WIDTH_INCHES / fieldWidth);
+            final double mmPerPixel_y = DistanceUnit.MM.fromInches(Config.FIELD_HEIGHT_INCHES / fieldHeight);
             final double piOver2 = Math.PI / 2.0;
             double temp = headingRadians / piOver2;
-            int side = (int)Math.round(temp); //-2, -1 ,0, 1, or 2 (2 and -2 both refer to the right side)
+            int side = (int) Math.round(temp); //-2, -1 ,0, 1, or 2 (2 and -2 both refer to the right side)
             double offset = Math.abs(headingRadians - (side * Math.PI / 2.0));
             if (offset > MAX_OFFSET) distanceMM = readingWhenOutOfRangeMM;
-            else switch (side){
+            else switch (side) {
                 case 2:
                 case -2:
-                    distanceMM = (y + halfFieldWidth) * mmPerPixel;
+                    distanceMM = (y + halfFieldHeight) * mmPerPixel_y;
                     break;
                 case -1:
-                    distanceMM = (halfFieldWidth - x) * mmPerPixel;
+                    distanceMM = (halfFieldWidth - x) * mmPerPixel_x;
                     break;
                 case 0:
-                    distanceMM = (halfFieldWidth - y) * mmPerPixel;
+                    distanceMM = (halfFieldHeight - y) * mmPerPixel_y;
                     break;
                 case 1:
-                    distanceMM = (x + halfFieldWidth) * mmPerPixel;
+                    distanceMM = (x + halfFieldWidth) * mmPerPixel_x;
                     break;
             }
         }

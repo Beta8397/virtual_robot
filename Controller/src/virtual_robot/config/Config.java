@@ -7,10 +7,26 @@ import javafx.scene.image.Image;
  */
 public class Config {
 
+
     /**
-     *  Width of the field, in pixels
+     * Width of the field, in pixels
      */
-    public static final double FIELD_WIDTH = 648;
+    public static final double FIELD_WIDTH = 648;  //435 for remote
+    /**
+     * Width of the field, in inches
+     */
+    public static final double FIELD_WIDTH_INCHES = 144;
+
+    /**
+     * Height of the field, in pixels
+     */
+    public static final double FIELD_HEIGHT = 648;
+
+    /**
+     * Height of the field, in inches
+     */
+    public static final double FIELD_HEIGHT_INCHES = 144;  // 96 for remote
+
 
     /**
      * Whether to use "Virtual Gamepad" (true -> Virtual gamepad, false -> Real gamepad)
@@ -21,6 +37,7 @@ public class Config {
      * The image object for the field.
      */
     public static final Image BACKGROUND = new Image("/virtual_robot/assets/ultimate_goal_648.bmp");
+    //public static final Image BACKGROUND = new Image("/virtual_robot/assets/ultimate_goal_remote_648.bmp");
 
     /**
      * If true, Virtual Gamepad joysticks and triggers will stay in the position where they were
