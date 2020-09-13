@@ -67,8 +67,8 @@ public class VirtualRobotController {
     //Virtual Hardware
     private HardwareMap hardwareMap = null;
     private VirtualBot bot = null;
-    GamePad gamePad1 = new GamePad();
-    GamePad gamePad2 = new GamePad();
+    Gamepad gamePad1 = new Gamepad();
+    Gamepad gamePad2 = new Gamepad();
     GamePadHelper gamePadHelper = null;
     ScheduledExecutorService gamePadExecutorService = Executors.newSingleThreadScheduledExecutor();
 
@@ -650,8 +650,8 @@ public class VirtualRobotController {
      */
     public class OpModeBase {
         protected final HardwareMap hardwareMap;
-        protected final GamePad gamepad1;
-        protected final GamePad gamepad2;
+        protected final Gamepad gamepad1;
+        protected final Gamepad gamepad2;
         protected final Telemetry telemetry;
 
         public OpModeBase() {
