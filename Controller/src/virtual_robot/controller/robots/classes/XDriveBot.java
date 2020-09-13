@@ -117,10 +117,11 @@ public class XDriveBot extends VirtualBot {
         y += dxR * sin + dyR * cos;
         headingRadians += headingChange;
 
-        constrainToBoundaries();
-
         if (headingRadians > Math.PI) headingRadians -= 2.0 * Math.PI;
         else if (headingRadians < -Math.PI) headingRadians += 2.0 * Math.PI;
+
+        constrainToBoundaries();
+
         //gyro.updateHeading(headingRadians * 180.0 / Math.PI);
         imu.updateHeadingRadians(headingRadians);
 

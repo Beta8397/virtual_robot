@@ -200,10 +200,17 @@ public abstract class VirtualBot {
      * Constrain robot to the boundaries X_MIN, X_MAX, Y_MIN, Y_MAX
      */
     protected void constrainToBoundaries(){
-        if (x >  (X_MAX - halfBotWidth)) x = X_MAX - halfBotWidth;
-        else if (x < (X_MIN + halfBotWidth)) x = X_MIN + halfBotWidth;
-        if (y > (Y_MAX - halfBotWidth)) y = Y_MAX - halfBotWidth;
-        else if (y < (Y_MIN + halfBotWidth)) y = Y_MIN + halfBotWidth;
+
+        double effectiveHalfBotWidth;    //Use this to keep corner of robot from leaving field
+        if (headingRadians <= -Math.PI/2.0) effectiveHalfBotWidth = -halfBotWidth * (Math.sin(headingRadians) + Math.cos(headingRadians));
+        else if (headingRadians <= 0) effectiveHalfBotWidth = halfBotWidth * (Math.cos(headingRadians) - Math.sin(headingRadians));
+        else if (headingRadians <= Math.PI/2.0) effectiveHalfBotWidth = halfBotWidth * (Math.sin(headingRadians) + Math.cos(headingRadians));
+        else effectiveHalfBotWidth = halfBotWidth * (Math.sin(headingRadians) - Math.cos(headingRadians));
+
+        if (x >  (X_MAX - effectiveHalfBotWidth)) x = X_MAX - effectiveHalfBotWidth;
+        else if (x < (X_MIN + effectiveHalfBotWidth)) x = X_MIN + effectiveHalfBotWidth;
+        if (y > (Y_MAX - effectiveHalfBotWidth)) y = Y_MAX - effectiveHalfBotWidth;
+        else if (y < (Y_MIN + effectiveHalfBotWidth)) y = Y_MIN + effectiveHalfBotWidth;
     }
 
 }

@@ -158,11 +158,11 @@ public class EncoderBot extends VirtualBot {
         y += dxR * sin + dyR * cos;
         headingRadians += headingChange;
 
-        //Need to account for possibility that robot has run in to the wall
-        constrainToBoundaries();
-
         if (headingRadians > Math.PI) headingRadians -= 2.0 * Math.PI;
         else if (headingRadians < -Math.PI) headingRadians += 2.0 * Math.PI;
+
+        //Need to account for possibility that robot has run in to the wall
+        constrainToBoundaries();
 
         imu.updateHeadingRadians(headingRadians);
 
