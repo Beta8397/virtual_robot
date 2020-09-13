@@ -144,6 +144,9 @@ public class VirtualRobotController {
         pathLine.setStrokeWidth(2);
         pathLine.setVisible(false);
         fieldPane.getChildren().addAll(new Group(pathRect, pathLine));
+
+        addConstraintMasks();
+
         sldRandomMotorError.valueProperty().addListener(sliderChangeListener);
         sldSystematicMotorError.valueProperty().addListener(sliderChangeListener);
         sldMotorInertia.valueProperty().addListener(sliderChangeListener);
@@ -168,6 +171,33 @@ public class VirtualRobotController {
             gamePadHelper = new RealGamePadHelper();
         }
         gamePadExecutorService.scheduleAtFixedRate(gamePadHelper, 0, 20, TimeUnit.MILLISECONDS);
+    }
+
+    private void addConstraintMasks(){
+        if (Config.X_MIN_FRACTION > 0){
+            Rectangle rect = new Rectangle(fieldWidth*Config.X_MIN_FRACTION, fieldWidth);
+            rect.setFill(Color.color(0.2, 0.2, 0.2, 0.75));
+            fieldPane.getChildren().add(rect);
+        }
+        if (Config.X_MAX_FRACTION < 1){
+            Rectangle rect = new Rectangle(fieldWidth*(1-Config.X_MAX_FRACTION), fieldWidth);
+            rect.setTranslateX(fieldWidth*Config.X_MAX_FRACTION);
+            rect.setFill(Color.color(0.2, 0.2, 0.2, 0.75));
+            fieldPane.getChildren().add(rect);
+        }
+        if (Config.Y_MIN_FRACTION > 0){
+            Rectangle rect = new Rectangle(fieldWidth*(Config.X_MAX_FRACTION-Config.X_MIN_FRACTION), fieldWidth*Config.Y_MIN_FRACTION);
+            rect.setTranslateX(fieldWidth*Config.X_MIN_FRACTION);
+            rect.setTranslateY(fieldWidth*(1-Config.Y_MIN_FRACTION));
+            rect.setFill(Color.color(0.2, 0.2, 0.2, 0.75));
+            fieldPane.getChildren().add(rect);
+        }
+        if (Config.Y_MAX_FRACTION < 1){
+            Rectangle rect = new Rectangle(fieldWidth*(Config.X_MAX_FRACTION-Config.X_MIN_FRACTION), fieldWidth*(1-Config.Y_MAX_FRACTION));
+            rect.setTranslateX(fieldWidth*Config.X_MIN_FRACTION);
+            rect.setFill(Color.color(0.2, 0.2, 0.2, 0.75));
+            fieldPane.getChildren().add(rect);
+        }
     }
 
     private void setupCbxRobotConfigs(){

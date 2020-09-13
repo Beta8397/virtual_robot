@@ -169,10 +169,13 @@ public abstract class VirtualBot {
     public synchronized void positionWithMouseClick(MouseEvent arg){
 
         if (arg.getButton() == MouseButton.PRIMARY) {
-            double argX = Math.max(halfBotWidth, Math.min(fieldWidth - halfBotWidth, arg.getX()));
-            double argY = Math.max(halfBotWidth, Math.min(fieldWidth - halfBotWidth, arg.getY()));
-            x = argX - halfFieldWidth;
-            y = halfFieldWidth - argY;
+//            double argX = Math.max(halfBotWidth, Math.min(fieldWidth - halfBotWidth, arg.getX()));
+//            double argY = Math.max(halfBotWidth, Math.min(fieldWidth - halfBotWidth, arg.getY()));
+//            x = argX - halfFieldWidth;
+//            y = halfFieldWidth - argY;
+            x = arg.getX() - halfFieldWidth;
+            y = halfFieldWidth - arg.getY();
+            constrainToBoundaries();
             updateDisplay();
         }
         else if (arg.getButton() == MouseButton.SECONDARY){
@@ -180,6 +183,7 @@ public abstract class VirtualBot {
             double centerY = halfFieldWidth - y;
             double displayAngleRads = Math.atan2(arg.getX() - centerX, centerY - arg.getY());
             headingRadians = -displayAngleRads;
+            constrainToBoundaries();
             updateDisplay();
         }
     }

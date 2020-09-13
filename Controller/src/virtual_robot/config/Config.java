@@ -11,8 +11,8 @@ public class Config {
      */
     public static final double X_MIN_FRACTION = 0.3333; //0 for WHOLE FIELD OR BLUE REMOTE, 0.3333 for RED REMOTE FIELD
     public static final double X_MAX_FRACTION = 1; //1 for WHOLE FIELD OR RED REMOTE, 0.6667 for BLUE REMOTE FIELD
-    public static final double Y_MIN_FRACTION = 0;
-    public static final double Y_MAX_FRACTION = 1;
+    public static final double Y_MIN_FRACTION = 0;  //Leave this alone for Ultimate Goal
+    public static final double Y_MAX_FRACTION = 1;  //Leave this alone for Ultimate Goal
 
     /**
      *  Width of the field, in pixels
@@ -27,7 +27,7 @@ public class Config {
     /**
      * The image object for the field.
      */
-    public static final Image BACKGROUND = new Image("/virtual_robot/assets/ultimate_goal_red_648.bmp");
+    public static final Image BACKGROUND = new Image("/virtual_robot/assets/ultimate_goal_648.bmp");
 
     /**
      * If true, Virtual Gamepad joysticks and triggers will stay in the position where they were
