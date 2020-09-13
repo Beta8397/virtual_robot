@@ -79,15 +79,16 @@ public class TwoWheelBot extends VirtualBot {
         double headingChange = (rightWheelDist - leftWheelDist) / interWheelDistance;
         double deltaRobotX = -distTraveled * Math.sin(headingRadians + headingChange / 2.0);
         double deltaRobotY = distTraveled * Math.cos(headingRadians + headingChange / 2.0);
+
         x += deltaRobotX;
         y += deltaRobotY;
-        if (x >  (halfFieldWidth - halfBotWidth)) x = halfFieldWidth - halfBotWidth;
-        else if (x < (halfBotWidth - halfFieldWidth)) x = halfBotWidth - halfFieldWidth;
-        if (y > (halfFieldWidth - halfBotWidth)) y = halfFieldWidth - halfBotWidth;
-        else if (y < (halfBotWidth - halfFieldWidth)) y = halfBotWidth - halfFieldWidth;
         headingRadians += headingChange;
+
         if (headingRadians > Math.PI) headingRadians -= 2.0 * Math.PI;
         else if (headingRadians < -Math.PI) headingRadians += 2.0 * Math.PI;
+
+        constrainToBoundaries();
+
         gyro.updateHeading(headingRadians * 180.0 / Math.PI);
         colorSensor.updateColor(x, y);
         final double piOver2 = Math.PI / 2.0;

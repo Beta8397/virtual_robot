@@ -144,6 +144,9 @@ public class VirtualRobotController {
         pathLine.setStrokeWidth(2);
         pathLine.setVisible(false);
         fieldPane.getChildren().addAll(new Group(pathRect, pathLine));
+
+        addConstraintMasks();
+
         sldRandomMotorError.valueProperty().addListener(sliderChangeListener);
         sldSystematicMotorError.valueProperty().addListener(sliderChangeListener);
         sldMotorInertia.valueProperty().addListener(sliderChangeListener);
@@ -168,6 +171,33 @@ public class VirtualRobotController {
             gamePadHelper = new RealGamePadHelper();
         }
         gamePadExecutorService.scheduleAtFixedRate(gamePadHelper, 0, 20, TimeUnit.MILLISECONDS);
+    }
+
+    private void addConstraintMasks(){
+        if (Config.X_MIN_FRACTION > 0){
+            Rectangle rect = new Rectangle(fieldWidth*Config.X_MIN_FRACTION, fieldWidth);
+            rect.setFill(Color.color(0.2, 0.2, 0.2, 0.75));
+            fieldPane.getChildren().add(rect);
+        }
+        if (Config.X_MAX_FRACTION < 1){
+            Rectangle rect = new Rectangle(fieldWidth*(1-Config.X_MAX_FRACTION), fieldWidth);
+            rect.setTranslateX(fieldWidth*Config.X_MAX_FRACTION);
+            rect.setFill(Color.color(0.2, 0.2, 0.2, 0.75));
+            fieldPane.getChildren().add(rect);
+        }
+        if (Config.Y_MIN_FRACTION > 0){
+            Rectangle rect = new Rectangle(fieldWidth*(Config.X_MAX_FRACTION-Config.X_MIN_FRACTION), fieldWidth*Config.Y_MIN_FRACTION);
+            rect.setTranslateX(fieldWidth*Config.X_MIN_FRACTION);
+            rect.setTranslateY(fieldWidth*(1-Config.Y_MIN_FRACTION));
+            rect.setFill(Color.color(0.2, 0.2, 0.2, 0.75));
+            fieldPane.getChildren().add(rect);
+        }
+        if (Config.Y_MAX_FRACTION < 1){
+            Rectangle rect = new Rectangle(fieldWidth*(Config.X_MAX_FRACTION-Config.X_MIN_FRACTION), fieldWidth*(1-Config.Y_MAX_FRACTION));
+            rect.setTranslateX(fieldWidth*Config.X_MIN_FRACTION);
+            rect.setFill(Color.color(0.2, 0.2, 0.2, 0.75));
+            fieldPane.getChildren().add(rect);
+        }
     }
 
     private void setupCbxRobotConfigs(){
@@ -605,11 +635,21 @@ public class VirtualRobotController {
     }
 
     public class DistanceSensorImpl implements DistanceSensor {
+
         private final double readingWhenOutOfRangeMM = 8200;
         private double distanceMM = readingWhenOutOfRangeMM;
         private static final double MIN_DISTANCE = 50; //mm
         private static final double MAX_DISTANCE = 1000; //mm
         private static final double MAX_OFFSET = 7.0 * Math.PI / 180.0;
+
+        private final double X_MIN, X_MAX, Y_MIN, Y_MAX;    //Need these to constrain field
+
+        public DistanceSensorImpl(){
+            X_MIN = 2.0 * (Config.X_MIN_FRACTION - 0.5) * halfFieldWidth;
+            X_MAX = 2.0 * (Config.X_MAX_FRACTION - 0.5) * halfFieldWidth;
+            Y_MIN = 2.0 * (Config.Y_MIN_FRACTION - 0.5) * halfFieldWidth;
+            Y_MAX = 2.0 * (Config.Y_MAX_FRACTION - 0.5) * halfFieldWidth;
+        }
 
         public synchronized double getDistance(DistanceUnit distanceUnit){
             double result;
@@ -623,22 +663,22 @@ public class VirtualRobotController {
             final double mmPerPixel = 144.0 * 25.4 / fieldWidth;
             final double piOver2 = Math.PI / 2.0;
             double temp = headingRadians / piOver2;
-            int side = (int)Math.round(temp); //-2, -1 ,0, 1, or 2 (2 and -2 both refer to the right side)
+            int side = (int)Math.round(temp); //-2, -1 ,0, 1, or 2 (2 and -2 both refer to the bottom)
             double offset = Math.abs(headingRadians - (side * Math.PI / 2.0));
             if (offset > MAX_OFFSET) distanceMM = readingWhenOutOfRangeMM;
             else switch (side){
                 case 2:
                 case -2:
-                    distanceMM = (y + halfFieldWidth) * mmPerPixel;
+                    distanceMM = (y - Y_MIN) * mmPerPixel;                  //BOTTOM
                     break;
                 case -1:
-                    distanceMM = (halfFieldWidth - x) * mmPerPixel;
+                    distanceMM = (X_MAX - x) * mmPerPixel;         //RIGHT
                     break;
                 case 0:
-                    distanceMM = (halfFieldWidth - y) * mmPerPixel;
+                    distanceMM = (Y_MAX - y) * mmPerPixel;         //TOP
                     break;
                 case 1:
-                    distanceMM = (x + halfFieldWidth) * mmPerPixel;
+                    distanceMM = (x - X_MIN) * mmPerPixel;         //LEFT
                     break;
             }
         }

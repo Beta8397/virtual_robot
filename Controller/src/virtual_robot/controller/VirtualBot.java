@@ -15,6 +15,7 @@ import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import virtual_robot.config.Config;
 
 /**
  *   For internal use only. Abstract base class for all of the specific robot configurations.
@@ -54,6 +55,8 @@ public abstract class VirtualBot {
     protected double y = 0;
     protected double headingRadians = 0;
 
+    private final double X_MIN, X_MAX, Y_MIN, Y_MAX;
+
     public VirtualBot(){
         fieldPane = controller.getFieldPane();
         createHardwareMap();
@@ -61,6 +64,10 @@ public abstract class VirtualBot {
         halfFieldWidth = fieldWidth / 2.0;
         botWidth = fieldWidth / 8.0;
         halfBotWidth = botWidth / 2.0;
+        X_MIN = 2.0 * (Config.X_MIN_FRACTION - 0.5) * halfFieldWidth;
+        X_MAX = 2.0 * (Config.X_MAX_FRACTION - 0.5) * halfFieldWidth;
+        Y_MIN = 2.0 * (Config.Y_MIN_FRACTION - 0.5) * halfFieldWidth;
+        Y_MAX = 2.0 * (Config.Y_MAX_FRACTION - 0.5) * halfFieldWidth;
     }
 
     static void setController(VirtualRobotController ctrl){
@@ -162,10 +169,13 @@ public abstract class VirtualBot {
     public synchronized void positionWithMouseClick(MouseEvent arg){
 
         if (arg.getButton() == MouseButton.PRIMARY) {
-            double argX = Math.max(halfBotWidth, Math.min(fieldWidth - halfBotWidth, arg.getX()));
-            double argY = Math.max(halfBotWidth, Math.min(fieldWidth - halfBotWidth, arg.getY()));
-            x = argX - halfFieldWidth;
-            y = halfFieldWidth - argY;
+//            double argX = Math.max(halfBotWidth, Math.min(fieldWidth - halfBotWidth, arg.getX()));
+//            double argY = Math.max(halfBotWidth, Math.min(fieldWidth - halfBotWidth, arg.getY()));
+//            x = argX - halfFieldWidth;
+//            y = halfFieldWidth - argY;
+            x = arg.getX() - halfFieldWidth;
+            y = halfFieldWidth - arg.getY();
+            constrainToBoundaries();
             updateDisplay();
         }
         else if (arg.getButton() == MouseButton.SECONDARY){
@@ -173,6 +183,7 @@ public abstract class VirtualBot {
             double centerY = halfFieldWidth - y;
             double displayAngleRads = Math.atan2(arg.getX() - centerX, centerY - arg.getY());
             headingRadians = -displayAngleRads;
+            constrainToBoundaries();
             updateDisplay();
         }
     }
@@ -188,5 +199,22 @@ public abstract class VirtualBot {
      * hardwareMap variable.
      */
     protected abstract void createHardwareMap();
+
+    /**
+     * Constrain robot to the boundaries X_MIN, X_MAX, Y_MIN, Y_MAX
+     */
+    protected void constrainToBoundaries(){
+
+        double effectiveHalfBotWidth;    //Use this to keep corner of robot from leaving field
+        if (headingRadians <= -Math.PI/2.0) effectiveHalfBotWidth = -halfBotWidth * (Math.sin(headingRadians) + Math.cos(headingRadians));
+        else if (headingRadians <= 0) effectiveHalfBotWidth = halfBotWidth * (Math.cos(headingRadians) - Math.sin(headingRadians));
+        else if (headingRadians <= Math.PI/2.0) effectiveHalfBotWidth = halfBotWidth * (Math.sin(headingRadians) + Math.cos(headingRadians));
+        else effectiveHalfBotWidth = halfBotWidth * (Math.sin(headingRadians) - Math.cos(headingRadians));
+
+        if (x >  (X_MAX - effectiveHalfBotWidth)) x = X_MAX - effectiveHalfBotWidth;
+        else if (x < (X_MIN + effectiveHalfBotWidth)) x = X_MIN + effectiveHalfBotWidth;
+        if (y > (Y_MAX - effectiveHalfBotWidth)) y = Y_MAX - effectiveHalfBotWidth;
+        else if (y < (Y_MIN + effectiveHalfBotWidth)) y = Y_MIN + effectiveHalfBotWidth;
+    }
 
 }

@@ -3,6 +3,8 @@
 New: Programming Board configuration to serve as a companion to the book "Learn Java For FTC", by Alan Smith. The
 PDF can be [downloaded for free](https://github.com/alan412/LearnJavaForFTC) or you can purchase the paperback on
 [Amazon](https://www.amazon.com/dp/B08DBVKXLZ).
+
+Also: Updated to allow use of either a full field or remote (8 x 12 ft) field for Ultimate Goal.
     
 ![](/readme_image.JPG)
 
@@ -83,6 +85,12 @@ To use:
 
 
 LOG OF CHANGES
+
+CHANGES 9/13/2020
+    Added the ability to "constrain" the field, to simulate partial fields being used for remote competitions. For a
+    "RED" field, change the value of X_MIN_FRACTION in Config.java from 0 to 0.3333. For a partial "BLUE" field, change
+    the value of X_MAX_FRACTION from 1 to 0.6667. This will mask the excluded parts of the field, and constrain robot
+    motion. The distance sensors will behave as if the wall has been moved to the edge of the constraint area.
 
 CHANGES 8/29/2020
     Added the ability to have the "virtual gamepad" triggers and joysticks "snap back" to zero when released. By
