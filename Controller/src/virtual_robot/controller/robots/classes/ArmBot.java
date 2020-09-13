@@ -277,10 +277,7 @@ public class ArmBot extends VirtualBot {
         /*
         This code is necessary to constrain x and y, so the robot can't escape the field.
          */
-        if (x >  (halfFieldWidth - halfBotWidth)) x = halfFieldWidth - halfBotWidth;
-        else if (x < (halfBotWidth - halfFieldWidth)) x = halfBotWidth - halfFieldWidth;
-        if (y > (halfFieldWidth - halfBotWidth)) y = halfFieldWidth - halfBotWidth;
-        else if (y < (halfBotWidth - halfFieldWidth)) y = halfBotWidth - halfFieldWidth;
+        constrainToBoundaries();
 
         /*
         This code restrains the robot heading (in radians) to the -pi to +pi range (i.e., -180 to +180 degrees)

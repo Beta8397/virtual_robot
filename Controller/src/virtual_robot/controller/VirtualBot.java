@@ -15,6 +15,7 @@ import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import virtual_robot.config.Config;
 
 /**
  *   For internal use only. Abstract base class for all of the specific robot configurations.
@@ -54,6 +55,8 @@ public abstract class VirtualBot {
     protected double y = 0;
     protected double headingRadians = 0;
 
+    private final double X_MIN, X_MAX, Y_MIN, Y_MAX;
+
     public VirtualBot(){
         fieldPane = controller.getFieldPane();
         createHardwareMap();
@@ -61,6 +64,10 @@ public abstract class VirtualBot {
         halfFieldWidth = fieldWidth / 2.0;
         botWidth = fieldWidth / 8.0;
         halfBotWidth = botWidth / 2.0;
+        X_MIN = 2.0 * (Config.X_MIN_FRACTION - 0.5) * halfFieldWidth;
+        X_MAX = 2.0 * (Config.X_MAX_FRACTION - 0.5) * halfFieldWidth;
+        Y_MIN = 2.0 * (Config.Y_MIN_FRACTION - 0.5) * halfFieldWidth;
+        Y_MAX = 2.0 * (Config.Y_MAX_FRACTION - 0.5) * halfFieldWidth;
     }
 
     static void setController(VirtualRobotController ctrl){
@@ -188,5 +195,15 @@ public abstract class VirtualBot {
      * hardwareMap variable.
      */
     protected abstract void createHardwareMap();
+
+    /**
+     * Constrain robot to the boundaries X_MIN, X_MAX, Y_MIN, Y_MAX
+     */
+    protected void constrainToBoundaries(){
+        if (x >  (X_MAX - halfBotWidth)) x = X_MAX - halfBotWidth;
+        else if (x < (X_MIN + halfBotWidth)) x = X_MIN + halfBotWidth;
+        if (y > (Y_MAX - halfBotWidth)) y = Y_MAX - halfBotWidth;
+        else if (y < (Y_MIN + halfBotWidth)) y = Y_MIN + halfBotWidth;
+    }
 
 }

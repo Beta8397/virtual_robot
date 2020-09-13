@@ -81,10 +81,9 @@ public class TwoWheelBot extends VirtualBot {
         double deltaRobotY = distTraveled * Math.cos(headingRadians + headingChange / 2.0);
         x += deltaRobotX;
         y += deltaRobotY;
-        if (x >  (halfFieldWidth - halfBotWidth)) x = halfFieldWidth - halfBotWidth;
-        else if (x < (halfBotWidth - halfFieldWidth)) x = halfBotWidth - halfFieldWidth;
-        if (y > (halfFieldWidth - halfBotWidth)) y = halfFieldWidth - halfBotWidth;
-        else if (y < (halfBotWidth - halfFieldWidth)) y = halfBotWidth - halfFieldWidth;
+
+        constrainToBoundaries();
+
         headingRadians += headingChange;
         if (headingRadians > Math.PI) headingRadians -= 2.0 * Math.PI;
         else if (headingRadians < -Math.PI) headingRadians += 2.0 * Math.PI;

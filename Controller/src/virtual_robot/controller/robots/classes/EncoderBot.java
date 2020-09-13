@@ -159,10 +159,7 @@ public class EncoderBot extends VirtualBot {
         headingRadians += headingChange;
 
         //Need to account for possibility that robot has run in to the wall
-        if (x >  (halfFieldWidth - halfBotWidth)) x = halfFieldWidth - halfBotWidth;
-        else if (x < (halfBotWidth - halfFieldWidth)) x = halfBotWidth - halfFieldWidth;
-        if (y > (halfFieldWidth - halfBotWidth)) y = halfFieldWidth - halfBotWidth;
-        else if (y < (halfBotWidth - halfFieldWidth)) y = halfBotWidth - halfFieldWidth;
+        constrainToBoundaries();
 
         if (headingRadians > Math.PI) headingRadians -= 2.0 * Math.PI;
         else if (headingRadians < -Math.PI) headingRadians += 2.0 * Math.PI;
