@@ -42,7 +42,7 @@ import virtual_robot.controller.VirtualGamePadController;
  *
  * Note: the fields in the class are all public, but they should not be changed from the OpMode code.
  */
-public class GamePad {
+public class Gamepad {
 
     public volatile boolean x = false;
     public volatile boolean y = false;

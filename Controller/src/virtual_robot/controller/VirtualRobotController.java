@@ -11,6 +11,8 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.shape.Polyline;
@@ -33,6 +35,7 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotorImpl;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import virtual_robot.controller.robots.classes.MechanumBot;
+import virtual_robot.keyboard.KeyState;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -64,8 +67,8 @@ public class VirtualRobotController {
     //Virtual Hardware
     private HardwareMap hardwareMap = null;
     private VirtualBot bot = null;
-    GamePad gamePad1 = new GamePad();
-    GamePad gamePad2 = new GamePad();
+    Gamepad gamePad1 = new Gamepad();
+    Gamepad gamePad2 = new Gamepad();
     GamePadHelper gamePadHelper = null;
     ScheduledExecutorService gamePadExecutorService = Executors.newSingleThreadScheduledExecutor();
 
@@ -99,6 +102,9 @@ public class VirtualRobotController {
 
     //Random Number Generator
     private Random random = new Random();
+
+    //KeyState
+    private KeyState keyState = new KeyState();
 
     //Motor Error Slider Listener
     private ChangeListener<Number> sliderChangeListener = new ChangeListener<Number>() {
@@ -138,6 +144,9 @@ public class VirtualRobotController {
         pathLine.setStrokeWidth(2);
         pathLine.setVisible(false);
         fieldPane.getChildren().addAll(new Group(pathRect, pathLine));
+
+        addConstraintMasks();
+
         sldRandomMotorError.valueProperty().addListener(sliderChangeListener);
         sldSystematicMotorError.valueProperty().addListener(sliderChangeListener);
         sldMotorInertia.valueProperty().addListener(sliderChangeListener);
@@ -162,6 +171,33 @@ public class VirtualRobotController {
             gamePadHelper = new RealGamePadHelper();
         }
         gamePadExecutorService.scheduleAtFixedRate(gamePadHelper, 0, 20, TimeUnit.MILLISECONDS);
+    }
+
+    private void addConstraintMasks(){
+        if (Config.X_MIN_FRACTION > 0){
+            Rectangle rect = new Rectangle(fieldWidth*Config.X_MIN_FRACTION, fieldWidth);
+            rect.setFill(Color.color(0.2, 0.2, 0.2, 0.75));
+            fieldPane.getChildren().add(rect);
+        }
+        if (Config.X_MAX_FRACTION < 1){
+            Rectangle rect = new Rectangle(fieldWidth*(1-Config.X_MAX_FRACTION), fieldWidth);
+            rect.setTranslateX(fieldWidth*Config.X_MAX_FRACTION);
+            rect.setFill(Color.color(0.2, 0.2, 0.2, 0.75));
+            fieldPane.getChildren().add(rect);
+        }
+        if (Config.Y_MIN_FRACTION > 0){
+            Rectangle rect = new Rectangle(fieldWidth*(Config.X_MAX_FRACTION-Config.X_MIN_FRACTION), fieldWidth*Config.Y_MIN_FRACTION);
+            rect.setTranslateX(fieldWidth*Config.X_MIN_FRACTION);
+            rect.setTranslateY(fieldWidth*(1-Config.Y_MIN_FRACTION));
+            rect.setFill(Color.color(0.2, 0.2, 0.2, 0.75));
+            fieldPane.getChildren().add(rect);
+        }
+        if (Config.Y_MAX_FRACTION < 1){
+            Rectangle rect = new Rectangle(fieldWidth*(Config.X_MAX_FRACTION-Config.X_MIN_FRACTION), fieldWidth*(1-Config.Y_MAX_FRACTION));
+            rect.setTranslateX(fieldWidth*Config.X_MIN_FRACTION);
+            rect.setFill(Color.color(0.2, 0.2, 0.2, 0.75));
+            fieldPane.getChildren().add(rect);
+        }
     }
 
     private void setupCbxRobotConfigs(){
@@ -536,7 +572,30 @@ public class VirtualRobotController {
             sb.append("\n Distance Sensors:");
             for (String distance : distanceSensors) sb.append("\n   " + distance);
         }
+        Set<String> digitalChannels = hardwareMap.keySet(DigitalChannel.class);
+        if (!digitalChannels.isEmpty()) {
+            sb.append("\n Digital Sensors:");
+            for (String digitalChannel : digitalChannels) sb.append("\n   " + digitalChannel);
+        }
+        Set<String> analogInputs = hardwareMap.keySet(AnalogInput.class);
+        if (!analogInputs.isEmpty()) {
+            sb.append("\n Analog Sensors:");
+            for (String analogInput : analogInputs) sb.append("\n   " + analogInput);
+        }
         txtTelemetry.setText(sb.toString());
+    }
+
+    @FXML
+    private void handleKeyEvents(KeyEvent e){
+        if (e.getEventType() == KeyEvent.KEY_PRESSED){
+            keyState.set(e.getCode(), true);
+        } else if (e.getEventType() == KeyEvent.KEY_RELEASED){
+            keyState.set(e.getCode(), false);
+        }
+    }
+
+    public boolean getKeyState(KeyCode code){
+        return keyState.get(code);
     }
 
     public class ColorSensorImpl implements ColorSensor {
@@ -576,11 +635,21 @@ public class VirtualRobotController {
     }
 
     public class DistanceSensorImpl implements DistanceSensor {
+
         private final double readingWhenOutOfRangeMM = 8200;
         private double distanceMM = readingWhenOutOfRangeMM;
         private static final double MIN_DISTANCE = 50; //mm
         private static final double MAX_DISTANCE = 1000; //mm
         private static final double MAX_OFFSET = 7.0 * Math.PI / 180.0;
+
+        private final double X_MIN, X_MAX, Y_MIN, Y_MAX;    //Need these to constrain field
+
+        public DistanceSensorImpl(){
+            X_MIN = 2.0 * (Config.X_MIN_FRACTION - 0.5) * halfFieldWidth;
+            X_MAX = 2.0 * (Config.X_MAX_FRACTION - 0.5) * halfFieldWidth;
+            Y_MIN = 2.0 * (Config.Y_MIN_FRACTION - 0.5) * halfFieldWidth;
+            Y_MAX = 2.0 * (Config.Y_MAX_FRACTION - 0.5) * halfFieldWidth;
+        }
 
         public synchronized double getDistance(DistanceUnit distanceUnit){
             double result;
@@ -594,22 +663,22 @@ public class VirtualRobotController {
             final double mmPerPixel = 144.0 * 25.4 / fieldWidth;
             final double piOver2 = Math.PI / 2.0;
             double temp = headingRadians / piOver2;
-            int side = (int)Math.round(temp); //-2, -1 ,0, 1, or 2 (2 and -2 both refer to the right side)
+            int side = (int)Math.round(temp); //-2, -1 ,0, 1, or 2 (2 and -2 both refer to the bottom)
             double offset = Math.abs(headingRadians - (side * Math.PI / 2.0));
             if (offset > MAX_OFFSET) distanceMM = readingWhenOutOfRangeMM;
             else switch (side){
                 case 2:
                 case -2:
-                    distanceMM = (y + halfFieldWidth) * mmPerPixel;
+                    distanceMM = (y - Y_MIN) * mmPerPixel;                  //BOTTOM
                     break;
                 case -1:
-                    distanceMM = (halfFieldWidth - x) * mmPerPixel;
+                    distanceMM = (X_MAX - x) * mmPerPixel;         //RIGHT
                     break;
                 case 0:
-                    distanceMM = (halfFieldWidth - y) * mmPerPixel;
+                    distanceMM = (Y_MAX - y) * mmPerPixel;         //TOP
                     break;
                 case 1:
-                    distanceMM = (x + halfFieldWidth) * mmPerPixel;
+                    distanceMM = (x - X_MIN) * mmPerPixel;         //LEFT
                     break;
             }
         }
@@ -621,8 +690,8 @@ public class VirtualRobotController {
      */
     public class OpModeBase {
         protected final HardwareMap hardwareMap;
-        protected final GamePad gamepad1;
-        protected final GamePad gamepad2;
+        protected final Gamepad gamepad1;
+        protected final Gamepad gamepad2;
         protected final Telemetry telemetry;
 
         public OpModeBase() {

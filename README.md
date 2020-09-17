@@ -1,14 +1,15 @@
 # A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
 
-    New: Programming Board configuration to serve as a companion to the book "Learn Java For FTC", by Alan Smith.
-    
-The PDF can be [downloaded for free](https://github.com/alan412/LearnJavaForFTC) or you can purchase the paperback on 
+New: Programming Board configuration to serve as a companion to the book "Learn Java For FTC", by Alan Smith. The
+PDF can be [downloaded for free](https://github.com/alan412/LearnJavaForFTC) or you can purchase the paperback on
 [Amazon](https://www.amazon.com/dp/B08DBVKXLZ).
+
+Also: Updated to allow use of either a full field or remote (8 x 12 ft) field for Ultimate Goal.
     
 ![](/readme_image.JPG)
 
 This is a JavaFX application developed using the (free) IntelliJ IDEA Community Edition IDE. The repository can be downloaded
-and unzipped, then opened with IntelliJ.
+and unzipped, then opened with IntelliJ. It can also be run using Android Studio (see this [video](https://www.youtube.com/watch?v=pmaT9Twbmao)).
 
 Five robot configurations are available: a simple two-wheeled robot, a robot with four mecanum wheels, an
 X-Drive robot with four OmniWheels mounted at 45 degrees at each corner of the robot, a mecanum-wheeled 
@@ -84,6 +85,18 @@ To use:
 
 
 LOG OF CHANGES
+
+CHANGES 9/13/2020
+    Added the ability to "constrain" the field, to simulate partial fields being used for remote competitions. For a
+    "RED" field, change the value of X_MIN_FRACTION in Config.java from 0 to 0.3333. For a partial "BLUE" field, change
+    the value of X_MAX_FRACTION from 1 to 0.6667. This will mask the excluded parts of the field, and constrain robot
+    motion. The distance sensors will behave as if the wall has been moved to the edge of the constraint area.
+
+CHANGES 8/29/2020
+    Added the ability to have the "virtual gamepad" triggers and joysticks "snap back" to zero when released. By
+    default, they will hold at current position when released. But, if the SHIFT or ALT key is being pressed, then when
+    these controls are released, they will return to zero. The default behavior can be changed by changing the value
+    of HOLD_CONTROLS_BY_DEFAULT in virtual_robot.config.Config.java.
 
 CHANGES 8/22/2020  
     Added programming board configuration to serve as a companion for the book "Learn Java For FTC", by Alan Smith.

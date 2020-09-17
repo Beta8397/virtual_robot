@@ -26,7 +26,7 @@
                   <Font size="14.0" />
                </font>
             </Button>
-            <Slider fx:id="sldLeft" blockIncrement="0.001" majorTickUnit="0.001" max="1.0" maxHeight="75.0" orientation="VERTICAL">
+            <Slider fx:id="sldLeft" blockIncrement="0.001" majorTickUnit="0.001" max="1.0" maxHeight="75.0" onMousePressed="#handleTriggerMouseEvent" onMouseReleased="#handleTriggerMouseEvent" orientation="VERTICAL">
                <VBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </VBox.margin>
@@ -67,7 +67,7 @@
          </children>
         </GridPane>
 
-        <StackPane fx:id="joyStickLeftPane" alignment="TOP_LEFT" maxHeight="120.0" maxWidth="120.0" minHeight="120.0" minWidth="120.0" onMouseDragged="#handleJoystickDrag" prefHeight="120.0" prefWidth="120.0">
+        <StackPane fx:id="joyStickLeftPane" alignment="TOP_LEFT" maxHeight="120.0" maxWidth="120.0" minHeight="120.0" minWidth="120.0" onMouseDragged="#handleJoystickMouseEvent" onMouseExited="#handleJoystickMouseEvent" onMousePressed="#handleJoystickMouseEvent" onMouseReleased="#handleJoystickMouseEvent" prefHeight="120.0" prefWidth="120.0">
             <children>
                 <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#404040" height="120.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="4.0" width="120.0">
                     <StackPane.margin>
@@ -83,7 +83,7 @@
             </HBox.margin>
         </StackPane>
 
-        <StackPane fx:id="joyStickRightPane" alignment="TOP_LEFT" maxHeight="120.0" maxWidth="120.0" minHeight="120.0" minWidth="120.0" onMouseDragged="#handleJoystickDrag" prefHeight="120.0" prefWidth="120.0">
+        <StackPane fx:id="joyStickRightPane" alignment="TOP_LEFT" maxHeight="120.0" maxWidth="120.0" minHeight="120.0" minWidth="120.0" onMouseDragged="#handleJoystickMouseEvent" onMouseExited="#handleJoystickMouseEvent" onMousePressed="#handleJoystickMouseEvent" onMouseReleased="#handleJoystickMouseEvent" prefHeight="120.0" prefWidth="120.0">
             <children>
                 <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#404040" height="120.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="4.0" width="120.0" />
                 <Line endX="60.0" endY="120.0" startX="60.0" stroke="RED" StackPane.alignment="CENTER" />
@@ -142,7 +142,7 @@
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </VBox.margin>
             </Button>
-            <Slider fx:id="sldRight" blockIncrement="0.001" majorTickUnit="0.001" max="1.0" maxHeight="75.0" orientation="VERTICAL">
+            <Slider fx:id="sldRight" blockIncrement="0.001" majorTickUnit="0.001" max="1.0" maxHeight="75.0" onMousePressed="#handleTriggerMouseEvent" onMouseReleased="#handleTriggerMouseEvent" orientation="VERTICAL">
                <VBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </VBox.margin>

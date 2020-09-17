@@ -5,9 +5,15 @@ import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Circle;
+import virtual_robot.config.Config;
+
+import java.security.Key;
 
 public class VirtualGamePadController {
 
@@ -27,6 +33,7 @@ public class VirtualGamePadController {
     @FXML Button btnRB;
     @FXML Slider sldLeft;
     @FXML Slider sldRight;
+
 
     volatile float left_stick_x = 0;
     volatile float left_stick_y = 0;
@@ -66,22 +73,53 @@ public class VirtualGamePadController {
         virtualRobotController = vrController;
     }
 
+
     @FXML
-    private void handleJoystickDrag(MouseEvent arg){
+    private void handleJoystickMouseEvent(MouseEvent arg){
         if (!virtualRobotController.getOpModeInitialized()) return;
-        float x = (float)Math.max(10, Math.min(110, arg.getX()));
-        float y = (float)Math.max(10, Math.min(110, arg.getY()));
-        if (arg.getSource() == joyStickLeftPane){
-            joyStickLeftHandle.setTranslateX(x-10);
-            joyStickLeftHandle.setTranslateY(y-10);
-            left_stick_x = (x - 60.0f) / 50.0f;
-            left_stick_y = (y - 60.0f) / 50.0f;
+        if (arg.getEventType() == MouseEvent.MOUSE_DRAGGED) {
+            float x = (float) Math.max(10, Math.min(110, arg.getX()));
+            float y = (float) Math.max(10, Math.min(110, arg.getY()));
+            if (arg.getSource() == joyStickLeftPane) {
+                joyStickLeftHandle.setTranslateX(x - 10);
+                joyStickLeftHandle.setTranslateY(y - 10);
+                left_stick_x = (x - 60.0f) / 50.0f;
+                left_stick_y = (y - 60.0f) / 50.0f;
+            } else if (arg.getSource() == joyStickRightPane) {
+                joyStickRightHandle.setTranslateX(x - 10);
+                joyStickRightHandle.setTranslateY(y - 10);
+                right_stick_x = (x - 60.0f) / 50.0f;
+                right_stick_y = (y - 60.0f) / 50.0f;
+            }
+        } else if (arg.getEventType() == MouseEvent.MOUSE_RELEASED){
+            boolean keyDown = virtualRobotController.getKeyState(KeyCode.SHIFT)
+                    || virtualRobotController.getKeyState(KeyCode.ALT);
+            if ((keyDown && Config.HOLD_CONTROLS_BY_DEFAULT)
+                    || (!keyDown && !Config.HOLD_CONTROLS_BY_DEFAULT)) {
+                if (arg.getSource() == joyStickLeftPane) {
+                    joyStickLeftHandle.setTranslateX(50);
+                    joyStickLeftHandle.setTranslateY(50);
+                    left_stick_x = 0;
+                    left_stick_y = 0;
+                } else if (arg.getSource() == joyStickRightPane) {
+                    joyStickRightHandle.setTranslateX(50);
+                    joyStickRightHandle.setTranslateY(50);
+                    right_stick_x = 0;
+                    right_stick_y = 0;
+                }
+            }
         }
-        else if (arg.getSource() == joyStickRightPane){
-            joyStickRightHandle.setTranslateX(x-10);
-            joyStickRightHandle.setTranslateY(y-10);
-            right_stick_x = (x - 60.0f) / 50.0f;
-            right_stick_y = (y - 60.0f) / 50.0f;
+    }
+
+    @FXML
+    public void handleTriggerMouseEvent(MouseEvent arg){
+        if (arg.getEventType() == MouseEvent.MOUSE_RELEASED){
+            boolean keyDown = virtualRobotController.getKeyState(KeyCode.SHIFT)
+                    || virtualRobotController.getKeyState(KeyCode.ALT);
+            if ((keyDown && Config.HOLD_CONTROLS_BY_DEFAULT)
+                    || (!keyDown && !Config.HOLD_CONTROLS_BY_DEFAULT)) {
+                ((Slider)arg.getSource()).setValue(0);
+            }
         }
     }
 
@@ -131,6 +169,7 @@ public class VirtualGamePadController {
         joyStickRightHandle.setTranslateX(50);
         joyStickRightHandle.setTranslateY(50);
     }
+
 
     public class ControllerState {
 
