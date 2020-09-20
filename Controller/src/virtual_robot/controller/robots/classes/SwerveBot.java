@@ -238,6 +238,8 @@ public class SwerveBot extends VirtualBot {
             motors[i].stopAndReset();
             crServos[i].setPower(0);
         }
+        velocity = new Vector2D(0, 0);
+        omega = 0;
         imu.close();
     }
 
