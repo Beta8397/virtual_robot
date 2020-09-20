@@ -5,6 +5,9 @@ PDF can be [downloaded for free](https://github.com/alan412/LearnJavaForFTC) or 
 [Amazon](https://www.amazon.com/dp/B08DBVKXLZ).
 
 Also: Updated to allow use of either a full field or remote (8 x 12 ft) field for Ultimate Goal.
+
+WORK IN PROGRESS: Addition of a Swerve Drive robot configuration. This branch is being released for testing purposes
+only.
     
 ![](/readme_image.JPG)
 
