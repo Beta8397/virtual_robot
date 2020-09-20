@@ -55,7 +55,7 @@ public abstract class VirtualBot {
     protected double y = 0;
     protected double headingRadians = 0;
 
-    private final double X_MIN, X_MAX, Y_MIN, Y_MAX;
+    protected final double X_MIN, X_MAX, Y_MIN, Y_MAX;
 
     public VirtualBot(){
         fieldPane = controller.getFieldPane();
