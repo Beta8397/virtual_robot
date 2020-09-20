@@ -6,18 +6,18 @@ PDF can be [downloaded for free](https://github.com/alan412/LearnJavaForFTC) or 
 
 Also: Updated to allow use of either a full field or remote (8 x 12 ft) field for Ultimate Goal.
 
-WORK IN PROGRESS: Addition of a Swerve Drive robot configuration. This branch is being released for testing purposes
-only.
+And: Addition of new Swerve robot configuration.
     
 ![](/readme_image.JPG)
 
 This is a JavaFX application developed using the (free) IntelliJ IDEA Community Edition IDE. The repository can be downloaded
 and unzipped, then opened with IntelliJ. It can also be run using Android Studio (see this [video](https://www.youtube.com/watch?v=pmaT9Twbmao)).
 
-Five robot configurations are available: a simple two-wheeled robot, a robot with four mecanum wheels, an
+Six robot configurations are available: a simple two-wheeled robot, a robot with four mecanum wheels, an
 X-Drive robot with four OmniWheels mounted at 45 degrees at each corner of the robot, a mecanum-wheeled 
-configuration that has an extendable arm with a grabber at the end, and a mecanum-wheeled configuration with
-three "Dead-wheel" encoders for odometry.
+configuration that has an extendable arm with a grabber at the end, a mecanum-wheeled configuration with
+three "Dead-wheel" encoders for odometry, and a swerve-drive robot with four swerve units (each with a drive
+motor, a cr-servo for steering, and an encoder to monitor steering).
 
 Each robot can be thought of as 18 inches wide.  For the two-wheel bot and mecanum wheel bots, the distance between
 the centers of the right and left wheels is 16 inches. For the mecanum wheel bots, the distance between the centers
@@ -88,6 +88,11 @@ To use:
 
 
 LOG OF CHANGES
+
+CHANGES 9/20/2020
+    Added Swerve robot configuration. Each of four swerve units has: a DcMotor for drive, a CR-Servo for steering,
+    and a separate encoder to monitor steering (this appears as a DcMotor in the config file). A TestSwerve op mode
+    is included for demonstration.
 
 CHANGES 9/13/2020
     Added the ability to "constrain" the field, to simulate partial fields being used for remote competitions. For a
