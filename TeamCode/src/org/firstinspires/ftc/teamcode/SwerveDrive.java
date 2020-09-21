@@ -13,7 +13,7 @@ public class SwerveDrive {
     public static final double TICKS_PER_ROTATION = 1120;
     public static final double MAX_TICKS_PER_SECOND = 2500;
 
-    public static final double CHASSIS_RAD_SQUARED = 14*14 + 16*16;
+    public static final double CHASSIS_RAD_SQUARED = 7*7 + 8*8;
     public static final double MAX_DRIVE_SPEED = MAX_TICKS_PER_SECOND * WHEEL_CIRCUMFERENCE / TICKS_PER_ROTATION;
     public static final double MAX_ANGULAR_SPEED = MAX_DRIVE_SPEED / Math.sqrt(CHASSIS_RAD_SQUARED);
 
@@ -23,10 +23,10 @@ public class SwerveDrive {
 
     //Positions of the four drive wheels in robot-coordinate system, in inches
     public static final PointF[] WHEEL_POS = new PointF[]{
-            new PointF(-16, -14),           //Back Left
-            new PointF(-16, 14),            //Front Left
-            new PointF(16, 14),             //Front Right
-            new PointF(16, -14)             //Back Right
+            new PointF(-8, -7),           //Back Left
+            new PointF(-8, 7),            //Front Left
+            new PointF(8, 7),             //Front Right
+            new PointF(8, -7)             //Back Right
     };
 
 
