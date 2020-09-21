@@ -19,13 +19,11 @@ import virtual_robot.util.Vector2D;
  * MechanumBot is the controller class for the "mechanum_bot.fxml" markup file.
  *
  */
-@BotConfig(name = "Swerve Bot", filename = "swerve_bot")
-public class SwerveBot extends VirtualBot {
+@BotConfig(name = "Differential Swerve Bot", filename = "diff_swerve_bot")
+public class DiffSwerveBot extends VirtualBot {
 
     MotorType motorType;
     private DcMotorExImpl[] motors = null;
-    private CRServoImpl[] crServos = null;
-    private DeadWheelEncoder[] steerEncoders = null;
     private BNO055IMUImpl imu = null;
     private VirtualRobotController.ColorSensorImpl colorSensor = null;
     private ServoImpl servo = null;
@@ -35,17 +33,21 @@ public class SwerveBot extends VirtualBot {
     @FXML Rectangle backServoArm;
 
     //Rectangles representing the wheels, loaded via fx:id properties
-    @FXML Rectangle rectFL;
-    @FXML Rectangle rectFR;
-    @FXML Rectangle rectBL;
-    @FXML Rectangle rectBR;
+    @FXML Rectangle rectLeft;
+    @FXML Rectangle rectRight;
 
     private double wheelCircumference;
     private double interWheelWidth;
     private double interWheelLength;
 
     //Vectors representing positions of each wheel relative to robot center, in field units
-    private final Vector2D[] WHEEL_POS = new Vector2D[4];
+    private final Vector2D[] WHEEL_POS = new Vector2D[2];
+
+    //Scalars representing the STEER, in radians of the left and right motors
+    private double[] steer = new double[2];
+
+    private final double STEER_RATIO = 4;
+    private final double DRIVE_RATIO = 1.25;
 
     //Vector representing robot velocity in field units/sec
     private Vector2D velocity = new Vector2D(0, 0);
@@ -53,26 +55,14 @@ public class SwerveBot extends VirtualBot {
     private double omega = 0;
 
 
-    public SwerveBot(){
+    public DiffSwerveBot(){
         super();
         hardwareMap.setActive(true);
         motors = new DcMotorExImpl[]{
-                (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "back_left_motor"),
-                (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "front_left_motor"),
-                (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "front_right_motor"),
-                (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "back_right_motor")
-        };
-        crServos = new CRServoImpl[] {
-                (CRServoImpl)hardwareMap.get(CRServoImpl.class, "back_left_crservo"),
-                (CRServoImpl)hardwareMap.get(CRServoImpl.class, "front_left_crservo"),
-                (CRServoImpl)hardwareMap.get(CRServoImpl.class, "front_right_crservo"),
-                (CRServoImpl)hardwareMap.get(CRServoImpl.class, "back_right_crservo")
-        };
-        steerEncoders = new DeadWheelEncoder[] {
-                (DeadWheelEncoder)hardwareMap.get(DeadWheelEncoder.class, "back_left_encoder"),
-                (DeadWheelEncoder)hardwareMap.get(DeadWheelEncoder.class, "front_left_encoder"),
-                (DeadWheelEncoder)hardwareMap.get(DeadWheelEncoder.class, "front_right_encoder"),
-                (DeadWheelEncoder)hardwareMap.get(DeadWheelEncoder.class, "back_right_encoder")
+                (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "bottom_left_motor"),
+                (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "top_left_motor"),
+                (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "bottom_right_motor"),
+                (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "top_right_motor")
         };
         distanceSensors = new VirtualRobotController.DistanceSensorImpl[]{
                 hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "front_distance"),
@@ -80,40 +70,29 @@ public class SwerveBot extends VirtualBot {
                 hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "back_distance"),
                 hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "right_distance")
         };
-        //gyro = (VirtualRobotController.GyroSensorImpl)hardwareMap.gyroSensor.get("gyro_sensor");
         imu = hardwareMap.get(BNO055IMUImpl.class, "imu");
         colorSensor = (VirtualRobotController.ColorSensorImpl)hardwareMap.colorSensor.get("color_sensor");
         servo = (ServoImpl)hardwareMap.servo.get("back_servo");
         wheelCircumference = Math.PI * botWidth / 4.5;
-        interWheelWidth = botWidth * 8.0 / 9.0;
-        interWheelLength = botWidth * 7.0 / 9.0;
+        interWheelWidth = botWidth * 12.0 / 18.0;
 
-        WHEEL_POS[0] = new Vector2D(-interWheelWidth/2, -interWheelLength/2);
-        WHEEL_POS[1] = new Vector2D(-interWheelWidth/2, interWheelLength/2);
-        WHEEL_POS[2] = new Vector2D(interWheelWidth/2, interWheelLength/2);
-        WHEEL_POS[3] = new Vector2D(interWheelWidth/2, -interWheelLength/2);
+        WHEEL_POS[0] = new Vector2D(-interWheelWidth/2, 0);         //Left
+        WHEEL_POS[1] = new Vector2D(interWheelWidth/2, 0);          //Right
 
         hardwareMap.setActive(false);
-        System.out.println("Exiting SwerveBot Constructor");
     }
 
     public void initialize(){
-        //backServoArm = (Rectangle)displayGroup.getChildren().get(8);
         backServoArm.getTransforms().add(new Rotate(0, 37.5, 67.5));
     }
 
     protected void createHardwareMap(){
         motorType = MotorType.Neverest40;
         hardwareMap = new HardwareMap();
-        String[] motorNames = new String[] {"back_left_motor", "front_left_motor", "front_right_motor", "back_right_motor"};
-        String[] encoderNames = new String[] {"back_left_encoder", "front_left_encoder", "front_right_encoder", "back_right_encoder"};
-        String[] crservoNames = new String[] {"back_left_crservo", "front_left_crservo", "front_right_crservo", "back_right_crservo"};
+        String[] motorNames = new String[] {"bottom_left_motor", "top_left_motor", "bottom_right_motor", "top_right_motor"};
         for (String name: motorNames) hardwareMap.put(name, new DcMotorExImpl(motorType));
-        for (String name: crservoNames) hardwareMap.put(name, new CRServoImpl(360));
-        for (String name: encoderNames) hardwareMap.put(name, new DeadWheelEncoder(motorType));
         String[] distNames = new String[]{"front_distance", "left_distance", "back_distance", "right_distance"};
         for (String name: distNames) hardwareMap.put(name, controller.new DistanceSensorImpl());
-        //hardwareMap.put("gyro_sensor", controller.new GyroSensorImpl());
         hardwareMap.put("imu", new BNO055IMUImpl(this, 10));
         hardwareMap.put("color_sensor", controller.new ColorSensorImpl());
         hardwareMap.put("back_servo", new ServoImpl());
@@ -141,13 +120,15 @@ public class SwerveBot extends VirtualBot {
 //        System.out.println("\n\nUpdateStateAndSensors Cycle");
 //        System.out.println("  heading = " + Math.toDegrees(headingRadians) + "  velocity = " + velocity.x + "  " + velocity.y + "  omega = " + omega);
 
-        for (int i = 0; i < 4; i++) {
-            double deltaPos = motors[i].update(millis);
-            steerEncoders[i].update(Math.toRadians(crServos[i].updatePositionDegrees(millis)), millis);
-            double steer = Math.toRadians(crServos[i].getPositionDegrees());
-            double s = deltaPos * wheelCircumference / motorType.TICKS_PER_ROTATION;
-            if (i < 2) s = -s;
-            Vector2D w = new Vector2D(-s * Math.sin(steer+headingRadians), s * Math.cos(steer+headingRadians));
+        for (int i = 0; i < 2; i++) {
+            double deltaPosBottom = motors[2*i].update(millis);
+            double deltaPosTop = motors[2*i+1].update(millis);
+            double steerTicks = (deltaPosBottom + deltaPosTop) / 2.0;
+            double driveTicks = (deltaPosBottom - deltaPosTop) / 2.0;
+            steer[i] -= 2.0 * Math.PI * driveTicks / (STEER_RATIO * motorType.TICKS_PER_ROTATION);
+            double s = driveTicks * wheelCircumference /(DRIVE_RATIO * motorType.TICKS_PER_ROTATION);
+            if (i == 1) s = -s;
+            Vector2D w = new Vector2D(-s * Math.sin(steer[i]+headingRadians), s * Math.cos(steer[i]+headingRadians));
             Vector2D v = velocity.added(WHEEL_POS[i].rotated(headingRadians+Math.PI/2).multiplied(omega));
             Vector2D skidVelocity = v.subtracted(w.divided(t));       //skid velocity in fieldUnit/sec
             Vector2D wheelForce = skidVelocity.multiplied(-FORCE_COEFF);          //frictional force on wheel in botMass*fieldUnit/sec^2
@@ -227,16 +208,14 @@ public class SwerveBot extends VirtualBot {
     public synchronized void updateDisplay(){
         super.updateDisplay();
         ((Rotate)backServoArm.getTransforms().get(0)).setAngle(-180.0 * servo.getInternalPosition());
-        rectBL.setRotate(-crServos[0].getPositionDegrees());
-        rectFL.setRotate(-crServos[1].getPositionDegrees());
-        rectFR.setRotate(-crServos[2].getPositionDegrees());
-        rectBR.setRotate(-crServos[3].getPositionDegrees());
+        rectLeft.setRotate(-Math.toDegrees(steer[0]));
+        rectRight.setRotate(-Math.toDegrees(steer[1]));
     }
 
     public void powerDownAndReset(){
-        for (int i=0; i<4; i++) {
-            motors[i].stopAndReset();
-            crServos[i].setPower(0);
+        for (int i=0; i<2; i++) {
+            motors[2*i].stopAndReset();
+            motors[2*i+1].stopAndReset();
         }
         velocity = new Vector2D(0, 0);
         omega = 0;

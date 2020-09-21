@@ -2,15 +2,11 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
-@TeleOp(name = "Test Swerve", group = "Test")
-public class TestSwerve extends OpMode {
+@TeleOp(name = "Test Differential Swerve", group = "Test")
+public class TestDiffSwerve extends OpMode {
 
-    SwerveDrive bot = new SwerveDrive();
+    DiffSwerveDrive bot = new DiffSwerveDrive();
 
     public void init(){
 
