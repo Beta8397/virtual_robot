@@ -17,9 +17,9 @@ public class TestDiffSwerve extends OpMode {
 
     public void loop(){
 
-        float vx = gamepad1.left_stick_x * (float)SwerveDrive.MAX_DRIVE_SPEED;
-        float vy = -gamepad1.left_stick_y * (float)SwerveDrive.MAX_DRIVE_SPEED;
-        float va = -gamepad1.right_stick_x * (float)SwerveDrive.MAX_ANGULAR_SPEED;
+        float vx = gamepad1.left_stick_x * (float)DiffSwerveDrive.MAX_DRIVE_SPEED;
+        float vy = -gamepad1.left_stick_y * (float)DiffSwerveDrive.MAX_DRIVE_SPEED;
+        float va = -gamepad1.right_stick_x * (float)DiffSwerveDrive.MAX_ANGULAR_SPEED;
 
         bot.setDriveSpeed(vx, vy, va);
     }

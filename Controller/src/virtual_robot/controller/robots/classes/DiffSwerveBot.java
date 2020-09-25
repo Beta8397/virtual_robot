@@ -87,7 +87,7 @@ public class DiffSwerveBot extends VirtualBot {
     }
 
     protected void createHardwareMap(){
-        motorType = MotorType.Neverest40;
+        motorType = MotorType.NeverestOrbital20;
         hardwareMap = new HardwareMap();
         String[] motorNames = new String[] {"bottom_left_motor", "top_left_motor", "bottom_right_motor", "top_right_motor"};
         for (String name: motorNames) hardwareMap.put(name, new DcMotorExImpl(motorType));
@@ -109,8 +109,8 @@ public class DiffSwerveBot extends VirtualBot {
          */
 
         //Bot Mass is one botMass unit
-        final double MAX_WHEEL_FORCE = 4 * botWidth;     //in botMass * fieldUnit/(sec^2)
-        final double FORCE_COEFF = 4;         //in botMass/sec    i.e., (botMass*botWidth/sec^2)/(botWidth/sec)
+        final double MAX_WHEEL_FORCE = 8 * botWidth;     //in botMass * fieldUnit/(sec^2)
+        final double FORCE_COEFF = 8;         //in botMass/sec    i.e., (botMass*botWidth/sec^2)/(botWidth/sec)
         final double INERTIA = botWidth * botWidth / 6.0;       //in botMass * fieldUnit^2
         double t = millis / 1000.0;
 
@@ -123,9 +123,11 @@ public class DiffSwerveBot extends VirtualBot {
         for (int i = 0; i < 2; i++) {
             double deltaPosBottom = motors[2*i].update(millis);
             double deltaPosTop = motors[2*i+1].update(millis);
-            double steerTicks = (deltaPosBottom + deltaPosTop) / 2.0;
+//            double steerTicks = (deltaPosBottom + deltaPosTop) / 2.0;
             double driveTicks = (deltaPosBottom - deltaPosTop) / 2.0;
-            steer[i] -= 2.0 * Math.PI * driveTicks / (STEER_RATIO * motorType.TICKS_PER_ROTATION);
+            steer[i] = -Math.PI * (motors[2*i].getActualPosition() + motors[2*i+1].getActualPosition())
+                    / (STEER_RATIO * motorType.TICKS_PER_ROTATION);
+//            steer[i] -= 2.0 * Math.PI * steerTicks / (STEER_RATIO * motorType.TICKS_PER_ROTATION);
             double s = driveTicks * wheelCircumference /(DRIVE_RATIO * motorType.TICKS_PER_ROTATION);
             if (i == 1) s = -s;
             Vector2D w = new Vector2D(-s * Math.sin(steer[i]+headingRadians), s * Math.cos(steer[i]+headingRadians));
@@ -216,7 +218,9 @@ public class DiffSwerveBot extends VirtualBot {
         for (int i=0; i<2; i++) {
             motors[2*i].stopAndReset();
             motors[2*i+1].stopAndReset();
+            steer[i] = 0;
         }
+        updateDisplay();
         velocity = new Vector2D(0, 0);
         omega = 0;
         imu.close();
