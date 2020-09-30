@@ -367,6 +367,9 @@ public class VirtualRobotController {
     @FXML
     private void handleDriverButtonAction(ActionEvent event){
         if (!opModeInitialized){
+            /*
+             * INIT has been pressed.
+             */
             if (!initOpMode()) return;
             pathLine.getPoints().clear();
             txtTelemetry.setText("");
@@ -401,21 +404,36 @@ public class VirtualRobotController {
             opModeThread.start();
         }
         else if (!opModeStarted){
+            /*
+             * START has been pressed.
+             */
             driverButton.setText("STOP");
             opModeStarted = true;
         }
         else{
+            /*
+             * STOP has been pressed. Note that it is not possible for this to happen before START is pressed.
+             */
             driverButton.setText("INIT");
             opModeInitialized = false;
+            /*
+             * Setting opModeStarted to false will:
+             *   -Cause the final loop in runOpModeAndCleanUp to exit;
+             *   -Cause opmode.Stop() to run
+             *   -In a linear opmode, the above will cause stopRequested to become true, and interrupt runOpMode thread
+             */
             opModeStarted = false;
-            //if (opModeThread.isAlive() && !opModeThread.isInterrupted()) opModeThread.interrupt();
             if (!executorService.isShutdown()) executorService.shutdown();
+            /*
+             * This should not be necessary, but...
+             */
             try{
                 opModeThread.join(500);
             } catch(InterruptedException exc) {
-                Thread.currentThread().interrupt();
+                opModeThread.interrupt();
             }
             if (opModeThread.isAlive()) System.out.println("OpMode Thread Failed to Terminate.");
+
             bot.getHardwareMap().setActive(false);
             bot.powerDownAndReset();
             if (Config.USE_VIRTUAL_GAMEPAD) virtualGamePadController.resetGamePad();
