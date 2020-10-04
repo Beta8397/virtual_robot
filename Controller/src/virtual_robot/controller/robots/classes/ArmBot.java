@@ -1,6 +1,5 @@
 package virtual_robot.controller.robots.classes;
 
-import com.qualcomm.hardware.bosch.BNO055IMUImpl;
 import com.qualcomm.robotcore.hardware.*;
 import com.qualcomm.robotcore.hardware.configuration.MotorType;
 import javafx.fxml.FXML;
@@ -8,9 +7,6 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import virtual_robot.controller.BotConfig;
-import virtual_robot.controller.VirtualBot;
-import virtual_robot.controller.VirtualRobotController;
-import virtual_robot.util.AngleUtils;
 
 /**
  * For internal use only. Represents a robot with four mechanum wheels, color sensor, four distance sensors,
@@ -91,8 +87,6 @@ public class ArmBot extends MechanumBase {
      *  as the robot operates
      */
     public void initialize(){
-        super.initialize();
-
         /*
         Scales the arm with pivot point at center of back of robot (which corresponds to the back of the arm).
         The Y-scaling is initialized to 1.0 (i.e., arm fully retracted)
@@ -121,9 +115,6 @@ public class ArmBot extends MechanumBase {
      */
     protected void createHardwareMap() {
         super.createHardwareMap();
-
-        //Motor type to use for the DC Motors
-        motorType = MotorType.Neverest40;
 
         //Add the arm motor using HardwareMap.put(...) method
         hardwareMap.put("arm_motor", new DcMotorExImpl(MotorType.Neverest40));

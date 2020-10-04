@@ -127,7 +127,7 @@ public class DiffSwerveBot extends VirtualBot {
             double driveTicks = (deltaPosBottom - deltaPosTop) / 2.0;
             steer[i] = -Math.PI * (motors[2*i].getActualPosition() + motors[2*i+1].getActualPosition())
                     / (STEER_RATIO * motorType.TICKS_PER_ROTATION);
-//            steer[i] -= 2.0 * Math.PI * steerTicks / (STEER_RATIO * motorType.TICKS_PER_ROTATION);
+//            steer[i] -= 2.0 * Math.PI * steerTicks / (STEER_RATIO * MOTOR_TYPE.TICKS_PER_ROTATION);
             double s = driveTicks * wheelCircumference /(DRIVE_RATIO * motorType.TICKS_PER_ROTATION);
             if (i == 1) s = -s;
             Vector2D w = new Vector2D(-s * Math.sin(steer[i]+headingRadians), s * Math.cos(steer[i]+headingRadians));

@@ -22,7 +22,7 @@ import virtual_robot.util.AngleUtils;
 
 /**
  * For internal use only. Represents a robot with four mechanum wheels, color sensor, four distance sensors,
- * a BNO055IMU, and an extensible arm with a grabber on the end.
+ * a BNO055IMU, and a turret that rotates and elevates.
  * <p>
  * The easiest way to create a new robot configuration is to copy and paste the Java class and the FXML file
  * of an existing configuration, then make make modifications. The ArmBot config is a modification of
@@ -81,8 +81,6 @@ public class TurretBot extends MechanumBase {
      * as the robot operates
      */
     public void initialize() {
-        super.initialize();
-
         turret.getTransforms().add(turretRotate);
     }
 

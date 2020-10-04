@@ -4,13 +4,8 @@ import com.qualcomm.hardware.bosch.BNO055IMUImpl;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorExImpl;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.ServoImpl;
 import com.qualcomm.robotcore.hardware.configuration.MotorType;
 
-import javafx.fxml.FXML;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.transform.Rotate;
-import virtual_robot.controller.BotConfig;
 import virtual_robot.controller.VirtualBot;
 import virtual_robot.controller.VirtualRobotController;
 import virtual_robot.util.AngleUtils;
@@ -21,7 +16,7 @@ import virtual_robot.util.AngleUtils;
  */
 public class MechanumBase extends VirtualBot {
 
-    MotorType motorType;
+    public static final MotorType MOTOR_TYPE = MotorType.Neverest40;
     private DcMotorExImpl[] motors = null;
     //private VirtualRobotController.GyroSensorImpl gyro = null;
     private BNO055IMUImpl imu = null;
@@ -68,14 +63,10 @@ public class MechanumBase extends VirtualBot {
         hardwareMap.setActive(false);
     }
 
-    public void initialize() {
-    }
-
     protected void createHardwareMap() {
-        motorType = MotorType.Neverest40;
         hardwareMap = new HardwareMap();
         String[] motorNames = new String[]{"back_left_motor", "front_left_motor", "front_right_motor", "back_right_motor"};
-        for (String name : motorNames) hardwareMap.put(name, new DcMotorExImpl(motorType));
+        for (String name : motorNames) hardwareMap.put(name, new DcMotorExImpl(MOTOR_TYPE));
         String[] distNames = new String[]{"front_distance", "left_distance", "back_distance", "right_distance"};
         for (String name : distNames) hardwareMap.put(name, controller.new DistanceSensorImpl());
         //hardwareMap.put("gyro_sensor", controller.new GyroSensorImpl());
@@ -90,7 +81,7 @@ public class MechanumBase extends VirtualBot {
 
         for (int i = 0; i < 4; i++) {
             deltaPos[i] = motors[i].update(millis);
-            w[i] = deltaPos[i] * wheelCircumference / motorType.TICKS_PER_ROTATION;
+            w[i] = deltaPos[i] * wheelCircumference / MOTOR_TYPE.TICKS_PER_ROTATION;
             if (i < 2) w[i] = -w[i];
         }
 
