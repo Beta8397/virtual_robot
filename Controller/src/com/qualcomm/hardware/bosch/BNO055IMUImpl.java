@@ -35,7 +35,9 @@ public class BNO055IMUImpl implements BNO055IMU {
     public synchronized boolean initialize(Parameters parameters){
         initialized = true;
         this.parameters = parameters;
-        headingRadians = initialHeadingRadians = bot.getHeadingRadians();
+        double tempHeadingRadians = bot.getHeadingRadians();
+        headingRadians = tempHeadingRadians;
+        initialHeadingRadians = tempHeadingRadians;
         return true;
     }
 
