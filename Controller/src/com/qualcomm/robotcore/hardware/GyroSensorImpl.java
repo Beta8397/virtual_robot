@@ -32,7 +32,9 @@ public class GyroSensorImpl implements GyroSensor {
      */
     public synchronized void init(){
         initialized = true;
-        heading = initialHeading = bot.getHeadingRadians() * 180.0 / Math.PI;
+        double tempHeading = bot.getHeadingRadians() * 180.0 / Math.PI;
+        heading = tempHeading;
+        initialHeading = tempHeading;
     }
 
     /**

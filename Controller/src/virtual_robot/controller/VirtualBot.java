@@ -51,11 +51,19 @@ public abstract class VirtualBot {
     protected double halfBotWidth;
     protected double botWidth;
 
-    protected double x = 0;
-    protected double y = 0;
-    protected double headingRadians = 0;
-
     protected final double X_MIN, X_MAX, Y_MIN, Y_MAX;
+
+    /*
+     * Note change: these have been made volatile, and their getters will no longer be synchronized. This is to prevent
+     * a deadlock condition that was possible when trying to initialize the gyro/BNO055IMU after the INIT button is pressed.
+     */
+    protected volatile double x = 0;
+    protected volatile double y = 0;
+    protected volatile double headingRadians = 0;
+
+    public double getX() { return x; }
+    public double getY() { return y; }
+    public double getHeadingRadians(){ return headingRadians; }
 
     public VirtualBot(){
         fieldPane = controller.getFieldPane();
@@ -162,9 +170,6 @@ public abstract class VirtualBot {
      */
     public abstract void powerDownAndReset();
 
-    public synchronized  double getX() { return x; }
-    public synchronized double getY() { return y; }
-    public synchronized double getHeadingRadians(){ return headingRadians; }
 
     public synchronized void positionWithMouseClick(MouseEvent arg){
 

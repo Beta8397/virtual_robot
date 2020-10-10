@@ -37,6 +37,15 @@ public class EncBot {
         for (int i=0; i<3; i++) encoders[i] = hwMap.get(DcMotorEx.class, encoderNames[i]);
     }
 
+//    public void init(HardwareMap hwMap){
+//        String[] motorNames =  new String[]{"back_left_motor", "front_left_motor", "front_right_motor", "back_right_motor"};
+//        for (int i=0; i<4; i++) motors[i] = hwMap.get(DcMotorEx.class, motorNames[i]);
+//        motors[0].setDirection(DcMotorSimple.Direction.REVERSE);
+//        motors[1].setDirection(DcMotorSimple.Direction.REVERSE);
+//        String[] encoderNames = new String[]{"enc_right", "enc_left", "enc_x"};
+//        for (int i=0; i<3; i++) encoders[i] = hwMap.get(DcMotorEx.class, encoderNames[i]);
+//    }
+
     public void setDrivePower(double px, double py, double pa){
         double[] p = new double[4];
         p[0] = -px + py - pa;
