@@ -16,9 +16,11 @@ package com.qualcomm.robotcore.hardware.configuration;
  */
 public enum MotorType {
     Neverest40(1120, 2500, false, 40, 0.85),
-    Neverest20(560, 2500, false, 40, 0.85),
-    NeverestOrbital20(560, 2500, true, 40, 0.85),
-    Neverest60(1680, 2500, false, 40, 0.85);
+    Neverest20(560, 2500, false, 20, 0.85),
+    NeverestOrbital20(560, 2500, true, 20, 0.85),
+    Neverest60(1680, 2500, false, 60, 0.85),
+    Gobilda192(537.6,2500,false,19.2,0.85),
+    Gobilda137(383.6, 2500, false, 13.7, 0.85);
 
     MotorType(double ticksPerRotation, double maxTicksPerSecond, boolean reversed, double gearing,
               double achievableMaxRPMFraction){
