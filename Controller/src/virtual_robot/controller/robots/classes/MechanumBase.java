@@ -24,6 +24,7 @@ public class MechanumBase extends VirtualBot {
     private VirtualRobotController.DistanceSensorImpl[] distanceSensors = null;
 
     private double wheelCircumference;
+    protected double gearRatioWheel = 1.0;
     private double interWheelWidth;
     private double interWheelLength;
     private double wlAverage;
@@ -81,7 +82,7 @@ public class MechanumBase extends VirtualBot {
 
         for (int i = 0; i < 4; i++) {
             deltaPos[i] = motors[i].update(millis);
-            w[i] = deltaPos[i] * wheelCircumference / MOTOR_TYPE.TICKS_PER_ROTATION;
+            w[i] = deltaPos[i] * wheelCircumference * gearRatioWheel / MOTOR_TYPE.TICKS_PER_ROTATION;
             if (i < 2) w[i] = -w[i];
         }
 
