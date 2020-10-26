@@ -106,7 +106,15 @@ public class VirtualRobotController {
     //KeyState
     private KeyState keyState = new KeyState();
 
-    //Motor Error Slider Listener
+    /*
+     * Motor slider listener
+     *
+     * The values set for random error fraction and systematic error fraction may look reversed, but they aren't.
+     * Systematic error fraction is set randomly for each motor when the slider is changed, but then remains the
+     * same for that motor until the slider is changed again. Random error fraction is set for each motor when the
+     * slider is changed, but then (in the DcMotorImpl class) gets multiplied by a new random number during each motor
+     * update cycle.
+     */
     private ChangeListener<Number> sliderChangeListener = new ChangeListener<Number>() {
         @Override
         public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
@@ -173,6 +181,10 @@ public class VirtualRobotController {
         gamePadExecutorService.scheduleAtFixedRate(gamePadHelper, 0, 20, TimeUnit.MILLISECONDS);
     }
 
+    /**
+     *  "Gray out" part of the field based on the field constraints (X_MIN_FRACTION, X_MAX_FRACTION,
+     *  Y_MIN_FRACTION, Y_MAX_FRACTION values)
+     */
     private void addConstraintMasks(){
         if (Config.X_MIN_FRACTION > 0){
             Rectangle rect = new Rectangle(fieldWidth*Config.X_MIN_FRACTION, fieldWidth);
