@@ -111,8 +111,8 @@ public class VirtualRobotController {
         @Override
         public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
             for (DcMotor motor: hardwareMap.dcMotor) {
-                ((DcMotorImpl)motor).setRandomErrorFrac(sldRandomMotorError.getValue());
-                ((DcMotorImpl)motor).setSystematicErrorFrac(sldSystematicMotorError.getValue() * 2.0 * (0.5 - random.nextDouble()));
+                ((DcMotorImpl)motor).setRandomErrorFrac(sldRandomMotorError.getValue() * 2.0 * (0.5 - random.nextDouble()));
+                ((DcMotorImpl)motor).setSystematicErrorFrac(sldSystematicMotorError.getValue());
                 ((DcMotorImpl)motor).setInertia(1.0 - Math.pow(10.0, -sldMotorInertia.getValue()));
             }
         }
