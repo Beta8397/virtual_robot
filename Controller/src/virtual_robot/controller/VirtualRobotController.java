@@ -274,6 +274,36 @@ public class VirtualRobotController {
         }
     }
 
+    private String getNameFromAnnotationOrOpmode(Class c){
+        String name = "";
+        Annotation a1 = c.getAnnotation(TeleOp.class);
+        if(a1 != null){
+            name = ((TeleOp)a1).name();
+        }else{
+            a1 = c.getAnnotation(Autonomous.class);
+            if(a1 != null){
+                name = ((Autonomous)a1).name();
+            }
+        }
+        if(name.isEmpty()){
+            name = c.getSimpleName();
+        }
+        return name;
+    }
+    private String getGroupFromAnnotationOrOpmode(Class c){
+        String group = null;
+        Annotation a1 = c.getAnnotation(TeleOp.class);
+        if(a1 != null){
+            group = ((TeleOp)a1).group();
+        }else{
+            a1 = c.getAnnotation(Autonomous.class);
+            if(a1 != null){
+                group = ((Autonomous)a1).group();
+            }
+        }
+        return group;
+    }
+
     private void setupCbxOpModes(){
         //Reflections reflections = new Reflections(VirtualRobotApplication.class.getClassLoader());
         Reflections reflections = new Reflections("org.firstinspires.ftc.teamcode");
@@ -290,21 +320,8 @@ public class VirtualRobotController {
         nonDisabledOpModeClasses.sort(new Comparator<Class<?>>() {
             @Override
             public int compare(Class<?> o1, Class<?> o2) {
-                String group1 = null;
-                Annotation a1 = o1.getAnnotation(TeleOp.class);
-                if (a1 != null) group1 = ((TeleOp)a1).group();
-                else{
-                    a1 = o1.getAnnotation(Autonomous.class);
-                    if (a1 != null) group1 = ((Autonomous)a1).group();
-                }
-
-                String group2 = null;
-                Annotation a2 = o2.getAnnotation(TeleOp.class);
-                if (a2 != null) group2 = ((TeleOp)a2).group();
-                else{
-                    a2 = o2.getAnnotation(Autonomous.class);
-                    if (a2 != null) group2 = ((Autonomous)a2).group();
-                }
+                String group1 = getGroupFromAnnotationOrOpmode(o1);
+                String group2 = getGroupFromAnnotationOrOpmode(o2);
 
                 if (group1 == null) return -1;
                 else if (group2 == null) return 1;
@@ -325,14 +342,14 @@ public class VirtualRobotController {
                             setText(null);
                             return;
                         }
-                        Annotation a = cl.getAnnotation(TeleOp.class);
-                        if (a != null) setText(((TeleOp)a).group() + ": " + ((TeleOp)a).name());
-                        else {
-                            a = cl.getAnnotation(Autonomous.class);
-                            if (a != null) setText(((Autonomous)a).group() + ": "  + ((Autonomous)a).name());
-                            else setText("No Name");
-                        }
+                        String group = getGroupFromAnnotationOrOpmode(cl);
+                        String name = getNameFromAnnotationOrOpmode(cl);
 
+                        if(group.isEmpty()) {
+                            setText(name);
+                        }else{
+                            setText(group + ": " + name);
+                        }
                     }
                 };
                 return cell;
@@ -347,13 +364,7 @@ public class VirtualRobotController {
                     setText(null);
                     return;
                 }
-                Annotation a = cl.getAnnotation(TeleOp.class);
-                if (a != null) setText(((TeleOp) a).name());
-                else {
-                    a = cl.getAnnotation(Autonomous.class);
-                    if (a != null) setText(((Autonomous) a).name());
-                    else setText("No Name");
-                }
+                setText(getNameFromAnnotationOrOpmode(cl));
             }
         });
 

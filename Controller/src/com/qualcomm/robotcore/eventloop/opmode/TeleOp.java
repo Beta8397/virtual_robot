@@ -37,18 +37,39 @@ Modified by FTC Team Beta 8397 for use in the Virtual_Robot Simulator
 
 package com.qualcomm.robotcore.eventloop.opmode;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Op Mode classes must be annotated with either Autonomous or TeleOp in order to be displayed in the dropdown box
- * of available op modes.
+ * Provides an easy and non-centralized way of determining the OpMode list
+ * shown on an FTC Driver Station.  Put an {@link TeleOp} annotation on
+ * your teleop OpModes that you want to show up in the driver station display.
+ *
+ * If you want to temporarily disable an opmode from showing up, then set then also add
+ * a {@link Disabled} annotation to it.
+ *
+ * @see Autonomous
+ * @see Disabled
  */
+@Documented
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface TeleOp {
-    String name();
-    String group() default "default";
+public @interface TeleOp
+{
+    /**
+     * The name to be used on the driver station display. If empty, the name of
+     * the OpMode class will be used.
+     * @return the name to use for the OpMode on the driver station
+     */
+    String name() default "";
+
+    /**
+     * Optionally indicates a group of other OpModes with which the annotated
+     * OpMode should be sorted on the driver station OpMode list.
+     * @return the group into which the annotated OpMode is to be categorized
+     */
+    String group() default "";
 }
