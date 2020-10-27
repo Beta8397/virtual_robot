@@ -119,6 +119,7 @@ public class VirtualRobotController {
         @Override
         public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
             for (DcMotor motor: hardwareMap.dcMotor) {
+                if (!(motor instanceof DcMotorImpl)) continue;      //Now that DeadWheelEncoder has been added, not all "DcMotor" are "DcMotorImpl"
                 ((DcMotorImpl)motor).setRandomErrorFrac(sldRandomMotorError.getValue());
                 ((DcMotorImpl)motor).setSystematicErrorFrac(sldSystematicMotorError.getValue() * 2.0 * (0.5 - random.nextDouble()));
                 ((DcMotorImpl)motor).setInertia(1.0 - Math.pow(10.0, -sldMotorInertia.getValue()));
