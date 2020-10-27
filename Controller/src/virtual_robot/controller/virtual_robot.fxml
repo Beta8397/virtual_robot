@@ -15,7 +15,7 @@
 
 <BorderPane fx:id="borderPane" onKeyPressed="#handleKeyEvents" onKeyReleased="#handleKeyEvents" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="virtual_robot.controller.VirtualRobotController">
    <center>
-      <StackPane fx:id="fieldPane" alignment="TOP_LEFT" maxHeight="0.0" maxWidth="0.0" minHeight="0.0" minWidth="0.0" onMouseClicked="#handleFieldMouseClick" prefHeight="0.0" prefWidth="0.0" BorderPane.alignment="CENTER">
+      <StackPane fx:id="fieldPane" alignment="TOP_LEFT" maxHeight="0.0" maxWidth="0.0" minHeight="0.0" minWidth="0.0" onMouseDragged="#handleFieldMouseClick" prefHeight="0.0" prefWidth="0.0" BorderPane.alignment="CENTER">
          <children>
             <ImageView fx:id="imgViewBackground" pickOnBounds="true" preserveRatio="true" />
          </children></StackPane>
