@@ -107,6 +107,37 @@ public class HardwareMap implements Iterable<HardwareDevice>{
         if (device instanceof CRServo) crservo.put(deviceName, (CRServo)device);
     }
 
+
+    /**
+     * (Advanced) Removes a device from the overall map, if present. If the device is also present in a
+     * DeviceMapping, then the device should be removed using {@link DeviceMapping#remove}
+     * instead of calling this method.
+     *
+     * <p>This is normally called only by code in the SDK itself, not by user code.</p>
+     *
+     * * @param deviceName  the name of the device to remove
+     * @param device      the device to remove under that name
+     * @return whether a device was removed or not
+     */
+    public boolean remove(String deviceName, HardwareDevice device) {
+            deviceName = deviceName.trim();
+            List<HardwareDevice> list = allDevicesMap.get(deviceName);
+            if (list != null) {
+                list.remove(device);
+                if (list.isEmpty()) {
+                    allDevicesMap.remove(deviceName);
+                }
+                //allDevicesList = null;
+                /*deviceNames = null;
+                if (serialNumber != null) {
+                    serialNumberMap.remove(serialNumber);
+                }
+                 */
+                return true;
+            }
+            return false;
+    }
+
     /**
      * Obtain a device with a specified name and class or interface from the HardwareMap.
      * @param classOrInterface
