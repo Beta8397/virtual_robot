@@ -63,10 +63,19 @@ public class ArmBot extends MechanumBase {
      * Constructor.
      */
     public ArmBot() {
-
-        //This call to the superclass constructor is essential. Among other things, this will call the
-        //createHardwareMap() method, so that a HardwareMap object will be available.
         super();
+    }
+
+    /**
+     *  The initialize() method is called automatically when the robot's graphical UI is loaded from the
+     *  arm_bot.fxml markup file. It should be used to set up parts of the graphical UI that will change
+     *  as the robot operates
+     */
+    public void initialize(){
+        //This call to the superclass initialize method is essential. Among other things, this will call the
+        //createHardwareMap() method, so that a HardwareMap object will be available. It also does all of
+        //the initialization of the Mechanum drive base.
+        super.initialize();
 
         //Temporarily activate the hardware map to allow calls to "get"
         hardwareMap.setActive(true);
@@ -79,14 +88,6 @@ public class ArmBot extends MechanumBase {
         //Deactivate the hardwaremap to prevent users from accessing hardware until after INIT is pressed
         hardwareMap.setActive(false);
 
-    }
-
-    /**
-     *  The initialize() method is called automatically when the robot's graphical UI is loaded from the
-     *  arm_bot.fxml markup file. It should be used to set up parts of the graphical UI that will change
-     *  as the robot operates
-     */
-    public void initialize(){
         /*
         Scales the arm with pivot point at center of back of robot (which corresponds to the back of the arm).
         The Y-scaling is initialized to 1.0 (i.e., arm fully retracted)

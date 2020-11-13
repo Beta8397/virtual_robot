@@ -33,7 +33,7 @@ import virtual_robot.util.AngleUtils;
 @BotConfig(name = "Programming Board", filename = "programming_board")
 public class ProgrammingBoard extends VirtualBot {
 
-    private MotorType motorType;
+    private MotorType MOTOR_TYPE = MotorType.Neverest40;
     private DcMotorExImpl motor = null;
     private BNO055IMUImpl imu = null;
     private PassiveColorSensorImpl colorSensor = null;
@@ -89,6 +89,11 @@ public class ProgrammingBoard extends VirtualBot {
 
     public ProgrammingBoard(){
         super();
+    }
+
+    public void initialize(){
+        super.initialize();
+
         hardwareMap.setActive(true);
         motor = (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "motor");
         imu = (BNO055IMUImpl) hardwareMap.get(BNO055IMU.class, "imu");
@@ -98,11 +103,7 @@ public class ProgrammingBoard extends VirtualBot {
         analogInput = hardwareMap.get(AnalogInput.class, "pot");
         distanceSensor = (PassiveDistanceSensorImpl)hardwareMap.get(PassiveDistanceSensorImpl.class, "sensor_color_distance");
         hardwareMap.setActive(false);
-        System.out.println("Exiting ProgrammingBoard constructor");
-    }
 
-    public void initialize(){
-        System.out.println("ProgrammingBoard initialize");
         propGroup.getTransforms().add(propGroupRotate);
         servoArmGroup.getTransforms().add(servoArmGroupRotate);
         Bounds boundsInScene = fieldPane.localToScene(fieldPane.getBoundsInLocal());
@@ -115,9 +116,8 @@ public class ProgrammingBoard extends VirtualBot {
     }
 
     protected void createHardwareMap(){
-        motorType = MotorType.Neverest40;
         hardwareMap = new HardwareMap();
-        hardwareMap.put("motor", new DcMotorExImpl(motorType));
+        hardwareMap.put("motor", new DcMotorExImpl(MOTOR_TYPE));
         hardwareMap.put("imu", new BNO055IMUImpl(this, 10));
         hardwareMap.put("sensor_color_distance", new PassiveColorSensorImpl());
         hardwareMap.put("servo", new ServoImpl());

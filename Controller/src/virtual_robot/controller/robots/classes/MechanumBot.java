@@ -27,12 +27,13 @@ public class MechanumBot extends MechanumBase {
 
     public MechanumBot() {
         super();
-        hardwareMap.setActive(true);
-        servo = (ServoImpl) hardwareMap.servo.get("back_servo");
-        hardwareMap.setActive(false);
     }
 
     public void initialize() {
+        super.initialize();
+        hardwareMap.setActive(true);
+        servo = (ServoImpl) hardwareMap.servo.get("back_servo");
+        hardwareMap.setActive(false);
         backServoArm.getTransforms().add(new Rotate(0, 37.5, 67.5));
     }
 

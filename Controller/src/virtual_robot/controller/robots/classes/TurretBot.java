@@ -56,13 +56,28 @@ public class TurretBot extends MechanumBase {
     private Label elevation;           //Where to put the elevation
 
     /**
-     * Constructor.
+     * No-parameter constructor. This will be used if TurretBot is selected from the Config menu. It will use
+     * the default motor type in MechanumBase.
      */
     public TurretBot() {
-
-        //This call to the superclass constructor is essential. Among other things, this will call the
-        //createHardwareMap() method, so that a HardwareMap object will be available.
         super();
+    }
+
+    /**
+     * TurretBot constructor. This can only be used by subclasses.
+     * @param driveMotorType
+     */
+    public TurretBot(MotorType driveMotorType){
+        super(driveMotorType);
+    }
+
+    /**
+     * The initialize() method is called automatically when the robot's graphical UI is loaded from the
+     * arm_bot.fxml markup file. It should be used to set up parts of the graphical UI that will change
+     * as the robot operates
+     */
+    public void initialize() {
+        super.initialize();
 
         //Temporarily activate the hardware map to allow calls to "get"
         hardwareMap.setActive(true);
@@ -73,14 +88,7 @@ public class TurretBot extends MechanumBase {
 
         //Deactivate the hardwaremap to prevent users from accessing hardware until after INIT is pressed
         hardwareMap.setActive(false);
-    }
 
-    /**
-     * The initialize() method is called automatically when the robot's graphical UI is loaded from the
-     * arm_bot.fxml markup file. It should be used to set up parts of the graphical UI that will change
-     * as the robot operates
-     */
-    public void initialize() {
         turret.getTransforms().add(turretRotate);
     }
 

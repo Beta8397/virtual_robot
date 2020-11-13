@@ -67,7 +67,6 @@ public abstract class VirtualBot {
 
     public VirtualBot(){
         fieldPane = controller.getFieldPane();
-        createHardwareMap();
         this.fieldWidth = fieldPane.getPrefWidth();
         halfFieldWidth = fieldWidth / 2.0;
         botWidth = fieldWidth / 8.0;
@@ -76,6 +75,14 @@ public abstract class VirtualBot {
         X_MAX = 2.0 * (Config.X_MAX_FRACTION - 0.5) * halfFieldWidth;
         Y_MIN = 2.0 * (Config.Y_MIN_FRACTION - 0.5) * halfFieldWidth;
         Y_MAX = 2.0 * (Config.Y_MAX_FRACTION - 0.5) * halfFieldWidth;
+    }
+
+    /**
+     * Create the HardwareMap.  Classes extending VirtualBot must have an 'initialize' method which has
+     * as its first statement 'super.init()'
+     */
+    public void initialize(){
+        createHardwareMap();
     }
 
     static void setController(VirtualRobotController ctrl){
