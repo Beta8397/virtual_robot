@@ -35,11 +35,17 @@ public class QQBot extends TurretBot {
      * Constructor.
      */
     public QQBot() {
-
-        //This call to the superclass constructor is essential. Among other things, this will call the
-        //createHardwareMap() method, so that a HardwareMap object will be available.
         super();
 
+    }
+
+    /**
+     * The initialize() method is called automatically when the robot's graphical UI is loaded from the
+     * arm_bot.fxml markup file. It should be used to set up parts of the graphical UI that will change
+     * as the robot operates
+     */
+    public void initialize() {
+        super.initialize();
         //Temporarily activate the hardware map to allow calls to "get"
         hardwareMap.setActive(true);
 
@@ -54,15 +60,6 @@ public class QQBot extends TurretBot {
         hardwareMap.setActive(false);
 
         gearRatioWheel = 0.5;  // take into account 2:1 reduction from motor
-    }
-
-    /**
-     * The initialize() method is called automatically when the robot's graphical UI is loaded from the
-     * arm_bot.fxml markup file. It should be used to set up parts of the graphical UI that will change
-     * as the robot operates
-     */
-    public void initialize() {
-        super.initialize();
     }
 
     /**
@@ -107,9 +104,6 @@ public class QQBot extends TurretBot {
 
         hardwareMap.put("servo_pivot_shooter", new ServoImpl());
         hardwareMap.put("servo_import_shooter", new ServoImpl());
-        /*
-
-         */
     }
 
     /**

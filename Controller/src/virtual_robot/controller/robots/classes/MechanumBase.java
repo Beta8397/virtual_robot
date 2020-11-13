@@ -16,7 +16,7 @@ import virtual_robot.util.AngleUtils;
  */
 public class MechanumBase extends VirtualBot {
 
-    public static final MotorType MOTOR_TYPE = MotorType.Neverest40;
+    public final MotorType MOTOR_TYPE;
     private DcMotorExImpl[] motors = null;
     //private VirtualRobotController.GyroSensorImpl gyro = null;
     private BNO055IMUImpl imu = null;
@@ -31,9 +31,20 @@ public class MechanumBase extends VirtualBot {
 
     private double[][] tWR; //Transform from wheel motion to robot motion
 
-
+    /**
+     * No-param constructor. Uses the default motor type of Neverest 40
+     */
     public MechanumBase() {
         super();
+        MOTOR_TYPE = MotorType.Neverest40;
+    }
+
+    public MechanumBase(MotorType driveMotorType){
+        MOTOR_TYPE = driveMotorType;
+    }
+
+    public void initialize(){
+        super.initialize();
         hardwareMap.setActive(true);
         motors = new DcMotorExImpl[]{
                 (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "back_left_motor"),

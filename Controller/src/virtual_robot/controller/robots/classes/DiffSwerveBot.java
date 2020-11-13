@@ -22,7 +22,7 @@ import virtual_robot.util.Vector2D;
 @BotConfig(name = "Differential Swerve Bot", filename = "diff_swerve_bot")
 public class DiffSwerveBot extends VirtualBot {
 
-    MotorType motorType;
+    private final MotorType MOTOR_TYPE = MotorType.NeverestOrbital20;
     private DcMotorExImpl[] motors = null;
     private BNO055IMUImpl imu = null;
     private VirtualRobotController.ColorSensorImpl colorSensor = null;
@@ -57,6 +57,10 @@ public class DiffSwerveBot extends VirtualBot {
 
     public DiffSwerveBot(){
         super();
+    }
+
+    public void initialize() {
+        super.initialize();
         hardwareMap.setActive(true);
         motors = new DcMotorExImpl[]{
                 (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "bottom_left_motor"),
@@ -80,17 +84,13 @@ public class DiffSwerveBot extends VirtualBot {
         WHEEL_POS[1] = new Vector2D(interWheelWidth/2, 0);          //Right
 
         hardwareMap.setActive(false);
-    }
-
-    public void initialize(){
         backServoArm.getTransforms().add(new Rotate(0, 37.5, 67.5));
     }
 
     protected void createHardwareMap(){
-        motorType = MotorType.NeverestOrbital20;
         hardwareMap = new HardwareMap();
         String[] motorNames = new String[] {"bottom_left_motor", "top_left_motor", "bottom_right_motor", "top_right_motor"};
-        for (String name: motorNames) hardwareMap.put(name, new DcMotorExImpl(motorType));
+        for (String name: motorNames) hardwareMap.put(name, new DcMotorExImpl(MOTOR_TYPE));
         String[] distNames = new String[]{"front_distance", "left_distance", "back_distance", "right_distance"};
         for (String name: distNames) hardwareMap.put(name, controller.new DistanceSensorImpl());
         hardwareMap.put("imu", new BNO055IMUImpl(this, 10));
@@ -126,9 +126,9 @@ public class DiffSwerveBot extends VirtualBot {
 //            double steerTicks = (deltaPosBottom + deltaPosTop) / 2.0;
             double driveTicks = (deltaPosBottom - deltaPosTop) / 2.0;
             steer[i] = -Math.PI * (motors[2*i].getActualPosition() + motors[2*i+1].getActualPosition())
-                    / (STEER_RATIO * motorType.TICKS_PER_ROTATION);
+                    / (STEER_RATIO * MOTOR_TYPE.TICKS_PER_ROTATION);
 //            steer[i] -= 2.0 * Math.PI * steerTicks / (STEER_RATIO * MOTOR_TYPE.TICKS_PER_ROTATION);
-            double s = driveTicks * wheelCircumference /(DRIVE_RATIO * motorType.TICKS_PER_ROTATION);
+            double s = driveTicks * wheelCircumference /(DRIVE_RATIO * MOTOR_TYPE.TICKS_PER_ROTATION);
             if (i == 1) s = -s;
             Vector2D w = new Vector2D(-s * Math.sin(steer[i]+headingRadians), s * Math.cos(steer[i]+headingRadians));
             Vector2D v = velocity.added(WHEEL_POS[i].rotated(headingRadians+Math.PI/2).multiplied(omega));
