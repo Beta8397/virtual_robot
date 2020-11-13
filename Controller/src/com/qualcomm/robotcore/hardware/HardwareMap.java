@@ -120,22 +120,17 @@ public class HardwareMap implements Iterable<HardwareDevice>{
      * @return whether a device was removed or not
      */
     public boolean remove(String deviceName, HardwareDevice device) {
-            deviceName = deviceName.trim();
-            List<HardwareDevice> list = allDevicesMap.get(deviceName);
-            if (list != null) {
-                list.remove(device);
-                if (list.isEmpty()) {
-                    allDevicesMap.remove(deviceName);
-                }
-                //allDevicesList = null;
-                /*deviceNames = null;
-                if (serialNumber != null) {
-                    serialNumberMap.remove(serialNumber);
-                }
-                 */
-                return true;
+        deviceName = deviceName.trim();
+        List<HardwareDevice> list = allDevicesMap.get(deviceName);
+        if (list != null) {
+            list.remove(device);
+            if (list.isEmpty()) {
+                allDevicesMap.remove(deviceName);
             }
-            return false;
+            allDevicesList.remove(device);
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -246,6 +241,27 @@ public class HardwareMap implements Iterable<HardwareDevice>{
         public synchronized void put(String deviceName, DEVICE_TYPE device){
             deviceName = deviceName.trim();
             map.put(deviceName, device);
+        }
+
+        /**
+         * FOR INTERNAL USE ONLY
+         *
+         * (Advanced) Removes the device with the indicated name (if any) from this DeviceMapping. The device
+         * is also removed under that name in the overall map itself. Note that this method is normally
+         * called only by code in the SDK itself, not by user code.
+         *
+         * @param deviceName the name of the device to remove.
+         * @return whether any modifications were made to this DeviceMapping
+         * @see HardwareMap#remove
+         */
+        public synchronized boolean remove(String deviceName) {
+            deviceName = deviceName.trim();
+            HardwareDevice device = map.remove(deviceName);
+            if (device != null) {
+                HardwareMap.this.remove(deviceName, device);
+                return true;
+            }
+            return false;
         }
 
         /**
