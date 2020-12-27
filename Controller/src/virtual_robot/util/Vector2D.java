@@ -83,4 +83,13 @@ public class Vector2D {
         return new Vector2D(x*cos - y*sin, x*sin + y*cos);
     }
 
+    public void rotate(double radians) {
+        double x0 = x;
+        double y0 = y;
+        double cos = Math.cos(radians);
+        double sin = Math.sin(radians);
+        x = x0 * cos - y0 * sin;
+        y = x0 * sin + y0 * cos;
+    }
+
 }

@@ -46,12 +46,8 @@ public abstract class VirtualBot {
     protected Group displayGroup = null;
 
     protected StackPane fieldPane;
-    protected double fieldWidth;
-    protected double halfFieldWidth;
     protected double halfBotWidth;
     protected double botWidth;
-
-    protected final double X_MIN, X_MAX, Y_MIN, Y_MAX;
 
     /*
      * Note change: these have been made volatile, and their getters will no longer be synchronized. This is to prevent
@@ -60,21 +56,17 @@ public abstract class VirtualBot {
     protected volatile double x = 0;
     protected volatile double y = 0;
     protected volatile double headingRadians = 0;
+    protected final VirtualField field;
 
     public double getX() { return x; }
     public double getY() { return y; }
     public double getHeadingRadians(){ return headingRadians; }
 
     public VirtualBot(){
-        fieldPane = controller.getFieldPane();
-        this.fieldWidth = fieldPane.getPrefWidth();
-        halfFieldWidth = fieldWidth / 2.0;
-        botWidth = fieldWidth / 8.0;
+        field = controller.getField();
+        fieldPane = field.fieldPane;
+        botWidth = field.fieldWidth / 8.0;
         halfBotWidth = botWidth / 2.0;
-        X_MIN = 2.0 * (Config.X_MIN_FRACTION - 0.5) * halfFieldWidth;
-        X_MAX = 2.0 * (Config.X_MAX_FRACTION - 0.5) * halfFieldWidth;
-        Y_MIN = 2.0 * (Config.Y_MIN_FRACTION - 0.5) * halfFieldWidth;
-        Y_MAX = 2.0 * (Config.Y_MAX_FRACTION - 0.5) * halfFieldWidth;
     }
 
     /**
@@ -130,7 +122,7 @@ public abstract class VirtualBot {
           around the field.
          */
         displayGroup.getTransforms().add(new Translate(0, 0));
-        displayGroup.getTransforms().add(new Rotate(0, halfFieldWidth, halfFieldWidth));
+        displayGroup.getTransforms().add(new Rotate(0, field.halfFieldWidth, field.halfFieldWidth));
         displayGroup.getTransforms().add(new Scale(botWidth/75.0, botWidth/75.0, 0, 0));
 
         fieldPane.getChildren().add(displayGroup);
@@ -185,14 +177,14 @@ public abstract class VirtualBot {
 //            double argY = Math.max(halfBotWidth, Math.min(fieldWidth - halfBotWidth, arg.getY()));
 //            x = argX - halfFieldWidth;
 //            y = halfFieldWidth - argY;
-            x = arg.getX() - halfFieldWidth;
-            y = halfFieldWidth - arg.getY();
+            x = arg.getX() - field.halfFieldWidth;
+            y = field.halfFieldWidth - arg.getY();
             constrainToBoundaries();
             updateDisplay();
         }
         else if (arg.getButton() == MouseButton.SECONDARY){
-            double centerX = x + halfFieldWidth;
-            double centerY = halfFieldWidth - y;
+            double centerX = x + field.halfFieldWidth;
+            double centerY = field.halfFieldWidth - y;
             double displayAngleRads = Math.atan2(arg.getX() - centerX, centerY - arg.getY());
             headingRadians = -displayAngleRads;
             constrainToBoundaries();
@@ -223,10 +215,10 @@ public abstract class VirtualBot {
         else if (headingRadians <= Math.PI/2.0) effectiveHalfBotWidth = halfBotWidth * (Math.sin(headingRadians) + Math.cos(headingRadians));
         else effectiveHalfBotWidth = halfBotWidth * (Math.sin(headingRadians) - Math.cos(headingRadians));
 
-        if (x >  (X_MAX - effectiveHalfBotWidth)) x = X_MAX - effectiveHalfBotWidth;
-        else if (x < (X_MIN + effectiveHalfBotWidth)) x = X_MIN + effectiveHalfBotWidth;
-        if (y > (Y_MAX - effectiveHalfBotWidth)) y = Y_MAX - effectiveHalfBotWidth;
-        else if (y < (Y_MIN + effectiveHalfBotWidth)) y = Y_MIN + effectiveHalfBotWidth;
+        if (x >  (field.X_MAX - effectiveHalfBotWidth)) x = field.X_MAX - effectiveHalfBotWidth;
+        else if (x < (field.X_MIN + effectiveHalfBotWidth)) x = field.X_MIN + effectiveHalfBotWidth;
+        if (y > (field.Y_MAX - effectiveHalfBotWidth)) y = field.Y_MAX - effectiveHalfBotWidth;
+        else if (y < (field.Y_MIN + effectiveHalfBotWidth)) y = field.Y_MIN + effectiveHalfBotWidth;
     }
 
 }

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.Group?>
+<?import javafx.scene.paint.RadialGradient?>
+<?import javafx.scene.paint.Stop?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.shape.Rectangle?>
+
+<Group xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.172-ea" fx:controller="virtual_robot.controller.robots.classes.BoPBot">
+    <children>
+        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="YELLOW" height="75.0" stroke="BLACK" strokeType="INSIDE" width="75.0" />
+        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="20.0" rotate="-45.0" stroke="BLACK" strokeType="INSIDE" width="6.0" x="6.192" y="55.807" />
+        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="20.0" rotate="45.0" stroke="BLACK" strokeType="INSIDE" width="6.0" x="6.192" y="-0.807" />
+        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="20.0" rotate="-45.0" stroke="BLACK" strokeType="INSIDE" width="6.0" x="62.807" y="-0.807" />
+        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="20.0" rotate="45.0" stroke="BLACK" strokeType="INSIDE" width="6.0" x="62.807" y="55.807" />
+        <Rectangle arcHeight="5.0" fill="LIME" height="10.0" stroke="BLACK" strokeType="INSIDE" width="10.0" x="15.0" fx:id="intake1" />
+        <Rectangle arcHeight="5.0" fill="LIME" height="10.0" stroke="BLACK" strokeType="INSIDE" width="10.0" x="50.0" fx:id="intake2" />
+
+        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="MAGENTA" height="10.4" stroke="BLACK" strokeType="INSIDE" width="10.4" x="40" y="40" fx:id="shooterFlyWheel" />
+        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="MAGENTA" height="20.0" stroke="BLACK" strokeType="INSIDE" width="5.0" x="30" y="30" fx:id="shooterIndexer" />
+    </children>
+</Group>
