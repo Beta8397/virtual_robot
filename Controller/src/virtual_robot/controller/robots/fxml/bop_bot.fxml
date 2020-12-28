@@ -13,10 +13,17 @@
         <Rectangle arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="20.0" rotate="45.0" stroke="BLACK" strokeType="INSIDE" width="6.0" x="6.192" y="-0.807" />
         <Rectangle arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="20.0" rotate="-45.0" stroke="BLACK" strokeType="INSIDE" width="6.0" x="62.807" y="-0.807" />
         <Rectangle arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="20.0" rotate="45.0" stroke="BLACK" strokeType="INSIDE" width="6.0" x="62.807" y="55.807" />
-        <Rectangle arcHeight="5.0" fill="LIME" height="10.0" stroke="BLACK" strokeType="INSIDE" width="10.0" x="15.0" fx:id="intake1" />
-        <Rectangle arcHeight="5.0" fill="LIME" height="10.0" stroke="BLACK" strokeType="INSIDE" width="10.0" x="50.0" fx:id="intake2" />
 
-        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="MAGENTA" height="10.4" stroke="BLACK" strokeType="INSIDE" width="10.4" x="40" y="40" fx:id="shooterFlyWheel" />
-        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="MAGENTA" height="20.0" stroke="BLACK" strokeType="INSIDE" width="5.0" x="30" y="30" fx:id="shooterIndexer" />
+        <Rectangle fx:id="intake" x="25.0" width="25.0" height="75.0" fill="LIME" arcHeight="5.0" stroke="BLACK" strokeType="INSIDE" />
+        <Rectangle fx:id="intake1" x="25.0" width="10.0" height="10.0" fill="LIME" arcHeight="5.0" stroke="BLACK" strokeType="INSIDE" />
+        <Rectangle fx:id="intake2" x="40.0" width="10.0" height="10.0" fill="LIME" arcHeight="5.0" stroke="BLACK" strokeType="INSIDE" />
+        <Circle fx:id="hopper" centerX="37.0" centerY="62.0" radius="12.5" fill="MAGENTA" stroke="BLACK" strokeType="INSIDE" />
+        <Rectangle fx:id="shooterFlyWheel" x="40" y="40" width="10.4" height="10.4" fill="MAGENTA" arcHeight="5.0" arcWidth="5.0" stroke="BLACK" strokeType="INSIDE" />
+        <Rectangle fx:id="shooterIndexer" x="30" y="30" width="5.0" height="20.0" fill="MAGENTA" arcHeight="5.0" arcWidth="5.0" stroke="BLACK" strokeType="INSIDE" />
+
+        <Rectangle fx:id="arm" arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="40.0" stroke="BLACK" strokeType="INSIDE" width="5.0" x="35.0" y="-35.0" />
+        <Rectangle fx:id="hand" arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="5.0" stroke="BLACK" strokeType="INSIDE" width="30.0" x="22.5" y="-35.0" />
+        <Rectangle fx:id="leftFinger" arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="20.0" stroke="BLACK" strokeType="INSIDE" width="5.0" x="22.5" y="-50.0" />
+        <Rectangle fx:id="rightFinger" arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="20.0" stroke="BLACK" strokeType="INSIDE" width="5.0" x="47.5" y="-50.0" />
     </children>
 </Group>

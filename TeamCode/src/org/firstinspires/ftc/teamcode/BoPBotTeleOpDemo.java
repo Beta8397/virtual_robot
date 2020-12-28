@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.configuration.MotorType;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -20,6 +21,11 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
  */
 @TeleOp(name = "BoP Bot TeleOp", group = "XBot")
 public class BoPBotTeleOpDemo extends LinearOpMode {
+
+    private static final double WOBBLE_GOAL_GRAB_ANGLE_DEG = 180.0;
+    private static final double WOBBLE_GOAL_CARRY_ANGLE_DEG = 155.0;
+    private static final double WOBBLE_GOAL_DROP_ANGLE_DEG = 120.0;
+    private static final double WOBBLE_GOAL_HOME_ANGLE_DEG = 0.0;
 
     @SuppressWarnings("StatementWithEmptyBody")
     public void runOpMode() {
@@ -48,9 +54,17 @@ public class BoPBotTeleOpDemo extends LinearOpMode {
         intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         boolean runIntakeMotor = false;
 
+        DcMotor armMotor = hardwareMap.dcMotor.get("arm_motor");
+        armMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armMotor.setTargetPosition(0); // start in home position
+        armMotor.setPower(1.0); // turn power on to the arm motor to always hold its position
+
         BNO055IMU imu = hardwareMap.get(BNO055IMU.class, "imu");
 
         Servo shooterServo = hardwareMap.servo.get("shooter_servo");
+        Servo handServo = hardwareMap.servo.get("hand_servo");
+
         DistanceSensor frontDistance = hardwareMap.get(DistanceSensor.class, "front_distance");
         DistanceSensor leftDistance = hardwareMap.get(DistanceSensor.class, "left_distance");
         DistanceSensor rightDistance = hardwareMap.get(DistanceSensor.class, "right_distance");
@@ -112,6 +126,27 @@ public class BoPBotTeleOpDemo extends LinearOpMode {
             shooterMotor.setPower(runShooterMotor ? 1.0 : 0.0);
             shooterServo.setPosition(gamepad1.right_trigger);
             intakeMotor.setPower((runIntakeMotor ? -1.0 : 0.0));
+            handServo.setPosition(gamepad1.left_trigger);
+
+            Double armPositionDeg = null;
+
+            if (gamepad1.dpad_down) { // grab position
+                armPositionDeg = WOBBLE_GOAL_GRAB_ANGLE_DEG;
+            }
+            else if (gamepad1.dpad_right) { // carry position
+                armPositionDeg = WOBBLE_GOAL_CARRY_ANGLE_DEG;
+            }
+            else if (gamepad1.dpad_up) { // drop position
+                armPositionDeg = WOBBLE_GOAL_DROP_ANGLE_DEG;
+            }
+            else if (gamepad1.dpad_left) { // home position
+                armPositionDeg = WOBBLE_GOAL_HOME_ANGLE_DEG;
+            }
+
+            if (armPositionDeg != null) {
+                armMotor.setTargetPosition(((int) (armPositionDeg / 360.0 * MotorType.Neverest60.TICKS_PER_ROTATION)));
+                armMotor.setPower(1.0);
+            }
 
             Orientation orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
             telemetry.addData("Heading", " %.1f", orientation.firstAngle * 180.0 / Math.PI);

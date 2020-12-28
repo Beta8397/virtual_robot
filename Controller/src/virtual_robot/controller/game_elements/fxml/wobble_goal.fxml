@@ -3,8 +3,6 @@
 <!--Markup file for the Wobble Goal game element graphics-->
 
 <?import javafx.scene.Group?>
-<?import javafx.scene.paint.RadialGradient?>
-<?import javafx.scene.paint.Stop?>
 <?import javafx.scene.shape.Circle?>
 
 <!--The root node is a Group object; this object has a stack of multiple children.  Tne
@@ -14,8 +12,8 @@
     <children>
 
         <!--The wobble goal-->
-        <Circle centerX="0" centerY="0" radius="16.7" strokeType="INSIDE" strokeWidth="0.0" fill="#ba0000">
-        </Circle>
+        <Circle centerX="0" centerY="0" radius="16.7" strokeType="INSIDE" stroke="BLACK" fill="#ba0000" />
+        <Circle centerX="0" centerY="0" radius="3.0" strokeType="INSIDE" stroke="BLACK" fill="#ba0000" />
 
     </children>
 </Group>

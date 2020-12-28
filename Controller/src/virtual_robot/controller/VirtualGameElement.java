@@ -3,12 +3,7 @@ package virtual_robot.controller;
 import javafx.geometry.Bounds;
 import javafx.scene.Group;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.transform.Rotate;
-import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
-import virtual_robot.controller.robots.classes.BoPBot;
 import virtual_robot.util.Vector2D;
 
 /**
@@ -44,6 +39,10 @@ public abstract class VirtualGameElement {
 
     public double getX() { return x; }
     public double getY() { return y; }
+
+    public Vector2D getLocation() {
+        return new Vector2D(x, y);
+    }
 
     public void setLocationInInches(Vector2D location) {
         double pixelsPerInch = controller.getField().fieldWidth / 144;

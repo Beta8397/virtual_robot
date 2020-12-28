@@ -37,7 +37,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import virtual_robot.config.Game;
 import virtual_robot.controller.robots.GameElementControlling;
-import virtual_robot.controller.robots.classes.MechanumBot;
+import virtual_robot.controller.robots.classes.BoPBot;
 import virtual_robot.keyboard.KeyState;
 
 import java.io.IOException;
@@ -233,7 +233,7 @@ public class VirtualRobotController {
                 validConfigClasses.add(c);
         }
         cbxConfig.setItems(validConfigClasses);
-        cbxConfig.setValue(MechanumBot.class);
+        cbxConfig.setValue(BoPBot.class);
 
         cbxConfig.setCellFactory(new Callback<ListView<Class<?>>, ListCell<Class<?>>>() {
             @Override

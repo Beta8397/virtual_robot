@@ -13,6 +13,8 @@ import java.util.List;
 import javafx.fxml.FXML;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Rotate;
+import javafx.scene.transform.Scale;
+import javafx.scene.transform.Translate;
 import virtual_robot.controller.BotConfig;
 import virtual_robot.controller.VirtualBot;
 import virtual_robot.controller.VirtualField;
@@ -26,7 +28,7 @@ import virtual_robot.util.Vector2D;
 
 /**
  * For internal use only. Represents a robot with four omni wheels, shooter motor, shooter servo,
- * intake motor and a BNO055IMU.
+ * intake motor, arm motor, hand servo, distance sensors, and a BNO055IMU.
  * <p>
  * BoPBot is modeled after the Team 11528 Bots of Prey 2020-2021 Ultimate Goal competition robot.
  * <p>
@@ -37,9 +39,6 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
 
     public static final double HOPPER_R_INCHES = 6.0;
     public static final double HOPPER_ANGLE_DEG = 270.0;
-
-    public static final double WOBBLE_R_INCHES = 6.5;
-    public static final double WOBBLE_ANGLE_DEG = 90.0;
 
     public static final double SHOOTER_MAX_INCHES_PER_SEC = 315.0; // ~8 m/s
     public static final double SHOOTER_OFFSET_DEG = 100;
@@ -54,6 +53,8 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
     public static final double INTAKE_DIST_TOLERANCE_INCHES = 13.5; // the distance to the ring at pick-up
     public static final long INTAKE_TO_HOPPER_TIME_MILLIS = 1000L;  // milliseconds that a ring blocks the intake from collecting another ring
 
+    public static final double WOBBLE_GRAB_TURN_FRACTION = 0.5; // fraction of turn at which wobble goal can be grabbed
+
     private final MotorType MOTOR_TYPE = MotorType.Neverest20;
     private DcMotorExImpl[] wheelMotors = null;
     private final MotorType SHOOTER_MOTOR_TYPE = MotorType.RevUltraPlanetaryOneToOne;
@@ -61,17 +62,41 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
     private final MotorType INTAKE_MOTOR_TYPE = MotorType.Gobilda137; // actual motor is goBUILDA 5202 planetary gear motor
     private DcMotorExImpl intakeMotor = null;
     private ServoImpl shooterServo = null;
+    private final MotorType ARM_MOTOR_TYPE = MotorType.Neverest60;
+    private DcMotorExImpl armMotor = null;
+    private ServoImpl handServo = null;
     private BNO055IMUImpl imu = null;
     private VirtualRobotController.DistanceSensorImpl[] distanceSensors = null;
 
-    @FXML
-    private Rectangle shooterFlyWheel;
-    @FXML
-    private Rectangle shooterIndexer;
-    @FXML
-    private Rectangle intake1;
-    @FXML
-    private Rectangle intake2;
+    /*
+    Variables representing graphical UI nodes that we will need to manipulate. The @FXML annotation will
+    cause these variables to be instantiated automatically during loading of the bop_bot.fxml file. The
+    fxml file must declare fx:id attributes for the Rectangles that represent the arm, hand, and both fingers.
+    For example, the attribute for the arm would be:  fx:id="arm"
+     */
+    @FXML private Rectangle shooterFlyWheel;
+    @FXML private Rectangle shooterIndexer;
+    @FXML private Rectangle intake1;
+    @FXML private Rectangle intake2;
+    @FXML private Rectangle arm;            // The arm. Must be able to extend/retract (i.e., scale) in Y-dimension.
+    @FXML private Rectangle hand;           // The hand. Must move in Y-dimension as arm extends/retracts.
+    @FXML private Rectangle leftFinger;     // Fingers must open and close based on position of hand servo.
+    @FXML private Rectangle rightFinger;
+
+    /*
+    Transform objects that will be instantiated in the initialize() method, and will be used in the
+    updateDisplay() method to manipulate the arm, hand, and fingers.
+     */
+    Scale armScaleTransform;
+    Translate handTranslateTransform;
+    Translate leftFingerTranslateTransform;
+    Translate rightFingerTranslateTransform;
+
+    /*
+    Current scale of the arm (i.e., the degree to which arm is extended or retracted). 1.0 means fully retracted.
+    2.0 would mean that arm is twice the fully retracted length, etc.
+     */
+    private volatile double armScale = 1.0;
 
     private double wheelCircumference;
 
@@ -103,6 +128,8 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         shooterMotor = (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "shooter_motor");
         shooterServo = (ServoImpl) hardwareMap.servo.get("shooter_servo");
         intakeMotor = (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "intake_motor");
+        armMotor = (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "arm_motor");
+        handServo = (ServoImpl) hardwareMap.servo.get("hand_servo");
 
         distanceSensors = new VirtualRobotController.DistanceSensorImpl[]{
                 hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "front_distance"),
@@ -128,6 +155,28 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         shooterIndexer.getTransforms().add(new Rotate(0, getCenterPivotX(shooterIndexer), getEdgePivotY(shooterIndexer)));
         intake1.getTransforms().add(new Rotate(0, getCenterPivotX(intake1), getCenterPivotY(intake1)));
         intake2.getTransforms().add(new Rotate(0, getCenterPivotX(intake2), getCenterPivotY(intake2)));
+
+        /*
+        Scales the arm with pivot point at center of back of robot (which corresponds to the back of the arm).
+        The Y-scaling is initialized to 1.0 (i.e., arm fully retracted)
+        We will never change the X-scaling (we don't need the arm to get fatter, only longer)
+         */
+        armScaleTransform = new Scale(1.0, 1.0, getCenterPivotX(arm), getEdgePivotY(arm));
+        arm.getTransforms().add(armScaleTransform);
+
+        // Translates the position of the hand so that it stays at the end of the arm.
+        handTranslateTransform = new Translate(0, 0);
+        hand.getTransforms().add(handTranslateTransform);
+
+        /*
+        Translates the position of the fingers in both X and Y dimensions. The X-translation is to open and close
+        the fingers. The Y-translation is so the fingers move along with the arm and hand, as the arm extends.
+         */
+        leftFingerTranslateTransform = new Translate(0, 0);
+        leftFinger.getTransforms().add(leftFingerTranslateTransform);
+
+        rightFingerTranslateTransform = new Translate(0, 0);
+        rightFinger.getTransforms().add(rightFingerTranslateTransform);
     }
 
     private double getCenterPivotX(Rectangle r) {
@@ -156,6 +205,8 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         hardwareMap.put("shooter_motor", new DcMotorExImpl(SHOOTER_MOTOR_TYPE));
         hardwareMap.put("shooter_servo", new ServoImpl());
         hardwareMap.put("intake_motor", new DcMotorExImpl(INTAKE_MOTOR_TYPE));
+        hardwareMap.put("arm_motor", new DcMotorExImpl(ARM_MOTOR_TYPE));
+        hardwareMap.put("hand_servo", new ServoImpl());
     }
 
     public synchronized void updateStateAndSensors(double millis) {
@@ -216,6 +267,13 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         shooterMotor.update(millis);
         intakeMotor.update(millis);
 
+        /*
+        Calculate the new value of armScale based on interval motion of the arm motor. BUT, do not manipulate
+        the arm UI here. Do that in the updateDisplay method, which will ultimately be called from the UI Thread.
+         */
+        armMotor.update(millis);
+        armScale = -Math.cos(armMotor.getCurrentPosition() / ARM_MOTOR_TYPE.TICKS_PER_ROTATION * Math.PI * 2.0);
+
         double pixelsPerInch = controller.getField().getPixelsPerInch();
 
         if (ringInIntake != null) {
@@ -249,9 +307,16 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         }
 
         if (wobble_goal != null) {
-            double dx = WOBBLE_R_INCHES * pixelsPerInch * Math.cos(headingRadians + WOBBLE_ANGLE_DEG * Math.PI / 180.0);
-            double dy = WOBBLE_R_INCHES * pixelsPerInch * Math.sin(headingRadians + WOBBLE_ANGLE_DEG * Math.PI / 180.0);
-            wobble_goal.setLocation(x + dx, y + dy);
+            if (handServo.getPosition() >= 0.75 || armMotor.getCurrentPosition() / ARM_MOTOR_TYPE.TICKS_PER_ROTATION <= 0.25) {
+                // when controlled, the wobble goal will stay between the fingers
+                Vector2D p = getHandLocation();
+                wobble_goal.setLocation(x + p.x, y + p.y);
+            }
+            else {
+                // release the wobble goal
+                wobble_goal.setControlledBy(null);
+                wobble_goal = null;
+            }
         }
 
         // shoot ring
@@ -274,6 +339,12 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         if (!readyToShoot && shooterServo.getPosition() <= 0.1) {
             readyToShoot = true;
         }
+    }
+
+    private Vector2D getHandLocation() {
+        double dx = handTranslateTransform.getX();
+        double dy = 75 - leftFingerTranslateTransform.getY(); // TODO Fix this - it's not quite right
+        return new Vector2D(dx, dy).rotated(headingRadians);
     }
 
     public void interact(VirtualGameElement e) {
@@ -311,12 +382,25 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
                 } else {
                     // ring is moving
                     // TODO else if the ring is in motion and collides with the robot, then stop the ring
-                    System.out.println("Collision with moving ring not implemented yet");
                 }
             }
         }
         else if (e instanceof WobbleGoal) {
             if (e.getControlledBy() == null) {
+                WobbleGoal w = (WobbleGoal) e;
+                if (armMotor.getCurrentPosition() / ARM_MOTOR_TYPE.TICKS_PER_ROTATION >= WOBBLE_GRAB_TURN_FRACTION) {
+                    // arm is in position to grab wobble goal
+                    if (handServo.getPosition() >= 0.75) {
+                        // hand is grasping
+                        // calculate distance from wobble goal to center of gripper
+                        Vector2D h = getHandLocation();
+                        double dist = h.added(new Vector2D(x, y)).subtracted(w.getLocation()).length();
+                        if (dist <= 10) {
+                            w.setControlledBy(this);
+                            wobble_goal = w;
+                        }
+                    }
+                }
                 collide(e, WobbleGoal.RADIUS_INCHES);
             }
         }
@@ -410,6 +494,26 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         ((Rotate) shooterIndexer.getTransforms().get(0)).setAngle(-shooterServo.getPosition() * 180.0);
         ((Rotate) intake1.getTransforms().get(0)).setAngle(-intakeMotor.getCurrentPosition() / 5.0); // the actual angle isn't important
         ((Rotate) intake2.getTransforms().get(0)).setAngle(intakeMotor.getCurrentPosition() / 5.0); // the actual angle isn't important
+
+        // Extend or retract the arm based on the value of armScale.
+
+        if (Math.abs(armScale - armScaleTransform.getY()) > 0.001) {
+            armScaleTransform.setY(armScale);
+
+            // Move the hand based on the position of armScale.
+            handTranslateTransform.setY(-40.0 * (armScale - 1.0));
+
+            // Move the fingers in the Y-direction based on the position of armScale.
+            leftFingerTranslateTransform.setY(-40.0 * (armScale - 1.0));
+            rightFingerTranslateTransform.setY(-40.0 * (armScale - 1.0));
+        }
+
+        // Mover fingers in the X-direction (i.e., open/close fingers) based on position of the handServo.
+        double fingerPos = 7.5 * handServo.getInternalPosition();
+        if (Math.abs(fingerPos - leftFingerTranslateTransform.getX()) > 0.001) {
+            leftFingerTranslateTransform.setX(fingerPos);
+            rightFingerTranslateTransform.setX(-fingerPos);
+        }
     }
 
     public void powerDownAndReset() {
