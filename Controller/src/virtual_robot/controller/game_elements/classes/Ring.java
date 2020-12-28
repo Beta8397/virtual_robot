@@ -10,7 +10,7 @@ import virtual_robot.controller.VirtualGameElement;
 @GameElementConfig(name = "Ring", filename = "ring", forGame = UltimateGoal.class, numInstances = 10)
 public class Ring extends VirtualGameElement {
     public static final double RING_RADIUS_INCHES = 2.5;
-    public static final double DRAG = -0.1;
+    public static final double DRAG = 0.0; // TODO fix this
     private boolean onField = true;
     private boolean inFlight = false;
     private boolean rolling = false;

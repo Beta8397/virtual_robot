@@ -380,8 +380,12 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
                         collide(r, Ring.RING_RADIUS_INCHES);
                     }
                 } else {
-                    // ring is moving
-                    // TODO else if the ring is in motion and collides with the robot, then stop the ring
+                    // if the ring is in motion and collides with the robot, then stop the ring
+                    if (r.getControlledBy() == null) {
+                        if (collide(r, Ring.RING_RADIUS_INCHES)) {
+                            r.setVelocity(0.0, 0.0);
+                        }
+                    }
                 }
             }
         }
@@ -406,9 +410,11 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         }
     }
 
-    private void collide(VirtualGameElement r, double radiusInches) {
+    private boolean collide(VirtualGameElement r, double radiusInches) {
         Vector2D[] robotBoundary = getBoundary();
         Vector2D point = new Vector2D(r.getX(), r.getY());
+
+        boolean collision = false;
 
         double pixelsPerInch = controller.getField().getPixelsPerInch();
         for (int i = 0; i < robotBoundary.length; ++i) {
@@ -426,8 +432,11 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
                 double rx = Math.max(field.X_MIN + radius, Math.min(r.getX(), field.X_MAX - radius));
                 double ry = Math.max(field.Y_MIN + radius, Math.min(r.getY(), field.Y_MAX - radius));
                 r.setLocation(rx, ry);
+                collision = true;
             }
         }
+
+        return collision;
     }
 
     private Vector2D[] getBoundary() {

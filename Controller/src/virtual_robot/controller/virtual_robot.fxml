@@ -69,7 +69,16 @@
             </HBox>
             <HBox prefWidth="200.0">
                <children>
-                  <CheckBox fx:id="cbxShowPath" mnemonicParsing="false" onAction="#handleCbxShowPathAction" text="Show Path">
+                  <CheckBox fx:id="cbxShowPath" mnemonicParsing="false" onAction="#handleCbxShowPathAction" text="Show path">
+                     <padding>
+                        <Insets left="10.0" top="15.0" />
+                     </padding>
+                  </CheckBox>
+               </children>
+            </HBox>
+            <HBox prefWidth="200.0">
+               <children>
+                  <CheckBox fx:id="checkBoxAutoHuman" mnemonicParsing="false" onAction="#handleCheckBoxAutoHumanAction" text="Automate human player">
                      <padding>
                         <Insets left="10.0" top="15.0" />
                      </padding>
