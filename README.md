@@ -89,6 +89,11 @@ To use:
 
 LOG OF CHANGES
 
+CHANGES 12/28/2020
+    Introduced support for game elements for the Ultimate Goal game including rings and wobble goal.  Robots can
+    interact with game elements, and the human player (to return rings) is also simulated.  The BoPBot robot
+    configuration demonstrates an implementation of an intake, shooter, and wobble goal manipulator arm.
+
 CHANGES 9/20/2020
     Added Swerve robot configuration. Each of four swerve units has: a DcMotor for drive, a CR-Servo for steering,
     and a separate encoder to monitor steering (this appears as a DcMotor in the config file). A TestSwerve op mode
