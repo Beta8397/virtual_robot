@@ -66,6 +66,7 @@ public class VirtualRobotController {
     @FXML private CheckBox checkBoxGamePad2;
     @FXML private BorderPane borderPane;
     @FXML private CheckBox cbxShowPath;
+    @FXML private CheckBox checkBoxAutoHuman;
 
     //Virtual Hardware
     private HardwareMap hardwareMap = null;
@@ -493,6 +494,9 @@ public class VirtualRobotController {
             Runnable singleCycle = new Runnable() {
                 @Override
                 public void run() {
+                    if (Config.GAME.hasHumanPlayer() && Config.GAME.isHumanPlayerActive()) {
+                        Config.GAME.updateHumanPlayerState(TIMER_INTERVAL_MILLISECONDS, gameElements);
+                    }
                     for (VirtualGameElement e: gameElements) {
                         e.updateState(TIMER_INTERVAL_MILLISECONDS);
                     }
@@ -649,6 +653,11 @@ public class VirtualRobotController {
     private void handleCbxShowPathAction(ActionEvent event){
         if (pathLine == null) return;
         pathLine.setVisible(cbxShowPath.isSelected());
+    }
+
+    @FXML
+    private void handleCheckBoxAutoHumanAction(ActionEvent event){
+        Config.GAME.setHumanPlayerActive(checkBoxAutoHuman.isSelected());
     }
 
     private void updateTelemetryDisplay(){
