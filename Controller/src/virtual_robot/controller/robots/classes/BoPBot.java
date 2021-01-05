@@ -1,6 +1,7 @@
 package virtual_robot.controller.robots.classes;
 
 import com.qualcomm.hardware.bosch.BNO055IMUImpl;
+import com.qualcomm.robotcore.hardware.CRServoImpl;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorExImpl;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -207,6 +208,10 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         hardwareMap.put("intake_motor", new DcMotorExImpl(INTAKE_MOTOR_TYPE));
         hardwareMap.put("arm_motor", new DcMotorExImpl(ARM_MOTOR_TYPE));
         hardwareMap.put("hand_servo", new ServoImpl());
+        hardwareMap.put("aimServo", new ServoImpl());
+        hardwareMap.put("elevatorServo", new CRServoImpl(180));
+        hardwareMap.put("topSensor", controller.new DistanceSensorImpl());
+        hardwareMap.put("bottomSensor", controller.new DistanceSensorImpl());
     }
 
     public synchronized void updateStateAndSensors(double millis) {

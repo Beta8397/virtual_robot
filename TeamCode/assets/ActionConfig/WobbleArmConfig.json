@@ -1,0 +1,9 @@
+{
+  "WHEEL_DIAMETER":"2.25",
+  "HOLD_KP":"0.001",
+  "HOLD_KI":"0.0",
+  "HOLD_I_MAX":"0.0",
+  "HOLD_KD":"0.0",
+  "TICKS_PER_DEGREE":"1.6",
+  "INITIAL_DEGREE":"0"
+}
