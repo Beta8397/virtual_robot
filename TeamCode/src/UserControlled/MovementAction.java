@@ -1,5 +1,5 @@
 package UserControlled;
 
 public interface MovementAction {
-    void OnMove(double x, double y);
+    void Invoke(double x, double y);
 }

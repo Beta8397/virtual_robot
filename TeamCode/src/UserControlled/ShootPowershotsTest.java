@@ -51,9 +51,11 @@ public class ShootPowershotsTest extends LinearOpMode {
     ShooterSystemV1 shooter;
     WobbleGrabberV1 grabber;
 
+    Action logHeadingAction, logMotorAction;
+
     // TODO change this if you want to move in front of the powershots
     //  before shooting, or shoot from where you currently are
-    boolean useCurLocation = true;
+    boolean useCurLocation = false;
 
     @Override
     public void runOpMode() {
@@ -61,7 +63,7 @@ public class ShootPowershotsTest extends LinearOpMode {
         // also create and initialize function local variables here
 
         controller = new GamepadController(gamepad1);
-        robot = new UltimateNavigation(hardwareMap, new Location(0, 0, 0), "RobotConfig/UltimateV1.json");
+        robot = new UltimateNavigation(hardwareMap, new Location(0, 0, UltimateNavigation.NORTH), "RobotConfig/UltimateV1.json");
 
         // initialize systems
         intake = new RingIntakeSystemV1(hardwareMap);
@@ -82,6 +84,13 @@ public class ShootPowershotsTest extends LinearOpMode {
         controller.OnBPressed = () -> shootPowershot(0, useCurLocation);
         controller.OnXPressed = () -> shootPowershot(1, useCurLocation);
         controller.OnYPressed = () -> shootPowershot(2, useCurLocation);
+        controller.OnRightBumperPressed = () -> useCurLocation = !useCurLocation;
+
+        // add update functions to robot
+        logHeadingAction = robot::logHeading;
+        logMotorAction = robot::logMotorPowers;
+        robot.addUpdateAction(logHeadingAction);
+        robot.addUpdateAction(logMotorAction);
 
         while (opModeIsActive()) controller.update();
 
@@ -121,7 +130,10 @@ public class ShootPowershotsTest extends LinearOpMode {
 
         if (!fromCurLocation)
             robot.driveToLocation(toDrive, UltimateNavigation.MAX_SPEED, this);
+
+        robot.removeUpdateAction(logMotorAction);
         robot.turnToLocation(powerShotLocation, this);
+        robot.addUpdateAction(logMotorAction);
 
         // check if the shooter motor is already on or not
         if (shooter.wheelMotor.motor.getPower() == 0) {

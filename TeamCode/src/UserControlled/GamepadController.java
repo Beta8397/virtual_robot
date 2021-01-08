@@ -36,100 +36,100 @@ public class GamepadController {
     public void update() {
 
         if (OnLeftStickMove != null)
-            OnLeftStickMove.OnMove(gamepad.left_stick_x, -gamepad.left_stick_y);
+            OnLeftStickMove.Invoke(gamepad.left_stick_x, -gamepad.left_stick_y);
         if (OnRightStickMove != null)
-            OnRightStickMove.OnMove(gamepad.right_stick_x, -gamepad.right_stick_y);
+            OnRightStickMove.Invoke(gamepad.right_stick_x, -gamepad.right_stick_y);
 
         // update a
         boolean prevAHeld = aHeld;
         aHeld = gamepad.a;
         if (prevAHeld) aPressed = false;
         if (!prevAHeld && aHeld) aPressed = true;
-        if (aPressed && OnAPressed != null) OnAPressed.OnAction();
+        if (aPressed && OnAPressed != null) OnAPressed.Invoke();
 
         // update b
         boolean prevBHeld = bHeld;
         bHeld = gamepad.b;
         if (prevBHeld) bPressed = false;
         if (!prevBHeld && bHeld) bPressed = true;
-        if (bPressed && OnBPressed != null) OnBPressed.OnAction();
+        if (bPressed && OnBPressed != null) OnBPressed.Invoke();
 
         // update x
         boolean prevXHeld = xHeld;
         xHeld = gamepad.x;
         if (prevXHeld) xPressed = false;
         if (!prevXHeld && xHeld) xPressed = true;
-        if (xPressed && OnXPressed != null) OnXPressed.OnAction();
+        if (xPressed && OnXPressed != null) OnXPressed.Invoke();
 
         // update y
         boolean prevYHeld = yHeld;
         yHeld = gamepad.y;
         if (prevYHeld) yPressed = false;
         if (!prevYHeld && yHeld) yPressed = true;
-        if (yPressed && OnYPressed != null) OnYPressed.OnAction();
+        if (yPressed && OnYPressed != null) OnYPressed.Invoke();
 
         // update right bumper
         boolean prevRightBumperHeld = rightBumperHeld;
         rightBumperHeld = gamepad.right_bumper;
         if (prevRightBumperHeld) rightBumperPressed = false;
         if (!prevRightBumperHeld && rightBumperHeld) rightBumperPressed = true;
-        if (rightBumperPressed && OnRightBumperPressed != null) OnRightBumperPressed.OnAction();
+        if (rightBumperPressed && OnRightBumperPressed != null) OnRightBumperPressed.Invoke();
 
         // update left bumper
         boolean prevLeftBumperHeld = leftBumperHeld;
         leftBumperHeld = gamepad.left_bumper;
         if (prevLeftBumperHeld) leftBumperPressed = false;
         if (!prevLeftBumperHeld && leftBumperHeld) leftBumperPressed = true;
-        if (leftBumperPressed && OnLeftBumperPressed != null) OnLeftBumperPressed.OnAction();
+        if (leftBumperPressed && OnLeftBumperPressed != null) OnLeftBumperPressed.Invoke();
 
         //update right trigger
         boolean prevRightTriggerHeld = rightTriggerHeld;
         rightTriggerHeld = isTriggerHeld(gamepad.right_trigger);
         if (prevRightTriggerHeld) rightTriggerPressed = false;
         if (!prevRightTriggerHeld && rightTriggerHeld) rightTriggerPressed = true;
-        if (rightTriggerPressed && OnRightTriggerPressed != null) OnRightTriggerPressed.OnAction();
+        if (rightTriggerPressed && OnRightTriggerPressed != null) OnRightTriggerPressed.Invoke();
 
         //update left trigger
         boolean prevLeftTriggerHeld = leftTriggerHeld;
         leftTriggerHeld = isTriggerHeld(gamepad.left_trigger);
         if (prevLeftTriggerHeld) leftTriggerPressed = false;
         if (!prevLeftTriggerHeld && leftTriggerHeld) leftTriggerPressed = true;
-        if (leftTriggerPressed && OnLeftTriggerPressed != null) OnLeftTriggerPressed.OnAction();
+        if (leftTriggerPressed && OnLeftTriggerPressed != null) OnLeftTriggerPressed.Invoke();
 
         // update d pad up
         boolean prevDPadUpHeld = dpadUpHeld;
         dpadUpHeld = gamepad.dpad_up;
         if (prevDPadUpHeld) dpadUpPressed = false;
         if (!prevDPadUpHeld && dpadUpHeld) dpadUpPressed = true;
-        if (dpadUpPressed && OnDPadUpPressed != null) OnDPadUpPressed.OnAction();
+        if (dpadUpPressed && OnDPadUpPressed != null) OnDPadUpPressed.Invoke();
 
         // update d pad right
         boolean prevDPadRightHeld = dpadRightHeld;
         dpadRightHeld = gamepad.dpad_right;
         if (prevDPadRightHeld) dpadRightPressed = false;
         if (!prevDPadRightHeld && dpadRightHeld) dpadRightPressed = true;
-        if (dpadRightPressed && OnDPadRightPressed != null) OnDPadRightPressed.OnAction();
+        if (dpadRightPressed && OnDPadRightPressed != null) OnDPadRightPressed.Invoke();
 
         // update d pad down
         boolean prevDPadDownHeld = dpadDownHeld;
         dpadDownHeld = gamepad.dpad_down;
         if (prevDPadDownHeld) dpadDownPressed = false;
         if (!prevDPadDownHeld && dpadDownHeld) dpadDownPressed = true;
-        if (dpadDownPressed && OnDPadDownPressed != null) OnDPadDownPressed.OnAction();
+        if (dpadDownPressed && OnDPadDownPressed != null) OnDPadDownPressed.Invoke();
 
         // update d pad left
         boolean prevDPadLeftHeld = dpadLeftHeld;
         dpadLeftHeld = gamepad.dpad_left;
         if (prevDPadLeftHeld) dpadLeftPressed = false;
         if (!prevDPadLeftHeld && dpadLeftHeld) dpadLeftPressed = true;
-        if (dpadLeftPressed && OnDPadLeftPressed != null) OnDPadLeftPressed.OnAction();
+        if (dpadLeftPressed && OnDPadLeftPressed != null) OnDPadLeftPressed.Invoke();
 
         // update start button
         boolean prevStartHeld = startHeld;
         startHeld = gamepad.start;
         if (prevStartHeld) startPressed = false;
         if (!prevStartHeld && startHeld) startPressed = true;
-        if (startPressed && OnStartPressed != null) OnStartPressed.OnAction();
+        if (startPressed && OnStartPressed != null) OnStartPressed.Invoke();
     }
 
     public double calculateLeftStickAngle() {

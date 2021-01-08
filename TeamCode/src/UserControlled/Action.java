@@ -1,5 +1,5 @@
 package UserControlled;
 
 public interface Action {
-    void OnAction();
+    void Invoke();
 }

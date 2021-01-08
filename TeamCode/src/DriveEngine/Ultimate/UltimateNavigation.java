@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import java.io.InputStream;
-import java.util.HashMap;
+import java.util.ArrayList;
 
 import Autonomous.HeadingVector;
 import Autonomous.Location;
@@ -19,6 +19,7 @@ import MotorControllers.MotorController;
 import MotorControllers.PIDController;
 import SensorHandlers.ImuHandler;
 import SensorHandlers.LIDARSensor;
+import UserControlled.Action;
 
 /**
  * Created by Jeremy on 8/23/2017.
@@ -43,6 +44,8 @@ public class UltimateNavigation extends Thread {
 
     public PIDController headingController, turnController, cameraTranslationYController,
             cameraTranslationXController, cameraOrientationController, xPositionController, yPositionController;
+
+    private final ArrayList<Action> actions;
 
     private final Location myLocation;
     private volatile HeadingVector[] wheelVectors;
@@ -72,6 +75,7 @@ public class UltimateNavigation extends Thread {
         orientationOffset = startLocation.getHeading();
         orientation = new ImuHandler("imu", orientationOffset, hardwareMap);
         myLocation = startLocation;
+        actions = new ArrayList<>();
 
 //        distanceSensors = new LIDARSensor[3];
 //        distanceSensors[LEFT_SENSOR] = new LIDARSensor(hardwareMap.get(DistanceSensor.class, "left"), LEFT_SENSOR, "left");
@@ -96,6 +100,8 @@ public class UltimateNavigation extends Thread {
             while (shouldRun) {
                 updateData();
                 safetySleep(threadDelayMillis);
+
+                for (Action action : actions) action.Invoke();
             }
         }).start();
     }
@@ -255,7 +261,6 @@ public class UltimateNavigation extends Thread {
         myLocation.addX(deltaX);
         myLocation.addY(deltaY);
         myLocation.setHeading(orientation.getOrientation());
-        Log.d("Location", "X:" + myLocation.getX() + " Y:" + myLocation.getY() + " Heading:" + myLocation.getHeading());
     }
 
     private double restrictAngle(double angleToChange, double referenceAngle) {
@@ -298,7 +303,7 @@ public class UltimateNavigation extends Thread {
     }
 
     public void initializeUsingConfigFile(String file) {
-        InputStream stream = null;
+        InputStream stream;
         try {
             stream = ConfigFile.open(hardwareMap, file);
         }
@@ -874,7 +879,7 @@ public class UltimateNavigation extends Thread {
         return velocities;
     }
 
-    public double[] calculateTurnVelocities(double rps){
+    public double[] calculateTurnVelocities(double rps) {
         double[] velocities = new double[4];
         if (Double.isNaN(rps)) rps = 0;
         double velocity = rps*WHEEL_BASE_RADIUS*2.0* Math.PI;
@@ -889,6 +894,7 @@ public class UltimateNavigation extends Thread {
 
         return velocities;
     }
+
     public void turn(double rps) {
         double[] velocities = calculateTurnVelocities(rps);
         applyMotorVelocities(velocities);
@@ -901,70 +907,75 @@ public class UltimateNavigation extends Thread {
         return distanceFromHeading;
     }
 
-    public void turnToHeading(double desiredHeading, double tolerance, LinearOpMode mode) {
-        turnController.setSp(0);
-        double curHeading = orientation.getOrientation() % 360;
-        double rps;
-        double distanceFromHeading = desiredHeading - curHeading;
-
-        if (distanceFromHeading > 180) distanceFromHeading -= 360;
-        else if (distanceFromHeading < -180) distanceFromHeading += 360;
-
-        if ((distanceFromHeading >= 0 && distanceFromHeading <= 180) ||
-                ((distanceFromHeading <= 360 && distanceFromHeading >= 180) || distanceFromHeading < 0)) {
-            while (Math.abs(distanceFromHeading) > tolerance && mode.opModeIsActive()) {
-                //heading always positive
-                rps = turnController.calculatePID(distanceFromHeading);
-                turn(-rps);
-                //mode.sleep(5);
-                curHeading = orientation.getOrientation();
-                distanceFromHeading = desiredHeading - curHeading;
-                if (distanceFromHeading > 180) distanceFromHeading -= 360;
-                else if (distanceFromHeading < -180) distanceFromHeading += 360;
-            }
-        }
-    }
+//    public void turnToHeading(double desiredHeading, double tolerance, LinearOpMode mode) {
+//        turnController.setSp(0);
+//        double curHeading = orientation.getOrientation() % 360;
+//        double rps;
+//        double distanceFromHeading = desiredHeading - curHeading;
+//
+//        if (distanceFromHeading > 180) distanceFromHeading -= 360;
+//        else if (distanceFromHeading < -180) distanceFromHeading += 360;
+//
+//        while (Math.abs(distanceFromHeading) > tolerance && mode.opModeIsActive()) {
+//            //heading always positive
+//            rps = turnController.calculatePID(distanceFromHeading);
+//            Log.d("RPS", "" + rps);
+//            turn(-rps);
+//            mode.sleep(5);
+//            curHeading = -orientation.getOrientation() % 360;
+//
+//            Log.d("Cur Heading", "" + curHeading);
+//
+//            distanceFromHeading = desiredHeading - curHeading;
+//
+//            while (distanceFromHeading > 180)
+//                distanceFromHeading -= 360;
+//            while (distanceFromHeading < -180)
+//                distanceFromHeading += 360;
+//            Log.d("Distance from heading", "" + distanceFromHeading);
+//        }
+//    }
 
     public void turnToHeading(double desiredHeading, LinearOpMode mode) {
         turnToHeading(desiredHeading, HEADING_THRESHOLD, mode);
     }
 
-//    public void turnToHeading(double desiredHeading, double tolerance, LinearOpMode mode){
-//        turnController.setSp(0);
-//        double curHeading = orientation.getOrientation() % 360;
-//        double rps;
-//        double distanceFromHeading = 0;
-//        distanceFromHeading = desiredHeading - curHeading;
-//        if(distanceFromHeading > 180) distanceFromHeading = distanceFromHeading - 360;
-//        else if(distanceFromHeading < -180) distanceFromHeading = 360 + distanceFromHeading;
-//        if(distanceFromHeading >= 0 && distanceFromHeading <= 180){
-//            while(Math.abs(distanceFromHeading) > tolerance && mode.opModeIsActive()){
-//                //heading always positive
-//                rps = turnController.calculatePID(distanceFromHeading);
-//                turn(-rps);
-//                mode.sleep(5);
-//                curHeading = orientation.getOrientation();
-//                distanceFromHeading = desiredHeading - curHeading;
-//                if(distanceFromHeading > 180) distanceFromHeading = distanceFromHeading - 360;
-//                else if(distanceFromHeading < -180) distanceFromHeading = 360 + distanceFromHeading;
-//            }
-//            brake();
-//        }
-//
-//        else if((distanceFromHeading <= 360 && distanceFromHeading >= 180) || distanceFromHeading < 0){
-//            while(Math.abs(distanceFromHeading) > tolerance && mode.opModeIsActive()){
-//                //heading always positive
-//                rps = turnController.calculatePID(distanceFromHeading);
-//                turn(-rps);
-//                mode.sleep(5);
-//                curHeading = orientation.getOrientation();
-//                distanceFromHeading = desiredHeading - curHeading;
-//                if(distanceFromHeading > 180) distanceFromHeading = distanceFromHeading - 360;
-//                else if(distanceFromHeading < -180) distanceFromHeading = 360 + distanceFromHeading;
-//            }
-//            brake();
-//        }
-//    }
+    public void turnToHeading(double desiredHeading, double tolerance, LinearOpMode mode){
+        turnController.setSp(0);
+        double curHeading = orientation.getOrientation() % 360;
+        double rps;
+        double distanceFromHeading = 0;
+        distanceFromHeading = desiredHeading - curHeading;
+        if(distanceFromHeading > 180) distanceFromHeading = distanceFromHeading - 360;
+        else if(distanceFromHeading < -180) distanceFromHeading = 360 + distanceFromHeading;
+        if(distanceFromHeading >= 0 && distanceFromHeading <= 180){
+            while(Math.abs(distanceFromHeading) > tolerance && mode.opModeIsActive()){
+                //heading always positive
+                rps = turnController.calculatePID(distanceFromHeading);
+                turn(-rps);
+                mode.sleep(5);
+                curHeading = orientation.getOrientation();
+                distanceFromHeading = desiredHeading - curHeading;
+                if(distanceFromHeading > 180) distanceFromHeading = distanceFromHeading - 360;
+                else if(distanceFromHeading < -180) distanceFromHeading = 360 + distanceFromHeading;
+            }
+            brake();
+        }
+
+        else if((distanceFromHeading <= 360 && distanceFromHeading >= 180) || distanceFromHeading < 0){
+            while(Math.abs(distanceFromHeading) > tolerance && mode.opModeIsActive()){
+                //heading always positive
+                rps = turnController.calculatePID(distanceFromHeading);
+                turn(-rps);
+                mode.sleep(5);
+                curHeading = orientation.getOrientation();
+                distanceFromHeading = desiredHeading - curHeading;
+                if(distanceFromHeading > 180) distanceFromHeading = distanceFromHeading - 360;
+                else if(distanceFromHeading < -180) distanceFromHeading = 360 + distanceFromHeading;
+            }
+            brake();
+        }
+    }
 
     public void setDrivePower(double power) { applyMotorPowers(new double[] { power, power, power, power }); }
 
@@ -979,13 +990,17 @@ public class UltimateNavigation extends Thread {
     }
 
     public void turnToLocation(Location target, LinearOpMode mode) {
+        turnToLocation(target, HEADING_THRESHOLD, mode);
+    }
+
+    public void turnToLocation(Location target, double tolerance, LinearOpMode mode) {
         double dx = target.getX() - myLocation.getX();
         double dy = target.getY() - myLocation.getY();
         double angle = -90 - Math.toDegrees(Math.atan(-dy / Math.abs(dx)));
         if (dx > 0)
             angle *= -1;
-        turnToHeading(angle, mode);
-//        mode.telemetry.addData("Angle to turn", angle + "");
+        turnToHeading(angle, tolerance, mode);
+        Log.d("Angle to turn", angle + "");
     }
 
     public void applyMotorVelocities(double[] velocities) {
@@ -1413,4 +1428,15 @@ public class UltimateNavigation extends Thread {
         while (mode.opModeIsActive() && angleToChange > referenceAngle + 180) angleToChange -= 360;
         return angleToChange;
     }
+
+    // logging functions
+    public void logLocation() { Log.d("Location", myLocation.toString()); }
+    public void logHeading() { Log.d("Heading", "" + myLocation.getHeading()); }
+    public void logMotorPowers() {
+        Log.d("Motor Powers", String.format("%f %f %f %f",
+                driveMotors[0].getMotorPower(), driveMotors[1].getMotorPower(),
+                driveMotors[2].getMotorPower(), driveMotors[3].getMotorPower()));
+    }
+    public void addUpdateAction(Action action) { actions.add(action); }
+    public void removeUpdateAction(Action action) { actions.remove(action); }
 }
