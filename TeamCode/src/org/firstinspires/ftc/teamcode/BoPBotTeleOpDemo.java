@@ -118,11 +118,11 @@ public class BoPBotTeleOpDemo extends LinearOpMode {
             m3.setPower(p3);
             m4.setPower(p4);
 
-            if (controller.aPressed()) {
+            if (controller.aPressed) {
                 runShooterMotor = !runShooterMotor;
             }
 
-            if (controller.xPressed()) {
+            if (controller.xPressed) {
                 runIntakeMotor = !runIntakeMotor;
             }
 

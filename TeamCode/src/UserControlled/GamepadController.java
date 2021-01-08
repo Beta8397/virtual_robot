@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
  */
 public class GamepadController {
 
-    private Gamepad gamepad;
+    private final Gamepad gamepad;
 
     private static final double TRIGGER_THRESHOLD = 0.1;
 
@@ -20,7 +20,9 @@ public class GamepadController {
             OnLeftBumperPressed, OnRightTriggerPressed, OnLeftTriggerPressed, OnDPadUpPressed,
             OnDPadRightPressed, OnDPadDownPressed, OnDPadLeftPressed, OnStartPressed;
 
-    private boolean aPressed = false, aHeld = false, bPressed = false, bHeld = false,
+    public MovementAction OnLeftStickMove, OnRightStickMove;
+
+    public boolean aPressed = false, aHeld = false, bPressed = false, bHeld = false,
             xPressed = false, xHeld = false, yPressed = false, yHeld = false,
             rightBumperPressed = false, rightBumperHeld = false, leftBumperPressed = false,
             leftBumperHeld = false, rightTriggerPressed = false, rightTriggerHeld = false,
@@ -29,9 +31,14 @@ public class GamepadController {
             dpadDownPressed = false, dpadDownHeld = false, dpadLeftPressed = false,
             dpadLeftHeld = false, startPressed = false, startHeld = false;
 
-    public GamepadController(Gamepad gamepad) { this.gamepad = gamepad; update(); }
+    public GamepadController(Gamepad gamepad) { this.gamepad = gamepad; }
 
     public void update() {
+
+        if (OnLeftStickMove != null)
+            OnLeftStickMove.OnMove(gamepad.left_stick_x, -gamepad.left_stick_y);
+        if (OnRightStickMove != null)
+            OnRightStickMove.OnMove(gamepad.right_stick_x, -gamepad.right_stick_y);
 
         // update a
         boolean prevAHeld = aHeld;
@@ -125,33 +132,25 @@ public class GamepadController {
         if (startPressed && OnStartPressed != null) OnStartPressed.OnAction();
     }
 
-    // getters for all of the "pressed" and "held" values
-    public boolean aPressed() { return aPressed; }
-    public boolean aHeld() { return aHeld; }
-    public boolean bPressed() { return bPressed; }
-    public boolean bHeld() { return bHeld; }
-    public boolean xPressed() { return xPressed; }
-    public boolean xHeld() { return xHeld; }
-    public boolean yPressed() { return yPressed; }
-    public boolean yHeld() { return yHeld; }
-    public boolean rightBumperPressed() { return rightBumperPressed; }
-    public boolean rightBumperHeld() { return rightBumperHeld; }
-    public boolean leftBumperPressed() { return leftBumperPressed; }
-    public boolean leftBumperHeld() { return leftBumperHeld; }
-    public boolean rightTriggerPressed() { return rightTriggerPressed; }
-    public boolean rightTriggerHeld() { return rightTriggerHeld; }
-    public boolean leftTriggerPressed() { return leftTriggerPressed; }
-    public boolean leftTriggerHeld() { return leftTriggerHeld; }
-    public boolean dpadUpPressed() { return dpadUpPressed; }
-    public boolean dpadUpHeld() { return dpadUpHeld; }
-    public boolean dpadRightPressed() { return dpadRightPressed; }
-    public boolean dpadRightHeld() { return dpadRightHeld; }
-    public boolean dpadDownPressed() { return dpadDownPressed; }
-    public boolean dpadDownHeld() { return dpadDownHeld; }
-    public boolean dpadLeftPressed() { return dpadLeftPressed; }
-    public boolean dpadLeftHeld() { return dpadLeftHeld; }
-    public boolean startPressed() { return startPressed; }
-    public boolean startHeld() { return startHeld; }
+    public double calculateLeftStickAngle() {
+        double angle = Math.toDegrees(Math.atan2(gamepad.left_stick_x, -gamepad.left_stick_y));
+        if (Double.isNaN(angle)) return 0;
+        return angle;
+    }
+
+    public double calculateRightStickAngle() {
+        double angle = Math.toDegrees(Math.atan2(gamepad.right_stick_x, -gamepad.right_stick_y));
+        if (Double.isNaN(angle)) return 0;
+        return angle;
+    }
+
+    public double calculateLeftStickMagnitude() {
+        return Math.sqrt(Math.pow(gamepad.left_stick_x, 2) + Math.pow(gamepad.left_stick_y, 2));
+    }
+
+    public double calculateRightStickMagnitude() {
+        return Math.sqrt(Math.pow(gamepad.right_stick_x, 2) + Math.pow(gamepad.right_stick_y, 2));
+    }
 
     private boolean isTriggerHeld(double trigger) {
         return trigger > TRIGGER_THRESHOLD;

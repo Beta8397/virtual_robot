@@ -77,6 +77,7 @@ public class ShootPowershotsTest extends LinearOpMode {
         waitForStart();
 
         // add functions to the controller
+        controller.OnLeftStickMove = controller.OnRightStickMove = this::controlDrive;
         controller.OnAPressed = () -> shootAllPowershots(useCurLocation);
         controller.OnBPressed = () -> shootPowershot(0, useCurLocation);
         controller.OnXPressed = () -> shootPowershot(1, useCurLocation);
@@ -85,6 +86,12 @@ public class ShootPowershotsTest extends LinearOpMode {
         while (opModeIsActive()) controller.update();
 
         robot.stopNavigation();
+    }
+
+    private void controlDrive(double x, double y) {
+        double drivePower = controller.calculateLeftStickMagnitude();
+        double turnPower = gamepad1.right_stick_x;
+        robot.driveOnHeadingWithTurning(controller.calculateLeftStickAngle(), -drivePower, -turnPower);
     }
 
     private void shootAllPowershots(boolean fromCurLocation) {
