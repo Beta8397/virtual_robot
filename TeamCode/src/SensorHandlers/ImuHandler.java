@@ -19,7 +19,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
     A class to handle the IMU for us - it sets up the gyroscope in the REV modules for us
  */
 public class ImuHandler extends Thread {
-    private long updateDelay = 200;
+    private long updateDelay = 10;
     private long lastUpdateStart;
     private BNO055IMU imu;
     private Orientation angles = new Orientation();
@@ -37,38 +37,35 @@ public class ImuHandler extends Thread {
         orientationOffset = robotOrientationOffset;
         previousOrientation = 0;
         turnCount = 0;
-        new Thread(new Runnable(){
-            public void run(){
-                while(shouldRun) {
-                    lastUpdateStart = System.currentTimeMillis();
-                    try{
-                        updateIMU();
-                    } catch (Exception e){
-                        shouldRun = false;
-                        throw new RuntimeException(e);
-                    }
-                    long timeLeft = updateDelay - (System.currentTimeMillis() - lastUpdateStart);
-                    if(timeLeft > 0) safetySleep(timeLeft);
+        new Thread(() -> {
+            while(shouldRun) {
+                lastUpdateStart = System.currentTimeMillis();
+                try{
+                    updateIMU();
+                } catch (Exception e){
+                    shouldRun = false;
+                    throw new RuntimeException(e);
                 }
+                long timeLeft = updateDelay - (System.currentTimeMillis() - lastUpdateStart);
+                if(timeLeft > 0) safetySleep(timeLeft);
             }
         }).start();
     }
 
-    public void setOrientationOffset(double offset){
+    public void setOrientationOffset(double offset) {
         orientationOffset = offset + orientationOffset;
     }
 
-    private void safetySleep(long time){
+    private void safetySleep(long millis) {
         long start = System.currentTimeMillis();
-        while(System.currentTimeMillis() - start < time && shouldRun);
+        while(System.currentTimeMillis() - start < millis && shouldRun);
     }
 
     private void initIMU(String name, HardwareMap hardwareMap){
         final BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        BNO055IMU.CalibrationData dat = ImuCalibration.getCalibrationData();
-        parameters.calibrationData = dat;
+        parameters.calibrationData = ImuCalibration.getCalibrationData();
         parameters.loggingEnabled      = true;
         parameters.loggingTag          = "IMU";
         imu = hardwareMap.get(BNO055IMU.class, name);

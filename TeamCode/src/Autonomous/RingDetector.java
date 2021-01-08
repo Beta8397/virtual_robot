@@ -1,7 +1,5 @@
 package Autonomous;
 
-import Misc.Log;
-
 import SensorHandlers.LIDARSensor;
 
 public class RingDetector extends Thread {
@@ -22,22 +20,18 @@ public class RingDetector extends Thread {
         bottomDetected = false;
         shouldRun = true;
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while(shouldRun) {
-                    detectNumRings();
-                    Log.d("Min Bottom Distance", "" + minBottomDist);
-                    Log.d("Min Top Distance", "" + minTopDist);
-                }
-            }
+        new Thread(() -> {
+            while(shouldRun)
+                detectNumRings();
         }).start();
     }
 
     public int getNumRings() {
         shouldRun = false;
-        if (topDetected && bottomDetected) return 4;
-        if (bottomDetected) return 1;
+        if (topDetected && bottomDetected)
+            return 4;
+        if (bottomDetected)
+            return 1;
         return 0;
     }
 

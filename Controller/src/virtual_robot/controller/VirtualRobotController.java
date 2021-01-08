@@ -334,8 +334,8 @@ public class VirtualRobotController {
 
     private void setupCbxOpModes(){
         //Reflections reflections = new Reflections(VirtualRobotApplication.class.getClassLoader());
-        //Reflections reflections = new Reflections("org.firstinspires.ftc.teamcode");
-        Reflections reflections = new Reflections("Autonomous.OpModes.UltimateAuto");
+        Reflections reflections = new Reflections("");
+        //Reflections reflections = new Reflections("Autonomous.OpModes.UltimateAuto");
         Set<Class<?>> opModes = new HashSet<>();
         opModes.addAll(reflections.getTypesAnnotatedWith(TeleOp.class));
         opModes.addAll(reflections.getTypesAnnotatedWith(Autonomous.class));

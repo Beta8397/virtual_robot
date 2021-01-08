@@ -61,5 +61,5 @@ public class Location {
         return (x >= area.left && x <= area.right && y >= area.top && y <= area.bottom);
     }
 
-    public String toString() { return "X: " + x + ", Y: " + y; }
+    public String toString() { return "X: " + x + ", Y: " + y + ", Heading:" + heading; }
 }

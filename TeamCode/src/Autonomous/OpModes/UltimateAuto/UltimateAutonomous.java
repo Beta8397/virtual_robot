@@ -98,10 +98,9 @@ public class UltimateAutonomous {
     public Location getZone(int numRings) {
         if (numRings == 0)
             return RED_ZONE_ONE;
-        else if (numRings == 1)
+        if (numRings == 1)
             return RED_ZONE_TWO;
-        else
-            return RED_ZONE_THREE;
+        return RED_ZONE_THREE;
     }
 
     public void driveToZone(int numRings) {

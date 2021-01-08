@@ -33,7 +33,6 @@ public class UltimateGoal implements Game {
         ringCount = 0;
     }
 
-
     @Override
     public void initGameElement(VirtualGameElement e, int i) {
         if (e instanceof WobbleGoal && i < WOBBLE_GOAL_STARTS.length) {

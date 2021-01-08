@@ -15,11 +15,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
+import Misc.Log;
+import UserControlled.GamepadController;
+
 /**
  * Example OpMode for BoPBot. Demonstrates use of XDrive drive system, IMU, shooter system,
  * and intake system.
  */
-@TeleOp(name = "BoP Bot TeleOp", group = "XBot")
+@TeleOp(name = "BoP Bot TeleOp", group = "Linear Opmode")
 public class BoPBotTeleOpDemo extends LinearOpMode {
 
     private static final double WOBBLE_GOAL_GRAB_ANGLE_DEG = 180.0;
@@ -27,8 +30,10 @@ public class BoPBotTeleOpDemo extends LinearOpMode {
     private static final double WOBBLE_GOAL_DROP_ANGLE_DEG = 120.0;
     private static final double WOBBLE_GOAL_HOME_ANGLE_DEG = 0.0;
 
-    @SuppressWarnings("StatementWithEmptyBody")
     public void runOpMode() {
+
+        GamepadController controller = new GamepadController(gamepad1);
+
         DcMotor m1 = hardwareMap.dcMotor.get("back_left_motor");
         DcMotor m2 = hardwareMap.dcMotor.get("front_left_motor");
         DcMotor m3 = hardwareMap.dcMotor.get("front_right_motor");
@@ -87,6 +92,9 @@ public class BoPBotTeleOpDemo extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
+
+            controller.update();
+
             double px = gamepad1.left_stick_x;
             if (Math.abs(px) < 0.05) px = 0;
             double py = -gamepad1.left_stick_y;
@@ -109,18 +117,13 @@ public class BoPBotTeleOpDemo extends LinearOpMode {
             m2.setPower(p2);
             m3.setPower(p3);
             m4.setPower(p4);
-            if (gamepad1.a) {
+
+            if (controller.aPressed()) {
                 runShooterMotor = !runShooterMotor;
-                while (gamepad1.a && opModeIsActive()) {
-                    // wait for button to be released
-                }
             }
 
-            if (gamepad1.x) {
+            if (controller.xPressed()) {
                 runIntakeMotor = !runIntakeMotor;
-                while (gamepad1.x && opModeIsActive()) {
-                    // wait for button to be released
-                }
             }
 
             shooterMotor.setPower(runShooterMotor ? 1.0 : 0.0);
