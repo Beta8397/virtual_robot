@@ -11,7 +11,6 @@ import MotorControllers.PIDController;
 public class WheelMotor {
 
     public DcMotor motor;
-    private LinearOpMode mode;
     public volatile double curRPM;
     public volatile double targetRPM;
     private long prevTicks;
@@ -26,15 +25,13 @@ public class WheelMotor {
 
     private PIDController rpmController;
 
-    public WheelMotor(String name, HardwareMap hardwareMap, final LinearOpMode mode) {
+    public WheelMotor(String name, HardwareMap hardwareMap) {
         motor = hardwareMap.dcMotor.get(name);
         motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         targetRPM = 0;
         prevTime = System.nanoTime();
         prevTicks = motor.getCurrentPosition();
-
-        this.mode = mode;
     }
 
     public void setRPM(int RPM) {

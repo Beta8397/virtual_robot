@@ -2,8 +2,11 @@ package Actions.Ultimate;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import Autonomous.ConfigVariables;
 import SensorHandlers.MagneticLimitSwitch;
@@ -42,18 +45,25 @@ public class ShooterSystemV1 {
     private double pinballAngle;
     public static final double PINBALL_TURNED = 1;
     public static final double PINBALL_REST = 0;
+    
+    public DistanceSensor ringSensor;
+    private static final double RING_DETECTOR_HEIGHT = 5;
+    public int numRings;
 
     private volatile boolean shouldRun;
 
     public ShooterSystemV1(HardwareMap hardwareMap, final LinearOpMode mode) {
         aimServo = hardwareMap.servo.get("aimServo");
-        wheelMotor = new WheelMotor("shooter_motor", hardwareMap, mode);
+        wheelMotor = new WheelMotor("shooter_motor", hardwareMap);
         elevatorServo = hardwareMap.crservo.get("elevatorServo");
         //elevatorTopSwitch = new MagneticLimitSwitch(hardwareMap.digitalChannel.get("elevatorTopSwitch"));
         //elevatorBottomSwitch = new MagneticLimitSwitch(hardwareMap.digitalChannel.get("elevatorBottomSwitch"));
 
         pinballServo = hardwareMap.servo.get("shooter_servo");
-
+    
+        ringSensor = hardwareMap.get(DistanceSensor.class, "ring_sensor");
+        
+        numRings = 0;
         wheelSpinning = false;
         elevatorPosition = BOTTOM;
         pinballAngle = PINBALL_REST;
@@ -136,6 +146,8 @@ public class ShooterSystemV1 {
 //            elevatorPosition = MIDDLE;
 
         wheelMotor.updateShooterRPM();
+        
+        numRings = numRingsInHopper();
     }
 
     public double calculateRingVelocity(double xDistance, double yDistance) {
@@ -156,6 +168,11 @@ public class ShooterSystemV1 {
     }
 
     public void stop() { shouldRun = false; }
+    
+    private int numRingsInHopper() {
+        double stackHeight = RING_DETECTOR_HEIGHT - ringSensor.getDistance(DistanceUnit.INCH);
+        return (int)Math.round(stackHeight / .75);
+    }
 
     // TODO
 //    public void shootWithAdjustedAngle(Location robotLocation) {

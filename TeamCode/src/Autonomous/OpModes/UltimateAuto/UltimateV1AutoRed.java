@@ -69,6 +69,7 @@ public class UltimateV1AutoRed extends LinearOpMode {
 
         waitForStart();
 
+        robot.getIntake().dropDown();
         robot.getShooter().keepElevatorAtTop();
         robot.getShooter().shoot();
         robot.getWobbleGrabber().grabWobbleGoal();
