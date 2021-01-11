@@ -12,12 +12,22 @@ public class RingIntakeSystemV1 {
     // TODO this class should be working rn
 
     private DcMotor intakeMotor;
-    private boolean intakeOn;
-    private boolean intakeReversed;
+    private static final int OFF = 0;
+    private static final int ON = 1;
+    private static final int REVERSE = 2;
+    private static final int[][] STATE_SWITCH =   {
+            { ON, REVERSE },
+            { OFF, REVERSE },
+            { ON, OFF }
+    };
+    
+    private static final int MOTOR_POWER = 1;
+    private static final double[] POWERS = { 0, MOTOR_POWER, -MOTOR_POWER };
+    
+    private int state;
     
     private Servo intakeServo;
 
-    private static final int MOTOR_POWER = 1;
     
     private DistanceSensor ringDetector;
     private boolean ringSensed;
@@ -28,57 +38,35 @@ public class RingIntakeSystemV1 {
     
     public RingIntakeSystemV1(HardwareMap hardwareMap) {
         intakeMotor = hardwareMap.dcMotor.get("intake_motor");
-        intakeOn = false;
-        intakeReversed = false;
+        
+        state = OFF;
         
         intakeServo = hardwareMap.servo.get("intake_servo");
+        
+        ringDetector = hardwareMap.get(DistanceSensor.class, "intakeSensor");
     }
-
-    public void toggleIntakePower() {
-        // Turn intake motor on or off
-        intakeOn = !intakeOn;
-        intakeMotor.setPower((intakeOn ? MOTOR_POWER : 0) * (intakeReversed ? -MOTOR_POWER : MOTOR_POWER));
+    
+    public void update() {//call this function repeatedly
+        intakeMotor.setPower(POWERS[state]);
+        detectRingsInIntake();
+        if (numRingsTakenIn > 3)
+            intakeReverse();
     }
 
     public void toggleIntake() {
-        if(intakeOn) {
-            toggleIntakePower();
-        }
-        else {
-            intakeOn = true;
-            intakeMotor.setPower(MOTOR_POWER);
-        }
+        updateState(0);
     }
 
     public void toggleOuttake() {
-        if(intakeOn) {
-            toggleIntakePower();
-        }
-        else {
-            intakeOn = true;
-            intakeMotor.setPower(-(MOTOR_POWER));
-        }
-    }
-
-    // the following are used in auto
-    public void forwardIntake() {
-        intakeReversed = false;
-        intakeMotor.setPower(intakeOn ? MOTOR_POWER : 0);
-    }
-
-    public void reverseIntake() {
-        intakeReversed = true;
-        intakeMotor.setPower(-(intakeOn ? MOTOR_POWER : 0));
+        updateState(1);
     }
 
     public void turnOn() {
-        intakeOn = true;
-        intakeMotor.setPower(MOTOR_POWER * (intakeReversed ? -1 : 1));
+        intakeOn();
     }
 
     public void turnOff() {
-        intakeOn = false;
-        intakeMotor.setPower(0);
+        intakeOff();
     }
     
     public void dropDown() {
@@ -92,11 +80,28 @@ public class RingIntakeSystemV1 {
             ringSensed = false;
         } else if (!ringSensed && distanceToRing < RING_DETECTION_THRESHOLD) {
             ringSensed = true;
-            if (intakeReversed && intakeOn) {
+            if (state == OFF) {
                 numRingsTakenIn--;
-            } else if (intakeOn) {
+            } else if (state == ON) {
                 numRingsTakenIn++;
             }
         }
+    }
+    
+    public void updateState(int buttonPressed) {//intake on = 0; intake reverse = 1
+        state = STATE_SWITCH[state][buttonPressed];
+    }
+    
+    // the following are used in auto
+    public void intakeOn() {
+        state = ON;
+    }
+    
+    public void intakeReverse() {
+        state = REVERSE;
+    }
+    
+    public void intakeOff() {
+        state = OFF;
     }
 }

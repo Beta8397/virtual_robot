@@ -29,6 +29,8 @@ public class ShooterSystemV1 {
     public WheelMotor wheelMotor;
     private boolean wheelSpinning;
     private static final int SHOOTER_ON_RPM = 3700;
+    private static final int HIGH_GOAL_SPEED = 0;
+    private static final int POWER_SHOT_SPEED = 0;
 
     // good
     public CRServo elevatorServo;
@@ -92,6 +94,14 @@ public class ShooterSystemV1 {
     public void turnOffShooterWheel() {
         wheelSpinning = false;
         wheelMotor.setRPM(0);
+    }
+    
+    public void setPowerShotSpeed() {
+        wheelMotor.setRPM(POWER_SHOT_SPEED);
+    }
+    
+    public void setHighGoalSpeed() {
+        wheelMotor.setRPM(HIGH_GOAL_SPEED);
     }
 
     // moves the pinball servo
