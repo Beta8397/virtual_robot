@@ -9,6 +9,8 @@ import util.math.geometry.Vector2D;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.lang.Math.abs;
+
 /**
  * A intermediary class between the robot and the gamepad controls that allows all control systems to be customized.
  * <p>
@@ -154,20 +156,13 @@ public class CustomizableGamepad {
         if (button.getGamepadNumber() == 1) {
             switch ((Button.BooleanInputs) button.getInputEnum()) {
 
-                case a:
-                    return robot.gamepad1.a;
-                case b:
-                    return robot.gamepad1.b;
-                case x:
-                    return robot.gamepad1.x;
-                case y:
-                    return robot.gamepad1.y;
-                case back:
-                    return robot.gamepad1.back;
-                case start:
-                    return robot.gamepad1.start;
-                case guide:
-                    return robot.gamepad1.guide;
+                case a: return robot.gamepad1.a;
+                case b: return robot.gamepad1.b;
+                case x: return robot.gamepad1.x;
+                case y: return robot.gamepad1.y;
+                case back: return robot.gamepad1.back;
+                case start: return robot.gamepad1.start;
+                case guide: return robot.gamepad1.guide;
                 case dpad_up: return robot.gamepad1.dpad_up;
                 case dpad_down: return robot.gamepad1.dpad_down;
                 case dpad_left: return robot.gamepad1.dpad_left;
@@ -186,10 +181,10 @@ public class CustomizableGamepad {
                 case bool_right_stick_x_left: return robot.gamepad1.right_stick_x < -button.getDeadzone();
                 case bool_right_stick_x_right: return robot.gamepad1.right_stick_x > button.getDeadzone();
                 case bool_right_stick_y_down: return -robot.gamepad1.right_stick_y < -button.getDeadzone();
-                case bool_left_stick_x: return Math.abs(robot.gamepad1.left_stick_x) > button.getDeadzone();
-                case bool_left_stick_y: return Math.abs(robot.gamepad1.left_stick_y) > button.getDeadzone();
-                case bool_right_stick_x: return Math.abs(robot.gamepad1.right_stick_x) > button.getDeadzone();
-                case bool_right_stick_y: return Math.abs(robot.gamepad1.right_stick_y) > button.getDeadzone();
+                case bool_left_stick_x: return abs(robot.gamepad1.left_stick_x) > button.getDeadzone();
+                case bool_left_stick_y: return abs(robot.gamepad1.left_stick_y) > button.getDeadzone();
+                case bool_right_stick_x: return abs(robot.gamepad1.right_stick_x) > button.getDeadzone();
+                case bool_right_stick_y: return abs(robot.gamepad1.right_stick_y) > button.getDeadzone();
 
                 default:
                     return defaultReturn;
@@ -222,13 +217,13 @@ public class CustomizableGamepad {
                 case bool_right_stick_x_left: return robot.gamepad2.right_stick_x < button.getDeadzone();
                 case bool_right_stick_x_right: return robot.gamepad2.right_stick_x > button.getDeadzone();
                 case bool_right_stick_y_down: return -robot.gamepad2.right_stick_y < -button.getDeadzone();
-                case bool_left_stick_x: return Math.abs(robot.gamepad2.left_stick_x) > button.getDeadzone();
+                case bool_left_stick_x: return abs(robot.gamepad2.left_stick_x) > button.getDeadzone();
                 case bool_left_stick_y:
-                    return Math.abs(robot.gamepad2.left_stick_y) > button.getDeadzone();
+                    return abs(robot.gamepad2.left_stick_y) > button.getDeadzone();
                 case bool_right_stick_x:
-                    return Math.abs(robot.gamepad2.right_stick_x) > button.getDeadzone();
+                    return abs(robot.gamepad2.right_stick_x) > button.getDeadzone();
                 case bool_right_stick_y:
-                    return Math.abs(robot.gamepad2.right_stick_y) > button.getDeadzone();
+                    return abs(robot.gamepad2.right_stick_y) > button.getDeadzone();
 
                 default:
                     return defaultReturn;
@@ -259,32 +254,35 @@ public class CustomizableGamepad {
         if (button.getGamepadNumber() == 1) {
             switch ((Button.DoubleInputs) button.getInputEnum()) {
                 case left_stick_x:
-                    return robot.gamepad1.left_stick_x;
+                    return abs(robot.gamepad1.left_stick_x) < button.getDeadzone() ? defaultReturn : robot.gamepad1.left_stick_x;
                 case left_trigger:
-                    return robot.gamepad1.left_trigger;
+                    return abs(robot.gamepad1.left_trigger) < button.getDeadzone() ? defaultReturn : robot.gamepad1.left_trigger;
                 case left_stick_y:
-                    return -robot.gamepad1.left_stick_y;
+                    return abs(robot.gamepad1.left_stick_y) < button.getDeadzone() ? defaultReturn : -robot.gamepad1.left_stick_y;
                 case right_stick_x:
-                    return robot.gamepad1.right_stick_x;
+                    return abs(robot.gamepad1.right_stick_x) < button.getDeadzone() ? defaultReturn : robot.gamepad1.right_stick_x;
                 case right_trigger:
-                    return robot.gamepad1.right_trigger;
+                    return abs(robot.gamepad1.right_trigger) < button.getDeadzone() ? defaultReturn : robot.gamepad1.right_trigger;
                 case right_stick_y:
-                    return -robot.gamepad1.right_stick_y;
+                    return abs(robot.gamepad1.right_stick_y) < button.getDeadzone() ? defaultReturn : -robot.gamepad1.right_stick_y;
 
                 default:
                     return defaultReturn;
             }
         } else {
             switch ((Button.DoubleInputs) button.getInputEnum()) {
-                case left_stick_x: return robot.gamepad2.left_stick_x;
-                case left_trigger: return robot.gamepad2.left_trigger;
-                case left_stick_y: return -robot.gamepad2.left_stick_y;
+                case left_stick_x:
+                    return abs(robot.gamepad2.left_stick_x) < button.getDeadzone() ? defaultReturn : robot.gamepad2.left_stick_x;
+                case left_trigger:
+                    return abs(robot.gamepad2.left_trigger) < button.getDeadzone() ? defaultReturn : robot.gamepad2.left_trigger;
+                case left_stick_y:
+                    return abs(robot.gamepad2.left_stick_y) < button.getDeadzone() ? defaultReturn : -robot.gamepad2.left_stick_y;
                 case right_stick_x:
-                    return robot.gamepad2.right_stick_x;
+                    return abs(robot.gamepad2.right_stick_x) < button.getDeadzone() ? defaultReturn : robot.gamepad2.right_stick_x;
                 case right_trigger:
-                    return robot.gamepad2.right_trigger;
+                    return abs(robot.gamepad2.right_trigger) < button.getDeadzone() ? defaultReturn : robot.gamepad2.right_trigger;
                 case right_stick_y:
-                    return -robot.gamepad2.right_stick_y;
+                    return abs(robot.gamepad2.right_stick_y) < button.getDeadzone() ? defaultReturn : -robot.gamepad2.right_stick_y;
 
                 default:
                     return defaultReturn;
@@ -317,9 +315,15 @@ public class CustomizableGamepad {
         if (button.getGamepadNumber() == 1) {
             switch ((Button.VectorInputs) button.getInputEnum()) {
                 case left_stick:
-                    return new Vector2D(robot.gamepad1.left_stick_x, -robot.gamepad1.left_stick_y);
+                    return new Vector2D(
+                            abs(robot.gamepad1.left_stick_x) < button.getDeadzone() ? defaultReturn.getX() : robot.gamepad1.left_stick_x,
+                            abs(robot.gamepad1.left_stick_y) < button.getDeadzone() ?  defaultReturn.getY() : -robot.gamepad1.left_stick_y
+                    );
                 case right_stick:
-                    return new Vector2D(robot.gamepad1.right_stick_x, -robot.gamepad1.right_stick_y);
+                    return new Vector2D(
+                            abs(robot.gamepad1.right_stick_x) < button.getDeadzone() ? defaultReturn.getX() : robot.gamepad1.right_stick_x,
+                            abs(robot.gamepad1.right_stick_y) < button.getDeadzone() ? defaultReturn.getY() : -robot.gamepad1.right_stick_y
+                    );
 
                 default:
                     return defaultReturn;
@@ -327,9 +331,15 @@ public class CustomizableGamepad {
         } else {
             switch ((Button.VectorInputs) button.getInputEnum()) {
                 case left_stick:
-                    return new Vector2D(robot.gamepad2.left_stick_x, -robot.gamepad2.left_stick_y);
+                    return new Vector2D(
+                            abs(robot.gamepad2.left_stick_x) < button.getDeadzone() ? defaultReturn.getX() : robot.gamepad2.left_stick_x,
+                            abs(robot.gamepad2.left_stick_y) < button.getDeadzone() ?  defaultReturn.getY() : -robot.gamepad2.left_stick_y
+                    );
                 case right_stick:
-                    return new Vector2D(robot.gamepad2.right_stick_x, -robot.gamepad2.right_stick_y);
+                    return new Vector2D(
+                            abs(robot.gamepad2.right_stick_x) < button.getDeadzone() ? defaultReturn.getX() : robot.gamepad2.right_stick_x,
+                            abs(robot.gamepad2.right_stick_y) < button.getDeadzone() ? defaultReturn.getY() : -robot.gamepad2.right_stick_y
+                    );
 
                 default:
                     return defaultReturn;
@@ -422,22 +432,22 @@ public class CustomizableGamepad {
         T testVal = null;
         try {
             testVal = (T) Boolean.valueOf(false);
-            System.out.println(LOGGING_TAG+": boolean conversion test passed");
+            //System.out.println(LOGGING_TAG+": boolean conversion test passed");
         } catch (ClassCastException e) {
-            System.out.println(LOGGING_TAG+": boolean conversion test failed");
+            //System.out.println(LOGGING_TAG+": boolean conversion test failed");
         }
         try {
             testVal = (T) Double.valueOf(0);
-            System.out.println(LOGGING_TAG+": double conversion test passed");
+            //System.out.println(LOGGING_TAG+": double conversion test passed");
         } catch (ClassCastException e) {
-            System.out.println(LOGGING_TAG+": double conversion test failed");
+            //System.out.println(LOGGING_TAG+": double conversion test failed");
         }
         try {
             testVal = (T) new Vector2D(0,0);
-            System.out.println("HAL9001: vector conversion test passed");
+            //System.out.println(LOGGING_TAG+": vector conversion test passed");
         }
         catch (ClassCastException e) {
-            System.out.println("HAL9001: vector conversion test failed");
+            //System.out.println(LOGGING_TAG+": vector conversion test failed");
         }
         ExceptionChecker.assertNonNull(testVal, new NothingToSeeHereException("Invalid return datatype :("));
 

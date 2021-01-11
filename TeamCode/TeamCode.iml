@@ -9,5 +9,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="Controller" />
     <orderEntry type="module" module-name="HAL9001" />
+    <orderEntry type="library" name="road-runner-core-0.5.3" level="project" />
   </component>
 </module>

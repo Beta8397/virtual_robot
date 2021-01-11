@@ -1,5 +1,6 @@
 package util.math.geometry;
 
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import org.ejml.simple.SimpleMatrix;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import util.exceptions.ExceptionChecker;
@@ -173,6 +174,14 @@ public class Vector2D extends BaseEuclideanVector<Vector2D> {
      */
     public Vector3D cross(Vector2D vector) {
         return new Vector3D(0, 0, this.getX() * vector.getY() + vector.getX() * this.getY());
+    }
+
+    public Vector2d toRoadrunner() {
+        return new Vector2d(getX(),getY());
+    }
+
+    public static Vector2D fromRoadrunner(Vector2d vector) {
+        return new Vector2D(vector.getX(), vector.getY());
     }
 
     @Override

@@ -1,5 +1,6 @@
 package virtual_robot.controller.robots.classes;
 
+import com.qualcomm.hardware.bosch.BNO055IMUImpl;
 import com.qualcomm.robotcore.hardware.*;
 import com.qualcomm.robotcore.hardware.configuration.MotorType;
 import javafx.fxml.FXML;
@@ -22,7 +23,7 @@ public class TwoWheelBot extends VirtualBot {
     private final MotorType MOTOR_TYPE = MotorType.Neverest40;
     private DcMotorExImpl leftMotor = null;
     private DcMotorExImpl rightMotor = null;
-    private GyroSensorImpl gyro = null;
+    private BNO055IMUImpl imu = null;
     private VirtualRobotController.ColorSensorImpl colorSensor = null;
     private ServoImpl servo = null;
     private VirtualRobotController.DistanceSensorImpl[] distanceSensors = null;
@@ -51,7 +52,7 @@ public class TwoWheelBot extends VirtualBot {
                 hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "back_distance"),
                 hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "right_distance")
         };
-        gyro = (GyroSensorImpl)hardwareMap.gyroSensor.get("gyro_sensor");
+        imu = hardwareMap.get(BNO055IMUImpl.class, "imu");
         colorSensor = (VirtualRobotController.ColorSensorImpl)hardwareMap.colorSensor.get("color_sensor");
         servo = (ServoImpl)hardwareMap.servo.get("back_servo");
         wheelCircumference = Math.PI * botWidth / 4.5;
@@ -67,7 +68,7 @@ public class TwoWheelBot extends VirtualBot {
         hardwareMap.put("right_motor", new DcMotorExImpl(MOTOR_TYPE));
         String[] distNames = new String[]{"front_distance", "left_distance", "back_distance", "right_distance"};
         for (String name: distNames) hardwareMap.put(name, controller.new DistanceSensorImpl());
-        hardwareMap.put("gyro_sensor", new GyroSensorImpl(this, 10));
+        hardwareMap.put("imu", new BNO055IMUImpl(this, 10));
         hardwareMap.put("color_sensor", controller.new ColorSensorImpl());
         hardwareMap.put("back_servo", new ServoImpl());
     }
@@ -91,7 +92,7 @@ public class TwoWheelBot extends VirtualBot {
 
         constrainToBoundaries();
 
-        gyro.updateHeading(headingRadians * 180.0 / Math.PI);
+        imu.updateHeadingRadians(headingRadians);
         colorSensor.updateColor(x, y);
         final double piOver2 = Math.PI / 2.0;
         for (int i = 0; i<4; i++){
@@ -109,7 +110,7 @@ public class TwoWheelBot extends VirtualBot {
     public void powerDownAndReset(){
         leftMotor.stopAndReset();
         rightMotor.stopAndReset();
-        gyro.deinit();
+        imu.close();
     }
 
 

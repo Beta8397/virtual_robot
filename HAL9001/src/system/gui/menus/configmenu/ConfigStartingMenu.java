@@ -9,7 +9,6 @@ import system.gui.event.DataPacket;
 import system.gui.menus.TextSelectionMenu;
 import system.gui.viewelement.eventlistener.EntireViewButton;
 import system.gui.viewelement.eventlistener.ViewButton;
-import system.robot.subsystems.MechanumDrive;
 import util.control.Button;
 import util.exceptions.ExceptionChecker;
 import util.exceptions.HALConfigException;

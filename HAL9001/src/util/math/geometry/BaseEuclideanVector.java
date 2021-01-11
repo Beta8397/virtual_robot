@@ -79,6 +79,7 @@ public abstract class BaseEuclideanVector<V extends BaseEuclideanVector<V>> impl
     @Override
     public V normalize() {
         double norm = this.magnitude();
+        if(this.isZeroVector()) return null;
         for (int i = 0; i < components.length; i++) components[i] /= norm;
         return (V) this;
     }

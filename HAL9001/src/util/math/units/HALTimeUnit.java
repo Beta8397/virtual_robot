@@ -11,20 +11,23 @@ package util.math.units;
  * @since 1.1.0
  */
 public enum HALTimeUnit {
-    NANOSECONDS(1),
-    MILLISECONDS(1e6),
-    SECONDS(MILLISECONDS.nanoConversionFactor * 1000);
+    NANOSECONDS(1,"ns"),
+    MILLISECONDS(1e6,"ms"),
+    SECONDS(MILLISECONDS.nanoConversionFactor * 1000,"s");
 
     //The conversion factor to convert 1 unit of this time into nanoseconds.
-    private double nanoConversionFactor;
+    private final double nanoConversionFactor;
+
+    public final String abbreviation;
 
     /**
      * The constructor for HALTimeUnit.
      *
      * @param nanoConversionFactor The amount of nanoseconds in one unit of this time unit.
      */
-    HALTimeUnit(double nanoConversionFactor) {
+    HALTimeUnit(double nanoConversionFactor, String abbreviation) {
         this.nanoConversionFactor = nanoConversionFactor;
+        this.abbreviation = abbreviation;
     }
 
     /**

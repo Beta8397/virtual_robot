@@ -36,5 +36,5 @@ public class Config {
      * But if the SHIFT or ALT key is down when the control is released, the behavior will be the opposite of the
      * default behavior.
      */
-    public static final boolean HOLD_CONTROLS_BY_DEFAULT = true;
+    public static final boolean HOLD_CONTROLS_BY_DEFAULT = false;
 }
