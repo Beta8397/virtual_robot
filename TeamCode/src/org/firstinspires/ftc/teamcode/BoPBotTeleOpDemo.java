@@ -25,10 +25,10 @@ import UserControlled.GamepadController;
 @TeleOp(name = "BoP Bot TeleOp", group = "Linear Opmode")
 public class BoPBotTeleOpDemo extends LinearOpMode {
 
-    private static final double WOBBLE_GOAL_GRAB_ANGLE_DEG = 180.0;
-    private static final double WOBBLE_GOAL_CARRY_ANGLE_DEG = 155.0;
-    private static final double WOBBLE_GOAL_DROP_ANGLE_DEG = 120.0;
-    private static final double WOBBLE_GOAL_HOME_ANGLE_DEG = 0.0;
+    private static final double WOBBLE_GOAL_GRAB_ANGLE = 180.0;
+    private static final double WOBBLE_GOAL_CARRY_ANGLE = 155.0;
+    private static final double WOBBLE_GOAL_DROP_ANGLE = 120.0;
+    private static final double WOBBLE_GOAL_HOME_ANGLE = 0.0;
 
     public void runOpMode() {
 
@@ -134,16 +134,16 @@ public class BoPBotTeleOpDemo extends LinearOpMode {
             Double armPositionDeg = null;
 
             if (gamepad1.dpad_down) { // grab position
-                armPositionDeg = WOBBLE_GOAL_GRAB_ANGLE_DEG;
+                armPositionDeg = WOBBLE_GOAL_GRAB_ANGLE;
             }
             else if (gamepad1.dpad_right) { // carry position
-                armPositionDeg = WOBBLE_GOAL_CARRY_ANGLE_DEG;
+                armPositionDeg = WOBBLE_GOAL_CARRY_ANGLE;
             }
             else if (gamepad1.dpad_up) { // drop position
-                armPositionDeg = WOBBLE_GOAL_DROP_ANGLE_DEG;
+                armPositionDeg = WOBBLE_GOAL_DROP_ANGLE;
             }
             else if (gamepad1.dpad_left) { // home position
-                armPositionDeg = WOBBLE_GOAL_HOME_ANGLE_DEG;
+                armPositionDeg = WOBBLE_GOAL_HOME_ANGLE;
             }
 
             if (armPositionDeg != null) {
