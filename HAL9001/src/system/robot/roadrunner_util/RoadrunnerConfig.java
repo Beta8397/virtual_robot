@@ -1,9 +1,20 @@
 package system.robot.roadrunner_util;
 
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import org.jetbrains.annotations.NotNull;
 import system.robot.subsystems.drivetrain.DriveConfig;
 import util.math.units.*;
 
+/**
+ * A data class used to store roadrunner configuration options.
+ * <p>
+ * Creation Date: 1/5/21
+ *
+ * @author Roadrunner Quickstart; Cole Savage, Level Up
+ * @version 1.0.0
+ * @see DriveConfig
+ * @since 1.1.1
+ */
 public class RoadrunnerConfig extends DriveConfig {
 
     /*
@@ -39,11 +50,27 @@ public class RoadrunnerConfig extends DriveConfig {
     public double MAX_ANG_VEL;
     public double MAX_ANG_ACCEL;
 
+    /*
+     * Tolerance and timeout values for trajectory followers.
+     */
     public double FOLLOWER_X_TOLERANCE = 0.5;
     public double FOLLOWER_Y_TOLERANCE = 0.5;
     public double FOLLOWER_HEADING_TOLERANCE = Math.toRadians(5.0);
     public double FOLLOWER_TIMEOUT = 0.5;
 
+    /**
+     * The constructor for RoadrunnerConfig.
+     *
+     * @param wheelRadius The radius of the drivetrain's wheels.
+     * @param wheelRadiusUnit The unit for the wheelRadius parameter.
+     * @param gearRatio The gear ratio between the motors and the drivetrain wheels.
+     * @param trackWidth The track width of the robot.
+     * @param trackWidthUnit The unit for the trackWidth parameter.
+     * @param wheelBase The wheel base of the robot.
+     * @param wheelBaseUnit The unit for the wheelBase parameter.
+     * @param motorTicksPerRevolution The number of encoder ticks per revolution of the drivetrain motors.
+     * @param motorMaxRPM The maximum RPM of the drivetrain motors.
+     */
     public RoadrunnerConfig(double wheelRadius, HALDistanceUnit wheelRadiusUnit, double gearRatio, double trackWidth, HALDistanceUnit trackWidthUnit, double wheelBase, HALDistanceUnit wheelBaseUnit, double motorTicksPerRevolution, double motorMaxRPM) {
         super(wheelRadius, wheelRadiusUnit, gearRatio, trackWidth, trackWidthUnit, wheelBase, wheelBaseUnit, motorTicksPerRevolution, motorMaxRPM);
         USE_DRIVE_ENCODERS = true;
@@ -59,96 +86,232 @@ public class RoadrunnerConfig extends DriveConfig {
         MAX_ANG_ACCEL = Math.toRadians(180);
     }
 
+    /**
+     * The constructor for RoadrunnerConfig.
+     *
+     * @param wheelRadiusInches The radius of the drivetrain's wheels in inches.
+     * @param gearRatio The gear ratio between the motors and the drivetrain wheels.
+     * @param trackWidthInches The track width of the robot in inches.
+     * @param wheelBaseInches The wheel base of the robot in inches.
+     * @param motorTicksPerRevolution The number of encoder ticks per revolution of the drivetrain motors.
+     * @param motorMaxRPM The maximum RPM of the drivetrain motors.
+     */
     public RoadrunnerConfig(double wheelRadiusInches, double gearRatio, double trackWidthInches, double wheelBaseInches, double motorTicksPerRevolution, double motorMaxRPM) {
         this(wheelRadiusInches, HALDistanceUnit.INCHES, gearRatio, trackWidthInches, HALDistanceUnit.INCHES, wheelBaseInches, HALDistanceUnit.INCHES, motorTicksPerRevolution, motorMaxRPM);
     }
 
+    /**
+     * The constructor for RoadrunnerConfig.
+     *
+     * @param wheelRadiusInches The radius of the drivetrain's wheels in inches.
+     * @param gearRatio The gear ratio between the motors and the drivetrain wheels.
+     * @param trackWidthInches The track width of the robot in inches.
+     * @param motorTicksPerRevolution The number of encoder ticks per revolution of the drivetrain motors.
+     * @param motorMaxRPM The maximum RPM of the drivetrain motors.
+     */
     public RoadrunnerConfig(double wheelRadiusInches, double gearRatio, double trackWidthInches, double motorTicksPerRevolution, double motorMaxRPM) {
         this(wheelRadiusInches, gearRatio, trackWidthInches, trackWidthInches, motorTicksPerRevolution, motorMaxRPM);
     }
 
+    /**
+     * Whether or not the drivetrain is using drive encoders in its localizer.
+     *
+     * @param useDriveEncoders Whether or not the drivetrain is using drive encoders in its localizer.
+     * @return This data object.
+     */
     public RoadrunnerConfig useDriveEncoders(boolean useDriveEncoders) {
         USE_DRIVE_ENCODERS = useDriveEncoders;
         return this;
     }
 
+    /**
+     * Sets the motor velocity PID coefficients.
+     *
+     * @param motorVelocityPIDCoefficients The motor velocity PID coefficients.
+     * @return This data object.
+     */
     public RoadrunnerConfig setMotorVelocityPID(PIDFCoefficients motorVelocityPIDCoefficients) {
         MOTOR_VELO_PID = motorVelocityPIDCoefficients;
         return this;
     }
 
+    /**
+     * Sets the kV value used to model motor behavior.
+     *
+     * @param kV The kV value used to model motor behavior.
+     * @return This data object.
+     */
     public RoadrunnerConfig setKV(double kV) {
         this.kV = kV;
         return this;
     }
 
+    /**
+     * Sets the kA value used to model motor behavior.
+     *
+     * @param kA The kA value used to model motor behavior.
+     * @return This data object.
+     */
     public RoadrunnerConfig setKA(double kA) {
         this.kA = kA;
         return this;
     }
 
+    /**
+     * Sets the kStatic value used to model motor behavior.
+     *
+     * @param kStatic The kStatic value used to model motor behavior.
+     * @return This data object.
+     */
     public RoadrunnerConfig setKStatic(double kStatic) {
         this.kStatic = kStatic;
         return this;
     }
 
+    /**
+     * Sets the maximum velocity the drivetrain can have while following roadrunner trajectories.
+     *
+     * @param maxVelocity The maximum velocity the drivetrain can have while following roadrunner trajectories.
+     * @param velocityUnit The units of the maximum velocity.
+     * @return This data object.
+     */
     public RoadrunnerConfig setMaxVelocity(double maxVelocity, HALVelocityUnit velocityUnit) {
         MAX_VEL = HALVelocityUnit.convert(maxVelocity, velocityUnit, HALVelocityUnit.INCHES_PER_SECOND);
         return this;
     }
 
+    /**
+     * Sets the maximum acceleration the drivetrain can have while following roadrunner trajectories.
+     *
+     * @param maxAcceleration The maximum acceleration the drivetrain can have while following roadrunner trajectories.
+     * @param accelerationUnit The units of the maximum acceleration.
+     * @return This data object.
+     */
     public RoadrunnerConfig setMaxAcceleration(double maxAcceleration, HALAccelerationUnit accelerationUnit) {
         MAX_ACCEL = HALAccelerationUnit.convert(maxAcceleration,accelerationUnit,HALAccelerationUnit.INCHES_PER_SECOND_SQUARED);
         return this;
     }
 
+    /**
+     * Sets the maximum angular velocity the drivetrain can have while following roadrunner trajectories.
+     *
+     * @param maxAngularVelocity The maximum angular velocity the drivetrain can have while following roadrunner trajectories.
+     * @param angularVelocityUnit The units of the maximum angular velocity.
+     * @return This data object.
+     */
     public RoadrunnerConfig setMaxAngularVelocity(double maxAngularVelocity, HALAngularVelocityUnit angularVelocityUnit) {
         MAX_ANG_VEL = HALAngularVelocityUnit.convert(maxAngularVelocity,angularVelocityUnit,HALAngularVelocityUnit.RADIANS_PER_SECOND);
         return this;
     }
 
+    /**
+     * Sets the maximum angular acceleration the drivetrain can have while following roadrunner trajectories.
+     *
+     * @param maxAngularAcceleration The maximum angular acceleration the drivetrain can have while following roadrunner trajectories.
+     * @param angularAccelerationUnit The units of the maximum angular acceleration.
+     * @return This data object.
+     */
     public RoadrunnerConfig setMaxAngularAcceleration(double maxAngularAcceleration, HALAngularAccelerationUnit angularAccelerationUnit) {
         MAX_ANG_ACCEL = HALAngularAccelerationUnit.convert(maxAngularAcceleration,angularAccelerationUnit,HALAngularAccelerationUnit.RADIANS_PER_SECOND_SQUARED);
         return this;
     }
 
+    /**
+     * Sets the trajectory follower X position tolerance.
+     *
+     * @param xTolerance The trajectory follower X position tolerance.
+     * @param toleranceUnit The units of the trajectory follower's x position tolerance.
+     * @return This data object.
+     */
     public RoadrunnerConfig setFollowerXTolerance(double xTolerance, HALDistanceUnit toleranceUnit) {
         FOLLOWER_X_TOLERANCE = HALDistanceUnit.convert(xTolerance, toleranceUnit, HALDistanceUnit.INCHES);
         return this;
     }
 
+    /**
+     * Sets the trajectory follower X position tolerance.
+     *
+     * @param xToleranceInches The trajectory follower X position tolerance in inches.
+     * @return This data object.
+     */
     public RoadrunnerConfig setFollowerXTolerance(double xToleranceInches) {
-        setFollowerXTolerance(xToleranceInches, HALDistanceUnit.INCHES);
-        return this;
+        return setFollowerXTolerance(xToleranceInches, HALDistanceUnit.INCHES);
     }
 
+    /**
+     * Sets the trajectory follower Y position tolerance.
+     *
+     * @param yTolerance The trajectory follower Y position tolerance.
+     * @param toleranceUnit The units of the trajectory follower's Y position tolerance.
+     * @return This data object.
+     */
     public RoadrunnerConfig setFollowerYTolerance(double yTolerance, HALDistanceUnit toleranceUnit) {
         FOLLOWER_Y_TOLERANCE = HALDistanceUnit.convert(yTolerance, toleranceUnit, HALDistanceUnit.INCHES);
         return this;
     }
 
+    /**
+     * Sets the trajectory follower Y position tolerance.
+     *
+     * @param yToleranceInches The trajectory follower Y position tolerance in inches.
+     * @return This data object.
+     */
     public RoadrunnerConfig setFollowerYTolerance(double yToleranceInches) {
-        setFollowerYTolerance(yToleranceInches, HALDistanceUnit.INCHES);
-        return this;
+        return setFollowerYTolerance(yToleranceInches, HALDistanceUnit.INCHES);
     }
 
-    public RoadrunnerConfig setFollowerHeadingTolerance(double headingTolerance, HALAngleUnit angleUnit) {
+    /**
+     * Sets the trajectory follower heading tolerance.
+     *
+     * @param headingTolerance The heading tolerance.
+     * @param angleUnit The units of the trajectory follower's heading tolerance.
+     * @return This data object.
+     */
+    public RoadrunnerConfig setFollowerHeadingTolerance(double headingTolerance, @NotNull HALAngleUnit angleUnit) {
         FOLLOWER_HEADING_TOLERANCE = angleUnit.convertTo(HALAngleUnit.RADIANS).apply(headingTolerance);
         return this;
     }
 
+    /**
+     * Sets the trajectory follower heading tolerance.
+     *
+     * @param headingToleranceRadians The heading tolerance in radians.
+     * @return This data object.
+     */
     public RoadrunnerConfig setFollowerHeadingTolerance(double headingToleranceRadians) {
-        setFollowerHeadingTolerance(headingToleranceRadians, HALAngleUnit.RADIANS);
+        return setFollowerHeadingTolerance(headingToleranceRadians, HALAngleUnit.RADIANS);
+    }
+
+    /**
+     * Sets the trajectory follower's timeout value.
+     *
+     * @param timeout The trajectory follower's timeout value.
+     * @param timeUnit The units of the trajectory follower's timeout value.
+     * @return This data object.
+     */
+    public RoadrunnerConfig setFollowerTimeout(double timeout, HALTimeUnit timeUnit) {
+        FOLLOWER_TIMEOUT = HALTimeUnit.convert(timeout, timeUnit, HALTimeUnit.SECONDS);
         return this;
     }
 
-    public RoadrunnerConfig setFollowerTimeout(double timeout) {
-        FOLLOWER_TIMEOUT = timeout;
-        return this;
+    /**
+     * Sets the trajectory follower's timeout value.
+     *
+     * @param timeoutSeconds The trajectory follower's timeout value in seconds.
+     * @return This data object.
+     */
+    public RoadrunnerConfig setFollowerTimeout(double timeoutSeconds) {
+        return setFollowerTimeout(timeoutSeconds, HALTimeUnit.SECONDS);
     }
 
+    /**
+     * Calculates the motor velocity kF value given the motor's maximum number of ticks per second.
+     * Calculation from <a href="https://docs.google.com/document/d/1tyWrXDfMidwYyP_5H4mZyVgaEswhOC35gvdmP-V-5hA/edit#heading=h.61g9ixenznbx">this</a> document.
+     *
+     * @param ticksPerSecond The motor's maximum number of ticks per second
+     * @return The motor's calculated velocity kF value.
+     */
     public static double getMotorVelocityF(double ticksPerSecond) {
-        // see https://docs.google.com/document/d/1tyWrXDfMidwYyP_5H4mZyVgaEswhOC35gvdmP-V-5hA/edit#heading=h.61g9ixenznbx
         return 32767 / ticksPerSecond;
     }
 }

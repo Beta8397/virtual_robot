@@ -7,6 +7,7 @@ import system.robot.BaseAutonomous;
 import system.robot.roadrunner_util.HALTrajectory;
 import system.robot.MainRobot;
 import util.math.geometry.Point2D;
+import util.math.units.HALDistanceUnit;
 
 import static java.lang.Math.PI;
 
@@ -18,7 +19,7 @@ public class ExampleAuto extends BaseAutonomous {
     @Override
     public void main() {
         HALTrajectory forward = robot.drive.trajectoryBuilder(new Pose2d())
-                .splineTo(new Point2D(30,30),0)
+                .splineTo(new Point2D(24,24),0)
                 .build();
         
         robot.drive.followTrajectory(forward);

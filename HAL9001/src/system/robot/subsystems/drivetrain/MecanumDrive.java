@@ -15,7 +15,6 @@ import com.acmerobotics.roadrunner.util.NanoClock;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 import org.jetbrains.annotations.NotNull;
 import system.config.AutonomousConfig;
@@ -27,6 +26,8 @@ import system.robot.roadrunner_util.HALTrajectory;
 import system.robot.roadrunner_util.HALTrajectoryBuilder;
 import system.robot.roadrunner_util.RoadrunnerConfig;
 import util.control.Button;
+import util.math.units.HALAngleUnit;
+import util.math.units.HALDistanceUnit;
 import util.math.units.HALTimeUnit;
 import util.misc.Timer;
 
@@ -35,19 +36,49 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * A built-in HAL mecanum drive subsystem. Has roadrunner compatibility.
+ * <p>
+ * Creation Date: 1/5/21
+ *
+ * @author Cole Savage, Level Up
+ * @version 1.0.0
+ * @see MecanumDriveSimple
+ * @see XDriveSimple
+ * @see XDrive
+ * @see HolonomicDrivetrain
+ * @see Drivetrain
+ * @see com.acmerobotics.roadrunner.drive.MecanumDrive
+ * @since 1.1.1
+ */
 public class MecanumDrive extends MecanumDriveSimple {
-
+    //The roadrunner configuration settings and drivetrain hardware constraints.
     private final RoadrunnerConfig rrConfig;
+    //The roadrunner drivetrain class that this class acts as a partial wrapper for. Used for interfacing with roadrunner.
     private final SimpleMecanumDriveRoadrunnerController rrInterface;
-
+    //The number of poses that the drivetrain can store in its pose history.
     private int POSE_HISTORY_LIMIT = 100;
 
+    /**
+     * The current mode of the roadrunner interface class.
+     */
     private enum Mode {
         IDLE,
         TURN,
         FOLLOW_TRAJECTORY
     }
 
+    /**
+     * The constructor for MecanumDrive.
+     *
+     * @param robot The robot using this drivetrain.
+     * @param rrConfig The roadrunner config settings and drivetrain hardware constraints.
+     * @param topLeft The top left motor config name.
+     * @param topRight The top right motor config name.
+     * @param botLeft The bottom left motor config name.
+     * @param botRight The bottom right motor config name.
+     * @param useConfig Whether or not the drivetrain uses the HAL config system.
+     */
     public MecanumDrive(Robot robot, RoadrunnerConfig rrConfig, String topLeft, String topRight, String botLeft, String botRight, boolean useConfig) {
         super(robot, rrConfig, topLeft, topRight, botLeft, botRight, useConfig);
 
@@ -57,75 +88,269 @@ public class MecanumDrive extends MecanumDriveSimple {
         rrInterface.setLocalizer(localizer);
     }
 
+    /**
+     * The constructor for MecanumDrive.
+     *
+     * @param robot The robot using this drivetrain.
+     * @param rrConfig The roadrunner config settings and drivetrain hardware constraints.
+     * @param topLeft The top left motor config name.
+     * @param topRight The top right motor config name.
+     * @param botLeft The bottom left motor config name.
+     * @param botRight The bottom right motor config name.
+     */
     public MecanumDrive(Robot robot, RoadrunnerConfig rrConfig, String topLeft, String topRight, String botLeft, String botRight) {
         this(robot, rrConfig, topLeft, topRight, botLeft, botRight, true);
     }
 
+    /**
+     * Uses roadrunner to turn to an angle asynchronously.
+     *
+     * @param angle The angle to turn to.
+     */
     public void turnAsync(double angle) {
         rrInterface.turnAsync(angle);
     }
 
+    /**
+     * Uses roadrunner to turn to an angle asynchronously.
+     *
+     * @param angle The angle to turn to.
+     * @param angleUnit The unit of the angle.
+     */
+    public void turnAsync(double angle, @NotNull HALAngleUnit angleUnit) {
+        turnAsync(angleUnit.convertTo(HALAngleUnit.RADIANS).apply(angle));
+    }
+
+    /**
+     * Uses roadrunner to turn to an angle.
+     *
+     * @param angle The angle to turn to.
+     */
     public void turn(double angle) {
         rrInterface.turn(angle);
     }
 
-    public void followTrajectoryAsync(HALTrajectory trajectory) {
+    /**
+     * Uses roadrunner to turn to an angle.
+     *
+     * @param angle The angle to turn to.
+     * @param angleUnit The unit of the angle.
+     */
+    public void turn(double angle, @NotNull HALAngleUnit angleUnit) {
+        turn(angleUnit.convertTo(HALAngleUnit.RADIANS).apply(angle));
+    }
+
+    /**
+     * Uses roadrunner to follow a trajectory asynchronously.
+     *
+     * @param trajectory The trajectory to follow.
+     */
+    public void followTrajectoryAsync(@NotNull HALTrajectory trajectory) {
         rrInterface.followTrajectoryAsync(trajectory.toRoadrunner());
     }
 
-    public void followTrajectory(HALTrajectory trajectory) {
+    /**
+     * Uses roadrunner to follow a trajectory.
+     *
+     * @param trajectory The trajectory to follow.
+     */
+    public void followTrajectory(@NotNull HALTrajectory trajectory) {
         rrInterface.followTrajectory(trajectory.toRoadrunner());
     }
 
-    public Pose2d getLastError() {
-        return rrInterface.getLastError();
-    }
-
-    public HALTrajectoryBuilder trajectoryBuilder(Pose2d startPose) {
+    /**
+     * Generates a trajectory builder that is used to create trajectories.
+     *
+     * @param startPose The drivetrain's starting pose.
+     * @param distanceUnit The units of the drivetrain's starting x and y coordinates.
+     * @param angleUnit The units of the drivetrain's starting heading.
+     * @return A trajectory builder that is used to create trajectories.
+     */
+    public HALTrajectoryBuilder trajectoryBuilder(@NotNull Pose2d startPose, HALDistanceUnit distanceUnit, @NotNull HALAngleUnit angleUnit) {
         return new HALTrajectoryBuilder(
                 new TrajectoryBuilder(
-                        coordinateMode.convertTo(CoordinateMode.ROADRUNNER).apply(startPose),
+                        coordinateMode.convertTo(CoordinateMode.ROADRUNNER).apply(new Pose2d(
+                                HALDistanceUnit.convert(startPose.getX(), distanceUnit, HALDistanceUnit.INCHES),
+                                HALDistanceUnit.convert(startPose.getY(), distanceUnit, HALDistanceUnit.INCHES),
+                                angleUnit.convertTo(HALAngleUnit.RADIANS).apply(startPose.getHeading())
+                        )),
                         rrInterface.velConstraint,
                         rrInterface.accelConstraint
-                ), coordinateMode
+                ), coordinateMode, distanceUnit, angleUnit
         );
     }
 
-    public HALTrajectoryBuilder trajectoryBuilder(Pose2d startPose, boolean reversed) {
+    /**
+     * Generates a trajectory builder that is used to create trajectories.
+     *
+     * @param startPose The drivetrain's starting pose.
+     * @param distanceUnit The units of the drivetrain's starting x and y coordinates.
+     * @return A trajectory builder that is used to create trajectories.
+     */
+    public HALTrajectoryBuilder trajectoryBuilder(@NotNull Pose2d startPose, HALDistanceUnit distanceUnit) {
+        return trajectoryBuilder(startPose, distanceUnit, HALAngleUnit.RADIANS);
+    }
 
+    /**
+     * Generates a trajectory builder that is used to create trajectories.
+     *
+     * @param startPose The drivetrain's starting pose.
+     * @param angleUnit The units of the drivetrain's starting heading.
+     * @return A trajectory builder that is used to create trajectories.
+     */
+    public HALTrajectoryBuilder trajectoryBuilder(@NotNull Pose2d startPose, HALAngleUnit angleUnit) {
+        return trajectoryBuilder(startPose, HALDistanceUnit.INCHES, angleUnit);
+    }
+
+    /**
+     * Generates a trajectory builder that is used to create trajectories.
+     *
+     * @param startPose The drivetrain's starting pose.
+     * @return A trajectory builder that is used to create trajectories.
+     */
+    public HALTrajectoryBuilder trajectoryBuilder(Pose2d startPose) {
+        return trajectoryBuilder(startPose, HALDistanceUnit.INCHES, HALAngleUnit.RADIANS);
+    }
+
+    /**
+     * Generates a trajectory builder that is used to create trajectories.
+     *
+     * @param startPose The drivetrain's starting pose.
+     * @param distanceUnit The units of the drivetrain's starting x and y coordinates.
+     * @param angleUnit The units of the drivetrain's starting heading.
+     * @param reversed Whether the trajectory is reversed.
+     * @return A trajectory builder that is used to create trajectories.
+     */
+    public HALTrajectoryBuilder trajectoryBuilder(@NotNull Pose2d startPose, HALDistanceUnit distanceUnit, @NotNull HALAngleUnit angleUnit, boolean reversed) {
         return new HALTrajectoryBuilder(
                 new TrajectoryBuilder(
-                        coordinateMode.convertTo(CoordinateMode.ROADRUNNER).apply(startPose),
+                        coordinateMode.convertTo(CoordinateMode.ROADRUNNER).apply(new Pose2d(
+                                HALDistanceUnit.convert(startPose.getX(), distanceUnit, HALDistanceUnit.INCHES),
+                                HALDistanceUnit.convert(startPose.getY(), distanceUnit, HALDistanceUnit.INCHES),
+                                angleUnit.convertTo(HALAngleUnit.RADIANS).apply(startPose.getHeading())
+                        )),
                         reversed,
                         rrInterface.velConstraint,
                         rrInterface.accelConstraint
-                ), coordinateMode
+                ), coordinateMode, distanceUnit, angleUnit
         );
     }
 
-    public HALTrajectoryBuilder trajectoryBuilder(Pose2d startPose, double startHeading) {
+    /**
+     * Generates a trajectory builder that is used to create trajectories.
+     *
+     * @param startPose The drivetrain's starting pose.
+     * @param distanceUnit The units of the drivetrain's starting x and y coordinates.
+     * @param reversed Whether the trajectory is reversed.
+     * @return A trajectory builder that is used to create trajectories.
+     */
+    public HALTrajectoryBuilder trajectoryBuilder(Pose2d startPose, HALDistanceUnit distanceUnit, boolean reversed) {
+        return trajectoryBuilder(startPose, distanceUnit, HALAngleUnit.RADIANS, reversed);
+    }
+
+    /**
+     * Generates a trajectory builder that is used to create trajectories.
+     *
+     * @param startPose The drivetrain's starting pose.
+     * @param angleUnit The units of the drivetrain's starting heading.
+     * @param reversed Whether the trajectory is reversed.
+     * @return A trajectory builder that is used to create trajectories.
+     */
+    public HALTrajectoryBuilder trajectoryBuilder(Pose2d startPose, HALAngleUnit angleUnit, boolean reversed) {
+        return trajectoryBuilder(startPose, HALDistanceUnit.INCHES, angleUnit, reversed);
+    }
+
+    /**
+     * Generates a trajectory builder that is used to create trajectories.
+     *
+     * @param startPose The drivetrain's starting pose.
+     * @param reversed Whether the trajectory is reversed.
+     * @return A trajectory builder that is used to create trajectories.
+     */
+    public HALTrajectoryBuilder trajectoryBuilder(Pose2d startPose, boolean reversed) {
+        return trajectoryBuilder(startPose, HALDistanceUnit.INCHES, HALAngleUnit.RADIANS, reversed);
+    }
+
+    /**
+     * Generates a trajectory builder that is used to create trajectories.
+     *
+     * @param startPose The drivetrain's starting pose.
+     * @param startTangent The path's starting heading.
+     * @param distanceUnit The units of the drivetrain's starting x and y coordinates.
+     * @param angleUnit The units of the drivetrain's starting heading and starting path tangent.
+     * @return A trajectory builder that is used to create trajectories.
+     */
+    public HALTrajectoryBuilder trajectoryBuilder(@NotNull Pose2d startPose, double startTangent, HALDistanceUnit distanceUnit, @NotNull HALAngleUnit angleUnit) {
         return new HALTrajectoryBuilder(
                 new TrajectoryBuilder(
-                        coordinateMode.convertTo(CoordinateMode.ROADRUNNER).apply(startPose),
-                        startHeading,
+                        coordinateMode.convertTo(CoordinateMode.ROADRUNNER).apply(new Pose2d(
+                                HALDistanceUnit.convert(startPose.getX(), distanceUnit, HALDistanceUnit.INCHES),
+                                HALDistanceUnit.convert(startPose.getY(), distanceUnit, HALDistanceUnit.INCHES),
+                                angleUnit.convertTo(HALAngleUnit.RADIANS).apply(startPose.getHeading())
+                        )),
+                        angleUnit.convertTo(HALAngleUnit.RADIANS).apply(startTangent),
                         rrInterface.velConstraint,
                         rrInterface.accelConstraint
-                ), coordinateMode
+                ), coordinateMode, distanceUnit, angleUnit
         );
     }
 
+    /**
+     * Generates a trajectory builder that is used to create trajectories.
+     *
+     * @param startPose The drivetrain's starting pose.
+     * @param startTangent The path's starting heading.
+     * @param distanceUnit The units of the drivetrain's starting x and y coordinates.
+     * @return A trajectory builder that is used to create trajectories.
+     */
+    public HALTrajectoryBuilder trajectoryBuilder(Pose2d startPose, double startTangent, HALDistanceUnit distanceUnit) {
+        return trajectoryBuilder(startPose, startTangent, distanceUnit, HALAngleUnit.RADIANS);
+    }
+
+    /**
+     * Generates a trajectory builder that is used to create trajectories.
+     *
+     * @param startPose The drivetrain's starting pose.
+     * @param startTangent The path's starting heading.
+     * @param angleUnit The units of the drivetrain's starting heading and starting path tangent.
+     * @return A trajectory builder that is used to create trajectories.
+     */
+    public HALTrajectoryBuilder trajectoryBuilder(Pose2d startPose, double startTangent, HALAngleUnit angleUnit) {
+        return trajectoryBuilder(startPose, startTangent, HALDistanceUnit.INCHES, angleUnit);
+    }
+
+    /**
+     * Generates a trajectory builder that is used to create trajectories.
+     *
+     * @param startPose The drivetrain's starting pose.
+     * @param startTangent The path's starting heading.
+     * @return A trajectory builder that is used to create trajectories.
+     */
+    public HALTrajectoryBuilder trajectoryBuilder(Pose2d startPose, double startTangent) {
+        return trajectoryBuilder(startPose, startTangent, HALDistanceUnit.INCHES, HALAngleUnit.RADIANS);
+    }
+
+    /**
+     * Waits for the roadrunner interface to enter an idle state.
+     */
     public void waitForRRInterfaceIdle() {
         rrInterface.waitForIdle();
     }
 
+    /**
+     * Gets whether the roadrunner interface is currently busy.
+     *
+     * @return Whether the roadrunner interface is currently busy.
+     */
     public boolean rRInterfaceIsBusy() {
         return rrInterface.isBusy();
     }
 
-    public void setMotorPIDFCoefficients(DcMotor.RunMode runMode, PIDFCoefficients pidfCoefficients) {
-        rrInterface.setPIDFCoefficients(runMode, pidfCoefficients);
-    }
-
+    /**
+     * Sets the drivetrain's pose history limit.
+     *
+     * @param poseHistoryLimit The drivetrain's pose history limit.
+     */
     public void setPoseHistoryLimit(int poseHistoryLimit) {
         POSE_HISTORY_LIMIT = poseHistoryLimit;
     }
@@ -133,12 +358,6 @@ public class MecanumDrive extends MecanumDriveSimple {
     @Override
     public void setLocalizer(Localizer localizer, CoordinateMode coordinateMode) {
         super.setLocalizer(localizer, coordinateMode);
-        rrInterface.setLocalizer(localizer);
-    }
-
-    @Override
-    public void setLocalizer(Localizer localizer) {
-        super.setLocalizer(localizer);
         rrInterface.setLocalizer(localizer);
     }
 
@@ -180,23 +399,34 @@ public class MecanumDrive extends MecanumDriveSimple {
         };
     }
 
+    /**
+     * A roadrunner mecanum drive class used by MecanumDrive to interface with roadrunner.
+     */
     private class SimpleMecanumDriveRoadrunnerController extends com.acmerobotics.roadrunner.drive.MecanumDrive {
-
+        //A nanosecond timer for keeping time.
         private final NanoClock clock;
+        //A HAL timer for printing values.
         private final Timer printTimer = new Timer();
-
+        //The current mode of the drivetrain.
         private Mode mode;
+        //The motion profile used for turning.
         private MotionProfile turnProfile;
+        //The starting time for the turn motion profile.
         private double turnStart;
-
+        //The trajectory velocity constraint.
         private final TrajectoryVelocityConstraint velConstraint;
+        //The trajectory acceleration constraint.
         private final TrajectoryAccelerationConstraint accelConstraint;
+        //The trajectory follower used to follow the trajectory.
         private final TrajectoryFollower follower;
-
+        //The drivetrain's pose history.
         private final LinkedList<Pose2d> poseHistory;
 
         //private VoltageSensor batteryVoltageSensor;
 
+        /**
+         * The constructor for the simple roadrunner interface.
+         */
         public SimpleMecanumDriveRoadrunnerController() {
             super(rrConfig.kV,rrConfig.kA,rrConfig.kStatic,rrConfig.TRACK_WIDTH,rrConfig.WHEEL_BASE,LATERAL_MULTIPLIER);
 
@@ -237,6 +467,11 @@ public class MecanumDrive extends MecanumDriveSimple {
             }
         }
 
+        /**
+         * Turns to an angle asynchronously.
+         *
+         * @param angle The angle to turn to in radians.
+         */
         public void turnAsync(double angle) {
             double heading = getPoseEstimate().getHeading();
 
@@ -251,33 +486,39 @@ public class MecanumDrive extends MecanumDriveSimple {
             mode = Mode.TURN;
         }
 
+        /**
+         * Turns to an angle.
+         *
+         * @param angle The angle to turn to in radians.
+         */
         public void turn(double angle) {
             turnAsync(angle);
             waitForIdle();
         }
 
+        /**
+         * Follows a trajectory asynchronously.
+         *
+         * @param trajectory The trajectory to follow.
+         */
         public void followTrajectoryAsync(Trajectory trajectory) {
             follower.followTrajectory(trajectory);
             mode = Mode.FOLLOW_TRAJECTORY;
         }
 
+        /**
+         * Follows a trajectory.
+         *
+         * @param trajectory The trajectory to follow.
+         */
         public void followTrajectory(Trajectory trajectory) {
             followTrajectoryAsync(trajectory);
             waitForIdle();
         }
 
-        public Pose2d getLastError() {
-            switch (mode) {
-                case FOLLOW_TRAJECTORY:
-                    return follower.getLastError();
-                case TURN:
-                    return new Pose2d(0, 0, headingController.getLastError());
-                case IDLE:
-                    return new Pose2d();
-            }
-            throw new AssertionError();
-        }
-
+        /**
+         * Updates the drivetrain.
+         */
         public void update() {
             updatePoseEstimate();
 
@@ -335,32 +576,30 @@ public class MecanumDrive extends MecanumDriveSimple {
             }
         }
 
+        /**
+         * Waits until the drivetrain is idle.
+         */
         public void waitForIdle() {
             while (!Thread.currentThread().isInterrupted() && isBusy()) {
                 update();
             }
         }
 
+        /**
+         * Gets whether the drivetrain is busy.
+         *
+         * @return Whether the drivetrain is busy.
+         */
         public boolean isBusy() {
             return mode != Mode.IDLE;
-        }
-
-        public void setPIDFCoefficients(DcMotor.RunMode runMode, PIDFCoefficients coefficients) {
-            PIDFCoefficients compensatedCoefficients = new PIDFCoefficients(
-                    coefficients.p, coefficients.i, coefficients.d,
-                    coefficients.f //TODO NOTE TO SELF RE-ADD FOR ANDROID STUDIO * 12 / batteryVoltageSensor.getVoltage()
-            );
-            for (DcMotorEx motor : motors.values()) {
-                motor.setPIDFCoefficients(runMode, compensatedCoefficients);
-            }
         }
 
         @NotNull
         @Override
         public List<Double> getWheelPositions() {
             List<Double> wheelPositions = new ArrayList<>();
-            for (DcMotorEx motor : motors.values()) {
-                wheelPositions.add(rrConfig.encoderTicksToInches(motor.getCurrentPosition()));
+            for (String motor : motors.keySet()) {
+                wheelPositions.add(rrConfig.encoderTicksToInches(getMotorEncoderPosition(motor)));
             }
             return wheelPositions;
         }
@@ -368,8 +607,8 @@ public class MecanumDrive extends MecanumDriveSimple {
         @Override
         public List<Double> getWheelVelocities() {
             List<Double> wheelVelocities = new ArrayList<>();
-            for (DcMotorEx motor : motors.values()) {
-                wheelVelocities.add(rrConfig.encoderTicksToInches(motor.getVelocity()));
+            for (String motor : motors.keySet()) {
+                wheelVelocities.add(rrConfig.encoderTicksToInches(getMotorVelocity(motor)));
             }
             return wheelVelocities;
         }

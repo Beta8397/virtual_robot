@@ -1,6 +1,7 @@
 package system.robot.subsystems.drivetrain;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import org.jetbrains.annotations.NotNull;
 import system.config.AutonomousConfig;
 import system.config.ConfigData;
 import system.config.ConfigParam;
@@ -15,8 +16,22 @@ import util.math.geometry.Vector2D;
 
 import static java.lang.Math.*;
 
+/**
+ * A simple HAL mecanum drive subsystem. Does not include roadrunner.
+ * <p>
+ * Creation Date: 1/5/21
+ *
+ * @author Cole Savage, Level Up
+ * @version 1.0.0
+ * @see HolonomicDrivetrain
+ * @see Drivetrain
+ * @see MecanumDrive
+ * @see XDriveSimple
+ * @see XDrive
+ * @since 1.1.1
+ */
 public class MecanumDriveSimple extends HolonomicDrivetrain {
-
+    //The names of all the drivetrain's control buttons.
     protected static final String
             DRIVE_STICK = "Drive Stick",
             TURN_STICK = "Turn Stick",
@@ -24,19 +39,24 @@ public class MecanumDriveSimple extends HolonomicDrivetrain {
             TURN_SPEED_TOGGLE = "Turn Speed Toggle",
             TURN_LEFT_BUTTON = "Turn Left Button",
             TURN_RIGHT_BUTTON = "Turn Right Button";
-
+    //The toggle objects used for the turn speed and velocity toggle buttons.
     private final Toggle
             speedToggle = new Toggle(Toggle.ToggleTypes.flipToggle, false),
             turnSpeedToggle = new Toggle(Toggle.ToggleTypes.flipToggle, false);
-
+    //The gamepad containing the drivetrain controls.
     private CustomizableGamepad gamepad;
-    protected final String TOP_LEFT, TOP_RIGHT, BOT_LEFT, BOT_RIGHT;
-
+    //The multipliers that are applied when the turn speed and velocity toggles are active.
     private double
             speedToggleMultiplier = 0.5,
             turnSpeedToggleMultiplier = 0.5;
+    //The power to turn at when the turn left or right buttons are pressed.
     private double turnButtonPower = 0.3;
+    //The names of the motors.
+    protected final String TOP_LEFT, TOP_RIGHT, BOT_LEFT, BOT_RIGHT;
 
+    /**
+     * Which motors on the drivetrain are reversed.
+     */
     public enum ReverseType {
         LEFT,
         RIGHT,
@@ -44,8 +64,24 @@ public class MecanumDriveSimple extends HolonomicDrivetrain {
         BACK
     }
 
+    /**
+     * The constructor for MecanumDriveSimple.
+     *
+     * @param robot The robot using this drivetrain.
+     * @param driveConfig The driveconfig, which gives basic hardware constraints of the drivetrain.
+     * @param topLeft The top left motor config name.
+     * @param topRight The top right motor config name.
+     * @param botLeft The bottom left motor config name.
+     * @param botRight The bottom right motor config name.
+     * @param useConfig Whether or not the drivetrain uses the HAL config system.
+     */
     public MecanumDriveSimple(Robot robot, DriveConfig driveConfig, String topLeft, String topRight, String botLeft, String botRight, boolean useConfig) {
         super(robot, driveConfig, topLeft, topRight, botLeft, botRight);
+
+        /*
+          Localizer defaults to using ONLY drive encoders. THIS IS A BAD IDEA, but is enabled by default in case people don't want to have to use the IMU for some reason.
+          To use the normal roadrunner default localizer, use the HolonomicDriveEncoderIMULocalizer.
+         */
 
         this.localizer = new HolonomicDriveEncoderLocalizer(
                 this,
@@ -73,11 +109,26 @@ public class MecanumDriveSimple extends HolonomicDrivetrain {
         gamepad.addButton(TURN_RIGHT_BUTTON, new Button<Boolean>(1, Button.BooleanInputs.noButton));
     }
 
+    /**
+     * The constructor for MecanumDriveSimple.
+     *
+     * @param robot The robot using this drivetrain.
+     * @param driveConfig The driveconfig, which gives basic hardware constraints of the drivetrain.
+     * @param topLeft The top left motor config name.
+     * @param topRight The top right motor config name.
+     * @param botLeft The bottom left motor config name.
+     * @param botRight The bottom right motor config name.
+     */
     public MecanumDriveSimple(Robot robot, DriveConfig driveConfig, String topLeft, String topRight, String botLeft, String botRight) {
         this(robot, driveConfig, topLeft, topRight, botLeft, botRight, true);
     }
 
-    public void setReverseType(ReverseType reverseType) {
+    /**
+     * Sets the directions of the drivetrain's motors based on the provided reversetype.
+     *
+     * @param reverseType Which motors on the drivetrain should be reversed.
+     */
+    public void setReverseType(@NotNull ReverseType reverseType) {
         switch (reverseType) {
             case LEFT:
                 setMotorDirection(TOP_LEFT, DcMotor.Direction.REVERSE);
@@ -106,42 +157,95 @@ public class MecanumDriveSimple extends HolonomicDrivetrain {
         }
     }
 
+    /**
+     * Sets the multiplier that is applied when the drivetrain velocity toggle is active.
+     *
+     * @param velocityMultiplier The multiplier that is applied when the drivetrain velocity toggle is active.
+     */
     public void setToggleableVelocityMultiplier(double velocityMultiplier) {
         speedToggleMultiplier = abs(velocityMultiplier);
     }
 
+    /**
+     * Sets the multiplier that is applied when the turn speed toggle is active.
+     *
+     * @param turnSpeedMultiplier The multiplier that is applied when the drivetrain turn speed toggle is active.
+     */
     public void setToggleableTurnSpeedMultiplier(double turnSpeedMultiplier) {
         turnSpeedToggleMultiplier = abs(turnSpeedMultiplier);
     }
 
+    /**
+     * Sets the power the drivetrain will turn at when the turn left or turn right buttons are pressed.
+     *
+     * @param turnButtonPower The drivetrain will turn at when the turn left or turn right buttons are pressed.
+     */
     public void setTurnButtonPower(double turnButtonPower) {
         this.turnButtonPower = turnButtonPower;
     }
 
+    /**
+     * Sets the controller button that will be used to control the drivetrain's velocity.
+     *
+     * @param driveStick The controller button that will be used to control the drivetrain's velocity.
+     */
     public void setDriveStick(Button<Vector2D> driveStick) {
         gamepad.addButton(DRIVE_STICK, driveStick);
     }
 
+    /**
+     * Sets the controller button that will be used to control the drivetrain's turn speed.
+     *
+     * @param turnStick The controller button that will be used to control the drivetrain's turn speed.
+     */
     public void setTurnStick(Button<Double> turnStick) {
         gamepad.addButton(TURN_STICK, turnStick);
     }
 
+    /**
+     * Sets the controller button that will be used to turn the drivetrain's velocity toggle on and off.
+     *
+     * @param speedToggleButton The controller button that will be used to turn the drivetrain's velocity toggle on and off.
+     */
     public void setSpeedToggleButton(Button<Boolean> speedToggleButton) {
         gamepad.addButton(SPEED_TOGGLE, speedToggleButton);
     }
 
+    /**
+     * Sets the controller button that will be used to turn the drivetrain's turn speed toggle on and off.
+     *
+     * @param turnSpeedToggleButton The controller button that will be used to turn the drivetrain's turn speed toggle on and off.
+     */
     public void setTurnSpeedToggleButton(Button<Boolean> turnSpeedToggleButton) {
         gamepad.addButton(TURN_SPEED_TOGGLE, turnSpeedToggleButton);
     }
 
+    /**
+     * Sets the button that will turn the drivetrain left.
+     *
+     * @param turnLeftButton The button that will turn the drivetrain left.
+     */
     public void setTurnLeftButton(Button<Boolean> turnLeftButton) {
         gamepad.addButton(TURN_LEFT_BUTTON, turnLeftButton);
     }
 
+    /**
+     * Sets the button that will turn the drivetrain right.
+     *
+     * @param turnRightButton The button that will turn the drivetrain right.
+     */
     public void setTurnRightButton(Button<Boolean> turnRightButton) {
         gamepad.addButton(TURN_RIGHT_BUTTON, turnRightButton);
     }
 
+    /**
+     * Sets the power to all 4 drivetrain motors. If any motor has a power > 1, it rescales it linearly so that all powers are <= 1.
+     *
+     * @param topLeftPower The power of the top left motor.
+     * @param topRightPower The power of the top right motor.
+     * @param botLeftPower The power of the bottom left motor.
+     * @param botRightPower The power of the bottom right motor.
+     */
     public void setPower(double topLeftPower, double topRightPower, double botLeftPower, double botRightPower) {
         double[] powers = new double[] {topLeftPower, topRightPower, botLeftPower, botRightPower};
 
@@ -155,7 +259,7 @@ public class MecanumDriveSimple extends HolonomicDrivetrain {
     }
 
     @Override
-    public void turnPowerInternal(double power) {
+    protected void turnPowerInternal(double power) {
         setPower(-power, power, -power, power);
     }
 
@@ -170,6 +274,12 @@ public class MecanumDriveSimple extends HolonomicDrivetrain {
         );
     }
 
+    /**
+     * Causes the drivetrain to turn and move at the same time, making a kind of arc.
+     *
+     * @param velocity The velocity to move at.
+     * @param turnPower The power to turn at.
+     */
     public void arcPower(Vector2D velocity, double turnPower) {
         Vector2D transformedPowerVector = modifyPower(velocity).rotate(PI/4);
         turnPower = modifyTurnPower(turnPower);
@@ -236,7 +346,7 @@ public class MecanumDriveSimple extends HolonomicDrivetrain {
             turnPower = -turnPower;
 
             if(turnPower == 0) {
-                double correction = -headingController.update(localizer.getPoseEstimate().getHeading(), localizer.getPoseVelocity().getHeading());
+                double correction = -headingController.update(localizer.getPoseEstimate().getHeading());
                 turnPower += abs(headingController.getLastError()) < headingAngleToleranceRadians ? 0 : correction;
             }
             else {

@@ -10,5 +10,6 @@
     <orderEntry type="module" module-name="Controller" />
     <orderEntry type="module" module-name="HAL9001" />
     <orderEntry type="library" name="road-runner-core-0.5.3" level="project" />
+    <orderEntry type="library" name="com.googlecode.efficient-java-matrix-library:ejml:0.25" level="project" />
   </component>
 </module>

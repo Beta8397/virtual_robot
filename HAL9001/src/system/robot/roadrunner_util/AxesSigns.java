@@ -2,6 +2,12 @@ package system.robot.roadrunner_util;
 
 /**
  * IMU axes signs in the order XYZ (after remapping).
+ * <p>
+ * Creation Date: 1/8/21
+ *
+ * @author Roadrunner Quickstart
+ * @since 1.0.0
+ * @version 1.1.1
  */
 public enum AxesSigns {
     PPP(0b000),
@@ -13,8 +19,14 @@ public enum AxesSigns {
     NNP(0b110),
     NNN(0b111);
 
+    //The byte value to send to the imu to set the sign option.
     public final int bVal;
 
+    /**
+     * The constructor for AxesSigns.
+     *
+     * @param bVal The byte value to send to the imu to set the sign option.
+     */
     AxesSigns(int bVal) {
         this.bVal = bVal;
     }

@@ -5,6 +5,7 @@ import system.robot.*;
 import system.robot.localizer.HolonomicDriveEncoderLocalizer;
 import system.robot.roadrunner_util.RoadrunnerConfig;
 import system.robot.subsystems.drivetrain.MecanumDrive;
+import system.robot.subsystems.drivetrain.XDrive;
 
 public class ExampleBot extends Robot {
     public MecanumDrive drive;
