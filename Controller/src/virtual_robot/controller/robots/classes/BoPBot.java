@@ -66,6 +66,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
     private final MotorType ARM_MOTOR_TYPE = MotorType.Neverest60;
     private DcMotorExImpl armMotor = null;
     private ServoImpl handServo = null;
+    private ServoImpl intakeServo = null;
     private BNO055IMUImpl imu = null;
     private VirtualRobotController.DistanceSensorImpl[] distanceSensors = null;
 
@@ -77,6 +78,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
      */
     @FXML private Rectangle shooterFlyWheel;
     @FXML private Rectangle shooterIndexer;
+    @FXML private Rectangle intakeRoller;
     @FXML private Rectangle intake1;
     @FXML private Rectangle intake2;
     @FXML private Rectangle arm;            // The arm. Must be able to extend/retract (i.e., scale) in Y-dimension.
@@ -110,6 +112,8 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
     private boolean readyToShoot = false;
     private Ring ringInIntake = null;
     private long intakeTimeMillis = 0L; // timestamp of when ring entered intake
+    
+    private boolean intakeReleased = false;
 
     public BoPBot() {
         super();
@@ -131,6 +135,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         intakeMotor = (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "intake_motor");
         armMotor = (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "arm_motor");
         handServo = (ServoImpl) hardwareMap.servo.get("hand_servo");
+        intakeServo = (ServoImpl) hardwareMap.servo.get("intakeServo");
 
         distanceSensors = new VirtualRobotController.DistanceSensorImpl[]{
                 hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "front_distance"),
@@ -156,6 +161,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         shooterIndexer.getTransforms().add(new Rotate(0, getCenterPivotX(shooterIndexer), getEdgePivotY(shooterIndexer)));
         intake1.getTransforms().add(new Rotate(0, getCenterPivotX(intake1), getCenterPivotY(intake1)));
         intake2.getTransforms().add(new Rotate(0, getCenterPivotX(intake2), getCenterPivotY(intake2)));
+        intakeRoller.getTransforms().add(new Translate(0, 0));
 
         /*
         Scales the arm with pivot point at center of back of robot (which corresponds to the back of the arm).
@@ -212,6 +218,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         hardwareMap.put("elevatorServo", new CRServoImpl(180));
         hardwareMap.put("topSensor", controller.new DistanceSensorImpl());
         hardwareMap.put("bottomSensor", controller.new DistanceSensorImpl());
+        hardwareMap.put("intakeServo", new ServoImpl());
     }
 
     public synchronized void updateStateAndSensors(double millis) {
@@ -343,6 +350,12 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
 
         if (!readyToShoot && shooterServo.getPosition() <= 0.1) {
             readyToShoot = true;
+        }
+    
+        System.out.println("\t\t\t\t\t\t\t\t\t\t\t\t" + intakeServo.getPosition());
+        System.out.println("\t\t\t\t\t\t\t\t\t\t\t\t" + intakeServo.getInternalPosition());
+        if (intakeServo.getPosition() > .9) {
+            intakeReleased = true;
         }
     }
 
@@ -508,7 +521,11 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         ((Rotate) shooterIndexer.getTransforms().get(0)).setAngle(-shooterServo.getPosition() * 180.0);
         ((Rotate) intake1.getTransforms().get(0)).setAngle(-intakeMotor.getCurrentPosition() / 5.0); // the actual angle isn't important
         ((Rotate) intake2.getTransforms().get(0)).setAngle(intakeMotor.getCurrentPosition() / 5.0); // the actual angle isn't important
-
+        
+        if (intakeReleased) {
+            ((Translate) intakeRoller.getTransforms().get(0)).setY(-12.5);
+        }
+        
         // Extend or retract the arm based on the value of armScale.
 
         if (Math.abs(armScale - armScaleTransform.getY()) > 0.001) {

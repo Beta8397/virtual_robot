@@ -14,6 +14,7 @@
         <Rectangle arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="20.0" rotate="-45.0" stroke="BLACK" strokeType="INSIDE" width="6.0" x="62.807" y="-0.807" />
         <Rectangle arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="20.0" rotate="45.0" stroke="BLACK" strokeType="INSIDE" width="6.0" x="62.807" y="55.807" />
 
+        <Rectangle fx:id="intakeRoller" x="0" y="0" width="75" height="12.5" fill="LIME" arcHeight="5.0" stroke="BLACK" strokeType="INSIDE" />
         <Rectangle fx:id="intake" x="25.0" width="25.0" height="75.0" fill="LIME" arcHeight="5.0" stroke="BLACK" strokeType="INSIDE" />
         <Rectangle fx:id="intake1" x="25.0" width="10.0" height="10.0" fill="LIME" arcHeight="5.0" stroke="BLACK" strokeType="INSIDE" />
         <Rectangle fx:id="intake2" x="40.0" width="10.0" height="10.0" fill="LIME" arcHeight="5.0" stroke="BLACK" strokeType="INSIDE" />

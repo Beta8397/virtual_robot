@@ -27,7 +27,6 @@ public class RingIntakeSystemV1 {
     private int state;
     
     private Servo intakeServo;
-
     
     private DistanceSensor ringDetector;
     private boolean ringSensed;
@@ -41,16 +40,18 @@ public class RingIntakeSystemV1 {
         
         state = OFF;
         
-        intakeServo = hardwareMap.servo.get("intake_servo");
+        intakeServo = hardwareMap.servo.get("intakeServo");
         
-        ringDetector = hardwareMap.get(DistanceSensor.class, "intakeSensor");
+        intakeServo.setPosition(0);
+        
+//        ringDetector = hardwareMap.get(DistanceSensor.class, "intakeSensor");
     }
     
     public void update() {//call this function repeatedly
         intakeMotor.setPower(POWERS[state]);
-        detectRingsInIntake();
-        if (numRingsTakenIn > 3)
-            intakeReverse();
+//        detectRingsInIntake();
+//        if (numRingsTakenIn > 3)
+//            intakeReverse();
     }
 
     public void toggleIntake() {
@@ -70,8 +71,10 @@ public class RingIntakeSystemV1 {
     }
     
     public void dropDown() {
-        intakeServo.setPosition(0);
         intakeServo.setPosition(1);
+        long time = System.currentTimeMillis();
+        while (System.currentTimeMillis() < time + 50);
+        intakeServo.setPosition(0);
     }
     
     private void detectRingsInIntake() {
