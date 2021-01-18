@@ -68,6 +68,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
     private ServoImpl handServo = null;
     private BNO055IMUImpl imu = null;
     private VirtualRobotController.DistanceSensorImpl[] distanceSensors = null;
+    private VirtualRobotController.DistanceSensorImpl intakeSensor = null;
 
     /*
     Variables representing graphical UI nodes that we will need to manipulate. The @FXML annotation will
@@ -109,6 +110,9 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
     private final List<Ring> ringsInHopper = new ArrayList<>(); // rings currently controlled by the robot
     private boolean readyToShoot = false;
     private Ring ringInIntake = null;
+    private boolean isRingInIntake = false;
+    private int ringWidth = 0;
+    private boolean ringPastSensor = false;
     private long intakeTimeMillis = 0L; // timestamp of when ring entered intake
 
     public BoPBot() {
@@ -129,6 +133,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         shooterMotor = (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "shooter_motor");
         shooterServo = (ServoImpl) hardwareMap.servo.get("shooter_servo");
         intakeMotor = (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "intake_motor");
+        intakeSensor = hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "intakeSensor");
         armMotor = (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "arm_motor");
         handServo = (ServoImpl) hardwareMap.servo.get("hand_servo");
 
@@ -212,6 +217,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         hardwareMap.put("elevatorServo", new CRServoImpl(180));
         hardwareMap.put("topSensor", controller.new DistanceSensorImpl());
         hardwareMap.put("bottomSensor", controller.new DistanceSensorImpl());
+        hardwareMap.put("intakeSensor", controller.new DistanceSensorImpl());
         hardwareMap.put("intake_servo", new ServoImpl());
     }
 
@@ -345,6 +351,18 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         if (!readyToShoot && shooterServo.getPosition() <= 0.1) {
             readyToShoot = true;
         }
+        
+        if (ringInIntake != null) isRingInIntake = true;
+        if (ringWidth >= 50) ringPastSensor = true;
+        if (isRingInIntake && !ringPastSensor) ringWidth += 10;
+        if (isRingInIntake && ringPastSensor) ringWidth -= 10;
+        if (ringWidth <= 0) {
+            ringPastSensor = false;
+            isRingInIntake = false;
+            ringWidth = 0;
+        }
+        
+        intakeSensor.updateDistance(0, 200 - ringWidth, 0);
     }
 
     private Vector2D getHandLocation() {
