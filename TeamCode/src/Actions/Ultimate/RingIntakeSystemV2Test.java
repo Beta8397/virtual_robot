@@ -2,8 +2,11 @@ package Actions.Ultimate;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import java.io.IOException;
 
@@ -25,6 +28,13 @@ public class RingIntakeSystemV2Test implements ActionHandler {
 
     private MotorController intakeMotor;
     private Servo intakeServo;
+    
+    private DistanceSensor ringDetector;
+    private boolean ringSensed;
+    private static final double RING_DETECTION_THRESHOLD = 0;//todo find these
+    private static final double NO_RING_THRESHOLD = 0;
+    
+    public int numRingsTakenIn;
 
     public RingIntakeSystemV2Test(HardwareMap hardwareMap) {
         try {
@@ -48,6 +58,9 @@ public class RingIntakeSystemV2Test implements ActionHandler {
     
     private void updateRobot() {
         intakeMotor.setMotorPower(POWERS[state]);//todo make led lights indicate state
+        detectRingsInIntake();
+        if (numRingsTakenIn > 3)
+            intakeReverse();
     }
     
     //tele-op function
@@ -62,7 +75,7 @@ public class RingIntakeSystemV2Test implements ActionHandler {
         updateRobot();
     }
     
-    public void IntakeReverse() {
+    public void intakeReverse() {
         state = REVERSE;
         updateRobot();
     }
@@ -70,6 +83,20 @@ public class RingIntakeSystemV2Test implements ActionHandler {
     public void intakeOff() {
         state = OFF;
         updateRobot();
+    }
+    
+    private void detectRingsInIntake() {
+        double distanceToRing = ringDetector.getDistance(DistanceUnit.INCH);
+        if (ringSensed && distanceToRing > NO_RING_THRESHOLD) {
+            ringSensed = false;
+        } else if (!ringSensed && distanceToRing < RING_DETECTION_THRESHOLD) {
+            ringSensed = true;
+            if (state == OFF) {
+                numRingsTakenIn--;
+            } else if (state == ON) {
+                numRingsTakenIn++;
+            }
+        }
     }
 
     @Override

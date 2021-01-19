@@ -49,9 +49,9 @@ public class RingIntakeSystemV1 {
     
     public void update() {//call this function repeatedly
         intakeMotor.setPower(POWERS[state]);
-//        detectRingsInIntake();
-//        if (numRingsTakenIn > 3)
-//            intakeReverse();
+        detectRingsInIntake();
+        if (numRingsTakenIn > 3)
+            intakeReverse();
     }
 
     public void toggleIntake() {
