@@ -195,7 +195,8 @@ public class UltimateV2Better extends LinearOpMode {
 			powerShotRight();
 		}
 		
-		if(controller.rightTriggerPressed) shooter.togglePinball();
+		if(controller.rightTriggerPressed)
+			shoot();
 		
 		// TODO: update this to be actually correct, need to determine which wall to be against and what the x and y values would be
 		if(controller.xPressed)
@@ -248,25 +249,19 @@ public class UltimateV2Better extends LinearOpMode {
 	private void powerShotLeft() {
 		shooter.setPowerShotSpeed();
 		robot.turnToLocation(ConfigVariables.POWER_SHOT_LEFT, this);
-		shooter.togglePinball();
-		sleep(10);
-		shooter.togglePinball();
+		shoot();
 	}
 	
 	private void powerShotCenter() {
 		shooter.setPowerShotSpeed();
 		robot.turnToLocation(ConfigVariables.POWER_SHOT_MIDDLE, this);
-		shooter.togglePinball();
-		sleep(10);
-		shooter.togglePinball();
+		shoot();
 	}
 	
 	private void powerShotRight() {
 		shooter.setPowerShotSpeed();
 		robot.turnToLocation(ConfigVariables.POWER_SHOT_RIGHT, this);
-		shooter.togglePinball();
-		sleep(10);
-		shooter.togglePinball();
+		shoot();
 	}
 	
 	private void stopActions() {
@@ -274,6 +269,13 @@ public class UltimateV2Better extends LinearOpMode {
 		intake.intakeOff();
 		grabber.pause();
 		shooter.turnOffShooterWheel();
+	}
+	
+	private void shoot() {
+		shooter.togglePinball();
+		intake.numRingsTakenIn--;
+		sleep(10);
+		shooter.togglePinball();
 	}
 	
 	private void updateMiscFunctions() {
