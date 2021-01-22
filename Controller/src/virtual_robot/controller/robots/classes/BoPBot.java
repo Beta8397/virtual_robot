@@ -377,7 +377,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
                     // ring is stationary and robot is moving
                     double diff = headingRadians + Math.PI / 2.0 - directionOfTravel;
                     double deltaAngle = Math.atan2(Math.sin(diff), Math.cos(diff));
-                    if (intakeMotor.getPower() < 0 && Math.toDegrees(Math.abs(deltaAngle)) <= INTAKE_DIR_TOLERANCE_DEG) {
+                    if (intakeMotor.getPower() > 0 && Math.toDegrees(Math.abs(deltaAngle)) <= INTAKE_DIR_TOLERANCE_DEG) {
                         // intake is on and direction of travel is aligned with the intake
                         double dx = r.getX() - this.x;
                         double dy = r.getY() - this.y;
