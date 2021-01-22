@@ -137,8 +137,8 @@ public class UltimateV2Better extends LinearOpMode {
 			updateEStop();
 			if (!eStop) {
 				updateEStop();
-				controllerOne.update();
-				controllerTwo.update();
+//				controllerOne.update();
+//				controllerTwo.update();
 				
 				controlDrive();
 				
@@ -281,7 +281,8 @@ public class UltimateV2Better extends LinearOpMode {
 	
 	private void shoot() {
 		shooter.togglePinball();
-		intake.numRingsTakenIn--;
+		if (intake.numRingsTakenIn > 0)
+			intake.numRingsTakenIn--;
 		sleep(10);
 		shooter.togglePinball();
 	}

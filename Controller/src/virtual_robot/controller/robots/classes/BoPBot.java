@@ -361,8 +361,6 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         if (ringInIntake != null) distance = 100;
         else distance = 200;
         intakeSensor.updateDistance(0, distance / -6.35 + 288, 0);
-        
-        if (intakeServo.getPosition() > .5) ((Translate) intakeRoller.getTransforms().get(0)).setY(-15);
     }
 
     private Vector2D getHandLocation() {
@@ -547,6 +545,8 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
             leftFingerTranslateTransform.setX(fingerPos);
             rightFingerTranslateTransform.setX(-fingerPos);
         }
+    
+        if (intakeServo.getPosition() > .5) ((Translate) intakeRoller.getTransforms().get(0)).setY(-15);
     }
 
     public void powerDownAndReset() {

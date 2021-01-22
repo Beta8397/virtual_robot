@@ -15,7 +15,7 @@ import MotorControllers.MotorController;
 
 public class RingIntakeSystemV2Test implements ActionHandler {
     
-    private static final int MOTOR_POWER = 1;
+    private static final int MOTOR_POWER = -1;
     
     private static final int OFF = 0;
     private static final int ON = 1;
