@@ -98,8 +98,9 @@ public class UltimateV2Better extends LinearOpMode {
 		// initialize robot
 		// TODO get starting angle
 		try {
-			robot = new UltimateNavigation2(hardwareMap, new Location(0, 0, 0), 0, "RobotConfig/UltimateV1.json");
+			robot = new UltimateNavigation2(hardwareMap, new Location(0, 0, 0), 0, "TeamCode/assets/RobotConfig/UltimateV1.json");
 		} catch (Exception e) {
+			System.out.println(e.toString());
 			telemetry.addData("Robot Error", e.toString());
 			telemetry.update();
 		}
@@ -127,6 +128,7 @@ public class UltimateV2Better extends LinearOpMode {
 		// puts the pinball servo on the outside
 		shooter.pinballServo.setPosition(ShooterSystemV1.PINBALL_REST);
 		shooter.update();
+		intake.dropDown();
 		
 		// should only be used for a time keeper or other small things, avoid using this space when possible
 		while (opModeIsActive() && !eStop) {
@@ -280,5 +282,6 @@ public class UltimateV2Better extends LinearOpMode {
 	
 	private void updateMiscFunctions() {
 		shooter.update();
+		intake.updateRobot();
 	}
 }

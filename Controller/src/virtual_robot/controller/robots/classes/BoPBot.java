@@ -69,6 +69,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
     private BNO055IMUImpl imu = null;
     private VirtualRobotController.DistanceSensorImpl[] distanceSensors = null;
     private VirtualRobotController.DistanceSensorImpl intakeSensor = null;
+    private ServoImpl intakeServo = null;
 
     /*
     Variables representing graphical UI nodes that we will need to manipulate. The @FXML annotation will
@@ -84,6 +85,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
     @FXML private Rectangle hand;           // The hand. Must move in Y-dimension as arm extends/retracts.
     @FXML private Rectangle leftFinger;     // Fingers must open and close based on position of hand servo.
     @FXML private Rectangle rightFinger;
+    @FXML private Rectangle intakeRoller;
 
     /*
     Transform objects that will be instantiated in the initialize() method, and will be used in the
@@ -93,6 +95,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
     Translate handTranslateTransform;
     Translate leftFingerTranslateTransform;
     Translate rightFingerTranslateTransform;
+    Translate dropDown;
 
     /*
     Current scale of the arm (i.e., the degree to which arm is extended or retracted). 1.0 means fully retracted.
@@ -136,6 +139,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         intakeSensor = hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "intakeSensor");
         armMotor = (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "arm_motor");
         handServo = (ServoImpl) hardwareMap.servo.get("hand_servo");
+        intakeServo = (ServoImpl) hardwareMap.servo.get("intakeServo");
 
         distanceSensors = new VirtualRobotController.DistanceSensorImpl[]{
                 hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "front_distance"),
@@ -161,6 +165,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         shooterIndexer.getTransforms().add(new Rotate(0, getCenterPivotX(shooterIndexer), getEdgePivotY(shooterIndexer)));
         intake1.getTransforms().add(new Rotate(0, getCenterPivotX(intake1), getCenterPivotY(intake1)));
         intake2.getTransforms().add(new Rotate(0, getCenterPivotX(intake2), getCenterPivotY(intake2)));
+        intakeRoller.getTransforms().add(new Translate(0, 0));
 
         /*
         Scales the arm with pivot point at center of back of robot (which corresponds to the back of the arm).
@@ -218,7 +223,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         hardwareMap.put("topSensor", controller.new DistanceSensorImpl());
         hardwareMap.put("bottomSensor", controller.new DistanceSensorImpl());
         hardwareMap.put("intakeSensor", controller.new DistanceSensorImpl());
-        hardwareMap.put("intake_servo", new ServoImpl());
+        hardwareMap.put("intakeServo", new ServoImpl());
     }
 
     public synchronized void updateStateAndSensors(double millis) {
@@ -352,17 +357,12 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
             readyToShoot = true;
         }
         
-        if (ringInIntake != null) isRingInIntake = true;
-        if (ringWidth >= 50) ringPastSensor = true;
-        if (isRingInIntake && !ringPastSensor) ringWidth += 10;
-        if (isRingInIntake && ringPastSensor) ringWidth -= 10;
-        if (ringWidth <= 0) {
-            ringPastSensor = false;
-            isRingInIntake = false;
-            ringWidth = 0;
-        }
+        double distance;
+        if (ringInIntake != null) distance = 100;
+        else distance = 200;
+        intakeSensor.updateDistance(0, distance / -6.35 + 288, 0);
         
-        intakeSensor.updateDistance(0, 200 - ringWidth, 0);
+        if (intakeServo.getPosition() > .5) ((Translate) intakeRoller.getTransforms().get(0)).setY(-15);
     }
 
     private Vector2D getHandLocation() {

@@ -350,7 +350,7 @@ public class UltimateNavigation2 extends Thread {
     public void initializeUsingConfigFile(String file) {
         InputStream stream = null;
         try {
-            stream = new FileInputStream(new File("C:\\Users\\Caden\\StudioProjects\\virtual_robot\\TeamCode\\assets\\" + file));
+            stream = new FileInputStream(new File(file));
         }
         catch(Exception e) {
             Log.d("Drive Engine Error: ",e.toString());

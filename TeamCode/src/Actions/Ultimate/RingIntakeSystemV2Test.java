@@ -31,10 +31,7 @@ public class RingIntakeSystemV2Test implements ActionHandler {
     
     private DistanceSensor ringDetector;
     private boolean ringSensed;
-    private static final double RING_DETECTION_THRESHOLD = 0;//todo find these
-    private static final double NO_RING_THRESHOLD = 0;
-    
-    public int numRingsTakenIn;
+    public double numRingsTakenIn;
 
     public RingIntakeSystemV2Test(HardwareMap hardwareMap) {
         try {
@@ -43,12 +40,17 @@ public class RingIntakeSystemV2Test implements ActionHandler {
             intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
             
-            intakeServo = hardwareMap.servo.get("intake_servo");
+            intakeServo = hardwareMap.servo.get("intakeServo");
+            
+            ringDetector = hardwareMap.get(DistanceSensor.class, "intakeSensor");
         } catch (IOException e) {
             e.printStackTrace();
         }
         
         state = OFF;
+        
+        numRingsTakenIn = 0;
+        ringSensed = false;
     }
     
     public void dropDown() {
@@ -56,11 +58,12 @@ public class RingIntakeSystemV2Test implements ActionHandler {
         intakeServo.setPosition(1);
     }
     
-    private void updateRobot() {
+    public void updateRobot() {
         intakeMotor.setMotorPower(POWERS[state]);//todo make led lights indicate state
         detectRingsInIntake();
         if (numRingsTakenIn > 3)
             intakeReverse();
+        System.out.println("\t\t\t\t\t\t\t\t\t\t" + numRingsTakenIn);
     }
     
     //tele-op function
@@ -86,16 +89,18 @@ public class RingIntakeSystemV2Test implements ActionHandler {
     }
     
     private void detectRingsInIntake() {
-        double distanceToRing = ringDetector.getDistance(DistanceUnit.INCH);
-        if (ringSensed && distanceToRing > NO_RING_THRESHOLD) {
-            ringSensed = false;
-        } else if (!ringSensed && distanceToRing < RING_DETECTION_THRESHOLD) {
+        double distance = ringDetector.getDistance(DistanceUnit.MM);
+        if (!ringSensed && distance < 160) {
             ringSensed = true;
-            if (state == OFF) {
-                numRingsTakenIn--;
-            } else if (state == ON) {
-                numRingsTakenIn++;
-            }
+            if (state == ON) numRingsTakenIn += .5;
+            else if (state == REVERSE) numRingsTakenIn -= .5;
+            else ringSensed = false;
+        }
+        else if (ringSensed && distance > 140) {
+            ringSensed = false;
+            if (state == ON) numRingsTakenIn += .5;
+            else if (state == REVERSE) numRingsTakenIn -= .5;
+            else ringSensed = true;
         }
     }
 
