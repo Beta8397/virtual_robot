@@ -200,6 +200,12 @@ public class UltimateV2Better extends LinearOpMode {
 		if(controller.rightTriggerPressed)
 			shoot();
 		
+		if(controller.aPressed)
+			shooter.toggleShooterWheel();
+		
+		if(controller.bPressed)
+			intake.updateState(0);
+		
 		// TODO: update this to be actually correct, need to determine which wall to be against and what the x and y values would be
 		if(controller.xPressed)
 			robot.setLocation(new Location(0, robot.getRobotLocation().getY()));

@@ -49,7 +49,7 @@ public class RingIntakeSystemV2Test implements ActionHandler {
         
         state = OFF;
         
-        numRingsTakenIn = 0;
+        numRingsTakenIn = 3;
         ringSensed = false;
     }
     
