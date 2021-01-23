@@ -523,8 +523,8 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         super.updateDisplay();
         ((Rotate) shooterFlyWheel.getTransforms().get(0)).setAngle(-shooterMotor.getCurrentPosition() / 14.0 * Math.PI); // the actual angle isn't important as long as it spins
         ((Rotate) shooterIndexer.getTransforms().get(0)).setAngle(-shooterServo.getPosition() * 180.0);
-        ((Rotate) intake1.getTransforms().get(0)).setAngle(-intakeMotor.getCurrentPosition() / 5.0); // the actual angle isn't important
-        ((Rotate) intake2.getTransforms().get(0)).setAngle(intakeMotor.getCurrentPosition() / 5.0); // the actual angle isn't important
+        ((Rotate) intake1.getTransforms().get(0)).setAngle(intakeMotor.getCurrentPosition() / 5.0); // the actual angle isn't important
+        ((Rotate) intake2.getTransforms().get(0)).setAngle(-intakeMotor.getCurrentPosition() / 5.0); // the actual angle isn't important
 
         // Extend or retract the arm based on the value of armScale.
 
