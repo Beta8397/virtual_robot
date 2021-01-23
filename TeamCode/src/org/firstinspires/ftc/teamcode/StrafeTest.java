@@ -8,8 +8,8 @@ import system.robot.MainRobot;
 import system.robot.roadrunner_util.HALTrajectory;
 
 @StandAlone
-@Autonomous(name = "Straight Test")
-public class StraightTest extends BaseAutonomous {
+@Autonomous(name = "Strafe Test")
+public class StrafeTest extends BaseAutonomous {
     public @MainRobot RoadrunnerCalibBot robot;
 
     public static double DISTANCE = 60; // in
@@ -17,16 +17,16 @@ public class StraightTest extends BaseAutonomous {
     @Override
     public void main() {
         HALTrajectory trajectory = robot.drive.trajectoryBuilder(new Pose2d())
-                .forward(DISTANCE)
+                .strafeRight(DISTANCE)
                 .build();
 
         robot.drive.followTrajectory(trajectory);
 
         Pose2d poseEstimate = robot.drive.getPoseEstimate();
-        robot.telemetry.addData("finalX", poseEstimate.getX());
-        robot.telemetry.addData("finalY", poseEstimate.getY());
-        robot.telemetry.addData("finalHeading", poseEstimate.getHeading());
-        robot.telemetry.update();
+        telemetry.addData("finalX", poseEstimate.getX());
+        telemetry.addData("finalY", poseEstimate.getY());
+        telemetry.addData("finalHeading", poseEstimate.getHeading());
+        telemetry.update();
 
         waitUntil(()->robot.isStopRequested());
     }

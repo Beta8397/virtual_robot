@@ -3,6 +3,8 @@ package system.robot.localizer;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.localization.Localizer;
 import com.acmerobotics.roadrunner.localization.TwoTrackingWheelLocalizer;
+import com.acmerobotics.roadrunner.util.Angle;
+import com.acmerobotics.roadrunner.util.NanoClock;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -14,6 +16,8 @@ import system.robot.roadrunner_util.Encoder;
 import system.robot.Robot;
 import util.math.units.HALAngleUnit;
 import util.math.units.HALDistanceUnit;
+import util.math.units.HALTimeUnit;
+import util.misc.Timer;
 
 import java.util.*;
 
@@ -42,6 +46,10 @@ public class TwoWheelLocalizer extends TwoTrackingWheelLocalizer {
     private final BNO055IMU imu;
     //The hardware constraints for the tracking wheels.
     private final TrackingWheelConfig trackingWheelConfig;
+
+    private final Timer timer = new Timer();
+
+    private double lastHeading = 0, heading = 0, headingVelo = 0;
 
     /**
      * The constructor for TwoWheelLocalizer.
@@ -184,7 +192,24 @@ public class TwoWheelLocalizer extends TwoTrackingWheelLocalizer {
 
     @Override
     public double getHeading() {
-        return imu.getAngularOrientation().firstAngle;
+        lastHeading = heading;
+        heading = imu.getAngularOrientation().firstAngle;
+        return heading;
+    }
+
+    @Nullable
+    @Override
+    public Double getHeadingVelocity() {
+        double headingDelta = Angle.normDelta(heading - lastHeading);
+
+        //TODO broken kinda, if robot at rest still returns non-zero velo. Modify when not on simulator
+
+        if(headingDelta != 0) {
+            headingVelo = headingDelta / timer.getTimePassed(HALTimeUnit.SECONDS);
+            timer.reset();
+        }
+
+        return headingVelo;
     }
 
     @NotNull

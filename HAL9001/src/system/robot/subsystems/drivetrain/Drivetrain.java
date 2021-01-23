@@ -210,8 +210,8 @@ public abstract class Drivetrain extends SubSystem {
     /**
      * Sets the motor PIDF coefficients and runmode for all drivetrain motors.
      *
-     * @param runMode
-     * @param pidfCoefficients
+     * @param runMode The runmode of the motor.
+     * @param pidfCoefficients The motor's PIDF coefficients.
      */
     public final void setMotorPIDFCoefficients(DcMotor.RunMode runMode, @NotNull PIDFCoefficients pidfCoefficients) {
         PIDFCoefficients compensatedCoefficients = new PIDFCoefficients(
@@ -302,7 +302,7 @@ public abstract class Drivetrain extends SubSystem {
      * @return That motor's velocity.
      */
     public double getMotorVelocity(String motorName) {
-        return getMotorVelocity(motorName, HALAngleUnit.RADIANS);
+        return getMotor(motorName).getVelocity();
     }
 
     /**
@@ -370,14 +370,14 @@ public abstract class Drivetrain extends SubSystem {
      * Counterclockwise is positive, clockwise is negative.
      *
      * @param power The power to turn at.
-     * @param amount The amount to turn.
+     * @param angleRadians The angle to turn by in radians.
      */
-    public final void turnSimple(double power, double amount) {
+    public final void turnSimple(double power, double angleRadians) {
         Pose2d initialPose = localizer.getPoseEstimate();
 
         if(power != 0) {
-            turnPower(amount < 0 ? -power : power);
-            waitWhile(() -> abs(localizer.getPoseEstimate().getHeading() - initialPose.getHeading()) < abs(amount), () -> {
+            turnPower(angleRadians < 0 ? -power : power);
+            waitWhile(() -> abs(localizer.getPoseEstimate().getHeading() - initialPose.getHeading()) < abs(angleRadians), () -> {
                 localizer.update();
                 System.out.println(localizer.getPoseEstimate());
             });
@@ -585,6 +585,15 @@ public abstract class Drivetrain extends SubSystem {
      */
     public final void setLocalizer(Localizer localizer) {
         setLocalizer(localizer, CoordinateMode.HAL);
+    }
+
+    /**
+     * Gets the localizer used to track the robot's position.
+     *
+     * @return The localizer used to track the robot's position.
+     */
+    public final Localizer getLocalizer() {
+        return localizer;
     }
 
     /**

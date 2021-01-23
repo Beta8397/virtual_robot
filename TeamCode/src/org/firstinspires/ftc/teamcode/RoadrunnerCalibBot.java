@@ -1,15 +1,20 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import system.robot.*;
-import system.robot.localizer.HolonomicDriveEncoderLocalizer;
+import system.gui.menus.examplemenu.ExampleMenu;
+import system.robot.Robot;
+import system.robot.localizer.*;
+import system.robot.roadrunner_util.CoordinateMode;
 import system.robot.roadrunner_util.RoadrunnerConfig;
 import system.robot.subsystems.drivetrain.MecanumDrive;
-import system.robot.subsystems.drivetrain.XDrive;
+import util.control.Button;
 
-public class ExampleBot extends Robot {
+import static java.lang.Math.PI;
+
+public class RoadrunnerCalibBot extends Robot {
     public MecanumDrive drive;
-    public ExampleBot(OpMode opMode) {
+    public RoadrunnerCalibBot(OpMode opMode) {
         super(opMode);
 
         drive = new MecanumDrive(this,
@@ -18,18 +23,25 @@ public class ExampleBot extends Robot {
                 "front_right_motor",
                 "back_left_motor",
                 "back_right_motor", false);
-
+        /*drive.setLocalizer(new HolonomicDriveEncoderIMULocalizer(
+                this,
+                drive,
+                "imu",
+                "front_left_motor",
+                "front_right_motor",
+                "back_left_motor",
+                "back_right_motor"
+        ));
         /*drive.setLocalizer(new TwoWheelLocalizer(
                 this,
                 "imu",
                 "enc_right",
-                new Pose2d(0,-6,0),
+                new Pose2d(6,0,0),
                 "enc_x",
                 new Pose2d(0,0,PI/2),
                 new TrackingWheelConfig(1,1,1120)
         ));*/
-/*
-        drive.setLocalizer(new ThreeWheelLocalizer(
+        /*drive.setLocalizer(new ThreeWheelLocalizer(
                 this,
                 12,
                 0,
@@ -37,24 +49,6 @@ public class ExampleBot extends Robot {
                 "enc_right",
                 "enc_x",
                 new TrackingWheelConfig(1,1,1120)
-        ).reverseEncoder("enc_left"));
-*/
-        /*drive.setLocalizer(new DriveEncoderIMULocalizer(
-                this,
-                "imu",
-                "front_left_motor",
-                "front_right_motor",
-                "back_left_motor",
-                "back_right_motor",
-                drive.driveConfig
-        ));*/
-        drive.setLocalizer(new HolonomicDriveEncoderLocalizer(
-                drive,
-                "front_left_motor",
-                "front_right_motor",
-                "back_left_motor",
-                "back_right_motor"
-        ));
-
+        ).reverseEncoder("enc_left"));*/
     }
 }

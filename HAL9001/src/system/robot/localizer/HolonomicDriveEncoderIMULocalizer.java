@@ -6,14 +6,16 @@ import com.acmerobotics.roadrunner.kinematics.MecanumKinematics;
 import com.acmerobotics.roadrunner.localization.Localizer;
 import com.acmerobotics.roadrunner.util.Angle;
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import system.robot.Robot;
 import system.robot.roadrunner_util.AxesSigns;
 import system.robot.roadrunner_util.CoordinateMode;
+import system.robot.roadrunner_util.Encoder;
 import system.robot.subsystems.drivetrain.HolonomicDrivetrain;
+import util.math.units.HALTimeUnit;
+import util.misc.Timer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,8 +33,8 @@ import java.util.List;
  * @since 1.1.1
  */
 public class HolonomicDriveEncoderIMULocalizer implements Localizer {
-    //The names of the motors.
-    private final String TOP_LEFT, BOT_LEFT, TOP_RIGHT, BOT_RIGHT;
+
+    private final String TOP_LEFT, TOP_RIGHT, BOT_LEFT, BOT_RIGHT;
     //The imu object.
     private final BNO055IMU imu;
     //The drivetrain using this localizer.
@@ -45,6 +47,8 @@ public class HolonomicDriveEncoderIMULocalizer implements Localizer {
     private List<Double> lastWheelPositions = new ArrayList<>();
     //The drivetrain's last heading value.
     private double lastHeading = Double.NaN;
+
+    private final Timer timer = new Timer();
 
     /**
      * The constructor for HolonomicDriveEncoderIMULocalizer.
@@ -62,6 +66,7 @@ public class HolonomicDriveEncoderIMULocalizer implements Localizer {
         this.drivetrain = drivetrain;
 
         this.imu = robot.hardwareMap.get(BNO055IMU.class, imu);
+
         TOP_LEFT = topLeft;
         TOP_RIGHT = topRight;
         BOT_LEFT = botLeft;
@@ -149,12 +154,24 @@ public class HolonomicDriveEncoderIMULocalizer implements Localizer {
                 drivetrain.driveConfig.encoderTicksToInches(drivetrain.getMotorVelocity(BOT_RIGHT)),
                 drivetrain.driveConfig.encoderTicksToInches(drivetrain.getMotorVelocity(TOP_RIGHT))
         );
+
         poseVelocity = MecanumKinematics.wheelToRobotVelocities(
                 wheelVelocities,
                 drivetrain.driveConfig.TRACK_WIDTH,
                 drivetrain.driveConfig.WHEEL_BASE,
                 drivetrain.getLateralMultiplier()
         );
+
+        if(!Double.isNaN(lastHeading)) {
+
+            //TODO see two wheel localizer
+            double headingDelta = Angle.normDelta(heading - lastHeading);
+
+            if(headingDelta != 0) {
+                poseVelocity = new Pose2d(poseVelocity.vec(), headingDelta / timer.getTimePassed(HALTimeUnit.SECONDS));
+                timer.reset();
+            }
+        }
 
         lastWheelPositions = wheelPositions;
         lastHeading = heading;

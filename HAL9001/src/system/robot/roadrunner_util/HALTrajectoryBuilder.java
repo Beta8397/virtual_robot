@@ -394,7 +394,6 @@ public final class HALTrajectoryBuilder{
      */
     @NotNull
     public final HALTrajectoryBuilder splineTo(@NotNull Point2D endPosition, double endTangent) {
-        System.out.println(distanceUnit);
         trajectoryBuilder.splineTo(
                 coordinateMode.convertTo(CoordinateMode.ROADRUNNER).apply(
                         new Pose2d(HALDistanceUnit.convert(endPosition.getX(), distanceUnit, HALDistanceUnit.INCHES), HALDistanceUnit.convert(endPosition.getY(), distanceUnit, HALDistanceUnit.INCHES), 0)

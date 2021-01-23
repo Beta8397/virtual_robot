@@ -10,6 +10,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import system.robot.roadrunner_util.CoordinateMode;
 import system.robot.subsystems.drivetrain.HolonomicDrivetrain;
+import util.math.units.HALTimeUnit;
+import util.misc.Timer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,6 +41,8 @@ public class HolonomicDriveEncoderLocalizer implements Localizer {
     private List<Double> lastWheelPositions = new ArrayList<>();
     //The drivetrain's last heading value.
     private double lastHeading = Double.NaN;
+
+    private final Timer timer = new Timer();
 
 
     /**
@@ -87,6 +91,7 @@ public class HolonomicDriveEncoderLocalizer implements Localizer {
                 drivetrain.driveConfig.encoderTicksToInches(drivetrain.getMotorEncoderPosition(TOP_RIGHT))
         );
         double heading = (((wheelPositions.get(3) + wheelPositions.get(2)) - (wheelPositions.get(0) + wheelPositions.get(1)))/4)/drivetrain.driveConfig.TRACK_WIDTH;
+
         if(!lastWheelPositions.isEmpty()) {
             List<Double> wheelDeltas = new ArrayList<>();
 
@@ -116,6 +121,17 @@ public class HolonomicDriveEncoderLocalizer implements Localizer {
                 drivetrain.driveConfig.WHEEL_BASE,
                 drivetrain.getLateralMultiplier()
         );
+
+        if(!Double.isNaN(lastHeading)) {
+
+            //TODO see two wheel localizer
+            double headingDelta = Angle.normDelta(heading - lastHeading);
+
+            if(headingDelta != 0 && timer.getTimePassed(HALTimeUnit.SECONDS) > 1e-4) {
+                poseVelocity = new Pose2d(poseVelocity.vec(), headingDelta / timer.getTimePassed(HALTimeUnit.SECONDS));
+                timer.reset();
+            }
+        }
 
         lastWheelPositions = wheelPositions;
         lastHeading = heading;

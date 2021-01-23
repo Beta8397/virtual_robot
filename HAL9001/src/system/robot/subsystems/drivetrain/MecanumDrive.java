@@ -52,12 +52,12 @@ import java.util.List;
  * @since 1.1.1
  */
 public class MecanumDrive extends MecanumDriveSimple {
-    //The roadrunner configuration settings and drivetrain hardware constraints.
-    private final RoadrunnerConfig rrConfig;
     //The roadrunner drivetrain class that this class acts as a partial wrapper for. Used for interfacing with roadrunner.
     private final SimpleMecanumDriveRoadrunnerController rrInterface;
     //The number of poses that the drivetrain can store in its pose history.
     private int POSE_HISTORY_LIMIT = 100;
+    //The roadrunner configuration settings and drivetrain hardware constraints.
+    public final RoadrunnerConfig rrConfig;
 
     /**
      * The current mode of the roadrunner interface class.
@@ -330,6 +330,14 @@ public class MecanumDrive extends MecanumDriveSimple {
         return trajectoryBuilder(startPose, startTangent, HALDistanceUnit.INCHES, HALAngleUnit.RADIANS);
     }
 
+    public List<Double> getWheelPositions() {
+        return rrInterface.getWheelPositions();
+    }
+
+    public List<Double> getWheelVelocities() {
+        return rrInterface.getWheelVelocities();
+    }
+
     /**
      * Waits for the roadrunner interface to enter an idle state.
      */
@@ -344,6 +352,13 @@ public class MecanumDrive extends MecanumDriveSimple {
      */
     public boolean rRInterfaceIsBusy() {
         return rrInterface.isBusy();
+    }
+
+    /**
+     * Updates the roadrunner interface manually.
+     */
+    public void updateRRInterface() {
+        rrInterface.update();
     }
 
     /**

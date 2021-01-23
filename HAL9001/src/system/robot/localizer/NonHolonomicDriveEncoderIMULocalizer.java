@@ -14,6 +14,8 @@ import system.robot.roadrunner_util.AxesSigns;
 import system.robot.roadrunner_util.CoordinateMode;
 import system.robot.subsystems.drivetrain.NonHolonomicDrivetrain;
 import system.robot.subsystems.drivetrain.TankDriveSimple;
+import util.math.units.HALTimeUnit;
+import util.misc.Timer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,6 +47,8 @@ public class NonHolonomicDriveEncoderIMULocalizer implements Localizer {
     private List<Double> lastWheelPositions = new ArrayList<>();
     //The drivetrain's last heading value.
     private double lastHeading = Double.NaN;
+
+    private final Timer timer = new Timer();
 
     /**
      * The constructor for NonHolonomicDriveEncoderIMULocalizer.
@@ -217,6 +221,17 @@ public class NonHolonomicDriveEncoderIMULocalizer implements Localizer {
                 wheelVelocities,
                 drivetrain.driveConfig.TRACK_WIDTH
         );
+
+        if(!Double.isNaN(lastHeading)) {
+
+            //TODO see two wheel localizer
+            double headingDelta = Angle.normDelta(heading - lastHeading);
+
+            if(headingDelta != 0) {
+                poseVelocity = new Pose2d(poseVelocity.vec(), headingDelta / timer.getTimePassed(HALTimeUnit.SECONDS));
+                timer.reset();
+            }
+        }
 
         lastWheelPositions = wheelPositions;
         lastHeading = heading;
