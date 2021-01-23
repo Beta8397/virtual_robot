@@ -1,15 +1,18 @@
 package Actions.Ultimate;
 
-//import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import java.io.IOException;
 
 import Actions.ActionHandler;
 import Actions.HardwareWrappers.ServoHandler;
 import Autonomous.ConfigVariables;
+import MotorControllers.MotorController;
 
 /**
  * Author: Jordan Martin
@@ -21,24 +24,32 @@ public class ShooterSystemV2Test implements ActionHandler {
 	// good
 	public WheelMotor wheelMotor;
 	private boolean wheelSpinning;
+	public MotorController betterWheelMotorMaybe;
 	
-	// TODO TEST FOR ACTUAL RPMS
-	private static final int SHOOTER_ON_SPEED = 3700; // rotations per minute
+	// TODO fix PID controller in rpm class
+	private static final int SHOOTER_ON_SPEED = 5000; // rotations per minute
 	private static final int SHOOTER_OFF_SPEED = 0;
 	private static final int HIGH_GOAL_SPEED = 0;
 	private static final int POWER_SHOT_SPEED = 0;
+
+
+	// TODO USE THESE POWERS
+	private double power = 0;
+	private static final double SHOOTER_OFF_POWER = 0;
+	private static final double HIGH_GOAL_POWER = 0.69;
+	private static final double POWER_SHOT_POWER = 0.6;
 	
 	
 	// good
-	public ServoHandler pinballServo;
-	private double pinballAngle;
-	public static final double PINBALL_TURNED = 1;
-	public static final double PINBALL_REST = 0;
-	
-	
-//	private RevBlinkinLedDriver ringCount;
-//	private DistanceSensor ringDetector;
-//	private static final double RING_DETECTOR_HEIGHT = 0;//todo find this value
+	public ServoHandler indexServo;
+	private double indexAngle;
+	public static final double INDEX_LEFT = -1;
+	public static final double INDEX_RIGHT = 1;
+
+
+	private RevBlinkinLedDriver ringCount;
+	private DistanceSensor ringDetector;
+	private static final double RING_DETECTOR_HEIGHT = 0;//todo find this value
 //	private static final RevBlinkinLedDriver.BlinkinPattern[] COLORS = {
 //			RevBlinkinLedDriver.BlinkinPattern.BLACK,
 //			RevBlinkinLedDriver.BlinkinPattern.DARK_GRAY,
@@ -47,56 +58,75 @@ public class ShooterSystemV2Test implements ActionHandler {
 //	};
 	
 	public ShooterSystemV2Test(HardwareMap hardwareMap) {
-		wheelMotor = new WheelMotor("shooter_motor", hardwareMap);
-		
-		pinballServo = new ServoHandler("shooter_servo", hardwareMap);
-		pinballServo.setDirection(Servo.Direction.FORWARD);
+//		wheelMotor = new WheelMotor("wheelMotor", hardwareMap);
+		try {
+			betterWheelMotorMaybe = new MotorController("wheelMotor", "MotorConfig/NeverRest40.json", hardwareMap);
+			betterWheelMotorMaybe.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+			betterWheelMotorMaybe.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+			betterWheelMotorMaybe.setDirection(DcMotorSimple.Direction.FORWARD);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		indexServo = new ServoHandler("indexServo", hardwareMap);
+		indexServo.setDirection(Servo.Direction.FORWARD);
 		
 		wheelSpinning = false;
-		pinballAngle = PINBALL_REST;
+		indexAngle = INDEX_LEFT;
 		
-		//ringDetector = hardwareMap.get(DistanceSensor.class, "ringDetector");
+//		ringDetector = hardwareMap.get(DistanceSensor.class, "ringDetector");
 	}
-	
-	public void turnOnShooterWheel() {
-		wheelMotor.setRPM(SHOOTER_ON_SPEED);
+
+	public void spinUp() {
+		betterWheelMotorMaybe.setMotorPower(power);
 	}
-	
-	public void turnOffShooterWheel() {
-		wheelMotor.setRPM(SHOOTER_OFF_SPEED);
+
+	public void incrementPower() {
+		if(power <= 0.9) {
+			power = power + 0.1;
+		}
 	}
-	
+
+	public void decrementPower() {
+		if(power >= 0.1){
+			power = power - 0.1;
+		}
+	}
+
+	public void pauseShooter() {
+		betterWheelMotorMaybe.brake();
+	}
+
 	public void toggleShooterWheel() {
 		if (wheelMotor.targetRPM == 0)
 			wheelMotor.setRPM(SHOOTER_ON_SPEED);
 		else
 			wheelMotor.setRPM(SHOOTER_OFF_SPEED);
 	}
-	
-	// moves the pinball servo
-	public void togglePinball() {
-		if (pinballAngle == PINBALL_REST) {
-			pinballAngle = PINBALL_TURNED;
-		}
-		else {
-			pinballAngle = PINBALL_REST;
-		}
-		
-		pinballServo.setPosition(pinballAngle);
+
+	// moves the index servo
+	public void setIndexLeft(){
+		indexServo.setPosition(INDEX_LEFT);
+		indexAngle = INDEX_LEFT;
+	}
+
+	public void setIndexRight(){
+		indexServo.setPosition(INDEX_RIGHT);
+		indexAngle = INDEX_RIGHT;
 	}
 	
-	public void setPowerShotSpeed() {
-		wheelMotor.setRPM(POWER_SHOT_SPEED);
+	public void setPowerShotPower() {
+		power = POWER_SHOT_POWER;
 	}
-	
-	public void setHighGoalSpeed() {
-		wheelMotor.setRPM(HIGH_GOAL_SPEED);
+
+	public void setHighGoalPower() {
+		power = HIGH_GOAL_POWER;
 	}
-	
+
 	public void update() {
 		wheelMotor.updateShooterRPM();
-		
-		//updateRingLEDs();
+
+//		updateRingLEDs();
 	}
 	
 	public double calculateRingVelocity(double xDistance, double yDistance) {
@@ -109,7 +139,7 @@ public class ShooterSystemV2Test implements ActionHandler {
 	
 //	private void updateRingLEDs() {
 //		double stackHeight = RING_DETECTOR_HEIGHT - ringDetector.getDistance(DistanceUnit.INCH);
-//		int numRings = (int) Math.round(stackHeight / .75);
+//		int numRings = (int)Math.round(stackHeight / .75);
 //		ringCount.setPattern(COLORS[numRings]);
 //	}
 	
@@ -129,5 +159,7 @@ public class ShooterSystemV2Test implements ActionHandler {
 	}
 	
 	@Override
-	public void kill() {}
+	public void kill() {
+		betterWheelMotorMaybe.killMotorController();
+	}
 }

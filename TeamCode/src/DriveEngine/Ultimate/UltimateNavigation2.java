@@ -5,7 +5,6 @@ import Misc.Log;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import java.io.File;
@@ -22,7 +21,6 @@ import MotorControllers.MotorController;
 import MotorControllers.PIDController;
 import SensorHandlers.ImuHandler;
 import SensorHandlers.LIDARSensor;
-import UserControlled.Ultimate.UltimateV2Better;
 
 /**
  * Created by Jeremy on 8/23/2017.
@@ -66,7 +64,7 @@ public class UltimateNavigation2 extends Thread {
     public ImuHandler orientation;
     private double orientationOffset = 0;
 
-    private volatile boolean shouldRun = true, loggingData = true, usingSensors = true;
+    private volatile boolean shouldRun = true, loggingData = true, usingSensors = false;
     private volatile long startTime = System.nanoTime();
     private volatile HeadingVector IMUTravelVector = new HeadingVector();
 
@@ -86,7 +84,7 @@ public class UltimateNavigation2 extends Thread {
     private double acceleration = 0;
     private HardwareMap hardwareMap;
 
-    public UltimateNavigation2(HardwareMap hw, Location startLocation, double robotOrientationOffset, String configFile, boolean ignoreInitialSensorLocation) throws Exception {
+    public UltimateNavigation2(HardwareMap hw, Location startLocation, double robotOrientationOffset, String configFile, boolean ignoreInitialSensorLocation) throws RuntimeException {
         hardwareMap = hw;
         initializeUsingConfigFile(configFile);
         populateHashmaps();
@@ -94,13 +92,13 @@ public class UltimateNavigation2 extends Thread {
         orientation = new ImuHandler("imu", orientationOffset, hardwareMap);
         myLocation = new Location(startLocation.getX(),startLocation.getY(), robotOrientationOffset);
         distanceSensors = new LIDARSensor[3];
-        distanceSensors[LEFT_SENSOR] = new LIDARSensor(hardwareMap.get(DistanceSensor.class, "left_distance"), LEFT_SENSOR, "left");
-        distanceSensors[BACK_SENSOR] = new LIDARSensor(hardwareMap.get(DistanceSensor.class, "back_distance"), BACK_SENSOR, "back");
-        distanceSensors[RIGHT_SENSOR] = new LIDARSensor(hardwareMap.get(DistanceSensor.class, "right_distance"), RIGHT_SENSOR, "right");
+//        distanceSensors[LEFT_SENSOR] = new LIDARSensor(hardwareMap.get(DistanceSensor.class, "left"), LEFT_SENSOR, "left");
+//        distanceSensors[BACK_SENSOR] = new LIDARSensor(hardwareMap.get(DistanceSensor.class, "back"), BACK_SENSOR, "back");
+//        distanceSensors[RIGHT_SENSOR] = new LIDARSensor(hardwareMap.get(DistanceSensor.class, "right"), RIGHT_SENSOR, "right");
 //        distanceSensors[LEFT_SENSOR].getDistance(); We shouldn't need these because of initSensor in LIDARSensor class
 //        distanceSensors[BACK_SENSOR].getDistance();
 //        distanceSensors[RIGHT_SENSOR].getDistance();
-        if (!ignoreInitialSensorLocation) getInitialLocation();
+//        if (!ignoreInitialSensorLocation) getInitialLocation();
 
         for (int i = 0; i < wheelVectors.length; i++)
             wheelVectors[i] = new HeadingVector();
@@ -130,8 +128,12 @@ public class UltimateNavigation2 extends Thread {
         }).start();
     }
 
-    public UltimateNavigation2(HardwareMap hw, Location startLocation, double robotOrientationOffset, String configFile) throws Exception {
+    public UltimateNavigation2(HardwareMap hw, Location startLocation, double robotOrientationOffset, String configFile) throws RuntimeException {
         this(hw, startLocation, robotOrientationOffset, configFile, false);
+    }
+
+    public UltimateNavigation2(HardwareMap hw, Location startLocation, String configFileLoc) throws RuntimeException {
+        this(hw, startLocation, startLocation.getHeading(), configFileLoc);
     }
 
     private void getInitialLocation() {
@@ -304,7 +306,7 @@ public class UltimateNavigation2 extends Thread {
         return angleToChange;
     }
 
-//    private void updateIMUTrackedDistance() {
+    private void updateIMUTrackedDistance() {
 //        double deltaTime = (System.nanoTime() - startTime) * (1.0/1.0e9);
 //
 //        HeadingVector travelVector = new HeadingVector(orientation.getAccelerations()[0], orientation.getAccelerations()[1]);
@@ -320,7 +322,7 @@ public class UltimateNavigation2 extends Thread {
 //        Log.d("IMU Location: ", IMUDistance.toString());
 //
 //        startTime = System.nanoTime();
-//    }
+    }
 
     public void setLocation(Location loc) {
         myLocation = new Location(loc.getX(), loc.getY());
@@ -331,7 +333,7 @@ public class UltimateNavigation2 extends Thread {
         updateHeading();
         wheelVectors = getWheelVectors();
         updateLocation();
-        //updateIMUTrackedDistance();
+//        updateIMUTrackedDistance();
     }
 
     private void safetySleep(long time){
@@ -350,7 +352,7 @@ public class UltimateNavigation2 extends Thread {
     public void initializeUsingConfigFile(String file) {
         InputStream stream = null;
         try {
-            stream = new FileInputStream(new File(file));
+            stream = Misc.ConfigFile.open(hardwareMap, file);
         }
         catch(Exception e) {
             Log.d("Drive Engine Error: ",e.toString());
@@ -1138,6 +1140,8 @@ public class UltimateNavigation2 extends Thread {
     }
 
     public void driveToLocationPID(Location startLocation, Location targetLocation, double desiredSpeed, double locationTolerance, LinearOpMode mode) {
+        if(targetLocation.getHeading() == Double.MIN_VALUE) targetLocation.setHeading(startLocation.getHeading()); // this should help to avoid having heading issues
+
         xPositionController.setSp(0);
         yPositionController.setSp(0);
         turnController.setSp(0);
@@ -1461,24 +1465,5 @@ public class UltimateNavigation2 extends Thread {
         updateLocationInformation[Q4].put(EAST, new int[] {DRIVE_BASE, RIGHT_SENSOR});
         updateLocationInformation[Q4].put(SOUTH, new int[] {LEFT_SENSOR, DRIVE_BASE});
         updateLocationInformation[Q4].put(WEST, new int[] {BACK_SENSOR, LEFT_SENSOR});
-    }
-
-    public void driveToXY(Location location, double desiredSpeed, LinearOpMode mode) {
-        location.setHeading(orientation.getOrientation());
-        driveToLocationPID(location, desiredSpeed, mode);
-    }
-
-    public void turnToLocation(Location target, LinearOpMode mode) {
-        turnToLocation(target, HEADING_THRESHOLD, mode);
-    }
-
-    public void turnToLocation(Location target, double tolerance, LinearOpMode mode) {
-        double dx = target.getX() - myLocation.getX();
-        double dy = target.getY() - myLocation.getY();
-        double angle = -90 - Math.toDegrees(Math.atan(-dy / Math.abs(dx)));
-        if (dx > 0)
-            angle *= -1;
-        turnToHeading(angle, tolerance, mode);
-        Log.d("Angle to turn", angle + "");
     }
 }

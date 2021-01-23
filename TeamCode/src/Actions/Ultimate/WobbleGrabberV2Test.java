@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import Actions.ActionHandler;
 import Actions.HardwareWrappers.ServoHandler;
 import MotorControllers.MotorController;
+import SensorHandlers.LimitSwitch;
 
 /**
  * Author: Ethan Fisher
@@ -19,31 +20,33 @@ public class WobbleGrabberV2Test implements ActionHandler {
 
     public ServoHandler claw;
     public MotorController arm;
+    public LimitSwitch sensor;
 
     private static final double ARM_POWER_DOWN = -.2;
     private static final double ARM_POWER_UP = .25;
 
-    public static final double CLAW_GRAB_ANGLE = 0.0;
-    public static final double CLAW_RELEASE_ANGLE = .9;
+    public static final double CLAW_GRAB_ANGLE = -1;
+    public static final double CLAW_RELEASE_ANGLE = 1;
 
-    // TODO TEST FOR ACTUAL ANGLES
     public static final double ANGLE_INCREMENT = 25;
-    public static final double GAINS_ANGLE = 0;
-    public static final double LIFT_ANGLE = 0;
-    public static final double GRAB_AND_DROP_ANGLE = 0;
+    public static final double WALL_ANGLE = -50;
+    public static final double LIFT_ANGLE = -100;
+    public static final double GRAB_AND_DROP_ANGLE = -125;
     public static final double INIT_ANGLE = 0;
 
     public boolean wobbleGrabbed;
 
     public WobbleGrabberV2Test(HardwareMap hardwareMap) {
-        claw = new ServoHandler("hand_servo", hardwareMap);
+        claw = new ServoHandler("wobbleGrabberClaw", hardwareMap);
         claw.setDirection(Servo.Direction.FORWARD);
+        //sensor = new LimitSwitch(hardwareMap.touchSensor.get("wobbleGrabberSensor"), "wobbleGrabberSensor");
 
         try {
-            arm = new MotorController("arm_motor", "ActionConfig/WobbleArmConfig.json", hardwareMap);
+            arm = new MotorController("wobbleGrabberArm", "ActionConfig/WobbleArmConfig.json", hardwareMap);
             arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             arm.setDirection(DcMotorSimple.Direction.FORWARD);
             arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            arm.setDefaultTicksPerDegree();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -53,21 +56,21 @@ public class WobbleGrabberV2Test implements ActionHandler {
 
     public void setClawGrabAngle() {
         claw.setPosition(CLAW_GRAB_ANGLE);
-        wobbleGrabbed = true;
     }
 
     public void releaseWobble() {
         claw.setPosition(CLAW_RELEASE_ANGLE);
-        wobbleGrabbed = false;
     }
-    
-    public void toggleWobbleGrabbed() {
-        if (wobbleGrabbed) {
-            releaseWobble();
-        }
-        else {
-            setClawGrabAngle();
-        }
+
+
+    public void incrementAngle(){
+        arm.setPositionDegrees(arm.getDegree() + ANGLE_INCREMENT);
+        arm.setMotorPower(ARM_POWER_UP);
+    }
+
+    public void decrementAngle(){
+        arm.setPositionDegrees(arm.getDegree() - ANGLE_INCREMENT);
+        arm.setMotorPower(ARM_POWER_UP);
     }
 
     public void setArmAngle(double angle) {
@@ -79,14 +82,6 @@ public class WobbleGrabberV2Test implements ActionHandler {
             arm.setPositionDegrees(angle);
             arm.setMotorPower(ARM_POWER_DOWN);
         }
-    }
-
-    public void grabOrReleaseWobble(){
-        setArmAngle(GRAB_AND_DROP_ANGLE); // Lower and wait for wobble arm
-        while(armIsBusy());
-        toggleWobbleGrabbed(); // Open / close grabber claw
-        setArmAngle(LIFT_ANGLE); // Lift and wait for wobble arm
-        while(armIsBusy());
     }
 
 

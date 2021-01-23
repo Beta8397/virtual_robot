@@ -2,7 +2,6 @@
 
 package MotorControllers;
 
-import Misc.ConfigFile;
 import Misc.Log;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -82,6 +81,10 @@ public class MotorController extends Thread {
 
     public MotorController(String motorName, HardwareMap hardwareMap) { motor = hardwareMap.dcMotor.get(motorName); }
 
+    public void setDefaultTicksPerDegree() {
+        ticksPerDegree = ticksPerRevolution/360.0;
+    }
+
     public DcMotor.RunMode getMotorRunMode() { return motor.getMode(); }
 
     public void setZeroPowerBehavior(DcMotor.ZeroPowerBehavior b) { motor.setZeroPowerBehavior(b); }
@@ -139,7 +142,7 @@ public class MotorController extends Thread {
     private int readConfig(String fileLoc) {
         InputStream stream = null;
         try {
-            stream = ConfigFile.open(hardwareMap, fileLoc);
+            stream = Misc.ConfigFile.open(hardwareMap, fileLoc);
         } catch(Exception e) {
             logError("Error: ", e.toString());
             throw new RuntimeException(e);
@@ -229,22 +232,22 @@ public class MotorController extends Thread {
 //            motor.setPower(0.6);
 //        }
 
-//        Log.d("Hold Position", "Start");
-//
-//        setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//        if (!takenStartValue) {
-//            startPos = motor.getCurrentPosition();
-//            takenStartValue = true;
-//            Log.d("Hold Position", "Start value taken");
-//        }
-//        holdController.setSp(0);
-//        int distToPos = motor.getCurrentPosition() - startPos;
-//        Log.d("Hold Position", "KP" + holdController.getP());
-//        Log.d("Hold Position", "Distance to position" + distToPos);
-//        double motorPower = holdController.calculatePID(distToPos);
-//        Log.d("Hold Position", "Motor Power" + motorPower);
-//        motor.setPower(motorPower);
-        motor.setPower(0);
+        Log.d("Hold Position", "Start");
+
+        setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        if (!takenStartValue) {
+            startPos = motor.getCurrentPosition();
+            takenStartValue = true;
+            Log.d("Hold Position", "Start value taken");
+        }
+        holdController.setSp(0);
+        int distToPos = motor.getCurrentPosition() - startPos;
+        Log.d("Hold Position", "KP" + holdController.getP());
+        Log.d("Hold Position", "Distance to position" + distToPos);
+        double motorPower = holdController.calculatePID(distToPos);
+        Log.d("Hold Position", "Motor Power" + motorPower);
+        motor.setPower(motorPower);
+//        motor.setPower(0);
     }
 
     public double getWheelDiameterInInches(){
@@ -301,7 +304,7 @@ public class MotorController extends Thread {
     }
 
     private void logError(String main, String sub){
-        Log.d(motor.getClass().getSimpleName(), logTag + ":" + main + ":" + sub);
+//        Log.d(motor.getDeviceName(), logTag + ":" + main + ":" + sub);
     }
 
     public DcMotor getMotor() { return motor; }

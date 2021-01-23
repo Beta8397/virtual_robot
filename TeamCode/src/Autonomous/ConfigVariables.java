@@ -8,6 +8,17 @@ public class ConfigVariables {
     /*********************************
      * NOTE: (0, 0) is the center of the field
      * since we're using half field, center should be one square to the right and three up.
+     *
+     *
+     * NOTE NOTE NOTE -------------------------------------------------------------
+     * the tiles are not exactly 24 inches!!!
+     * in fact, they are about 23.674 inches from each center of the tabs
+     * the tabs themselves stick out about .8 inches from the tile
+     * the inner tile is about 22.874 inches
+     *
+     * from the center line to the outer edge, the field is about 70.622 inches
+     * the field from edge to edge is about 141.244 inches
+     * DO NOT FORGET THE NOTE ABOVE -----------------------------------------------
      *********************************/
 
     public static final double STONE_ONE_LEFT = 36.5;
@@ -59,37 +70,40 @@ public class ConfigVariables {
     public static final Location RED_FOUNDATION_STACK_LEFT = new Location(20+9+4, 37.5, 270);
     public static final Location BLUE_FOUNDATION_CENTER = new Location(-24-10-5, 49.5, 90);
 
-    public static final Location RED_ZONE_ONE = new Location(47, 11);
-    public static final Location RED_ZONE_TWO = new Location(47, 35);
-    public static final Location RED_ZONE_THREE = new Location(47, 63);
+    public static final Location RED_ZONE_ONE = new Location(48.8, 4.3); // may want to use something like 60 for the x value
+    public static final Location RED_ZONE_TWO = new Location(48.8, 19.4);
+    public static final Location RED_ZONE_THREE = new Location(48.8, 51.6);
     public static final Location ZONE_WAYPOINT = new Location(12, 60);
 
     public static final Location RING_DETECTION_POINT= new Location(52, -20, 180);
     public static final Location RING_CHECKPOINT = new Location(52, -10);
-    public static final Location STARTING_RING_PILE = new Location(36, -24);
+    public static final Location STARTING_RING_PILE = new Location(36.3, -23.7); // may need to adjust
 
 //    public static final HorizontalLine SHOOT_LINE = new HorizontalLine(new Location(-120, 30), 240);
     public static final Location PARKING_LOCATION = new Location(42, 10);
-    public static final Location SHOOTING_LINE_POINT = new Location(44, 4, 180);
+    public static final Location SHOOTING_LINE_POINT = new Location(23.7, -1.7, 0); // may need to adjust
     public static final Location SHOOTING_LINE_WAYPOINT = new Location(22, 30);
     public static final Location CENTER = new Location(0,0);
 
     public static final Location RED_WOBBLE_GOAL_LEFT_CHECKPOINT = new Location(57, -55);
-    public static final Location RED_WOBBLE_GOAL_LEFT = new Location(30, -54);
-    public static final Location RED_WOBBLE_GOAL_RIGHT = new Location(56, -31);
+    public static final Location RED_WOBBLE_GOAL_LEFT = new Location(25.1, -47.3); // may need to adjust
+    public static final Location RED_WOBBLE_GOAL_RIGHT = new Location(48.8, -47.3); // shouldn't need this one
 
     public static final Location WOBBLE_GOAL_PLACEMENT_OFFSET = new Location(3, -3);
 
-    public static final Location STARTING_ROBOT_LOCATION_LEFT = new Location(24, -60);
-    public static final Location STARTING_ROBOT_LOCATION_RIGHT = new Location(52, -60);
+    public static final Location STARTING_ROBOT_LOCATION_LEFT = new Location(24, -61.6);
+    public static final Location STARTING_ROBOT_LOCATION_RIGHT = new Location(48.8, -61.6, 0);
 
     // TODO find these locations
-    public static final int LEFT_POWER_SHOT_HEADING = -17;
-    public static final int MIDDLE_POWER_SHOT_HEADING = -10;
-    public static final int RIGHT_POWER_SHOT_HEADING = -7;
-    public static final Location POWER_SHOT_LEFT = new Location(4, 72);
-    public static final Location POWER_SHOT_MIDDLE = new Location(12, 72);
-    public static final Location POWER_SHOT_RIGHT = new Location(20, 72);
+    public static final double LEFT_POWER_SHOT_HEADING = -0.7;
+    public static final double MIDDLE_POWER_SHOT_HEADING = -6.4;
+    public static final double RIGHT_POWER_SHOT_HEADING = -11.9;
+    public static final Location POWER_SHOT_LEFT = new Location(24, 0, LEFT_POWER_SHOT_HEADING);
+    public static final Location POWER_SHOT_MIDDLE = new Location(24, 0, MIDDLE_POWER_SHOT_HEADING);
+    public static final Location POWER_SHOT_RIGHT = new Location(24, 0, RIGHT_POWER_SHOT_HEADING);
+    public static final Location POWER_SHOT_LOCATION_NO_HEADING = new Location(24, 0);
+
+
     public static final double POWER_SHOT_HEIGHT_CM = 77;
 
     public static final Location TOP_GOAL = new Location(36, 72);

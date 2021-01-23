@@ -98,9 +98,10 @@ public class UltimateAutonomous {
     public Location getZone(int numRings) {
         if (numRings == 0)
             return RED_ZONE_ONE;
-        if (numRings == 1)
+        else if (numRings == 1)
             return RED_ZONE_TWO;
-        return RED_ZONE_THREE;
+        else
+            return RED_ZONE_THREE;
     }
 
     public void driveToZone(int numRings) {
@@ -224,13 +225,13 @@ public class UltimateAutonomous {
 
     public void grabStartingPileRings() {
         turnToInitHeading();
-        intake.turnOn();
+        intake.intakeOn();
 
         driveDistance(20, UltimateNavigation.NORTH);
         mode.sleep(2000);
         robot.brake();
 
-        intake.turnOff();
+        intake.intakeOff();
         turnToInitHeading();
     }
 
@@ -267,6 +268,11 @@ public class UltimateAutonomous {
         location.setHeading(heading);
         driveToLocation(location);
     }
+    
+//    public void dropDownIntake() {todo use intake system v2 before uncommenting this
+//        intake.dropDown();
+//    }
+    
     public void driveToLocation(Location location) { robot.driveToLocationPID(redToBlue(location), MAX_SPEED, mode); }
     public void driveDistance(double distanceInInches, double heading) { robot.driveDistance(distanceInInches, heading, MAX_SPEED, mode); }
     public WobbleGrabberV1 getWobbleGrabber() { return wobbleGrabber; }

@@ -54,6 +54,8 @@ import static Autonomous.ConfigVariables.WOBBLE_GOAL_PLACEMENT_OFFSET;
 //@Disabled
 public class UltimateV1AutoRed extends LinearOpMode {
 
+//    volatile boolean shouldRun = true;
+
     @Override
     public void runOpMode() {
 
@@ -69,10 +71,12 @@ public class UltimateV1AutoRed extends LinearOpMode {
 
         waitForStart();
 
-        robot.getIntake().dropDown();
         robot.getShooter().keepElevatorAtTop();
         robot.getShooter().shoot();
+
         robot.getWobbleGrabber().grabWobbleGoal();
+        
+//        robot.dropDownIntake();
 
 //        robot.driveToLocationOnInitHeading(RING_DETECTION_POINT);
         robot.driveToLocationOnInitHeading(ConfigVariables.RED_ZONE_ONE);

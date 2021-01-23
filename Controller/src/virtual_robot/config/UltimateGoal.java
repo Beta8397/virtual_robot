@@ -55,6 +55,10 @@ public class UltimateGoal implements Game {
         }
     }
 
+    public int getStarterStackSize() {
+        return starterStackSize;
+    }
+
     @Override
     public boolean hasHumanPlayer() {
         return true;

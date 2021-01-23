@@ -1,9 +1,12 @@
 package virtual_robot.controller.robots.classes;
 
 import com.qualcomm.hardware.bosch.BNO055IMUImpl;
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.hardware.CRServoImpl;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorExImpl;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.DigitalChannelImpl;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.ServoImpl;
 import com.qualcomm.robotcore.hardware.configuration.MotorType;
@@ -54,7 +57,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
     public static final double INTAKE_DIST_TOLERANCE_INCHES = 13.5; // the distance to the ring at pick-up
     public static final long INTAKE_TO_HOPPER_TIME_MILLIS = 1000L;  // milliseconds that a ring blocks the intake from collecting another ring
 
-    public static final double WOBBLE_GRAB_TURN_FRACTION = 0.5; // fraction of turn at which wobble goal can be grabbed
+    public static final double WOBBLE_GRAB_TURN_FRACTION = 0.34; // fraction of turn at which wobble goal can be grabbed
 
     private final MotorType MOTOR_TYPE = MotorType.Neverest20;
     private DcMotorExImpl[] wheelMotors = null;
@@ -66,10 +69,10 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
     private final MotorType ARM_MOTOR_TYPE = MotorType.Neverest60;
     private DcMotorExImpl armMotor = null;
     private ServoImpl handServo = null;
+    private DigitalChannel armSwitch = null;
     private BNO055IMUImpl imu = null;
     private VirtualRobotController.DistanceSensorImpl[] distanceSensors = null;
     private VirtualRobotController.DistanceSensorImpl intakeSensor = null;
-    private ServoImpl intakeServo = null;
 
     /*
     Variables representing graphical UI nodes that we will need to manipulate. The @FXML annotation will
@@ -85,7 +88,6 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
     @FXML private Rectangle hand;           // The hand. Must move in Y-dimension as arm extends/retracts.
     @FXML private Rectangle leftFinger;     // Fingers must open and close based on position of hand servo.
     @FXML private Rectangle rightFinger;
-    @FXML private Rectangle intakeRoller;
 
     /*
     Transform objects that will be instantiated in the initialize() method, and will be used in the
@@ -95,7 +97,6 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
     Translate handTranslateTransform;
     Translate leftFingerTranslateTransform;
     Translate rightFingerTranslateTransform;
-    Translate dropDown;
 
     /*
     Current scale of the arm (i.e., the degree to which arm is extended or retracted). 1.0 means fully retracted.
@@ -127,19 +128,19 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
 
         hardwareMap.setActive(true);
         wheelMotors = new DcMotorExImpl[]{
-                (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "back_left_motor"),
-                (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "front_left_motor"),
-                (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "front_right_motor"),
-                (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "back_right_motor")
+                (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "blMotor"),
+                (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "flMotor"),
+                (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "frMotor"),
+                (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "brMotor")
         };
 
-        shooterMotor = (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "shooter_motor");
-        shooterServo = (ServoImpl) hardwareMap.servo.get("shooter_servo");
-        intakeMotor = (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "intake_motor");
+        shooterMotor = (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "wheelMotor");
+        shooterServo = (ServoImpl) hardwareMap.servo.get("indexServo");
+        intakeMotor = (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "intakeMotor");
         intakeSensor = hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "intakeSensor");
-        armMotor = (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "arm_motor");
-        handServo = (ServoImpl) hardwareMap.servo.get("hand_servo");
-        intakeServo = (ServoImpl) hardwareMap.servo.get("intakeServo");
+        armMotor = (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "wobbleGrabberArm");
+        handServo = (ServoImpl) hardwareMap.servo.get("wobbleGrabberClaw");
+        armSwitch = (DigitalChannelImpl) hardwareMap.get(DigitalChannel.class, "armSwitch");
 
         distanceSensors = new VirtualRobotController.DistanceSensorImpl[]{
                 hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "front_distance"),
@@ -165,7 +166,6 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         shooterIndexer.getTransforms().add(new Rotate(0, getCenterPivotX(shooterIndexer), getEdgePivotY(shooterIndexer)));
         intake1.getTransforms().add(new Rotate(0, getCenterPivotX(intake1), getCenterPivotY(intake1)));
         intake2.getTransforms().add(new Rotate(0, getCenterPivotX(intake2), getCenterPivotY(intake2)));
-        intakeRoller.getTransforms().add(new Translate(0, 0));
 
         /*
         Scales the arm with pivot point at center of back of robot (which corresponds to the back of the arm).
@@ -204,7 +204,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
 
     protected void createHardwareMap() {
         hardwareMap = new HardwareMap();
-        String[] motorNames = new String[]{"back_left_motor", "front_left_motor", "front_right_motor", "back_right_motor"};
+        String[] motorNames = new String[]{"blMotor", "flMotor", "frMotor", "brMotor"};
         for (String name : motorNames) {
             hardwareMap.put(name, new DcMotorExImpl(MOTOR_TYPE));
         }
@@ -213,17 +213,19 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
             hardwareMap.put(name, controller.new DistanceSensorImpl());
         }
         hardwareMap.put("imu", new BNO055IMUImpl(this, 10));
-        hardwareMap.put("shooter_motor", new DcMotorExImpl(SHOOTER_MOTOR_TYPE));
-        hardwareMap.put("shooter_servo", new ServoImpl());
-        hardwareMap.put("intake_motor", new DcMotorExImpl(INTAKE_MOTOR_TYPE));
-        hardwareMap.put("arm_motor", new DcMotorExImpl(ARM_MOTOR_TYPE));
-        hardwareMap.put("hand_servo", new ServoImpl());
+        hardwareMap.put("wheelMotor", new DcMotorExImpl(SHOOTER_MOTOR_TYPE));
+        hardwareMap.put("indexServo", new ServoImpl());
+        hardwareMap.put("intakeMotor", new DcMotorExImpl(INTAKE_MOTOR_TYPE));
+        hardwareMap.put("wobbleGrabberArm", new DcMotorExImpl(ARM_MOTOR_TYPE));
+        hardwareMap.put("wobbleGrabberClaw", new ServoImpl());
         hardwareMap.put("aimServo", new ServoImpl());
         hardwareMap.put("elevatorServo", new CRServoImpl(180));
         hardwareMap.put("topSensor", controller.new DistanceSensorImpl());
         hardwareMap.put("bottomSensor", controller.new DistanceSensorImpl());
         hardwareMap.put("intakeSensor", controller.new DistanceSensorImpl());
         hardwareMap.put("intakeServo", new ServoImpl());
+        hardwareMap.put("armSwitch", new DigitalChannelImpl());
+        hardwareMap.put("intakeLEDs", new RevBlinkinLedDriver());
     }
 
     public synchronized void updateStateAndSensors(double millis) {
@@ -231,7 +233,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         double[] w = new double[4];
 
         for (int i = 0; i < 4; i++) {
-            deltaPos[i] = wheelMotors[i].update(millis);
+            deltaPos[i] = -wheelMotors[i].update(millis);
             w[i] = deltaPos[i] * wheelCircumference / MOTOR_TYPE.TICKS_PER_ROTATION;
             if (i < 2) w[i] = -w[i];
         }
@@ -324,7 +326,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         }
 
         if (wobble_goal != null) {
-            if (handServo.getPosition() >= 0.75 || armMotor.getCurrentPosition() / ARM_MOTOR_TYPE.TICKS_PER_ROTATION <= 0.25) {
+            if (handServo.getPosition() >= 0.75 || Math.abs(armMotor.getCurrentPosition()) / ARM_MOTOR_TYPE.TICKS_PER_ROTATION <= 0.25) {
                 // when controlled, the wobble goal will stay between the fingers
                 Vector2D p = getHandLocation();
                 wobble_goal.setLocation(x + p.x, y + p.y);
@@ -357,10 +359,15 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
             readyToShoot = true;
         }
         
-        double distance;
-        if (ringInIntake != null) distance = 100;
-        else distance = 200;
-        intakeSensor.updateDistance(0, distance / -6.35 + 288, 0);
+        if (ringInIntake != null) isRingInIntake = true;
+        if (ringWidth >= 50) ringPastSensor = true;
+        if (isRingInIntake && !ringPastSensor) ringWidth += 10;
+        if (isRingInIntake && ringPastSensor) ringWidth -= 10;
+        if (ringWidth <= 0) {
+            ringPastSensor = false;
+            isRingInIntake = false;
+            ringWidth = 0;
+        }
     }
 
     private Vector2D getHandLocation() {
@@ -414,7 +421,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         else if (e instanceof WobbleGoal) {
             if (e.getControlledBy() == null) {
                 WobbleGoal w = (WobbleGoal) e;
-                if (armMotor.getCurrentPosition() / ARM_MOTOR_TYPE.TICKS_PER_ROTATION >= WOBBLE_GRAB_TURN_FRACTION) {
+                if (Math.abs(armMotor.getCurrentPosition()) / ARM_MOTOR_TYPE.TICKS_PER_ROTATION >= WOBBLE_GRAB_TURN_FRACTION) {
                     // arm is in position to grab wobble goal
                     if (handServo.getPosition() >= 0.75) {
                         // hand is grasping
@@ -546,7 +553,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
             rightFingerTranslateTransform.setX(-fingerPos);
         }
     
-        if (intakeServo.getPosition() > .5) ((Translate) intakeRoller.getTransforms().get(0)).setY(-15);
+        intakeSensor.updateDistance(0, 200 - ringWidth, 0);
     }
 
     public void powerDownAndReset() {
