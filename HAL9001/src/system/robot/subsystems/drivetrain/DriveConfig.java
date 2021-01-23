@@ -110,6 +110,35 @@ public class DriveConfig {
     }
 
     /**
+     * The constructor for DriveConfig. Assumes a roughly square robot with a normal center of mass.
+     *
+     * @param wheelRadius The radius of the drivetrain's wheels.
+     * @param radiusUnit The unit for the wheelRadius parameter.
+     * @param gearRatio The gear ratio between the motors and the drivetrain wheels.
+     * @param trackWidth The track width of the robot.
+     * @param trackWidthUnit The unit for the trackWidth parameter.
+     * @param encoderTicksPerRev The number of encoder ticks per revolution of the drivetrain motors.
+     * @param motorMaxRPM The maximum RPM of the drivetrain motors.
+     */
+    public DriveConfig(double wheelRadius, HALDistanceUnit radiusUnit, double gearRatio, double trackWidth, HALDistanceUnit trackWidthUnit, double encoderTicksPerRev, double motorMaxRPM) {
+        this(wheelRadius, radiusUnit, gearRatio, trackWidth, trackWidthUnit, trackWidth, trackWidthUnit, encoderTicksPerRev, motorMaxRPM);
+    }
+
+    /**
+     * The constructor for DriveConfig. Assumes a roughly square robot with a normal center of mass.
+     *
+     * @param wheelRadiusInches The radius of the drivetrain's wheels in inches.
+     * @param gearRatio The gear ratio between the motors and the drivetrain wheels.
+     * @param trackWidth The track width of the robot.
+     * @param trackWidthUnit The unit for the trackWidth parameter.
+     * @param encoderTicksPerRev The number of encoder ticks per revolution of the drivetrain motors.
+     * @param motorMaxRPM The maximum RPM of the drivetrain motors.
+     */
+    public DriveConfig(double wheelRadiusInches, double gearRatio, double trackWidth, HALDistanceUnit trackWidthUnit, double encoderTicksPerRev, double motorMaxRPM) {
+        this(wheelRadiusInches, HALDistanceUnit.INCHES, gearRatio, trackWidth, trackWidthUnit, encoderTicksPerRev, motorMaxRPM);
+    }
+
+    /**
      * Converts encoder ticks to inches using driveconfig's inputted data.
      *
      * @param ticks The number of encoder ticks travelled.

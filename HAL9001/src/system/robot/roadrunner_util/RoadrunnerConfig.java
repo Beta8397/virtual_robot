@@ -93,26 +93,79 @@ public class RoadrunnerConfig extends DriveConfig {
      * @param gearRatio The gear ratio between the motors and the drivetrain wheels.
      * @param trackWidthInches The track width of the robot in inches.
      * @param wheelBaseInches The wheel base of the robot in inches.
-     * @param motorTicksPerRevolution The number of encoder ticks per revolution of the drivetrain motors.
+     * @param motorTicksPerRev The number of encoder ticks per revolution of the drivetrain motors.
      * @param motorMaxRPM The maximum RPM of the drivetrain motors.
      */
-    public RoadrunnerConfig(double wheelRadiusInches, double gearRatio, double trackWidthInches, double wheelBaseInches, double motorTicksPerRevolution, double motorMaxRPM) {
-        this(wheelRadiusInches, HALDistanceUnit.INCHES, gearRatio, trackWidthInches, HALDistanceUnit.INCHES, wheelBaseInches, HALDistanceUnit.INCHES, motorTicksPerRevolution, motorMaxRPM);
+    public RoadrunnerConfig(double wheelRadiusInches, double gearRatio, double trackWidthInches, double wheelBaseInches, double motorTicksPerRev, double motorMaxRPM) {
+        this(wheelRadiusInches, HALDistanceUnit.INCHES, gearRatio, trackWidthInches, HALDistanceUnit.INCHES, wheelBaseInches, HALDistanceUnit.INCHES, motorTicksPerRev, motorMaxRPM);
     }
 
     /**
-     * The constructor for RoadrunnerConfig.
+     * The constructor for RoadrunnerConfig. Assumes a roughly square robot with a normal center of mass.
      *
      * @param wheelRadiusInches The radius of the drivetrain's wheels in inches.
      * @param gearRatio The gear ratio between the motors and the drivetrain wheels.
      * @param trackWidthInches The track width of the robot in inches.
-     * @param motorTicksPerRevolution The number of encoder ticks per revolution of the drivetrain motors.
+     * @param motorTicksPerRev The number of encoder ticks per revolution of the drivetrain motors.
      * @param motorMaxRPM The maximum RPM of the drivetrain motors.
      */
-    public RoadrunnerConfig(double wheelRadiusInches, double gearRatio, double trackWidthInches, double motorTicksPerRevolution, double motorMaxRPM) {
-        this(wheelRadiusInches, gearRatio, trackWidthInches, trackWidthInches, motorTicksPerRevolution, motorMaxRPM);
+    public RoadrunnerConfig(double wheelRadiusInches, double gearRatio, double trackWidthInches, double motorTicksPerRev, double motorMaxRPM) {
+        this(wheelRadiusInches, HALDistanceUnit.INCHES, gearRatio, trackWidthInches, HALDistanceUnit.INCHES, trackWidthInches, HALDistanceUnit.INCHES, motorTicksPerRev, motorMaxRPM);
     }
 
+    /**
+     * The constructor for RoadrunnerConfig. Assumes a roughly square robot with a normal center of mass.
+     *
+     * @param wheelRadius The radius of the drivetrain's wheels.
+     * @param radiusUnit The unit for the wheelRadius parameter.
+     * @param gearRatio The gear ratio between the motors and the drivetrain wheels.
+     * @param encoderTicksPerRev The number of encoder ticks per revolution of the drivetrain motors.
+     * @param motorMaxRPM The maximum RPM of the drivetrain motors.
+     */
+    public RoadrunnerConfig(double wheelRadius, HALDistanceUnit radiusUnit, double gearRatio, double encoderTicksPerRev, double motorMaxRPM) {
+        this(wheelRadius, radiusUnit, gearRatio, 1, HALDistanceUnit.INCHES, 1, HALDistanceUnit.INCHES, encoderTicksPerRev, motorMaxRPM);
+    }
+
+    /**
+     * The constructor for RoadrunnerConfig. Assumes a roughly square robot with a normal center of mass.
+     *
+     * @param wheelRadiusInches The radius of the drivetrain's wheels in inches.
+     * @param gearRatio The gear ratio between the motors and the drivetrain wheels.
+     * @param encoderTicksPerRev The number of encoder ticks per revolution of the drivetrain motors.
+     * @param motorMaxRPM The maximum RPM of the drivetrain motors.
+     */
+    public RoadrunnerConfig(double wheelRadiusInches, double gearRatio, double encoderTicksPerRev, double motorMaxRPM) {
+        this(wheelRadiusInches, HALDistanceUnit.INCHES, gearRatio, encoderTicksPerRev, motorMaxRPM);
+    }
+
+    /**
+     * The constructor for RoadrunnerConfig. Assumes a roughly square robot with a normal center of mass.
+     *
+     * @param wheelRadius The radius of the drivetrain's wheels.
+     * @param radiusUnit The unit for the wheelRadius parameter.
+     * @param gearRatio The gear ratio between the motors and the drivetrain wheels.
+     * @param trackWidth The track width of the robot.
+     * @param trackWidthUnit The unit for the trackWidth parameter.
+     * @param encoderTicksPerRev The number of encoder ticks per revolution of the drivetrain motors.
+     * @param motorMaxRPM The maximum RPM of the drivetrain motors.
+     */
+    public RoadrunnerConfig(double wheelRadius, HALDistanceUnit radiusUnit, double gearRatio, double trackWidth, HALDistanceUnit trackWidthUnit, double encoderTicksPerRev, double motorMaxRPM) {
+        this(wheelRadius, radiusUnit, gearRatio, trackWidth, trackWidthUnit, trackWidth, trackWidthUnit, encoderTicksPerRev, motorMaxRPM);
+    }
+
+    /**
+     * The constructor for RoadrunnerConfig. Assumes a roughly square robot with a normal center of mass.
+     *
+     * @param wheelRadiusInches The radius of the drivetrain's wheels in inches.
+     * @param gearRatio The gear ratio between the motors and the drivetrain wheels.
+     * @param trackWidth The track width of the robot.
+     * @param trackWidthUnit The unit for the trackWidth parameter.
+     * @param encoderTicksPerRev The number of encoder ticks per revolution of the drivetrain motors.
+     * @param motorMaxRPM The maximum RPM of the drivetrain motors.
+     */
+    public RoadrunnerConfig(double wheelRadiusInches, double gearRatio, double trackWidth, HALDistanceUnit trackWidthUnit, double encoderTicksPerRev, double motorMaxRPM) {
+        this(wheelRadiusInches, HALDistanceUnit.INCHES, gearRatio, trackWidth, trackWidthUnit, encoderTicksPerRev, motorMaxRPM);
+    }
     /**
      * Whether or not the drivetrain is using drive encoders in its localizer.
      *
