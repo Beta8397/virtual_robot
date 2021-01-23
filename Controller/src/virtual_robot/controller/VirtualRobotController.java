@@ -19,6 +19,7 @@ import javafx.scene.shape.Polyline;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Callback;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.internal.opmode.TelemetryImpl;
 import org.reflections.Reflections;
 import virtual_robot.config.Config;
 import javafx.application.Platform;
@@ -95,10 +96,6 @@ public class VirtualRobotController {
     //Virtual Robot Control Engine
     ScheduledExecutorService executorService = null;
     public static final double TIMER_INTERVAL_MILLISECONDS = 33;
-
-    //Telemetry
-    private volatile String telemetryText;
-    private volatile boolean telemetryTextChanged = false;
 
     //Random Number Generator
     private Random random = new Random();
@@ -413,7 +410,6 @@ public class VirtualRobotController {
                 public void run() {
                     bot.updateDisplay();
                     pathLine.getPoints().addAll(halfFieldWidth + bot.getX(), halfFieldWidth - bot.getY());
-                    updateTelemetryDisplay();
                 }
             };
             Runnable singleCycle = new Runnable() {
@@ -574,9 +570,8 @@ public class VirtualRobotController {
         pathLine.setVisible(cbxShowPath.isSelected());
     }
 
-    private void updateTelemetryDisplay(){
-        if (telemetryTextChanged && telemetryText != null) txtTelemetry.setText(telemetryText);
-        telemetryTextChanged = false;
+    public void updateTelemetryDisplay(String telemetryText){
+        txtTelemetry.setText(telemetryText);
     }
 
     private void initializeTelemetryTextArea(){
@@ -745,56 +740,10 @@ public class VirtualRobotController {
             hardwareMap = VirtualRobotController.this.hardwareMap;
             gamepad1 = gamePad1;
             this.gamepad2 = gamePad2;
-            telemetry = new TelemetryImpl();
+            telemetry = new TelemetryImpl(VirtualRobotController.this);
         }
     }
 
-    public class TelemetryImpl implements Telemetry {
-
-        public TelemetryImpl(){
-            data.setLength(0);
-            setText(data.toString());
-        }
-
-        /**
-         * Add data to telemetry (note-must call update() to cause the data to be displayed)
-         * @param caption The caption for this telemetry entry.
-         * @param fmt Format string, for formatting the data.
-         * @param data The data to be formatted by the format string.
-         */
-        public void addData(String caption, String fmt, Object... data){
-            this.data.append(caption + ": ");
-            String s = String.format(fmt, data);
-            this.data.append(s + "\n");
-        }
-
-        /**
-         * Add single data object to telemetry, with a caption (note-must call update() to cause the data to be displayed)
-         * @param caption The caption for this telemetry entry.
-         * @param data The data for this telemetry entry.
-         */
-        public void addData(String caption, Object data){
-            this.data.append(caption + ": " + data.toString() + "\n");
-        }
-
-
-        /**
-         * Replace any data currently displayed on telemetry with all data that has been added since the previous call to
-         * update(). Note: if no data has been added, this method does nothing.
-         */
-        public void update(){
-            if (data.length() > 0) {
-                setText(data.toString());
-                data.setLength(0);
-            }
-        }
-
-        private void setText(String text){
-            telemetryText = text;
-            telemetryTextChanged = true;
-        }
-
-    }
 
     public interface GamePadHelper extends Runnable{
         public void quit();
