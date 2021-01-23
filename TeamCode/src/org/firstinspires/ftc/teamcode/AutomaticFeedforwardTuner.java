@@ -90,7 +90,7 @@ public class AutomaticFeedforwardTuner extends BaseAutonomous {
         List<Double> positionSamples = new ArrayList<>();
         List<Double> powerSamples = new ArrayList<>();
 
-        robot.drive.getLocalizer().setPoseEstimate(new Pose2d());
+        robot.drive.setPoseEstimate(new Pose2d());
 
         double startTime = clock.seconds();
         while (!robot.isStopRequested()) {
@@ -106,7 +106,7 @@ public class AutomaticFeedforwardTuner extends BaseAutonomous {
             powerSamples.add(power);
 
             robot.drive.movePower(new Vector2D(0, power));
-            robot.drive.getLocalizer().update();
+            robot.drive.updateLocalizer();
 
             waitTime(SIMULATED_SAMPLE_TIME_MS);
         }
@@ -161,7 +161,7 @@ public class AutomaticFeedforwardTuner extends BaseAutonomous {
         positionSamples.clear();
         powerSamples.clear();
 
-        robot.drive.getLocalizer().setPoseEstimate(new Pose2d());
+        robot.drive.setPoseEstimate(new Pose2d());
         robot.drive.movePower(new Vector2D(0, MAX_POWER));
 
         startTime = clock.seconds();
@@ -177,7 +177,7 @@ public class AutomaticFeedforwardTuner extends BaseAutonomous {
             positionSamples.add(robot.drive.getPoseEstimate().getY());
             powerSamples.add(MAX_POWER);
 
-            robot.drive.getLocalizer().update();
+            robot.drive.updateLocalizer();
 
             waitTime(SIMULATED_SAMPLE_TIME_MS);
         }

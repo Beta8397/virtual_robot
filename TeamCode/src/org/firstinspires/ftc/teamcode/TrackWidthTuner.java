@@ -32,7 +32,7 @@ public class TrackWidthTuner extends BaseAutonomous {
 
         MovingStatistics trackWidthStats = new MovingStatistics(NUM_TRIALS);
         for (int i = 0; i < NUM_TRIALS; i++) {
-            robot.drive.getLocalizer().setPoseEstimate(new Pose2d());
+            robot.drive.setPoseEstimate(new Pose2d());
 
             // it is important to handle heading wraparounds
             double headingAccumulator = 0;

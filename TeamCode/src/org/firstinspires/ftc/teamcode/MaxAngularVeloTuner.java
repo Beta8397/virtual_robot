@@ -36,9 +36,9 @@ public class MaxAngularVeloTuner extends BaseAutonomous {
         ElapsedTime timer = new ElapsedTime();
 
         while (!robot.isStopRequested() && timer.seconds() < RUNTIME) {
-            robot.drive.getLocalizer().update();
+            robot.drive.updateLocalizer();
 
-            Pose2d poseVelo = Objects.requireNonNull(robot.drive.getLocalizer().getPoseVelocity(), "poseVelocity() must not be null. Ensure that the getWheelVelocities() method has been overridden in your localizer.");
+            Pose2d poseVelo = Objects.requireNonNull(robot.drive.getPoseVelocity(), "poseVelocity() must not be null. Ensure that the getWheelVelocities() method has been overridden in your localizer.");
 
             maxAngVelocity = Math.max(poseVelo.getHeading(), maxAngVelocity);
         }

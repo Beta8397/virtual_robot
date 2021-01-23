@@ -23,7 +23,7 @@ public class RoadrunnerCalibBot extends Robot {
                 "front_right_motor",
                 "back_left_motor",
                 "back_right_motor", false);
-        /*drive.setLocalizer(new HolonomicDriveEncoderIMULocalizer(
+        drive.setLocalizer(new HolonomicDriveEncoderIMULocalizer(
                 this,
                 drive,
                 "imu",
@@ -32,23 +32,5 @@ public class RoadrunnerCalibBot extends Robot {
                 "back_left_motor",
                 "back_right_motor"
         ));
-        /*drive.setLocalizer(new TwoWheelLocalizer(
-                this,
-                "imu",
-                "enc_right",
-                new Pose2d(6,0,0),
-                "enc_x",
-                new Pose2d(0,0,PI/2),
-                new TrackingWheelConfig(1,1,1120)
-        ));*/
-        /*drive.setLocalizer(new ThreeWheelLocalizer(
-                this,
-                12,
-                0,
-                "enc_left",
-                "enc_right",
-                "enc_x",
-                new TrackingWheelConfig(1,1,1120)
-        ).reverseEncoder("enc_left"));*/
     }
 }

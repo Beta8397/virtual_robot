@@ -20,7 +20,7 @@ public class FollowerPIDTuner extends BaseAutonomous {
     protected void onInit() {
         startPose = new Pose2d(DISTANCE / 2, -DISTANCE / 2, 0);
 
-        robot.drive.getLocalizer().setPoseEstimate(startPose);
+        robot.drive.setPoseEstimate(startPose);
     }
 
     @Override

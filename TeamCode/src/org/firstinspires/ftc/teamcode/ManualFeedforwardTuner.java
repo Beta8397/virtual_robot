@@ -88,9 +88,9 @@ public class ManualFeedforwardTuner extends BaseAutonomous {
                     double targetPower = Kinematics.calculateMotorFeedforward(motionState.getV(), motionState.getA(), robot.drive.rrConfig.kV, robot.drive.rrConfig.kA, robot.drive.rrConfig.kStatic);
 
                     robot.drive.movePower(new Vector2D(0, targetPower));
-                    robot.drive.getLocalizer().update();
+                    robot.drive.updateLocalizer();
 
-                    Pose2d poseVelo = Objects.requireNonNull(robot.drive.getLocalizer().getPoseVelocity(), "poseVelocity() must not be null. Ensure that the getWheelVelocities() method has been overridden in your localizer.");
+                    Pose2d poseVelo = Objects.requireNonNull(robot.drive.getPoseVelocity(), "poseVelocity() must not be null. Ensure that the getWheelVelocities() method has been overridden in your localizer.");
                     double currentVelo = poseVelo.getY();
 
                     // update telemetry

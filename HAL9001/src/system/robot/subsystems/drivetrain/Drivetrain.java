@@ -612,7 +612,32 @@ public abstract class Drivetrain extends SubSystem {
      */
     @NotNull
     public final Pose2d getPoseEstimate() {
-        return localizer.getPoseEstimate();
+        return localizerCoordinateMode.convertTo(coordinateMode).apply(localizer.getPoseEstimate());
+    }
+
+    /**
+     * Sets the localizer pose estimate.
+     *
+     * @param poseEstimate The localizer pose estimate.
+     */
+    public final void setPoseEstimate(Pose2d poseEstimate) {
+        localizer.setPoseEstimate(coordinateMode.convertTo(localizerCoordinateMode).apply(poseEstimate));
+    }
+
+    /**
+     * Gets the localizer estimated pose velocity.
+     *
+     * @return The localizer estimated pose velocity.
+     */
+    public final Pose2d getPoseVelocity() {
+        return localizerCoordinateMode.convertTo(coordinateMode).apply(localizer.getPoseVelocity());
+    }
+
+    /**
+     * Updates the localizer.
+     */
+    public final void updateLocalizer() {
+        localizer.update();
     }
 
     /**
