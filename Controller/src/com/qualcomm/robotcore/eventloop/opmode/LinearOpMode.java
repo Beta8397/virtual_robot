@@ -180,6 +180,11 @@ public abstract class LinearOpMode extends OpMode {
                 System.out.println("Exception from runOpMode:");
                 System.out.println(helper.getException().getClass().getName());
                 System.out.println(helper.getException().getLocalizedMessage());
+                System.out.println("Stack Trace:");
+                for (StackTraceElement stackTraceElement: helper.getException().getStackTrace()){
+                    System.out.println("  " + stackTraceElement.toString());
+                }
+                System.out.println();
             }
             stop();
             Thread.currentThread().interrupt();

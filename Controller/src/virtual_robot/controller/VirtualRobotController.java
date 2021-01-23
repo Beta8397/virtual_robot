@@ -526,6 +526,11 @@ public class VirtualRobotController {
             System.out.println("Exception thrown by opModeThread.");
             System.out.println(e.getClass().getName());
             System.out.println(e.getLocalizedMessage());
+            System.out.println("Stack Trace:");
+            for (StackTraceElement stackTraceElement: e.getStackTrace()){
+                System.out.println("  " + stackTraceElement.toString());
+            }
+            System.out.println();
         }
 
         bot.getHardwareMap().setActive(false);
