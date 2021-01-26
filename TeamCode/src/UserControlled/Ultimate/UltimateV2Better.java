@@ -209,16 +209,10 @@ public class UltimateV2Better extends LinearOpMode {
 		// Indexer toggle
 		if(gamepad1.right_trigger > 0.1 && !rt1Pressed){
 			rt1Pressed = true;
-			toggleIndex = !toggleIndex;
+			shoot();
 		}
-		else if(!(gamepad1.right_trigger > 0.1)){
+		else if(!(gamepad1.right_trigger > 0.1)) {
 			rt1Pressed = false;
-		}
-		if(toggleIndex){
-			shooter.setIndexLeft();
-		}
-		else{
-			shooter.setIndexRight();
 		}
 
 		// TODO: update this to be actually correct, need to determine which wall to be against and what the x and y values would be
@@ -335,28 +329,19 @@ public class UltimateV2Better extends LinearOpMode {
 	private void powerShotLeft() {
 		shooter.setPowerShotPower();
 		robot.driveToLocationPID(ConfigVariables.POWER_SHOT_LEFT, MED_SPEED,this);
-		if(shooter.indexServo.getPosition() == 1) {
-			shooter.setIndexLeft();
-		}
-		else {
-			shooter.setIndexRight();
-		}
+		shoot();
 	}
 	
 	private void powerShotCenter() {
 		shooter.setPowerShotPower();
 		robot.driveToLocationPID(ConfigVariables.POWER_SHOT_MIDDLE, MED_SPEED,this);
+		shoot();
 	}
 	
 	private void powerShotRight() {
 		shooter.setPowerShotPower();
 		robot.driveToLocationPID(ConfigVariables.POWER_SHOT_RIGHT, MED_SPEED,this);
-		if(shooter.indexServo.getPosition() == 1) {
-			shooter.setIndexLeft();
-		}
-		else {
-			shooter.setIndexRight();
-		}
+		shoot();
 	}
 	
 	private void stopActions() {
@@ -369,6 +354,6 @@ public class UltimateV2Better extends LinearOpMode {
 	
 	private void updateMiscFunctions() {
 		shooter.update();
-//		intake.update();
+		intake.update();
 	}
 }

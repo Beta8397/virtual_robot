@@ -43,8 +43,8 @@ public class RingIntakeSystemV2Test implements ActionHandler {
 
 	private DistanceSensor ringDetector;
 	private boolean ringSensed;
-	private static final double RING_DETECTION_THRESHOLD = 0;//todo find these
-	private static final double NO_RING_THRESHOLD = 0;
+	private static final double RING_DETECTION_THRESHOLD = 160;//todo find these
+	private static final double NO_RING_THRESHOLD = 140;
 	
 	public int numRingsTakenIn;
 	
@@ -72,8 +72,8 @@ public class RingIntakeSystemV2Test implements ActionHandler {
 	public void update() {//call this function repeatedly
 		intakeMotor.setMotorPower(POWERS[state]);
 		driver.setPattern(COLORS[state]);
-		detectRingsInIntake();
-		outtakeExtraRing();
+//		detectRingsInIntake();
+//		outtakeExtraRing();
 	}
 	
 	private void outtakeExtraRing() {
@@ -82,7 +82,7 @@ public class RingIntakeSystemV2Test implements ActionHandler {
 	}
 	
 	private void detectRingsInIntake() {
-		double distanceToRing = ringDetector.getDistance(DistanceUnit.INCH);
+		double distanceToRing = ringDetector.getDistance(DistanceUnit.MM);
 		if (ringSensed && distanceToRing > NO_RING_THRESHOLD) {
 			ringSensed = false;
 		} else if (!ringSensed && distanceToRing < RING_DETECTION_THRESHOLD) {
