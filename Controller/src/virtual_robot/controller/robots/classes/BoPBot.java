@@ -58,7 +58,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
     public static final long INTAKE_TO_HOPPER_TIME_MILLIS = 1000L;  // milliseconds that a ring blocks the intake from collecting another ring
 
     public static final double WOBBLE_GRAB_TURN_FRACTION = 0.34; // fraction of turn at which wobble goal can be grabbed
-
+    
     private final MotorType MOTOR_TYPE = MotorType.Neverest20;
     private DcMotorExImpl[] wheelMotors = null;
     private final MotorType SHOOTER_MOTOR_TYPE = MotorType.RevUltraPlanetaryOneToOne;
@@ -73,6 +73,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
     private BNO055IMUImpl imu = null;
     private VirtualRobotController.DistanceSensorImpl[] distanceSensors = null;
     private VirtualRobotController.DistanceSensorImpl intakeSensor = null;
+    private VirtualRobotController.DistanceSensorImpl ringDetector = null;
 
     /*
     Variables representing graphical UI nodes that we will need to manipulate. The @FXML annotation will
@@ -114,10 +115,13 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
     private final List<Ring> ringsInHopper = new ArrayList<>(); // rings currently controlled by the robot
     private boolean readyToShoot = false;
     private Ring ringInIntake = null;
+    private int directionOfRing = 1;
     private boolean isRingInIntake = false;
     private int ringWidth = 0;
     private boolean ringPastSensor = false;
     private long intakeTimeMillis = 0L; // timestamp of when ring entered intake
+    private long lastTimeMillis = 0L;
+    private double positionInIntake = 0;
 
     public BoPBot() {
         super();
@@ -141,6 +145,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         armMotor = (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "wobbleGrabberArm");
         handServo = (ServoImpl) hardwareMap.servo.get("wobbleGrabberClaw");
         armSwitch = (DigitalChannelImpl) hardwareMap.get(DigitalChannel.class, "armSwitch");
+        ringDetector = hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "ringDetector");
 
         distanceSensors = new VirtualRobotController.DistanceSensorImpl[]{
                 hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "front_distance"),
@@ -223,9 +228,11 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         hardwareMap.put("topSensor", controller.new DistanceSensorImpl());
         hardwareMap.put("bottomSensor", controller.new DistanceSensorImpl());
         hardwareMap.put("intakeSensor", controller.new DistanceSensorImpl());
+        hardwareMap.put("ringDetector", controller.new DistanceSensorImpl());
         hardwareMap.put("intakeServo", new ServoImpl());
         hardwareMap.put("armSwitch", new DigitalChannelImpl());
         hardwareMap.put("intakeLEDs", new RevBlinkinLedDriver());
+        hardwareMap.put("ringCountDisplay", new RevBlinkinLedDriver());
     }
 
     public synchronized void updateStateAndSensors(double millis) {
@@ -296,9 +303,10 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         double pixelsPerInch = controller.getField().getPixelsPerInch();
 
         if (ringInIntake != null) {
-            double timeInIntakeMillis = System.currentTimeMillis() - intakeTimeMillis;
-            if (timeInIntakeMillis <= INTAKE_TO_HOPPER_TIME_MILLIS) {
-                double t = timeInIntakeMillis / INTAKE_TO_HOPPER_TIME_MILLIS;
+//            double timeInIntakeMillis = System.currentTimeMillis() - intakeTimeMillis;
+            positionInIntake += intakeMotor.getPower() * (millis / INTAKE_TO_HOPPER_TIME_MILLIS);
+            if (positionInIntake <= 1 && positionInIntake > 0) {
+                double t = positionInIntake;
                 // calculate the intake location
                 double ix = INTAKE_R_INCHES * pixelsPerInch * Math.cos(headingRadians + INTAKE_ANGLE_DEG * Math.PI / 180.0);
                 double iy = INTAKE_R_INCHES * pixelsPerInch * Math.sin(headingRadians + INTAKE_ANGLE_DEG * Math.PI / 180.0);
@@ -311,10 +319,15 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
                 Vector2D p = u.added(v.subtracted(u).multiplied(t));
                 ringInIntake.setLocation(x + p.x, y + p.y);
             }
-            else {
+            else if (positionInIntake > 1) {//ring is intaken
                 ringsInHopper.add(ringInIntake);
                 ringInIntake = null;
-                intakeTimeMillis = 0L;
+                positionInIntake = 0;
+            }
+            else {//ring is spat out
+                ringInIntake.setControlledBy(null);
+                ringInIntake = null;
+                positionInIntake = 0;
             }
         }
 
@@ -359,15 +372,10 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
             readyToShoot = true;
         }
         
-        if (ringInIntake != null) isRingInIntake = true;
-        if (ringWidth >= 50) ringPastSensor = true;
-        if (isRingInIntake && !ringPastSensor) ringWidth += 10;
-        if (isRingInIntake && ringPastSensor) ringWidth -= 10;
-        if (ringWidth <= 0) {
-            ringPastSensor = false;
-            isRingInIntake = false;
-            ringWidth = 0;
-        }
+        if (ringInIntake == null)
+            intakeSensor.setDistance(200);
+        else
+            intakeSensor.setDistance(100);
     }
 
     private Vector2D getHandLocation() {

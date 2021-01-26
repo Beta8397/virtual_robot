@@ -9,7 +9,12 @@ public class RevBlinkinLedDriver implements HardwareDevice {
     public void setPattern(BlinkinPattern pattern) {
     }
 
-    public enum BlinkinPattern {BLACK, GREEN, WHITE, RED;
-
+    public enum BlinkinPattern {
+        BLACK,
+        GREEN,
+        WHITE,
+        RED,
+        DARK_GRAY,
+        GRAY
     }
 }

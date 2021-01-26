@@ -4,6 +4,7 @@ import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -40,7 +41,7 @@ public class RingIntakeSystemV2Test implements ActionHandler {
 	private Servo intakeServo; // use a servo handler here instead
 	private RevBlinkinLedDriver driver;
 
-	private RevColorSensorV3 ringDetector;
+	private DistanceSensor ringDetector;
 	private boolean ringSensed;
 	private static final double RING_DETECTION_THRESHOLD = 0;//todo find these
 	private static final double NO_RING_THRESHOLD = 0;
@@ -63,6 +64,8 @@ public class RingIntakeSystemV2Test implements ActionHandler {
 		ringSensed = false;
 		
 		driver = hardwareMap.get(RevBlinkinLedDriver.class, "intakeLEDs");
+		
+		ringDetector = hardwareMap.get(DistanceSensor.class, "intakeSensor");
 	}
 
 	
@@ -70,6 +73,12 @@ public class RingIntakeSystemV2Test implements ActionHandler {
 		intakeMotor.setMotorPower(POWERS[state]);
 		driver.setPattern(COLORS[state]);
 		detectRingsInIntake();
+		outtakeExtraRing();
+	}
+	
+	private void outtakeExtraRing() {
+		if (numRingsTakenIn > 3)
+			intakeReverse();
 	}
 	
 	private void detectRingsInIntake() {

@@ -46,25 +46,25 @@ public class ShooterSystemV2Test implements ActionHandler {
 	public static final double INDEX_LEFT = -1;
 	public static final double INDEX_RIGHT = 1;
 
-
-	private RevBlinkinLedDriver ringCount;
+	private RevBlinkinLedDriver ringCountDisplay;
 	private DistanceSensor ringDetector;
 	private static final double RING_DETECTOR_HEIGHT = 0;//todo find this value
-//	private static final RevBlinkinLedDriver.BlinkinPattern[] COLORS = {
-//			RevBlinkinLedDriver.BlinkinPattern.BLACK,
-//			RevBlinkinLedDriver.BlinkinPattern.DARK_GRAY,
-//			RevBlinkinLedDriver.BlinkinPattern.GRAY,
-//			RevBlinkinLedDriver.BlinkinPattern.WHITE
-//	};
+	private static final RevBlinkinLedDriver.BlinkinPattern[] COLORS = {
+			RevBlinkinLedDriver.BlinkinPattern.BLACK,
+			RevBlinkinLedDriver.BlinkinPattern.DARK_GRAY,
+			RevBlinkinLedDriver.BlinkinPattern.GRAY,
+			RevBlinkinLedDriver.BlinkinPattern.WHITE
+	};
 	
 	public ShooterSystemV2Test(HardwareMap hardwareMap) {
-//		wheelMotor = new WheelMotor("wheelMotor", hardwareMap);
+		wheelMotor = new WheelMotor("wheelMotor", hardwareMap);
 		try {
 			betterWheelMotorMaybe = new MotorController("wheelMotor", "MotorConfig/NeverRest40.json", hardwareMap);
 			betterWheelMotorMaybe.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 			betterWheelMotorMaybe.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 			betterWheelMotorMaybe.setDirection(DcMotorSimple.Direction.FORWARD);
 		} catch (IOException e) {
+			System.out.println(e.toString());
 			e.printStackTrace();
 		}
 
@@ -74,7 +74,9 @@ public class ShooterSystemV2Test implements ActionHandler {
 		wheelSpinning = false;
 		indexAngle = INDEX_LEFT;
 		
-//		ringDetector = hardwareMap.get(DistanceSensor.class, "ringDetector");
+		ringDetector = hardwareMap.get(DistanceSensor.class, "ringDetector");
+		
+		ringCountDisplay = hardwareMap.get(RevBlinkinLedDriver.class, "ringCountDisplay");
 	}
 
 	public void spinUp() {

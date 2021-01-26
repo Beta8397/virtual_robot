@@ -261,7 +261,7 @@ public class UltimateV2Better extends LinearOpMode {
 			x2Pressed = true;
 			toggleShooterWheel = !toggleShooterWheel;
 		} else if (!gamepad2.x) {
-			x2Pressed = !x2Pressed;
+			x2Pressed = false;
 		}
 		if (toggleShooterWheel) {
 			shooter.spinUp();
@@ -313,6 +313,16 @@ public class UltimateV2Better extends LinearOpMode {
 		}
 	}
 	
+	private void shoot() {
+		if(shooter.indexServo.getPosition() == 1){
+			shooter.setIndexLeft();
+		}
+		else {
+			shooter.setIndexRight();
+		}
+		intake.numRingsTakenIn--;
+	}
+	
 	private void powerShots() {
 		robot.driveToLocationPID(ConfigVariables.POWER_SHOT_LOCATION_NO_HEADING, MED_SPEED, this);
 		powerShotLeft();
@@ -336,12 +346,6 @@ public class UltimateV2Better extends LinearOpMode {
 	private void powerShotCenter() {
 		shooter.setPowerShotPower();
 		robot.driveToLocationPID(ConfigVariables.POWER_SHOT_MIDDLE, MED_SPEED,this);
-		if(shooter.indexServo.getPosition() == 1){
-			shooter.setIndexLeft();
-		}
-		else {
-			shooter.setIndexRight();
-		}
 	}
 	
 	private void powerShotRight() {
@@ -364,6 +368,7 @@ public class UltimateV2Better extends LinearOpMode {
 	}
 	
 	private void updateMiscFunctions() {
-//		shooter.update();
+		shooter.update();
+//		intake.update();
 	}
 }

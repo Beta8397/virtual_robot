@@ -816,6 +816,10 @@ public class VirtualRobotController {
                     break;
             }
         }
+        
+        public synchronized void setDistance(double distance) {
+            distanceMM = distance;
+        }
     }
 
 

@@ -39,7 +39,7 @@ public class WobbleGrabberV2Test implements ActionHandler {
     public WobbleGrabberV2Test(HardwareMap hardwareMap) {
         claw = new ServoHandler("wobbleGrabberClaw", hardwareMap);
         claw.setDirection(Servo.Direction.FORWARD);
-        //sensor = new LimitSwitch(hardwareMap.touchSensor.get("wobbleGrabberSensor"), "wobbleGrabberSensor");
+//        sensor = new LimitSwitch(hardwareMap.touchSensor.get("wobbleGrabberSensor"), "wobbleGrabberSensor");
 
         try {
             arm = new MotorController("wobbleGrabberArm", "ActionConfig/WobbleArmConfig.json", hardwareMap);
