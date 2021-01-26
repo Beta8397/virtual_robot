@@ -235,23 +235,17 @@ public class UltimateV2Better extends LinearOpMode {
 	private void playerTwoFunctions(GamepadController controller) {
 		if(gamepad2.a && !a2Pressed) {
 			a2Pressed = true;
-			intakeOn = !intakeOn;
-			outakeOn = false;
+			intake.updateState(intake.ON_BUTTON);
 		} else if(!gamepad2.a) {
 			a2Pressed = false;
 		}
 
 		if(gamepad2.b && !b2Pressed) {
 			b2Pressed = true;
-			outakeOn = !outakeOn;
-			intakeOn = false;
+			intake.updateState(intake.OFF_BUTTON);
 		} else if(!gamepad2.b) {
 			b2Pressed = false;
 		}
-
-		if(intakeOn) intake.intake();
-		else if(outakeOn) intake.spit();
-		else intake.pauseIntake();
 
 		// Shooter wheel toggle
 		if (gamepad2.x && !x2Pressed) {
