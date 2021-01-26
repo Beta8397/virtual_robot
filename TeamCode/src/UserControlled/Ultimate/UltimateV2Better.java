@@ -91,6 +91,7 @@ public class UltimateV2Better extends LinearOpMode {
 	protected static final double MED_SPEED = 25;
 	protected static final double LOW_SPEED = 15;
 	protected static final double MIN_SPEED = 5;
+	private static final double MIN_MOVEMENT_POWER = .1;
 	
 	boolean eStop = false, slowMode = false, intakeOn = false, outakeOn = false, y2Pressed = false, x2Pressed = false, toggleShooterWheel = false, toggleWobbleGrabbed = false,
 			rt1Pressed = false, rightTriggerPressed = false, toggleIndex = false, toggleIntakeServo = false, rt2Pressed = false, a2Pressed = false, b2Pressed = false,
@@ -186,6 +187,8 @@ public class UltimateV2Better extends LinearOpMode {
 		else slowMode = false;
 		double drivePower = slowMode ? leftStick.magnitude() / 3 : leftStick.magnitude();
 		double turnPower = slowMode ? rightStick.x() / 4 : rightStick.x();
+		drivePower = (drivePower > MIN_MOVEMENT_POWER) ? drivePower : 0;//slight error in joystick position doesn't move the robot
+		turnPower = (Math.abs(turnPower) > MIN_MOVEMENT_POWER) ? turnPower : 0;
 		if (!eStop)
 			robot.driveOnHeadingWithTurning(leftStick.angle(), drivePower, turnPower);
 	}
