@@ -2,6 +2,9 @@ package Autonomous;
 
 //import com.acmerobotics.dashboard.config.Config;
 
+import DriveEngine.Ultimate.UltimateNavigation;
+import DriveEngine.Ultimate.UltimateNavigation2;
+
 //@Config
 public class ConfigVariables {
 
@@ -77,17 +80,18 @@ public class ConfigVariables {
 
     public static final Location RING_DETECTION_POINT = new Location(52, -20, 180);
     public static final Location RING_CHECKPOINT = new Location(52, -10);
-    public static final Location RING_STACK_START_POINT = new Location(19, -23.7); // may need to adjust
-    public static final Location QUAD_STACK_END_POINT = new Location(35, -23.7);
+    public static final Location RING_PATH_TURN = new Location(12, -12);
+    public static final Location RING_STACK_START_POINT = new Location(12, -23, UltimateNavigation2.EAST); // may need to adjust
+    public static final Location QUAD_STACK_END_POINT = new Location(35, -23, UltimateNavigation2.EAST);
 
 //    public static final HorizontalLine SHOOT_LINE = new HorizontalLine(new Location(-120, 30), 240);
     public static final Location PARKING_LOCATION = new Location(42, 10);
-    public static final Location SHOOTING_LINE_POINT = new Location(24, -2.5, 0); // may need to adjust
+    public static final Location SHOOTING_LINE_POINT = new Location(24, -1, 0); // may need to adjust
     public static final Location SHOOTING_LINE_WAYPOINT = new Location(22, 30);
     public static final Location CENTER = new Location(0,0);
 
     public static final Location RED_WOBBLE_GOAL_LEFT_CHECKPOINT = new Location(57, -55);
-    public static final Location RED_WOBBLE_GOAL_LEFT = new Location(24, -32); // may need to adjust
+    public static final Location RED_WOBBLE_GOAL_LEFT = new Location(24, -32, UltimateNavigation2.EAST); // may need to adjust
     public static final Location RED_WOBBLE_GOAL_RIGHT = new Location(48.8, -47.3); // shouldn't need this one
 
     public static final Location WOBBLE_GOAL_PLACEMENT_OFFSET = new Location(3, -3);

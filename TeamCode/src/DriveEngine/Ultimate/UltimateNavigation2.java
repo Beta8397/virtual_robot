@@ -1181,8 +1181,9 @@ public class UltimateNavigation2 extends Thread {
             Log.d("Dist to travel: ", ""+distToTravel);
             Log.d("Dist travelled: ", ""+distTravelled);
             Log.d("Velocity: ", ""+velocity);
-            mode.telemetry.addData("Velocity", velocity);
-            mode.telemetry.update();
+            // todo remove, for testing only
+            //mode.telemetry.addData("Velocity", velocity);
+            //mode.telemetry.update();
             if (distTravelled >= distToTravel - distToStop) {
                 Log.d("Decelerating", "...");
                 velocity = velocity - decel * (System.currentTimeMillis() - startTime) / 1000.0;

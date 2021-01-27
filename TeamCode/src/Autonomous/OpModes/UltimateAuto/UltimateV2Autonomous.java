@@ -20,6 +20,7 @@ import static Autonomous.ConfigVariables.RED_ZONE_ONE;
 import static Autonomous.ConfigVariables.RED_ZONE_THREE;
 import static Autonomous.ConfigVariables.RED_ZONE_TWO;
 import static Autonomous.ConfigVariables.RIGHT_POWER_SHOT_HEADING;
+import static Autonomous.ConfigVariables.RING_PATH_TURN;
 import static Autonomous.ConfigVariables.RING_STACK_START_POINT;
 import static Autonomous.ConfigVariables.SHOOTING_LINE_POINT;
 
@@ -147,8 +148,10 @@ public class UltimateV2Autonomous {
     // reorients and drives to intake the extra rings but only if there are extra rings
     protected void intakeExtraRings(LinearOpMode mode, RingCount ringCount, double runtime) {
         if(mode.opModeIsActive() && 30 - runtime > 10 && ringCount != RingCount.NO_RINGS) {
+                robot.driveToLocationPID(RING_PATH_TURN, MED_SPEED, mode);
                 robot.turnToHeading(UltimateNavigation2.EAST, 5, mode);
                 intake.intakeOn();
+                intake.update();
                 robot.driveToLocationPID(RING_STACK_START_POINT, MED_SPEED, mode); // consider using drive to location PID -- is thought to be more accurate?
                 // do a funky intake thingy here
                 if(ringCount == ringCount.SINGLE_STACK) {
@@ -162,7 +165,7 @@ public class UltimateV2Autonomous {
 
     // drives to the second wobble goal and grabs it
     protected void obtainSecondWobbleGoal(LinearOpMode mode, double runtime) {
-        if(mode.opModeIsActive() && 30 - runtime > 10) {
+        if(mode.opModeIsActive() /*&& 30 - runtime > 10*/) {
             robot.turnToHeading(UltimateNavigation2.EAST, mode);
             robot.driveToLocationPID(RED_WOBBLE_GOAL_LEFT, MED_SPEED, mode);
             wobbleGrabber.setGrabAndDropAngle(); // Bring arm down to grab angle

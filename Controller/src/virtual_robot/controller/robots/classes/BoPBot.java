@@ -287,7 +287,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
             directionOfTravel = null;
         }
 
-        imu.updateHeadingRadians(-headingRadians);
+        imu.updateHeadingRadians(headingRadians);
 
         final double piOver2 = Math.PI / 2.0;
         for (int i = 0; i < 4; i++) {
