@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.DigitalChannelImpl;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.ServoImpl;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.hardware.configuration.MotorType;
 
 import java.util.ArrayList;
@@ -70,6 +71,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
     private DcMotorExImpl armMotor = null;
     private ServoImpl handServo = null;
     private DigitalChannel armSwitch = null;
+    private TouchSensor wobbleGrabberSensor = null;
     private BNO055IMUImpl imu = null;
     private VirtualRobotController.DistanceSensorImpl[] distanceSensors = null;
     private VirtualRobotController.DistanceSensorImpl intakeSensor = null;
@@ -145,13 +147,15 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         armMotor = (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "wobbleGrabberArm");
         handServo = (ServoImpl) hardwareMap.servo.get("wobbleGrabberClaw");
         armSwitch = (DigitalChannelImpl) hardwareMap.get(DigitalChannel.class, "armSwitch");
+        wobbleGrabberSensor = (TouchSensor) hardwareMap.get(TouchSensor.class, "wobbleGrabberSensor");
+
         ringDetector = hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "ringDetector");
 
         distanceSensors = new VirtualRobotController.DistanceSensorImpl[]{
-                hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "front_distance"),
-                hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "left_distance"),
-                hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "back_distance"),
-                hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "right_distance")
+                hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "front"),
+                hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "left"),
+                hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "back"),
+                hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "right")
         };
 
         imu = hardwareMap.get(BNO055IMUImpl.class, "imu");
@@ -213,7 +217,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         for (String name : motorNames) {
             hardwareMap.put(name, new DcMotorExImpl(MOTOR_TYPE));
         }
-        String[] distNames = new String[]{"front_distance", "left_distance", "back_distance", "right_distance"};
+        String[] distNames = new String[]{"front", "left", "back", "right"};
         for (String name : distNames) {
             hardwareMap.put(name, controller.new DistanceSensorImpl());
         }
@@ -231,8 +235,10 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         hardwareMap.put("ringDetector", controller.new DistanceSensorImpl());
         hardwareMap.put("intakeServo", new ServoImpl());
         hardwareMap.put("armSwitch", new DigitalChannelImpl());
+        hardwareMap.put("wobbleGrabberSensor", new TouchSensor());
         hardwareMap.put("intakeLEDs", new RevBlinkinLedDriver());
         hardwareMap.put("ringCountDisplay", new RevBlinkinLedDriver());
+        hardwareMap.put("rollerMotor", new DcMotorExImpl(INTAKE_MOTOR_TYPE));
     }
 
     public synchronized void updateStateAndSensors(double millis) {

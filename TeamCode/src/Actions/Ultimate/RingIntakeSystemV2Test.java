@@ -4,7 +4,6 @@ import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -37,14 +36,14 @@ public class RingIntakeSystemV2Test implements ActionHandler {
 	
 	private int state;
 	
-	private MotorController intakeMotor;
+	private MotorController intakeMotor, rollerMotor;
 	private Servo intakeServo; // use a servo handler here instead
 	private RevBlinkinLedDriver driver;
-
-	private DistanceSensor ringDetector;
+	
+	private RevColorSensorV3 ringDetector;
 	private boolean ringSensed;
-	private static final double RING_DETECTION_THRESHOLD = 160;//todo find these
-	private static final double NO_RING_THRESHOLD = 140;
+	private static final double RING_DETECTION_THRESHOLD = 0; // todo find these
+	private static final double NO_RING_THRESHOLD = 0;
 	
 	public int numRingsTakenIn;
 	
@@ -53,7 +52,12 @@ public class RingIntakeSystemV2Test implements ActionHandler {
 			intakeMotor = new MotorController("intakeMotor", "MotorConfig/NeverRest40.json", hardwareMap);
 			intakeMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 			intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-			intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+			intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+
+			rollerMotor = new MotorController("rollerMotor", "MotorConfig/NeverRest40.json", hardwareMap);
+			rollerMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // there is no encoder on this motor currently
+			rollerMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+			rollerMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 			
 			intakeServo = hardwareMap.servo.get("intakeServo");
 		} catch (IOException e) {
@@ -64,25 +68,18 @@ public class RingIntakeSystemV2Test implements ActionHandler {
 		ringSensed = false;
 		
 		driver = hardwareMap.get(RevBlinkinLedDriver.class, "intakeLEDs");
-		
-		ringDetector = hardwareMap.get(DistanceSensor.class, "intakeSensor");
 	}
 
 	
-	public void update() {//call this function repeatedly
+	public void update() { // call this function repeatedly
 		intakeMotor.setMotorPower(POWERS[state]);
+		rollerMotor.setMotorPower(POWERS[state]);
 		driver.setPattern(COLORS[state]);
-//		detectRingsInIntake();
-//		outtakeExtraRing();
-	}
-	
-	private void outtakeExtraRing() {
-		if (numRingsTakenIn > 3)
-			intakeReverse();
+		detectRingsInIntake();
 	}
 	
 	private void detectRingsInIntake() {
-		double distanceToRing = ringDetector.getDistance(DistanceUnit.MM);
+		double distanceToRing = ringDetector.getDistance(DistanceUnit.INCH);
 		if (ringSensed && distanceToRing > NO_RING_THRESHOLD) {
 			ringSensed = false;
 		} else if (!ringSensed && distanceToRing < RING_DETECTION_THRESHOLD) {
@@ -96,7 +93,7 @@ public class RingIntakeSystemV2Test implements ActionHandler {
 	}
 	
 	//tele-op function
-	public void updateState(int buttonPressed) {//intake on = 0; intake reverse = 1
+	public void updateState(int buttonPressed) { // intake on = 0; intake reverse = 1
 		state = STATE_SWITCH[state][buttonPressed];
 	}
 	
@@ -114,15 +111,18 @@ public class RingIntakeSystemV2Test implements ActionHandler {
 	}
 
 	public void intake() {
-		intakeMotor.setMotorPower(1);
+		intakeMotor.setMotorPower(ON);
+		rollerMotor.setMotorPower(ON);
 	}
 
 	public void spit() {
 		intakeMotor.setMotorPower(-1);
+		rollerMotor.setMotorPower(-1);
 	}
 
 	public void pauseIntake() {
 		intakeMotor.brake();
+		rollerMotor.brake();
 	}
 
 	public void intakeServoOut() { intakeServo.setPosition(0); }
@@ -147,5 +147,6 @@ public class RingIntakeSystemV2Test implements ActionHandler {
 	@Override
 	public void kill() {
 		intakeMotor.killMotorController();
+		rollerMotor.killMotorController();
 	}
 }

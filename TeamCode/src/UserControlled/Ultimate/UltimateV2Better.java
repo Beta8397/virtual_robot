@@ -153,9 +153,10 @@ public class UltimateV2Better extends LinearOpMode {
 					playerOneFunctions(controllerOne);
 					playerTwoFunctions(controllerTwo);
 				}
-				telemetry.addData("Wheel Power:", shooter.betterWheelMotorMaybe.getMotorPower());
-				telemetry.addData("Robot Heading:", robot.getOrientation());
-				telemetry.addData("Wobble Angle:", grabber.arm.getDegree());
+				telemetry.addData("Wheel Power", shooter.betterWheelMotorMaybe.getMotorPower());
+				telemetry.addData("Wheel Speed (ticks/sec)", shooter.betterWheelMotorMaybe.getCurrentTicksPerSecond());
+				telemetry.addData("Robot Heading", robot.getOrientation());
+				telemetry.addData("Wobble Angle", grabber.arm.getDegree());
 				telemetry.update();
 
 				updateEStop();
@@ -184,8 +185,8 @@ public class UltimateV2Better extends LinearOpMode {
 	private void controlDrive() {
 		if(controllerOne.leftTriggerHeld) slowMode = true;
 		else slowMode = false;
-		double drivePower = slowMode ? leftStick.magnitude() / 3 : leftStick.magnitude();
-		double turnPower = slowMode ? rightStick.x() / 4 : rightStick.x();
+		double drivePower = slowMode ? leftStick.magnitude() / 3.0 : leftStick.magnitude();
+		double turnPower = slowMode ? rightStick.x() / 4.0 : rightStick.x() / 2.0;
 		if (!eStop)
 			robot.driveOnHeadingWithTurning(leftStick.angle(), drivePower, turnPower);
 	}
@@ -209,10 +210,16 @@ public class UltimateV2Better extends LinearOpMode {
 		// Indexer toggle
 		if(gamepad1.right_trigger > 0.1 && !rt1Pressed){
 			rt1Pressed = true;
-			shoot();
+			toggleIndex = !toggleIndex;
 		}
-		else if(!(gamepad1.right_trigger > 0.1)) {
+		else if(!(gamepad1.right_trigger > 0.1)){
 			rt1Pressed = false;
+		}
+		if(toggleIndex){
+			shooter.setIndexLeft();
+		}
+		else{
+			shooter.setIndexRight();
 		}
 
 		// TODO: update this to be actually correct, need to determine which wall to be against and what the x and y values would be
@@ -307,16 +314,6 @@ public class UltimateV2Better extends LinearOpMode {
 		}
 	}
 	
-	private void shoot() {
-		if(shooter.indexServo.getPosition() == 1){
-			shooter.setIndexLeft();
-		}
-		else {
-			shooter.setIndexRight();
-		}
-		intake.numRingsTakenIn--;
-	}
-	
 	private void powerShots() {
 		robot.driveToLocationPID(ConfigVariables.POWER_SHOT_LOCATION_NO_HEADING, MED_SPEED, this);
 		powerShotLeft();
@@ -329,19 +326,34 @@ public class UltimateV2Better extends LinearOpMode {
 	private void powerShotLeft() {
 		shooter.setPowerShotPower();
 		robot.driveToLocationPID(ConfigVariables.POWER_SHOT_LEFT, MED_SPEED,this);
-		shoot();
+		if(shooter.indexServo.getPosition() == 1) {
+			shooter.setIndexLeft();
+		}
+		else {
+			shooter.setIndexRight();
+		}
 	}
 	
 	private void powerShotCenter() {
 		shooter.setPowerShotPower();
 		robot.driveToLocationPID(ConfigVariables.POWER_SHOT_MIDDLE, MED_SPEED,this);
-		shoot();
+		if(shooter.indexServo.getPosition() == 1){
+			shooter.setIndexLeft();
+		}
+		else {
+			shooter.setIndexRight();
+		}
 	}
 	
 	private void powerShotRight() {
 		shooter.setPowerShotPower();
 		robot.driveToLocationPID(ConfigVariables.POWER_SHOT_RIGHT, MED_SPEED,this);
-		shoot();
+		if(shooter.indexServo.getPosition() == 1) {
+			shooter.setIndexLeft();
+		}
+		else {
+			shooter.setIndexRight();
+		}
 	}
 	
 	private void stopActions() {
@@ -353,7 +365,6 @@ public class UltimateV2Better extends LinearOpMode {
 	}
 	
 	private void updateMiscFunctions() {
-		shooter.update();
-		intake.update();
+//		shooter.update();
 	}
 }

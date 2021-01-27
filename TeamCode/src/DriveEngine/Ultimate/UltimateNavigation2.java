@@ -5,12 +5,15 @@ import Misc.Log;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
+
+import javax.xml.ws.handler.HandlerResolver;
 
 import Autonomous.ConfigVariables;
 import Autonomous.HeadingVector;
@@ -21,6 +24,7 @@ import MotorControllers.MotorController;
 import MotorControllers.PIDController;
 import SensorHandlers.ImuHandler;
 import SensorHandlers.LIDARSensor;
+import Misc.ConfigFile;
 
 /**
  * Created by Jeremy on 8/23/2017.
@@ -92,9 +96,9 @@ public class UltimateNavigation2 extends Thread {
         orientation = new ImuHandler("imu", orientationOffset, hardwareMap);
         myLocation = new Location(startLocation.getX(),startLocation.getY(), robotOrientationOffset);
         distanceSensors = new LIDARSensor[3];
-//        distanceSensors[LEFT_SENSOR] = new LIDARSensor(hardwareMap.get(DistanceSensor.class, "left"), LEFT_SENSOR, "left");
-//        distanceSensors[BACK_SENSOR] = new LIDARSensor(hardwareMap.get(DistanceSensor.class, "back"), BACK_SENSOR, "back");
-//        distanceSensors[RIGHT_SENSOR] = new LIDARSensor(hardwareMap.get(DistanceSensor.class, "right"), RIGHT_SENSOR, "right");
+        distanceSensors[LEFT_SENSOR] = new LIDARSensor(hardwareMap.get(DistanceSensor.class, "left"), LEFT_SENSOR, "left");
+        distanceSensors[BACK_SENSOR] = new LIDARSensor(hardwareMap.get(DistanceSensor.class, "back"), BACK_SENSOR, "back");
+        distanceSensors[RIGHT_SENSOR] = new LIDARSensor(hardwareMap.get(DistanceSensor.class, "right"), RIGHT_SENSOR, "right");
 //        distanceSensors[LEFT_SENSOR].getDistance(); We shouldn't need these because of initSensor in LIDARSensor class
 //        distanceSensors[BACK_SENSOR].getDistance();
 //        distanceSensors[RIGHT_SENSOR].getDistance();
@@ -352,7 +356,7 @@ public class UltimateNavigation2 extends Thread {
     public void initializeUsingConfigFile(String file) {
         InputStream stream = null;
         try {
-            stream = Misc.ConfigFile.open(hardwareMap, file);
+            stream = ConfigFile.open(hardwareMap, file);
         }
         catch(Exception e) {
             Log.d("Drive Engine Error: ",e.toString());

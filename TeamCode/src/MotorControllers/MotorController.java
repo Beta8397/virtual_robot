@@ -2,6 +2,7 @@
 
 package MotorControllers;
 
+import Misc.ConfigFile;
 import Misc.Log;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -50,7 +51,7 @@ public class MotorController extends Thread {
             shouldRun = false;
             throw new IOException("Failed to parse Motor Config File: " + configFileLoc);
         }
-        tachometer = new MotorTachometer(m,ticksPerRevolution, MotorTachometer.RPS_SMOOTHER.NONE);
+        tachometer = new MotorTachometer(m, ticksPerRevolution, MotorTachometer.RPS_SMOOTHER.NONE);
         shouldRun = true;
         logDebug("Ticks per rev", Double.toString(ticksPerRevolution));
         new Thread(new Runnable() {
@@ -82,7 +83,11 @@ public class MotorController extends Thread {
     public MotorController(String motorName, HardwareMap hardwareMap) { motor = hardwareMap.dcMotor.get(motorName); }
 
     public void setDefaultTicksPerDegree() {
-        ticksPerDegree = ticksPerRevolution/360.0;
+        ticksPerDegree = ticksPerRevolution / 360.0;
+    }
+
+    public void setTicksPerDegree(double ticksPerDegree) {
+        this.ticksPerDegree = ticksPerDegree;
     }
 
     public DcMotor.RunMode getMotorRunMode() { return motor.getMode(); }
@@ -142,7 +147,7 @@ public class MotorController extends Thread {
     private int readConfig(String fileLoc) {
         InputStream stream = null;
         try {
-            stream = Misc.ConfigFile.open(hardwareMap, fileLoc);
+            stream = ConfigFile.open(hardwareMap, fileLoc);
         } catch(Exception e) {
             logError("Error: ", e.toString());
             throw new RuntimeException(e);
@@ -271,26 +276,27 @@ public class MotorController extends Thread {
     public void setPositionInches(double positionInInches) {
         //go ahead and set mode
         motor.setPower(0);
-        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         int positionInTicks = (int)(positionInInches/(wheelDiameterInInches* Math.PI)*ticksPerRevolution);
         logDebug("Desired tick", Double.toString(positionInTicks));
         motor.setTargetPosition(positionInTicks);
+        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
     public void setPositionTicks(int tick) { motor.setTargetPosition(tick); }
 
     public void setPositionDegrees(double deg) {
-        motor.setPower(0);
-        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        brake();
         int targetTick = (int)(deg*ticksPerDegree);
         motor.setTargetPosition(targetTick);
+        if(getMotorRunMode() != DcMotor.RunMode.RUN_TO_POSITION) motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
     public void setPositionDegrees(double deg, double power) {
-        motor.setPower(power);
-        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        brake();
         int targetTick = (int)(deg*ticksPerDegree);
         motor.setTargetPosition(targetTick);
+        if(getMotorRunMode() != DcMotor.RunMode.RUN_TO_POSITION) motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motor.setPower(power);
     }
 
     private void logDebug(String main, String sub){
@@ -304,7 +310,7 @@ public class MotorController extends Thread {
     }
 
     private void logError(String main, String sub){
-//        Log.d(motor.getDeviceName(), logTag + ":" + main + ":" + sub);
+        Log.d(motor.getClass().getSimpleName(), logTag + ":" + main + ":" + sub);
     }
 
     public DcMotor getMotor() { return motor; }

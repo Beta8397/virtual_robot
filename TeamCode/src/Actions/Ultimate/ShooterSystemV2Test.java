@@ -1,9 +1,7 @@
 package Actions.Ultimate;
 
-import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -34,11 +32,10 @@ public class ShooterSystemV2Test implements ActionHandler {
 
 
 	// TODO USE THESE POWERS
-	private double power = 0;
 	private static final double SHOOTER_OFF_POWER = 0;
-	private static final double HIGH_GOAL_POWER = 0.69;
-	private static final double POWER_SHOT_POWER = 0.6;
-	
+	public static final double HIGH_GOAL_POWER = 0.66;
+	public static final double POWER_SHOT_POWER = 0.6;
+	private double power = HIGH_GOAL_POWER;
 	
 	// good
 	public ServoHandler indexServo;
@@ -46,25 +43,25 @@ public class ShooterSystemV2Test implements ActionHandler {
 	public static final double INDEX_LEFT = -1;
 	public static final double INDEX_RIGHT = 1;
 
-	private RevBlinkinLedDriver ringCountDisplay;
-	private DistanceSensor ringDetector;
-	private static final double RING_DETECTOR_HEIGHT = 0;//todo find this value
-	private static final RevBlinkinLedDriver.BlinkinPattern[] COLORS = {
-			RevBlinkinLedDriver.BlinkinPattern.BLACK,
-			RevBlinkinLedDriver.BlinkinPattern.DARK_GRAY,
-			RevBlinkinLedDriver.BlinkinPattern.GRAY,
-			RevBlinkinLedDriver.BlinkinPattern.WHITE
-	};
+
+//	private RevBlinkinLedDriver ringCount;
+//	private DistanceSensor ringDetector;
+//	private static final double RING_DETECTOR_HEIGHT = 0;//todo find this value
+//	private static final RevBlinkinLedDriver.BlinkinPattern[] COLORS = {
+//			RevBlinkinLedDriver.BlinkinPattern.BLACK,
+//			RevBlinkinLedDriver.BlinkinPattern.DARK_GRAY,
+//			RevBlinkinLedDriver.BlinkinPattern.GRAY,
+//			RevBlinkinLedDriver.BlinkinPattern.WHITE
+//	};
 	
 	public ShooterSystemV2Test(HardwareMap hardwareMap) {
-		wheelMotor = new WheelMotor("wheelMotor", hardwareMap);
+//		wheelMotor = new WheelMotor("wheelMotor", hardwareMap);
 		try {
 			betterWheelMotorMaybe = new MotorController("wheelMotor", "MotorConfig/NeverRest40.json", hardwareMap);
 			betterWheelMotorMaybe.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 			betterWheelMotorMaybe.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 			betterWheelMotorMaybe.setDirection(DcMotorSimple.Direction.FORWARD);
 		} catch (IOException e) {
-			System.out.println(e.toString());
 			e.printStackTrace();
 		}
 
@@ -74,9 +71,7 @@ public class ShooterSystemV2Test implements ActionHandler {
 		wheelSpinning = false;
 		indexAngle = INDEX_LEFT;
 		
-		ringDetector = hardwareMap.get(DistanceSensor.class, "ringDetector");
-		
-		ringCountDisplay = hardwareMap.get(RevBlinkinLedDriver.class, "ringCountDisplay");
+//		ringDetector = hardwareMap.get(DistanceSensor.class, "ringDetector");
 	}
 
 	public void spinUp() {

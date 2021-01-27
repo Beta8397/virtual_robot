@@ -1,6 +1,6 @@
 package com.qualcomm.robotcore.hardware;
 
-public class TouchSensor {
+public class TouchSensor implements HardwareDevice{
     public boolean isPressed() {
         return false;
     }
