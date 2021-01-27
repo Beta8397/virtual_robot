@@ -91,7 +91,8 @@ public class UltimateV2Better extends LinearOpMode {
 	protected static final double MED_SPEED = 25;
 	protected static final double LOW_SPEED = 15;
 	protected static final double MIN_SPEED = 5;
-	
+	private static final double MIN_MOVEMENT_POWER = .1;
+
 	boolean eStop = false, slowMode = false, intakeOn = false, outakeOn = false, y2Pressed = false, x2Pressed = false, toggleShooterWheel = false, toggleWobbleGrabbed = false,
 			rt1Pressed = false, rightTriggerPressed = false, toggleIndex = false, toggleIntakeServo = false, rt2Pressed = false, a2Pressed = false, b2Pressed = false,
 			dpadD2pressed = false, toggleIncrement = false, dpadU2pressed = false, toggleDecrement = false;
@@ -185,8 +186,10 @@ public class UltimateV2Better extends LinearOpMode {
 	private void controlDrive() {
 		if(controllerOne.leftTriggerHeld) slowMode = true;
 		else slowMode = false;
-		double drivePower = slowMode ? leftStick.magnitude() / 3.0 : leftStick.magnitude();
-		double turnPower = slowMode ? rightStick.x() / 4.0 : rightStick.x() / 2.0;
+		double drivePower = slowMode ? leftStick.magnitude() / 3 : leftStick.magnitude();
+		double turnPower = slowMode ? rightStick.x() / 4 : rightStick.x();
+		drivePower = (drivePower > MIN_MOVEMENT_POWER) ? drivePower : 0;//slight error in joystick position doesn't move the robot
+		turnPower = (Math.abs(turnPower) > MIN_MOVEMENT_POWER) ? turnPower : 0;
 		if (!eStop)
 			robot.driveOnHeadingWithTurning(leftStick.angle(), drivePower, turnPower);
 	}
@@ -239,6 +242,7 @@ public class UltimateV2Better extends LinearOpMode {
 	private void playerTwoFunctions(GamepadController controller) {
 		if(gamepad2.a && !a2Pressed) {
 			a2Pressed = true;
+			//intake.updateState(intake.ON_BUTTON);
 			intakeOn = !intakeOn;
 			outakeOn = false;
 		} else if(!gamepad2.a) {
@@ -247,6 +251,7 @@ public class UltimateV2Better extends LinearOpMode {
 
 		if(gamepad2.b && !b2Pressed) {
 			b2Pressed = true;
+			//intake.updateState(intake.OFF_BUTTON);
 			outakeOn = !outakeOn;
 			intakeOn = false;
 		} else if(!gamepad2.b) {
@@ -313,7 +318,7 @@ public class UltimateV2Better extends LinearOpMode {
 			shooter.setPowerShotPower();
 		}
 	}
-	
+
 	private void powerShots() {
 		robot.driveToLocationPID(ConfigVariables.POWER_SHOT_LOCATION_NO_HEADING, MED_SPEED, this);
 		powerShotLeft();

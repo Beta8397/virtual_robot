@@ -22,6 +22,9 @@ public class RingIntakeSystemV2Test implements ActionHandler {
 	private static final int ON = 1;
 	private static final int REVERSE = 2;
 	
+	public static final int ON_BUTTON = 0;
+	public static final int OFF_BUTTON = 1;
+
 	private static final double[] POWERS = { 0, MOTOR_POWER, -MOTOR_POWER };
 	private static final int[][] STATE_SWITCH =   {
 			{ ON, REVERSE },
@@ -39,7 +42,7 @@ public class RingIntakeSystemV2Test implements ActionHandler {
 	private MotorController intakeMotor, rollerMotor;
 	private Servo intakeServo; // use a servo handler here instead
 	private RevBlinkinLedDriver driver;
-	
+
 	private RevColorSensorV3 ringDetector;
 	private boolean ringSensed;
 	private static final double RING_DETECTION_THRESHOLD = 0; // todo find these
