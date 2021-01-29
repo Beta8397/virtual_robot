@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.ServoImpl;
 import com.qualcomm.robotcore.hardware.configuration.MotorType;
 
+import java.awt.SystemTray;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -352,7 +353,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         }
 
         // shoot ring
-        if (Math.abs(shooterMotor.getPower()) > 0) {
+        if (Math.abs(shooterMotor.getPower()) > 0.001) {
             if (readyToShoot && shooterServo.getPosition() >= 0.9 && ringsInHopper.size() > 0) {
                 Ring r = ringsInHopper.remove(0);
                 r.setControlledBy(null);

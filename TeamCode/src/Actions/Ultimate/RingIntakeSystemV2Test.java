@@ -46,8 +46,8 @@ public class RingIntakeSystemV2Test implements ActionHandler {
 
 	private DistanceSensor ringDetector;
 	private boolean ringSensed;
-	private static final double RING_DETECTION_THRESHOLD = 160;//todo find these
-	private static final double NO_RING_THRESHOLD = 140;
+	private static final double RING_DETECTION_THRESHOLD = 140;//todo find these
+	private static final double NO_RING_THRESHOLD = 160;
 	
 	public int numRingsTakenIn;
 	
@@ -65,6 +65,7 @@ public class RingIntakeSystemV2Test implements ActionHandler {
 		
 		state = OFF;
 		ringSensed = false;
+		numRingsTakenIn = 3;
 		
 		driver = hardwareMap.get(RevBlinkinLedDriver.class, "intakeLEDs");
 		
@@ -75,26 +76,24 @@ public class RingIntakeSystemV2Test implements ActionHandler {
 	public void update() {//call this function repeatedly
 		intakeMotor.setMotorPower(POWERS[state]);
 		driver.setPattern(COLORS[state]);
-//		detectRingsInIntake();
-//		outtakeExtraRing();
+		detectRingsInIntake();
+		outtakeExtraRing();
 	}
 	
 	private void outtakeExtraRing() {
-		if (numRingsTakenIn > 3)
+		if (numRingsTakenIn > 3) {
 			intakeReverse();
+			numRingsTakenIn--;
+		}
 	}
 	
 	private void detectRingsInIntake() {
-		double distanceToRing = ringDetector.getDistance(DistanceUnit.MM);
-		if (ringSensed && distanceToRing > NO_RING_THRESHOLD) {
+		double distance = ringDetector.getDistance(DistanceUnit.MM);
+		if (distance > NO_RING_THRESHOLD) {
 			ringSensed = false;
-		} else if (!ringSensed && distanceToRing < RING_DETECTION_THRESHOLD) {
+		} else if (!ringSensed && distance < RING_DETECTION_THRESHOLD) {
+			numRingsTakenIn++;
 			ringSensed = true;
-			if (state == REVERSE) {
-				numRingsTakenIn--;
-			} else {
-				numRingsTakenIn++;
-			}
 		}
 	}
 	
