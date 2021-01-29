@@ -60,7 +60,7 @@ public class VisionHelperUltimateGoal extends Thread {
     VectorF ringTranslation;
     private int mode = LOCATION;
     private int numOfRings = 0;
-    private RevBlinkinLedDriver LEDStripController;
+//    private RevBlinkinLedDriver LEDStripController;
 
     private static final float mmPerInch        = 25.4f;
     private static final float mmFTCFieldWidth  = (12*6) * mmPerInch;  // the width of the FTC field (from the center point to the outer panels)
@@ -90,9 +90,9 @@ public class VisionHelperUltimateGoal extends Thread {
                 break;
         }
 
-        LEDStripController = hardwareMap.get(RevBlinkinLedDriver.class, "LEDStripController");
-        LEDStripController.resetDeviceConfigurationForOpMode();
-        LEDStripController.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
+//        LEDStripController = hardwareMap.get(RevBlinkinLedDriver.class, "LEDStripController");
+//        LEDStripController.resetDeviceConfigurationForOpMode();
+//        LEDStripController.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
     }
 
     private void initBoth(int camera, HardwareMap hardwareMap) {
@@ -110,9 +110,9 @@ public class VisionHelperUltimateGoal extends Thread {
 //        }
     }
 
-    public void setLEDMode(RevBlinkinLedDriver.BlinkinPattern pattern) {
-        LEDStripController.setPattern(pattern);
-    }
+//    public void setLEDMode(RevBlinkinLedDriver.BlinkinPattern pattern) {
+//        LEDStripController.setPattern(pattern);
+//    }
 
     @Override
     public void run() {

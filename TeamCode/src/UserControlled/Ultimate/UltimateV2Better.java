@@ -104,7 +104,6 @@ public class UltimateV2Better extends LinearOpMode {
 		
 		// initialize robot
 		// TODO get starting angle
-		
 		try {
 			robot = new UltimateNavigation2(hardwareMap, new Location(0, 0, 0), "RobotConfig/UltimateV2.json");
 			Log.d("Robot: ", robot.toString());
@@ -155,8 +154,9 @@ public class UltimateV2Better extends LinearOpMode {
 					playerOneFunctions(controllerOne);
 					playerTwoFunctions(controllerTwo);
 				}
-				telemetry.addData("Robot Heading:", robot.getOrientation());
 				telemetry.addData("Wheel Power:", shooter.betterWheelMotorMaybe.getMotorPower());
+				telemetry.addData("Wheel Speed (ticks/sec)", shooter.betterWheelMotorMaybe.getCurrentTicksPerSecond());
+				telemetry.addData("Robot Heading:", robot.getOrientation());
 				telemetry.addData("Wobble Angle:", grabber.arm.getDegree());
 				telemetry.update();
 
@@ -218,9 +218,6 @@ public class UltimateV2Better extends LinearOpMode {
 		else if(!(gamepad1.right_trigger > 0.1)) {
 			rt1Pressed = false;
 		}
-		
-		if(gamepad1.a)
-			shooter.spinUp();
 
 		// TODO: update this to be actually correct, need to determine which wall to be against and what the x and y values would be
 		if(gamepad1.x)
@@ -252,17 +249,17 @@ public class UltimateV2Better extends LinearOpMode {
 		}
 
 		// Shooter wheel toggle
-//		if (gamepad2.x && !x2Pressed) {
-//			x2Pressed = true;
-//			toggleShooterWheel = !toggleShooterWheel;
-//		} else if (!gamepad2.x) {
-//			x2Pressed = false;
-//		}
-//		if (toggleShooterWheel) {
-//			shooter.spinUp();
-//		} else {
-//			shooter.pauseShooter();
-//		}
+		if (gamepad2.x && !x2Pressed) {
+			x2Pressed = true;
+			toggleShooterWheel = !toggleShooterWheel;
+		} else if (!gamepad2.x) {
+			x2Pressed = false;
+		}
+		if (toggleShooterWheel) {
+			shooter.spinUp();
+		} else {
+			shooter.pauseShooter();
+		}
 
 		// Wobble grab toggle
 		if (gamepad2.y && !y2Pressed) {
@@ -315,7 +312,7 @@ public class UltimateV2Better extends LinearOpMode {
 		else {
 			shooter.setIndexRight();
 		}
-		System.out.println(intake.numRingsTakenIn--);
+		intake.numRingsTakenIn--;
 	}
 	
 	private void powerShots() {

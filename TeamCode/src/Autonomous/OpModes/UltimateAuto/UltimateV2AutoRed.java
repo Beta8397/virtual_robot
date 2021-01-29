@@ -68,38 +68,42 @@ public class UltimateV2AutoRed extends LinearOpMode {
         // the loop below updates the ring count as the camera runs in a background thread
         while(!opModeIsActive()) {
             telemetry.addData("Status", "Initialized");
+//            telemetry.addData("# of rings", 4);
             telemetry.addData("# of rings", robot.vision.numOfSeenRings());
             telemetry.update();
         }
         waitForStart();
 
         // first determine the number of rings to assist in the wobble goal position
-        RingCount ringCount = robot.vision.getRingCount();
-        telemetry.addData("# of rings", robot.vision.numOfSeenRings());
+//        RingCount ringCount = robot.vision.getRingCount();
+        RingCount ringCount = RingCount.QUAD_STACK;
+//        telemetry.addData("# of rings", robot.vision.numOfSeenRings());
+        telemetry.addData("# of rings", ringCount);
         telemetry.update();
-        robot.vision.stopDetection(); // stop using the camera after we have taken our count, if you don't it may underperform
+//        robot.vision.stopDetection(); // stop using the camera after we have taken our count, if you don't it may underperform
 
         // start by dropping down the intake
-        robot.dropIntake();
+        robot.dropIntakeAndWobble(this);
+        telemetry.update();
 
         // next we deliver the first wobble goal to the zone
-        robot.deliverWobbleGoal(ringCount, this.getRuntime(), 1);
+        robot.deliverWobbleGoal(this, ringCount, this.getRuntime(), 1);
 
         // following the delivery we shoot the preloaded rings at the power shot targets
-        robot.performPowerShots(this.getRuntime());
+        robot.performPowerShots(this, this.getRuntime());
 
         // next we can intake the extra rings if there are some while we travel to the second wobble goal
-        robot.intakeExtraRings(ringCount, this.getRuntime());
-        robot.obtainSecondWobbleGoal(this.getRuntime());
+        robot.intakeExtraRings(this, ringCount, this.getRuntime());
+        robot.obtainSecondWobbleGoal(this, this.getRuntime());
 
         // after grabbing the second wobble goal, we can shoot the extra rings while travelling to deliver it
 
-        // TODO: may need a separate condition or function for delivering the second wobble goal
-        robot.deliverWobbleGoal(ringCount, this.getRuntime(), 2);
-        robot.shootExtraRings(ringCount, this.getRuntime());
+        // todo: added wobbleNum parameter to differentiate between the first and second wobble goals
+        robot.deliverWobbleGoal(this, ringCount, this.getRuntime(), 2);
+        robot.shootExtraRings(this, ringCount, this.getRuntime());
 
         // finally we park
-        robot.park();
+        robot.park(this);
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive());

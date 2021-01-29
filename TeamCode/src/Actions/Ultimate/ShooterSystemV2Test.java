@@ -8,7 +8,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import java.io.IOException;
-import java.rmi.server.ExportException;
 
 import Actions.ActionHandler;
 import Actions.HardwareWrappers.ServoHandler;
@@ -23,23 +22,22 @@ import MotorControllers.MotorController;
  */
 public class ShooterSystemV2Test implements ActionHandler {
 	// good
-//	public WheelMotor wheelMotor;
+	public WheelMotor wheelMotor;
 	private boolean wheelSpinning;
 	public MotorController betterWheelMotorMaybe;
 	
 	// TODO fix PID controller in rpm class
 	private static final int SHOOTER_ON_SPEED = 5000; // rotations per minute
 	private static final int SHOOTER_OFF_SPEED = 0;
-	private static final int HIGH_GOAL_SPEED = 3600;
+	private static final int HIGH_GOAL_SPEED = 0;
 	private static final int POWER_SHOT_SPEED = 0;
 
 
 	// TODO USE THESE POWERS
-	private double power = 0;
 	private static final double SHOOTER_OFF_POWER = 0;
-	private static final double HIGH_GOAL_POWER = 0.69;
-	private static final double POWER_SHOT_POWER = 0.6;
-	
+	public static final double HIGH_GOAL_POWER = 0.69;
+	public static final double POWER_SHOT_POWER = 0.6;
+	private double power = HIGH_GOAL_POWER;
 	
 	// good
 	public ServoHandler indexServo;
@@ -58,14 +56,15 @@ public class ShooterSystemV2Test implements ActionHandler {
 	};
 	
 	public ShooterSystemV2Test(HardwareMap hardwareMap) {
-//		wheelMotor = new WheelMotor("wheelMotor", hardwareMap);
+		wheelMotor = new WheelMotor("wheelMotor", hardwareMap);
 		try {
 			betterWheelMotorMaybe = new MotorController("wheelMotor", "MotorConfig/NeverRest40.json", hardwareMap);
 			betterWheelMotorMaybe.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 			betterWheelMotorMaybe.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 			betterWheelMotorMaybe.setDirection(DcMotorSimple.Direction.FORWARD);
-		} catch (Exception e) {
+		} catch (IOException e) {
 			System.out.println(e.toString());
+			e.printStackTrace();
 		}
 
 		indexServo = new ServoHandler("indexServo", hardwareMap);
@@ -80,7 +79,7 @@ public class ShooterSystemV2Test implements ActionHandler {
 	}
 
 	public void spinUp() {
-		betterWheelMotorMaybe.setMotorPower(1);
+		betterWheelMotorMaybe.setMotorPower(power);
 	}
 
 	public void incrementPower() {
@@ -96,14 +95,14 @@ public class ShooterSystemV2Test implements ActionHandler {
 	}
 
 	public void pauseShooter() {
-		betterWheelMotorMaybe.setMotorPower(0);
+		betterWheelMotorMaybe.brake();
 	}
 
 	public void toggleShooterWheel() {
-//		if (wheelMotor.targetRPM == 0)
-//			wheelMotor.setRPM(SHOOTER_ON_SPEED);
-//		else
-//			wheelMotor.setRPM(SHOOTER_OFF_SPEED);
+		if (wheelMotor.targetRPM == 0)
+			wheelMotor.setRPM(SHOOTER_ON_SPEED);
+		else
+			wheelMotor.setRPM(SHOOTER_OFF_SPEED);
 	}
 
 	// moves the index servo
@@ -126,7 +125,7 @@ public class ShooterSystemV2Test implements ActionHandler {
 	}
 
 	public void update() {
-//		wheelMotor.updateShooterRPM();
+		wheelMotor.updateShooterRPM();
 
 //		updateRingLEDs();
 	}
@@ -162,6 +161,6 @@ public class ShooterSystemV2Test implements ActionHandler {
 	
 	@Override
 	public void kill() {
-		betterWheelMotorMaybe = null;
+		betterWheelMotorMaybe.killMotorController();
 	}
 }
