@@ -34,6 +34,8 @@ import Misc.Log;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 import Actions.Ultimate.RingIntakeSystemV2Test;
 import Actions.Ultimate.ShooterSystemV2Test;
 import Actions.Ultimate.WobbleGrabberV2Test;
@@ -158,6 +160,8 @@ public class UltimateV2Better extends LinearOpMode {
 				telemetry.addData("Wheel Speed (ticks/sec)", shooter.betterWheelMotorMaybe.getCurrentTicksPerSecond());
 				telemetry.addData("Robot Heading:", robot.getOrientation());
 				telemetry.addData("Wobble Angle:", grabber.arm.getDegree());
+				telemetry.addData("Ring Distance:", (int)intake.ringDetector.getDistance(DistanceUnit.MM));
+				telemetry.addData("Rings In Intake:", intake.numRingsTakenIn);
 				telemetry.update();
 
 				updateEStop();

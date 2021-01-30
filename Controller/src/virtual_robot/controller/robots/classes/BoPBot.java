@@ -198,6 +198,8 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
 
         rightFingerTranslateTransform = new Translate(0, 0);
         rightFinger.getTransforms().add(rightFingerTranslateTransform);
+        
+        intakeSensor.setDistance(200);
     }
 
     private double getCenterPivotX(Rectangle r) {
@@ -567,8 +569,6 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
             leftFingerTranslateTransform.setX(fingerPos);
             rightFingerTranslateTransform.setX(-fingerPos);
         }
-    
-        intakeSensor.updateDistance(0, 200 - ringWidth, 0);
     }
 
     public void powerDownAndReset() {

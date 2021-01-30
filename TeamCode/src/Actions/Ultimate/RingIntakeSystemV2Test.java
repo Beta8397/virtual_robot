@@ -11,6 +11,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import java.io.IOException;
 
+import javax.print.attribute.standard.JobOriginatingUserName;
+
 import Actions.ActionHandler;
 import MotorControllers.MotorController;
 
@@ -43,10 +45,11 @@ public class RingIntakeSystemV2Test implements ActionHandler {
 	private Servo intakeServo; // use a servo handler here instead
 	private RevBlinkinLedDriver driver;
 
-	private DistanceSensor ringDetector;
+	public DistanceSensor ringDetector;
 	private boolean ringSensed;
-	private static final double RING_DETECTION_THRESHOLD = 160;//todo find these
-	private static final double NO_RING_THRESHOLD = 140;
+	private boolean ringDetected;
+	private static final double RING_DETECTION_THRESHOLD = 140;//todo find these
+	private static final double NO_RING_THRESHOLD = 160;
 	
 	public int numRingsTakenIn;
 	
@@ -70,6 +73,8 @@ public class RingIntakeSystemV2Test implements ActionHandler {
 		state = OFF;
 		ringSensed = false;
 		
+		numRingsTakenIn = 3;
+		
 		driver = hardwareMap.get(RevBlinkinLedDriver.class, "intakeLEDs");
 		
 		ringDetector = hardwareMap.get(DistanceSensor.class, "intakeSensor");
@@ -85,17 +90,24 @@ public class RingIntakeSystemV2Test implements ActionHandler {
 	}
 	
 	private void outtakeExtraRing() {
-		if (numRingsTakenIn > 3)
+		if (numRingsTakenIn > 3) {
 			intakeReverse();
+			numRingsTakenIn--;
+		}
 	}
 	
 	private void detectRingsInIntake() {
 		double distance = ringDetector.getDistance(DistanceUnit.MM);
-		if (distance > NO_RING_THRESHOLD) {
-			ringSensed = false;
-		} else if (!ringSensed && distance < RING_DETECTION_THRESHOLD) {
-			numRingsTakenIn++;
-			ringSensed = true;
+		ringDetected = (distance < RING_DETECTION_THRESHOLD) || ringDetected;//detect if ring is present
+		ringDetected = !(distance > NO_RING_THRESHOLD) && ringDetected;//detect if ring is absent
+		
+		if (ringDetected ^ ringSensed) {//edge detection
+			if (ringDetected) {//test if the edge is rising or falling
+				ringSensed = true;
+				numRingsTakenIn++;
+			} else {
+				ringSensed = false;
+			}
 		}
 	}
 	
