@@ -54,9 +54,9 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
 
     public static final double INTAKE_R_INCHES = 9.0;
     public static final double INTAKE_ANGLE_DEG = 90.0;
-    public static final double INTAKE_DIR_TOLERANCE_DEG = 5.0;      // determines how accurate the drive direction must be to pick up a ring
-    public static final double INTAKE_ANGLE_TOLERANCE_DEG = 10.0;   // determines how accurate the alignment to the ring must be
-    public static final double INTAKE_DIST_TOLERANCE_INCHES = 13.5; // the distance to the ring at pick-up
+    public static final double INTAKE_DIR_TOLERANCE_DEG = 45.0;      // determines how accurate the drive direction must be to pick up a ring
+    public static final double INTAKE_ANGLE_TOLERANCE_DEG = 180.0;   // determines how accurate the alignment to the ring must be
+    public static final double INTAKE_DIST_TOLERANCE_INCHES = 15; // the distance to the ring at pick-up
     public static final long INTAKE_TO_HOPPER_TIME_MILLIS = 1000L;  // milliseconds that a ring blocks the intake from collecting another ring
 
     public static final double WOBBLE_GRAB_TURN_FRACTION = 0.34; // fraction of turn at which wobble goal can be grabbed
@@ -427,10 +427,8 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
                     }
                 } else {
                     // if the ring is in motion and collides with the robot, then stop the ring
-                    if (r.getControlledBy() == null) {
-                        if (collide(r, Ring.RING_RADIUS_INCHES)) {
-                            r.setVelocity(0.0, 0.0);
-                        }
+                    if (collide(r, Ring.RING_RADIUS_INCHES)) {
+                        r.setVelocity(0.0, 0.0);
                     }
                 }
             }
