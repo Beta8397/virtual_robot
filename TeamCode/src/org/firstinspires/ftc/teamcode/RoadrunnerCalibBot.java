@@ -33,7 +33,7 @@ public class RoadrunnerCalibBot extends Robot {
                 "front_left_motor",
                 "front_right_motor",
                 "back_left_motor",
-                "back_right_motor", false);
+                "back_right_motor", true);
         drive.setLocalizer(new HolonomicDriveEncoderIMULocalizer(
                 this,
                 drive,

@@ -93,6 +93,8 @@ public final class HALGUI {
         lastRenderTime = 0;
         cycleToggle = new Toggle(Toggle.ToggleTypes.trueOnceToggle, false);
         clearToggle = new Toggle(Toggle.ToggleTypes.flipToggle, false);
+        robot.telemetry.setMsTransmissionInterval(DEFAULT_HAL_TRANSMISSION_INTERVAL_MS);
+        robot.telemetry.setDisplayFormat(Telemetry.DisplayFormat.MONOSPACE);
         GamepadEventGenerator.getInstance().reset();
     }
 
@@ -205,7 +207,7 @@ public final class HALGUI {
         //Runs this if in clear screen protocol.
         else if (isInitialized() && clearToggle.getCurrentState()) {
             //Clears the screen.
-            robot.telemetry.addData("","");
+            robot.telemetry.addLine();
             robot.telemetry.update();
 
             //Resets the toggle.
@@ -324,6 +326,10 @@ public final class HALGUI {
      * Stops the HAL GUI.
      */
     public final void stop() {
+        if (robot != null) {
+            robot.telemetry.setMsTransmissionInterval(DEFAULT_TRANSMISSION_INTERVAL_MS);
+            robot.telemetry.setDisplayFormat(Telemetry.DisplayFormat.CLASSIC);
+        }
         currentStack = null;
         currentMenu = null;
         robot = null;

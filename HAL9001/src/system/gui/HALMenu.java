@@ -301,7 +301,7 @@ public abstract class HALMenu {
             String toDisplay = line;
             if (cursorY == i) toDisplay = blinkCursor(line);
 
-            gui.getRobot().telemetry.addData("",toDisplay);
+            gui.getRobot().telemetry.addLine(toDisplay);
         }
     }
 
