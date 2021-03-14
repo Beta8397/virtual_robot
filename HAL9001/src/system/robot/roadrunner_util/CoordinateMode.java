@@ -41,4 +41,22 @@ public enum CoordinateMode {
                 else return (Pose2d pose) -> pose;
         }
     }
+
+    public Function<Vector2D, Vector2D> convertVectorTo(CoordinateMode coordinateMode) {
+        Function<Vector2D, Vector2D> vectorConverter = (Vector2D vector) -> {
+            Pose2d rawVectorPose = new Pose2d(vector.getX(), vector.getY());
+            Pose2d vectorPose = converter.apply(rawVectorPose);
+            return new Vector2D(vectorPose.getX(), vectorPose.getY());
+        };
+
+        switch (this) {
+            default:
+            case HAL:
+                if(coordinateMode == HAL) return (Vector2D vector) -> vector;
+                else return vectorConverter;
+            case ROADRUNNER:
+                if(coordinateMode == HAL) return vectorConverter;
+                else return (Vector2D vector) -> vector;
+        }
+    }
 }

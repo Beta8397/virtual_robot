@@ -639,13 +639,4 @@ public abstract class Drivetrain extends SubSystem {
     public final void updateLocalizer() {
         localizer.update();
     }
-
-    /**
-     * Uses the localizer to get an estimate of the drivetrain's velocity.
-     *
-     * @return An estimate of the drivetrain's velocity.
-     */
-    public final Pose2d getPoseVelocityEstimate() {
-        return localizer.getPoseVelocity();
-    }
 }

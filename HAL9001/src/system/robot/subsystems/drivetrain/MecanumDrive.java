@@ -21,10 +21,7 @@ import system.config.AutonomousConfig;
 import system.config.ConfigParam;
 import system.config.TeleopConfig;
 import system.robot.*;
-import system.robot.roadrunner_util.CoordinateMode;
-import system.robot.roadrunner_util.HALTrajectory;
-import system.robot.roadrunner_util.HALTrajectoryBuilder;
-import system.robot.roadrunner_util.RoadrunnerConfig;
+import system.robot.roadrunner_util.*;
 import util.control.Button;
 import util.math.units.HALAngleUnit;
 import util.math.units.HALDistanceUnit;
@@ -65,7 +62,7 @@ public class MecanumDrive extends MecanumDriveSimple {
     private enum Mode {
         IDLE,
         TURN,
-        FOLLOW_TRAJECTORY
+        FOLLOW_TRAJECTORY,
     }
 
     /**

@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import system.robot.roadrunner_util.CoordinateMode;
 import system.robot.Robot;
 import util.math.geometry.Vector2D;
+import util.math.units.HALAngleUnit;
 import util.math.units.HALDistanceUnit;
 import util.math.units.HALTimeUnit;
 
@@ -90,17 +91,47 @@ public abstract class HolonomicDrivetrain extends Drivetrain {
      */
     protected abstract void movePowerInternal(Vector2D power);
 
+    public final void movePower(double xPower, double yPower) {
+        Vector2D power = coordinateMode.convertVectorTo(CoordinateMode.HAL).apply(new Vector2D(xPower, yPower));
+        if(driveMode == DriveMode.FIELD_CENTRIC) {
+            power.rotate(-localizer.getPoseEstimate().getHeading());
+        }
+        movePowerInternal(modifyPower(power));
+    }
+
     /**
      * Causes the drivetrain to move at the specified power (after being modified by modifyPower).
      *
      * @param power The power to move at.
      */
     public final void movePower(Vector2D power) {
-        Vector2D transformedPower = power.clone();
-        if(coordinateMode == CoordinateMode.HAL) {
-            transformedPower.rotate(-PI/2);
-        }
-        movePowerInternal(modifyPower(transformedPower));
+        movePower(power.getX(), power.getY());
+    }
+
+    public final void movePower(double power, double angle, HALAngleUnit angleUnit) {
+        Vector2D inputVector = new Vector2D(power, angle, angleUnit);
+        //90 degree ccw rotation.
+        movePower(-inputVector.getY(), inputVector.getX());
+    }
+
+    public final void moveTime(double xPower, double yPower, long duration, HALTimeUnit timeUnit) {
+        movePower(xPower, yPower);
+        waitTime((long) HALTimeUnit.convert(duration,timeUnit,HALTimeUnit.MILLISECONDS), () -> localizer.update());
+        stopAllMotors();
+    }
+
+    public final void moveTime(double xPower, double yPower, long durationMs) {
+        moveTime(xPower, yPower, durationMs, HALTimeUnit.MILLISECONDS);
+    }
+
+    public final void moveTime(double power, double angle, HALAngleUnit angleUnit, long duration, HALTimeUnit timeUnit) {
+        Vector2D inputVector = new Vector2D(power, angle, angleUnit);
+        //90 degree ccw rotation.
+        moveTime(-inputVector.getY(), inputVector.getX(), duration, timeUnit);
+    }
+
+    public final void moveTime(double power, double angle, HALAngleUnit angleUnit, long durationMs) {
+        moveTime(power, angle, angleUnit, durationMs, HALTimeUnit.MILLISECONDS);
     }
 
     /**
@@ -111,9 +142,7 @@ public abstract class HolonomicDrivetrain extends Drivetrain {
      * @param timeUnit The units of the duration parameter.
      */
     public final void moveTime(Vector2D power, long duration, HALTimeUnit timeUnit) {
-        movePower(power);
-        waitTime((long) HALTimeUnit.convert(duration,timeUnit,HALTimeUnit.MILLISECONDS), () -> localizer.update());
-        stopAllMotors();
+        moveTime(power.getX(), power.getY(), duration, timeUnit);
     }
 
     /**
@@ -126,6 +155,48 @@ public abstract class HolonomicDrivetrain extends Drivetrain {
         moveTime(power, durationMs, HALTimeUnit.MILLISECONDS);
     }
 
+    public final void moveSimple(double xDisplacement, double yDisplacement, HALDistanceUnit distanceUnit, double power) {
+        Pose2d initialPose = localizerCoordinateMode.convertTo(coordinateMode).apply(localizer.getPoseEstimate());
+
+        //Convert from given distance unit to inches.
+        Vector2D displacement = coordinateMode.convertVectorTo(CoordinateMode.HAL).apply(
+                new Vector2D(
+                        HALDistanceUnit.convert(xDisplacement, distanceUnit, HALDistanceUnit.INCHES),
+                        HALDistanceUnit.convert(yDisplacement, distanceUnit, HALDistanceUnit.INCHES)
+                )
+        );
+
+        Vector2D velocity = displacement.clone().normalize().multiply(Range.clip(power,-1,1));
+
+        //Change the displacement vector to robot-centric mode if needed.
+        if(driveMode != DriveMode.FIELD_CENTRIC) {
+            displacement.rotate(localizer.getPoseEstimate().getHeading());
+        }
+
+        movePower(velocity);
+        waitWhile(() -> {
+            Pose2d currentPose = localizerCoordinateMode.convertTo(coordinateMode).apply(localizer.getPoseEstimate());
+            //System.out.println(currentPose);
+            return abs(currentPose.getX()-initialPose.getX()) < abs(displacement.getX()) || abs(currentPose.getY()-initialPose.getY()) < abs(displacement.getY());
+        }, () -> localizer.update());
+
+        stopAllMotors();
+    }
+
+    public final void moveSimple(double xDisplacement, double yDisplacement, double power) {
+        moveSimple(xDisplacement, yDisplacement, HALDistanceUnit.INCHES, power);
+    }
+
+    public final void moveSimple(double displacement, HALDistanceUnit distanceUnit, double angle, HALAngleUnit angleUnit, double power) {
+        Vector2D inputVector = new Vector2D(displacement, angle, angleUnit);
+        //90 degree ccw rotation.
+        moveSimple(-inputVector.getY(), inputVector.getX(), distanceUnit, power);
+    }
+
+    public final void moveSimple(double displacementInches, double angle, HALAngleUnit angleUnit, double power) {
+        moveSimple(displacementInches, HALDistanceUnit.INCHES, angle, angleUnit, power);
+    }
+
     /**
      * Causes the drivetrain to move by a specific amount. Note: This is affected by field centric vs robot-centric coordinates and HAL vs roadrunner coordinates.
      *
@@ -134,31 +205,7 @@ public abstract class HolonomicDrivetrain extends Drivetrain {
      * @param power The power to move at.
      */
     public final void moveSimple(@NotNull Vector2D displacement, HALDistanceUnit distanceUnit, double power) {
-        Pose2d initialPose = localizerCoordinateMode.convertTo(coordinateMode).apply(localizer.getPoseEstimate());
-
-        Vector2D transformedDisplacement = new Vector2D(
-                HALDistanceUnit.convert(displacement.getX(), distanceUnit, HALDistanceUnit.INCHES),
-                HALDistanceUnit.convert(displacement.getY(), distanceUnit, HALDistanceUnit.INCHES)
-        );
-
-        if(coordinateMode == CoordinateMode.ROADRUNNER) {
-            transformedDisplacement.rotate(PI/2);
-        }
-
-        Vector2D velocity = transformedDisplacement.clone().normalize().multiply(Range.clip(power,-1,1)).rotate(-PI/2);
-
-        if(driveMode == DriveMode.STANDARD) {
-            transformedDisplacement.rotate(localizer.getPoseEstimate().getHeading());
-        }
-
-        movePower(velocity);
-        waitWhile(() -> {
-            Pose2d currentPose = localizerCoordinateMode.convertTo(coordinateMode).apply(localizer.getPoseEstimate());
-            System.out.println(currentPose);
-            return abs(currentPose.getX()-initialPose.getX()) < abs(transformedDisplacement.getX()) || abs(currentPose.getY()-initialPose.getY()) < abs(transformedDisplacement.getY());
-        }, () -> localizer.update());
-
-        stopAllMotors();
+        moveSimple(displacement.getX(), displacement.getY(), distanceUnit, power);
     }
 
     /**

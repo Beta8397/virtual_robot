@@ -265,7 +265,7 @@ public class MecanumDriveSimple extends HolonomicDrivetrain {
 
     @Override
     protected void movePowerInternal(Vector2D power) {
-        Vector2D transformedPowerVector = power.clone().rotate(PI/4);
+        Vector2D transformedPowerVector = power.clone().rotate(-PI/4);
         setPower(
                 transformedPowerVector.getX(),
                 transformedPowerVector.getY(),

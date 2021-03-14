@@ -82,9 +82,10 @@ public abstract class HALProgram extends LinearOpMode {
                             throw new IllegalAccessException("Your robot's constructor is not public, :(");
                         }
                         try {
+                            field.setAccessible(true);
                             field.set(this, robot);
                         } catch (IllegalAccessException e) {
-                            throw new IllegalAccessException("Your robot isn't public, and so @MainRobot won't work. The program can't access it. SHARE!!!!");
+                            throw new IllegalAccessException("Your robot isn't accessible, and so @MainRobot won't work. The program can't access it. SHARE!!!!");
                         }
                     }
                 }

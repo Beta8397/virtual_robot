@@ -217,8 +217,8 @@ public class HALTrajectory {
      *
      * @return The path object associated with this trajectory.
      */
-    public Path getPath() {
-        return trajectory.getPath(); //TODO HAL Path
+    public HALPath getPath() {
+        return new HALPath(trajectory.getPath(), coordinateMode);
     }
 
     /**

@@ -17,17 +17,17 @@ public class SplineTest extends BaseAutonomous {
     @Override
     public void main() {
         HALTrajectory traj = robot.drive.trajectoryBuilder(new Pose2d())
-                .splineTo(new Point2D(30, 30), 0)
+                .splineTo(new Point2D(24, 24), 0)
                 .build();
 
         robot.drive.followTrajectory(traj);
-
+/*
         waitTime(2000);
 
         robot.drive.followTrajectory(
                 robot.drive.trajectoryBuilder(traj.end(), HALAngleUnit.DEGREES,true)
                         .splineTo(new Point2D(0, 0), 180)
                         .build()
-        );
+        );*/
     }
 }
