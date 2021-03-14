@@ -89,6 +89,10 @@ To use:
 
 LOG OF CHANGES
 
+CHANGES 1/22/2021
+    Changed telemetry to match (nearly completely) the API of the FTC SDK (but no speech). Also, add stack trace output 
+    for exceptions thrown by op modes.
+
 CHANGES 9/20/2020
     Added Swerve robot configuration. Each of four swerve units has: a DcMotor for drive, a CR-Servo for steering,
     and a separate encoder to monitor steering (this appears as a DcMotor in the config file). A TestSwerve op mode

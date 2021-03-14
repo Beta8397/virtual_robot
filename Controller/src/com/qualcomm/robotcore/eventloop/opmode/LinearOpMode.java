@@ -1,5 +1,7 @@
 package com.qualcomm.robotcore.eventloop.opmode;
 
+import org.firstinspires.ftc.robotcore.internal.opmode.TelemetryImpl;
+
 /**
  * Virtual Robot's implementation of LinearOpMode
  *
@@ -197,10 +199,10 @@ public abstract class LinearOpMode extends OpMode {
     }
 
     @Override
-    public final void internalPostInitLoop(){}
+    public final void internalPostInitLoop(){((TelemetryImpl)telemetry).tryUpdateIfDirty();}
 
     @Override
-    public final void internalPostLoop() {}
+    public final void internalPostLoop() {((TelemetryImpl)telemetry).tryUpdateIfDirty();}
 
     /**
      * For internal use only.
