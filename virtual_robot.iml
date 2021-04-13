@@ -8,5 +8,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="Hardware-6.1.1-sources" level="project" />
+    <orderEntry type="library" name="Hardware-6.1.1-sources1" level="project" />
   </component>
 </module>

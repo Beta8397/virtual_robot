@@ -107,8 +107,8 @@ public class ProgrammingBoard extends VirtualBot {
         propGroup.getTransforms().add(propGroupRotate);
         servoArmGroup.getTransforms().add(servoArmGroupRotate);
         Bounds boundsInScene = fieldPane.localToScene(fieldPane.getBoundsInLocal());
-        fieldCenterX = boundsInScene.getMinX() + halfFieldWidth;
-        fieldCenterY = boundsInScene.getMinY() + halfFieldWidth;
+        fieldCenterX = boundsInScene.getMinX() + field.halfFieldWidth;
+        fieldCenterY = boundsInScene.getMinY() + field.halfFieldWidth;
         sldPot.setMax(analogInput.getMaxVoltage());
         sldRed.valueProperty().addListener(sliderColorChangeListener);
         sldGreen.valueProperty().addListener(sliderColorChangeListener);
@@ -198,7 +198,7 @@ public class ProgrammingBoard extends VirtualBot {
           around the field.
          */
         displayGroup.getTransforms().add(new Translate(0, 0));
-        displayGroup.getTransforms().add(new Rotate(0, halfFieldWidth, halfFieldWidth));
+        displayGroup.getTransforms().add(new Rotate(0, field.halfFieldWidth, field.halfFieldWidth));
         displayGroup.getTransforms().add(new Scale(botWidth/75.0, botWidth/75.0, 0, 0));
 
         fieldPane.getChildren().add(displayGroup);

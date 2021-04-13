@@ -35,7 +35,10 @@ import javafx.scene.paint.Color;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotorImpl;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import virtual_robot.controller.robots.classes.MechanumBot;
+
+import virtual_robot.config.Game;
+import virtual_robot.controller.robots.GameElementControlling;
+import virtual_robot.controller.robots.classes.BoPBot;
 import virtual_robot.keyboard.KeyState;
 
 import java.io.IOException;
@@ -64,10 +67,13 @@ public class VirtualRobotController {
     @FXML private CheckBox checkBoxGamePad2;
     @FXML private BorderPane borderPane;
     @FXML private CheckBox cbxShowPath;
+    @FXML private CheckBox checkBoxAutoHuman;
 
     //Virtual Hardware
     private HardwareMap hardwareMap = null;
     private VirtualBot bot = null;
+    private VirtualField field = null;
+    private List<VirtualGameElement> gameElements = new ArrayList<>();
     Gamepad gamePad1 = new Gamepad();
     Gamepad gamePad2 = new Gamepad();
     GamePadHelper gamePadHelper = null;
@@ -95,7 +101,7 @@ public class VirtualRobotController {
 
     //Virtual Robot Control Engine
     ScheduledExecutorService executorService = null;
-    public static final double TIMER_INTERVAL_MILLISECONDS = 33;
+    public static final double TIMER_INTERVAL_MILLISECONDS = 20;
 
     //Random Number Generator
     private Random random = new Random();
@@ -129,6 +135,8 @@ public class VirtualRobotController {
     public void initialize() {
         OpMode.setVirtualRobotController(this);
         VirtualBot.setController(this);
+        VirtualField.setController(this);
+        VirtualGameElement.setController(this);
         setupCbxOpModes();
         setupCbxRobotConfigs();
         fieldWidth = Config.FIELD_WIDTH;
@@ -152,6 +160,8 @@ public class VirtualRobotController {
         fieldPane.getChildren().addAll(new Group(pathRect, pathLine));
 
         addConstraintMasks();
+
+        field = new VirtualField();
 
         sldRandomMotorError.valueProperty().addListener(sliderChangeListener);
         sldSystematicMotorError.valueProperty().addListener(sliderChangeListener);
@@ -221,7 +231,7 @@ public class VirtualRobotController {
                 validConfigClasses.add(c);
         }
         cbxConfig.setItems(validConfigClasses);
-        cbxConfig.setValue(MechanumBot.class);
+        cbxConfig.setValue(BoPBot.class);
 
         cbxConfig.setCellFactory(new Callback<ListView<Class<?>>, ListCell<Class<?>>>() {
             @Override
@@ -268,6 +278,23 @@ public class VirtualRobotController {
         } catch (Exception e){
             System.out.println("Unable to load robot configuration.");
             System.out.println(e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public VirtualGameElement getVirtualGameElementInstance(Class<?> c){
+        try {
+            Annotation a = c.getAnnotation(GameElementConfig.class);
+            FXMLLoader loader = new FXMLLoader((getClass().getResource("/virtual_robot/controller/game_elements/fxml/" + ((GameElementConfig) a).filename() + ".fxml")));
+            Group group = (Group) loader.load();
+            VirtualGameElement element = (VirtualGameElement) loader.getController();
+            element.setUpDisplayGroup(group);
+            return element;
+        } catch (Exception e){
+            System.out.println("Unable to load game element configuration.");
+            System.out.println(e.getMessage());
+            e.printStackTrace();
             return null;
         }
     }
@@ -304,7 +331,8 @@ public class VirtualRobotController {
 
     private void setupCbxOpModes(){
         //Reflections reflections = new Reflections(VirtualRobotApplication.class.getClassLoader());
-        Reflections reflections = new Reflections("org.firstinspires.ftc.teamcode");
+        Reflections reflections = new Reflections("");
+        //Reflections reflections = new Reflections("Autonomous.OpModes.UltimateAuto");
         Set<Class<?>> opModes = new HashSet<>();
         opModes.addAll(reflections.getTypesAnnotatedWith(TeleOp.class));
         opModes.addAll(reflections.getTypesAnnotatedWith(Autonomous.class));
@@ -383,7 +411,51 @@ public class VirtualRobotController {
         sldMotorInertia.setValue(0.0);
     }
 
+    private void initializeGameElements() {
+        // remove prior game elements
+        for (VirtualGameElement e : gameElements) {
+            e.removeFromDisplay(fieldPane);
+        }
+
+        gameElements.clear();
+
+        // iterate through annotated game element classes; filter for classes having forGame == Config.GAME
+        Reflections reflections = new Reflections("virtual_robot.controller.game_elements.classes");
+        Set<Class<?>> configClasses = new HashSet<>();
+        configClasses.addAll(reflections.getTypesAnnotatedWith(GameElementConfig.class));
+        for (Class<?> c : configClasses) {
+            Class<? extends Game> forGame = c.getAnnotation(GameElementConfig.class).forGame();
+            int numInstances = c.getAnnotation(GameElementConfig.class).numInstances();
+            if (forGame.equals(Config.GAME.getClass()) && numInstances > 0 && VirtualGameElement.class.isAssignableFrom(c)) {
+                // create numInstances instances of each
+                for (int i = 0; i < numInstances; ++i) {
+                    gameElements.add(getVirtualGameElementInstance(c));
+                }
+            }
+        }
+
+        // allow the bot to preload game elements
+        if (bot instanceof GameElementControlling) {
+            ((GameElementControlling) bot).initControl(gameElements);
+        }
+
+        Config.GAME.initialize();
+        // allow the game to initialize game elements
+        int j = 0;
+        for (int i = 0; i < gameElements.size(); ++i) {
+            // the instances are grouped by type in the list, but we want to provide an inter-group
+            // counter when calling initGameElement for convenience
+            if (i == 0 || !gameElements.get(i - 1).getClass().equals(gameElements.get(i).getClass())) {
+                j = 0;
+            }
+            Config.GAME.initGameElement(gameElements.get(i), j);
+            ++j;
+        }
+    }
+
     public StackPane getFieldPane(){ return fieldPane; }
+
+    public VirtualField getField(){ return field; }
 
     @FXML
     private void handleDriverButtonAction(ActionEvent event){
@@ -395,6 +467,7 @@ public class VirtualRobotController {
             pathLine.getPoints().clear();
             txtTelemetry.setText("");
             driverButton.setText("START");
+            initializeGameElements();
             opModeInitialized = true;
             cbxConfig.setDisable(true);
             Runnable runOpMode = new Runnable() {
@@ -408,6 +481,9 @@ public class VirtualRobotController {
             Runnable updateDisplay = new Runnable() {
                 @Override
                 public void run() {
+                    for (VirtualGameElement e: gameElements) {
+                        e.updateDisplay();
+                    }
                     bot.updateDisplay();
                     pathLine.getPoints().addAll(halfFieldWidth + bot.getX(), halfFieldWidth - bot.getY());
                 }
@@ -415,12 +491,23 @@ public class VirtualRobotController {
             Runnable singleCycle = new Runnable() {
                 @Override
                 public void run() {
+                    if (Config.GAME.hasHumanPlayer() && Config.GAME.isHumanPlayerActive()) {
+                        Config.GAME.updateHumanPlayerState(TIMER_INTERVAL_MILLISECONDS, gameElements);
+                    }
+                    for (VirtualGameElement e: gameElements) {
+                        e.updateState(TIMER_INTERVAL_MILLISECONDS);
+                    }
                     bot.updateStateAndSensors(TIMER_INTERVAL_MILLISECONDS);
+                    if (bot instanceof GameElementControlling) {
+                        for (VirtualGameElement e : gameElements) {
+                            ((GameElementControlling) bot).interact(e);
+                        }
+                    }
                     Platform.runLater(updateDisplay);
                 }
             };
             executorService = Executors.newSingleThreadScheduledExecutor();
-            executorService.scheduleAtFixedRate(singleCycle, 0, 33, TimeUnit.MILLISECONDS);
+            executorService.scheduleAtFixedRate(singleCycle, 0, (long) TIMER_INTERVAL_MILLISECONDS, TimeUnit.MILLISECONDS);
             opModeThread.start();
         }
         else if (!opModeStarted){
@@ -572,7 +659,12 @@ public class VirtualRobotController {
 
     public void updateTelemetryDisplay(String telemetryText){
         txtTelemetry.setText(telemetryText);
+		
+    @FXML
+    private void handleCheckBoxAutoHumanAction(ActionEvent event){
+        Config.GAME.setHumanPlayerActive(checkBoxAutoHuman.isSelected());
     }
+
 
     private void initializeTelemetryTextArea(){
         StringBuilder sb = new StringBuilder();
@@ -723,6 +815,10 @@ public class VirtualRobotController {
                     distanceMM = (x - X_MIN) * mmPerPixel;         //LEFT
                     break;
             }
+        }
+        
+        public synchronized void setDistance(double distance) {
+            distanceMM = distance;
         }
     }
 

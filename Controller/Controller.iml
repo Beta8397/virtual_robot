@@ -18,5 +18,8 @@
       </library>
     </orderEntry>
     <orderEntry type="library" name="org.reflections:reflections:0.9.11" level="project" />
+    <orderEntry type="library" name="org.json:json:20201115" level="project" />
+    <orderEntry type="library" name="com.google.code.gson:gson:2.8.6" level="project" />
+    <orderEntry type="library" name="RobotCore-6.1.1-javadoc.jar" level="project" />
   </component>
 </module>
