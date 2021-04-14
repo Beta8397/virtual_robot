@@ -28,7 +28,7 @@ public class Ring extends VirtualGameElement {
         x += vx * millis / 1000.0;
         y += vy * millis / 1000.0;
 
-        VirtualField field = controller.getField();
+        VirtualField field = VirtualField.getInstance();
 
         if (isInFlight()) {
             if (x < field.X_MIN || x > field.X_MAX || y < field.Y_MIN || y > field.Y_MAX) {
@@ -53,7 +53,7 @@ public class Ring extends VirtualGameElement {
                 vy = 0.0;
             }
 
-            double pixelsPerInch = field.fieldWidth / 144.0;
+            double pixelsPerInch = field.FIELD_WIDTH / 144.0;
             double ringRadiusPixels = RING_RADIUS_INCHES * pixelsPerInch;
             double px1 = x - ringRadiusPixels;
             double px2 = x + ringRadiusPixels;
@@ -73,7 +73,7 @@ public class Ring extends VirtualGameElement {
     @Override
     public synchronized void updateDisplay() {
         if (!onField) {
-            y = controller.getField().Y_MAX + 15; // move ring off the field
+            y = VirtualField.getInstance().Y_MAX + 15; // move ring off the field
         }
         super.updateDisplay();
     }

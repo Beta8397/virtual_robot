@@ -18,6 +18,11 @@ import javafx.scene.layout.HBox;
 import javafx.scene.shape.Polyline;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Callback;
+import org.dyn4j.collision.CategoryFilter;
+import org.dyn4j.dynamics.Body;
+import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.geometry.MassType;
+import org.dyn4j.world.World;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.internal.opmode.TelemetryImpl;
 import org.reflections.Reflections;
@@ -69,10 +74,12 @@ public class VirtualRobotController {
     @FXML private CheckBox cbxShowPath;
     @FXML private CheckBox checkBoxAutoHuman;
 
-    //Virtual Hardware
+    // dyn4j world
+    World<Body> world = new World<Body>();
+
+    // Virtual Hardware
     private HardwareMap hardwareMap = null;
     private VirtualBot bot = null;
-    private VirtualField field = null;
     private List<VirtualGameElement> gameElements = new ArrayList<>();
     Gamepad gamePad1 = new Gamepad();
     Gamepad gamePad2 = new Gamepad();
@@ -135,7 +142,6 @@ public class VirtualRobotController {
     public void initialize() {
         OpMode.setVirtualRobotController(this);
         VirtualBot.setController(this);
-        VirtualField.setController(this);
         VirtualGameElement.setController(this);
         setupCbxOpModes();
         setupCbxRobotConfigs();
@@ -161,7 +167,7 @@ public class VirtualRobotController {
 
         addConstraintMasks();
 
-        field = new VirtualField();
+        setupPhysicsWorld();
 
         sldRandomMotorError.valueProperty().addListener(sliderChangeListener);
         sldSystematicMotorError.valueProperty().addListener(sliderChangeListener);
@@ -187,6 +193,56 @@ public class VirtualRobotController {
             gamePadHelper = new RealGamePadHelper();
         }
         gamePadExecutorService.scheduleAtFixedRate(gamePadHelper, 0, 20, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     *  Adjust world settings (especially gravity, but other settings may need adjustment as well).
+     *  Add Bodys (with rectangular BodyFixtures) on all four sides, representing the walls.
+     */
+    private void setupPhysicsWorld(){
+        world.setGravity(0, 0);
+
+        // Create Rectangles for four 1 meter thick walls
+        org.dyn4j.geometry.Rectangle topRect = new org.dyn4j.geometry.Rectangle(
+                VirtualField.FIELD_WIDTH_METERS + 2, 1);
+        org.dyn4j.geometry.Rectangle bottomRect = new org.dyn4j.geometry.Rectangle(
+                VirtualField.FIELD_WIDTH_METERS + 2, 1);
+        org.dyn4j.geometry.Rectangle leftRect = new org.dyn4j.geometry.Rectangle(
+                1, VirtualField.FIELD_WIDTH_METERS);
+        org.dyn4j.geometry.Rectangle rightRect = new org.dyn4j.geometry.Rectangle(
+                1, VirtualField.FIELD_WIDTH_METERS);
+
+        // Translate the rectangles into correct positions
+        topRect.translate(0, VirtualField.getInstance().Y_MAX/VirtualField.getInstance().PIXELS_PER_METER + 0.5);
+        bottomRect.translate(0, VirtualField.getInstance().Y_MIN/VirtualField.getInstance().PIXELS_PER_METER - 0.5);
+        leftRect.translate(VirtualField.getInstance().X_MIN/VirtualField.getInstance().PIXELS_PER_METER - 0.5, 0);
+        rightRect.translate(VirtualField.getInstance().X_MAX/VirtualField.getInstance().PIXELS_PER_METER + 0.5, 0);
+
+        /*
+         * For each wall, create a body with infinite mass. The shape (i.e., Rectangle) for each wall is placed into
+         * the body via a BodyFixture. The Fixture is assigned a Category filter which assigns it to the WALL
+         * category, and allows it to collide with all categories.
+         */
+        Body topWall = new Body();
+        BodyFixture topFixture = topWall.addFixture(topRect);
+        topFixture.setFilter(Filters.WALL_FILTER);
+        topWall.setMass(MassType.INFINITE);
+        world.addBody(topWall);
+        Body bottomWall = new Body();
+        BodyFixture bottomFixture = bottomWall.addFixture(bottomRect);
+        bottomFixture.setFilter(Filters.WALL_FILTER);
+        bottomWall.setMass(MassType.INFINITE);
+        world.addBody(bottomWall);
+        Body leftWall = new Body();
+        BodyFixture leftFixture = leftWall.addFixture(leftRect);
+        leftFixture.setFilter(Filters.WALL_FILTER);
+        leftWall.setMass(MassType.INFINITE);
+        world.addBody(leftWall);
+        Body rightWall = new Body();
+        BodyFixture rightFixture = rightWall.addFixture(rightRect);
+        rightFixture.setFilter(Filters.WALL_FILTER);
+        rightWall.setMass(MassType.INFINITE);
+        world.addBody(rightWall);
     }
 
     /**
@@ -455,7 +511,7 @@ public class VirtualRobotController {
 
     public StackPane getFieldPane(){ return fieldPane; }
 
-    public VirtualField getField(){ return field; }
+    public World<Body> getWorld(){ return world; }
 
     @FXML
     private void handleDriverButtonAction(ActionEvent event){
@@ -657,8 +713,9 @@ public class VirtualRobotController {
         pathLine.setVisible(cbxShowPath.isSelected());
     }
 
-    public void updateTelemetryDisplay(String telemetryText){
+    public void updateTelemetryDisplay(String telemetryText) {
         txtTelemetry.setText(telemetryText);
+    }
 		
     @FXML
     private void handleCheckBoxAutoHumanAction(ActionEvent event){

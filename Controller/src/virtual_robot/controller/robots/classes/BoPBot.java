@@ -12,7 +12,6 @@ import com.qualcomm.robotcore.hardware.ServoImpl;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.hardware.configuration.MotorType;
 
-import java.awt.SystemTray;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -309,7 +308,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         armMotor.update(millis);
         armScale = -Math.cos(armMotor.getCurrentPosition() / ARM_MOTOR_TYPE.TICKS_PER_ROTATION * Math.PI * 2.0);
 
-        double pixelsPerInch = controller.getField().getPixelsPerInch();
+        double pixelsPerInch = VirtualField.getInstance().getPixelsPerInch();
 
         if (ringInIntake != null) {
 //            double timeInIntakeMillis = System.currentTimeMillis() - intakeTimeMillis;
@@ -408,7 +407,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
                         double directionToRing = Math.atan2(dy, dx);
                         if (Math.abs(directionToRing - directionOfTravel) <= Math.toRadians(INTAKE_ANGLE_TOLERANCE_DEG)) {
                             // ring is in front of the running intake
-                            double distanceToRingInches = Math.sqrt(dx * dx + dy * dy) / (controller.getField().fieldWidth / 144);
+                            double distanceToRingInches = Math.sqrt(dx * dx + dy * dy) / (VirtualField.getInstance().FIELD_WIDTH / 144);
                             if (distanceToRingInches <= INTAKE_DIST_TOLERANCE_INCHES) {
                                 // ring is close enough to be picked up and there is not another ring in the intake
                                 if (ringInIntake == null) {
@@ -460,7 +459,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
 
         boolean collision = false;
 
-        double pixelsPerInch = controller.getField().getPixelsPerInch();
+        double pixelsPerInch = VirtualField.getInstance().getPixelsPerInch();
         for (int i = 0; i < robotBoundary.length; ++i) {
             int j = (i == 0) ? 3 : i - 1;
             // calculate distance from ring to boundary segment of the robot
@@ -471,7 +470,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
                 // move the ring coordinates to eliminate the overlap
                 Vector2D u = normalToSegment(robotBoundary[j], robotBoundary[i]);
                 r.setLocation(point.added(u.multiplied(overlapPixels)));
-                VirtualField field = controller.getField();
+                VirtualField field = VirtualField.getInstance();
                 double radius = radiusInches * field.getPixelsPerInch();
                 double rx = Math.max(field.X_MIN + radius, Math.min(r.getX(), field.X_MAX - radius));
                 double ry = Math.max(field.Y_MIN + radius, Math.min(r.getY(), field.Y_MAX - radius));
@@ -492,7 +491,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
                 new Vector2D(-9.0, -9.0) // left-bottom
         };
 
-        double pixelsPerInch = controller.getField().getPixelsPerInch();
+        double pixelsPerInch = VirtualField.getInstance().getPixelsPerInch();
         Vector2D location = new Vector2D(x, y);
 
         for (Vector2D v : boundary) {

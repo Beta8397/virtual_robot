@@ -1,21 +1,15 @@
 package virtual_robot.controller;
 
-import javafx.collections.ObservableList;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import virtual_robot.config.Config;
 
 /**
  *   For internal use only. Abstract base class for all of the specific robot configurations.
@@ -63,9 +57,9 @@ public abstract class VirtualBot {
     public double getHeadingRadians(){ return headingRadians; }
 
     public VirtualBot(){
-        field = controller.getField();
-        fieldPane = field.fieldPane;
-        botWidth = field.fieldWidth / 8.0;
+        field = VirtualField.getInstance();
+        fieldPane = controller.getFieldPane();
+        botWidth = field.FIELD_WIDTH / 8.0;
         halfBotWidth = botWidth / 2.0;
     }
 
@@ -122,7 +116,7 @@ public abstract class VirtualBot {
           around the field.
          */
         displayGroup.getTransforms().add(new Translate(0, 0));
-        displayGroup.getTransforms().add(new Rotate(0, field.halfFieldWidth, field.halfFieldWidth));
+        displayGroup.getTransforms().add(new Rotate(0, field.HALF_FIELD_WIDTH, field.HALF_FIELD_WIDTH));
         displayGroup.getTransforms().add(new Scale(botWidth/75.0, botWidth/75.0, 0, 0));
 
         fieldPane.getChildren().add(displayGroup);
@@ -177,14 +171,14 @@ public abstract class VirtualBot {
 //            double argY = Math.max(halfBotWidth, Math.min(fieldWidth - halfBotWidth, arg.getY()));
 //            x = argX - halfFieldWidth;
 //            y = halfFieldWidth - argY;
-            x = arg.getX() - field.halfFieldWidth;
-            y = field.halfFieldWidth - arg.getY();
+            x = arg.getX() - field.HALF_FIELD_WIDTH;
+            y = field.HALF_FIELD_WIDTH - arg.getY();
             constrainToBoundaries();
             updateDisplay();
         }
         else if (arg.getButton() == MouseButton.SECONDARY){
-            double centerX = x + field.halfFieldWidth;
-            double centerY = field.halfFieldWidth - y;
+            double centerX = x + field.HALF_FIELD_WIDTH;
+            double centerY = field.HALF_FIELD_WIDTH - y;
             double displayAngleRads = Math.atan2(arg.getX() - centerX, centerY - arg.getY());
             headingRadians = -displayAngleRads;
             constrainToBoundaries();

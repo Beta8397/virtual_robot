@@ -18,8 +18,16 @@
       </library>
     </orderEntry>
     <orderEntry type="library" name="org.reflections:reflections:0.9.11" level="project" />
-    <orderEntry type="library" name="org.json:json:20201115" level="project" />
-    <orderEntry type="library" name="com.google.code.gson:gson:2.8.6" level="project" />
-    <orderEntry type="library" name="RobotCore-6.1.1-javadoc.jar" level="project" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../lib/dyn4j-4.1.4.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/../lib/dyn4j-4.1.4-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
   </component>
 </module>

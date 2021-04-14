@@ -45,7 +45,7 @@ public abstract class VirtualGameElement {
     }
 
     public void setLocationInInches(Vector2D location) {
-        double pixelsPerInch = controller.getField().fieldWidth / 144;
+        double pixelsPerInch = VirtualField.getInstance().PIXELS_PER_INCH;
         x = location.x * pixelsPerInch;
         y = location.y * pixelsPerInch;
     }
@@ -84,8 +84,8 @@ public abstract class VirtualGameElement {
         Bounds boundsInLocal = displayGroup.getBoundsInLocal();
         double width = boundsInLocal.getWidth();
         double height = boundsInLocal.getHeight();
-        displayGroup.setTranslateX(displayGroup.getTranslateX() + controller.getField().halfFieldWidth - width / 2);
-        displayGroup.setTranslateY(displayGroup.getTranslateY() + controller.getField().halfFieldWidth - height / 2);
+        displayGroup.setTranslateX(displayGroup.getTranslateX() + VirtualField.getInstance().HALF_FIELD_WIDTH - width / 2);
+        displayGroup.setTranslateY(displayGroup.getTranslateY() + VirtualField.getInstance().HALF_FIELD_WIDTH - height / 2);
 
         //Create a new display group with the 600x600 transparent rectangle as its base layer, and
         //the original display group as its upper layer.
