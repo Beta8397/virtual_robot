@@ -43,6 +43,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import virtual_robot.config.Game;
 import virtual_robot.controller.robots.GameElementControlling;
 import virtual_robot.controller.robots.classes.BoPBot;
+import virtual_robot.controller.robots.classes.MechanumBot;
 import virtual_robot.keyboard.KeyState;
 
 import java.io.IOException;
@@ -289,7 +290,7 @@ public class VirtualRobotController {
                 validConfigClasses.add(c);
         }
         cbxConfig.setItems(validConfigClasses);
-        cbxConfig.setValue(BoPBot.class);
+        cbxConfig.setValue(MechanumBot.class);
 
         cbxConfig.setCellFactory(new Callback<ListView<Class<?>>, ListCell<Class<?>>>() {
             @Override
@@ -460,7 +461,10 @@ public class VirtualRobotController {
     @FXML
     public void setConfig(ActionEvent event){
         if (opModeInitialized || opModeStarted) return;
-        if (bot != null) bot.removeFromDisplay(fieldPane);
+        if (bot != null) {
+            bot.removeFromWorld();
+            bot.removeFromDisplay(fieldPane);
+        }
         bot = getVirtualBotInstance(cbxConfig.getValue());
         if (bot == null) System.out.println("Unable to get VirtualBot Object");
         hardwareMap = bot.getHardwareMap();
@@ -526,6 +530,8 @@ public class VirtualRobotController {
             pathLine.getPoints().clear();
             txtTelemetry.setText("");
             driverButton.setText("START");
+
+            // Initialize the game elements -- should this be here, or done via a UI button?
             initializeGameElements();
             opModeInitialized = true;
             cbxConfig.setDisable(true);
@@ -697,7 +703,7 @@ public class VirtualRobotController {
         // Update the physics engine. This will also call any collision/contact listeners that have been set.
         // These listeners will generally be in the bot class. They should record events within fields in the bot's
         // class, to be handled later in the bot.updateStateAndSensors call.
-        world.updatev(PHYSICS_INTERVAL_MILLISECONDS);
+        world.updatev(PHYSICS_INTERVAL_MILLISECONDS / 1000.0);
 
         // Update game element pose, and any other relevant state, of all game elements
         for (VirtualGameElement e: gameElements) {

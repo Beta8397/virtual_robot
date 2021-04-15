@@ -19,7 +19,7 @@ public class DcMotorImpl implements DcMotor {
 
     private final Random random = new Random();
     private RunMode mode = RunMode.RUN_WITHOUT_ENCODER;
-    protected Direction direction = Direction.FORWARD;
+    private Direction direction = Direction.FORWARD;
 
     //power is the requested speed, normalized to the -1 to +1 range
     private double power = 0.0;
@@ -33,6 +33,8 @@ public class DcMotorImpl implements DcMotor {
     //position to use as baseline for encoder tick calculation
     private double encoderBasePosition = 0.0;
 
+    private boolean supportsError = true;
+    private boolean supportsInertia = true;
     private double randomErrorFrac = 0.0;
     private double systematicErrorFrac = 0.0;
     private double inertia;
@@ -48,6 +50,19 @@ public class DcMotorImpl implements DcMotor {
     public DcMotorImpl(MotorType motorType){
         MOTOR_TYPE = motorType;
         MOTOR_CONFIGURATION_TYPE = new MotorConfigurationType(motorType);
+    }
+
+    /**
+     * For internal use only
+     * @param motorType
+     * @param supportsError  True, if motor is to be affected by random and systematic error.
+     * @param supportsInertia   True, if motor is to be affected by inertia.
+     */
+    public DcMotorImpl(MotorType motorType, boolean supportsError, boolean supportsInertia){
+        MOTOR_TYPE = motorType;
+        MOTOR_CONFIGURATION_TYPE = new MotorConfigurationType(motorType);
+        this.supportsInertia = supportsInertia;
+        this.supportsError = supportsError;
     }
 
     /**
@@ -95,12 +110,6 @@ public class DcMotorImpl implements DcMotor {
     }
 
     /**
-     * Get actual speed
-     * @return actual speed, in ticks per sec
-     */
-    protected synchronized double getSpeed(){ return speed; }
-
-    /**
      * Get current position (as number of encoder ticks)
      * @return number of encoder ticks
      */
@@ -118,27 +127,27 @@ public class DcMotorImpl implements DcMotor {
 
     /**
      * For internal use only.
-     * Updates motor speed based on current speed, power, and inertia. Then, uses motor speed to update position.
+     * Updates motor speed based on current speed, power, and inertia. Then, uses average motor speed to update position.
      * @param milliseconds number of milliseconds since last update
      * @return change in actualPosition
      */
     public synchronized double update(double milliseconds){
+        double speedChange, avgSpeed;
         if (mode == RunMode.STOP_AND_RESET_ENCODER) return 0.0;
         else if (mode == RunMode.RUN_TO_POSITION){
             double targetSpeed = COEFF_PROPORTIONATE * (double)(targetPosition - getCurrentPosition())
                     / MOTOR_TYPE.MAX_TICKS_PER_SECOND;
             double absPower = Math.abs(power);
             targetSpeed = Math.max(-absPower, Math.min(targetSpeed, absPower));
-            speed = speed + (1.0 - inertia) * (targetSpeed - speed);
+            speedChange = (1.0 - inertia) * (targetSpeed - speed);
+            avgSpeed = speed + speedChange / 2.0;
+            speed = speed + speedChange;
         } else {
-            speed = speed + (1.0 - inertia) * (power - speed);
+            speedChange = (1.0 - inertia) * (power - speed);
+            avgSpeed = speed + speedChange / 2.0;
+            speed = speed + speedChange;
         }
-        double positionChange = speed * MOTOR_TYPE.MAX_TICKS_PER_SECOND * milliseconds / 1000.0;
-        /*
-         * Apply error to position change: for a given motor object the systematic error remains the same
-         * until it is changed by a call to setSystematicErrorFrac. The random error is multiplied during
-         * each update cycle by a different random number with gaussian distribution.
-         */
+        double positionChange = avgSpeed * MOTOR_TYPE.MAX_TICKS_PER_SECOND * milliseconds / 1000.0;
         positionChange *= (1.0 + systematicErrorFrac + randomErrorFrac * random.nextGaussian());
         if (direction == Direction.FORWARD && MOTOR_TYPE.REVERSED ||
                 direction == Direction.REVERSE && !MOTOR_TYPE.REVERSED) positionChange = -positionChange;
@@ -147,10 +156,30 @@ public class DcMotorImpl implements DcMotor {
     }
 
     /**
+     * For internal use only. Adjust internal position of motor. This can be called in order to simulate
+     * a stalled motor, by passing in negative of the last value returned by update(...).
+     * @param actualPositionAdjustment amount by which to increment (or decrement if negative) actualPosition
+     */
+    public synchronized  void adjustActualPosition(double actualPositionAdjustment){
+        actualPosition += actualPositionAdjustment;
+    }
+
+    public synchronized void setActualPosition(double pos){
+        actualPosition = pos;
+    }
+
+    /**
+     * Get actual speed
+     * @return actual speed, in ticks per sec
+     */
+    protected synchronized double getSpeed(){ return speed; }
+
+    /**
      * For internal use only.
      * @param rdmErrFrac
      */
     public synchronized void setRandomErrorFrac(double rdmErrFrac){
+        if (!supportsError) return;
         randomErrorFrac = rdmErrFrac;
     }
 
@@ -158,13 +187,16 @@ public class DcMotorImpl implements DcMotor {
      * For internal use only.
      * @param sysErrFrac
      */
-    public synchronized void setSystematicErrorFrac(double sysErrFrac) { systematicErrorFrac = sysErrFrac; }
+    public synchronized void setSystematicErrorFrac(double sysErrFrac) {
+        if (!supportsError) return;
+        systematicErrorFrac = sysErrFrac; }
 
     /**
      * For internal use only.
      * @param in
      */
     public synchronized void setInertia(double in){
+        if (!supportsInertia) return;
         if (in < 0) inertia = 0.0;
         else if (in > 0.99) inertia = 0.99;
         else inertia = in;
@@ -201,13 +233,9 @@ public class DcMotorImpl implements DcMotor {
         return mode == RunMode.RUN_TO_POSITION && Math.abs(power) > 0.0001 && (!atTarget || !almostStopped);
     }
 
-    public synchronized void setZeroPowerBehavior(ZeroPowerBehavior zeroPowerBehavior){
-        this.zeroPowerBehavior = zeroPowerBehavior;
-    }
+    public synchronized void setZeroPowerBehavior(ZeroPowerBehavior beh) { zeroPowerBehavior = beh; }
 
-    public synchronized ZeroPowerBehavior getZeroPowerBehavior(){
-        return this.zeroPowerBehavior;
-    }
+    public synchronized ZeroPowerBehavior getZeroPowerBehavior() { return zeroPowerBehavior; }
 
     public MotorConfigurationType getMotorType(){
         return MOTOR_CONFIGURATION_TYPE;

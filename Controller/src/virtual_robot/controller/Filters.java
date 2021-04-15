@@ -12,6 +12,11 @@ public class Filters {
     //Categories
 
     public static long WALL = 0b1;
+    public static long CHASSIS = 0b10;
 
+    // Filter for the field walls: collides with anything that includes WALL in its mask
     public static final CategoryFilter WALL_FILTER = new CategoryFilter(WALL, MASK_ALL);
+
+    // Filter for the robot chassis: collides with anything that includes CHASSIS in its mask
+    public static final CategoryFilter CHASSIS_FILTER = new CategoryFilter(CHASSIS, MASK_ALL);
 }

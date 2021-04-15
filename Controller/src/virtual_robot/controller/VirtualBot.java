@@ -10,11 +10,19 @@ import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import org.dyn4j.dynamics.Body;
+import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.geometry.MassType;
+import org.dyn4j.geometry.Transform;
+import org.dyn4j.world.World;
 
 /**
  *   For internal use only. Abstract base class for all of the specific robot configurations.
  *
- *   A robot config class that extend VirtualBot must:
+ *   The VirtualBot class does not require use of the physics engine. Classes that extend
+ *   VirtualBot can utilize the physics engine, or not.
+ *
+ *   A robot config class that extends VirtualBot must:
  *
  *   1) Provide a no-argument constructor whose first statement is super();
  *   2) Be the controller class for an .fxml file that defines the graphical respresentation of the bot;
@@ -25,8 +33,10 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
  *   Optionally (and in most cases), it will also be necessary to:
  *
  *   1) Provide a public initialize() method for initialization of accessories whose appearance will change
- *      as the robot operates.
+ *      as the robot operates, and to set up for use of physics engine, if applicable.
  *   2) Override the public synchronized updateDisplay() method to update the appearance of accessories.
+ *   3) Override the removeFromWorld() method to remove not only the chassisBody, but any additional
+ *      Bodys that have been created to represent robot components.
  *
  *   The ArmBot class has detailed comments regarding the workings of these methods.
  *
@@ -38,6 +48,13 @@ public abstract class VirtualBot {
     protected HardwareMap hardwareMap;
 
     protected Group displayGroup = null;
+
+    // dyn4j Body, BodyFixture, and Shape for the robot chassis
+    protected Body chassisBody = null;
+    protected BodyFixture chassisFixture = null;
+    protected org.dyn4j.geometry.Rectangle chassisRectangle = null;
+
+    protected World<Body> world;
 
     protected StackPane fieldPane;
     protected double halfBotWidth;
@@ -61,6 +78,7 @@ public abstract class VirtualBot {
         fieldPane = controller.getFieldPane();
         botWidth = field.FIELD_WIDTH / 8.0;
         halfBotWidth = botWidth / 2.0;
+        world = controller.getWorld();
     }
 
     /**
@@ -69,10 +87,34 @@ public abstract class VirtualBot {
      */
     public void initialize(){
         createHardwareMap();
+        setUpChassisBody();
     }
 
     static void setController(VirtualRobotController ctrl){
         controller = ctrl;
+    }
+
+    /**
+     *  Set up the chassisBody and add it to the dyn4j world. This method creates a Body and adds a BodyFixture
+     *  containing a Rectangle. Add the chassis body to the world.
+     *     The density value of 71.76 kg/m2 results in chassis mass of 15 kg.
+     *     The "friction" of 0 refers to robot-game element and robot-wall friction (NOT robot-floor)
+     *     The "restitution" of 0 refers to "bounce" when robot collides with wall and game elements
+     *
+     *     May want to change density, friction, and restitution to obtain desired behavior
+     *
+     *  The filter set on the chassisFixture indicates what other things the robot is capable of colliding with
+     */
+    public void setUpChassisBody(){
+        chassisBody = new Body();
+        double botWidthMeters = botWidth / field.PIXELS_PER_METER;
+        chassisFixture = chassisBody.addFixture(
+                new org.dyn4j.geometry.Rectangle(botWidthMeters, botWidthMeters), 71.76, 0, 0);
+        chassisRectangle = (org.dyn4j.geometry.Rectangle)chassisFixture.getShape();
+        chassisFixture.setFilter(Filters.CHASSIS_FILTER);
+        chassisBody.setMass(MassType.NORMAL);
+        world.addBody(chassisBody);
+        System.out.println("Chassis added to world. Mass = " + chassisBody.getMass().getMass());
     }
 
     /**
@@ -167,10 +209,6 @@ public abstract class VirtualBot {
     public synchronized void positionWithMouseClick(MouseEvent arg){
 
         if (arg.getButton() == MouseButton.PRIMARY) {
-//            double argX = Math.max(halfBotWidth, Math.min(fieldWidth - halfBotWidth, arg.getX()));
-//            double argY = Math.max(halfBotWidth, Math.min(fieldWidth - halfBotWidth, arg.getY()));
-//            x = argX - halfFieldWidth;
-//            y = halfFieldWidth - argY;
             x = arg.getX() - field.HALF_FIELD_WIDTH;
             y = field.HALF_FIELD_WIDTH - arg.getY();
             constrainToBoundaries();
@@ -184,10 +222,25 @@ public abstract class VirtualBot {
             constrainToBoundaries();
             updateDisplay();
         }
+
+        if (chassisBody != null){
+            Transform t = new Transform();
+            t.rotate(headingRadians);
+            t.translate(x/field.PIXELS_PER_METER, y/field.PIXELS_PER_METER);
+        }
+
     }
 
     public void removeFromDisplay(StackPane fieldPane){
         fieldPane.getChildren().remove(displayGroup);
+    }
+
+    /**
+     * Remove chassisBody (if not null) from world. If subclass adds more Bodys, this method will need
+     * to be overridden (with a call to super.removeFromWorld())
+     */
+    public void removeFromWorld(){
+        if (chassisBody != null && world.containsBody(chassisBody)) world.removeBody(chassisBody);
     }
 
     public HardwareMap getHardwareMap(){ return hardwareMap; }
@@ -200,9 +253,10 @@ public abstract class VirtualBot {
 
     /**
      * Constrain robot to the boundaries X_MIN, X_MAX, Y_MIN, Y_MAX
+     * If physics simulation is being used, this should not be called during active simulation (just let robot collide
+     * with walls). But, it is needed for positioning robot with mouse.
      */
     protected void constrainToBoundaries(){
-
         double effectiveHalfBotWidth;    //Use this to keep corner of robot from leaving field
         if (headingRadians <= -Math.PI/2.0) effectiveHalfBotWidth = -halfBotWidth * (Math.sin(headingRadians) + Math.cos(headingRadians));
         else if (headingRadians <= 0) effectiveHalfBotWidth = halfBotWidth * (Math.cos(headingRadians) - Math.sin(headingRadians));
