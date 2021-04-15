@@ -35,8 +35,8 @@ public class VirtualRobotApplication extends Application {
 
     @Override
     public void stop() {
-        if (controllerHandle.executorService != null && !controllerHandle.executorService.isShutdown()) {
-            controllerHandle.executorService.shutdownNow();
+        if (controllerHandle.physicsExecutorService != null && !controllerHandle.physicsExecutorService.isShutdown()) {
+            controllerHandle.physicsExecutorService.shutdownNow();
         }
         if (controllerHandle.gamePadExecutorService != null && !controllerHandle.gamePadExecutorService.isShutdown()) {
             controllerHandle.gamePadExecutorService.shutdownNow();

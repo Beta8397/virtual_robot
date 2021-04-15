@@ -18,7 +18,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.shape.Polyline;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Callback;
-import org.dyn4j.collision.CategoryFilter;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.MassType;
@@ -107,8 +106,11 @@ public class VirtualRobotController {
     private Thread opModeThread = null;
 
     //Virtual Robot Control Engine
-    ScheduledExecutorService executorService = null;
-    public static final double TIMER_INTERVAL_MILLISECONDS = 20;
+    ScheduledExecutorService physicsExecutorService = null;
+    public static final double PHYSICS_INTERVAL_MILLISECONDS = 10;
+    ScheduledExecutorService displayExecutorService = null;
+    public static final double DISPLAY_INTERVAL_MILLISECONDS = 20;
+
 
     //Random Number Generator
     private Random random = new Random();
@@ -371,6 +373,7 @@ public class VirtualRobotController {
         }
         return name;
     }
+
     private String getGroupFromAnnotationOrOpmode(Class c){
         String group = null;
         Annotation a1 = c.getAnnotation(TeleOp.class);
@@ -532,8 +535,10 @@ public class VirtualRobotController {
                     runOpModeAndCleanUp();
                 }
             };
+
             opModeThread = new Thread(runOpMode);
             opModeThread.setDaemon(true);
+
             Runnable updateDisplay = new Runnable() {
                 @Override
                 public void run() {
@@ -544,36 +549,34 @@ public class VirtualRobotController {
                     pathLine.getPoints().addAll(halfFieldWidth + bot.getX(), halfFieldWidth - bot.getY());
                 }
             };
-            Runnable singleCycle = new Runnable() {
+
+            Runnable singleDisplayCycle = new Runnable() {
                 @Override
                 public void run() {
-                    if (Config.GAME.hasHumanPlayer() && Config.GAME.isHumanPlayerActive()) {
-                        Config.GAME.updateHumanPlayerState(TIMER_INTERVAL_MILLISECONDS, gameElements);
-                    }
-                    for (VirtualGameElement e: gameElements) {
-                        e.updateState(TIMER_INTERVAL_MILLISECONDS);
-                    }
-                    bot.updateStateAndSensors(TIMER_INTERVAL_MILLISECONDS);
-                    if (bot instanceof GameElementControlling) {
-                        for (VirtualGameElement e : gameElements) {
-                            ((GameElementControlling) bot).interact(e);
-                        }
-                    }
                     Platform.runLater(updateDisplay);
                 }
             };
-            executorService = Executors.newSingleThreadScheduledExecutor();
-            executorService.scheduleAtFixedRate(singleCycle, 0, (long) TIMER_INTERVAL_MILLISECONDS, TimeUnit.MILLISECONDS);
+
+            Runnable singlePhysicsCycle = new Runnable() {
+                @Override
+                public void run() {
+                    singlePhysicsCycle();
+                    Platform.runLater(updateDisplay);
+                }
+            };
+            physicsExecutorService = Executors.newSingleThreadScheduledExecutor();
+            physicsExecutorService.scheduleAtFixedRate(singlePhysicsCycle, 0, (long) PHYSICS_INTERVAL_MILLISECONDS, TimeUnit.MILLISECONDS);
+            displayExecutorService = Executors.newSingleThreadScheduledExecutor();
+            displayExecutorService.scheduleAtFixedRate(singleDisplayCycle, 0, (long)DISPLAY_INTERVAL_MILLISECONDS, TimeUnit.MILLISECONDS);
+
             opModeThread.start();
-        }
-        else if (!opModeStarted){
+        } else if (!opModeStarted){
             /*
              * START has been pressed.
              */
             driverButton.setText("STOP");
             opModeStarted = true;
-        }
-        else{
+        } else{
             /*
              * STOP has been pressed. Note that it is not possible for this to happen before START is pressed.
              */
@@ -586,7 +589,7 @@ public class VirtualRobotController {
              *   -In a linear opmode, the above will cause stopRequested to become true, and interrupt runOpMode thread
              */
             opModeStarted = false;
-            if (!executorService.isShutdown()) executorService.shutdown();
+            if (!physicsExecutorService.isShutdown()) physicsExecutorService.shutdown();
             /*
              * This should not be necessary, but...
              */
@@ -674,7 +677,7 @@ public class VirtualRobotController {
 
         bot.getHardwareMap().setActive(false);
         bot.powerDownAndReset();
-        if (!executorService.isShutdown()) executorService.shutdown();
+        if (!physicsExecutorService.isShutdown()) physicsExecutorService.shutdown();
         opModeInitialized = false;
         opModeStarted = false;
         Platform.runLater(new Runnable() {
@@ -688,6 +691,28 @@ public class VirtualRobotController {
         });
 
         System.out.println("Finished executing runOpModeAndCleanUp() on opModeThread.");
+    }
+
+    private synchronized void singlePhysicsCycle(){
+        // Update the physics engine. This will also call any collision/contact listeners that have been set.
+        // These listeners will generally be in the bot class. They should record events within fields in the bot's
+        // class, to be handled later in the bot.updateStateAndSensors call.
+        world.updatev(PHYSICS_INTERVAL_MILLISECONDS);
+
+        // Update game element pose, and any other relevant state, of all game elements
+        for (VirtualGameElement e: gameElements) {
+            e.updateState(PHYSICS_INTERVAL_MILLISECONDS);
+        }
+
+        // Update robot's pose by obtaining it from the physics engine, accumulate forces on Body based on
+        // drive motor status, and update robot sensors. Depending on collision/contact events that occurred
+        // during the world.updatev() call, it is also possible that this method will directly affect game elements.
+        bot.updateStateAndSensors(PHYSICS_INTERVAL_MILLISECONDS);
+
+
+        if (Config.GAME.hasHumanPlayer() && Config.GAME.isHumanPlayerActive()) {
+            Config.GAME.updateHumanPlayerState(PHYSICS_INTERVAL_MILLISECONDS, gameElements);
+        }
     }
 
     @FXML
