@@ -1,16 +1,23 @@
 package virtual_robot.controller.game_elements.classes;
 
 import javafx.scene.Group;
+import org.dyn4j.collision.CategoryFilter;
+import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.geometry.MassType;
 import virtual_robot.config.UltimateGoal;
-import virtual_robot.controller.GameElementConfig;
-import virtual_robot.controller.VirtualBot;
-import virtual_robot.controller.VirtualGameElement;
-import virtual_robot.util.Vector2D;
+import virtual_robot.controller.*;
 
 @GameElementConfig(name = "Wobble Goal", filename = "wobble_goal", forGame = UltimateGoal.class, numInstances = 2)
 public class WobbleGoal extends VirtualGameElement {
+
     public static final double RADIUS_INCHES = 4.0;
     private VirtualBot bot;
+
+    private VRBody wobbleBody;
+    BodyFixture wobbleFixture;
+
+    public static final long WOBBLE_CATEGORY = 512;
+    public static final CategoryFilter WOBBLE_FILTER = new CategoryFilter(WOBBLE_CATEGORY, Filters.MASK_ALL);
 
     @Override
     protected void setUpDisplayGroup(Group group) {
@@ -19,7 +26,9 @@ public class WobbleGoal extends VirtualGameElement {
 
     @Override
     public void updateState(double millis) {
-        // TODO make wobble goal wobble?
+        x = wobbleBody.getTransform().getTranslationX() * FIELD.PIXELS_PER_METER;
+        y = wobbleBody.getTransform().getTranslationY() * FIELD.PIXELS_PER_METER;
+        headingRadians = wobbleBody.getTransform().getRotationAngle();
     }
 
     @Override
@@ -35,5 +44,16 @@ public class WobbleGoal extends VirtualGameElement {
     @Override
     public void setControlledBy(VirtualBot bot) {
         this.bot = bot;
+    }
+
+    @Override
+    public void setUpPhysicsBodies(){
+        wobbleBody = new VRBody(this);
+        double wobbleRadiusMeters = 4.0 / VirtualField.INCHES_PER_METER;
+        wobbleFixture = wobbleBody.addFixture(
+                new org.dyn4j.geometry.Circle(wobbleRadiusMeters), 1, 0, 0);
+        wobbleFixture.setFilter(WOBBLE_FILTER);
+        wobbleBody.setMass(MassType.NORMAL);
+        world.addBody(wobbleBody);
     }
 }

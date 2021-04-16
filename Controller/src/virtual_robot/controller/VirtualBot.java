@@ -10,11 +10,11 @@ import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.world.World;
+import virtual_robot.config.GameObject;
 
 /**
  *   For internal use only. Abstract base class for all of the specific robot configurations.
@@ -41,7 +41,7 @@ import org.dyn4j.world.World;
  *   The ArmBot class has detailed comments regarding the workings of these methods.
  *
  */
-public abstract class VirtualBot {
+public abstract class VirtualBot implements GameObject {
 
     protected static VirtualRobotController controller;
 
@@ -50,11 +50,11 @@ public abstract class VirtualBot {
     protected Group displayGroup = null;
 
     // dyn4j Body, BodyFixture, and Shape for the robot chassis
-    protected Body chassisBody = null;
+    protected VRBody chassisBody = null;
     protected BodyFixture chassisFixture = null;
     protected org.dyn4j.geometry.Rectangle chassisRectangle = null;
 
-    protected World<Body> world;
+    protected World<VRBody> world;
 
     protected StackPane fieldPane;
     protected double halfBotWidth;
@@ -67,16 +67,17 @@ public abstract class VirtualBot {
     protected volatile double x = 0;
     protected volatile double y = 0;
     protected volatile double headingRadians = 0;
-    protected final VirtualField field;
+
+    protected final VirtualField FIELD;
 
     public double getX() { return x; }
     public double getY() { return y; }
     public double getHeadingRadians(){ return headingRadians; }
 
     public VirtualBot(){
-        field = VirtualField.getInstance();
+        FIELD = VirtualField.getInstance();
         fieldPane = controller.getFieldPane();
-        botWidth = field.FIELD_WIDTH / 8.0;
+        botWidth = FIELD.FIELD_WIDTH / 8.0;
         halfBotWidth = botWidth / 2.0;
         world = controller.getWorld();
     }
@@ -106,15 +107,14 @@ public abstract class VirtualBot {
      *  The filter set on the chassisFixture indicates what other things the robot is capable of colliding with
      */
     public void setUpChassisBody(){
-        chassisBody = new Body();
-        double botWidthMeters = botWidth / field.PIXELS_PER_METER;
+        chassisBody = new VRBody(this);
+        double botWidthMeters = botWidth / FIELD.PIXELS_PER_METER;
         chassisFixture = chassisBody.addFixture(
                 new org.dyn4j.geometry.Rectangle(botWidthMeters, botWidthMeters), 71.76, 0, 0);
         chassisRectangle = (org.dyn4j.geometry.Rectangle)chassisFixture.getShape();
         chassisFixture.setFilter(Filters.CHASSIS_FILTER);
         chassisBody.setMass(MassType.NORMAL);
         world.addBody(chassisBody);
-        System.out.println("Chassis added to world. Mass = " + chassisBody.getMass().getMass());
     }
 
     /**
@@ -158,7 +158,7 @@ public abstract class VirtualBot {
           around the field.
          */
         displayGroup.getTransforms().add(new Translate(0, 0));
-        displayGroup.getTransforms().add(new Rotate(0, field.HALF_FIELD_WIDTH, field.HALF_FIELD_WIDTH));
+        displayGroup.getTransforms().add(new Rotate(0, FIELD.HALF_FIELD_WIDTH, FIELD.HALF_FIELD_WIDTH));
         displayGroup.getTransforms().add(new Scale(botWidth/75.0, botWidth/75.0, 0, 0));
 
         fieldPane.getChildren().add(displayGroup);
@@ -209,14 +209,14 @@ public abstract class VirtualBot {
     public synchronized void positionWithMouseClick(MouseEvent arg){
 
         if (arg.getButton() == MouseButton.PRIMARY) {
-            x = arg.getX() - field.HALF_FIELD_WIDTH;
-            y = field.HALF_FIELD_WIDTH - arg.getY();
+            x = arg.getX() - FIELD.HALF_FIELD_WIDTH;
+            y = FIELD.HALF_FIELD_WIDTH - arg.getY();
             constrainToBoundaries();
             updateDisplay();
         }
         else if (arg.getButton() == MouseButton.SECONDARY){
-            double centerX = x + field.HALF_FIELD_WIDTH;
-            double centerY = field.HALF_FIELD_WIDTH - y;
+            double centerX = x + FIELD.HALF_FIELD_WIDTH;
+            double centerY = FIELD.HALF_FIELD_WIDTH - y;
             double displayAngleRads = Math.atan2(arg.getX() - centerX, centerY - arg.getY());
             headingRadians = -displayAngleRads;
             constrainToBoundaries();
@@ -226,7 +226,7 @@ public abstract class VirtualBot {
         if (chassisBody != null){
             Transform t = new Transform();
             t.rotate(headingRadians);
-            t.translate(x/field.PIXELS_PER_METER, y/field.PIXELS_PER_METER);
+            t.translate(x/ FIELD.PIXELS_PER_METER, y/ FIELD.PIXELS_PER_METER);
         }
 
     }
@@ -263,10 +263,10 @@ public abstract class VirtualBot {
         else if (headingRadians <= Math.PI/2.0) effectiveHalfBotWidth = halfBotWidth * (Math.sin(headingRadians) + Math.cos(headingRadians));
         else effectiveHalfBotWidth = halfBotWidth * (Math.sin(headingRadians) - Math.cos(headingRadians));
 
-        if (x >  (field.X_MAX - effectiveHalfBotWidth)) x = field.X_MAX - effectiveHalfBotWidth;
-        else if (x < (field.X_MIN + effectiveHalfBotWidth)) x = field.X_MIN + effectiveHalfBotWidth;
-        if (y > (field.Y_MAX - effectiveHalfBotWidth)) y = field.Y_MAX - effectiveHalfBotWidth;
-        else if (y < (field.Y_MIN + effectiveHalfBotWidth)) y = field.Y_MIN + effectiveHalfBotWidth;
+        if (x >  (FIELD.X_MAX - effectiveHalfBotWidth)) x = FIELD.X_MAX - effectiveHalfBotWidth;
+        else if (x < (FIELD.X_MIN + effectiveHalfBotWidth)) x = FIELD.X_MIN + effectiveHalfBotWidth;
+        if (y > (FIELD.Y_MAX - effectiveHalfBotWidth)) y = FIELD.Y_MAX - effectiveHalfBotWidth;
+        else if (y < (FIELD.Y_MIN + effectiveHalfBotWidth)) y = FIELD.Y_MIN + effectiveHalfBotWidth;
     }
 
 }

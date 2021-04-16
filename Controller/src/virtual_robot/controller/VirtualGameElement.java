@@ -3,7 +3,11 @@ package virtual_robot.controller;
 import javafx.geometry.Bounds;
 import javafx.scene.Group;
 import javafx.scene.layout.StackPane;
+import javafx.scene.transform.Rotate;
+import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
+import org.dyn4j.world.World;
+import virtual_robot.config.GameObject;
 import virtual_robot.util.Vector2D;
 
 /**
@@ -18,27 +22,36 @@ import virtual_robot.util.Vector2D;
  *  Optionally (and in most cases), it will also be necessary to:
  *
  *  1) Provide a public initialize() method for initialization of of the game element whose appearance
- *     may change as it interacts with the robot.
+ *     may change as it interacts with the robot. First statement must be super.initialize().
  *  2) Override the public synchronized updateDisplay() method to update the appearance.
+ *  3) Override the setUpBodies method, if the game element will participate in the physics
+ *     simulation. This method should contruct one or more dyn4j Bodys, with associated BodyFixtures,
+ *     set their mass(es), and add them to the world.
  *
  *  The Wobble Goal class has detailed comments regarding the workings of these methods.
  */
-public abstract class VirtualGameElement {
+public abstract class VirtualGameElement implements GameObject {
     protected static VirtualRobotController controller;
+
+    protected Group displayGroup = null;
+
+    protected World<VRBody> world = null;
+
+    protected final VirtualField FIELD;
 
     static void setController(VirtualRobotController ctrl) {
         controller = ctrl;
     }
 
-    protected Group displayGroup = null;
-
     public Group getDisplayGroup() { return displayGroup; }
 
     protected volatile double x = 0;
     protected volatile double y = 0;
+    protected volatile double headingRadians = 0;
 
     public double getX() { return x; }
     public double getY() { return y; }
+    public double getHeadingRadians() { return headingRadians; }
 
     public Vector2D getLocation() {
         return new Vector2D(x, y);
@@ -61,7 +74,8 @@ public abstract class VirtualGameElement {
     }
 
     public VirtualGameElement() {
-        // TODO - figure out what goes here
+        FIELD = VirtualField.getInstance();
+        world = controller.getWorld();
     }
 
     /**
@@ -69,7 +83,7 @@ public abstract class VirtualGameElement {
      * perform custom initialization.  The default implementation does nothing.
      */
     public void initialize() {
-        // Intentionally empty
+        setUpPhysicsBodies();
     }
 
     /**
@@ -100,8 +114,10 @@ public abstract class VirtualGameElement {
           around the field.
          */
         displayGroup.getTransforms().add(new Translate(0, 0));
-//        displayGroup.getTransforms().add(new Rotate(0, field.halfFieldWidth, field.halfFieldWidth));
-//        displayGroup.getTransforms().add(new Scale(botWidth/75.0, botWidth/75.0, 0, 0));
+        displayGroup.getTransforms().add(new Rotate(0, VirtualField.getInstance().HALF_FIELD_WIDTH,
+                VirtualField.getInstance().HALF_FIELD_WIDTH));
+        displayGroup.getTransforms().add(new Scale(VirtualField.getInstance().FIELD_WIDTH/600,
+                VirtualField.getInstance().FIELD_WIDTH/600, 0, 0));
 
         controller.getFieldPane().getChildren().add(displayGroup);
     }
@@ -132,9 +148,11 @@ public abstract class VirtualGameElement {
     public synchronized void updateDisplay(){
         double displayX = x;
         double displayY = -y;
+        double displayAngle = -headingRadians * 180.0 / Math.PI;
         Translate translate = (Translate)displayGroup.getTransforms().get(0);
         translate.setX(displayX);
         translate.setY(displayY);
+        ((Rotate)displayGroup.getTransforms().get(1)).setAngle(displayAngle);
     }
 
     public void removeFromDisplay(StackPane fieldPane) {
@@ -153,4 +171,12 @@ public abstract class VirtualGameElement {
      * @param bot the robot controlling the game element or null, if not being controlled
      */
     public abstract void setControlledBy(VirtualBot bot);
+
+    /**
+     *  Set up the dyn4j Body / Bodys for the game element, if any.
+     *  Default implementation is intentionally empty, to allow for the possibility that
+     *  a game element does not participate in the physics simulation.
+     */
+    public void setUpPhysicsBodies(){ }
+
 }

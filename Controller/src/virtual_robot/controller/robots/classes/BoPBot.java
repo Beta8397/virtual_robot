@@ -308,7 +308,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
         armMotor.update(millis);
         armScale = -Math.cos(armMotor.getCurrentPosition() / ARM_MOTOR_TYPE.TICKS_PER_ROTATION * Math.PI * 2.0);
 
-        double pixelsPerInch = VirtualField.getInstance().getPixelsPerInch();
+        double pixelsPerInch = FIELD.PIXELS_PER_INCH;
 
         if (ringInIntake != null) {
 //            double timeInIntakeMillis = System.currentTimeMillis() - intakeTimeMillis;
@@ -459,7 +459,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
 
         boolean collision = false;
 
-        double pixelsPerInch = VirtualField.getInstance().getPixelsPerInch();
+        double pixelsPerInch = FIELD.PIXELS_PER_INCH;
         for (int i = 0; i < robotBoundary.length; ++i) {
             int j = (i == 0) ? 3 : i - 1;
             // calculate distance from ring to boundary segment of the robot
@@ -471,7 +471,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
                 Vector2D u = normalToSegment(robotBoundary[j], robotBoundary[i]);
                 r.setLocation(point.added(u.multiplied(overlapPixels)));
                 VirtualField field = VirtualField.getInstance();
-                double radius = radiusInches * field.getPixelsPerInch();
+                double radius = radiusInches * field.PIXELS_PER_INCH;
                 double rx = Math.max(field.X_MIN + radius, Math.min(r.getX(), field.X_MAX - radius));
                 double ry = Math.max(field.Y_MIN + radius, Math.min(r.getY(), field.Y_MAX - radius));
                 r.setLocation(rx, ry);
@@ -491,7 +491,7 @@ public class BoPBot extends VirtualBot implements GameElementControlling {
                 new Vector2D(-9.0, -9.0) // left-bottom
         };
 
-        double pixelsPerInch = VirtualField.getInstance().getPixelsPerInch();
+        double pixelsPerInch = FIELD.PIXELS_PER_INCH;
         Vector2D location = new Vector2D(x, y);
 
         for (Vector2D v : boundary) {

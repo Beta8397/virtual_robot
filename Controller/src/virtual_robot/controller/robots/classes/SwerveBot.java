@@ -207,19 +207,19 @@ public class SwerveBot extends VirtualBot {
         else if (headingRadians <= Math.PI/2.0) effectiveHalfBotWidth = halfBotWidth * (Math.sin(headingRadians) + Math.cos(headingRadians));
         else effectiveHalfBotWidth = halfBotWidth * (Math.sin(headingRadians) - Math.cos(headingRadians));
 
-        if (x >  (field.X_MAX - effectiveHalfBotWidth)) {
-            x = field.X_MAX - effectiveHalfBotWidth;
+        if (x >  (FIELD.X_MAX - effectiveHalfBotWidth)) {
+            x = FIELD.X_MAX - effectiveHalfBotWidth;
             velocity.x = Math.min(velocity.x, 0);
-        } else if (x < (field.X_MIN + effectiveHalfBotWidth)) {
-            x = field.X_MIN + effectiveHalfBotWidth;
+        } else if (x < (FIELD.X_MIN + effectiveHalfBotWidth)) {
+            x = FIELD.X_MIN + effectiveHalfBotWidth;
             velocity.x = Math.max(velocity.x, 0);
         }
 
-        if (y > (field.Y_MAX - effectiveHalfBotWidth)){
-            y = field.Y_MAX - effectiveHalfBotWidth;
+        if (y > (FIELD.Y_MAX - effectiveHalfBotWidth)){
+            y = FIELD.Y_MAX - effectiveHalfBotWidth;
             velocity.y = Math.min(velocity.y, 0);
-        } else if (y < (field.Y_MIN + effectiveHalfBotWidth)) {
-            y = field.Y_MIN + effectiveHalfBotWidth;
+        } else if (y < (FIELD.Y_MIN + effectiveHalfBotWidth)) {
+            y = FIELD.Y_MIN + effectiveHalfBotWidth;
             velocity.y = Math.max(velocity.y, 0);
         }
     }

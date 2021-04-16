@@ -26,8 +26,9 @@ public class VirtualField {
     public static final double FIELD_WIDTH_METERS = FIELD_WIDTH_INCHES * 0.0254;
     public static final double HALF_FIELD_WIDTH_METERS = FIELD_WIDTH_METERS / 2.0;
 
-    public final double X_MIN, X_MAX, Y_MIN, Y_MAX;     // Field boundaries in Pixels
+    public static final double INCHES_PER_METER = 1.0 / 0.0254;
 
+    public final double X_MIN, X_MAX, Y_MIN, Y_MAX;     // Field boundaries in Pixels
 
     private VirtualField() {
         FIELD_WIDTH = Config.FIELD_WIDTH;
@@ -45,68 +46,6 @@ public class VirtualField {
             instance = new VirtualField();
         }
         return instance;
-    }
-
-    public double getPixelsPerInch() {
-        return FIELD_WIDTH / FIELD_WIDTH_INCHES;
-    }
-
-    public double getPixelsPerMeter() {
-        return FIELD_WIDTH / FIELD_WIDTH_METERS;
-    }
-
-    public Vector2 pixelCoordsFromMeters(double x, double y){
-        return new Vector2(
-                HALF_FIELD_WIDTH + x * PIXELS_PER_METER,
-                HALF_FIELD_WIDTH - y * PIXELS_PER_METER
-        );
-    }
-
-    public Vector2 pixelCoordsFromMeters(Vector2 meters){
-        return pixelCoordsFromMeters(meters.x, meters.y);
-    }
-
-    public Vector2 pixelCoordsFromInches(double x, double y){
-        return new Vector2(
-                HALF_FIELD_WIDTH + x * PIXELS_PER_INCH,
-                HALF_FIELD_WIDTH - y * PIXELS_PER_INCH
-        );
-    }
-
-    public Vector2 pixelCoordsFromInches(Vector2 inches){
-        return pixelCoordsFromInches(inches.x, inches.y);
-    }
-
-    public Vector2 meterCoordsFromPixels(double x, double y){
-        return new Vector2((x - HALF_FIELD_WIDTH) / PIXELS_PER_METER, (HALF_FIELD_WIDTH - y) / PIXELS_PER_METER);
-    }
-
-    public Vector2 meterCoordsFromPixels(Vector2 pixels){
-        return meterCoordsFromPixels(pixels.x, pixels.y);
-    }
-
-    public Vector2 inchCoordsFromPixels(double x, double y){
-        return new Vector2( (x- HALF_FIELD_WIDTH)/ PIXELS_PER_INCH, (HALF_FIELD_WIDTH -y)/ PIXELS_PER_INCH);
-    }
-
-    public Vector2 inchCoordsFromPixels(Vector2 pixels){
-        return inchCoordsFromPixels(pixels.x, pixels.y);
-    }
-
-    public Vector2 meterCoordsFromInches(double x, double y){
-        return new Vector2(x * 0.0254, y * 0.0254);
-    }
-
-    public Vector2 meterCoordsFromInches(Vector2 inches){
-        return meterCoordsFromInches(inches.x, inches.y);
-    }
-
-    public Vector2 inchCoordsFromMeters(double x, double y){
-        return new Vector2(x/0.0254, y/0.0254);
-    }
-
-    public Vector2 inchCoordsFromMeters(Vector2 meters){
-        return inchCoordsFromMeters(meters.x, meters.y);
     }
 
 }

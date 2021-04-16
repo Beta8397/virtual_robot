@@ -1,22 +1,25 @@
 package virtual_robot.controller.game_elements.classes;
 
 import javafx.scene.Group;
+import org.dyn4j.collision.CategoryFilter;
+import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.geometry.MassType;
 import virtual_robot.config.UltimateGoal;
-import virtual_robot.controller.GameElementConfig;
-import virtual_robot.controller.VirtualBot;
-import virtual_robot.controller.VirtualField;
-import virtual_robot.controller.VirtualGameElement;
+import virtual_robot.controller.*;
 
 @GameElementConfig(name = "Ring", filename = "ring", forGame = UltimateGoal.class, numInstances = 10)
 public class Ring extends VirtualGameElement {
     public static final double RING_RADIUS_INCHES = 2.5;
-    public static final double DRAG = 0.0; // TODO fix this
     private boolean onField = true;
     private boolean inFlight = false;
     private boolean rolling = false;
     private VirtualBot bot = null;
-    private double vx = 0.0; // pixels per sec
-    private double vy = 0.0; // pixels per sec
+
+    VRBody ringBody;
+    BodyFixture ringFixture;
+
+    public static long RING_CATEGORY = 1024;
+    public static CategoryFilter RING_FILTER = new CategoryFilter(RING_CATEGORY, Filters.MASK_ALL);
 
     @Override
     protected void setUpDisplayGroup(Group group) {
@@ -25,49 +28,9 @@ public class Ring extends VirtualGameElement {
 
     @Override
     public synchronized void updateState(double millis) {
-        x += vx * millis / 1000.0;
-        y += vy * millis / 1000.0;
-
-        VirtualField field = VirtualField.getInstance();
-
-        if (isInFlight()) {
-            if (x < field.X_MIN || x > field.X_MAX || y < field.Y_MIN || y > field.Y_MAX) {
-                // ring exited field
-                onField = false;
-                inFlight = false;
-                rolling = false;
-                vx = 0.0;
-                vy = 0.0;
-            }
-        }
-        else if (getVx() != 0.0 || getVy() != 0.0) {
-            // when rolling on the ground, apply the acceleration
-            double angle = Math.atan2(vy, vx);
-            vx += vx * DRAG * Math.cos(angle) * millis / 1000.0;
-            vy += vy * DRAG * Math.sin(angle) * millis / 1000.0;
-
-            if (Math.abs(vx) < 1.0e-5) {
-                vx = 0.0;
-            }
-            if (Math.abs(vy) < 1.0e-5) {
-                vy = 0.0;
-            }
-
-            double pixelsPerInch = field.FIELD_WIDTH / 144.0;
-            double ringRadiusPixels = RING_RADIUS_INCHES * pixelsPerInch;
-            double px1 = x - ringRadiusPixels;
-            double px2 = x + ringRadiusPixels;
-            double py1 = y - ringRadiusPixels;
-            double py2 = y + ringRadiusPixels;
-            if (px1 <= field.X_MIN || px2 >= field.X_MAX || py1 <= field.Y_MIN || py2 >= field.Y_MAX) {
-                // ring hit wall - note this doesn't handle possible deflections off the walls
-                vx = 0.0;
-                vy = 0.0;
-                x = Math.max(field.X_MIN + ringRadiusPixels, Math.min(x, field.X_MAX - ringRadiusPixels));
-                y = Math.max(field.Y_MIN + ringRadiusPixels, Math.min(y, field.Y_MAX - ringRadiusPixels));
-                rolling = false;
-            }
-        }
+        x += ringBody.getTransform().getTranslationX() * FIELD.PIXELS_PER_METER;
+        y += ringBody.getTransform().getTranslationY() * FIELD.PIXELS_PER_METER;
+        headingRadians = ringBody.getTransform().getRotationAngle();
     }
 
     @Override
@@ -88,29 +51,23 @@ public class Ring extends VirtualGameElement {
         this.bot = bot;
     }
 
+    @Override
+    public void setUpPhysicsBodies(){
+        ringBody = new VRBody(this);
+        double ringRadiusMeters = RING_RADIUS_INCHES / VirtualField.INCHES_PER_METER;
+        ringFixture = ringBody.addFixture(
+                new org.dyn4j.geometry.Circle(ringRadiusMeters), 1, 0, 0);
+        ringFixture.setFilter(RING_FILTER);
+        ringBody.setMass(MassType.NORMAL);
+        world.addBody(ringBody);
+    }
+
     public boolean isOnField() {
         return onField;
     }
 
     public void setOnField(boolean onField) {
         this.onField = onField;
-    }
-
-    public double getVx() {
-        return vx;
-    }
-
-    public double getVy() {
-        return vy;
-    }
-
-    public boolean isStationary() {
-        return vx == 0.0 && vy == 0.0;
-    }
-
-    public void setVelocity(double vx, double vy) {
-        this.vx = vx;
-        this.vy = vy;
     }
 
     public boolean isInFlight() {

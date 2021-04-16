@@ -75,7 +75,7 @@ public class VirtualRobotController {
     @FXML private CheckBox checkBoxAutoHuman;
 
     // dyn4j world
-    World<Body> world = new World<Body>();
+    World<VRBody> world = new World<VRBody>();
 
     // Virtual Hardware
     private HardwareMap hardwareMap = null;
@@ -175,6 +175,7 @@ public class VirtualRobotController {
         sldRandomMotorError.valueProperty().addListener(sliderChangeListener);
         sldSystematicMotorError.valueProperty().addListener(sliderChangeListener);
         sldMotorInertia.valueProperty().addListener(sliderChangeListener);
+
         if (Config.USE_VIRTUAL_GAMEPAD){
             checkBoxGamePad1.setVisible(false);
             checkBoxGamePad2.setVisible(false);
@@ -226,26 +227,33 @@ public class VirtualRobotController {
          * the body via a BodyFixture. The Fixture is assigned a Category filter which assigns it to the WALL
          * category, and allows it to collide with all categories.
          */
-        Body topWall = new Body();
+        VRBody topWall = new VRBody();
         BodyFixture topFixture = topWall.addFixture(topRect);
         topFixture.setFilter(Filters.WALL_FILTER);
         topWall.setMass(MassType.INFINITE);
         world.addBody(topWall);
-        Body bottomWall = new Body();
+        topWall.setParent(new Wall());
+
+        VRBody bottomWall = new VRBody();
         BodyFixture bottomFixture = bottomWall.addFixture(bottomRect);
         bottomFixture.setFilter(Filters.WALL_FILTER);
         bottomWall.setMass(MassType.INFINITE);
         world.addBody(bottomWall);
-        Body leftWall = new Body();
+        bottomWall.setParent(new Wall());
+
+        VRBody leftWall = new VRBody();
         BodyFixture leftFixture = leftWall.addFixture(leftRect);
         leftFixture.setFilter(Filters.WALL_FILTER);
         leftWall.setMass(MassType.INFINITE);
         world.addBody(leftWall);
-        Body rightWall = new Body();
+        leftWall.setParent(new Wall());
+
+        VRBody rightWall = new VRBody();
         BodyFixture rightFixture = rightWall.addFixture(rightRect);
         rightFixture.setFilter(Filters.WALL_FILTER);
         rightWall.setMass(MassType.INFINITE);
         world.addBody(rightWall);
+        rightWall.setParent(new Wall());
     }
 
     /**
@@ -518,7 +526,7 @@ public class VirtualRobotController {
 
     public StackPane getFieldPane(){ return fieldPane; }
 
-    public World<Body> getWorld(){ return world; }
+    public World<VRBody> getWorld(){ return world; }
 
     @FXML
     private void handleDriverButtonAction(ActionEvent event){

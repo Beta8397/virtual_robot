@@ -7,7 +7,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.configuration.MotorType;
 
 import org.dyn4j.collision.CategoryFilter;
-import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.contact.Contact;
 import org.dyn4j.dynamics.contact.SolvedContact;
@@ -17,11 +16,11 @@ import org.dyn4j.world.ContactCollisionData;
 import org.dyn4j.world.ManifoldCollisionData;
 import org.dyn4j.world.NarrowphaseCollisionData;
 import org.dyn4j.world.listener.CollisionListener;
-import org.dyn4j.world.listener.CollisionListenerAdapter;
 import org.dyn4j.world.listener.ContactListener;
 import org.firstinspires.ftc.robotcore.external.matrices.GeneralMatrixF;
 import org.firstinspires.ftc.robotcore.external.matrices.MatrixF;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
+import virtual_robot.controller.VRBody;
 import virtual_robot.controller.VirtualBot;
 import virtual_robot.controller.VirtualRobotController;
 import virtual_robot.util.AngleUtils;
@@ -112,21 +111,21 @@ public class MechanumBase extends VirtualBot {
         maxWheelXForce = (float)(9.8 * chassisBody.getMass().getMass() * FIELD_FRICTION_COEFF / (4.0 * Math.sqrt(2)));
         System.out.println("Max wheel X force = " + maxWheelXForce);
 
-        world.addCollisionListener(new CollisionListener<Body, BodyFixture>() {
+        world.addCollisionListener(new CollisionListener<VRBody, BodyFixture>() {
             @Override
-            public boolean collision(BroadphaseCollisionData<Body, BodyFixture> collision) {
+            public boolean collision(BroadphaseCollisionData<VRBody, BodyFixture> collision) {
                 System.out.println("BroadPhase Listener");
                 return true;
             }
 
             @Override
-            public boolean collision(NarrowphaseCollisionData<Body, BodyFixture> collision) {
+            public boolean collision(NarrowphaseCollisionData<VRBody, BodyFixture> collision) {
                 System.out.println("NarrowPhase Listener");
                 return true;
             }
 
             @Override
-            public boolean collision(ManifoldCollisionData<Body, BodyFixture> collision) {
+            public boolean collision(ManifoldCollisionData<VRBody, BodyFixture> collision) {
                 long cat1 = ((CategoryFilter)collision.getFixture1().getFilter()).getCategory();
                 long cat2 = ((CategoryFilter)collision.getFixture2().getFilter()).getCategory();
                 System.out.println("Manifold Listener:  cat1 = " + cat1 + "  cat2 = " + cat2);
@@ -134,39 +133,39 @@ public class MechanumBase extends VirtualBot {
             }
         });
 
-        world.addContactListener(new ContactListener<Body>() {
+        world.addContactListener(new ContactListener<VRBody>() {
             @Override
-            public void begin(ContactCollisionData<Body> collision, Contact contact) {
+            public void begin(ContactCollisionData<VRBody> collision, Contact contact) {
                 System.out.println("Contact begin");
             }
 
             @Override
-            public void persist(ContactCollisionData<Body> collision, Contact oldContact, Contact newContact) {
+            public void persist(ContactCollisionData<VRBody> collision, Contact oldContact, Contact newContact) {
                 System.out.println("Contact persist");
             }
 
             @Override
-            public void end(ContactCollisionData<Body> collision, Contact contact) {
+            public void end(ContactCollisionData<VRBody> collision, Contact contact) {
                 System.out.println("Contace end");
             }
 
             @Override
-            public void destroyed(ContactCollisionData<Body> collision, Contact contact) {
+            public void destroyed(ContactCollisionData<VRBody> collision, Contact contact) {
                 System.out.println("Contact destroyed");
             }
 
             @Override
-            public void collision(ContactCollisionData<Body> collision) {
+            public void collision(ContactCollisionData<VRBody> collision) {
                 System.out.println("Contact collision");
             }
 
             @Override
-            public void preSolve(ContactCollisionData<Body> collision, Contact contact) {
+            public void preSolve(ContactCollisionData<VRBody> collision, Contact contact) {
                 System.out.println("Contact preSolve");
             }
 
             @Override
-            public void postSolve(ContactCollisionData<Body> collision, SolvedContact contact) {
+            public void postSolve(ContactCollisionData<VRBody> collision, SolvedContact contact) {
                 System.out.println("Contact postSolve");
             }
         });
@@ -189,8 +188,8 @@ public class MechanumBase extends VirtualBot {
     public synchronized void updateStateAndSensors(double millis) {
 
         //Update current position (pixel units) by obtaining it from physics Body and converting to pixels
-        x = chassisBody.getTransform().getTranslationX() * field.PIXELS_PER_METER;
-        y = chassisBody.getTransform().getTranslationY() * field.PIXELS_PER_METER;
+        x = chassisBody.getTransform().getTranslationX() * FIELD.PIXELS_PER_METER;
+        y = chassisBody.getTransform().getTranslationY() * FIELD.PIXELS_PER_METER;
         headingRadians = chassisBody.getTransform().getRotationAngle();
 
 //        System.out.println("Updated Position (Pixel Units): x = " + x + "  y = " + y + " heading = " + headingRadians);
@@ -228,8 +227,8 @@ public class MechanumBase extends VirtualBot {
         double cos = Math.cos(avgHeading);
 
         // TENTATIVE change in position, in WORLD COORDINATES (METERS)
-        double dX = (dxR * cos - dyR * sin) / field.PIXELS_PER_METER;
-        double dY = (dxR * sin + dyR * cos) / field.PIXELS_PER_METER;
+        double dX = (dxR * cos - dyR * sin) / FIELD.PIXELS_PER_METER;
+        double dY = (dxR * sin + dyR * cos) / FIELD.PIXELS_PER_METER;
 
         /* Determine the force and torque (WORLD COORDS) that would be required to achieve the changes predicted by
          * the kinematic model.
