@@ -17,17 +17,17 @@ public class Config {
     /**
      *  Width of the field, in pixels
      */
-    public static final double FIELD_WIDTH = 576;
+    public static final double FIELD_WIDTH = 648;
 
     /**
      * Whether to use "Virtual Gamepad" (true -> Virtual gamepad, false -> Real gamepad)
      */
-    public static final boolean USE_VIRTUAL_GAMEPAD = true;
+    public static final boolean USE_VIRTUAL_GAMEPAD = false;
 
     /**
      * The image object for the field.
      */
-    public static final Image BACKGROUND = new Image("/virtual_robot/assets/ultimate_goal_576.bmp");
+    public static final Image BACKGROUND = new Image("/virtual_robot/assets/ultimate_goal_648.bmp");
 
     /**
      * If true, Virtual Gamepad joysticks and triggers will stay in the position where they were

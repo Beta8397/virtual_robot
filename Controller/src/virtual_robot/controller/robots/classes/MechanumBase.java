@@ -3,6 +3,7 @@ package virtual_robot.controller.robots.classes;
 import com.qualcomm.hardware.bosch.BNO055IMUImpl;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorExImpl;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.configuration.MotorType;
 
@@ -20,8 +21,10 @@ import org.dyn4j.world.listener.ContactListener;
 import org.firstinspires.ftc.robotcore.external.matrices.GeneralMatrixF;
 import org.firstinspires.ftc.robotcore.external.matrices.MatrixF;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import virtual_robot.controller.VRBody;
 import virtual_robot.controller.VirtualBot;
+import virtual_robot.controller.VirtualField;
 import virtual_robot.controller.VirtualRobotController;
 import virtual_robot.util.AngleUtils;
 
@@ -129,72 +132,102 @@ public class MechanumBase extends VirtualBot {
 
     public synchronized void updateStateAndSensors(double millis) {
 
-//        System.out.println("\nInit Position (Pixel Units): x = " + x + "  y = " + y);
-        //Update current position (pixel units) by obtaining it from physics Body and converting to pixels
         x = chassisBody.getTransform().getTranslationX() * FIELD.PIXELS_PER_METER;
         y = chassisBody.getTransform().getTranslationY() * FIELD.PIXELS_PER_METER;
         headingRadians = chassisBody.getTransform().getRotationAngle();
 
-//        System.out.println("Updated Position (Pixel Units): x = " + x + "  y = " + y + " heading = " + headingRadians);
 
-        /*
-         * Calculate the force (from friction with the floor) to be applied to the robot chassis during the next
-         * physics update.
-         *
-         * The first step is to compute the tentative change in robot position using the KINEMATIC model.
-         */
-        double[] deltaPos = new double[4];
-        double[] w = new double[4];
 
-        for (int i = 0; i < 4; i++) {
-            deltaPos[i] = motors[i].update(millis);
-            w[i] = deltaPos[i] * wheelCircumference * gearRatioWheel / motors[i].MOTOR_TYPE.TICKS_PER_ROTATION;
-            if (i < 2) w[i] = -w[i];
+        double[] wSpd = new double[4];
+        for (int i=0; i<4; i++){
+            motors[i].update(millis);
+            wSpd[i] = motors[i].getVelocity(AngleUnit.RADIANS) * gearRatioWheel * wheelCircumference  / (2.0 * Math.PI);
+            boolean mtRev = MOTOR_TYPE.REVERSED;
+            boolean dirRev = motors[i].getDirection() == DcMotorSimple.Direction.REVERSE;
+            if (
+                    i<2 && (mtRev && dirRev || !mtRev && !dirRev) || i>=2 && (mtRev && !dirRev || !mtRev && dirRev)
+            ) wSpd[i] = -wSpd[i];
         }
 
-        double[] robotDeltaPos = new double[]{0, 0, 0, 0};
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                robotDeltaPos[i] += tWR[i][j] * w[j];
+        double[] robotTargetSpd = new double[]{0,0,0,0};
+        for (int i=0; i<4; i++){
+            for (int j=0; j<4; j++){
+                robotTargetSpd[i] += tWR[i][j] * wSpd[j];
             }
         }
 
-        // TENTATIVE change in position, in ROBOT COORDINATES (PIXEL UNITS)
-        double dxR = robotDeltaPos[0];
-        double dyR = robotDeltaPos[1];
-        double headingChange = robotDeltaPos[2];
-        double avgHeading = headingRadians + headingChange / 2.0;
-//        System.out.println("dxR = " + dxR + "  dyR = " + dyR + "  headingChange = " + headingChange);
-
-        double sin = Math.sin(avgHeading);
-        double cos = Math.cos(avgHeading);
-
-        // TENTATIVE change in position, in WORLD COORDINATES (METERS)
-        double dX = (dxR * cos - dyR * sin) / FIELD.PIXELS_PER_METER;
-        double dY = (dxR * sin + dyR * cos) / FIELD.PIXELS_PER_METER;
-
-        /* Determine the force and torque (WORLD COORDS) that would be required to achieve the changes predicted by
-         * the kinematic model.
-         *
-         * Note: dX, dY, and dHeading are based on average speeds during the interval, so we can calculate force
-         * and torque using:
-         *
-         *       d(Position) = v0*t + 0.5*(F/m)*t*t
-         *       d(Heading) = omega0*t + 0.5*(Torque/I)*t*t
-         *
-         *       or,
-         *
-         *       F = 2m( d(Position) - v0*t ) / (t*t)
-         *       Torque = 2I( d(Heading) - omega0*t ) / (t*t)
-         */
+        robotTargetSpd[0] /= FIELD.PIXELS_PER_METER;
+        robotTargetSpd[1] /= FIELD.PIXELS_PER_METER;
 
         double t = millis / 1000.0;
-        double tSqr = t * t;
-        Vector2 dPos = new Vector2(dX, dY);
-        Vector2 v0 = chassisBody.getLinearVelocity();
-        Vector2 force = dPos.difference(v0.product(t)).product(2.0*chassisBody.getMass().getMass()/tSqr);
-        double angVel = chassisBody.getAngularVelocity();
-        double torque = 2.0 * chassisBody.getMass().getInertia() * (headingChange - angVel*t) / tSqr;
+        double estFinalHeading = headingRadians + 0.5 * (chassisBody.getAngularVelocity() + robotTargetSpd[2]) * t;
+        double sinFinal = Math.sin(estFinalHeading);
+        double cosFinal = Math.cos(estFinalHeading);
+        Vector2 estFinalVelocity = new Vector2(
+                robotTargetSpd[0]*cosFinal - robotTargetSpd[1]*sinFinal,
+                robotTargetSpd[0]*sinFinal + robotTargetSpd[1]*cosFinal
+        );
+
+        Vector2 force = estFinalVelocity.difference(chassisBody.getLinearVelocity()).product(chassisBody.getMass().getMass()/t);
+        double torque = (robotTargetSpd[2] - chassisBody.getAngularVelocity()) * chassisBody.getMass().getInertia()/t;
+
+
+//        /*
+//         * Calculate the force (from friction with the floor) to be applied to the robot chassis during the next
+//         * physics update.
+//         *
+//         * The first step is to compute the tentative change in robot position using the KINEMATIC model.
+//         */
+//        double[] deltaPos = new double[4];
+//        double[] w = new double[4];
+//
+//        for (int i = 0; i < 4; i++) {
+//            deltaPos[i] = motors[i].update(millis);
+//            w[i] = deltaPos[i] * wheelCircumference * gearRatioWheel / motors[i].MOTOR_TYPE.TICKS_PER_ROTATION;
+//            if (i < 2) w[i] = -w[i];
+//        }
+//
+//        double[] robotDeltaPos = new double[]{0, 0, 0, 0};
+//        for (int i = 0; i < 4; i++) {
+//            for (int j = 0; j < 4; j++) {
+//                robotDeltaPos[i] += tWR[i][j] * w[j];
+//            }
+//        }
+//
+//        // TENTATIVE change in position, in ROBOT COORDINATES (PIXEL UNITS)
+//        double dxR = robotDeltaPos[0];
+//        double dyR = robotDeltaPos[1];
+//        double headingChange = robotDeltaPos[2];
+//        double avgHeading = headingRadians + headingChange / 2.0;
+//
+//        double sin = Math.sin(avgHeading);
+//        double cos = Math.cos(avgHeading);
+//
+//        // TENTATIVE change in position, in WORLD COORDINATES (METERS)
+//        double dX = (dxR * cos - dyR * sin) / FIELD.PIXELS_PER_METER;
+//        double dY = (dxR * sin + dyR * cos) / FIELD.PIXELS_PER_METER;
+//
+//        /* Determine the force and torque (WORLD COORDS) that would be required to achieve the changes predicted by
+//         * the kinematic model.
+//         *
+//         * Note: dX, dY, and dHeading are based on average speeds during the interval, so we can calculate force
+//         * and torque using:
+//         *
+//         *       d(Position) = v0*t + 0.5*(F/m)*t*t
+//         *       d(Heading) = omega0*t + 0.5*(Torque/I)*t*t
+//         *
+//         *       or,
+//         *
+//         *       F = 2m( d(Position) - v0*t ) / (t*t)
+//         *       Torque = 2I( d(Heading) - omega0*t ) / (t*t)
+//         */
+//
+//        double tSqr = t * t;
+//        Vector2 dPos = new Vector2(dX, dY);
+//        Vector2 v0 = chassisBody.getLinearVelocity();
+//        Vector2 force = dPos.difference(v0.product(t)).product(2.0*chassisBody.getMass().getMass()/tSqr);
+//        double angVel = chassisBody.getAngularVelocity();
+//        double torque = 2.0 * chassisBody.getMass().getInertia() * (headingChange - angVel*t) / tSqr;
 
         //Convert the tentative total force to the ROBOT COORDINATE system
 
@@ -207,8 +240,6 @@ public class MechanumBase extends VirtualBot {
         // VectorF containing total force and torque required on bot to achieve the tentative position change,
         // in robot coordinate system
         VectorF totalForce = new VectorF(fXR, fYR, (float)torque, 0);
-
-//        System.out.println("Tentative Force (Robot):  fxR = " + fXR + "  fYR = " + fYR + "  torque = " + torque);
 
         // Required friction force from floor to achieve the tentative position change. For now, this will
         // be the same as totalForce, but may want to add offsets to collision forces
@@ -235,16 +266,11 @@ public class MechanumBase extends VirtualBot {
 
         frictionForces = M_ForceWheelToRobot.multiplied(wheel_X_Forces);
 
-//        System.out.println("Adjusted total force (Robot)  fXR = " + frictionForces.get(0) + "  fYR = "
-//         + frictionForces.get(1) + "  torque = " + frictionForces.get(2));
-
         // Convert these adjusted friction forces to WORLD COORDINATES  and put into the original
         // force and torque variables
         force = new Vector2(frictionForces.get(0)*cosHd - frictionForces.get(1)*sinHd,
                 frictionForces.get(0)*sinHd + frictionForces.get(1)*cosHd);
         torque = frictionForces.get(2);
-
-//        System.out.println("Final force (WORLD):  FX = " + force.x + "  FY = " + force.y + "  torque = " + torque);
 
         /*
          * Apply the adjusted frictional force and torque to the chassisBody
