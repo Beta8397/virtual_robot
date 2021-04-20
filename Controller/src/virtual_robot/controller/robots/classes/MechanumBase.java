@@ -111,64 +111,6 @@ public class MechanumBase extends VirtualBot {
         maxWheelXForce = (float)(9.8 * chassisBody.getMass().getMass() * FIELD_FRICTION_COEFF / (4.0 * Math.sqrt(2)));
         System.out.println("Max wheel X force = " + maxWheelXForce);
 
-        world.addCollisionListener(new CollisionListener<VRBody, BodyFixture>() {
-            @Override
-            public boolean collision(BroadphaseCollisionData<VRBody, BodyFixture> collision) {
-                System.out.println("BroadPhase Listener");
-                return true;
-            }
-
-            @Override
-            public boolean collision(NarrowphaseCollisionData<VRBody, BodyFixture> collision) {
-                System.out.println("NarrowPhase Listener");
-                return true;
-            }
-
-            @Override
-            public boolean collision(ManifoldCollisionData<VRBody, BodyFixture> collision) {
-                long cat1 = ((CategoryFilter)collision.getFixture1().getFilter()).getCategory();
-                long cat2 = ((CategoryFilter)collision.getFixture2().getFilter()).getCategory();
-                System.out.println("Manifold Listener:  cat1 = " + cat1 + "  cat2 = " + cat2);
-                return true;
-            }
-        });
-
-        world.addContactListener(new ContactListener<VRBody>() {
-            @Override
-            public void begin(ContactCollisionData<VRBody> collision, Contact contact) {
-                System.out.println("Contact begin");
-            }
-
-            @Override
-            public void persist(ContactCollisionData<VRBody> collision, Contact oldContact, Contact newContact) {
-                System.out.println("Contact persist");
-            }
-
-            @Override
-            public void end(ContactCollisionData<VRBody> collision, Contact contact) {
-                System.out.println("Contace end");
-            }
-
-            @Override
-            public void destroyed(ContactCollisionData<VRBody> collision, Contact contact) {
-                System.out.println("Contact destroyed");
-            }
-
-            @Override
-            public void collision(ContactCollisionData<VRBody> collision) {
-                System.out.println("Contact collision");
-            }
-
-            @Override
-            public void preSolve(ContactCollisionData<VRBody> collision, Contact contact) {
-                System.out.println("Contact preSolve");
-            }
-
-            @Override
-            public void postSolve(ContactCollisionData<VRBody> collision, SolvedContact contact) {
-                System.out.println("Contact postSolve");
-            }
-        });
 
         hardwareMap.setActive(false);
 
@@ -187,6 +129,7 @@ public class MechanumBase extends VirtualBot {
 
     public synchronized void updateStateAndSensors(double millis) {
 
+//        System.out.println("\nInit Position (Pixel Units): x = " + x + "  y = " + y);
         //Update current position (pixel units) by obtaining it from physics Body and converting to pixels
         x = chassisBody.getTransform().getTranslationX() * FIELD.PIXELS_PER_METER;
         y = chassisBody.getTransform().getTranslationY() * FIELD.PIXELS_PER_METER;

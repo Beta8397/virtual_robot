@@ -18,8 +18,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.shape.Polyline;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Callback;
-import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.dynamics.ContinuousDetectionMode;
 import org.dyn4j.geometry.MassType;
 import org.dyn4j.world.World;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -41,8 +41,6 @@ import com.qualcomm.robotcore.hardware.DcMotorImpl;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import virtual_robot.config.Game;
-import virtual_robot.controller.robots.GameElementControlling;
-import virtual_robot.controller.robots.classes.BoPBot;
 import virtual_robot.controller.robots.classes.MechanumBot;
 import virtual_robot.keyboard.KeyState;
 
@@ -75,12 +73,11 @@ public class VirtualRobotController {
     @FXML private CheckBox checkBoxAutoHuman;
 
     // dyn4j world
-    World<VRBody> world = new World<VRBody>();
+    World<VRBody> world = new World<>();
 
     // Virtual Hardware
     private HardwareMap hardwareMap = null;
     private VirtualBot bot = null;
-    private List<VirtualGameElement> gameElements = new ArrayList<>();
     Gamepad gamePad1 = new Gamepad();
     Gamepad gamePad2 = new Gamepad();
     GamePadHelper gamePadHelper = null;
@@ -89,16 +86,15 @@ public class VirtualRobotController {
     VirtualGamePadController virtualGamePadController = null;
 
     //Background Image and Field
-    private Image backgroundImage = Config.BACKGROUND;
-    private PixelReader pixelReader = backgroundImage.getPixelReader();
+    private final Image backgroundImage = Config.BACKGROUND;
+    private final PixelReader pixelReader = backgroundImage.getPixelReader();
     private double halfFieldWidth;
     private double fieldWidth;
 
     //Path Drawing
     Polyline pathLine;
 
-    //Lists of OpMode classes and OpMode Names
-    private ObservableList<Class<?>> nonDisabledOpModeClasses = null;
+
 
     //OpMode Control
     private OpMode opMode = null;
@@ -107,17 +103,15 @@ public class VirtualRobotController {
     private Thread opModeThread = null;
 
     //Virtual Robot Control Engine
-    ScheduledExecutorService physicsExecutorService = null;
-    public static final double PHYSICS_INTERVAL_MILLISECONDS = 10;
-    ScheduledExecutorService displayExecutorService = null;
-    public static final double DISPLAY_INTERVAL_MILLISECONDS = 20;
+    ScheduledExecutorService executorService = null;
+    public static final double TIME_INTERVAL_MILLISECONDS = 20;
 
 
     //Random Number Generator
-    private Random random = new Random();
+    private final Random random = new Random();
 
     //KeyState
-    private KeyState keyState = new KeyState();
+    private final KeyState keyState = new KeyState();
 
     /*
      * Motor slider listener
@@ -128,7 +122,7 @@ public class VirtualRobotController {
      * slider is changed, but then (in the DcMotorImpl class) gets multiplied by a new random number during each motor
      * update cycle.
      */
-    private ChangeListener<Number> sliderChangeListener = new ChangeListener<Number>() {
+    private final ChangeListener<Number> sliderChangeListener = new ChangeListener<Number>() {
         @Override
         public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
             for (DcMotor motor: hardwareMap.dcMotor) {
@@ -146,6 +140,7 @@ public class VirtualRobotController {
         OpMode.setVirtualRobotController(this);
         VirtualBot.setController(this);
         VirtualGameElement.setController(this);
+        Game.setController(this);
         setupCbxOpModes();
         setupCbxRobotConfigs();
         fieldWidth = Config.FIELD_WIDTH;
@@ -171,6 +166,11 @@ public class VirtualRobotController {
         addConstraintMasks();
 
         setupPhysicsWorld();
+
+        System.out.println("World Settings: " + world.getSettings());
+
+        Config.GAME.initialize();
+        Config.GAME.resetGameElements();
 
         sldRandomMotorError.valueProperty().addListener(sliderChangeListener);
         sldSystematicMotorError.valueProperty().addListener(sliderChangeListener);
@@ -205,6 +205,7 @@ public class VirtualRobotController {
      */
     private void setupPhysicsWorld(){
         world.setGravity(0, 0);
+        world.getSettings().setContinuousDetectionMode(ContinuousDetectionMode.BULLETS_ONLY);
 
         // Create Rectangles for four 1 meter thick walls
         org.dyn4j.geometry.Rectangle topRect = new org.dyn4j.geometry.Rectangle(
@@ -350,21 +351,6 @@ public class VirtualRobotController {
         }
     }
 
-    public VirtualGameElement getVirtualGameElementInstance(Class<?> c){
-        try {
-            Annotation a = c.getAnnotation(GameElementConfig.class);
-            FXMLLoader loader = new FXMLLoader((getClass().getResource("/virtual_robot/controller/game_elements/fxml/" + ((GameElementConfig) a).filename() + ".fxml")));
-            Group group = (Group) loader.load();
-            VirtualGameElement element = (VirtualGameElement) loader.getController();
-            element.setUpDisplayGroup(group);
-            return element;
-        } catch (Exception e){
-            System.out.println("Unable to load game element configuration.");
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            return null;
-        }
-    }
 
     private String getNameFromAnnotationOrOpmode(Class c){
         String name = "";
@@ -403,8 +389,8 @@ public class VirtualRobotController {
         //Reflections reflections = new Reflections("Autonomous.OpModes.UltimateAuto");
         Set<Class<?>> opModes = new HashSet<>();
         opModes.addAll(reflections.getTypesAnnotatedWith(TeleOp.class));
-        opModes.addAll(reflections.getTypesAnnotatedWith(Autonomous.class));
-        nonDisabledOpModeClasses = FXCollections.observableArrayList();
+        opModes.addAll(reflections.getTypesAnnotatedWith(Autonomous.class));//Lists of OpMode classes and OpMode Names
+        ObservableList<Class<?>> nonDisabledOpModeClasses = FXCollections.observableArrayList();
         for (Class<?> c : opModes){
             if (c.getAnnotation(Disabled.class) == null && OpMode.class.isAssignableFrom(c)){
                 nonDisabledOpModeClasses.add(c);
@@ -482,47 +468,6 @@ public class VirtualRobotController {
         sldMotorInertia.setValue(0.0);
     }
 
-    private void initializeGameElements() {
-        // remove prior game elements
-        for (VirtualGameElement e : gameElements) {
-            e.removeFromDisplay(fieldPane);
-        }
-
-        gameElements.clear();
-
-        // iterate through annotated game element classes; filter for classes having forGame == Config.GAME
-        Reflections reflections = new Reflections("virtual_robot.controller.game_elements.classes");
-        Set<Class<?>> configClasses = new HashSet<>();
-        configClasses.addAll(reflections.getTypesAnnotatedWith(GameElementConfig.class));
-        for (Class<?> c : configClasses) {
-            Class<? extends Game> forGame = c.getAnnotation(GameElementConfig.class).forGame();
-            int numInstances = c.getAnnotation(GameElementConfig.class).numInstances();
-            if (forGame.equals(Config.GAME.getClass()) && numInstances > 0 && VirtualGameElement.class.isAssignableFrom(c)) {
-                // create numInstances instances of each
-                for (int i = 0; i < numInstances; ++i) {
-                    gameElements.add(getVirtualGameElementInstance(c));
-                }
-            }
-        }
-
-        // allow the bot to preload game elements
-        if (bot instanceof GameElementControlling) {
-            ((GameElementControlling) bot).initControl(gameElements);
-        }
-
-        Config.GAME.initialize();
-        // allow the game to initialize game elements
-        int j = 0;
-        for (int i = 0; i < gameElements.size(); ++i) {
-            // the instances are grouped by type in the list, but we want to provide an inter-group
-            // counter when calling initGameElement for convenience
-            if (i == 0 || !gameElements.get(i - 1).getClass().equals(gameElements.get(i).getClass())) {
-                j = 0;
-            }
-            Config.GAME.initGameElement(gameElements.get(i), j);
-            ++j;
-        }
-    }
 
     public StackPane getFieldPane(){ return fieldPane; }
 
@@ -538,9 +483,6 @@ public class VirtualRobotController {
             pathLine.getPoints().clear();
             txtTelemetry.setText("");
             driverButton.setText("START");
-
-            // Initialize the game elements -- should this be here, or done via a UI button?
-            initializeGameElements();
             opModeInitialized = true;
             cbxConfig.setDisable(true);
             Runnable runOpMode = new Runnable() {
@@ -556,32 +498,21 @@ public class VirtualRobotController {
             Runnable updateDisplay = new Runnable() {
                 @Override
                 public void run() {
-                    for (VirtualGameElement e: gameElements) {
-                        e.updateDisplay();
-                    }
+                    Config.GAME.updateDisplay();
                     bot.updateDisplay();
                     pathLine.getPoints().addAll(halfFieldWidth + bot.getX(), halfFieldWidth - bot.getY());
                 }
             };
 
-            Runnable singleDisplayCycle = new Runnable() {
-                @Override
-                public void run() {
-                    Platform.runLater(updateDisplay);
-                }
-            };
-
-            Runnable singlePhysicsCycle = new Runnable() {
+            Runnable singleCycle = new Runnable() {
                 @Override
                 public void run() {
                     singlePhysicsCycle();
                     Platform.runLater(updateDisplay);
                 }
             };
-            physicsExecutorService = Executors.newSingleThreadScheduledExecutor();
-            physicsExecutorService.scheduleAtFixedRate(singlePhysicsCycle, 0, (long) PHYSICS_INTERVAL_MILLISECONDS, TimeUnit.MILLISECONDS);
-            displayExecutorService = Executors.newSingleThreadScheduledExecutor();
-            displayExecutorService.scheduleAtFixedRate(singleDisplayCycle, 0, (long)DISPLAY_INTERVAL_MILLISECONDS, TimeUnit.MILLISECONDS);
+            executorService = Executors.newSingleThreadScheduledExecutor();
+            executorService.scheduleAtFixedRate(singleCycle, 0, (long) TIME_INTERVAL_MILLISECONDS, TimeUnit.MILLISECONDS);
 
             opModeThread.start();
         } else if (!opModeStarted){
@@ -603,7 +534,7 @@ public class VirtualRobotController {
              *   -In a linear opmode, the above will cause stopRequested to become true, and interrupt runOpMode thread
              */
             opModeStarted = false;
-            if (!physicsExecutorService.isShutdown()) physicsExecutorService.shutdown();
+            if (!executorService.isShutdown()) executorService.shutdown();
             /*
              * This should not be necessary, but...
              */
@@ -691,7 +622,7 @@ public class VirtualRobotController {
 
         bot.getHardwareMap().setActive(false);
         bot.powerDownAndReset();
-        if (!physicsExecutorService.isShutdown()) physicsExecutorService.shutdown();
+        if (!executorService.isShutdown()) executorService.shutdown();
         opModeInitialized = false;
         opModeStarted = false;
         Platform.runLater(new Runnable() {
@@ -707,25 +638,23 @@ public class VirtualRobotController {
         System.out.println("Finished executing runOpModeAndCleanUp() on opModeThread.");
     }
 
-    private synchronized void singlePhysicsCycle(){
+    private void singlePhysicsCycle(){
         // Update the physics engine. This will also call any collision/contact listeners that have been set.
         // These listeners will generally be in the bot class. They should record events within fields in the bot's
         // class, to be handled later in the bot.updateStateAndSensors call.
-        world.updatev(PHYSICS_INTERVAL_MILLISECONDS / 1000.0);
+        world.updatev(TIME_INTERVAL_MILLISECONDS / 1000.0);
 
         // Update game element pose, and any other relevant state, of all game elements
-        for (VirtualGameElement e: gameElements) {
-            e.updateState(PHYSICS_INTERVAL_MILLISECONDS);
-        }
+        Config.GAME.updateGameElementState(TIME_INTERVAL_MILLISECONDS);
 
         // Update robot's pose by obtaining it from the physics engine, accumulate forces on Body based on
         // drive motor status, and update robot sensors. Depending on collision/contact events that occurred
         // during the world.updatev() call, it is also possible that this method will directly affect game elements.
-        bot.updateStateAndSensors(PHYSICS_INTERVAL_MILLISECONDS);
+        bot.updateStateAndSensors(TIME_INTERVAL_MILLISECONDS);
 
 
         if (Config.GAME.hasHumanPlayer() && Config.GAME.isHumanPlayerActive()) {
-            Config.GAME.updateHumanPlayerState(PHYSICS_INTERVAL_MILLISECONDS, gameElements);
+            Config.GAME.updateHumanPlayerState(TIME_INTERVAL_MILLISECONDS);
         }
     }
 

@@ -206,6 +206,17 @@ public abstract class VirtualBot implements GameObject {
     public abstract void powerDownAndReset();
 
 
+    /**
+     * Position the VirtualBot on the field using a MouseEvent.
+     * This also makes the necessary adjustment to the position of the dyn4j chassis Body,
+     * and ensures that the chassis body is stationary, with no accumulated forces.
+     *
+     * NOTE: For a robot that includes additional Bodys attached by joints, Override this method.
+     * First call can be super. Then, set the linear and angular velocities of any attached
+     * Bodys to zero, and clear their accumulated forces/torques. As long a they are attached by rigid
+     * joints to the chassis body, it shouldn't be necessary to explicitly position them.
+     * @param arg
+     */
     public synchronized void positionWithMouseClick(MouseEvent arg){
 
         if (arg.getButton() == MouseButton.PRIMARY) {
@@ -227,6 +238,11 @@ public abstract class VirtualBot implements GameObject {
             Transform t = new Transform();
             t.rotate(headingRadians);
             t.translate(x/ FIELD.PIXELS_PER_METER, y/ FIELD.PIXELS_PER_METER);
+            chassisBody.setTransform(t);
+            chassisBody.setLinearVelocity(0, 0);
+            chassisBody.setAngularVelocity(0);
+            chassisBody.clearAccumulatedForce();
+            chassisBody.clearAccumulatedTorque();
         }
 
     }

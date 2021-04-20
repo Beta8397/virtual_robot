@@ -12,15 +12,18 @@ public class WobbleGoal extends VirtualGameElement {
 
     public static final double RADIUS_INCHES = 4.0;
     private VirtualBot bot;
-
-    private VRBody wobbleBody;
+    VRBody wobbleBody = null;
     BodyFixture wobbleFixture;
 
     public static final long WOBBLE_CATEGORY = 512;
     public static final CategoryFilter WOBBLE_FILTER = new CategoryFilter(WOBBLE_CATEGORY, Filters.MASK_ALL);
 
+    public void initialize(){
+        super.initialize();
+    }
+
     @Override
-    protected void setUpDisplayGroup(Group group) {
+    public void setUpDisplayGroup(Group group) {
         super.setUpDisplayGroup(group);
     }
 
@@ -37,23 +40,14 @@ public class WobbleGoal extends VirtualGameElement {
     }
 
     @Override
-    public VirtualBot getControlledBy() {
-        return bot;
-    }
-
-    @Override
-    public void setControlledBy(VirtualBot bot) {
-        this.bot = bot;
-    }
-
-    @Override
-    public void setUpPhysicsBodies(){
-        wobbleBody = new VRBody(this);
+    public void setUpBody(){
+        elementBody = new VRBody(this);
+        wobbleBody = elementBody;
         double wobbleRadiusMeters = 4.0 / VirtualField.INCHES_PER_METER;
         wobbleFixture = wobbleBody.addFixture(
                 new org.dyn4j.geometry.Circle(wobbleRadiusMeters), 1, 0, 0);
         wobbleFixture.setFilter(WOBBLE_FILTER);
         wobbleBody.setMass(MassType.NORMAL);
-        world.addBody(wobbleBody);
+        wobbleBody.setLinearDamping(100.0);
     }
 }
