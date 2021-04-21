@@ -112,8 +112,6 @@ public class MechanumBase extends VirtualBot {
         // Note the division by 4 (assumes each wheel gets 1/4 of robot mass) and the division by sqrt(2) (because
         // the X-direction force is 1/sqrt(2) times the total friction force on the wheel.
         maxWheelXForce = (float)(9.8 * chassisBody.getMass().getMass() * FIELD_FRICTION_COEFF / (4.0 * Math.sqrt(2)));
-        System.out.println("Max wheel X force = " + maxWheelXForce);
-
 
         hardwareMap.setActive(false);
 
@@ -132,11 +130,14 @@ public class MechanumBase extends VirtualBot {
 
     public synchronized void updateStateAndSensors(double millis) {
 
+        /*
+         * Get updated position and heading from the dyn4j body (chassisBody)
+         */
         x = chassisBody.getTransform().getTranslationX() * FIELD.PIXELS_PER_METER;
         y = chassisBody.getTransform().getTranslationY() * FIELD.PIXELS_PER_METER;
         headingRadians = chassisBody.getTransform().getRotationAngle();
 
-
+        // Compute new wheel speeds in pixel units per second
 
         double[] wSpd = new double[4];
         for (int i=0; i<4; i++){
@@ -149,6 +150,10 @@ public class MechanumBase extends VirtualBot {
             ) wSpd[i] = -wSpd[i];
         }
 
+        /*
+         * Based on wheel speeds, compute the target final robot velocity and angular speed, in the robot
+         * coordinate system.
+         */
         double[] robotTargetSpd = new double[]{0,0,0,0};
         for (int i=0; i<4; i++){
             for (int j=0; j<4; j++){
@@ -159,78 +164,33 @@ public class MechanumBase extends VirtualBot {
         robotTargetSpd[0] /= FIELD.PIXELS_PER_METER;
         robotTargetSpd[1] /= FIELD.PIXELS_PER_METER;
 
+        /*
+         * Compute an estimated final heading. This is used only to convert the target final robot velocity
+         * from robot coordinate system to world coordinate system.
+         */
         double t = millis / 1000.0;
         double estFinalHeading = headingRadians + 0.5 * (chassisBody.getAngularVelocity() + robotTargetSpd[2]) * t;
         double sinFinal = Math.sin(estFinalHeading);
         double cosFinal = Math.cos(estFinalHeading);
+
+        /*
+         * Convert target final robot velocity from robot coordinate system to world coordinate system.
+         */
         Vector2 estFinalVelocity = new Vector2(
                 robotTargetSpd[0]*cosFinal - robotTargetSpd[1]*sinFinal,
                 robotTargetSpd[0]*sinFinal + robotTargetSpd[1]*cosFinal
         );
 
+        /*
+         * Compute the force and torque that would be required to achieve the target changes in robot velocity and
+         * angular speed (F = ma,  tau = I*alpha)
+         */
         Vector2 force = estFinalVelocity.difference(chassisBody.getLinearVelocity()).product(chassisBody.getMass().getMass()/t);
         double torque = (robotTargetSpd[2] - chassisBody.getAngularVelocity()) * chassisBody.getMass().getInertia()/t;
 
-
-//        /*
-//         * Calculate the force (from friction with the floor) to be applied to the robot chassis during the next
-//         * physics update.
-//         *
-//         * The first step is to compute the tentative change in robot position using the KINEMATIC model.
-//         */
-//        double[] deltaPos = new double[4];
-//        double[] w = new double[4];
-//
-//        for (int i = 0; i < 4; i++) {
-//            deltaPos[i] = motors[i].update(millis);
-//            w[i] = deltaPos[i] * wheelCircumference * gearRatioWheel / motors[i].MOTOR_TYPE.TICKS_PER_ROTATION;
-//            if (i < 2) w[i] = -w[i];
-//        }
-//
-//        double[] robotDeltaPos = new double[]{0, 0, 0, 0};
-//        for (int i = 0; i < 4; i++) {
-//            for (int j = 0; j < 4; j++) {
-//                robotDeltaPos[i] += tWR[i][j] * w[j];
-//            }
-//        }
-//
-//        // TENTATIVE change in position, in ROBOT COORDINATES (PIXEL UNITS)
-//        double dxR = robotDeltaPos[0];
-//        double dyR = robotDeltaPos[1];
-//        double headingChange = robotDeltaPos[2];
-//        double avgHeading = headingRadians + headingChange / 2.0;
-//
-//        double sin = Math.sin(avgHeading);
-//        double cos = Math.cos(avgHeading);
-//
-//        // TENTATIVE change in position, in WORLD COORDINATES (METERS)
-//        double dX = (dxR * cos - dyR * sin) / FIELD.PIXELS_PER_METER;
-//        double dY = (dxR * sin + dyR * cos) / FIELD.PIXELS_PER_METER;
-//
-//        /* Determine the force and torque (WORLD COORDS) that would be required to achieve the changes predicted by
-//         * the kinematic model.
-//         *
-//         * Note: dX, dY, and dHeading are based on average speeds during the interval, so we can calculate force
-//         * and torque using:
-//         *
-//         *       d(Position) = v0*t + 0.5*(F/m)*t*t
-//         *       d(Heading) = omega0*t + 0.5*(Torque/I)*t*t
-//         *
-//         *       or,
-//         *
-//         *       F = 2m( d(Position) - v0*t ) / (t*t)
-//         *       Torque = 2I( d(Heading) - omega0*t ) / (t*t)
-//         */
-//
-//        double tSqr = t * t;
-//        Vector2 dPos = new Vector2(dX, dY);
-//        Vector2 v0 = chassisBody.getLinearVelocity();
-//        Vector2 force = dPos.difference(v0.product(t)).product(2.0*chassisBody.getMass().getMass()/tSqr);
-//        double angVel = chassisBody.getAngularVelocity();
-//        double torque = 2.0 * chassisBody.getMass().getInertia() * (headingChange - angVel*t) / tSqr;
-
-        //Convert the tentative total force to the ROBOT COORDINATE system
-
+        /*
+         * Convert the proposed force from world to robot coordinate system.
+         */
         double sinHd = Math.sin(headingRadians);
         double cosHd = Math.cos(headingRadians);
 
@@ -308,6 +268,8 @@ public class MechanumBase extends VirtualBot {
         for (int i = 0; i < 4; i++) motors[i].stopAndReset();
         imu.close();
     }
+
+
 
 
 }

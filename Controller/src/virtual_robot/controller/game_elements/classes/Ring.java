@@ -104,4 +104,8 @@ public class Ring extends VirtualGameElement {
         this.ringBody.setLinearVelocity(vx / VirtualField.INCHES_PER_METER, vy / VirtualField.INCHES_PER_METER);
     }
 
+    public void setVelocityMetersPerSec(double vx, double vy){
+        this.ringBody.setLinearVelocity(vx, vy);
+    }
+
 }

@@ -8,6 +8,7 @@ import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import org.dyn4j.geometry.Transform;
+import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.World;
 import virtual_robot.config.GameObject;
 import virtual_robot.util.Vector2D;
@@ -155,7 +156,7 @@ public abstract class VirtualGameElement implements GameObject {
         }
     }
 
-    public void setLocation(Vector2D locationPixels, double thetaRadians){
+    public void setLocation(Vector2 locationPixels, double thetaRadians){
         setLocation(locationPixels.x, locationPixels.y, thetaRadians);
     }
 
@@ -163,7 +164,7 @@ public abstract class VirtualGameElement implements GameObject {
         setLocation(xInches * FIELD.PIXELS_PER_INCH, yInches * FIELD.PIXELS_PER_INCH);
     }
 
-    public void setLocationInches(Vector2D locationInches) {
+    public void setLocationInches(Vector2 locationInches) {
         setLocationInches(locationInches.x, locationInches.y);
     }
 
@@ -171,8 +172,16 @@ public abstract class VirtualGameElement implements GameObject {
         setLocation(xInches * FIELD.PIXELS_PER_INCH, yInches * FIELD.PIXELS_PER_INCH, thetaRadians);
     }
 
-    public void setLocationInches(Vector2D locationInches, double thetaRadians){
+    public void setLocationInches(Vector2 locationInches, double thetaRadians){
         setLocationInches(locationInches.x, locationInches.y, thetaRadians);
+    }
+
+    public void setLocationMeters(double xMeters, double yMeters){
+        setLocation(xMeters * FIELD.PIXELS_PER_METER, yMeters * FIELD.PIXELS_PER_METER);
+    }
+
+    public void setLocationMeters(Vector2 locationMeters){
+        setLocation(locationMeters.x * FIELD.PIXELS_PER_METER, locationMeters.y * FIELD.PIXELS_PER_METER);
     }
 
     /**

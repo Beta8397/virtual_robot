@@ -18,12 +18,12 @@ public class UltimateGoal extends Game {
     private List<Ring> ringsOffField = new ArrayList<>();
     private List<WobbleGoal> wobbles = new ArrayList<>();
 
-    public static final Vector2D[] WOBBLE_GOAL_STARTS = new Vector2D[]{
-            new Vector2D(49.5, -48),
-            new Vector2D(25.5, -48)
+    public static final Vector2[] WOBBLE_GOAL_STARTS = new Vector2[]{
+            new Vector2(49.5, -48),
+            new Vector2(25.5, -48)
     };
-    public static final Vector2D STARTER_STACK = new Vector2D(36, -22.5);
-    public static final Vector2D RING_RETURN = new Vector2D(24, 67);
+    public static final Vector2 STARTER_STACK = new Vector2(36, -22.5);
+    public static final Vector2 RING_RETURN = new Vector2(24, 67);
     public static final double RING_RETURN_VELOCITY = 20.0; // inches per second
     public static final double RING_RETURN_VELOCITY_VARIATION = 2.4; // inches per second
     public static final long RING_RELEASE_INTERVAL_MILLIS = 1500;
