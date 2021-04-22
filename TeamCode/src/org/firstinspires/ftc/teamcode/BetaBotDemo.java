@@ -15,6 +15,8 @@ public class BetaBotDemo extends LinearOpMode {
 
     private DcMotorEx m1, m2, m3, m4;
     private Servo kickerServo;
+    private DcMotorEx intakeMotor;
+    private DcMotorEx shooterMotor;
 
     public void runOpMode(){
         m1 = hardwareMap.get(DcMotorEx.class,"back_left_motor");
@@ -35,7 +37,13 @@ public class BetaBotDemo extends LinearOpMode {
         kickerServo = hardwareMap.get(Servo.class, "kicker_servo");
         kickerServo.setPosition(0);
 
+        intakeMotor = hardwareMap.get(DcMotorEx.class, "intake_motor");
+        shooterMotor = hardwareMap.get(DcMotorEx.class, "shooter_motor");
+
         gamepad1.setJoystickDeadzone(0.05f);
+
+        intakeMotor.setPower(0.75);
+        shooterMotor.setPower(0.75);
 
         waitForStart();
         while (opModeIsActive()){

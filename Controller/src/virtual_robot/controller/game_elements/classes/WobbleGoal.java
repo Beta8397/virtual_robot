@@ -7,16 +7,23 @@ import org.dyn4j.geometry.MassType;
 import virtual_robot.config.UltimateGoal;
 import virtual_robot.controller.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @GameElementConfig(name = "Wobble Goal", filename = "wobble_goal", forGame = UltimateGoal.class, numInstances = 2)
 public class WobbleGoal extends VirtualGameElement {
 
     public static final double RADIUS_INCHES = 4.0;
+    public static final List<WobbleGoal> wobbles = new ArrayList<>();
+
     private VirtualBot bot;
     VRBody wobbleBody = null;
     BodyFixture wobbleFixture;
 
     public static final long WOBBLE_CATEGORY = 512;
     public static final CategoryFilter WOBBLE_FILTER = new CategoryFilter(WOBBLE_CATEGORY, Filters.MASK_ALL);
+
+    private boolean onField = false;
 
     public void initialize(){
         super.initialize();
@@ -49,5 +56,25 @@ public class WobbleGoal extends VirtualGameElement {
         wobbleFixture.setFilter(WOBBLE_FILTER);
         wobbleBody.setMass(MassType.NORMAL);
         wobbleBody.setLinearDamping(100.0);
+    }
+
+    /**
+     * Add or remove the wobble to/from field, which includes the following actions:
+     *   1) set the value of onField
+     *   2) Remove body from world, or add body to world.
+     *   3) Remove or add the element displayGroup from/to the display.
+     *
+     * @param onField
+     */
+    public void setOnField(boolean onField){
+        this.onField = onField;
+        if (onField && !world.containsBody(wobbleBody)) world.addBody(wobbleBody);
+        else if (!onField && world.containsBody(wobbleBody)) world.removeBody(wobbleBody);
+        if (onField) addToDisplay();
+        else removeFromDisplay();
+    }
+
+    public boolean isOnField(){
+        return this.onField;
     }
 }

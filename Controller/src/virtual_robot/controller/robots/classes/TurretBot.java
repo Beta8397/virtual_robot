@@ -32,7 +32,7 @@ import virtual_robot.util.AngleUtils;
  * combo box. The filename refers to the fxml file that contains the markup for the graphical UI.
  * Note: the fxml file must be located in the virtual_robot.controller.robots.classes.fxml folder.
  */
-@BotConfig(name = "Turret Bot", filename = "turret_bot")
+//@BotConfig(name = "Turret Bot", filename = "turret_bot")
 public class TurretBot extends MechanumBase {
     private static double TURRET_LENGTH = 35;
     private static double TURRET_WIDTH = 10;

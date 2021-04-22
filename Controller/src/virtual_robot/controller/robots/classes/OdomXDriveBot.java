@@ -20,7 +20,7 @@ import virtual_robot.util.Vector2D;
  * XDriveBot is the controller class for the "xdrive_bot.fxml" markup file.
  *
  */
-@BotConfig(name = "OdomXDrive Bot", filename = "odomxdrive_bot")
+//@BotConfig(name = "OdomXDrive Bot", filename = "odomxdrive_bot")
 public class OdomXDriveBot extends VirtualBot {
 
     private final MotorType MOTOR_TYPE = MotorType.Neverest40;

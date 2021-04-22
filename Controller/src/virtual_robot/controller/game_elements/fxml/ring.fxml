@@ -12,9 +12,9 @@
     <children>
 
         <!--The ring-->
-        <Circle centerX="37.0" centerY="37.0" radius="10.4" strokeType="INSIDE" strokeWidth="0.0"
+        <Circle centerX="0.0" centerY="0.0" radius="10.4" strokeType="INSIDE" strokeWidth="0.0"
             fill="#ed9315" />
-        <Circle centerX="37.0" centerY="37.0" radius="6.24" strokeType="INSIDE" strokeWidth="0.0"
+        <Circle centerX="0.0" centerY="0.0" radius="6.24" strokeType="INSIDE" strokeWidth="0.0"
             fill="#b8b8b8" />
 
     </children>

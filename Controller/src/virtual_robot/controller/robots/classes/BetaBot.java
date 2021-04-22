@@ -1,10 +1,15 @@
 package virtual_robot.controller.robots.classes;
 
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorExImpl;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.ServoImpl;
+import com.qualcomm.robotcore.hardware.configuration.MotorType;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import javafx.fxml.FXML;
 import javafx.scene.transform.Rotate;
 import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.dynamics.Force;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
@@ -32,13 +37,14 @@ public class BetaBot extends MechanumBase {
     private List<Ring> loadedRings = new ArrayList<>();
     private Ring ringToLoad = null;
 
-    private boolean intakeOn = true;
-
     enum KickerState {COCKING, COCKED, SHOOTING, SHOOT, SHOT_DONE}
 
     private ServoImpl kickerServo;
     ElapsedTime kickerTimer = new ElapsedTime();
     private KickerState kickerState = KickerState.COCKED;
+
+    private DcMotorExImpl intakeMotor;
+    private DcMotorExImpl shooterMotor;
 
     public BetaBot() {
         super();
@@ -48,6 +54,8 @@ public class BetaBot extends MechanumBase {
         super.initialize();
         hardwareMap.setActive(true);
         kickerServo = hardwareMap.get(ServoImpl.class, "kicker_servo");
+        intakeMotor = hardwareMap.get(DcMotorExImpl.class, "intake_motor");
+        shooterMotor = hardwareMap.get(DcMotorExImpl.class, "shooter_motor");
         hardwareMap.setActive(false);
 
         /*
@@ -75,10 +83,15 @@ public class BetaBot extends MechanumBase {
     protected void createHardwareMap(){
         super.createHardwareMap();
         hardwareMap.put("kicker_servo", new ServoImpl());
+        hardwareMap.put("intake_motor", new DcMotorExImpl(MotorType.Neverest40));
+        hardwareMap.put("shooter_motor", new DcMotorExImpl(MotorType.Neverest40));
     }
 
     public synchronized void updateStateAndSensors(double millis){
         super.updateStateAndSensors(millis);
+
+        intakeMotor.update(millis);
+        shooterMotor.update(millis);
 
         if (ringToLoad != null) loadRing();
 
@@ -130,12 +143,15 @@ public class BetaBot extends MechanumBase {
     private boolean handleNarrowPhaseCollisions(NarrowphaseCollisionData<VRBody, BodyFixture> collision){
         BodyFixture f1 = collision.getFixture1();
         BodyFixture f2 = collision.getFixture2();
-        if ((f1 == intakeFixture || f2 == intakeFixture) && intakeOn && loadedRings.size() < 3
+        if ((f1 == intakeFixture || f2 == intakeFixture) &&  loadedRings.size() < 3
                 && ringToLoad == null) {
             VRBody b = f1 == intakeFixture ? collision.getBody2() : collision.getBody1();
-            if (b.getParent() instanceof Ring){
+            double intakeVel = intakeMotor.getVelocity();
+            boolean intakeFwd = intakeMotor.getDirection() == DcMotorSimple.Direction.FORWARD;
+            boolean intakeOn = intakeVel>560 && intakeFwd || intakeVel<-560 && !intakeFwd;
+            if (b.getParent() instanceof Ring && intakeOn){
                 Ring r = (Ring)b.getParent();
-                if (!r.isInFlight()) {
+                if (!(r.getStatus() == Ring.RingStatus.FLYING)) {
                     ringToLoad = r;
                     return false;
                 }
@@ -145,28 +161,27 @@ public class BetaBot extends MechanumBase {
     }
 
     private void loadRing(){
-        ringToLoad.setOnField(false);
-        ringToLoad.setControlled(true);
-        ringToLoad.setRolling(false);
+        ringToLoad.setStatus(Ring.RingStatus.CONTROLLED);
         if (!loadedRings.contains(ringToLoad)) loadedRings.add(ringToLoad);
         ringToLoad = null;
     }
 
     private void shootRing(){
-        if (loadedRings.isEmpty()) return;
+        double shooterVel = shooterMotor.getVelocity();
+        boolean shooterFwd = shooterMotor.getDirection() == DcMotorSimple.Direction.FORWARD;
+        boolean shooterOn = shooterVel > 200 && shooterFwd || shooterVel < -200 && !shooterFwd;
+        System.out.println("Loaded: " + loadedRings.size() + "  shooterVel: " + shooterVel
+                + "  shooterFwd: " + shooterFwd + "  shooterOn: " + shooterOn);
+        if (loadedRings.isEmpty() || !shooterOn) return;
         Ring r = loadedRings.remove(0);
-        r.setInFlight(true);
-        r.setControlled(false);
+        r.setStatus(Ring.RingStatus.FLYING);
         // Initial position and velocity of the shot ring (meters and meters/sec)
         Vector2 pos = chassisBody.getWorldPoint(new Vector2(0, 12 / VirtualField.INCHES_PER_METER));
-        Vector2 vel = chassisBody.getWorldVector(new Vector2(0, 48 / VirtualField.INCHES_PER_METER));
-        System.out.println("Chassis: " + chassisBody.getTransform().getTranslationX()
-                + "  " + chassisBody.getTransform().getTranslationY());
-        System.out.println("Pos: " + pos);
-        System.out.println("Vel: " + vel);
+        Vector2 vel = chassisBody.getWorldVector(new Vector2(0, 60 / VirtualField.INCHES_PER_METER));
+        vel.add(new Vector2(0, 12 / VirtualField.INCHES_PER_METER).cross(chassisBody.getAngularVelocity()));
+        vel.multiply(Math.abs(shooterVel) / 1120);
         r.setLocationMeters(pos);
         r.setVelocityMetersPerSec(vel.x, vel.y);
-        r.setOnField(true);
     }
 
 }

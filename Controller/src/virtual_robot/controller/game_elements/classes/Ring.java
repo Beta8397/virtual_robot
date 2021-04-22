@@ -4,25 +4,47 @@ import javafx.scene.Group;
 import org.dyn4j.collision.CategoryFilter;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.MassType;
-import org.dyn4j.geometry.Vector2;
-import org.dyn4j.world.ContactCollisionData;
-import org.dyn4j.world.NarrowphaseCollisionData;
-import org.dyn4j.world.listener.CollisionListenerAdapter;
-import org.dyn4j.world.listener.ContactListenerAdapter;
-import virtual_robot.config.GameObject;
 import virtual_robot.config.UltimateGoal;
 import virtual_robot.controller.*;
 
-import java.util.Random;
+import java.util.ArrayList;
+import java.util.List;
 
 @GameElementConfig(name = "Ring", filename = "ring", forGame = UltimateGoal.class, numInstances = 10)
 public class Ring extends VirtualGameElement {
+
     public static final double RING_RADIUS_INCHES = 2.5;
-    private boolean onField = true;
-    private boolean inFlight = false;
-    private boolean rolling = false;
-    private boolean controlled = false;
-    private boolean stacked = false;
+    public static final List<Ring> rings = new ArrayList<>();
+    public static final List<Ring> ringsOffField = new ArrayList<>();
+
+    public enum RingStatus {
+        NORMAL(true, 100, RING_FILTER),
+        ROLLING(true, 0.2, RING_FILTER),
+        FLYING(true, 0, RING_FLYING_FILTER),
+        STACKED(true, 100, RING_STACKED_FILTER),
+        CONTROLLED(false, 0, RING_FILTER),
+        OFF_FIELD(false, 0, RING_FILTER);
+
+        private boolean inPlay;
+        private double linearDamping;
+        private CategoryFilter filter;
+
+        RingStatus(boolean inPlay, double linearDamping, CategoryFilter filter){
+            this.inPlay = inPlay;
+            this.linearDamping = linearDamping;
+            this.filter = filter;
+        }
+
+        public boolean isInPlay() { return inPlay; }
+        public double getLinearDamping() { return linearDamping; }
+        public CategoryFilter getFilter() { return filter; }
+    }
+
+
+    private RingStatus status = RingStatus.OFF_FIELD;
+    private RingStatus nextStatus = RingStatus.OFF_FIELD;
+
+    private double RING_BOUNDARY;   // TODO: make this final and static (and figure out how to initialize)
 
     VRBody ringBody;
     BodyFixture ringFixture;
@@ -36,6 +58,7 @@ public class Ring extends VirtualGameElement {
 
     public void initialize(){
         super.initialize();
+        RING_BOUNDARY = FIELD.HALF_FIELD_WIDTH + 4 * RING_RADIUS_INCHES * FIELD.PIXELS_PER_INCH;
     }
 
     @Override
@@ -48,11 +71,17 @@ public class Ring extends VirtualGameElement {
         x = ringBody.getTransform().getTranslationX() * FIELD.PIXELS_PER_METER;
         y = ringBody.getTransform().getTranslationY() * FIELD.PIXELS_PER_METER;
         headingRadians = ringBody.getTransform().getRotationAngle();
+
+        if (Math.abs(x) > RING_BOUNDARY || Math.abs(y) > RING_BOUNDARY){
+            nextStatus = RingStatus.OFF_FIELD;
+        }
+
+        setStatus(nextStatus);
     }
 
     @Override
     public synchronized void updateDisplay() {
-        displayGroup.setVisible(onField);
+        displayGroup.setVisible(status.isInPlay());
         super.updateDisplay();
     }
 
@@ -68,37 +97,6 @@ public class Ring extends VirtualGameElement {
         ringBody.setLinearDamping(100);
     }
 
-    public VRBody getRingBody(){ return ringBody; }
-
-    public boolean isInFlight() {
-        return inFlight;
-    }
-
-    public void setInFlight(boolean inFlight) {
-        this.inFlight = inFlight;
-        ringFixture.setFilter(inFlight? RING_FLYING_FILTER : RING_FILTER);
-        ringBody.setLinearDamping(0);
-    }
-
-    public boolean isRolling() {
-        return rolling;
-    }
-
-    public void setRolling(boolean rolling) {
-        this.rolling = rolling;
-        ringBody.setLinearDamping(rolling? 0.2 : 100.0);
-    }
-
-    public void setControlled(boolean controlled) { this.controlled = controlled; }
-
-    public boolean getControlled() { return controlled; }
-
-    public void setStacked(boolean stacked){
-        this.stacked = stacked;
-        ringFixture.setFilter(stacked? RING_STACKED_FILTER : RING_FILTER);
-    }
-
-    public boolean isStacked() { return this.stacked; }
 
     public void setVelocityInchesPerSec(double vx, double vy) {
         this.ringBody.setLinearVelocity(vx / VirtualField.INCHES_PER_METER, vy / VirtualField.INCHES_PER_METER);
@@ -106,6 +104,32 @@ public class Ring extends VirtualGameElement {
 
     public void setVelocityMetersPerSec(double vx, double vy){
         this.ringBody.setLinearVelocity(vx, vy);
+    }
+
+    public RingStatus getNextStatus(){ return nextStatus; }
+
+    public void setNextStatus(RingStatus nextStatus) { this.nextStatus = nextStatus; }
+
+    public RingStatus getStatus() { return status; }
+
+    public void setStatus(RingStatus status){
+        this.status = status;
+        this.nextStatus = status;
+        setInPlay(status.isInPlay());
+        if (status == RingStatus.OFF_FIELD && !ringsOffField.contains(this)) {
+            ringsOffField.add(this);
+        } else if (status != RingStatus.OFF_FIELD && ringsOffField.contains(this)){
+            ringsOffField.remove(this);
+        }
+        ringBody.setLinearDamping(status.getLinearDamping());
+        ringFixture.setFilter(status.getFilter());
+    }
+
+    public void setInPlay(boolean inPlay) {
+        if (inPlay && !world.containsBody(elementBody)) world.addBody(elementBody);
+        else if (!inPlay && world.containsBody(elementBody)) world.removeBody(elementBody);
+        if (inPlay) addToDisplay();
+        else removeFromDisplay();
     }
 
 }

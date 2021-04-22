@@ -20,7 +20,7 @@ import virtual_robot.controller.BotConfig;
  * combo box. The filename refers to the fxml file that contains the markup for the graphical UI.
  * Note: the fxml file must be located in the virtual_robot.controller.robots.classes.fxml folder.
  */
-@BotConfig(name = "Arm Bot", filename = "arm_bot")
+//@BotConfig(name = "Arm Bot", filename = "arm_bot")
 public class ArmBot extends MechanumBase {
 
     /*

@@ -19,7 +19,7 @@ import virtual_robot.util.Vector2D;
  * MechanumBot is the controller class for the "mechanum_bot.fxml" markup file.
  *
  */
-@BotConfig(name = "Differential Swerve Bot", filename = "diff_swerve_bot")
+//@BotConfig(name = "Differential Swerve Bot", filename = "diff_swerve_bot")
 public class DiffSwerveBot extends VirtualBot {
 
     private final MotorType MOTOR_TYPE = MotorType.NeverestOrbital20;

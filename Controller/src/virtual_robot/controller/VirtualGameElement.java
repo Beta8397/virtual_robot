@@ -54,7 +54,6 @@ public abstract class VirtualGameElement implements GameObject {
     protected volatile double x = 0;
     protected volatile double y = 0;
     protected volatile double headingRadians = 0;
-    private boolean onField = false;
 
     public VirtualGameElement() {
         FIELD = VirtualField.getInstance();
@@ -73,24 +72,7 @@ public abstract class VirtualGameElement implements GameObject {
         setUpBody();
     }
 
-    /**
-     * Add or remove the game element from the field, which includes the following actions:
-     *   1) set the value of onField
-     *   2) Remove elementBody from world, or add elementBody to world.
-     *   3) Remove or add the element displayGroup from/to the display.
-     * @param onField
-     */
-    public void setOnField(boolean onField){
-        this.onField = onField;
-        if (onField && !world.containsBody(elementBody)) world.addBody(elementBody);
-        else if (!onField && world.containsBody(elementBody)) world.removeBody(elementBody);
-        if (onField) addToDisplay();
-        else removeFromDisplay();
-    }
 
-    public boolean isOnField(){
-        return this.onField;
-    }
 
     /**
      * Get the location of the game element in pixel units.

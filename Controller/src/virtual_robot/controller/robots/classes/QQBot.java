@@ -23,7 +23,7 @@ import virtual_robot.controller.BotConfig;
  * combo box. The filename refers to the fxml file that contains the markup for the graphical UI.
  * Note: the fxml file must be located in the virtual_robot.controller.robots.classes.fxml folder.
  */
-@BotConfig(name = "QQ Bot", filename = "qq_bot")
+//@BotConfig(name = "QQ Bot", filename = "qq_bot")
 public class QQBot extends TurretBot {
     // Wobbly goal mechanism
     private ServoImpl grabberServo;
