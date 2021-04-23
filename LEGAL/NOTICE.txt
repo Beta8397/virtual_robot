@@ -22,5 +22,7 @@ Virtual Robot, Copyright 2019 Team Beta
 
    Javassist software (Copyright 1999-2019, Shigeru Chiba), Licensed under Apache License, Version 2.0
 
+   dyn4j software (Copyright 2010-2021, William Bittle), Licensed under the BSD 3-Clause Revised License
+
 
 

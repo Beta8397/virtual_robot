@@ -1,8 +1,9 @@
-#WORK IN PROGRESS -- NOT READY FOR USE. Integrating dyn4j 2-D physics/collision engine into the botsofprey/virtual_robot fork of beta8397/virtual_robot.
-
 # A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
 
-New: Programming Board configuration to serve as a companion to the book "Learn Java For FTC", by Alan Smith. The
+New: Modification to allow game elements courtesy of Daniel McDonald, BotsOfPrey. In addition, modified to 
+incorporate the dyn4j 2D physics and collision engine.
+
+Includes Programming Board configuration to serve as a companion to the book "Learn Java For FTC", by Alan Smith. The
 PDF can be [downloaded for free](https://github.com/alan412/LearnJavaForFTC) or you can purchase the paperback on
 [Amazon](https://www.amazon.com/dp/B08DBVKXLZ).
 
