@@ -47,9 +47,22 @@ public class BetaBotDemo extends LinearOpMode {
         intakeMotor.setPower(0.75);
         shooterMotor.setPower(0.75);
 
+        telemetry.addData("Drive: ", "Lt and Rt Sticks");
+        telemetry.addData("Shoot: ", "'A' (250ms on, 250ms off)");
+        telemetry.addData("Scoop: ", "Dpad up/down");
+        telemetry.addData("Intake: ", "Back of bot");
+        telemetry.addData("Press 'START' to start.","");
+        telemetry.update();
 
         waitForStart();
         while (opModeIsActive()){
+
+            telemetry.addData("Drive: ", "Lt and Rt Sticks");
+            telemetry.addData("Shoot: ", "'A' (250ms on, 250ms off)");
+            telemetry.addData("Scoop: ", "Dpad up/down");
+            telemetry.addData("Intake: ","Back of bot");
+            telemetry.update();
+
             double px = gamepad1.left_stick_x;
             double py = -gamepad1.left_stick_y;
             double pa = -gamepad1.right_stick_x;
@@ -73,8 +86,8 @@ public class BetaBotDemo extends LinearOpMode {
             if (gamepad1.a) kickerServo.setPosition(1);
             else kickerServo.setPosition(0);
 
-            if (gamepad1.dpad_up) scoopMotor.setPower(0.2);
-            else if (gamepad1.dpad_down) scoopMotor.setPower(-0.2);
+            if (gamepad1.dpad_up) scoopMotor.setPower(0.5);
+            else if (gamepad1.dpad_down) scoopMotor.setPower(-0.5);
             else scoopMotor.setPower(0);
         }
 

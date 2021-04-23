@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
+import virtual_robot.controller.BotConfig;
 
 /**
  * For internal use only. Represents a robot with four mechanum wheels, color sensor, four distance sensors,
@@ -19,7 +20,7 @@ import javafx.scene.transform.Translate;
  * combo box. The filename refers to the fxml file that contains the markup for the graphical UI.
  * Note: the fxml file must be located in the virtual_robot.controller.robots.classes.fxml folder.
  */
-//@BotConfig(name = "Arm Bot", filename = "arm_bot")
+@BotConfig(name = "Arm Bot", filename = "arm_bot")
 public class ArmBot extends MechanumBase {
 
     /*
