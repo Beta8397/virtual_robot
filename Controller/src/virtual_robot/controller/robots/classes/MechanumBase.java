@@ -3,28 +3,10 @@ package virtual_robot.controller.robots.classes;
 import com.qualcomm.hardware.bosch.BNO055IMUImpl;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorExImpl;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.configuration.MotorType;
 
-import org.dyn4j.collision.CategoryFilter;
-import org.dyn4j.dynamics.BodyFixture;
-import org.dyn4j.dynamics.contact.Contact;
-import org.dyn4j.dynamics.contact.SolvedContact;
-import org.dyn4j.geometry.Vector2;
-import org.dyn4j.world.BroadphaseCollisionData;
-import org.dyn4j.world.ContactCollisionData;
-import org.dyn4j.world.ManifoldCollisionData;
-import org.dyn4j.world.NarrowphaseCollisionData;
-import org.dyn4j.world.listener.CollisionListener;
-import org.dyn4j.world.listener.ContactListener;
-import org.firstinspires.ftc.robotcore.external.matrices.GeneralMatrixF;
-import org.firstinspires.ftc.robotcore.external.matrices.MatrixF;
-import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import virtual_robot.controller.VRBody;
 import virtual_robot.controller.VirtualBot;
-import virtual_robot.controller.VirtualField;
 import virtual_robot.controller.VirtualRobotController;
 import virtual_robot.util.AngleUtils;
 
@@ -47,15 +29,7 @@ public class MechanumBase extends VirtualBot {
     private double interWheelLength;
     private double wlAverage;
 
-    private double[][] tWR; //Transform from wheel motion to robot motion (KINETIC MODEL)
-
-
-
-    GeneralMatrixF M_ForceWheelToRobot; // Converts from individual wheel forces to total force/torque on robot
-    MatrixF M_ForceRobotToWheel;  // Converts from total force/torque on robot to individual wheel forces
-
-    protected final float FIELD_FRICTION_COEFF = 100.0f;  // For now, use ridiculously high friction coefficient
-    protected float maxWheelXForce; // Need to assign this in the initialize method.
+    private double[][] tWR; //Transform from wheel motion to robot motion
 
     /**
      * No-param constructor. Uses the default motor type of Neverest 40
@@ -84,6 +58,7 @@ public class MechanumBase extends VirtualBot {
                 hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "back_distance"),
                 hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "right_distance")
         };
+        //gyro = (VirtualRobotController.GyroSensorImpl)hardwareMap.gyroSensor.get("gyro_sensor");
         imu = hardwareMap.get(BNO055IMUImpl.class, "imu");
         colorSensor = (VirtualRobotController.ColorSensorImpl) hardwareMap.colorSensor.get("color_sensor");
         wheelCircumference = Math.PI * botWidth / 4.5;
@@ -97,24 +72,7 @@ public class MechanumBase extends VirtualBot {
                 {-0.25 / wlAverage, -0.25 / wlAverage, 0.25 / wlAverage, 0.25 / wlAverage},
                 {-0.25, 0.25, 0.25, -0.25}
         };
-
-        float RRt2 = 0.5f * (float)Math.sqrt(interWheelLength*interWheelLength + interWheelWidth*interWheelWidth) * (float)Math.sqrt(2.0);
-
-        M_ForceWheelToRobot = new GeneralMatrixF(4, 4, new float[]{
-                1, 1, 1, 1,
-                -1, 1, -1, 1,
-                RRt2, -RRt2, -RRt2, RRt2,
-                1, 1, -1, -1});
-
-        M_ForceRobotToWheel = M_ForceWheelToRobot.inverted();
-
-        // Maximum possible frictional force (in robot-X direction) between field and any individual robot wheel.
-        // Note the division by 4 (assumes each wheel gets 1/4 of robot mass) and the division by sqrt(2) (because
-        // the X-direction force is 1/sqrt(2) times the total friction force on the wheel.
-        maxWheelXForce = (float)(9.8 * chassisBody.getMass().getMass() * FIELD_FRICTION_COEFF / (4.0 * Math.sqrt(2)));
-
         hardwareMap.setActive(false);
-
     }
 
     protected void createHardwareMap() {
@@ -130,122 +88,40 @@ public class MechanumBase extends VirtualBot {
 
     public synchronized void updateStateAndSensors(double millis) {
 
-        /*
-         * Get updated position and heading from the dyn4j body (chassisBody)
-         */
-        x = chassisBody.getTransform().getTranslationX() * FIELD.PIXELS_PER_METER;
-        y = chassisBody.getTransform().getTranslationY() * FIELD.PIXELS_PER_METER;
-        headingRadians = chassisBody.getTransform().getRotationAngle();
+        double[] deltaPos = new double[4];
+        double[] w = new double[4];
 
-        // Compute new wheel speeds in pixel units per second
-
-        double[] wSpd = new double[4];
-        for (int i=0; i<4; i++){
-            motors[i].update(millis);
-            wSpd[i] = motors[i].getVelocity(AngleUnit.RADIANS) * gearRatioWheel * wheelCircumference  / (2.0 * Math.PI);
-            boolean mtRev = MOTOR_TYPE.REVERSED;
-            boolean dirRev = motors[i].getDirection() == DcMotorSimple.Direction.REVERSE;
-            if (
-                    i<2 && (mtRev && dirRev || !mtRev && !dirRev) || i>=2 && (mtRev && !dirRev || !mtRev && dirRev)
-            ) wSpd[i] = -wSpd[i];
+        for (int i = 0; i < 4; i++) {
+            deltaPos[i] = motors[i].update(millis);
+            w[i] = deltaPos[i] * wheelCircumference * gearRatioWheel / motors[i].MOTOR_TYPE.TICKS_PER_ROTATION;
+            if (i < 2) w[i] = -w[i];
         }
 
-        /*
-         * Based on wheel speeds, compute the target final robot velocity and angular speed, in the robot
-         * coordinate system.
-         */
-        double[] robotTargetSpd = new double[]{0,0,0,0};
-        for (int i=0; i<4; i++){
-            for (int j=0; j<4; j++){
-                robotTargetSpd[i] += tWR[i][j] * wSpd[j];
+        double[] robotDeltaPos = new double[]{0, 0, 0, 0};
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                robotDeltaPos[i] += tWR[i][j] * w[j];
             }
         }
 
-        robotTargetSpd[0] /= FIELD.PIXELS_PER_METER;
-        robotTargetSpd[1] /= FIELD.PIXELS_PER_METER;
+        double dxR = robotDeltaPos[0];
+        double dyR = robotDeltaPos[1];
+        double headingChange = robotDeltaPos[2];
+        double avgHeading = headingRadians + headingChange / 2.0;
 
-        /*
-         * Compute an estimated final heading. This is used only to convert the target final robot velocity
-         * from robot coordinate system to world coordinate system.
-         */
-        double t = millis / 1000.0;
-        double estFinalHeading = headingRadians + 0.5 * (chassisBody.getAngularVelocity() + robotTargetSpd[2]) * t;
-        double sinFinal = Math.sin(estFinalHeading);
-        double cosFinal = Math.cos(estFinalHeading);
+        double sin = Math.sin(avgHeading);
+        double cos = Math.cos(avgHeading);
 
-        /*
-         * Convert target final robot velocity from robot coordinate system to world coordinate system.
-         */
-        Vector2 estFinalVelocity = new Vector2(
-                robotTargetSpd[0]*cosFinal - robotTargetSpd[1]*sinFinal,
-                robotTargetSpd[0]*sinFinal + robotTargetSpd[1]*cosFinal
-        );
+        x += dxR * cos - dyR * sin;
+        y += dxR * sin + dyR * cos;
+        headingRadians += headingChange;
 
-        /*
-         * Compute the force and torque that would be required to achieve the target changes in robot velocity and
-         * angular speed (F = ma,  tau = I*alpha)
-         */
-        Vector2 force = estFinalVelocity.difference(chassisBody.getLinearVelocity()).product(chassisBody.getMass().getMass()/t);
-        double torque = (robotTargetSpd[2] - chassisBody.getAngularVelocity()) * chassisBody.getMass().getInertia()/t;
+        if (headingRadians > Math.PI) headingRadians -= 2.0 * Math.PI;
+        else if (headingRadians < -Math.PI) headingRadians += 2.0 * Math.PI;
 
-        /*
-         * Convert the proposed force from world to robot coordinate system.
-         */
-        double sinHd = Math.sin(headingRadians);
-        double cosHd = Math.cos(headingRadians);
+        constrainToBoundaries();
 
-        float fXR = (float)(force.x*cosHd + force.y*sinHd);
-        float fYR = (float)(-force.x*sinHd + force.y*cosHd);
 
-        // VectorF containing total force and torque required on bot to achieve the tentative position change,
-        // in robot coordinate system
-        VectorF totalForce = new VectorF(fXR, fYR, (float)torque, 0);
-
-        // Required friction force from floor to achieve the tentative position change. For now, this will
-        // be the same as totalForce, but may want to add offsets to collision forces
-        VectorF frictionForces = new VectorF(totalForce.get(0), totalForce.get(1), totalForce.get(2), totalForce.get(3));
-
-        // Determine the X-direction forces that would be required on each of the bot's four wheels to achieve
-        // the total frictional force and torque predicted by the kinematic model. Note that the magnitude of
-        // total force on each wheel is sqrt(2) times abs(x-direction force). (ROBOT coordinate system)
-
-        VectorF wheel_X_Forces = M_ForceRobotToWheel.multiplied(frictionForces);
-
-        //If any of the wheel forces exceeds the product of muStatic*mass*gravity, reduce the magnitude
-        //of that force to muKinetic*mass*gravity, keeping the direction the same
-
-        for (int i=0; i<4; i++){
-            float f = wheel_X_Forces.get(i);
-            if (Math.abs(f) > maxWheelXForce) {
-                wheel_X_Forces.put(i, maxWheelXForce * Math.signum(f));
-            }
-        }
-
-        //Based on the adjusted forces at each wheel, determine net frictional force and torque on the bot,
-        //Force is in ROBOT COORDINATE system
-
-        frictionForces = M_ForceWheelToRobot.multiplied(wheel_X_Forces);
-
-        // Convert these adjusted friction forces to WORLD COORDINATES  and put into the original
-        // force and torque variables
-        force = new Vector2(frictionForces.get(0)*cosHd - frictionForces.get(1)*sinHd,
-                frictionForces.get(0)*sinHd + frictionForces.get(1)*cosHd);
-        torque = frictionForces.get(2);
-
-        /*
-         * Apply the adjusted frictional force and torque to the chassisBody
-         *
-         * Note:  We are only applying the frictional forces from the floor, NOT the collision forces. The
-         *        collision forces will be applied automatically during the next update of the world by the
-         *        dyn4j physics engine.
-         */
-
-        chassisBody.applyForce(force);
-        chassisBody.applyTorque(torque);
-
-        /*
-         * Update the sensors
-         */
         imu.updateHeadingRadians(headingRadians);
 
         colorSensor.updateColor(x, y);
@@ -268,8 +144,6 @@ public class MechanumBase extends VirtualBot {
         for (int i = 0; i < 4; i++) motors[i].stopAndReset();
         imu.close();
     }
-
-
 
 
 }

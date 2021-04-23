@@ -29,10 +29,8 @@ import virtual_robot.util.Vector2D;
  *  1) Provide a public initialize() method for initialization of of the game element whose appearance
  *     may change as it interacts with the robot. First statement must be super.initialize().
  *  2) Override the public synchronized updateDisplay() method to update the appearance.
- *  3) Override the setLocation methods. This would only be necessary if the game element has
- *     more than one physics body.
  *
- *  The Wobble Goal class has detailed comments regarding the workings of these methods.
+ *  The WobbleGoal and Ring classes have detailed comments regarding the workings of these methods.
  */
 public abstract class VirtualGameElement implements GameObject {
     protected static VirtualRobotController controller;
@@ -45,12 +43,18 @@ public abstract class VirtualGameElement implements GameObject {
 
     protected final VirtualField FIELD;
 
+    /**
+     * Obtain a reference to the VirtualRobotController.
+     * This must be called before creating instances of game elements.
+     * @param ctrl
+     */
     static void setController(VirtualRobotController ctrl) {
         controller = ctrl;
     }
 
     public Group getDisplayGroup() { return displayGroup; }
 
+    // Position (pixel units) and heading (radians) of the game element.
     protected volatile double x = 0;
     protected volatile double y = 0;
     protected volatile double headingRadians = 0;
@@ -60,13 +64,19 @@ public abstract class VirtualGameElement implements GameObject {
         world = controller.getWorld();
     }
 
+    // Accessors of position (pixel units) and heading (radians)
     public double getX() { return x; }
     public double getY() { return y; }
     public double getHeadingRadians() { return headingRadians; }
 
     /**
-     * Initialize the game element.  Classes extending VirtualGameElement may override this to
-     * perform custom initialization.  The default implementation does nothing.
+     * Initialize the game element.
+     *
+     * Default method calls the concrete implementation of setUpBody to instantiate and configure the
+     * dyn4j physics body.
+     *
+     * Classes extending VirtualGameElement may override this to perform custom initialization; in that
+     * case, the first statement should be super.initialize().
      */
     public void initialize() {
         setUpBody();
@@ -202,6 +212,9 @@ public abstract class VirtualGameElement implements GameObject {
      *  it SHOULD NOT make changes to the game element's graphical UI. Those changes should be made by
      *  overriding the updateDisplay() method, which is run on the UI thread.
      *
+     *  updateState is the appropriate place to make necessary changes within the dyne4j physics world
+     *  (e.g., adding or removing Bodys, setting velocities, etc.)
+     *
      *  The implementation of updateState should be synchronized.
      *
      *  @param millis milliseconds since the previous update
@@ -271,5 +284,10 @@ public abstract class VirtualGameElement implements GameObject {
      *  the "main" body should be assigned to elementBody.
      */
     public abstract void setUpBody();
+
+    /**
+     *  Set linear and angular speeds of all dyn4j Bodys in the game element to zero.
+     */
+    public abstract void stop();
 
 }

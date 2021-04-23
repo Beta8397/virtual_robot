@@ -77,4 +77,10 @@ public class WobbleGoal extends VirtualGameElement {
     public boolean isOnField(){
         return this.onField;
     }
+
+    @Override
+    public void stop(){
+        wobbleBody.setLinearVelocity(0,0);
+        wobbleBody.setAngularVelocity(0);
+    }
 }

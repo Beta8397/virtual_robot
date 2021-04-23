@@ -10,8 +10,8 @@
         <Rectangle arcHeight="5.0" arcWidth="5.0" fill="YELLOW" height="75.0" stroke="BLACK" strokeType="INSIDE" width="75.0" />
         <Rectangle arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="20.0" stroke="BLACK" strokeType="INSIDE" width="10.0" y="55.0" />
         <Rectangle arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="20.0" stroke="BLACK" strokeType="INSIDE" width="10.0" />
-      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="20.0" stroke="BLACK" strokeType="INSIDE" width="10.0" x="65.0" />
-      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="20.0" stroke="BLACK" strokeType="INSIDE" width="10.0" x="65.0" y="55.0" />
+        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="20.0" stroke="BLACK" strokeType="INSIDE" width="10.0" x="65.0" />
+        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="20.0" stroke="BLACK" strokeType="INSIDE" width="10.0" x="65.0" y="55.0" />
         <Rectangle arcHeight="5.0" fill="LIME" height="10.0" stroke="BLACK" strokeType="INSIDE" width="10.0" x="32.5" />
         <Circle centerX="37.0" centerY="37.0" radius="10.0" strokeType="INSIDE" strokeWidth="0.0">
             <fill>
@@ -26,7 +26,20 @@
                         <Stop color="WHITE" offset="1.0" />
                     </stops>
                 </RadialGradient>
-            </fill></Circle>
-        <Rectangle fx:id="backServoArm" arcHeight="5.0" arcWidth="5.0" fill="MAGENTA" height="10.0" stroke="BLACK" strokeType="INSIDE" width="45.0" x="15.0" y="65.0" />
+            </fill>
+        </Circle>
+      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="LIME" height="10.0" layoutX="12.5" layoutY="65.0" stroke="BLACK" strokeType="INSIDE" width="50.0" />
+      <Group fx:id="scoopGroup">
+         <children>
+            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="BROWN" height="30.0" stroke="BLACK" strokeType="INSIDE" width="5.0" x="58.0" />
+            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="BROWN" height="30.0" stroke="BLACK" strokeType="INSIDE" width="5.0" x="12.0" />
+         </children>
+      </Group>
+        <Group fx:id="loadedRingGroup" layoutX="37.5" layoutY="37.5">
+            <children>
+                <Circle centerX="0.0" centerY="0.0" fill="#ed9315" radius="10.4" strokeType="INSIDE" strokeWidth="0.0" />
+                <Circle centerX="0.0" centerY="0.0" fill="#b8b8b8" radius="6.24" strokeType="INSIDE" strokeWidth="0.0" />
+            </children>
+        </Group>
     </children>
 </Group>

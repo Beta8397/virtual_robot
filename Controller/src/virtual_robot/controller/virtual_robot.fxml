@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
@@ -13,7 +18,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane fx:id="borderPane" onKeyPressed="#handleKeyEvents" onKeyReleased="#handleKeyEvents" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="virtual_robot.controller.VirtualRobotController">
+<BorderPane fx:id="borderPane" onKeyPressed="#handleKeyEvents" onKeyReleased="#handleKeyEvents" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="virtual_robot.controller.VirtualRobotController">
    <center>
       <StackPane fx:id="fieldPane" alignment="TOP_LEFT" maxHeight="0.0" maxWidth="0.0" minHeight="0.0" minWidth="0.0" onMouseDragged="#handleFieldMouseClick" onMousePressed="#handleFieldMouseClick" prefHeight="0.0" prefWidth="0.0" BorderPane.alignment="CENTER">
          <children>
@@ -76,16 +81,36 @@
                   </CheckBox>
                </children>
             </HBox>
-            <HBox prefWidth="200.0">
-               <children>
-                  <CheckBox fx:id="checkBoxAutoHuman" mnemonicParsing="false" onAction="#handleCheckBoxAutoHumanAction" text="Automate human player">
-                     <padding>
-                        <Insets left="10.0" top="15.0" />
-                     </padding>
-                  </CheckBox>
-               </children>
-            </HBox>
          </children>
       </VBox>
    </right>
+   <left>
+      <VBox alignment="CENTER" BorderPane.alignment="CENTER">
+         <children>
+            <CheckBox fx:id="checkBoxAutoHuman" mnemonicParsing="false" onAction="#handleCheckBoxAutoHumanAction" selected="true" text="Automate human player">
+               <padding>
+                  <Insets left="10.0" top="15.0" />
+               </padding>
+               <VBox.margin>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </VBox.margin>
+            </CheckBox>
+            <Button mnemonicParsing="false" onAction="#handleBtnHumanAction" text="Human Action">
+               <VBox.margin>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </VBox.margin>
+            </Button>
+            <Button mnemonicParsing="false" onAction="#handleBtnResetGameElements" text="Reset Elements">
+               <VBox.margin>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </VBox.margin>
+            </Button>
+            <Button mnemonicParsing="false" onAction="#handleBtnPreloadElementsOnBot" text="Preload Elements">
+               <VBox.margin>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </VBox.margin>
+            </Button>
+         </children>
+      </VBox>
+   </left>
 </BorderPane>

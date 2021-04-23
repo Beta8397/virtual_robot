@@ -98,24 +98,11 @@ public abstract class VirtualBot implements GameObject {
     /**
      *  Set up the chassisBody and add it to the dyn4j world. This method creates a Body and adds a BodyFixture
      *  containing a Rectangle. Add the chassis body to the world.
-     *     The density value of 71.76 kg/m2 results in chassis mass of 15 kg.
-     *     The "friction" of 0 refers to robot-game element and robot-wall friction (NOT robot-floor)
-     *     The "restitution" of 0 refers to "bounce" when robot collides with wall and game elements
      *
-     *     May want to change density, friction, and restitution to obtain desired behavior
-     *
-     *  The filter set on the chassisFixture indicates what other things the robot is capable of colliding with
+     *  Overriding this method is optional. The default do-nothing implementation is for a robot that
+     *  is not controlled by the dyn4j physics engine.
      */
-    public void setUpChassisBody(){
-        chassisBody = new VRBody(this);
-        double botWidthMeters = botWidth / FIELD.PIXELS_PER_METER;
-        chassisFixture = chassisBody.addFixture(
-                new org.dyn4j.geometry.Rectangle(botWidthMeters, botWidthMeters), 71.76, 0, 0);
-        chassisRectangle = (org.dyn4j.geometry.Rectangle)chassisFixture.getShape();
-        chassisFixture.setFilter(Filters.CHASSIS_FILTER);
-        chassisBody.setMass(MassType.NORMAL);
-        world.addBody(chassisBody);
-    }
+    public void setUpChassisBody(){ }
 
     /**
      * Set up the Group object that will be displayed as the virtual robot. The resource file should contain
@@ -128,18 +115,18 @@ public abstract class VirtualBot implements GameObject {
         displayGroup = group;
 
         /*
-           Create a transparent 600x600 rectangle to serve as the base layer of the robot. It will go
-           below the 75x75 chassis rectangle.
-        */
+         * Create a transparent 600x600 rectangle to serve as the base layer of the robot. It will go
+         * below the 75x75 chassis rectangle.
+         */
 
         Rectangle baseRect = new Rectangle(0, 0, 600, 600);
         baseRect.setFill(new Color(1.0, 0.0, 1.0, 0.0));
         baseRect.setVisible(true);
 
         /*
-          Translate the display group by (300 - 37.5) in X and Y, so that the
-          center of the chassis rectangle will be at the same location as the center of the 600x600 base
-          rectangle.
+         * Translate the display group by (300 - 37.5) in X and Y, so that the
+         * center of the chassis rectangle will be at the same location as the center of the 600x600 base
+         * rectangle.
          */
 
         displayGroup.setTranslateX(displayGroup.getTranslateX() + 300 - 37.5);
@@ -151,11 +138,11 @@ public abstract class VirtualBot implements GameObject {
         displayGroup = new Group(baseRect, displayGroup);
 
         /*
-          Add transforms. They will be applied in the opposite order from the order in which they are added.
-          The scale transform scales the entire display group so that the base layer has the same width as the field,
-          and the chassis rectangle (originally the 75x75 rectangle) is one-eight of the field width.
-          The rotate and translate transforms are added so that they can be manipulated later, when the robot moves
-          around the field.
+         * Add transforms. They will be applied in the opposite order from the order in which they are added.
+         * The scale transform scales the entire display group so that the base layer has the same width as the field,
+         * and the chassis rectangle (originally the 75x75 rectangle) is one-eight of the field width.
+         * The rotate and translate transforms are added so that they can be manipulated later, when the robot moves
+         * around the field.
          */
         displayGroup.getTransforms().add(new Translate(0, 0));
         displayGroup.getTransforms().add(new Rotate(0, FIELD.HALF_FIELD_WIDTH, FIELD.HALF_FIELD_WIDTH));
@@ -166,7 +153,9 @@ public abstract class VirtualBot implements GameObject {
 
     /**
      *  Update the state of the robot. This includes the x, y, and headingRadians variables, as well other variables
-     *  that may need to be updated for a specific robot configuration.
+     *  that may need to be updated for a specific robot configuration. This may include changes in the physics
+     *  body for the VirtualBot, or changes to game elements (if a listener has flagged that the robot should
+     *  take control of a game element).
      *
      *  Also, update the robot's sensors by calling the update.. methods of the sensors (e.g., the
      *  updateDistance(...) method of the distance sensors).

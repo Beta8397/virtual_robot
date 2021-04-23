@@ -12,7 +12,6 @@ import javafx.scene.layout.StackPane;
 import org.dyn4j.world.World;
 import org.reflections.Reflections;
 import virtual_robot.controller.*;
-import virtual_robot.controller.robots.GameElementControlling;
 
 public abstract class Game {
 
@@ -20,12 +19,22 @@ public abstract class Game {
 
     protected StackPane fieldPane = null;
 
+    // The dyn4j physics world.
     protected World<VRBody> world = null;
 
+    // List to hold all of the game elements for the Game instance.
     protected List<VirtualGameElement> gameElements = new ArrayList<VirtualGameElement>();
+
+    // Flag to indicate whether human player action has been requested.
+    protected volatile boolean humanPlayerActionRequested;
 
     public Game(){ }
 
+    /**
+     * Set a reference to the VirtualRobotController. This must be called before the
+     * initialize() method can be called on an instance of Game.
+     * @param c
+     */
     public static void setController(VirtualRobotController c){
         controller = c;
     }
@@ -33,6 +42,8 @@ public abstract class Game {
     /**
      * Initialize the game.
      * Implementation may override, but must include super.initialize() as first statement.
+     * Game.setController must be called to obtain the controller reference before the
+     * initialize method can be called.
      */
     public void initialize(){
         world = controller.getWorld();
@@ -97,13 +108,13 @@ public abstract class Game {
      * Report if the human player is currently active.
      * @return true if the human player is active, false otherwise
      */
-    public abstract boolean isHumanPlayerActive();
+    public abstract boolean isHumanPlayerAuto();
 
     /**
      * Activate or deactivate the human player.
      * @param selected true if human player is active; false indicates inactive
      */
-    public abstract void setHumanPlayerActive(boolean selected);
+    public abstract void setHumanPlayerAuto(boolean selected);
 
     /**
      * Update the state of the human player.  This is called by the VirtualRobotController during
@@ -111,6 +122,12 @@ public abstract class Game {
      * @param millis milliseconds since the previous update
      */
     public abstract void updateHumanPlayerState(double millis);
+
+    public void requestHumanPlayerAction(){
+        humanPlayerActionRequested = true;
+    }
+
+    public boolean isHumanPlayerActionRequested() { return humanPlayerActionRequested; }
 
     /**
      * Update state of all game elements.
@@ -129,6 +146,10 @@ public abstract class Game {
         for (VirtualGameElement e: gameElements){
             e.updateDisplay();
         }
+    }
+
+    public synchronized void stopGameElements(){
+        for (VirtualGameElement e: gameElements) e.stop();
     }
 
 }

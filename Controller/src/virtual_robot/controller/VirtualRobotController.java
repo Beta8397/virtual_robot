@@ -41,6 +41,7 @@ import com.qualcomm.robotcore.hardware.DcMotorImpl;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import virtual_robot.config.Game;
+import virtual_robot.controller.robots.ControlsElements;
 import virtual_robot.controller.robots.classes.MechanumBot;
 import virtual_robot.keyboard.KeyState;
 
@@ -171,6 +172,7 @@ public class VirtualRobotController {
 
         Config.GAME.initialize();
         Config.GAME.resetGameElements();
+        Config.GAME.setHumanPlayerAuto(true);
 
         sldRandomMotorError.valueProperty().addListener(sliderChangeListener);
         sldSystematicMotorError.valueProperty().addListener(sliderChangeListener);
@@ -547,6 +549,7 @@ public class VirtualRobotController {
 
             bot.getHardwareMap().setActive(false);
             bot.powerDownAndReset();
+            Config.GAME.stopGameElements();
             if (Config.USE_VIRTUAL_GAMEPAD) virtualGamePadController.resetGamePad();
             initializeTelemetryTextArea();
             cbxConfig.setDisable(false);
@@ -622,6 +625,7 @@ public class VirtualRobotController {
 
         bot.getHardwareMap().setActive(false);
         bot.powerDownAndReset();
+        Config.GAME.stopGameElements();
         if (!executorService.isShutdown()) executorService.shutdown();
         opModeInitialized = false;
         opModeStarted = false;
@@ -653,7 +657,8 @@ public class VirtualRobotController {
         bot.updateStateAndSensors(TIME_INTERVAL_MILLISECONDS);
 
 
-        if (Config.GAME.hasHumanPlayer() && Config.GAME.isHumanPlayerActive()) {
+        if (Config.GAME.hasHumanPlayer() && Config.GAME.isHumanPlayerAuto() && opModeStarted
+                || Config.GAME.isHumanPlayerActionRequested() && opModeInitialized) {
             Config.GAME.updateHumanPlayerState(TIME_INTERVAL_MILLISECONDS);
         }
     }
@@ -687,7 +692,26 @@ public class VirtualRobotController {
 		
     @FXML
     private void handleCheckBoxAutoHumanAction(ActionEvent event){
-        Config.GAME.setHumanPlayerActive(checkBoxAutoHuman.isSelected());
+        Config.GAME.setHumanPlayerAuto(checkBoxAutoHuman.isSelected());
+    }
+
+    @FXML
+    private void handleBtnHumanAction(ActionEvent event){
+        if (opModeInitialized) Config.GAME.requestHumanPlayerAction();
+    }
+
+    @FXML
+    private void handleBtnResetGameElements(ActionEvent event){
+        if (opModeInitialized) return;
+        if (bot instanceof ControlsElements) ((ControlsElements) bot).clearLoadedElements(Config.GAME);
+        Config.GAME.resetGameElements();
+    }
+
+    @FXML
+    private void handleBtnPreloadElementsOnBot(ActionEvent event){
+        if (!opModeInitialized && bot instanceof ControlsElements){
+            ((ControlsElements) bot).preloadElements(Config.GAME);
+        }
     }
 
 

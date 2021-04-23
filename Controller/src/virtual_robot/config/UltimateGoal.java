@@ -13,14 +13,17 @@ import virtual_robot.controller.game_elements.classes.WobbleGoal;
 
 public class UltimateGoal extends Game {
 
+    // Positions (inches) for wobble goals, starter stack, and ring return
     public static final Vector2[] WOBBLE_GOAL_STARTS = new Vector2[]{
             new Vector2(49.5, -48),
             new Vector2(25.5, -48)
     };
     public static final Vector2 STARTER_STACK = new Vector2(36, -22.5);
     public static final Vector2 RING_RETURN = new Vector2(24, 67);
+
     public static final double RING_RETURN_VELOCITY = 20.0; // inches per second
     public static final double RING_RETURN_VELOCITY_VARIATION = 2.4; // inches per second
+
     public static final long RING_RELEASE_INTERVAL_MILLIS = 1500;
     public static final long RING_RELEASE_INTERVAL_MILLIS_VARIATION = 500;
     private boolean humanPlayerActive = true;
@@ -31,7 +34,7 @@ public class UltimateGoal extends Game {
 
     @Override
     public void initialize() {
-        //Calling the super... method causes the game elements to be created, populating the gameElements list.
+        //Calling the super method causes the game elements to be created, populating the gameElements list.
         super.initialize();
 
         //Assign the game elements to the appropriate static final lists.
@@ -58,11 +61,14 @@ public class UltimateGoal extends Game {
 
     }
 
+    /**
+     * Randomize starter stack size. Place wobbles and stacked rings on the field, and change
+     * status of the stacked rings to STACKED (and all others OFF_FIELD).
+     */
     @Override
     public void resetGameElements(){
         int stackIndex = new Random().nextInt(3);
-//        starterStackSize = new int[]{0, 1, 4}[stackIndex];
-        starterStackSize = 4;
+        starterStackSize = new int[]{0, 1, 4}[stackIndex];
 
         Ring.ringsOffField.clear();
 
@@ -99,12 +105,12 @@ public class UltimateGoal extends Game {
     }
 
     @Override
-    public boolean isHumanPlayerActive() {
+    public boolean isHumanPlayerAuto() {
         return humanPlayerActive;
     }
 
     @Override
-    public void setHumanPlayerActive(boolean humanPlayerActive) {
+    public void setHumanPlayerAuto(boolean humanPlayerActive) {
         this.humanPlayerActive = humanPlayerActive;
     }
 
@@ -116,7 +122,8 @@ public class UltimateGoal extends Game {
     @Override
     public void updateHumanPlayerState(double millis) {
 
-        if (Ring.ringsOffField.size() > 0 && System.currentTimeMillis() >= nextRingReleaseTimeMillis) {
+        if (Ring.ringsOffField.size() > 0 &&
+                (System.currentTimeMillis() >= nextRingReleaseTimeMillis || humanPlayerActionRequested)) {
             Ring r = Ring.ringsOffField.get(0);
             r.setLocationInches(RING_RETURN);
             r.setStatus(Ring.RingStatus.ROLLING);
@@ -131,7 +138,9 @@ public class UltimateGoal extends Game {
         } else if (Ring.ringsOffField.size() == 0){
             nextRingReleaseTimeMillis = System.currentTimeMillis() + RING_RELEASE_INTERVAL_MILLIS;
         }
+        humanPlayerActionRequested = false;
     }
+
 
     /**
      * Narrowphase Collision event handler
