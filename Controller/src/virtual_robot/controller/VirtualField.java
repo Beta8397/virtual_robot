@@ -13,6 +13,8 @@ import virtual_robot.config.Config;
  */
 public class VirtualField {
 
+    public enum Unit {PIXEL, METER, INCH}
+
     private static VirtualField instance = null;
 
     public final double FIELD_WIDTH;         // Field width in Pixels
@@ -46,6 +48,20 @@ public class VirtualField {
             instance = new VirtualField();
         }
         return instance;
+    }
+
+    public double conversionFactor(Unit fromUnit, Unit toUnit){
+        if (fromUnit == toUnit) return 1.0;
+        switch (fromUnit){
+            case PIXEL:
+                return toUnit == Unit.METER? 1.0 / PIXELS_PER_METER : 1.0 / PIXELS_PER_INCH;
+            case METER:
+                return toUnit == Unit.PIXEL? PIXELS_PER_METER : INCHES_PER_METER;
+            case INCH:
+                return toUnit == Unit.PIXEL? PIXELS_PER_INCH : 1.0 / INCHES_PER_METER;
+            default:
+                return 1.0;
+        }
     }
 
 }

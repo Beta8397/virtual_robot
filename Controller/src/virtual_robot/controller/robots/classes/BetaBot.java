@@ -9,7 +9,6 @@ import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.transform.Translate;
 import org.dyn4j.dynamics.BodyFixture;
-import org.dyn4j.dynamics.joint.PrismaticJoint;
 import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Vector2;
@@ -23,6 +22,7 @@ import virtual_robot.controller.VRBody;
 import virtual_robot.controller.VirtualField;
 import virtual_robot.controller.game_elements.classes.Ring;
 import virtual_robot.controller.robots.ControlsElements;
+import virtual_robot.dyn4j.Slide;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,37 +30,42 @@ import java.util.List;
 import static virtual_robot.controller.game_elements.classes.Ring.RingStatus.OFF_FIELD;
 
 /**
- * For internal use only. Represents a robot with four mechanum wheels, color sensor, four distance sensors,
- * a BNO055IMU, and a Servo-controlled arm on the back.
- * <p>
- * MechanumBot is the controller class for the "mechanum_bot.fxml" markup file.
+ * For internal use only. Represents a robot with four mecanum wheels, a "scoop" at the front,
+ * a rear intake, a shooter, a color sensor, four distance sensors, and BNO055 imu.
+ *
+ * This configuration controlled by the dyn4j physics/collision engine, and configured to
+ * interact with game elements in the UltimateGoal game.
+ *
+ * BetaBot is the controller class for the "beta_bot.fxml" markup file.
  */
 @BotConfig(name = "Beta Bot", filename = "beta_bot")
 public class BetaBot extends MecanumPhysicsBase implements ControlsElements {
 
+    //Fixture to hold the collision geometry of the ring intake
     private BodyFixture intakeFixture = null;
 
-    private List<Ring> loadedRings = new ArrayList<>();
-    private Ring ringToLoad = null;
-    @FXML private Group loadedRingGroup;
+    private List<Ring> loadedRings = new ArrayList<>();     //List of loaded rings
+    private Ring ringToLoad = null;                         //Ring pending loading, if any
+    @FXML private Group loadedRingGroup;      // Group to represent loaded rings in the UI
 
+    // States of the system that pushes loaded rings into the shooter mechanism
     enum KickerState {COCKING, COCKED, SHOOTING, SHOOT, SHOT_DONE}
 
     private ServoImpl kickerServo;
     ElapsedTime kickerTimer = new ElapsedTime();
     private KickerState kickerState = KickerState.COCKED;
 
+    // Motors for intake, shooting, and scoop
     private DcMotorExImpl intakeMotor;
     private DcMotorExImpl shooterMotor;
     private DcMotorExImpl scoopMotor;
 
-    VRBody scoopBody;
-    BodyFixture leftScoopFixture;
-    BodyFixture rightScoopFixture;
-    PrismaticJoint scoopJoint;
-    @FXML Group scoopGroup;
-    Translate scoopTranslate = new Translate(0, 0);
-    double scoopPosition = 0;
+    //Scoop mechanism
+    VRBody scoopBody;           // Body to represent the scoop in the physics engine
+    Slide scoopSlide;           // The Slide joint that will connect scoop to the bot chassis
+    @FXML Group scoopGroup;     // The Group to represent the scoop in the JavaFX UI
+    Translate scoopTranslate = new Translate(0, 0);   // Transform to control position of scoopGroup
+    double scoopPosition = 0;   // Current position of scoop in pixel units
 
     public BetaBot() {
         super();
@@ -89,21 +94,22 @@ public class BetaBot extends MecanumPhysicsBase implements ControlsElements {
          * moving the wobbles arount. This body will have two fixtures, each of which has a thin rectangular
          * shape, one positioned on the right and the other on the left.
          *
-         * The scoop body will joint to the chassis body by a prismatic joint. This joint can have a motor,
-         * and can also have limits. Using the motor and limits, the scoop body can be extended/retracted
-         * from/into the chassis body.
+         * The scoop body will join to the chassis body by a Slide joint. This joint has a motor that
+         * allows the scoop position relative to the chassis to be controlled.
          */
         scoopBody = new VRBody();
+
         /*
          * make the long skinny fixtures a little larger (37x10 pixel units) than the graphical representation
          * of the prongs (30x5), in order to account for "penetration slop".
          */
-        leftScoopFixture = scoopBody.addFixture(
+        BodyFixture leftScoopFixture = scoopBody.addFixture(
                 new Rectangle(10/FIELD.PIXELS_PER_METER, 37/FIELD.PIXELS_PER_METER),
                 1, 0, 0);
-        rightScoopFixture = scoopBody.addFixture(
+        BodyFixture rightScoopFixture = scoopBody.addFixture(
                 new Rectangle(10/FIELD.PIXELS_PER_METER, 37/FIELD.PIXELS_PER_METER),
                 1, 0, 0);
+        //Position the scoop fixture shapes to the left and right of midline
         leftScoopFixture.getShape().translate(-23/FIELD.PIXELS_PER_METER, 0);
         rightScoopFixture.getShape().translate(23/FIELD.PIXELS_PER_METER, 0);
         scoopBody.setMass(MassType.NORMAL);
@@ -114,15 +120,11 @@ public class BetaBot extends MecanumPhysicsBase implements ControlsElements {
         scoopBody.translate(0, 22.5 / FIELD.PIXELS_PER_METER);
         // Because the prongs are skinny, set as bullet (not sure this helps at all)
         scoopBody.setBullet(true);
-        //Create and configure the prismatic joint, and add it to the world
-        scoopJoint = new PrismaticJoint(chassisBody, scoopBody, new Vector2(0,0), new Vector2(0,-1));
-        scoopJoint.setMotorEnabled(true);
-        scoopJoint.setMaximumMotorForce(100);
-        scoopJoint.setLimitsEnabled(-0.001, 0.001);
-        world.addJoint(scoopJoint);
+        // Create a Slide (specialized motorized Prismatic Joint) and add it to the world
+        scoopSlide = new Slide(chassisBody, scoopBody, new Vector2(0,0), new Vector2(0,-1),
+                VirtualField.Unit.PIXEL);
+        world.addJoint(scoopSlide);
         scoopGroup.getTransforms().add(scoopTranslate);
-
-
 
         /*
          * Add a collision listener to the dyn4j world. This will handle collisions where the bot needs
@@ -203,9 +205,7 @@ public class BetaBot extends MecanumPhysicsBase implements ControlsElements {
         scoopPosition += scoopTicks * 30.0 / 1800.0;    //Scoop position in pixels
         if (scoopPosition > 25) scoopPosition = 25;
         else if (scoopPosition < 0) scoopPosition = 0;
-        double scoopPositionMeters = scoopPosition / FIELD.PIXELS_PER_METER;
-        scoopJoint.setMotorSpeed( 10.0 * Math.signum(scoopTicks));
-        scoopJoint.setLimits(scoopPositionMeters - 0.005, scoopPositionMeters + 0.005);
+        scoopSlide.setPosition(scoopPosition);
     }
 
     public synchronized void updateDisplay(){
@@ -275,6 +275,11 @@ public class BetaBot extends MecanumPhysicsBase implements ControlsElements {
         r.setVelocityMetersPerSec(vel.x, vel.y);
     }
 
+    /**
+     * Preload rings (if Off-Field Rings are available)
+     * @param game
+     */
+    @Override
     public void preloadElements(Game game){
         if (!(game instanceof UltimateGoal)) return;
         if (ringToLoad != null) {
@@ -289,6 +294,11 @@ public class BetaBot extends MecanumPhysicsBase implements ControlsElements {
         updateDisplay();
     }
 
+    /**
+     * Remove any loaded rings and set them to OFF_FIELD status.
+     * @param game
+     */
+    @Override
     public void clearLoadedElements(Game game){
         if (!(game instanceof UltimateGoal)) return;
         if (ringToLoad != null) {
