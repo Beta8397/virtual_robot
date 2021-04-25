@@ -11,10 +11,9 @@ import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.dyn4j.dynamics.BodyFixture;
-import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.world.World;
-import virtual_robot.config.GameObject;
+import virtual_robot.dyn4j.VRBody;
 
 /**
  *   For internal use only. Abstract base class for all of the specific robot configurations.
@@ -41,7 +40,7 @@ import virtual_robot.config.GameObject;
  *   The ArmBot class has detailed comments regarding the workings of these methods.
  *
  */
-public abstract class VirtualBot implements GameObject {
+public abstract class VirtualBot {
 
     protected static VirtualRobotController controller;
 
@@ -145,7 +144,9 @@ public abstract class VirtualBot implements GameObject {
          * around the field.
          */
         displayGroup.getTransforms().add(new Translate(0, 0));
+
         displayGroup.getTransforms().add(new Rotate(0, FIELD.HALF_FIELD_WIDTH, FIELD.HALF_FIELD_WIDTH));
+
         displayGroup.getTransforms().add(new Scale(botWidth/75.0, botWidth/75.0, 0, 0));
 
         fieldPane.getChildren().add(displayGroup);

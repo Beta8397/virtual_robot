@@ -6,7 +6,7 @@ import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.NarrowphaseCollisionData;
 import org.dyn4j.world.listener.CollisionListenerAdapter;
-import virtual_robot.controller.VRBody;
+import virtual_robot.dyn4j.VRBody;
 import virtual_robot.controller.VirtualGameElement;
 import virtual_robot.controller.game_elements.classes.Ring;
 import virtual_robot.controller.game_elements.classes.WobbleGoal;
@@ -161,8 +161,8 @@ public class UltimateGoal extends Game {
 
         VRBody b1 = collision.getBody1();
         VRBody b2 = collision.getBody2();
-        GameObject o1 = b1.getParent();
-        GameObject o2 = b2.getParent();
+        Object o1 = b1.getParent();
+        Object o2 = b2.getParent();
 
         if (o1 instanceof Ring){
             Ring r1 = (Ring)o1;

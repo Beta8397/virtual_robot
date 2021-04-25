@@ -2,7 +2,6 @@ package virtual_robot.dyn4j;
 
 import org.dyn4j.dynamics.joint.PrismaticJoint;
 import org.dyn4j.geometry.Vector2;
-import virtual_robot.controller.VRBody;
 import virtual_robot.controller.VirtualField;
 
 /**

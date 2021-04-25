@@ -43,6 +43,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import virtual_robot.config.Game;
 import virtual_robot.controller.robots.ControlsElements;
 import virtual_robot.controller.robots.classes.MechanumBot;
+import virtual_robot.dyn4j.VRBody;
 import virtual_robot.keyboard.KeyState;
 
 import java.io.IOException;

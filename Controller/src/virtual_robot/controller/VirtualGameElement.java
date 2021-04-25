@@ -10,7 +10,7 @@ import javafx.scene.transform.Translate;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.World;
-import virtual_robot.config.GameObject;
+import virtual_robot.dyn4j.VRBody;
 import virtual_robot.util.Vector2D;
 
 /**
@@ -32,7 +32,7 @@ import virtual_robot.util.Vector2D;
  *
  *  The WobbleGoal and Ring classes have detailed comments regarding the workings of these methods.
  */
-public abstract class VirtualGameElement implements GameObject {
+public abstract class VirtualGameElement {
     protected static VirtualRobotController controller;
 
     protected Group displayGroup = null;

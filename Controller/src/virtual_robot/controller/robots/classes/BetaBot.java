@@ -18,7 +18,7 @@ import virtual_robot.config.Game;
 import virtual_robot.config.UltimateGoal;
 import virtual_robot.controller.BotConfig;
 import virtual_robot.controller.Filters;
-import virtual_robot.controller.VRBody;
+import virtual_robot.dyn4j.VRBody;
 import virtual_robot.controller.VirtualField;
 import virtual_robot.controller.game_elements.classes.Ring;
 import virtual_robot.controller.robots.ControlsElements;

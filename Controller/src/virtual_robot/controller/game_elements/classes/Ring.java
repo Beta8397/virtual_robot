@@ -6,6 +6,7 @@ import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.MassType;
 import virtual_robot.config.UltimateGoal;
 import virtual_robot.controller.*;
+import virtual_robot.dyn4j.VRBody;
 
 import java.util.ArrayList;
 import java.util.List;

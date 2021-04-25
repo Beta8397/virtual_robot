@@ -7,23 +7,14 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.configuration.MotorType;
 
-import org.dyn4j.collision.CategoryFilter;
-import org.dyn4j.dynamics.BodyFixture;
-import org.dyn4j.dynamics.contact.Contact;
-import org.dyn4j.dynamics.contact.SolvedContact;
 import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.world.BroadphaseCollisionData;
-import org.dyn4j.world.ContactCollisionData;
-import org.dyn4j.world.ManifoldCollisionData;
-import org.dyn4j.world.NarrowphaseCollisionData;
-import org.dyn4j.world.listener.CollisionListener;
-import org.dyn4j.world.listener.ContactListener;
 import org.firstinspires.ftc.robotcore.external.matrices.GeneralMatrixF;
 import org.firstinspires.ftc.robotcore.external.matrices.MatrixF;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import virtual_robot.controller.*;
+import virtual_robot.dyn4j.VRBody;
 import virtual_robot.util.AngleUtils;
 
 /**

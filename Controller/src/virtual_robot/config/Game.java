@@ -12,6 +12,7 @@ import javafx.scene.layout.StackPane;
 import org.dyn4j.world.World;
 import org.reflections.Reflections;
 import virtual_robot.controller.*;
+import virtual_robot.dyn4j.VRBody;
 
 public abstract class Game {
 
