@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.transform.Translate;
+import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Rectangle;
@@ -18,7 +19,6 @@ import virtual_robot.config.Game;
 import virtual_robot.config.UltimateGoal;
 import virtual_robot.controller.BotConfig;
 import virtual_robot.controller.Filters;
-import virtual_robot.dyn4j.VRBody;
 import virtual_robot.controller.VirtualField;
 import virtual_robot.controller.game_elements.classes.Ring;
 import virtual_robot.controller.robots.ControlsElements;
@@ -61,7 +61,7 @@ public class BetaBot extends MecanumPhysicsBase implements ControlsElements {
     private DcMotorExImpl scoopMotor;
 
     //Scoop mechanism
-    VRBody scoopBody;           // Body to represent the scoop in the physics engine
+    Body scoopBody;           // Body to represent the scoop in the physics engine
     Slide scoopSlide;           // The Slide joint that will connect scoop to the bot chassis
     @FXML Group scoopGroup;     // The Group to represent the scoop in the JavaFX UI
     Translate scoopTranslate = new Translate(0, 0);   // Transform to control position of scoopGroup
@@ -97,7 +97,7 @@ public class BetaBot extends MecanumPhysicsBase implements ControlsElements {
          * The scoop body will join to the chassis body by a Slide joint. This joint has a motor that
          * allows the scoop position relative to the chassis to be controlled.
          */
-        scoopBody = new VRBody();
+        scoopBody = new Body();
 
         /*
          * make the long skinny fixtures a little larger (37x10 pixel units) than the graphical representation
@@ -130,9 +130,9 @@ public class BetaBot extends MecanumPhysicsBase implements ControlsElements {
          * Add a collision listener to the dyn4j world. This will handle collisions where the bot needs
          * to take control of a game element.
          */
-        world.addCollisionListener(new CollisionListenerAdapter<VRBody, BodyFixture>(){
+        world.addCollisionListener(new CollisionListenerAdapter<Body, BodyFixture>(){
             @Override
-            public boolean collision(NarrowphaseCollisionData<VRBody, BodyFixture> collision) {
+            public boolean collision(NarrowphaseCollisionData<Body, BodyFixture> collision) {
                 return handleNarrowPhaseCollisions(collision);
             }
         });
@@ -233,17 +233,17 @@ public class BetaBot extends MecanumPhysicsBase implements ControlsElements {
      * @param collision
      * @return True to allow collision resolution to continue; False to terminate collision resolution.
      */
-    private boolean handleNarrowPhaseCollisions(NarrowphaseCollisionData<VRBody, BodyFixture> collision){
+    private boolean handleNarrowPhaseCollisions(NarrowphaseCollisionData<Body, BodyFixture> collision){
         BodyFixture f1 = collision.getFixture1();
         BodyFixture f2 = collision.getFixture2();
         if ((f1 == intakeFixture || f2 == intakeFixture) &&  loadedRings.size() < 3
                 && ringToLoad == null) {
-            VRBody b = f1 == intakeFixture ? collision.getBody2() : collision.getBody1();
+            Body b = f1 == intakeFixture ? collision.getBody2() : collision.getBody1();
             double intakeVel = intakeMotor.getVelocity();
             boolean intakeFwd = intakeMotor.getDirection() == DcMotorSimple.Direction.FORWARD;
             boolean intakeOn = intakeVel>560 && intakeFwd || intakeVel<-560 && !intakeFwd;
-            if (b.getParent() instanceof Ring && intakeOn){
-                Ring r = (Ring)b.getParent();
+            if (b.getUserData() instanceof Ring && intakeOn){
+                Ring r = (Ring)b.getUserData();
                 if (!(r.getStatus() == Ring.RingStatus.FLYING)) {
                     ringToLoad = r;
                     return false;

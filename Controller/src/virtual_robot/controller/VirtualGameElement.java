@@ -7,10 +7,10 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
+import org.dyn4j.dynamics.Body;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.World;
-import virtual_robot.dyn4j.VRBody;
 import virtual_robot.util.Vector2D;
 
 /**
@@ -37,9 +37,9 @@ public abstract class VirtualGameElement {
 
     protected Group displayGroup = null;
 
-    protected VRBody elementBody = null;
+    protected Body elementBody = null;
 
-    protected World<VRBody> world = null;
+    protected World<Body> world = null;
 
     protected final VirtualField FIELD;
 

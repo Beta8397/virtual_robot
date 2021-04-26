@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotorExImpl;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.configuration.MotorType;
-
+import org.dyn4j.dynamics.Body;
 import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Vector2;
 import org.firstinspires.ftc.robotcore.external.matrices.GeneralMatrixF;
@@ -14,7 +14,6 @@ import org.firstinspires.ftc.robotcore.external.matrices.MatrixF;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import virtual_robot.controller.*;
-import virtual_robot.dyn4j.VRBody;
 import virtual_robot.util.AngleUtils;
 
 /**
@@ -270,7 +269,8 @@ public class MecanumPhysicsBase extends VirtualBot {
      *  The filter set on the chassisFixture indicates what other things the robot is capable of colliding with
      */
     public void setUpChassisBody(){
-        chassisBody = new VRBody(this);
+        chassisBody = new Body();
+        chassisBody.setUserData(this);
         double botWidthMeters = botWidth / FIELD.PIXELS_PER_METER;
         chassisFixture = chassisBody.addFixture(
                 new org.dyn4j.geometry.Rectangle(botWidthMeters, botWidthMeters), 71.76, 0, 0);

@@ -1,5 +1,6 @@
 package virtual_robot.dyn4j;
 
+import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.joint.PrismaticJoint;
 import org.dyn4j.geometry.Vector2;
 import virtual_robot.controller.VirtualField;
@@ -24,7 +25,7 @@ public class Slide extends PrismaticJoint {
      * @param axis      Slide axis vector
      * @param unit      Distance unit for anchor point, and for setting defaultUnit
      */
-    public Slide(VRBody b1, VRBody b2, Vector2 anchor, Vector2 axis, VirtualField.Unit unit) {
+    public Slide(Body b1, Body b2, Vector2 anchor, Vector2 axis, VirtualField.Unit unit) {
         super(b1, b2,
                 anchor.product(VirtualField.getInstance().conversionFactor(unit, VirtualField.Unit.METER)),
                 axis.product(VirtualField.getInstance().conversionFactor(unit, VirtualField.Unit.METER)));
@@ -35,7 +36,7 @@ public class Slide extends PrismaticJoint {
     /**
      * Constructor -- with specified values of maxForce, speed, and tolerance
      */
-    public Slide(VRBody b1, VRBody b2, Vector2 anchor, Vector2 axis, VirtualField.Unit unit,
+    public Slide(Body b1, Body b2, Vector2 anchor, Vector2 axis, VirtualField.Unit unit,
                  double maxForce, double speed, double tolerance){
         super(b1, b2,
             anchor.product(VirtualField.getInstance().conversionFactor(unit, VirtualField.Unit.METER)),

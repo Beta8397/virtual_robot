@@ -9,10 +9,10 @@ import java.util.Set;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
 import javafx.scene.layout.StackPane;
+import org.dyn4j.dynamics.Body;
 import org.dyn4j.world.World;
 import org.reflections.Reflections;
 import virtual_robot.controller.*;
-import virtual_robot.dyn4j.VRBody;
 
 public abstract class Game {
 
@@ -21,7 +21,7 @@ public abstract class Game {
     protected StackPane fieldPane = null;
 
     // The dyn4j physics world.
-    protected World<VRBody> world = null;
+    protected World<Body> world = null;
 
     // List to hold all of the game elements for the Game instance.
     protected List<VirtualGameElement> gameElements = new ArrayList<VirtualGameElement>();

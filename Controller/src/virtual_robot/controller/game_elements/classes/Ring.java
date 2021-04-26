@@ -2,11 +2,11 @@ package virtual_robot.controller.game_elements.classes;
 
 import javafx.scene.Group;
 import org.dyn4j.collision.CategoryFilter;
+import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.MassType;
 import virtual_robot.config.UltimateGoal;
 import virtual_robot.controller.*;
-import virtual_robot.dyn4j.VRBody;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +58,7 @@ public class Ring extends VirtualGameElement {
      * Physics body and BodyFixture for the ring. ringBody will just be an alias of elementBody from
      * the VirtualGameElement parent class.
      */
-    VRBody ringBody;
+    Body ringBody;
     BodyFixture ringFixture;
 
     //The bit indicating the category of rings for collision detection (0x10000000000)
@@ -133,7 +133,8 @@ public class Ring extends VirtualGameElement {
       */
     @Override
     public void setUpBody(){
-        elementBody = new VRBody(this);
+        elementBody = new Body();
+        elementBody.setUserData(this);
         ringBody = elementBody;
         double ringRadiusMeters = RING_RADIUS_INCHES / VirtualField.INCHES_PER_METER;
         ringFixture = ringBody.addFixture(

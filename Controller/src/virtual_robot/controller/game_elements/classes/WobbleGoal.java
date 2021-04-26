@@ -2,11 +2,11 @@ package virtual_robot.controller.game_elements.classes;
 
 import javafx.scene.Group;
 import org.dyn4j.collision.CategoryFilter;
+import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.MassType;
 import virtual_robot.config.UltimateGoal;
 import virtual_robot.controller.*;
-import virtual_robot.dyn4j.VRBody;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +18,7 @@ public class WobbleGoal extends VirtualGameElement {
     public static final List<WobbleGoal> wobbles = new ArrayList<>();
 
     private VirtualBot bot;
-    VRBody wobbleBody = null;
+    Body wobbleBody = null;
     BodyFixture wobbleFixture;
 
     public static final long WOBBLE_CATEGORY = 512;
@@ -49,7 +49,8 @@ public class WobbleGoal extends VirtualGameElement {
 
     @Override
     public void setUpBody(){
-        elementBody = new VRBody(this);
+        elementBody = new Body();
+        elementBody.setUserData(this);
         wobbleBody = elementBody;
         double wobbleRadiusMeters = 4.0 / VirtualField.INCHES_PER_METER;
         wobbleFixture = wobbleBody.addFixture(

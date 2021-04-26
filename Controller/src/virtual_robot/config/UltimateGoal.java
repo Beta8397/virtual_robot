@@ -2,11 +2,11 @@ package virtual_robot.config;
 
 import java.util.*;
 
+import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.NarrowphaseCollisionData;
 import org.dyn4j.world.listener.CollisionListenerAdapter;
-import virtual_robot.dyn4j.VRBody;
 import virtual_robot.controller.VirtualGameElement;
 import virtual_robot.controller.game_elements.classes.Ring;
 import virtual_robot.controller.game_elements.classes.WobbleGoal;
@@ -52,9 +52,9 @@ public class UltimateGoal extends Game {
          * include collisions resulting in the robot controlling a game element: that should be handled within
          * the specific VirtualBot implementations.
          */
-        world.addCollisionListener(new CollisionListenerAdapter<VRBody, BodyFixture>(){
+        world.addCollisionListener(new CollisionListenerAdapter<Body, BodyFixture>(){
             @Override
-            public boolean collision(NarrowphaseCollisionData<VRBody, BodyFixture> collision) {
+            public boolean collision(NarrowphaseCollisionData<Body, BodyFixture> collision) {
                 return handleNarrowPhaseCollision(collision);
             }
         });
@@ -155,14 +155,14 @@ public class UltimateGoal extends Game {
      *  Note: handling of collisions that result in the robot taking control of a game element should
      *  be handled by a listener set in the VirtualBot implementation.
      */
-    private boolean handleNarrowPhaseCollision(NarrowphaseCollisionData<VRBody, BodyFixture> collision){
+    private boolean handleNarrowPhaseCollision(NarrowphaseCollisionData<Body, BodyFixture> collision){
 
         boolean result = true;
 
-        VRBody b1 = collision.getBody1();
-        VRBody b2 = collision.getBody2();
-        Object o1 = b1.getParent();
-        Object o2 = b2.getParent();
+        Body b1 = collision.getBody1();
+        Body b2 = collision.getBody2();
+        Object o1 = b1.getUserData();
+        Object o2 = b2.getUserData();
 
         if (o1 instanceof Ring){
             Ring r1 = (Ring)o1;
