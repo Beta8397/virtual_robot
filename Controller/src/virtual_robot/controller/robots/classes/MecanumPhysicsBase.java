@@ -121,8 +121,8 @@ public class MecanumPhysicsBase extends VirtualBot {
         /*
          * Get updated position and heading from the dyn4j body (chassisBody)
          */
-        x = chassisBody.getTransform().getTranslationX() * FIELD.PIXELS_PER_METER;
-        y = chassisBody.getTransform().getTranslationY() * FIELD.PIXELS_PER_METER;
+        x = chassisBody.getTransform().getTranslationX() * VirtualField.PIXELS_PER_METER;
+        y = chassisBody.getTransform().getTranslationY() * VirtualField.PIXELS_PER_METER;
         headingRadians = chassisBody.getTransform().getRotationAngle();
 
         // Compute new wheel speeds in pixel units per second
@@ -149,8 +149,8 @@ public class MecanumPhysicsBase extends VirtualBot {
             }
         }
 
-        robotTargetSpd[0] /= FIELD.PIXELS_PER_METER;
-        robotTargetSpd[1] /= FIELD.PIXELS_PER_METER;
+        robotTargetSpd[0] /= VirtualField.PIXELS_PER_METER;
+        robotTargetSpd[1] /= VirtualField.PIXELS_PER_METER;
 
         /*
          * Compute an estimated final heading. This is used only to convert the target final robot velocity
@@ -271,7 +271,7 @@ public class MecanumPhysicsBase extends VirtualBot {
     public void setUpChassisBody(){
         chassisBody = new Body();
         chassisBody.setUserData(this);
-        double botWidthMeters = botWidth / FIELD.PIXELS_PER_METER;
+        double botWidthMeters = botWidth / VirtualField.PIXELS_PER_METER;
         chassisFixture = chassisBody.addFixture(
                 new org.dyn4j.geometry.Rectangle(botWidthMeters, botWidthMeters), 71.76, 0, 0);
         chassisRectangle = (org.dyn4j.geometry.Rectangle)chassisFixture.getShape();

@@ -94,17 +94,17 @@ public class Dyn4jUtil {
 
         if (shape instanceof Rectangle) {
             Rectangle r = (Rectangle) shape;
-            double widthMeters = r.getWidth() / PIXELS_PER_METER;
-            double heightMeters = r.getHeight() / PIXELS_PER_METER;
+            double widthMeters = fixtureData.xMag * r.getWidth() / PIXELS_PER_METER;
+            double heightMeters = fixtureData.yMag * r.getHeight() / PIXELS_PER_METER;
             convex = new org.dyn4j.geometry.Rectangle(widthMeters, heightMeters);
         } else if (shape instanceof Circle) {
             Circle c = (Circle) shape;
-            double radMeters = c.getRadius() / PIXELS_PER_METER;
+            double radMeters = fixtureData.xMag * c.getRadius() / PIXELS_PER_METER;
             convex = new org.dyn4j.geometry.Circle(radMeters);
         } else if (shape instanceof Ellipse) {
             Ellipse e = (Ellipse) shape;
-            double widthMeters = 2.0 * e.getRadiusX() / PIXELS_PER_METER;
-            double heightMeters = 2.0 * e.getRadiusY() / PIXELS_PER_METER;
+            double widthMeters = 2.0 * fixtureData.xMag * e.getRadiusX() / PIXELS_PER_METER;
+            double heightMeters = 2.0 * fixtureData.yMag * e.getRadiusY() / PIXELS_PER_METER;
             convex = new org.dyn4j.geometry.Ellipse(widthMeters, heightMeters);
         } else {
             throw new IllegalArgumentException("Shape must be Rectangle, Circle, or Ellipse.");

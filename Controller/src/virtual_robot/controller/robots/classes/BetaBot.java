@@ -22,6 +22,8 @@ import virtual_robot.controller.Filters;
 import virtual_robot.controller.VirtualField;
 import virtual_robot.controller.game_elements.classes.Ring;
 import virtual_robot.controller.robots.ControlsElements;
+import virtual_robot.dyn4j.Dyn4jUtil;
+import virtual_robot.dyn4j.FixtureData;
 import virtual_robot.dyn4j.Slide;
 
 import java.util.ArrayList;
@@ -97,29 +99,42 @@ public class BetaBot extends MecanumPhysicsBase implements ControlsElements {
          * The scoop body will join to the chassis body by a Slide joint. This joint has a motor that
          * allows the scoop position relative to the chassis to be controlled.
          */
-        scoopBody = new Body();
+
+//        The conventional way of creating the scoop Body:
+//
+//        scoopBody = new Body();
+//
+//        /*
+//         * make the long skinny fixtures a little larger (37x10 pixel units) than the graphical representation
+//         * of the prongs (30x5), in order to account for "penetration slop".
+//         */
+//        BodyFixture leftScoopFixture = scoopBody.addFixture(
+//                new Rectangle(10/VirtualField.PIXELS_PER_METER, 37/VirtualField.PIXELS_PER_METER),
+//                1, 0, 0);
+//        BodyFixture rightScoopFixture = scoopBody.addFixture(
+//                new Rectangle(10/VirtualField.PIXELS_PER_METER, 37/VirtualField.PIXELS_PER_METER),
+//                1, 0, 0);
+//        //Position the scoop fixture shapes to the left and right of midline
+//        leftScoopFixture.getShape().translate(-23/VirtualField.PIXELS_PER_METER, 0);
+//        rightScoopFixture.getShape().translate(23/VirtualField.PIXELS_PER_METER, 0);
+//        scoopBody.setMass(MassType.NORMAL);
+//        world.addBody(scoopBody);
+//        leftScoopFixture.setFilter(Filters.CHASSIS_FILTER);
+//        rightScoopFixture.setFilter(Filters.CHASSIS_FILTER);
+//        // Position the scoop body over front part of chassis
+//        scoopBody.translate(0, 22.5 / VirtualField.PIXELS_PER_METER);
 
         /*
-         * make the long skinny fixtures a little larger (37x10 pixel units) than the graphical representation
-         * of the prongs (30x5), in order to account for "penetration slop".
+         * Use Dyn4jUtil.createBody to generate dyn4j body from the JavaFX Group for the scoop.
          */
-        BodyFixture leftScoopFixture = scoopBody.addFixture(
-                new Rectangle(10/FIELD.PIXELS_PER_METER, 37/FIELD.PIXELS_PER_METER),
-                1, 0, 0);
-        BodyFixture rightScoopFixture = scoopBody.addFixture(
-                new Rectangle(10/FIELD.PIXELS_PER_METER, 37/FIELD.PIXELS_PER_METER),
-                1, 0, 0);
-        //Position the scoop fixture shapes to the left and right of midline
-        leftScoopFixture.getShape().translate(-23/FIELD.PIXELS_PER_METER, 0);
-        rightScoopFixture.getShape().translate(23/FIELD.PIXELS_PER_METER, 0);
-        scoopBody.setMass(MassType.NORMAL);
+        FixtureData scoopBodyData = new FixtureData(Filters.CHASSIS_FILTER, 1.0, 0.0, 0.0,
+                false, 2.0, 37.0/30.0);
+        scoopBody = Dyn4jUtil.createBody(scoopGroup, scoopBodyData);
         world.addBody(scoopBody);
-        leftScoopFixture.setFilter(Filters.CHASSIS_FILTER);
-        rightScoopFixture.setFilter(Filters.CHASSIS_FILTER);
-        // Position the scoop body over front part of chassis
-        scoopBody.translate(0, 22.5 / FIELD.PIXELS_PER_METER);
+
         // Because the prongs are skinny, set as bullet (not sure this helps at all)
         scoopBody.setBullet(true);
+
         // Create a Slide (specialized motorized Prismatic Joint) and add it to the world
         scoopSlide = new Slide(chassisBody, scoopBody, new Vector2(0,0), new Vector2(0,-1),
                 VirtualField.Unit.PIXEL);

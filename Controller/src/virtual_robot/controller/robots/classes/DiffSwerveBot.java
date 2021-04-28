@@ -11,6 +11,7 @@ import virtual_robot.controller.VirtualBot;
 import virtual_robot.controller.VirtualRobotController;
 import virtual_robot.util.AngleUtils;
 import virtual_robot.util.Vector2D;
+import virtual_robot.controller.VirtualField;
 
 /**
  * For internal use only. Represents a robot with four mechanum wheels, color sensor, four distance sensors,
@@ -190,19 +191,19 @@ public class DiffSwerveBot extends VirtualBot {
         else if (headingRadians <= Math.PI/2.0) effectiveHalfBotWidth = halfBotWidth * (Math.sin(headingRadians) + Math.cos(headingRadians));
         else effectiveHalfBotWidth = halfBotWidth * (Math.sin(headingRadians) - Math.cos(headingRadians));
 
-        if (x >  (FIELD.X_MAX - effectiveHalfBotWidth)) {
-            x = FIELD.X_MAX - effectiveHalfBotWidth;
+        if (x >  (VirtualField.X_MAX - effectiveHalfBotWidth)) {
+            x = VirtualField.X_MAX - effectiveHalfBotWidth;
             velocity.x = Math.min(velocity.x, 0);
-        } else if (x < (FIELD.X_MIN + effectiveHalfBotWidth)) {
-            x = FIELD.X_MIN + effectiveHalfBotWidth;
+        } else if (x < (VirtualField.X_MIN + effectiveHalfBotWidth)) {
+            x = VirtualField.X_MIN + effectiveHalfBotWidth;
             velocity.x = Math.max(velocity.x, 0);
         }
 
-        if (y > (FIELD.Y_MAX - effectiveHalfBotWidth)){
-            y = FIELD.Y_MAX - effectiveHalfBotWidth;
+        if (y > (VirtualField.Y_MAX - effectiveHalfBotWidth)){
+            y = VirtualField.Y_MAX - effectiveHalfBotWidth;
             velocity.y = Math.min(velocity.y, 0);
-        } else if (y < (FIELD.Y_MIN + effectiveHalfBotWidth)) {
-            y = FIELD.Y_MIN + effectiveHalfBotWidth;
+        } else if (y < (VirtualField.Y_MIN + effectiveHalfBotWidth)) {
+            y = VirtualField.Y_MIN + effectiveHalfBotWidth;
             velocity.y = Math.max(velocity.y, 0);
         }
     }

@@ -22,6 +22,7 @@ import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import virtual_robot.controller.BotConfig;
 import virtual_robot.controller.VirtualBot;
+import virtual_robot.controller.VirtualField;
 import virtual_robot.util.AngleUtils;
 
 /**
@@ -107,8 +108,8 @@ public class ProgrammingBoard extends VirtualBot {
         propGroup.getTransforms().add(propGroupRotate);
         servoArmGroup.getTransforms().add(servoArmGroupRotate);
         Bounds boundsInScene = fieldPane.localToScene(fieldPane.getBoundsInLocal());
-        fieldCenterX = boundsInScene.getMinX() + FIELD.HALF_FIELD_WIDTH;
-        fieldCenterY = boundsInScene.getMinY() + FIELD.HALF_FIELD_WIDTH;
+        fieldCenterX = boundsInScene.getMinX() + VirtualField.HALF_FIELD_WIDTH;
+        fieldCenterY = boundsInScene.getMinY() + VirtualField.HALF_FIELD_WIDTH;
         sldPot.setMax(analogInput.getMaxVoltage());
         sldRed.valueProperty().addListener(sliderColorChangeListener);
         sldGreen.valueProperty().addListener(sliderColorChangeListener);
@@ -198,7 +199,7 @@ public class ProgrammingBoard extends VirtualBot {
           around the field.
          */
         displayGroup.getTransforms().add(new Translate(0, 0));
-        displayGroup.getTransforms().add(new Rotate(0, FIELD.HALF_FIELD_WIDTH, FIELD.HALF_FIELD_WIDTH));
+        displayGroup.getTransforms().add(new Rotate(0, VirtualField.HALF_FIELD_WIDTH, VirtualField.HALF_FIELD_WIDTH));
         displayGroup.getTransforms().add(new Scale(botWidth/75.0, botWidth/75.0, 0, 0));
 
         fieldPane.getChildren().add(displayGroup);

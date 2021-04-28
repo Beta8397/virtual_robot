@@ -67,16 +67,13 @@ public abstract class VirtualBot {
     protected volatile double y = 0;
     protected volatile double headingRadians = 0;
 
-    protected final VirtualField FIELD;
-
     public double getX() { return x; }
     public double getY() { return y; }
     public double getHeadingRadians(){ return headingRadians; }
 
     public VirtualBot(){
-        FIELD = VirtualField.getInstance();
         fieldPane = controller.getFieldPane();
-        botWidth = FIELD.FIELD_WIDTH / 8.0;
+        botWidth = VirtualField.FIELD_WIDTH / 8.0;
         halfBotWidth = botWidth / 2.0;
         world = controller.getWorld();
     }
@@ -145,7 +142,7 @@ public abstract class VirtualBot {
          */
         displayGroup.getTransforms().add(new Translate(0, 0));
 
-        displayGroup.getTransforms().add(new Rotate(0, FIELD.HALF_FIELD_WIDTH, FIELD.HALF_FIELD_WIDTH));
+        displayGroup.getTransforms().add(new Rotate(0, VirtualField.HALF_FIELD_WIDTH, VirtualField.HALF_FIELD_WIDTH));
 
         displayGroup.getTransforms().add(new Scale(botWidth/75.0, botWidth/75.0, 0, 0));
 
@@ -210,14 +207,14 @@ public abstract class VirtualBot {
     public synchronized void positionWithMouseClick(MouseEvent arg){
 
         if (arg.getButton() == MouseButton.PRIMARY) {
-            x = arg.getX() - FIELD.HALF_FIELD_WIDTH;
-            y = FIELD.HALF_FIELD_WIDTH - arg.getY();
+            x = arg.getX() - VirtualField.HALF_FIELD_WIDTH;
+            y = VirtualField.HALF_FIELD_WIDTH - arg.getY();
             constrainToBoundaries();
             updateDisplay();
         }
         else if (arg.getButton() == MouseButton.SECONDARY){
-            double centerX = x + FIELD.HALF_FIELD_WIDTH;
-            double centerY = FIELD.HALF_FIELD_WIDTH - y;
+            double centerX = x + VirtualField.HALF_FIELD_WIDTH;
+            double centerY = VirtualField.HALF_FIELD_WIDTH - y;
             double displayAngleRads = Math.atan2(arg.getX() - centerX, centerY - arg.getY());
             headingRadians = -displayAngleRads;
             constrainToBoundaries();
@@ -227,7 +224,7 @@ public abstract class VirtualBot {
         if (chassisBody != null){
             Transform t = new Transform();
             t.rotate(headingRadians);
-            t.translate(x/ FIELD.PIXELS_PER_METER, y/ FIELD.PIXELS_PER_METER);
+            t.translate(x/ VirtualField.PIXELS_PER_METER, y/ VirtualField.PIXELS_PER_METER);
             chassisBody.setTransform(t);
             chassisBody.setLinearVelocity(0, 0);
             chassisBody.setAngularVelocity(0);
@@ -269,10 +266,10 @@ public abstract class VirtualBot {
         else if (headingRadians <= Math.PI/2.0) effectiveHalfBotWidth = halfBotWidth * (Math.sin(headingRadians) + Math.cos(headingRadians));
         else effectiveHalfBotWidth = halfBotWidth * (Math.sin(headingRadians) - Math.cos(headingRadians));
 
-        if (x >  (FIELD.X_MAX - effectiveHalfBotWidth)) x = FIELD.X_MAX - effectiveHalfBotWidth;
-        else if (x < (FIELD.X_MIN + effectiveHalfBotWidth)) x = FIELD.X_MIN + effectiveHalfBotWidth;
-        if (y > (FIELD.Y_MAX - effectiveHalfBotWidth)) y = FIELD.Y_MAX - effectiveHalfBotWidth;
-        else if (y < (FIELD.Y_MIN + effectiveHalfBotWidth)) y = FIELD.Y_MIN + effectiveHalfBotWidth;
+        if (x >  (VirtualField.X_MAX - effectiveHalfBotWidth)) x = VirtualField.X_MAX - effectiveHalfBotWidth;
+        else if (x < (VirtualField.X_MIN + effectiveHalfBotWidth)) x = VirtualField.X_MIN + effectiveHalfBotWidth;
+        if (y > (VirtualField.Y_MAX - effectiveHalfBotWidth)) y = VirtualField.Y_MAX - effectiveHalfBotWidth;
+        else if (y < (VirtualField.Y_MIN + effectiveHalfBotWidth)) y = VirtualField.Y_MIN + effectiveHalfBotWidth;
     }
 
 }
