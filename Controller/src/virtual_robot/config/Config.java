@@ -43,4 +43,11 @@ public class Config {
      * on the VirtualGameElement implementations.
      */
     public static final Game GAME = new UltimateGoal();
+
+    /**
+     * Friction coefficient between field and robot wheels. A very high value will minimize the effect
+     * of collisions on robot kinetics, but will allow robot to push game elements substantially into
+     * the wall.
+     */
+    public static final double FIELD_FRICTION_COEFF = 100;
 }

@@ -57,7 +57,7 @@ public abstract class Game {
      */
     private void createGameElements() {
         // iterate through annotated game element classes; filter for classes having forGame == Config.GAME
-        Reflections reflections = new Reflections("virtual_robot.controller.game_elements.classes");
+        Reflections reflections = new Reflections("virtual_robot.game_elements.classes");
         Set<Class<?>> configClasses = new HashSet<>();
         configClasses.addAll(reflections.getTypesAnnotatedWith(GameElementConfig.class));
         for (Class<?> c : configClasses) {
@@ -85,7 +85,7 @@ public abstract class Game {
     private VirtualGameElement getVirtualGameElementInstance(Class<?> c){
         try {
             Annotation a = c.getAnnotation(GameElementConfig.class);
-            FXMLLoader loader = new FXMLLoader((getClass().getResource("/virtual_robot/controller/game_elements/fxml/" + ((GameElementConfig) a).filename() + ".fxml")));
+            FXMLLoader loader = new FXMLLoader((getClass().getResource("/virtual_robot/game_elements/fxml/" + ((GameElementConfig) a).filename() + ".fxml")));
             Group group = (Group) loader.load();
             VirtualGameElement element = (VirtualGameElement) loader.getController();
             element.setUpDisplayGroup(group);

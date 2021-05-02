@@ -138,8 +138,8 @@ CHANGES 12/16/2019
     in the group can be given fx:id attributes, which make them accessible in the robot config class by using
     a @FXML annotation. The easiest way to create a new configuration is to copy, then modify, the ".java" and ".fxml"
     files from an existing configuration (for example, MechanumBot.java and mechanum_bot.fxml). See extensive comments
-    in the virtual_robot.controller.VirtualBot and virtual_robot.controller.robots.classes.ArmBot classes and the
-    virtual_robot.controller.robots.fxml.arm_bot.fxml file for more explanation.
+    in the virtual_robot.controller.VirtualBot and virtual_robot.robots.classes.ArmBot classes and the
+    virtual_robot.robots.fxml.arm_bot.fxml file for more explanation.
 
 CHANGES 12/12/2019
     Changes made to all more versatile building of new robot configurations. A transparent robot base layer (equal in
@@ -164,7 +164,7 @@ CHANGES 8/17/2019
 CHANGES 8/4/2019
     To better approximate real robot behavior, latency of 175ms added to the standard gyro sensor (used only on the
     Two-Wheel Bot). That is, updated values are available only every 175ms. The amount of latency can be changed
-    easily in the createHardwareMap method of the virtual_robot.controller.robots.classes.TwoWheelBot class. Will probably make a
+    easily in the createHardwareMap method of the virtual_robot.robots.classes.TwoWheelBot class. Will probably make a
     similar change to the BNO055IMU soon.
 
 CHANGES 7/10/2019

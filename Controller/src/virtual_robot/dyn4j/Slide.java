@@ -27,8 +27,8 @@ public class Slide extends PrismaticJoint {
      */
     public Slide(Body b1, Body b2, Vector2 anchor, Vector2 axis, VirtualField.Unit unit) {
         super(b1, b2,
-                anchor.product(VirtualField.getInstance().conversionFactor(unit, VirtualField.Unit.METER)),
-                axis.product(VirtualField.getInstance().conversionFactor(unit, VirtualField.Unit.METER)));
+                anchor.product(VirtualField.conversionFactor(unit, VirtualField.Unit.METER)),
+                axis.product(VirtualField.conversionFactor(unit, VirtualField.Unit.METER)));
         defaultUnit = unit;
         initialize();
     }
@@ -39,8 +39,8 @@ public class Slide extends PrismaticJoint {
     public Slide(Body b1, Body b2, Vector2 anchor, Vector2 axis, VirtualField.Unit unit,
                  double maxForce, double speed, double tolerance){
         super(b1, b2,
-            anchor.product(VirtualField.getInstance().conversionFactor(unit, VirtualField.Unit.METER)),
-            axis.product(VirtualField.getInstance().conversionFactor(unit, VirtualField.Unit.METER)));
+            anchor.product(VirtualField.conversionFactor(unit, VirtualField.Unit.METER)),
+            axis.product(VirtualField.conversionFactor(unit, VirtualField.Unit.METER)));
         defaultUnit = unit;
         this.maxForce = maxForce;
         this.speed = speed;
@@ -61,7 +61,7 @@ public class Slide extends PrismaticJoint {
      */
     public void setPosition(double position){
         double newPositionMeters =
-                position * VirtualField.getInstance().conversionFactor(defaultUnit, VirtualField.Unit.METER);
+                position * VirtualField.conversionFactor(defaultUnit, VirtualField.Unit.METER);
         setMotorSpeed(speed * Math.signum(newPositionMeters - this.positionMeters));
         this.positionMeters = newPositionMeters;
         setLimits(this.positionMeters - tolerance, this.positionMeters + tolerance);
@@ -74,7 +74,7 @@ public class Slide extends PrismaticJoint {
      * @param unit
      */
     public void setPosition(double position, VirtualField.Unit unit){
-        setPosition(position * VirtualField.getInstance().conversionFactor(unit, defaultUnit));
+        setPosition(position * VirtualField.conversionFactor(unit, defaultUnit));
     }
 
     /**
@@ -84,7 +84,7 @@ public class Slide extends PrismaticJoint {
      */
     public double getPosition(){
         return positionMeters
-                * VirtualField.getInstance().conversionFactor(VirtualField.Unit.METER, defaultUnit);
+                * VirtualField.conversionFactor(VirtualField.Unit.METER, defaultUnit);
     }
 
     /**
@@ -95,7 +95,7 @@ public class Slide extends PrismaticJoint {
      */
     public double getPosition(VirtualField.Unit unit){
         return positionMeters
-                * VirtualField.getInstance().conversionFactor(VirtualField.Unit.METER, unit);
+                * VirtualField.conversionFactor(VirtualField.Unit.METER, unit);
     }
 
 }

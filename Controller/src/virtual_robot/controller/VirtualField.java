@@ -35,17 +35,7 @@ public class VirtualField {
     public static final double Y_MIN = 2.0 * (Config.Y_MIN_FRACTION - 0.5) * HALF_FIELD_WIDTH;
     public static final double Y_MAX = 2.0 * (Config.Y_MAX_FRACTION - 0.5) * HALF_FIELD_WIDTH;
 
-    private VirtualField() {
-    }
-
-    public static VirtualField getInstance(){
-        if (instance == null) {
-            instance = new VirtualField();
-        }
-        return instance;
-    }
-
-    public double conversionFactor(Unit fromUnit, Unit toUnit){
+    public static double conversionFactor(Unit fromUnit, Unit toUnit){
         if (fromUnit == toUnit) return 1.0;
         switch (fromUnit){
             case PIXEL:

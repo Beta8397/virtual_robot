@@ -41,7 +41,8 @@ public abstract class VirtualGameElement {
 
     protected World<Body> world = null;
 
-    protected final VirtualField FIELD;
+    private Translate translate = null;
+    private Rotate rotate = null;
 
     /**
      * Obtain a reference to the VirtualRobotController.
@@ -60,7 +61,6 @@ public abstract class VirtualGameElement {
     protected volatile double headingRadians = 0;
 
     public VirtualGameElement() {
-        FIELD = VirtualField.getInstance();
         world = controller.getWorld();
     }
 
@@ -72,15 +72,13 @@ public abstract class VirtualGameElement {
     /**
      * Initialize the game element.
      *
-     * Default method calls the concrete implementation of setUpBody to instantiate and configure the
-     * dyn4j physics body.
+     * This method just sets up the dyn4j Body/Bodys for the game element
+     * TODO: Figure out how to rearrange code so that the display group has been set up before creating Body(s).
      *
      * Classes extending VirtualGameElement may override this to perform custom initialization; in that
      * case, the first statement should be super.initialize().
      */
-    public void initialize() {
-        setUpBody();
-    }
+    public void initialize() { setUpBody(); }
 
 
 
@@ -105,7 +103,7 @@ public abstract class VirtualGameElement {
         this.y = yPixels;
         if (elementBody != null){
             Transform t = new Transform();
-            t.translate(x / FIELD.PIXELS_PER_METER, y / FIELD.PIXELS_PER_METER);
+            t.translate(x / VirtualField.PIXELS_PER_METER, y / VirtualField.PIXELS_PER_METER);
             t.rotate(headingRadians);
             elementBody.setTransform(t);
             elementBody.setLinearVelocity(0,0);
@@ -138,7 +136,7 @@ public abstract class VirtualGameElement {
         this.y = yPixels;
         if (elementBody != null) {
             Transform t = new Transform();
-            t.translate(x / FIELD.PIXELS_PER_METER, y / FIELD.PIXELS_PER_METER);
+            t.translate(x / VirtualField.PIXELS_PER_METER, y / VirtualField.PIXELS_PER_METER);
             t.rotate(thetaRadians);
             elementBody.setTransform(t);
             elementBody.setLinearVelocity(0, 0);
@@ -153,7 +151,7 @@ public abstract class VirtualGameElement {
     }
 
     public void setLocationInches(double xInches, double yInches){
-        setLocation(xInches * FIELD.PIXELS_PER_INCH, yInches * FIELD.PIXELS_PER_INCH);
+        setLocation(xInches * VirtualField.PIXELS_PER_INCH, yInches * VirtualField.PIXELS_PER_INCH);
     }
 
     public void setLocationInches(Vector2 locationInches) {
@@ -161,7 +159,7 @@ public abstract class VirtualGameElement {
     }
 
     public void setLocationInches(double xInches, double yInches, double thetaRadians){
-        setLocation(xInches * FIELD.PIXELS_PER_INCH, yInches * FIELD.PIXELS_PER_INCH, thetaRadians);
+        setLocation(xInches * VirtualField.PIXELS_PER_INCH, yInches * VirtualField.PIXELS_PER_INCH, thetaRadians);
     }
 
     public void setLocationInches(Vector2 locationInches, double thetaRadians){
@@ -169,16 +167,19 @@ public abstract class VirtualGameElement {
     }
 
     public void setLocationMeters(double xMeters, double yMeters){
-        setLocation(xMeters * FIELD.PIXELS_PER_METER, yMeters * FIELD.PIXELS_PER_METER);
+        setLocation(xMeters * VirtualField.PIXELS_PER_METER, yMeters * VirtualField.PIXELS_PER_METER);
     }
 
     public void setLocationMeters(Vector2 locationMeters){
-        setLocation(locationMeters.x * FIELD.PIXELS_PER_METER, locationMeters.y * FIELD.PIXELS_PER_METER);
+        setLocation(locationMeters.x * VirtualField.PIXELS_PER_METER, locationMeters.y * VirtualField.PIXELS_PER_METER);
     }
 
     /**
      * Set up the Group object that will be displayed as the virtual game element. The resource file
      * should contain a Group containing the game element's visual components.
+     *
+     * Also calls the concrete implementation of setUpBody to create and configure the dyn4j physics Body
+     * (or Bodys) for the game element.
      *
      */
     public void setUpDisplayGroup(Group group){
@@ -186,10 +187,11 @@ public abstract class VirtualGameElement {
         displayGroup = group;
 
         Bounds boundsInLocal = displayGroup.getBoundsInLocal();
-        double width = boundsInLocal.getWidth();
-        double height = boundsInLocal.getHeight();
-        displayGroup.setTranslateX(displayGroup.getTranslateX() + VirtualField.getInstance().HALF_FIELD_WIDTH - width / 2);
-        displayGroup.setTranslateY(displayGroup.getTranslateY() + VirtualField.getInstance().HALF_FIELD_WIDTH - height / 2);
+//        double width = boundsInLocal.getWidth();
+//        double height = boundsInLocal.getHeight();
+
+//        displayGroup.setTranslateX(displayGroup.getTranslateX() + VirtualField.HALF_FIELD_WIDTH - width/2);
+//        displayGroup.setTranslateY(displayGroup.getTranslateY() + VirtualField.HALF_FIELD_WIDTH - height/2);
 
         /*
           Add transforms. They will be applied in the opposite order from the order in which they are added. The
@@ -197,11 +199,27 @@ public abstract class VirtualGameElement {
           The rotate and translate transforms are added so that they can be manipulated later, when the robot moves
           around the field.
          */
-        displayGroup.getTransforms().add(new Translate(0, 0));
-        displayGroup.getTransforms().add(new Rotate(0, VirtualField.getInstance().HALF_FIELD_WIDTH,
-                VirtualField.getInstance().HALF_FIELD_WIDTH));
-        displayGroup.getTransforms().add(new Scale(VirtualField.getInstance().FIELD_WIDTH/600,
-                VirtualField.getInstance().FIELD_WIDTH/600, 0, 0));
+
+//        displayGroup.getTransforms().add(new Translate(0, 0));
+//        displayGroup.getTransforms().add(new Rotate(0, VirtualField.HALF_FIELD_WIDTH,
+//                VirtualField.HALF_FIELD_WIDTH));
+//        displayGroup.getTransforms().add(new Scale(VirtualField.FIELD_WIDTH/600,
+//                VirtualField.FIELD_WIDTH/600, 0, 0));
+
+        double ctrX = boundsInLocal.getMinX() + 0.5 * boundsInLocal.getWidth();
+        double ctrY = boundsInLocal.getMinY() + 0.5 * boundsInLocal.getHeight();
+        double offsetCtrX = boundsInLocal.getWidth() / 2;
+        double offsetCtrY = boundsInLocal.getHeight() / 2;
+
+        displayGroup.getTransforms().add(new Translate(VirtualField.HALF_FIELD_WIDTH - offsetCtrX,
+                VirtualField.HALF_FIELD_WIDTH - offsetCtrY));
+        translate = new Translate(0,0);
+        displayGroup.getTransforms().add(translate);
+        rotate = new Rotate(0, ctrX, ctrY);
+        displayGroup.getTransforms().add(rotate);
+        displayGroup.getTransforms().add(new Scale(VirtualField.FIELD_WIDTH/600,
+                VirtualField.FIELD_WIDTH/600, ctrX, ctrY));
+
     }
 
     /**
@@ -236,10 +254,13 @@ public abstract class VirtualGameElement {
         double displayX = x;
         double displayY = -y;
         double displayAngle = -headingRadians * 180.0 / Math.PI;
-        Translate translate = (Translate)displayGroup.getTransforms().get(0);
+//        Translate translate = (Translate)displayGroup.getTransforms().get(0);
+//        translate.setX(displayX);
+//        translate.setY(displayY);
+//        ((Rotate)displayGroup.getTransforms().get(1)).setAngle(displayAngle);
         translate.setX(displayX);
         translate.setY(displayY);
-        ((Rotate)displayGroup.getTransforms().get(1)).setAngle(displayAngle);
+        rotate.setAngle(displayAngle);
     }
 
     /**

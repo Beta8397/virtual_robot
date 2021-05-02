@@ -42,8 +42,8 @@ import com.qualcomm.robotcore.hardware.DcMotorImpl;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import virtual_robot.config.Game;
-import virtual_robot.controller.robots.ControlsElements;
-import virtual_robot.controller.robots.classes.MechanumBot;
+import virtual_robot.robots.ControlsElements;
+import virtual_robot.robots.classes.MechanumBot;
 import virtual_robot.keyboard.KeyState;
 
 import java.io.IOException;
@@ -221,10 +221,10 @@ public class VirtualRobotController {
                 1, VirtualField.FIELD_WIDTH_METERS);
 
         // Translate the rectangles into correct positions
-        topRect.translate(0, VirtualField.getInstance().Y_MAX/VirtualField.getInstance().PIXELS_PER_METER + 0.5);
-        bottomRect.translate(0, VirtualField.getInstance().Y_MIN/VirtualField.getInstance().PIXELS_PER_METER - 0.5);
-        leftRect.translate(VirtualField.getInstance().X_MIN/VirtualField.getInstance().PIXELS_PER_METER - 0.5, 0);
-        rightRect.translate(VirtualField.getInstance().X_MAX/VirtualField.getInstance().PIXELS_PER_METER + 0.5, 0);
+        topRect.translate(0, VirtualField.Y_MAX/VirtualField.PIXELS_PER_METER + 0.5);
+        bottomRect.translate(0, VirtualField.Y_MIN/VirtualField.PIXELS_PER_METER - 0.5);
+        leftRect.translate(VirtualField.X_MIN/VirtualField.PIXELS_PER_METER - 0.5, 0);
+        rightRect.translate(VirtualField.X_MAX/VirtualField.PIXELS_PER_METER + 0.5, 0);
 
         /*
          * For each wall, create a body with infinite mass. The shape (i.e., Rectangle) for each wall is placed into
@@ -293,7 +293,7 @@ public class VirtualRobotController {
 
     private void setupCbxRobotConfigs(){
         //Reflections reflections = new Reflections(VirtualRobotApplication.class.getClassLoader());
-        Reflections reflections = new Reflections("virtual_robot.controller.robots.classes");
+        Reflections reflections = new Reflections("virtual_robot.robots.classes");
         Set<Class<?>> configClasses = new HashSet<>();
         configClasses.addAll(reflections.getTypesAnnotatedWith(BotConfig.class));
         ObservableList<Class<?>> validConfigClasses = FXCollections.observableArrayList();
@@ -341,7 +341,7 @@ public class VirtualRobotController {
     public VirtualBot getVirtualBotInstance(Class<?> c){
         try {
             Annotation a = c.getAnnotation(BotConfig.class);
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/virtual_robot/controller/robots/fxml/" + ((BotConfig) a).filename() + ".fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/virtual_robot/robots/fxml/" + ((BotConfig) a).filename() + ".fxml"));
             Group group = (Group) loader.load();
             VirtualBot bot = (VirtualBot) loader.getController();
             bot.setUpDisplayGroup(group);

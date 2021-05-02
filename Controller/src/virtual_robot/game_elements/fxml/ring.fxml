@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--Markup file for the Ring game element graphics-->
+
+<?import javafx.scene.Group?>
+<?import javafx.scene.shape.Circle?>
+
+<!--The root node is a Group object; this object has a stack of multiple children.  Tne
+    fx:controller attribute indicates that Ring is the controller class-->
+
+<Group xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="virtual_robot.game_elements.classes.Ring">
+    <children>
+
+        <!--The ring-->
+        <Circle centerX="0.0" centerY="0.0" radius="10.4" strokeType="INSIDE" strokeWidth="0.0"
+            fill="#ed9315" />
+        <Circle centerX="0.0" centerY="0.0" radius="6.24" strokeType="INSIDE" strokeWidth="0.0"
+            fill="#b8b8b8" />
+
+    </children>
+</Group>
