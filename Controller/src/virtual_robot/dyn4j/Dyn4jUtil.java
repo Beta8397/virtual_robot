@@ -133,7 +133,7 @@ public class Dyn4jUtil {
         bodyFixture.setDensity(fixtureData.density);
         bodyFixture.setSensor(fixtureData.isSensor);
 
-        bodyFixture.setUserData(shape.getId());
+        bodyFixture.setUserData(shape);
 
         return bodyFixture;
     }
@@ -163,10 +163,6 @@ public class Dyn4jUtil {
             }
         }
         return list;
-    }
-
-    public static List<BodyFixture> createFixtures(Group group, FixtureData fixtureData) {
-        return createFixtures(group, 9, 9, fixtureData);
     }
 
     public static List<BodyFixture> createFixtures(Group group, double xOffsetInches, double yOffsetInches,

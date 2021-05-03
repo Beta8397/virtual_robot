@@ -8,6 +8,7 @@ import java.util.Set;
 
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.world.World;
@@ -18,7 +19,7 @@ public abstract class Game {
 
     protected static VirtualRobotController controller;
 
-    protected StackPane fieldPane = null;
+    protected Pane fieldPane = null;
 
     // The dyn4j physics world.
     protected World<Body> world = null;

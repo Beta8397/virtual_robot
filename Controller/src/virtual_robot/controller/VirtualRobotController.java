@@ -15,6 +15,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.shape.Polyline;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Callback;
@@ -59,7 +60,7 @@ import java.util.concurrent.TimeUnit;
 public class VirtualRobotController {
 
     //User Interface
-    @FXML private StackPane fieldPane;
+    @FXML private Pane fieldPane;
     @FXML ImageView imgViewBackground;
     @FXML private ComboBox<Class<?>> cbxConfig;
     @FXML private Button driverButton;
@@ -472,7 +473,7 @@ public class VirtualRobotController {
     }
 
 
-    public StackPane getFieldPane(){ return fieldPane; }
+    public Pane getFieldPane(){ return fieldPane; }
 
     public World<Body> getWorld(){ return world; }
 

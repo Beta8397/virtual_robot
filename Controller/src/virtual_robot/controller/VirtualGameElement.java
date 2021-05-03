@@ -3,6 +3,7 @@ package virtual_robot.controller;
 import javafx.application.Platform;
 import javafx.geometry.Bounds;
 import javafx.scene.Group;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
@@ -20,8 +21,10 @@ import virtual_robot.util.Vector2D;
  *
  *  1) Provide a no-argument constructor whose first statement is super();
  *  2) Be the controller class for an .fxml file that defines the graphical representation of the game element;
+ *     The root element of this .fxml file should be a Group. The (0,0) position of the group will correspond
+ *     to the current position of the game element, and will serve as its rotation center;
  *  3) Provide a public setUpBody method which creates/configures the dyn4j physics body (including fixture(s)),
- *     and assigns it to elementBody ;
+ *     and assigns it to elementBody;
  *  4) Provide a public synchronized updateState(double millis) method;
  *
  *  Optionally, it may also be necessary to:
@@ -178,47 +181,36 @@ public abstract class VirtualGameElement {
      * Set up the Group object that will be displayed as the virtual game element. The resource file
      * should contain a Group containing the game element's visual components.
      *
-     * Also calls the concrete implementation of setUpBody to create and configure the dyn4j physics Body
-     * (or Bodys) for the game element.
+     * Note: The ORIGIN of Group space will serve as the position of the game element, and its center
+     * of rotation. So the contents (children) of the group should be positioned accordingly within
+     * the group. For example, if the group contains a single circle, that circle should have (centerX, centerY)
+     * of (0,0). On the other hand, if the group contains a single rectangle (W x H), the rectangle should
+     * have (x,y) of (-W/2, -H/2).
      *
      */
     public void setUpDisplayGroup(Group group){
 
         displayGroup = group;
 
-        Bounds boundsInLocal = displayGroup.getBoundsInLocal();
-//        double width = boundsInLocal.getWidth();
-//        double height = boundsInLocal.getHeight();
-
-//        displayGroup.setTranslateX(displayGroup.getTranslateX() + VirtualField.HALF_FIELD_WIDTH - width/2);
-//        displayGroup.setTranslateY(displayGroup.getTranslateY() + VirtualField.HALF_FIELD_WIDTH - height/2);
+        // This transform ensures that a game element at (x=0, y=0) will be positioned at the center of the field.
+        displayGroup.getTransforms().add(new Translate(VirtualField.HALF_FIELD_WIDTH,
+                VirtualField.HALF_FIELD_WIDTH));
 
         /*
-          Add transforms. They will be applied in the opposite order from the order in which they are added. The
-          translate transform adjusts size of the displayed game element based on Field Width.
-          The rotate and translate transforms are added so that they can be manipulated later, when the robot moves
-          around the field.
+         * The following transforms will be applied in the reverse order to the order in which they are added.
          */
 
-//        displayGroup.getTransforms().add(new Translate(0, 0));
-//        displayGroup.getTransforms().add(new Rotate(0, VirtualField.HALF_FIELD_WIDTH,
-//                VirtualField.HALF_FIELD_WIDTH));
-//        displayGroup.getTransforms().add(new Scale(VirtualField.FIELD_WIDTH/600,
-//                VirtualField.FIELD_WIDTH/600, 0, 0));
-
-        double ctrX = boundsInLocal.getMinX() + 0.5 * boundsInLocal.getWidth();
-        double ctrY = boundsInLocal.getMinY() + 0.5 * boundsInLocal.getHeight();
-        double offsetCtrX = boundsInLocal.getWidth() / 2;
-        double offsetCtrY = boundsInLocal.getHeight() / 2;
-
-        displayGroup.getTransforms().add(new Translate(VirtualField.HALF_FIELD_WIDTH - offsetCtrX,
-                VirtualField.HALF_FIELD_WIDTH - offsetCtrY));
+        // Transform to position game element at its current (x,y)
         translate = new Translate(0,0);
         displayGroup.getTransforms().add(translate);
-        rotate = new Rotate(0, ctrX, ctrY);
+
+        // Transform to rotate game element to its current heading
+        rotate = new Rotate(0, 0, 0);
         displayGroup.getTransforms().add(rotate);
+
+        // This transform scales game element to correct size, based on field width
         displayGroup.getTransforms().add(new Scale(VirtualField.FIELD_WIDTH/600,
-                VirtualField.FIELD_WIDTH/600, ctrX, ctrY));
+                VirtualField.FIELD_WIDTH/600, 0, 0));
 
     }
 
@@ -267,7 +259,7 @@ public abstract class VirtualGameElement {
      *  Remove the game element from the display.
      */
     public void removeFromDisplay() {
-        StackPane fieldPane = controller.getFieldPane();
+        Pane fieldPane = controller.getFieldPane();
         if (Platform.isFxApplicationThread()) {
             if (fieldPane.getChildren().contains(displayGroup)) fieldPane.getChildren().remove(displayGroup);
         } else {
@@ -284,7 +276,7 @@ public abstract class VirtualGameElement {
      *  Add the game element to the display.
      */
     public void addToDisplay() {
-        StackPane fieldPane = controller.getFieldPane();
+        Pane fieldPane = controller.getFieldPane();
         if (Platform.isFxApplicationThread()) {
             if (!fieldPane.getChildren().contains(displayGroup)) fieldPane.getChildren().add(displayGroup);
         } else {

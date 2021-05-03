@@ -3,6 +3,7 @@ package virtual_robot.controller;
 import javafx.scene.Group;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -55,7 +56,7 @@ public abstract class VirtualBot {
 
     protected World<Body> world;
 
-    protected StackPane fieldPane;
+    protected Pane fieldPane;
     protected double halfBotWidth;
     protected double botWidth;
 
@@ -66,6 +67,9 @@ public abstract class VirtualBot {
     protected volatile double x = 0;
     protected volatile double y = 0;
     protected volatile double headingRadians = 0;
+
+    private Translate botTranslate = null;
+    private Rotate botRotate = null;
 
     public double getX() { return x; }
     public double getY() { return y; }
@@ -110,41 +114,24 @@ public abstract class VirtualBot {
 
         displayGroup = group;
 
-        /*
-         * Create a transparent 600x600 rectangle to serve as the base layer of the robot. It will go
-         * below the 75x75 chassis rectangle.
-         */
-
-        Rectangle baseRect = new Rectangle(0, 0, 600, 600);
-        baseRect.setFill(new Color(1.0, 0.0, 1.0, 0.0));
-        baseRect.setVisible(true);
+        // This transform ensures that (x=0,y=0) corresponds to the center of the field.
+        displayGroup.getTransforms().add(new Translate(VirtualField.HALF_FIELD_WIDTH - halfBotWidth,
+                VirtualField.HALF_FIELD_WIDTH - halfBotWidth));
 
         /*
-         * Translate the display group by (300 - 37.5) in X and Y, so that the
-         * center of the chassis rectangle will be at the same location as the center of the 600x600 base
-         * rectangle.
+         * The following transforms will be appled in the reverse order to that in which they are added
          */
 
-        displayGroup.setTranslateX(displayGroup.getTranslateX() + 300 - 37.5);
-        displayGroup.setTranslateY(displayGroup.getTranslateY() + 300 - 37.5);
+        // This will be used to display the bot at its current position (x,y)
+        botTranslate = new Translate(0, 0);
+        displayGroup.getTransforms().add(botTranslate);
 
-        //Create a new display group with the 600x600 transparent rectangle as its base layer, and
-        //the original display group as its upper layer.
+        // This will be used to display the bot at the correct heading
+        botRotate = new Rotate(0, halfBotWidth, halfBotWidth);
+        displayGroup.getTransforms().add(botRotate);
 
-        displayGroup = new Group(baseRect, displayGroup);
-
-        /*
-         * Add transforms. They will be applied in the opposite order from the order in which they are added.
-         * The scale transform scales the entire display group so that the base layer has the same width as the field,
-         * and the chassis rectangle (originally the 75x75 rectangle) is one-eight of the field width.
-         * The rotate and translate transforms are added so that they can be manipulated later, when the robot moves
-         * around the field.
-         */
-        displayGroup.getTransforms().add(new Translate(0, 0));
-
-        displayGroup.getTransforms().add(new Rotate(0, VirtualField.HALF_FIELD_WIDTH, VirtualField.HALF_FIELD_WIDTH));
-
-        displayGroup.getTransforms().add(new Scale(botWidth/75.0, botWidth/75.0, 0, 0));
+        // This will adjust the bot to the correct size, based on size of the field display
+        displayGroup.getTransforms().add(new Scale(botWidth/75, botWidth/75, 0, 0));
 
         fieldPane.getChildren().add(displayGroup);
     }
@@ -181,10 +168,9 @@ public abstract class VirtualBot {
         double displayX = x;
         double displayY = -y;
         double displayAngle = -headingRadians * 180.0 / Math.PI;
-        Translate translate = (Translate)displayGroup.getTransforms().get(0);
-        translate.setX(displayX);
-        translate.setY(displayY);
-        ((Rotate)displayGroup.getTransforms().get(1)).setAngle(displayAngle);
+        botTranslate.setX(displayX);
+        botTranslate.setY(displayY);
+        botRotate.setAngle(displayAngle);
     }
 
     /**
@@ -234,7 +220,7 @@ public abstract class VirtualBot {
 
     }
 
-    public void removeFromDisplay(StackPane fieldPane){
+    public void removeFromDisplay(Pane fieldPane){
         fieldPane.getChildren().remove(displayGroup);
     }
 
