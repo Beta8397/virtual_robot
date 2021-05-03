@@ -128,7 +128,7 @@ public class BetaBot extends MecanumPhysicsBase implements ControlsElements {
          */
         FixtureData scoopBodyData = new FixtureData(Filters.CHASSIS_FILTER, 1.0, 0.0, 0.0,
                 false, 2.0, 37.0/30.0);
-        scoopBody = Dyn4jUtil.createBody(scoopGroup, 9, 9, scoopBodyData);
+        scoopBody = Dyn4jUtil.createBody(scoopGroup, this, 9, 9, scoopBodyData);
         world.addBody(scoopBody);
 
         // Because the prongs are skinny, set as bullet (not sure this helps at all)

@@ -89,7 +89,7 @@ public abstract class Game {
             FXMLLoader loader = new FXMLLoader((getClass().getResource("/virtual_robot/game_elements/fxml/" + ((GameElementConfig) a).filename() + ".fxml")));
             Group group = (Group) loader.load();
             VirtualGameElement element = (VirtualGameElement) loader.getController();
-            element.setUpDisplayGroup(group);
+            element.setUpGameElement(group);
             return element;
         } catch (Exception e){
             System.out.println("Unable to load game element configuration.");

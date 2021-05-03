@@ -1,10 +1,11 @@
 package virtual_robot.game_elements.classes;
 
+import javafx.fxml.FXML;
 import javafx.scene.Group;
+import javafx.scene.shape.Circle;
 import org.dyn4j.collision.CategoryFilter;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
-import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.MassType;
 import virtual_robot.config.UltimateGoal;
 import virtual_robot.controller.*;
@@ -21,6 +22,13 @@ public class Ring extends VirtualGameElement {
     public static final List<Ring> rings = new ArrayList<>();
     public static final List<Ring> ringsOffField = new ArrayList<>();
 
+    // Reference to outer circle from the .fxml file, to be used when generating the dyn4j Body
+    @FXML
+    private Circle outerCircle;
+
+    /*
+     * The STATUS of a Ring determines whether it is "in play", its linear damping, and its collision filter.
+     */
     public enum RingStatus {
         NORMAL(true, 100, RING_FILTER),
         ROLLING(true, 0.05, RING_FILTER),
@@ -136,14 +144,15 @@ public class Ring extends VirtualGameElement {
       */
     @Override
     public void setUpBody(){
-        elementBody = new Body();
-        elementBody.setUserData(this);
-        ringBody = elementBody;
-        double ringRadiusMeters = RING_RADIUS_INCHES / VirtualField.INCHES_PER_METER;
-        ringFixture = ringBody.addFixture(
-                new org.dyn4j.geometry.Circle(ringRadiusMeters), 1, 0, 0);
-        ringBody.setMass(MassType.NORMAL);
-
+        /*
+         * Use Dyn4jUtil.createBody to generate and configure a dyn4j Body, using the outerCircle from the .fxml
+         * file. Note that we save a reference to the BodyFixture. this is needed so that the collision
+         * filter can be changed as ring status changes.
+         */
+        elementBody = Dyn4jUtil.createBody(outerCircle,this, 0, 0,
+                new FixtureData(RING_FILTER, 1.0, 0, 0));
+        ringBody = elementBody;     //Just an alias
+        ringFixture = ringBody.getFixture(0);
         this.setStatus(RingStatus.OFF_FIELD);
     }
 

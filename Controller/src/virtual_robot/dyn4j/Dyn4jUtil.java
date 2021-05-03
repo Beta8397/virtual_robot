@@ -197,7 +197,7 @@ public class Dyn4jUtil {
      * @param fixtureData
      * @return
      */
-    public static Body createBody(Shape shape, double xOffsetInches, double yOffsetInches, FixtureData fixtureData) {
+    public static Body createBody(Shape shape, Object userData, double xOffsetInches, double yOffsetInches, FixtureData fixtureData) {
         Body body = new Body();
         BodyFixture bodyFixture = createFixture(shape, xOffsetInches, yOffsetInches, false, fixtureData);
         Vector2 translate = getCenterMeters(shape, xOffsetInches, yOffsetInches);
@@ -206,6 +206,7 @@ public class Dyn4jUtil {
         body.setMass(MassType.NORMAL);
         body.rotate(rotate);
         body.translate(translate);
+        body.setUserData(userData);
         return body;
     }
 
@@ -222,7 +223,7 @@ public class Dyn4jUtil {
      *                      for each fixture.
      * @return
      */
-    public static Body createBody(Group group, double xOffsetInches, double yOffsetInches, Map<Shape, FixtureData> map) {
+    public static Body createBody(Group group, Object userData, double xOffsetInches, double yOffsetInches, Map<Shape, FixtureData> map) {
         Body body = new Body();
         List<BodyFixture> fixtureList = createFixtures(group, xOffsetInches, yOffsetInches, map);
         for (BodyFixture fixture : fixtureList) {
@@ -232,6 +233,7 @@ public class Dyn4jUtil {
                 -group.getTranslateY() / PIXELS_PER_METER);
         body.setMass(MassType.NORMAL);
         body.translate(translate);
+        body.setUserData(userData);
         return body;
     }
 
@@ -247,7 +249,7 @@ public class Dyn4jUtil {
      *                      to be applied to all fixtures.
      * @return
      */
-    public static Body createBody(Group group, double xOffsetInches, double yOffsetInches, FixtureData fixtureData) {
+    public static Body createBody(Group group, Object userData, double xOffsetInches, double yOffsetInches, FixtureData fixtureData) {
         Body body = new Body();
         List<BodyFixture> fixtureList = createFixtures(group, xOffsetInches, yOffsetInches, fixtureData);
         for (BodyFixture fixture : fixtureList) {
@@ -257,6 +259,7 @@ public class Dyn4jUtil {
                 -group.getTranslateY() / PIXELS_PER_METER);
         body.setMass(MassType.NORMAL);
         body.translate(translate);
+        body.setUserData(userData);
         return body;
     }
 }

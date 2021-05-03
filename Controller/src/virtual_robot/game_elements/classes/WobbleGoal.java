@@ -1,12 +1,16 @@
 package virtual_robot.game_elements.classes;
 
+import javafx.fxml.FXML;
 import javafx.scene.Group;
+import javafx.scene.shape.Circle;
 import org.dyn4j.collision.CategoryFilter;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.MassType;
 import virtual_robot.config.UltimateGoal;
 import virtual_robot.controller.*;
+import virtual_robot.dyn4j.Dyn4jUtil;
+import virtual_robot.dyn4j.FixtureData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,14 +21,17 @@ public class WobbleGoal extends VirtualGameElement {
     public static final double RADIUS_INCHES = 4.0;
     public static final List<WobbleGoal> wobbles = new ArrayList<>();
 
-    private VirtualBot bot;
     Body wobbleBody = null;
-    BodyFixture wobbleFixture;
 
+    // Category and filter for collisions
     public static final long WOBBLE_CATEGORY = 512;
     public static final CategoryFilter WOBBLE_FILTER = new CategoryFilter(WOBBLE_CATEGORY, Filters.MASK_ALL);
 
     private boolean onField = false;
+
+    // Outer circle from the .fxml file; will use to generate dyn4j Body
+    @FXML
+    private Circle outerCircle;
 
     public void initialize(){
         super.initialize();
@@ -35,6 +42,11 @@ public class WobbleGoal extends VirtualGameElement {
         super.setUpDisplayGroup(group);
     }
 
+    /**
+     * The implementation of updateState for WobbleGoal is simple: just obtain (x, y, headingRadians)
+     * from the physics body, and translate x and y from meters to pixels.
+     * @param millis milliseconds since the previous update
+     */
     @Override
     public void updateState(double millis) {
         x = wobbleBody.getTransform().getTranslationX() * VirtualField.PIXELS_PER_METER;
@@ -47,17 +59,19 @@ public class WobbleGoal extends VirtualGameElement {
         super.updateDisplay();
     }
 
+    /**
+     * Set up the dyn4j physics body for the wobble goal.
+     */
     @Override
     public void setUpBody(){
-        elementBody = new Body();
-        elementBody.setUserData(this);
-        wobbleBody = elementBody;
-        double wobbleRadiusMeters = 4.0 / VirtualField.INCHES_PER_METER;
-        wobbleFixture = wobbleBody.addFixture(
-                new org.dyn4j.geometry.Circle(wobbleRadiusMeters), 1, 0, 0);
-        wobbleFixture.setFilter(WOBBLE_FILTER);
-        wobbleBody.setMass(MassType.NORMAL);
-        wobbleBody.setLinearDamping(100.0);
+        /*
+         * Use Dyn4jUtil.createBody to create a Body. outerCircle (from the .fxml file) is used to generate
+         * a single BodyFixture that is added to the Body.
+         */
+        elementBody = Dyn4jUtil.createBody(outerCircle, this, 0, 0,
+                new FixtureData(WOBBLE_FILTER, 1, 0, 0));
+        wobbleBody = elementBody;       // Alias for elementBody
+        wobbleBody.setLinearDamping(100.0);     // Lots of damping (simulates floor-wobble friction)
     }
 
     /**

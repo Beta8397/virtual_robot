@@ -58,7 +58,7 @@ public abstract class VirtualGameElement {
 
     public Group getDisplayGroup() { return displayGroup; }
 
-    // Position (pixel units) and heading (radians) of the game element.
+    // Position (pixel units, Y-up) and heading (radians) of the game element.
     protected volatile double x = 0;
     protected volatile double y = 0;
     protected volatile double headingRadians = 0;
@@ -76,12 +76,11 @@ public abstract class VirtualGameElement {
      * Initialize the game element.
      *
      * This method just sets up the dyn4j Body/Bodys for the game element
-     * TODO: Figure out how to rearrange code so that the display group has been set up before creating Body(s).
      *
      * Classes extending VirtualGameElement may override this to perform custom initialization; in that
      * case, the first statement should be super.initialize().
      */
-    public void initialize() { setUpBody(); }
+    public void initialize() {  }
 
 
 
@@ -178,6 +177,24 @@ public abstract class VirtualGameElement {
     }
 
     /**
+     * This must be called after the VirtualGameElement is created.
+     * @param group
+     */
+    public void setUpGameElement(Group group){
+        /*
+         * Save reference to the game element's display group, and add the transforms that will be used to control
+         * its position on the field.
+         */
+        setUpDisplayGroup(group);
+        /*
+         * Create and configure the dyn4j Body for the game elements. This method is called AFTER the call to
+         * setUpDisplayGroup, so that displayGroup can be used in the setUpBody() implementation to
+         * automatically generate the Body, if desired.
+         */
+        setUpBody();
+    }
+
+    /**
      * Set up the Group object that will be displayed as the virtual game element. The resource file
      * should contain a Group containing the game element's visual components.
      *
@@ -192,13 +209,13 @@ public abstract class VirtualGameElement {
 
         displayGroup = group;
 
-        // This transform ensures that a game element at (x=0, y=0) will be positioned at the center of the field.
-        displayGroup.getTransforms().add(new Translate(VirtualField.HALF_FIELD_WIDTH,
-                VirtualField.HALF_FIELD_WIDTH));
-
         /*
          * The following transforms will be applied in the reverse order to the order in which they are added.
          */
+
+        // This transform ensures that a game element at (x=0, y=0) will be positioned at the center of the field.
+        displayGroup.getTransforms().add(new Translate(VirtualField.HALF_FIELD_WIDTH,
+                VirtualField.HALF_FIELD_WIDTH));
 
         // Transform to position game element at its current (x,y)
         translate = new Translate(0,0);
@@ -215,8 +232,8 @@ public abstract class VirtualGameElement {
     }
 
     /**
-     *  Update the state of the game element. This includes the x and y variables, as well other variables
-     *  that may need to be updated for a specific game element configuration.
+     *  Update the state of the game element. This includes the x, y, and headingRadians variables, as well
+     *  other variables that may need to be updated for a specific game element configuration.
      *
      *  updateState is called on a non-UI thread via an ExecutorService object. For that reason,
      *  it SHOULD NOT make changes to the game element's graphical UI. Those changes should be made by
@@ -232,8 +249,8 @@ public abstract class VirtualGameElement {
     public abstract void updateState(double millis);
 
     /**
-     *  Update the display based on the current x, y of the game element.
-     *  This method is run on the UI thread via a call to Platform.runLater(...).
+     *  Update the display based on the current x, y , headingRadians of the game element.
+     *  This method is usually run on the UI thread via a call to Platform.runLater(...).
      *
      *  For some game element configurations, it may be necessary to override this method, so as to
      *  implement graphical behavior that is specific to an individual game element configuration.
@@ -246,10 +263,6 @@ public abstract class VirtualGameElement {
         double displayX = x;
         double displayY = -y;
         double displayAngle = -headingRadians * 180.0 / Math.PI;
-//        Translate translate = (Translate)displayGroup.getTransforms().get(0);
-//        translate.setX(displayX);
-//        translate.setY(displayY);
-//        ((Rotate)displayGroup.getTransforms().get(1)).setAngle(displayAngle);
         translate.setX(displayX);
         translate.setY(displayY);
         rotate.setAngle(displayAngle);
@@ -262,7 +275,7 @@ public abstract class VirtualGameElement {
         Pane fieldPane = controller.getFieldPane();
         if (Platform.isFxApplicationThread()) {
             if (fieldPane.getChildren().contains(displayGroup)) fieldPane.getChildren().remove(displayGroup);
-        } else {
+        } else {    // If not on application thread, changes to UI must be made via call to Platform.runLater
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
@@ -279,7 +292,7 @@ public abstract class VirtualGameElement {
         Pane fieldPane = controller.getFieldPane();
         if (Platform.isFxApplicationThread()) {
             if (!fieldPane.getChildren().contains(displayGroup)) fieldPane.getChildren().add(displayGroup);
-        } else {
+        } else {    // If not on application thread, changes to UI must be made via call to Platform.runLater
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
