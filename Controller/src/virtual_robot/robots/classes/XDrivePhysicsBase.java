@@ -14,31 +14,29 @@ import org.firstinspires.ftc.robotcore.external.matrices.MatrixF;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import virtual_robot.config.Config;
-import virtual_robot.controller.*;
+import virtual_robot.controller.Filters;
+import virtual_robot.controller.VirtualBot;
+import virtual_robot.controller.VirtualField;
+import virtual_robot.controller.VirtualRobotController;
 import virtual_robot.util.AngleUtils;
 
 /**
- * For internal use only. Base class for a physics-based robot with four mecanum wheels, color sensor,
+ * For internal use only. Base class for a physics-based robot with four Omni wheels, color sensor,
  * four distance sensors, and a BNO055IMU.
  */
-public abstract class MecanumPhysicsBase extends VirtualBot {
+public abstract class XDrivePhysicsBase extends VirtualBot {
 
     public final MotorType MOTOR_TYPE;
     private DcMotorExImpl[] motors = null;
-    //private VirtualRobotController.GyroSensorImpl gyro = null;
     private BNO055IMUImpl imu = null;
     private VirtualRobotController.ColorSensorImpl colorSensor = null;
     private VirtualRobotController.DistanceSensorImpl[] distanceSensors = null;
 
     private double wheelCircumference;
     protected double gearRatioWheel = 1.0;
-    private double interWheelWidth;
-    private double interWheelLength;
-    private double wlAverage;
+    protected double wheelBaseRadius;
 
     private double[][] tWR; //Transform from wheel motion to robot motion (KINETIC MODEL)
-
-
 
     GeneralMatrixF M_ForceWheelToRobot; // Converts from individual wheel forces to total force/torque on robot
     MatrixF M_ForceRobotToWheel;  // Converts from total force/torque on robot to individual wheel forces
@@ -47,12 +45,12 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
     /**
      * No-param constructor. Uses the default motor type of Neverest 40
      */
-    public MecanumPhysicsBase() {
+    public XDrivePhysicsBase() {
         super();
         MOTOR_TYPE = MotorType.Neverest40;
     }
 
-    public MecanumPhysicsBase(MotorType driveMotorType){
+    public XDrivePhysicsBase(MotorType driveMotorType){
         MOTOR_TYPE = driveMotorType;
     }
 
@@ -74,18 +72,17 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
         imu = hardwareMap.get(BNO055IMUImpl.class, "imu");
         colorSensor = (VirtualRobotController.ColorSensorImpl) hardwareMap.colorSensor.get("color_sensor");
         wheelCircumference = Math.PI * botWidth / 4.5;
-        interWheelWidth = botWidth * 8.0 / 9.0;
-        interWheelLength = botWidth * 7.0 / 9.0;
-        wlAverage = (interWheelLength + interWheelWidth) / 2.0;
 
-        tWR = new double[][]{
-                {-0.25, 0.25, -0.25, 0.25},
-                {0.25, 0.25, 0.25, 0.25},
-                {-0.25 / wlAverage, -0.25 / wlAverage, 0.25 / wlAverage, 0.25 / wlAverage},
+        double sqrt2 = Math.sqrt(2);
+        wheelBaseRadius = botWidth * (1.0/sqrt2 - 5.0/36.0);
+        float RRt2 = (float)(wheelBaseRadius * sqrt2);
+
+        tWR = new double[][] {
+                {-0.25*sqrt2, 0.25*sqrt2, -0.25*sqrt2, 0.25*sqrt2},
+                {0.25*sqrt2, 0.25*sqrt2, 0.25*sqrt2, 0.25*sqrt2},
+                {-0.25/ wheelBaseRadius, -0.25/ wheelBaseRadius, 0.25/ wheelBaseRadius, 0.25/ wheelBaseRadius},
                 {-0.25, 0.25, 0.25, -0.25}
         };
-
-        float RRt2 = 0.5f * (float)Math.sqrt(interWheelLength*interWheelLength + interWheelWidth*interWheelWidth) * (float)Math.sqrt(2.0);
 
         M_ForceWheelToRobot = new GeneralMatrixF(4, 4, new float[]{
                 1, 1, 1, 1,

@@ -68,8 +68,8 @@ public abstract class VirtualBot {
     protected volatile double y = 0;
     protected volatile double headingRadians = 0;
 
-    private Translate botTranslate = null;
-    private Rotate botRotate = null;
+    protected Translate botTranslate = null;
+    protected Rotate botRotate = null;
 
     public double getX() { return x; }
     public double getY() { return y; }

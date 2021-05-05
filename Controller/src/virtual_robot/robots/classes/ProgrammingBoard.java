@@ -71,6 +71,8 @@ public class ProgrammingBoard extends VirtualBot {
     private double fieldCenterX = 0;
     private double fieldCenterY = 0;
 
+    private double boardWidth = 0;
+
 
     private ChangeListener<Number> sliderColorChangeListener = new ChangeListener<Number>() {
         @Override
@@ -114,6 +116,8 @@ public class ProgrammingBoard extends VirtualBot {
         sldRed.valueProperty().addListener(sliderColorChangeListener);
         sldGreen.valueProperty().addListener(sliderColorChangeListener);
         sldBlue.valueProperty().addListener(sliderColorChangeListener);
+
+        boardWidth = rectBoard.getWidth() * VirtualField.FIELD_WIDTH / 600;
     }
 
     protected void createHardwareMap(){
@@ -168,40 +172,13 @@ public class ProgrammingBoard extends VirtualBot {
 
         displayGroup = group;
 
-        /*
-           Create a transparent 600x600 rectangle to serve as the base layer of the robot. It will go
-           below the 500x500 board chassis.
-        */
-
-        Rectangle baseRect = new Rectangle(0, 0, 600, 600);
-        baseRect.setFill(new Color(1.0, 0.0, 1.0, 0.0));
-        baseRect.setVisible(true);
-
-        /*
-          Translate the display group by (300 - 250) in X and Y, so that the
-          center of the chassis rectangle will be at the same location as the center of the 600x600 base
-          rectangle.
-         */
-
-        displayGroup.setTranslateX(displayGroup.getTranslateX() + 300 - 200);
-        displayGroup.setTranslateY(displayGroup.getTranslateY() + 300 - 200);
-
-        //Create a new display group with the 600x600 transparent rectangle as its base layer, and
-        //the original display group as its upper layer.
-
-        displayGroup = new Group(baseRect, displayGroup);
-
-        /*
-          Add transforms. They will be applied in the opposite order from the order in which they are added.
-          The scale transform scales the entire display group so that the base layer has the same width as the field,
-          and the chassis rectangle (originally the 75x75 rectangle) is one-eight of the field width.
-          The rotate and translate transforms are added so that they can be manipulated later, when the robot moves
-          around the field.
-         */
-        displayGroup.getTransforms().add(new Translate(0, 0));
-        displayGroup.getTransforms().add(new Rotate(0, VirtualField.HALF_FIELD_WIDTH, VirtualField.HALF_FIELD_WIDTH));
-        displayGroup.getTransforms().add(new Scale(botWidth/75.0, botWidth/75.0, 0, 0));
-
+        displayGroup.getTransforms().add(new Translate(VirtualField.HALF_FIELD_WIDTH - boardWidth/2,
+                VirtualField.HALF_FIELD_WIDTH - boardWidth/2));
+        botTranslate = new Translate(0,0);
+        displayGroup.getTransforms().add(botTranslate);
+        botRotate = new Rotate(0, boardWidth/2, boardWidth/2);
+        displayGroup.getTransforms().add(botRotate);
+        displayGroup.getTransforms().add(new Scale(VirtualField.FIELD_WIDTH/600, VirtualField.FIELD_WIDTH/600));
         fieldPane.getChildren().add(displayGroup);
     }
 

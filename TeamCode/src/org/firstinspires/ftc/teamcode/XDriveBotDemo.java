@@ -13,11 +13,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.*;
 @TeleOp(name = "XDriveBot demo", group = "XBot")
 public class XDriveBotDemo extends LinearOpMode {
 
+    DcMotor m1, m2, m3, m4;
+    CRServo backServo;
+
     public void runOpMode(){
-        DcMotor m1 = hardwareMap.dcMotor.get("back_left_motor");
-        DcMotor m2 = hardwareMap.dcMotor.get("front_left_motor");
-        DcMotor m3 = hardwareMap.dcMotor.get("front_right_motor");
-        DcMotor m4 = hardwareMap.dcMotor.get("back_right_motor");
+        m1 = hardwareMap.dcMotor.get("back_left_motor");
+        m2 = hardwareMap.dcMotor.get("front_left_motor");
+        m3 = hardwareMap.dcMotor.get("front_right_motor");
+        m4 = hardwareMap.dcMotor.get("back_right_motor");
         m1.setDirection(DcMotor.Direction.REVERSE);
         m2.setDirection(DcMotor.Direction.REVERSE);
         m1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -32,7 +35,7 @@ public class XDriveBotDemo extends LinearOpMode {
         //GyroSensor gyro = hardwareMap.gyroSensor.get("gyro_sensor");
         BNO055IMU imu = hardwareMap.get(BNO055IMU.class, "imu");
 
-        CRServo backServo = hardwareMap.crservo.get("back_crservo");
+        backServo = hardwareMap.crservo.get("back_crservo");
         DistanceSensor frontDistance = hardwareMap.get(DistanceSensor.class, "front_distance");
         DistanceSensor leftDistance = hardwareMap.get(DistanceSensor.class, "left_distance");
         DistanceSensor rightDistance = hardwareMap.get(DistanceSensor.class, "right_distance");
@@ -77,14 +80,12 @@ public class XDriveBotDemo extends LinearOpMode {
             m2.setPower(p2);
             m3.setPower(p3);
             m4.setPower(p4);
-            double psrv = -gamepad2.left_stick_y;
+            double psrv = gamepad1.right_trigger;
             if (Math.abs(psrv) < 0.05) psrv = 0.0;
             backServo.setPower(psrv);
             telemetry.addData("Color","R %d  G %d  B %d", colorSensor.red(), colorSensor.green(), colorSensor.blue());
-            //telemetry.addData("Heading"," %.1f", gyro.getHeading());
             Orientation orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
             telemetry.addData("Heading", " %.1f", orientation.firstAngle * 180.0 / Math.PI);
-
             telemetry.addData("Front Distance", " %.1f", frontDistance.getDistance(DistanceUnit.CM));
             telemetry.addData("Left Distance", " %.1f", leftDistance.getDistance(DistanceUnit.CM));
             telemetry.addData("Right Distance", " %.1f", rightDistance.getDistance(DistanceUnit.CM));
