@@ -75,7 +75,7 @@ public abstract class XDrivePhysicsBase extends VirtualBot {
 
         double sqrt2 = Math.sqrt(2);
         wheelBaseRadius = botWidth * (1.0/sqrt2 - 5.0/36.0);
-        float RRt2 = (float)(wheelBaseRadius * sqrt2);
+        float RRt2 = (float)(wheelBaseRadius * sqrt2 / VirtualField.PIXELS_PER_METER);
 
         tWR = new double[][] {
                 {-0.25*sqrt2, 0.25*sqrt2, -0.25*sqrt2, 0.25*sqrt2},

@@ -49,5 +49,5 @@ public class Config {
      * of collisions on robot kinetics, but will allow robot to push game elements substantially into
      * the wall.
      */
-    public static final double FIELD_FRICTION_COEFF = 100;
+    public static final double FIELD_FRICTION_COEFF = 10;
 }

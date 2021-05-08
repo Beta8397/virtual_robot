@@ -170,8 +170,6 @@ public class VirtualRobotController {
 
         setupPhysicsWorld();
 
-        System.out.println("World Settings: " + world.getSettings());
-
         Config.GAME.initialize();
         Config.GAME.resetGameElements();
         Config.GAME.setHumanPlayerAuto(true);

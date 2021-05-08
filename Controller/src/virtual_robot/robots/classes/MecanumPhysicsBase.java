@@ -85,7 +85,8 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
                 {-0.25, 0.25, 0.25, -0.25}
         };
 
-        float RRt2 = 0.5f * (float)Math.sqrt(interWheelLength*interWheelLength + interWheelWidth*interWheelWidth) * (float)Math.sqrt(2.0);
+        float RRt2 = 0.5f * (float)Math.sqrt(interWheelLength*interWheelLength + interWheelWidth*interWheelWidth)
+                * (float)Math.sqrt(2.0) / (float)VirtualField.PIXELS_PER_METER;
 
         M_ForceWheelToRobot = new GeneralMatrixF(4, 4, new float[]{
                 1, 1, 1, 1,
@@ -278,6 +279,8 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
         chassisFixture.setFilter(Filters.CHASSIS_FILTER);
         chassisBody.setMass(MassType.NORMAL);
         world.addBody(chassisBody);
+        System.out.println("Chassis Mass = " + chassisBody.getMass().getMass());
+        System.out.println("Chassis Inertia = " + chassisBody.getMass().getInertia());
     }
 
 }

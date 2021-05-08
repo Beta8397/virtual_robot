@@ -1,11 +1,11 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.disabled_samples;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.*;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.*;
 
 /**
  * Example OpMode. Demonstrates use of gyro, color sensor, encoders, and telemetry.
@@ -15,18 +15,34 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 @TeleOp(name = "two wheel demo linear", group = "TwoWheel")
 public class TwoWheelDemoLinear extends LinearOpMode {
 
+    DcMotorEx left;
+    DcMotorEx right;
+    BNO055IMU imu;
+    Servo backServo;
+    ColorSensor colorSensor;
+    DistanceSensor frontDistance, leftDistance, backDistance, rightDistance;
+
     public void runOpMode() {
-        DcMotorEx left = (DcMotorEx)hardwareMap.dcMotor.get("left_motor");
-        DcMotorEx right = (DcMotorEx)hardwareMap.dcMotor.get("right_motor");
+        left = (DcMotorEx)hardwareMap.dcMotor.get("left_motor");
+        right = (DcMotorEx)hardwareMap.dcMotor.get("right_motor");
         left.setDirection(DcMotor.Direction.REVERSE);
-        GyroSensor gyro = hardwareMap.gyroSensor.get("gyro_sensor");
-        Servo backServo = hardwareMap.servo.get("back_servo");
-        gyro.init();
-        ColorSensor colorSensor = hardwareMap.colorSensor.get("color_sensor");
-        DistanceSensor frontDistance = hardwareMap.get(DistanceSensor.class, "front_distance");
-        DistanceSensor leftDistance = hardwareMap.get(DistanceSensor.class, "left_distance");
-        DistanceSensor backDistance = hardwareMap.get(DistanceSensor.class, "back_distance");
-        DistanceSensor rightDistance = hardwareMap.get(DistanceSensor.class, "right_distance");
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        backServo = hardwareMap.servo.get("back_servo");
+        colorSensor = hardwareMap.colorSensor.get("color_sensor");
+        frontDistance = hardwareMap.get(DistanceSensor.class, "front_distance");
+        leftDistance = hardwareMap.get(DistanceSensor.class, "left_distance");
+        backDistance = hardwareMap.get(DistanceSensor.class, "back_distance");
+        rightDistance = hardwareMap.get(DistanceSensor.class, "right_distance");
+
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.accelerationIntegrationAlgorithm = null;
+        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters.calibrationData = null;
+        parameters.calibrationDataFile = "";
+        parameters.loggingEnabled = false;
+        parameters.loggingTag = "Who cares.";
+        imu.initialize(parameters);
 
         telemetry.addData("Press Start to Continue","");
         telemetry.update();
@@ -58,7 +74,8 @@ public class TwoWheelDemoLinear extends LinearOpMode {
             telemetry.addData("Press", "Y-fwd, A-rev, B-Rt, X-Lt");
             telemetry.addData("Left Gamepad stick controls back servo","");
             telemetry.addData("Color","R %d  G %d  B %d", colorSensor.red(), colorSensor.green(), colorSensor.blue());
-            telemetry.addData("Heading"," %.1f", gyro.getHeading());
+            Orientation orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            telemetry.addData("Heading"," %.1f", orientation.firstAngle);
             telemetry.addData("Encoders","Left %d  Right %d", left.getCurrentPosition(), right.getCurrentPosition());
             telemetry.addData("Vel, TPS", "Left %.0f  Right %.0f", left.getVelocity(), right.getVelocity());
             telemetry.addData("Vel, DPS", "Left %.1f  Right %.1f", left.getVelocity(AngleUnit.DEGREES), right.getVelocity(AngleUnit.DEGREES));
