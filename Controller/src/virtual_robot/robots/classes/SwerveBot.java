@@ -6,11 +6,14 @@ import com.qualcomm.robotcore.hardware.configuration.MotorType;
 import javafx.fxml.FXML;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Rotate;
-import virtual_robot.controller.VirtualBot;
-import virtual_robot.controller.VirtualRobotController;
+import org.dyn4j.dynamics.Body;
+import org.dyn4j.geometry.MassType;
+import org.dyn4j.geometry.Vector2;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import virtual_robot.config.Config;
+import virtual_robot.controller.*;
 import virtual_robot.util.AngleUtils;
 import virtual_robot.util.Vector2D;
-import virtual_robot.controller.VirtualField;
 
 /**
  * For internal use only. Represents a robot with four mechanum wheels, color sensor, four distance sensors,
@@ -19,7 +22,7 @@ import virtual_robot.controller.VirtualField;
  * MechanumBot is the controller class for the "mechanum_bot.fxml" markup file.
  *
  */
-//@BotConfig(name = "Swerve Bot", filename = "swerve_bot")
+@BotConfig(name = "Swerve Bot", filename = "swerve_bot")
 public class SwerveBot extends VirtualBot {
 
     private final MotorType MOTOR_TYPE = MotorType.Neverest40;
@@ -40,17 +43,15 @@ public class SwerveBot extends VirtualBot {
     @FXML Rectangle rectBL;
     @FXML Rectangle rectBR;
 
-    private double wheelCircumference;
+    private double wheelRadius;
     private double interWheelWidth;
     private double interWheelLength;
 
     //Vectors representing positions of each wheel relative to robot center, in field units
-    private final Vector2D[] WHEEL_POS = new Vector2D[4];
+    private final Vector2[] WHEEL_POS = new Vector2[4];
 
-    //Vector representing robot velocity in field units/sec
-    private Vector2D velocity = new Vector2D(0, 0);
-    //Scalar representing robot angular speed in radians/sec
-    private double omega = 0;
+    //Maximum frictional force that can be applied to a single wheel by the floor
+    private double maxWheelForce;
 
 
     public SwerveBot(){
@@ -88,15 +89,20 @@ public class SwerveBot extends VirtualBot {
         //gyro = (VirtualRobotController.GyroSensorImpl)hardwareMap.gyroSensor.get("gyro_sensor");
         imu = hardwareMap.get(BNO055IMUImpl.class, "imu");
         colorSensor = (VirtualRobotController.ColorSensorImpl)hardwareMap.colorSensor.get("color_sensor");
-        servo = (ServoImpl)hardwareMap.servo.get("back_servo");
-        wheelCircumference = Math.PI * botWidth / 4.5;
-        interWheelWidth = botWidth * 8.0 / 9.0;
-        interWheelLength = botWidth * 7.0 / 9.0;
 
-        WHEEL_POS[0] = new Vector2D(-interWheelWidth/2, -interWheelLength/2);
-        WHEEL_POS[1] = new Vector2D(-interWheelWidth/2, interWheelLength/2);
-        WHEEL_POS[2] = new Vector2D(interWheelWidth/2, interWheelLength/2);
-        WHEEL_POS[3] = new Vector2D(interWheelWidth/2, -interWheelLength/2);
+        servo = (ServoImpl)hardwareMap.servo.get("back_servo");
+
+        wheelRadius = 0.5 * botWidth / (4.5 * VirtualField.PIXELS_PER_METER);
+
+        interWheelWidth = botWidth * 8.0 / (9.0 * VirtualField.PIXELS_PER_METER);
+        interWheelLength = botWidth * 7.0 / (9.0 * VirtualField.PIXELS_PER_METER);
+
+        WHEEL_POS[0] = new Vector2(-interWheelWidth/2, -interWheelLength/2);
+        WHEEL_POS[1] = new Vector2(-interWheelWidth/2, interWheelLength/2);
+        WHEEL_POS[2] = new Vector2(interWheelWidth/2, interWheelLength/2);
+        WHEEL_POS[3] = new Vector2(interWheelWidth/2, -interWheelLength/2);
+
+        maxWheelForce = Config.FIELD_FRICTION_COEFF * 9.8 * chassisBody.getMass().getMass() / 4.0;
 
         hardwareMap.setActive(false);
 
@@ -121,6 +127,13 @@ public class SwerveBot extends VirtualBot {
 
     public synchronized void updateStateAndSensors(double millis){
 
+        x = chassisBody.getTransform().getTranslationX() * VirtualField.PIXELS_PER_METER;
+        y = chassisBody.getTransform().getTranslationY() * VirtualField.PIXELS_PER_METER;
+        headingRadians = chassisBody.getTransform().getRotationAngle();
+
+        Vector2 velocity = chassisBody.getLinearVelocity();
+        double omega = chassisBody.getAngularVelocity();
+
         /*
          *  This is not a realistic physics-based simulation. The virtual_robot simulator is kinematic. For the swerve bot,
          *  pure kinematic simulation isn't feasible, since the wheels can be aligned in such a way that lots of
@@ -129,57 +142,35 @@ public class SwerveBot extends VirtualBot {
          *  to the floor (not true of real kinetic friction).
          */
 
-        //Bot Mass is one botMass unit
-        final double MAX_WHEEL_FORCE = 4 * botWidth;     //in botMass * fieldUnit/(sec^2)
         final double FORCE_COEFF = 4;         //in botMass/sec    i.e., (botMass*botWidth/sec^2)/(botWidth/sec)
-        final double INERTIA = botWidth * botWidth / 6.0;       //in botMass * fieldUnit^2
-        double t = millis / 1000.0;
 
-        Vector2D totalForce = new Vector2D(0,0);
+        Vector2 totalForce = new Vector2(0,0);
         double totalTorque = 0;
 
-//        System.out.println("\n\nUpdateStateAndSensors Cycle");
-//        System.out.println("  heading = " + Math.toDegrees(headingRadians) + "  velocity = " + velocity.x + "  " + velocity.y + "  omega = " + omega);
-
         for (int i = 0; i < 4; i++) {
-            double deltaPos = motors[i].update(millis);
+            motors[i].update(millis);
+            double wSpd = motors[i].getVelocity(AngleUnit.RADIANS) * wheelRadius;
+            boolean mtRev = MOTOR_TYPE.REVERSED;
+            boolean dirRev = motors[i].getDirection() == DcMotorSimple.Direction.REVERSE;
+            if (i<2 && (mtRev && dirRev || !mtRev && !dirRev) || i>=2 && (mtRev && !dirRev || !mtRev && dirRev)) {
+                wSpd = -wSpd;
+            }
             steerEncoders[i].update(Math.toRadians(crServos[i].updatePositionDegrees(millis)), millis);
             double steer = Math.toRadians(crServos[i].getPositionDegrees());
-            double s = deltaPos * wheelCircumference / MOTOR_TYPE.TICKS_PER_ROTATION;
-            if (i < 2) s = -s;
-            Vector2D w = new Vector2D(-s * Math.sin(steer+headingRadians), s * Math.cos(steer+headingRadians));
-            Vector2D v = velocity.added(WHEEL_POS[i].rotated(headingRadians+Math.PI/2).multiplied(omega));
-            Vector2D skidVelocity = v.subtracted(w.divided(t));       //skid velocity in fieldUnit/sec
-            Vector2D wheelForce = skidVelocity.multiplied(-FORCE_COEFF);          //frictional force on wheel in botMass*fieldUnit/sec^2
-            double wheelForceMagnitude = wheelForce.length();
-            if (wheelForceMagnitude > MAX_WHEEL_FORCE) wheelForce = wheelForce.multiplied(MAX_WHEEL_FORCE / wheelForceMagnitude);
+            Vector2 w = new Vector2(-wSpd * Math.sin(steer+headingRadians), wSpd * Math.cos(steer+headingRadians));
+            Vector2 v = velocity.sum(new Vector2(WHEEL_POS[i]).rotate(headingRadians + Math.PI/2).product(omega));
+            Vector2 skidVelocity = v.difference(w);       //skid velocity in meters/sec
+            //frictional force on wheel in kg*meters/sec^2
+            Vector2 wheelForce = skidVelocity.product(-FORCE_COEFF * chassisBody.getMass().getMass());
+            if (wheelForce.getMagnitude() > maxWheelForce) wheelForce.setMagnitude(maxWheelForce);
             totalForce.add(wheelForce);
-            Vector2D torqueArm = WHEEL_POS[i].rotated(headingRadians);
+            Vector2 torqueArm = new Vector2(WHEEL_POS[i]).rotate(headingRadians);
             double torque = torqueArm.cross(wheelForce);
-            totalTorque += torque;                         //in botMass*fieldUnit^2/sec^2
-
-//            System.out.printf("\n  wheel %d:  steer=%.1f  s=%.1f wx=%.1f wy=%.1f  vx=%.1f  vy=%.1f  skVX=%.1f  skVY=%.1f  Fx=%.1f  Fy=%.1f  torque = %.1f",
-//                    i, Math.toDegrees(steer), s, w.x, w.y, v.x, v.y, skidVelocity.x, skidVelocity.y, wheelForce.x, wheelForce.y,
-//                    torque);
+            totalTorque += torque;                         //in kg*m^2/sec^2
         }
 
-//        System.out.printf("\nTotal force = %.1f  %.1f   Total torque = %.1f", totalForce.x, totalForce.y, totalTorque);
-
-        Vector2D dPos = totalForce.multiplied(0.5 * t * t).added(velocity.multiplied(t));      //in field units
-        x += dPos.x;
-        y += dPos.y;
-        double dHeading = omega * t + 0.5 * totalTorque * t * t / INERTIA;  //in radians
-        headingRadians += dHeading;
-        if (headingRadians > Math.PI) {
-            headingRadians -= 2.0 * Math.PI;
-        } else if (headingRadians < -Math.PI) {
-            headingRadians += 2.0 * Math.PI;
-        }
-
-        velocity = velocity.added(totalForce.multiplied(t));
-        omega = omega + totalTorque * t / INERTIA;
-
-        constrainToBoundaries();
+        chassisBody.applyForce(totalForce);
+        chassisBody.applyTorque(totalTorque);
 
         imu.updateHeadingRadians(headingRadians);
 
@@ -193,35 +184,6 @@ public class SwerveBot extends VirtualBot {
                     y + halfBotWidth * Math.cos(sensorHeading), sensorHeading);
         }
 
-    }
-
-    /**
-     * Constrain robot to the boundaries X_MIN, X_MAX, Y_MIN, Y_MAX
-     */
-    @Override
-    protected void constrainToBoundaries(){
-
-        double effectiveHalfBotWidth;    //Use this to keep corner of robot from leaving field
-        if (headingRadians <= -Math.PI/2.0) effectiveHalfBotWidth = -halfBotWidth * (Math.sin(headingRadians) + Math.cos(headingRadians));
-        else if (headingRadians <= 0) effectiveHalfBotWidth = halfBotWidth * (Math.cos(headingRadians) - Math.sin(headingRadians));
-        else if (headingRadians <= Math.PI/2.0) effectiveHalfBotWidth = halfBotWidth * (Math.sin(headingRadians) + Math.cos(headingRadians));
-        else effectiveHalfBotWidth = halfBotWidth * (Math.sin(headingRadians) - Math.cos(headingRadians));
-
-        if (x >  (VirtualField.X_MAX - effectiveHalfBotWidth)) {
-            x = VirtualField.X_MAX - effectiveHalfBotWidth;
-            velocity.x = Math.min(velocity.x, 0);
-        } else if (x < (VirtualField.X_MIN + effectiveHalfBotWidth)) {
-            x = VirtualField.X_MIN + effectiveHalfBotWidth;
-            velocity.x = Math.max(velocity.x, 0);
-        }
-
-        if (y > (VirtualField.Y_MAX - effectiveHalfBotWidth)){
-            y = VirtualField.Y_MAX - effectiveHalfBotWidth;
-            velocity.y = Math.min(velocity.y, 0);
-        } else if (y < (VirtualField.Y_MIN + effectiveHalfBotWidth)) {
-            y = VirtualField.Y_MIN + effectiveHalfBotWidth;
-            velocity.y = Math.max(velocity.y, 0);
-        }
     }
 
     public synchronized void updateDisplay(){
@@ -238,10 +200,32 @@ public class SwerveBot extends VirtualBot {
             motors[i].stopAndReset();
             crServos[i].setPower(0);
         }
-        velocity = new Vector2D(0, 0);
-        omega = 0;
         imu.close();
+        chassisBody.setAngularVelocity(0);
+        chassisBody.setLinearVelocity(0,0);
     }
 
+    /**
+     *  Set up the chassisBody and add it to the dyn4j world. This method creates a Body and adds a BodyFixture
+     *  containing a Rectangle. Add the chassis body to the world.
+     *     Large mass: collisions with lightweight game elements will have neglible effect on bot motion
+     *     The "friction" of 0 refers to robot-game element and robot-wall friction (NOT robot-floor)
+     *     The "restitution" of 0 refers to "bounce" when robot collides with wall and game elements
+     *
+     *     May want to change density, friction, and restitution to obtain desired behavior
+     *
+     *  The filter set on the chassisFixture indicates what other things the robot is capable of colliding with
+     */
+    public void setUpChassisBody(){
+        chassisBody = new Body();
+        chassisBody.setUserData(this);
+        double botWidthMeters = botWidth / VirtualField.PIXELS_PER_METER;
+        chassisFixture = chassisBody.addFixture(
+                new org.dyn4j.geometry.Rectangle(botWidthMeters, botWidthMeters), 71.76, 0, 0);
+        chassisRectangle = (org.dyn4j.geometry.Rectangle)chassisFixture.getShape();
+        chassisFixture.setFilter(Filters.CHASSIS_FILTER);
+        chassisBody.setMass(MassType.NORMAL);
+        world.addBody(chassisBody);
+    }
 
 }

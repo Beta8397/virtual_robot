@@ -252,6 +252,8 @@ public abstract class XDrivePhysicsBase extends VirtualBot {
     public void powerDownAndReset() {
         for (int i = 0; i < 4; i++) motors[i].stopAndReset();
         imu.close();
+        chassisBody.setAngularVelocity(0);
+        chassisBody.setLinearVelocity(0,0);
     }
 
     /**

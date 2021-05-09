@@ -184,6 +184,8 @@ public class TwoWheelPhysicsBase extends VirtualBot {
         leftMotor.stopAndReset();
         rightMotor.stopAndReset();
         imu.close();
+        chassisBody.setAngularVelocity(0);
+        chassisBody.setLinearVelocity(0,0);
     }
 
     /**
