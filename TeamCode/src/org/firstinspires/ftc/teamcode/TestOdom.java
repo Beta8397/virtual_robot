@@ -15,6 +15,7 @@ public class TestOdom extends LinearOpMode {
     public void runOpMode(){
         gamepad1.setJoystickDeadzone(0.05f);
         bot.init(hardwareMap);
+        bot.resetOdometry(0, 0, Math.PI/2.0);
         while(!opModeIsActive() && !isStopRequested()){
             telemetry.addData("time", this.time);
             telemetry.update();

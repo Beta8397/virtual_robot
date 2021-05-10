@@ -16,13 +16,13 @@ import virtual_robot.util.AngleUtils;
 import virtual_robot.util.Vector2D;
 
 /**
- * For internal use only. Represents a robot with four mechanum wheels, color sensor, four distance sensors,
+ * For internal use only. Represents a robot with four swerve drives, color sensor, four distance sensors,
  * a BNO055IMU, and a Servo-controlled arm on the back.
  *
- * MechanumBot is the controller class for the "mechanum_bot.fxml" markup file.
+ * SwerveBot is the controller class for the "swerve_bot.fxml" markup file.
  *
  */
-@BotConfig(name = "Swerve Bot", filename = "swerve_bot")
+//@BotConfig(name = "Swerve Bot", filename = "swerve_bot")
 public class SwerveBot extends VirtualBot {
 
     private final MotorType MOTOR_TYPE = MotorType.Neverest40;
