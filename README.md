@@ -10,11 +10,16 @@ PDF can be [downloaded for free](https://github.com/alan412/LearnJavaForFTC) or 
 ![](/readme_image.JPG)
 
 This is a JavaFX application developed using the (free) IntelliJ IDEA Community Edition IDE. The repository can be downloaded
-and unzipped, then opened with IntelliJ. It can also be run using Android Studio (see this [video](https://www.youtube.com/watch?v=pmaT9Twbmao)).
+and unzipped, then opened with IntelliJ. It can also be run using Android Studio 
+(see this [video](https://www.youtube.com/watch?v=pmaT9Twbmao)).
 
-Multiple robot configurations are available: a simple two-wheeled robot, several with mecanum wheels (including 
-one with three dead-wheel encoder pods), an X-Drive robot with four OmniWheels mounted at 45 degrees at each corner 
-of the robot, a swerve-drive robot with four swerve units, and a differential swerve-drive robot.
+Multiple robot configurations are available. MecanumBot has a mecanum drive with a servo-driven arm at the back, 
+and with three dead-wheel encoders.  BetaBot is a mecanum-drive bot with a rear intake, a ring shooter, and a 
+front "scoop" for moving wobble goals. XDriveBot has four corner-mounted Omni-wheels, a rear arm driven by a cr-servo, 
+and three dead-wheel encoders. ArmBot is a mecanum drive bot with a motor-driven arm and servo-driven grabble; it 
+provides a purely kinematic simulation (no interaction with game elements). Several other configurations (SwerveBot, 
+DiffSwerveBot, etc) are available, but are currently disabled. They can be enabled by un-commenting the @Botconfig 
+annotations in their configuration classes (package virtual_robot.robots.classes).
 
 Each robot can be thought of as 18 inches wide.  For the two-wheel bot and mecanum wheel bots, the distance between
 the centers of the right and left wheels is 16 inches. For the mecanum wheel bots, the distance between the centers
@@ -22,10 +27,10 @@ of the front and back wheels is 14 inches, and the mecanum wheels (when viewed f
 For the X-Drive bot, the distance between the centers of any two adjacent wheels is 14.5 inches. Each motor has an
 encoder. There is a downward-facing color sensor in the center of each robot. A BNO055 IMU is also 
 included. Each robot also has distance sensors on the front, left, right and back sides. A small green rectangle 
-indicates the front of each robot. Wheel diameters are all 4 inches. The bot with "Dead-wheel" encoders ("EncoderBot") 
-has three dead-wheel encoders; the forward-reverse encoder wheels are mounted 6 inches to the right and left of center, 
+indicates the front of each robot. Wheel diameters are all 4 inches. For the robots with dead-wheel encoders 
+(MecanumBot and XDriveBot), the forward-reverse encoder wheels are mounted 6 inches to the right and left of center, 
 while the X-direction (i.e., right-left) encoder wheel is mounted at the center. The dead-wheels are two inches in 
-diameter.
+diameter. Positioning of the dead-wheels can be changed easily in the robot configuration classes.
 
 The field can be thought of as 12 feet wide. The field graphic (currently the Ultimate Goal field)
 is obtained from a bitmap (.bmp) image. The color sensor detects the field color beneath the center of the
@@ -38,10 +43,9 @@ most laptops). The Config class also allows selection between the use of "real" 
 In addition to the robot configurations described above, there is an additional configuration called
 "ProgrammingBoard". It is meant to emulate the programming board described in the book "Learn Java For FTC", by
 Alan Smith.  (The PDF can be [downloaded for free](https://github.com/alan412/LearnJavaForFTC) or you can purchase 
-the paperback on [Amazon](https://www.amazon.com/dp/B08DBVKXLZ).)
-It is a board with several hardware devices attached: DcMotor, Servo, Potentiometer, Touch Sensor,
-and a Color-Distance Sensor. It also has a BNO055 IMU. The board doesn't move around the field, but it can
-be rotated (to test the IMU) by dragging the board chassis.
+the paperback on [Amazon](https://www.amazon.com/dp/B08DBVKXLZ).) It is a board with several hardware devices 
+attached: DcMotor, Servo, Potentiometer, Touch Sensor, and a Color-Distance Sensor. It also has a BNO055 IMU. 
+The board doesn't move around the field, but it can be rotated (to test the IMU) by dragging the board chassis.
 
 An abridged approximation of the FTC SDK is provided.
 
@@ -64,8 +68,6 @@ of sample op modes are currently disabled; they can be re-enabled by commenting 
 number of robot configurations are also disabled. A robot configuration can be re-enabled by finding its class 
 in the virtual_robot.robots.classes package, and un-commenting its @BotConfig annotation.
 
-Some recent changes have simplified the process of creating new robot configurations (see  Log of Changes below).
-
 To use:
 
   1. Make sure you have the Java 8 JDK installed on your PC. Also, install the free Community Edition of JetBrains
@@ -73,9 +75,9 @@ To use:
   2. Download the virtual_robot .zip, and extract contents. Open the project in IntelliJ. You'll see three modules in
      the project (Controller, TeamCode, and virtual_robot) -- the only module you'll need to touch is TeamCode. It
      contains the org.firstinspires.ftc.teamcode package.
-  3. Write your OpModes in the org.firstinspires.ftc.teamcode package; make sure to include a @TeleOp or @Autonomous annotation. These must
-    extend the OpMode class (may either extend OpMode OR LinearOpMode). OpMode must provide init() and loop() methods;
-     LinearOpMode must provide runOpMode() method.
+  3. Write your OpModes in the org.firstinspires.ftc.teamcode package; make sure to include a @TeleOp or @Autonomous 
+     annotation. These must extend the OpMode class (may either extend OpMode OR LinearOpMode). OpMode must provide 
+     init() and loop() methods; LinearOpMode must provide runOpMode() method.
   4. Make sure at least one gamepad is plugged in to the computer.
   5. Run the application (by clicking the green arrowhead at the toolbar).
   6. Press start-A or start-B on gamepad(s) to select which is gamepad1 vs. gamepad2.
@@ -92,10 +94,11 @@ LOG OF CHANGES
 CHANGES 5/7/2021
     Incorporated changes from Daniel McDonald/Bots Of Prey to allow interaction with game elements. Then, 
     to accommodate future games and simplify collision handling, incorporated the dyn4j physics and collision 
-    engine. Some robot configurations have not yet been adapted for the physics engine; they work, but still 
-    use kinetic simulation and don't collide with game elements. Only one robot configuration actually takes up 
-    and shoots rings: BetaBot. To use the simulator without game elements, open the Config.java file and change 
-    the value of GAME from "new UltimateGoal()" to "new NoGame()".
+    engine. Most robot configurations have been modified to work with the physics engine (though ArmBot has
+    not, and provides a purely kinematic simulation). Only one configuration, BetaBot, actually takes up game
+    elements (rings) and shoots them. A NoGame simulation is available: in Convig.java, just set
+    GAME = NoGame(). For the physics simulation, the friction coefficient between the robot wheels and the field is 
+    currently very high (10), so there is virtually no skidding. This can be modified in the Config.java class.
 
 CHANGES 1/22/2021
     Changed telemetry to match (nearly completely) the API of the FTC SDK (but no speech). Also, add stack trace output 

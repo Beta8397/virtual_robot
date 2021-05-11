@@ -1,10 +1,12 @@
-package virtual_robot.config;
+package virtual_robot.games;
+
+import virtual_robot.controller.Game;
 
 /**
  * Implementation of Game to be used when no game elements are to be used, and
  * the dyn4j physics engine is not going to be used.
  */
-public final class NoGame extends Game{
+public final class NoGame extends Game {
 
     @Override
     public final void initialize() { }

@@ -36,13 +36,11 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotorImpl;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-import virtual_robot.config.Game;
 import virtual_robot.robots.ControlsElements;
 import virtual_robot.robots.classes.MecanumBot;
 import virtual_robot.keyboard.KeyState;

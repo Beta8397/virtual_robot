@@ -1,6 +1,8 @@
 package virtual_robot.config;
 
 import javafx.scene.image.Image;
+import virtual_robot.controller.Game;
+import virtual_robot.games.UltimateGoal;
 
 /**
  * Class for configuring field (width and image), and gamepad (virtual vs. real)

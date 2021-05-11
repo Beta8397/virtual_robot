@@ -9,8 +9,11 @@ import javafx.scene.transform.Translate;
 import virtual_robot.controller.BotConfig;
 
 /**
- * For internal use only. Represents a robot with four mechanum wheels, color sensor, four distance sensors,
+ * For internal use only. Represents a robot with four mecanum wheels, color sensor, four distance sensors,
  * a BNO055IMU, and an extensible arm with a grabber on the end.
+ *
+ * NOTE: ArmBot has not been modified to be controlled by the Dyn4j physics and collision engine. It
+ * provides a purely kinematic simulation, and does not interact with game elements.
  *
  * The easiest way to create a new robot configuration is to copy and paste the Java class and the FXML file
  * of an existing configuration, then make make modifications. The ArmBot config is a modification of
