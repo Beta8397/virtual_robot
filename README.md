@@ -92,6 +92,10 @@ LOG OF CHANGES
 CHANGES 1/22/2021
     Changed telemetry to match (nearly completely) the API of the FTC SDK (but no speech). Also, add stack trace output 
     for exceptions thrown by op modes.
+	
+CHANGES 12/28/2020
+    Introduced support for game elements for the Ultimate Goal game including rings and wobble goal.  Robots can
+    interact with game elements, and the human player (to return rings) is also simulated.  
 
 CHANGES 9/20/2020
     Added Swerve robot configuration. Each of four swerve units has: a DcMotor for drive, a CR-Servo for steering,

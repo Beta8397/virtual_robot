@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="EntryPointsManager">
+    <list size="1">
+      <item index="0" class="java.lang.String" itemvalue="com.qualcomm.robotcore.eventloop.opmode.TeleOp" />
+    </list>
+    <writeAnnotations>
+      <writeAnnotation name="javafx.fxml.FXML" />
+    </writeAnnotations>
+  </component>
   <component name="JavadocGenerationManager">
     <option name="OUTPUT_DIRECTORY" value="$PROJECT_DIR$/doc/javadoc" />
   </component>

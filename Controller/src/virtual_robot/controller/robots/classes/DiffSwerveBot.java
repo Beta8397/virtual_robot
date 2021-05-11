@@ -178,10 +178,10 @@ public class DiffSwerveBot extends VirtualBot {
 
     }
 
-    @Override
     /**
      * Constrain robot to the boundaries X_MIN, X_MAX, Y_MIN, Y_MAX
      */
+    @Override
     protected void constrainToBoundaries(){
 
         double effectiveHalfBotWidth;    //Use this to keep corner of robot from leaving field
@@ -190,19 +190,19 @@ public class DiffSwerveBot extends VirtualBot {
         else if (headingRadians <= Math.PI/2.0) effectiveHalfBotWidth = halfBotWidth * (Math.sin(headingRadians) + Math.cos(headingRadians));
         else effectiveHalfBotWidth = halfBotWidth * (Math.sin(headingRadians) - Math.cos(headingRadians));
 
-        if (x >  (X_MAX - effectiveHalfBotWidth)) {
-            x = X_MAX - effectiveHalfBotWidth;
+        if (x >  (field.X_MAX - effectiveHalfBotWidth)) {
+            x = field.X_MAX - effectiveHalfBotWidth;
             velocity.x = Math.min(velocity.x, 0);
-        } else if (x < (X_MIN + effectiveHalfBotWidth)) {
-            x = X_MIN + effectiveHalfBotWidth;
+        } else if (x < (field.X_MIN + effectiveHalfBotWidth)) {
+            x = field.X_MIN + effectiveHalfBotWidth;
             velocity.x = Math.max(velocity.x, 0);
         }
 
-        if (y > (Y_MAX - effectiveHalfBotWidth)){
-            y = Y_MAX - effectiveHalfBotWidth;
+        if (y > (field.Y_MAX - effectiveHalfBotWidth)){
+            y = field.Y_MAX - effectiveHalfBotWidth;
             velocity.y = Math.min(velocity.y, 0);
-        } else if (y < (Y_MIN + effectiveHalfBotWidth)) {
-            y = Y_MIN + effectiveHalfBotWidth;
+        } else if (y < (field.Y_MIN + effectiveHalfBotWidth)) {
+            y = field.Y_MIN + effectiveHalfBotWidth;
             velocity.y = Math.max(velocity.y, 0);
         }
     }
