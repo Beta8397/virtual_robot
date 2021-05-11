@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Group?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.text.Font?>
+
+<Group xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="virtual_robot.robots.classes.ProgrammingBoard">
+<children>
+    <Rectangle fx:id="rectBoard" arcHeight="5.0" arcWidth="5.0" fill="#ddd2a1" height="400.0" onDragDetected="#handleMouseEvents" onMouseDragOver="#handleMouseEvents" stroke="BLACK" strokeType="INSIDE" width="400.0" />
+    <Circle fill="GREY" radius="40.0" stroke="BLACK" strokeType="INSIDE" translateX="300.0" translateY="300.0" />
+    <Group fx:id="propGroup" translateX="250.0" translateY="250.0">
+        <children>
+            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="100.0" stroke="BLACK" strokeType="INSIDE" translateX="40.0" width="20.0" />
+            <!--
+            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="20.0" stroke="BLACK" strokeType="INSIDE" translateY="40.0" width="100.0" />
+            -->
+            <Circle radius="8.0" stroke="BLACK" strokeType="INSIDE" translateX="50.0" translateY="50.0" />
+        </children>
+    </Group>
+    <Rectangle arcHeight="5.0" arcWidth="5.0" height="80.0" stroke="BLACK" strokeType="INSIDE" width="50.0" x="175.0" y="170.0" />
+    <Group fx:id="servoArmGroup" translateX="175.0" translateY="170.0">
+        <children>
+            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="MAGENTA" height="10.0" stroke="BLACK" strokeType="INSIDE" translateX="20.0" translateY="20.0" width="60.0" />
+            <Circle fill="SILVER" radius="10.0" stroke="BLACK" strokeType="INSIDE" translateX="25.0" translateY="25.0" />
+        </children>
+    </Group>
+    <Button fx:id="btnTouch" maxHeight="60.0" maxWidth="60.0" minHeight="65.0" minWidth="60.0" mnemonicParsing="false" onMouseExited="#handleMouseEvents" onMousePressed="#handleMouseEvents" onMouseReleased="#handleMouseEvents" prefHeight="60.0" prefWidth="60.0" text="TOUCH" translateX="70.0" translateY="270.0" />
+    <Slider fx:id="sldPot" blockIncrement="0.1" majorTickUnit="1.0" max="5.0" maxHeight="120.0" maxWidth="20.0" minHeight="120.0" minWidth="20.0" minorTickCount="10" orientation="VERTICAL" prefHeight="120.0" prefWidth="20.0" translateX="90.0" translateY="40.0" />
+    <Circle fx:id="circleColor" radius="30.0" stroke="BLACK" strokeType="INSIDE" translateX="350.0" translateY="80.0" />
+    <Group translateX="190.0" translateY="30.0">
+        <children>
+            <VBox>
+                <children>
+                  <HBox>
+                     <children>
+                        <Label text="R" />
+                          <Slider fx:id="sldRed" blockIncrement="1.0" majorTickUnit="50.0" max="255.0" maxHeight="20.0" maxWidth="100.0" minHeight="20.0" minWidth="100.0" minorTickCount="10" prefHeight="20.0" prefWidth="100.0">
+                           <HBox.margin>
+                              <Insets left="5.0" />
+                           </HBox.margin>
+                          </Slider>
+                     </children>
+                  </HBox>
+                  <HBox>
+                     <children>
+                        <Label text="G" />
+                          <Slider fx:id="sldGreen" blockIncrement="1.0" majorTickUnit="50.0" max="255.0" maxHeight="20.0" maxWidth="100.0" minHeight="20.0" minWidth="100.0" minorTickCount="10" prefHeight="20.0" prefWidth="100.0">
+                           <HBox.margin>
+                              <Insets left="5.0" />
+                           </HBox.margin>
+                          </Slider>
+                     </children>
+                  </HBox>
+                  <HBox>
+                     <children>
+                        <Label text="B" />
+                          <Slider fx:id="sldBlue" blockIncrement="1.0" majorTickUnit="50.0" max="255.0" maxHeight="20.0" maxWidth="100.0" minHeight="20.0" minWidth="100.0" minorTickCount="10" prefHeight="20.0" prefWidth="100.0">
+                           <HBox.margin>
+                              <Insets left="5.0" />
+                           </HBox.margin>
+                          </Slider>
+                     </children>
+                  </HBox>
+                  <HBox>
+                     <children>
+                        <Label text="D" />
+                        <Slider fx:id="sldDist" blockIncrement="1.0" majorTickUnit="10.0" max="300.0" maxHeight="20.0" maxWidth="100.0" minHeight="20.0" minWidth="100.0" minorTickCount="1" prefHeight="20.0" prefWidth="100.0">
+                           <HBox.margin>
+                              <Insets left="5.0" />
+                           </HBox.margin>
+                        </Slider>
+                     </children>
+                     <VBox.margin>
+                        <Insets top="15.0" />
+                     </VBox.margin>
+                  </HBox>
+                </children>
+            </VBox>
+        </children>
+    </Group>
+    <Label text="RGB - DIST" translateX="210.0" translateY="5.0">
+        <font>
+            <Font size="18.0" />
+        </font>
+    </Label>
+    <Label text="POT" translateX="40.0" translateY="80.0">
+        <font>
+            <Font size="18.0" />
+        </font>
+    </Label>
+</children>
+</Group>

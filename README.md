@@ -1,38 +1,38 @@
 # A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
 
-New: Programming Board configuration to serve as a companion to the book "Learn Java For FTC", by Alan Smith. The
+New: Modification to allow game elements from Daniel McDonald, BotsOfPrey. In addition, modified to 
+incorporate the dyn4j 2D physics and collision engine.
+
+Includes Programming Board configuration to serve as a companion to the book "Learn Java For FTC", by Alan Smith. The
 PDF can be [downloaded for free](https://github.com/alan412/LearnJavaForFTC) or you can purchase the paperback on
 [Amazon](https://www.amazon.com/dp/B08DBVKXLZ).
-
-Also: Updated to allow use of either a full field or remote (8 x 12 ft) field for Ultimate Goal.
-
-And: Addition of new Swerve robot configuration.
     
 ![](/readme_image.JPG)
 
 This is a JavaFX application developed using the (free) IntelliJ IDEA Community Edition IDE. The repository can be downloaded
-and unzipped, then opened with IntelliJ. It can also be run using Android Studio (see this [video](https://www.youtube.com/watch?v=pmaT9Twbmao)).
+and unzipped, then opened with IntelliJ. It can also be run using Android Studio 
+(see this [video](https://www.youtube.com/watch?v=pmaT9Twbmao)).
 
-Six robot configurations are available: a simple two-wheeled robot, a robot with four mecanum wheels, an
-X-Drive robot with four OmniWheels mounted at 45 degrees at each corner of the robot, a mecanum-wheeled 
-configuration that has an extendable arm with a grabber at the end, a mecanum-wheeled configuration with
-three "Dead-wheel" encoders for odometry, and a swerve-drive robot with four swerve units (each with a drive
-motor, a cr-servo for steering, and an encoder to monitor steering).
+Multiple robot configurations are available. MecanumBot has a mecanum drive with a servo-driven arm at the back, 
+and with three dead-wheel encoders.  BetaBot is a mecanum-drive bot with a rear intake, a ring shooter, and a 
+front "scoop" for moving wobble goals. XDriveBot has four corner-mounted Omni-wheels, a rear arm driven by a cr-servo, 
+and three dead-wheel encoders. ArmBot is a mecanum drive bot with a motor-driven arm and servo-driven grabble; it 
+provides a purely kinematic simulation (no interaction with game elements). Several other configurations (SwerveBot, 
+DiffSwerveBot, etc) are available, but are currently disabled. They can be enabled by un-commenting the @Botconfig 
+annotations in their configuration classes (package virtual_robot.robots.classes).
 
 Each robot can be thought of as 18 inches wide.  For the two-wheel bot and mecanum wheel bots, the distance between
 the centers of the right and left wheels is 16 inches. For the mecanum wheel bots, the distance between the centers
 of the front and back wheels is 14 inches, and the mecanum wheels (when viewed from the top) have an "X" configuration.
 For the X-Drive bot, the distance between the centers of any two adjacent wheels is 14.5 inches. Each motor has an
-encoder. There is a downward-facing color sensor in the center of the robot. A gyro sensor (or BNO055 imu) is also included.
-The ArmBot has an extendable arm (DcMotor operated) with a grabber (Servo-operated) at the end. The other robots
-have a simple rotating arm at the back. For the Mechanum bot and Two-Wheeled bot, the arm is controlled by a servo.
-For the X-Drive bot, the arm is controlled by a CR servo. Each robot also has distance sensors on the front, left, right
-and back sides. A small green rectangle indicates the front of the robot. Wheel diameters are all 4 inches. The bot 
-with "Dead-wheel" encoders ("EncoderBot") has three dead-wheel encoders; the forward-reverse encoder wheels are 
-mounted 6 inches to the right and left of center, while the X-direction (i.e., right-left) encoder wheel is
-mounted at the center. The dead-wheels are two inches in diameter.
+encoder. There is a downward-facing color sensor in the center of each robot. A BNO055 IMU is also 
+included. Each robot also has distance sensors on the front, left, right and back sides. A small green rectangle 
+indicates the front of each robot. Wheel diameters are all 4 inches. For the robots with dead-wheel encoders 
+(MecanumBot and XDriveBot), the forward-reverse encoder wheels are mounted 6 inches to the right and left of center, 
+while the X-direction (i.e., right-left) encoder wheel is mounted at the center. The dead-wheels are two inches in 
+diameter. Positioning of the dead-wheels can be changed easily in the robot configuration classes.
 
-The field can be thought of as 12 feet wide. The field graphic (currently the Skystone field)
+The field can be thought of as 12 feet wide. The field graphic (currently the Ultimate Goal field)
 is obtained from a bitmap (.bmp) image. The color sensor detects the field color beneath the center of the
 robot. The field graphic is easily changed by providing a different .bmp image in the virtual_robot.config.Config class.
 The .bmp image is the skysone_field648.bmp file in the virtual_robot.assets folder. If a different .bmp image is used,
@@ -43,28 +43,30 @@ most laptops). The Config class also allows selection between the use of "real" 
 In addition to the robot configurations described above, there is an additional configuration called
 "ProgrammingBoard". It is meant to emulate the programming board described in the book "Learn Java For FTC", by
 Alan Smith.  (The PDF can be [downloaded for free](https://github.com/alan412/LearnJavaForFTC) or you can purchase 
-the paperback on [Amazon](https://www.amazon.com/dp/B08DBVKXLZ).)
-It is a board with several hardware devices attached: DcMotor, Servo, Potentiometer, Touch Sensor,
-and a Color-Distance Sensor. It also has a BNO055 IMU. The board doesn't move around the field, but it can
-be rotated (to test the IMU) by dragging the board chassis.
+the paperback on [Amazon](https://www.amazon.com/dp/B08DBVKXLZ).) It is a board with several hardware devices 
+attached: DcMotor, Servo, Potentiometer, Touch Sensor, and a Color-Distance Sensor. It also has a BNO055 IMU. 
+The board doesn't move around the field, but it can be rotated (to test the IMU) by dragging the board chassis.
 
 An abridged approximation of the FTC SDK is provided.
 
-User-defined OpModes must be placed in the org.firstinspires.ftc.teamcode package, and must extend OpMode (or LinearOpMode). OpModes are
-registered by placing a @TeleOp or @Autonomous annotation immediately above the class declaration.
+User-defined OpModes must be placed in the org.firstinspires.ftc.teamcode package, and must extend OpMode 
+(or LinearOpMode). OpModes are registered by placing a @TeleOp or @Autonomous annotation immediately above the class 
+declaration.
 
 The OpMode (and therefore LinearOpMode) class in the simulator provides access to:
 
-  1. A HardwareMap object, which in turn provides access to the DCMotor objects, the gyro sensor, distance sensors,
-     the servo, and the color sensor;
-  2. Two GamePads(actual hardware gamepads, though there is an option to use a "virtual gamepad -- see Log of Changes below");
+  1. A HardwareMap object, which in turn provides access to the DCMotor objects, the BNO055 IMU sensor, distance 
+     sensors, the servo, and the color sensor;
+  2. Two GamePads(actual hardware gamepads, though there is an option to use a "virtual gamepad" -- see Log of 
+     Changes below);
   3. A Telemetry object.
 
 An approximation of the FTC SDK's ElapsedTime class is provided in the time package.
 
-Several example OpModes are provided in the org.firstinspires.ftc.teamcode package.
-
-Some recent changes have simplified the process of creating new robot configurations (see  Log of Changes below).
+Several example OpModes are provided in the org.firstinspires.ftc.teamcode package. To minimize clutter, a number 
+of sample op modes are currently disabled; they can be re-enabled by commenting out the @Disabled annotation. A 
+number of robot configurations are also disabled. A robot configuration can be re-enabled by finding its class 
+in the virtual_robot.robots.classes package, and un-commenting its @BotConfig annotation.
 
 To use:
 
@@ -73,9 +75,9 @@ To use:
   2. Download the virtual_robot .zip, and extract contents. Open the project in IntelliJ. You'll see three modules in
      the project (Controller, TeamCode, and virtual_robot) -- the only module you'll need to touch is TeamCode. It
      contains the org.firstinspires.ftc.teamcode package.
-  3. Write your OpModes in the org.firstinspires.ftc.teamcode package; make sure to include a @TeleOp or @Autonomous annotation. These must
-    extend the OpMode class (may either extend OpMode OR LinearOpMode). OpMode must provide init() and loop() methods;
-     LinearOpMode must provide runOpMode() method.
+  3. Write your OpModes in the org.firstinspires.ftc.teamcode package; make sure to include a @TeleOp or @Autonomous 
+     annotation. These must extend the OpMode class (may either extend OpMode OR LinearOpMode). OpMode must provide 
+     init() and loop() methods; LinearOpMode must provide runOpMode() method.
   4. Make sure at least one gamepad is plugged in to the computer.
   5. Run the application (by clicking the green arrowhead at the toolbar).
   6. Press start-A or start-B on gamepad(s) to select which is gamepad1 vs. gamepad2.
@@ -88,6 +90,15 @@ To use:
 
 
 LOG OF CHANGES
+
+CHANGES 5/7/2021
+    Incorporated changes from Daniel McDonald/Bots Of Prey to allow interaction with game elements. Then, 
+    to accommodate future games and simplify collision handling, incorporated the dyn4j physics and collision 
+    engine. Most robot configurations have been modified to work with the physics engine (though ArmBot has
+    not, and provides a purely kinematic simulation). Only one configuration, BetaBot, actually takes up game
+    elements (rings) and shoots them. A NoGame simulation is available: in Convig.java, just set
+    GAME = NoGame(). For the physics simulation, the friction coefficient between the robot wheels and the field is 
+    currently very high (10), so there is virtually no skidding. This can be modified in the Config.java class.
 
 CHANGES 1/22/2021
     Changed telemetry to match (nearly completely) the API of the FTC SDK (but no speech). Also, add stack trace output 
@@ -130,8 +141,8 @@ CHANGES 12/16/2019
     in the group can be given fx:id attributes, which make them accessible in the robot config class by using
     a @FXML annotation. The easiest way to create a new configuration is to copy, then modify, the ".java" and ".fxml"
     files from an existing configuration (for example, MechanumBot.java and mechanum_bot.fxml). See extensive comments
-    in the virtual_robot.controller.VirtualBot and virtual_robot.controller.robots.classes.ArmBot classes and the
-    virtual_robot.controller.robots.fxml.arm_bot.fxml file for more explanation.
+    in the virtual_robot.controller.VirtualBot and virtual_robot.robots.classes.ArmBot classes and the
+    virtual_robot.robots.fxml.arm_bot.fxml file for more explanation.
 
 CHANGES 12/12/2019
     Changes made to all more versatile building of new robot configurations. A transparent robot base layer (equal in
@@ -156,7 +167,7 @@ CHANGES 8/17/2019
 CHANGES 8/4/2019
     To better approximate real robot behavior, latency of 175ms added to the standard gyro sensor (used only on the
     Two-Wheel Bot). That is, updated values are available only every 175ms. The amount of latency can be changed
-    easily in the createHardwareMap method of the virtual_robot.controller.robots.classes.TwoWheelBot class. Will probably make a
+    easily in the createHardwareMap method of the virtual_robot.robots.classes.TwoWheelBot class. Will probably make a
     similar change to the BNO055IMU soon.
 
 CHANGES 7/10/2019
