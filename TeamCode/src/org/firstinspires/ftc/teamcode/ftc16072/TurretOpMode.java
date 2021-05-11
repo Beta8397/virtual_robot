@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.ftc16072;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -7,6 +8,7 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.ftc16072.Util.Polar;
 
+@Disabled
 @TeleOp(name = "0 - TurretOpMode", group = "ftc16072")
 public class TurretOpMode extends OpMode {
     private Robot robot = new Robot();

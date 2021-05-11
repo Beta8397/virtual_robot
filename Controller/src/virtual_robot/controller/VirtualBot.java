@@ -1,26 +1,28 @@
 package virtual_robot.controller;
 
-import javafx.collections.ObservableList;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import virtual_robot.config.Config;
+import org.dyn4j.dynamics.Body;
+import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.geometry.Transform;
+import org.dyn4j.world.World;
 
 /**
  *   For internal use only. Abstract base class for all of the specific robot configurations.
  *
- *   A robot config class that extend VirtualBot must:
+ *   The VirtualBot class does not require use of the physics engine. Classes that extend
+ *   VirtualBot can utilize the physics engine, or not.
+ *
+ *   A robot config class that extends VirtualBot must:
  *
  *   1) Provide a no-argument constructor whose first statement is super();
  *   2) Be the controller class for an .fxml file that defines the graphical respresentation of the bot;
@@ -31,8 +33,10 @@ import virtual_robot.config.Config;
  *   Optionally (and in most cases), it will also be necessary to:
  *
  *   1) Provide a public initialize() method for initialization of accessories whose appearance will change
- *      as the robot operates.
+ *      as the robot operates, and to set up for use of physics engine, if applicable.
  *   2) Override the public synchronized updateDisplay() method to update the appearance of accessories.
+ *   3) Override the removeFromWorld() method to remove not only the chassisBody, but any additional
+ *      Bodys that have been created to represent robot components.
  *
  *   The ArmBot class has detailed comments regarding the workings of these methods.
  *
@@ -45,7 +49,14 @@ public abstract class VirtualBot {
 
     protected Group displayGroup = null;
 
-    protected StackPane fieldPane;
+    // dyn4j Body, BodyFixture, and Shape for the robot chassis
+    protected Body chassisBody = null;
+    protected BodyFixture chassisFixture = null;
+    protected org.dyn4j.geometry.Rectangle chassisRectangle = null;
+
+    protected World<Body> world;
+
+    protected Pane fieldPane;
     protected double halfBotWidth;
     protected double botWidth;
 
@@ -56,17 +67,19 @@ public abstract class VirtualBot {
     protected volatile double x = 0;
     protected volatile double y = 0;
     protected volatile double headingRadians = 0;
-    protected final VirtualField field;
+
+    protected Translate botTranslate = null;
+    protected Rotate botRotate = null;
 
     public double getX() { return x; }
     public double getY() { return y; }
     public double getHeadingRadians(){ return headingRadians; }
 
     public VirtualBot(){
-        field = controller.getField();
-        fieldPane = field.fieldPane;
-        botWidth = field.fieldWidth / 8.0;
+        fieldPane = controller.getFieldPane();
+        botWidth = VirtualField.FIELD_WIDTH / 8.0;
         halfBotWidth = botWidth / 2.0;
+        world = controller.getWorld();
     }
 
     /**
@@ -75,11 +88,21 @@ public abstract class VirtualBot {
      */
     public void initialize(){
         createHardwareMap();
+        setUpChassisBody();
     }
 
     static void setController(VirtualRobotController ctrl){
         controller = ctrl;
     }
+
+    /**
+     *  Set up the chassisBody and add it to the dyn4j world. This method creates a Body and adds a BodyFixture
+     *  containing a Rectangle. Add the chassis body to the world.
+     *
+     *  Overriding this method is optional. The default do-nothing implementation is for a robot that
+     *  is not controlled by the dyn4j physics engine.
+     */
+    public void setUpChassisBody(){ }
 
     /**
      * Set up the Group object that will be displayed as the virtual robot. The resource file should contain
@@ -91,46 +114,33 @@ public abstract class VirtualBot {
 
         displayGroup = group;
 
-        /*
-           Create a transparent 600x600 rectangle to serve as the base layer of the robot. It will go
-           below the 75x75 chassis rectangle.
-        */
-
-        Rectangle baseRect = new Rectangle(0, 0, 600, 600);
-        baseRect.setFill(new Color(1.0, 0.0, 1.0, 0.0));
-        baseRect.setVisible(true);
+        // This transform ensures that (x=0,y=0) corresponds to the center of the field.
+        displayGroup.getTransforms().add(new Translate(VirtualField.HALF_FIELD_WIDTH - halfBotWidth,
+                VirtualField.HALF_FIELD_WIDTH - halfBotWidth));
 
         /*
-          Translate the display group by (300 - 37.5) in X and Y, so that the
-          center of the chassis rectangle will be at the same location as the center of the 600x600 base
-          rectangle.
+         * The following transforms will be appled in the reverse order to that in which they are added
          */
 
-        displayGroup.setTranslateX(displayGroup.getTranslateX() + 300 - 37.5);
-        displayGroup.setTranslateY(displayGroup.getTranslateY() + 300 - 37.5);
+        // This will be used to display the bot at its current position (x,y)
+        botTranslate = new Translate(0, 0);
+        displayGroup.getTransforms().add(botTranslate);
 
-        //Create a new display group with the 600x600 transparent rectangle as its base layer, and
-        //the original display group as its upper layer.
+        // This will be used to display the bot at the correct heading
+        botRotate = new Rotate(0, halfBotWidth, halfBotWidth);
+        displayGroup.getTransforms().add(botRotate);
 
-        displayGroup = new Group(baseRect, displayGroup);
-
-        /*
-          Add transforms. They will be applied in the opposite order from the order in which they are added.
-          The scale transform scales the entire display group so that the base layer has the same width as the field,
-          and the chassis rectangle (originally the 75x75 rectangle) is one-eight of the field width.
-          The rotate and translate transforms are added so that they can be manipulated later, when the robot moves
-          around the field.
-         */
-        displayGroup.getTransforms().add(new Translate(0, 0));
-        displayGroup.getTransforms().add(new Rotate(0, field.halfFieldWidth, field.halfFieldWidth));
-        displayGroup.getTransforms().add(new Scale(botWidth/75.0, botWidth/75.0, 0, 0));
+        // This will adjust the bot to the correct size, based on size of the field display
+        displayGroup.getTransforms().add(new Scale(botWidth/75, botWidth/75, 0, 0));
 
         fieldPane.getChildren().add(displayGroup);
     }
 
     /**
      *  Update the state of the robot. This includes the x, y, and headingRadians variables, as well other variables
-     *  that may need to be updated for a specific robot configuration.
+     *  that may need to be updated for a specific robot configuration. This may include changes in the physics
+     *  body for the VirtualBot, or changes to game elements (if a listener has flagged that the robot should
+     *  take control of a game element).
      *
      *  Also, update the robot's sensors by calling the update.. methods of the sensors (e.g., the
      *  updateDistance(...) method of the distance sensors).
@@ -158,10 +168,9 @@ public abstract class VirtualBot {
         double displayX = x;
         double displayY = -y;
         double displayAngle = -headingRadians * 180.0 / Math.PI;
-        Translate translate = (Translate)displayGroup.getTransforms().get(0);
-        translate.setX(displayX);
-        translate.setY(displayY);
-        ((Rotate)displayGroup.getTransforms().get(1)).setAngle(displayAngle);
+        botTranslate.setX(displayX);
+        botTranslate.setY(displayY);
+        botRotate.setAngle(displayAngle);
     }
 
     /**
@@ -170,30 +179,57 @@ public abstract class VirtualBot {
     public abstract void powerDownAndReset();
 
 
+    /**
+     * Position the VirtualBot on the field using a MouseEvent.
+     * This also makes the necessary adjustment to the position of the dyn4j chassis Body,
+     * and ensures that the chassis body is stationary, with no accumulated forces.
+     *
+     * NOTE: For a robot that includes additional Bodys attached by joints, Override this method.
+     * First call can be super. Then, set the linear and angular velocities of any attached
+     * Bodys to zero, and clear their accumulated forces/torques. As long a they are attached by rigid
+     * joints to the chassis body, it shouldn't be necessary to explicitly position them.
+     * @param arg
+     */
     public synchronized void positionWithMouseClick(MouseEvent arg){
 
         if (arg.getButton() == MouseButton.PRIMARY) {
-//            double argX = Math.max(halfBotWidth, Math.min(fieldWidth - halfBotWidth, arg.getX()));
-//            double argY = Math.max(halfBotWidth, Math.min(fieldWidth - halfBotWidth, arg.getY()));
-//            x = argX - halfFieldWidth;
-//            y = halfFieldWidth - argY;
-            x = arg.getX() - field.halfFieldWidth;
-            y = field.halfFieldWidth - arg.getY();
+            x = arg.getX() - VirtualField.HALF_FIELD_WIDTH;
+            y = VirtualField.HALF_FIELD_WIDTH - arg.getY();
             constrainToBoundaries();
             updateDisplay();
         }
         else if (arg.getButton() == MouseButton.SECONDARY){
-            double centerX = x + field.halfFieldWidth;
-            double centerY = field.halfFieldWidth - y;
+            double centerX = x + VirtualField.HALF_FIELD_WIDTH;
+            double centerY = VirtualField.HALF_FIELD_WIDTH - y;
             double displayAngleRads = Math.atan2(arg.getX() - centerX, centerY - arg.getY());
             headingRadians = -displayAngleRads;
             constrainToBoundaries();
             updateDisplay();
         }
+
+        if (chassisBody != null){
+            Transform t = new Transform();
+            t.rotate(headingRadians);
+            t.translate(x/ VirtualField.PIXELS_PER_METER, y/ VirtualField.PIXELS_PER_METER);
+            chassisBody.setTransform(t);
+            chassisBody.setLinearVelocity(0, 0);
+            chassisBody.setAngularVelocity(0);
+            chassisBody.clearAccumulatedForce();
+            chassisBody.clearAccumulatedTorque();
+        }
+
     }
 
-    public void removeFromDisplay(StackPane fieldPane){
+    public void removeFromDisplay(Pane fieldPane){
         fieldPane.getChildren().remove(displayGroup);
+    }
+
+    /**
+     * Remove chassisBody (if not null) from world. If subclass adds more Bodys, this method will need
+     * to be overridden (with a call to super.removeFromWorld())
+     */
+    public void removeFromWorld(){
+        if (chassisBody != null && world.containsBody(chassisBody)) world.removeBody(chassisBody);
     }
 
     public HardwareMap getHardwareMap(){ return hardwareMap; }
@@ -206,19 +242,20 @@ public abstract class VirtualBot {
 
     /**
      * Constrain robot to the boundaries X_MIN, X_MAX, Y_MIN, Y_MAX
+     * If physics simulation is being used, this should not be called during active simulation (just let robot collide
+     * with walls). But, it is needed for positioning robot with mouse.
      */
     protected void constrainToBoundaries(){
-
         double effectiveHalfBotWidth;    //Use this to keep corner of robot from leaving field
         if (headingRadians <= -Math.PI/2.0) effectiveHalfBotWidth = -halfBotWidth * (Math.sin(headingRadians) + Math.cos(headingRadians));
         else if (headingRadians <= 0) effectiveHalfBotWidth = halfBotWidth * (Math.cos(headingRadians) - Math.sin(headingRadians));
         else if (headingRadians <= Math.PI/2.0) effectiveHalfBotWidth = halfBotWidth * (Math.sin(headingRadians) + Math.cos(headingRadians));
         else effectiveHalfBotWidth = halfBotWidth * (Math.sin(headingRadians) - Math.cos(headingRadians));
 
-        if (x >  (field.X_MAX - effectiveHalfBotWidth)) x = field.X_MAX - effectiveHalfBotWidth;
-        else if (x < (field.X_MIN + effectiveHalfBotWidth)) x = field.X_MIN + effectiveHalfBotWidth;
-        if (y > (field.Y_MAX - effectiveHalfBotWidth)) y = field.Y_MAX - effectiveHalfBotWidth;
-        else if (y < (field.Y_MIN + effectiveHalfBotWidth)) y = field.Y_MIN + effectiveHalfBotWidth;
+        if (x >  (VirtualField.X_MAX - effectiveHalfBotWidth)) x = VirtualField.X_MAX - effectiveHalfBotWidth;
+        else if (x < (VirtualField.X_MIN + effectiveHalfBotWidth)) x = VirtualField.X_MIN + effectiveHalfBotWidth;
+        if (y > (VirtualField.Y_MAX - effectiveHalfBotWidth)) y = VirtualField.Y_MAX - effectiveHalfBotWidth;
+        else if (y < (VirtualField.Y_MIN + effectiveHalfBotWidth)) y = VirtualField.Y_MIN + effectiveHalfBotWidth;
     }
 
 }

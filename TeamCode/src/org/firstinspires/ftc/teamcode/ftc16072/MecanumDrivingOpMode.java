@@ -12,6 +12,7 @@ public class MecanumDrivingOpMode extends OpMode {
     @Override
     public void init() {
         mecanumDrive.init(hardwareMap);
+        gamepad1.setJoystickDeadzone(0.05f);
     }
 
     // Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP

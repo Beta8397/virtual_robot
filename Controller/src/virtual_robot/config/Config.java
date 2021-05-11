@@ -9,7 +9,7 @@ public class Config {
     /**
      * FRACTION OF TOTAL FIELD TO CONSTRAIN ROBOT MOTION
      */
-    public static final double X_MIN_FRACTION = 0; //0 for WHOLE FIELD OR BLUE REMOTE, 0.3333 for RED REMOTE FIELD
+    public static final double X_MIN_FRACTION = 0.3333; //0 for WHOLE FIELD OR BLUE REMOTE, 0.3333 for RED REMOTE FIELD
     public static final double X_MAX_FRACTION = 1; //1 for WHOLE FIELD OR RED REMOTE, 0.6667 for BLUE REMOTE FIELD
     public static final double Y_MIN_FRACTION = 0;  //Leave this alone for Ultimate Goal
     public static final double Y_MAX_FRACTION = 1;  //Leave this alone for Ultimate Goal
@@ -43,4 +43,11 @@ public class Config {
      * on the VirtualGameElement implementations.
      */
     public static final Game GAME = new UltimateGoal();
+
+    /**
+     * Friction coefficient between field and robot wheels. A very high value will minimize the effect
+     * of collisions on robot kinetics, but will allow robot to push game elements substantially into
+     * the wall.
+     */
+    public static final double FIELD_FRICTION_COEFF = 10;
 }

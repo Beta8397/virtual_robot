@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.Group?><?import javafx.scene.paint.RadialGradient?><?import javafx.scene.paint.Stop?><?import javafx.scene.shape.Circle?><?import javafx.scene.shape.Rectangle?><?import javafx.scene.control.Label?>
+
+<Group xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="virtual_robot.robots.classes.TurretBot">
+    <children>
+
+        <!--The lowest child objecet is a yellow rectangle measuring 75x75-->
+        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="YELLOW" height="75.0" stroke="BLACK"
+            strokeType="INSIDE" width="75.0" />
+
+        <!--Left back wheel-->
+        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="20.0" stroke="BLACK"
+            strokeType="INSIDE" width="10.0" y="55.0" />
+
+        <!--Left front wheel-->
+        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="20.0" stroke="BLACK"
+            strokeType="INSIDE" width="10.0" />
+
+        <!--Right front wheel-->
+        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="20.0" stroke="BLACK"
+            strokeType="INSIDE" width="10.0" x="65.0" />
+
+        <!--Right back wheel-->
+        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="20.0" stroke="BLACK"
+            strokeType="INSIDE" width="10.0" x="65.0" y="55.0" />
+
+        <!--Green square indicating the front center of the robot-->
+        <Rectangle arcHeight="5.0" fill="LIME" height="10.0" stroke="BLACK" strokeType="INSIDE"
+            width="10.0" x="32.5" />
+
+        <!--The color sensor-->
+        <Circle centerX="37.0" centerY="37.0" radius="10.0" strokeType="INSIDE" strokeWidth="0.0">
+            <fill>
+                <RadialGradient centerX="0.4722222222222222" centerY="0.4666666666666667"
+                    radius="0.6046511627906976">
+                    <stops>
+                        <Stop color="#3900ff" />
+                        <Stop color="#ff00b6" offset="0.15649563534383953" />
+                        <Stop color="#ff1100" offset="0.32195757791207485" />
+                        <Stop color="#ffee00" offset="0.4880910060433701" />
+                        <Stop color="#18ff00" offset="0.675751471343366" />
+                        <Stop color="#00fffc" offset="0.8281391950073069" />
+                        <Stop color="WHITE" offset="1.0" />
+                    </stops>
+                </RadialGradient>
+            </fill>
+        </Circle>
+
+        <!-- The arm: note the fx:id attribute. This will instantiate a variable named "turret" in the TurretBot class. That
+             variable is of type Rectangle and is annotated with @FXML-->
+        <Rectangle fx:id="turret" arcHeight="5.0" arcWidth="5.0" fill="GRAY" height="35.0"
+            stroke="BLACK" strokeType="INSIDE" width="10.0" x="32.5" y="0.0" />
+        <Label fx:id="elevation" text="15.0" translateX="20.0" translateY="40.0" />
+    </children>
+</Group>
