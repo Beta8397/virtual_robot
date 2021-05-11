@@ -386,9 +386,8 @@ public class VirtualRobotController {
     }
 
     private void setupCbxOpModes(){
-        //Reflections reflections = new Reflections(VirtualRobotApplication.class.getClassLoader());
-        Reflections reflections = new Reflections("");
-        //Reflections reflections = new Reflections("Autonomous.OpModes.UltimateAuto");
+//        Reflections reflections = new Reflections("");
+        Reflections reflections = new Reflections("org.firstinspires.ftc.teamcode");
         Set<Class<?>> opModes = new HashSet<>();
         opModes.addAll(reflections.getTypesAnnotatedWith(TeleOp.class));
         opModes.addAll(reflections.getTypesAnnotatedWith(Autonomous.class));//Lists of OpMode classes and OpMode Names
@@ -865,10 +864,7 @@ public class VirtualRobotController {
                     break;
             }
         }
-        
-        public synchronized void setDistance(double distance) {
-            distanceMM = distance;
-        }
+
     }
 
 
