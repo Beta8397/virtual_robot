@@ -24,8 +24,13 @@ public class DcMotorImpl implements DcMotor {
     //power is the requested speed, normalized to the -1 to +1 range
     private double power = 0.0;
 
-    //speed is the actual speed, normalized to the -1 to +1 range
-    private double speed = 0.0;
+    /*
+     * actualSpeed is current motor "actual speed", normalized to the -1 to +1 range. This refers
+     * to the rate at which the output shaft is rotating in the CLOCKWISE direction (when viewed from
+     * the shaft end). This will be equal in magnitude to speed, but may differ in sign, depending
+     * upon the values of direction and MOTOR_TYPE.reversed.
+     */
+    private double actualSpeed = 0.0;
 
     //actual position of motor
     private double actualPosition = 0.0;
@@ -41,6 +46,11 @@ public class DcMotorImpl implements DcMotor {
 
     private ZeroPowerBehavior zeroPowerBehavior = ZeroPowerBehavior.BRAKE;
 
+    // Physical limits on output shaft travel
+    private double upperActualPositionLimit = 0;
+    private double lowerActualPositionLimit = 0;
+    private boolean upperPositionLimitEnabled = false;
+    private boolean lowerPositionLimitEnabled = false;
 
 
     /**
@@ -131,50 +141,100 @@ public class DcMotorImpl implements DcMotor {
      * @param milliseconds number of milliseconds since last update
      * @return change in actualPosition
      */
+//    public synchronized double oldUpdate(double milliseconds){
+//        double speedChange, avgSpeed;
+//        if (mode == RunMode.STOP_AND_RESET_ENCODER) return 0.0;
+//        else if (mode == RunMode.RUN_TO_POSITION){
+//            double targetSpeed = COEFF_PROPORTIONATE * (double)(targetPosition - getCurrentPosition())
+//                    / MOTOR_TYPE.MAX_TICKS_PER_SECOND;
+//            double absPower = Math.abs(power);
+//            targetSpeed = Math.max(-absPower, Math.min(targetSpeed, absPower));
+//            speedChange = (1.0 - inertia) * (targetSpeed - speed);
+//            avgSpeed = speed + speedChange / 2.0;
+//            speed = speed + speedChange;
+//        } else {
+//            speedChange = (1.0 - inertia) * (power - speed);
+//            avgSpeed = speed + speedChange / 2.0;
+//            speed = speed + speedChange;
+//        }
+//        double positionChange = avgSpeed * MOTOR_TYPE.MAX_TICKS_PER_SECOND * milliseconds / 1000.0;
+//        positionChange *= (1.0 + systematicErrorFrac + randomErrorFrac * random.nextGaussian());
+//        if (direction == Direction.FORWARD && MOTOR_TYPE.REVERSED ||
+//                direction == Direction.REVERSE && !MOTOR_TYPE.REVERSED) {
+//            positionChange = -positionChange;
+//            actualSpeed = -speed;
+//        } else {
+//            actualSpeed = speed;
+//        }
+//        actualPosition += positionChange;
+//        return positionChange;
+//    }
+
+    /*
+     * For internal use only.
+     * New version of the update method that is compatible with position limits.
+     * Updates motor speed based on current speed, power, and inertia. Then, uses average motor speed to update position.
+     * @param milliseconds number of milliseconds since last update
+     * @return change in actualPosition
+     */
     public synchronized double update(double milliseconds){
-        double speedChange, avgSpeed;
         if (mode == RunMode.STOP_AND_RESET_ENCODER) return 0.0;
-        else if (mode == RunMode.RUN_TO_POSITION){
-            double targetSpeed = COEFF_PROPORTIONATE * (double)(targetPosition - getCurrentPosition())
+
+        double actualSpeedChange, avgActualSpeed, tentativeActualSpeed;
+        boolean rev = direction == Direction.FORWARD && MOTOR_TYPE.REVERSED
+                || direction == Direction.REVERSE && !MOTOR_TYPE.REVERSED;
+        if (mode == RunMode.RUN_TO_POSITION){
+            double actualTargetPosition = rev? -targetPosition : targetPosition;
+            double actualTargetSpeed = COEFF_PROPORTIONATE
+                    * (double)(actualTargetPosition - (actualPosition - encoderBasePosition))
                     / MOTOR_TYPE.MAX_TICKS_PER_SECOND;
             double absPower = Math.abs(power);
-            targetSpeed = Math.max(-absPower, Math.min(targetSpeed, absPower));
-            speedChange = (1.0 - inertia) * (targetSpeed - speed);
-            avgSpeed = speed + speedChange / 2.0;
-            speed = speed + speedChange;
+            actualTargetSpeed = Math.max(-absPower, Math.min(actualTargetSpeed, absPower));
+            actualSpeedChange = (1.0 - inertia) * (actualTargetSpeed - actualSpeed);
+            avgActualSpeed = actualSpeed + actualSpeedChange / 2.0;
+            tentativeActualSpeed = actualSpeed + actualSpeedChange;
         } else {
-            speedChange = (1.0 - inertia) * (power - speed);
-            avgSpeed = speed + speedChange / 2.0;
-            speed = speed + speedChange;
+            double actualPower = rev? -power : power;
+            actualSpeedChange = (1.0 - inertia) * (actualPower - actualSpeed);
+            avgActualSpeed = actualSpeed + actualSpeedChange / 2.0;
+            tentativeActualSpeed = actualSpeed + actualSpeedChange;
         }
-        double positionChange = avgSpeed * MOTOR_TYPE.MAX_TICKS_PER_SECOND * milliseconds / 1000.0;
-        positionChange *= (1.0 + systematicErrorFrac + randomErrorFrac * random.nextGaussian());
-        if (direction == Direction.FORWARD && MOTOR_TYPE.REVERSED ||
-                direction == Direction.REVERSE && !MOTOR_TYPE.REVERSED) positionChange = -positionChange;
-        actualPosition += positionChange;
+
+        double tentativeActualPositionChange = avgActualSpeed * MOTOR_TYPE.MAX_TICKS_PER_SECOND * milliseconds / 1000.0;
+        tentativeActualPositionChange *= (1.0 + systematicErrorFrac + randomErrorFrac * random.nextGaussian());
+        double tentativeActualPosition = actualPosition + tentativeActualPositionChange;
+
+        if (upperPositionLimitEnabled && tentativeActualPosition > upperActualPositionLimit){
+            tentativeActualPosition = upperActualPositionLimit;
+            tentativeActualSpeed = Math.min(0, tentativeActualSpeed);
+        } else if (lowerPositionLimitEnabled && tentativeActualPosition < lowerActualPositionLimit){
+            tentativeActualPosition = lowerActualPositionLimit;
+            tentativeActualSpeed = Math.max(0, tentativeActualSpeed);
+        }
+
+        actualSpeed = tentativeActualSpeed;
+        double positionChange = tentativeActualPosition - actualPosition;
+        actualPosition = tentativeActualPosition;
+
         return positionChange;
     }
 
     /**
-     * For internal use only. Adjust internal position of motor. This can be called in order to simulate
-     * a stalled motor, by passing in negative of the last value returned by update(...).
-     * @param actualPositionAdjustment amount by which to increment (or decrement if negative) actualPosition
+     * For internal use only -- The FTC SDK does not include a "getSpeed()" method in the DcMotorImpl class.
+     * Related: see getVelocity methods of DcMotorEx
+     * @return current motor speed, normalized -1 to 1
      */
-    public synchronized  void adjustActualPosition(double actualPositionAdjustment){
-        actualPosition += actualPositionAdjustment;
-    }
-
-    public synchronized void setActualPosition(double pos){
-        actualPosition = pos;
+    protected synchronized double getSpeed(){
+        boolean rev = direction == Direction.FORWARD && MOTOR_TYPE.REVERSED
+                || direction == Direction.REVERSE && !MOTOR_TYPE.REVERSED;
+        return rev? -actualSpeed : actualSpeed;
     }
 
     /**
-     * Get actual speed
-     * @return actual speed, normalized -1 to 1
+     * For internal use only -- the FTC SDK does not include a "getActualSpeed()" method in the DcMotorImpl class.
+     * @return current motor actual speed, normalized -1 to 1.
      */
-    protected synchronized double getSpeed(){
-        return speed;
-    }
+    protected synchronized double getActualSpeed() { return actualSpeed; }
 
     /**
      * For internal use only.
@@ -207,7 +267,7 @@ public class DcMotorImpl implements DcMotor {
     //For internal use only: for stopping and resetting motor between op mode runs
     public synchronized void stopAndReset(){
         power = 0.0;
-        speed = 0.0;
+        actualSpeed = 0.0;
         actualPosition = 0.0;
         encoderBasePosition = 0.0;
         direction = Direction.FORWARD;
@@ -231,7 +291,7 @@ public class DcMotorImpl implements DcMotor {
         final double MAX_ROT_OFFSET = 0.02;
         int pos = getCurrentPosition();
         boolean atTarget = Math.abs(pos-targetPosition)/MOTOR_TYPE.TICKS_PER_ROTATION < MAX_ROT_OFFSET;
-        boolean almostStopped = Math.abs(speed) / (COEFF_PROPORTIONATE * MOTOR_TYPE.TICKS_PER_ROTATION) < MAX_ROT_OFFSET;
+        boolean almostStopped = Math.abs(actualSpeed) / (COEFF_PROPORTIONATE * MOTOR_TYPE.TICKS_PER_ROTATION) < MAX_ROT_OFFSET;
         return mode == RunMode.RUN_TO_POSITION && Math.abs(power) > 0.0001 && (!atTarget || !almostStopped);
     }
 
@@ -241,6 +301,32 @@ public class DcMotorImpl implements DcMotor {
 
     public MotorConfigurationType getMotorType(){
         return MOTOR_CONFIGURATION_TYPE;
+    }
+
+    public synchronized void setUpperPositionLimitEnabled(boolean upperLimitEnabled){
+        this.upperPositionLimitEnabled = upperLimitEnabled;
+    }
+
+    public synchronized void setLowerPositionLimitEnabled(boolean lowerLimitEnabled){
+        this.lowerPositionLimitEnabled = lowerLimitEnabled;
+    }
+
+    public synchronized void setUpperActualPositionLimit(double upperPositionLimit){
+        this.upperActualPositionLimit = upperPositionLimit;
+    }
+
+    public synchronized void setLowerActualPositionLimit(double lowerPositionLimit){
+        this.lowerActualPositionLimit = lowerPositionLimit;
+    }
+
+    public synchronized void setPositionLimitsEnabled(boolean limitsEnabled){
+        this.upperPositionLimitEnabled = limitsEnabled;
+        this.lowerPositionLimitEnabled = limitsEnabled;
+    }
+
+    public synchronized void setActualPositionLimits(double lowerPositionLimit, double upperPositionLimit){
+        this.upperActualPositionLimit = upperPositionLimit;
+        this.lowerActualPositionLimit = lowerPositionLimit;
     }
 
 }
