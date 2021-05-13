@@ -2,9 +2,12 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorExImpl;
 
 /**
- * TeleOp op mode to test odometry with three "dead-wheel" encoders.
+ * TeleOp op mode to test odometry with three "dead-wheel" encoders. This op mode will work with
+ * either the MecBot or the XDriveBot robot configuration.
  */
 @TeleOp(name = "TestOdom", group = "OdomBot")
 public class TestOdom extends LinearOpMode {
@@ -16,10 +19,12 @@ public class TestOdom extends LinearOpMode {
         gamepad1.setJoystickDeadzone(0.05f);
         bot.init(hardwareMap);
         bot.resetOdometry(0, 0, Math.PI/2.0);
+
         while(!opModeIsActive() && !isStopRequested()){
             telemetry.addData("time", this.time);
             telemetry.update();
         }
+
         while (opModeIsActive()){
             pose = bot.updateOdometry();
             telemetry.addData("time", this.time);
