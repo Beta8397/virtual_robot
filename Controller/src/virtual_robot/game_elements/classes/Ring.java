@@ -72,14 +72,13 @@ public class Ring extends VirtualGameElement {
     BodyFixture ringFixture;
 
     //The bit indicating the category of rings for collision detection (0x10000000000)
-    public static long RING_CATEGORY = 1024;
+    public static long RING_CATEGORY = 2048;
 
     //Standard ring filter: collide with everything that is allowed to collide with ring
     public static final CategoryFilter RING_FILTER = new CategoryFilter(RING_CATEGORY, Filters.MASK_ALL);
 
     //Flying ring filter: collide with NOTHING
-    public static final CategoryFilter RING_FLYING_FILTER = new CategoryFilter(RING_CATEGORY,
-            Filters.MASK_ALL & 0);
+    public static final CategoryFilter RING_FLYING_FILTER = new CategoryFilter(RING_CATEGORY, 0);
 
     //Stacked ring filter: collide with everything except ring (to prevent stack from becoming unstable)
     public static final CategoryFilter RING_STACKED_FILTER = new CategoryFilter(RING_CATEGORY,

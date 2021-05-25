@@ -1,30 +1,44 @@
 package virtual_robot.robots.classes;
 
-import com.qualcomm.robotcore.hardware.*;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorExImpl;
+import com.qualcomm.robotcore.hardware.ServoImpl;
 import com.qualcomm.robotcore.hardware.configuration.MotorType;
 import javafx.fxml.FXML;
+import javafx.scene.Group;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Shape;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
+import org.dyn4j.collision.CategoryFilter;
+import org.dyn4j.dynamics.Body;
+import org.dyn4j.geometry.Vector2;
 import virtual_robot.controller.BotConfig;
+import virtual_robot.controller.Filters;
+import virtual_robot.controller.VirtualField;
+import virtual_robot.dyn4j.Dyn4jUtil;
+import virtual_robot.dyn4j.FixtureData;
+import virtual_robot.dyn4j.Slide;
+import virtual_robot.game_elements.classes.WobbleGoal;
+
+import java.util.HashMap;
 
 /**
  * For internal use only. Represents a robot with four mecanum wheels, color sensor, four distance sensors,
  * a BNO055IMU, and an extensible arm with a grabber on the end.
  *
- * NOTE: ArmBot has not been modified to be controlled by the Dyn4j physics and collision engine. It
- * provides a purely kinematic simulation, and does not interact with game elements.
+ * ArmBot extends the MecanumPhysicsBase class, which manages the drive train and various sensors, as well as
+ * basic interaction between the chassis and the walls and game elements.
  *
- * The easiest way to create a new robot configuration is to copy and paste the Java class and the FXML file
- * of an existing configuration, then make make modifications. The ArmBot config is a modification of
- * the MechanumBot config.
+ * ArmBot adds the extensible arm, including both the graphical display and the dyn4j Bodys that represent the
+ * arm. Any "special" interaction between the robot and game elements must be handled by ArmBot.
  *
  * The @BotConfig annotation is required. The name will be displayed to the user in the Configuration
  * combo box. The filename refers to the fxml file that contains the markup for the graphical UI.
  * Note: the fxml file must be located in the virtual_robot.robots.classes.fxml folder.
  */
 @BotConfig(name = "Arm Bot", filename = "arm_bot")
-public class ArmBot extends MechanumBase {
+public class ArmBot extends MecanumPhysicsBase {
 
     /*
     The DC Motors.  Note use of the DcMotorImpl class rather than the DcMotor interface. That allows use of
@@ -42,25 +56,42 @@ public class ArmBot extends MechanumBase {
     fxml file must declare fx:id attributes for the Rectangles that represent the arm, hand, and both fingers.
     For example, the attribute for the arm would be:  fx:id="arm"
      */
-    @FXML private Rectangle arm;            //The arm. Must be able to extend/retract (i.e., scale) in Y-dimension.
-    @FXML private Rectangle hand;           //The hand. Must move in Y-dimension as arm extends/retracts.
-    @FXML private Rectangle leftFinger;     //Fingers must open and close based on position of hand servo.
-    @FXML private Rectangle rightFinger;
+    @FXML private Group armGroup;
+    @FXML private Rectangle arm;
+    @FXML private Rectangle hand;
+    @FXML private Group leftFingerGroup;
+    @FXML private Rectangle leftProximalPhalanx;
+    @FXML private Rectangle leftDistalPhalanx;
+    @FXML private Group rightFingerGroup;
+    @FXML private Rectangle rightProximalPhalanx;
+    @FXML private Rectangle rightDistalPhalanx;
 
     /*
-    Transform objects that will be instantiated in the initialize() method, and will be used in the
-    updateDisplay() method to manipulate the arm, hand, and fingers.
+     * Transform objects that will be instantiated in the initialize() method, and will be used in the
+     * updateDisplay() method to manipulate the arm, hand, and fingers.
      */
-    Scale armScaleTransform;
-    Translate handTranslateTransform;
+    Translate armTranslateTransform;
     Translate leftFingerTranslateTransform;
     Translate rightFingerTranslateTransform;
 
     /*
-    Current scale of the arm (i.e., the degree to which arm is extended or retracted). 1.0 means fully retracted.
-    2.0 would mean that arm is twice the fully retracted length, etc.
+     * Current Y-translation of the arm, in pixels. 0 means fully retracted. 50 means fully extended.
      */
-    private double armScale = 1.0;
+    private double armTranslation = 0;
+
+    /*
+     * Current X-translation of the fingers, in pixels. 0 means fully open.
+     */
+    private double fingerPos = 0;
+
+    private Body armBody;
+    private Body leftFingerBody;
+    private Body rightFingerBody;
+    Slide armSlide;
+    Slide leftFingerSlide;
+    Slide rightFingerSlide;
+
+    private CategoryFilter ARM_FILTER = new CategoryFilter(Filters.ARM, WobbleGoal.WOBBLE_HANDLE_CATEGORY | Filters.WALL);
 
     /**
      * Constructor.
@@ -84,6 +115,8 @@ public class ArmBot extends MechanumBase {
         hardwareMap.setActive(true);
 
         armMotor = (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "arm_motor");
+        armMotor.setActualPositionLimits(0, 2240);
+        armMotor.setPositionLimitsEnabled(true);
 
         //Instantiate the hand servo. Note the cast to ServoImpl.
         handServo = (ServoImpl)hardwareMap.servo.get("hand_servo");
@@ -92,26 +125,60 @@ public class ArmBot extends MechanumBase {
         hardwareMap.setActive(false);
 
         /*
-        Scales the arm with pivot point at center of back of robot (which corresponds to the back of the arm).
-        The Y-scaling is initialized to 1.0 (i.e., arm fully retracted)
-        We will never change the X-scaling (we don't need the arm to get fatter, only longer)
+         * Translates the arm (only the Y-dimension will be used).
          */
-        armScaleTransform = new Scale(1.0, 1.0, 37.5, 75.0);
-        arm.getTransforms().add(armScaleTransform);
-
-        // Translates the position of the hand so that it stays at the end of the arm.
-        handTranslateTransform = new Translate(0, 0);
-        hand.getTransforms().add(handTranslateTransform);
+        armTranslateTransform = new Translate(0, 0);
+        armGroup.getTransforms().add(armTranslateTransform);
 
         /*
-        Translates the position of the fingers in both X and Y dimensions. The X-translation is to open and close
-        the fingers. The Y-translation is so the fingers move along with the arm and hand, as the arm extends.
+         * Translates the position of the fingers in both X and Y dimensions. The X-translation is to open and close
+         * the fingers. The Y-translation is so the fingers move along with the arm and hand, as the arm extends.
          */
         leftFingerTranslateTransform = new Translate(0, 0);
-        leftFinger.getTransforms().add(leftFingerTranslateTransform);
+        leftFingerGroup.getTransforms().add(leftFingerTranslateTransform);
 
         rightFingerTranslateTransform = new Translate(0, 0);
-        rightFinger.getTransforms().add(rightFingerTranslateTransform);
+        rightFingerGroup.getTransforms().add(rightFingerTranslateTransform);
+
+        /*
+         * Create the dyn4j Body for the arm; it will have two BodyFixtures, one corresponding to the "arm" javafx ,
+         * Shape, and the other to the "hand" shape. Each of those will be created using a different FixtureData, to allow the
+         * dyn4j shapes to have twice the short-axis thickness of the very thin javafx shapes. Then create a Slide
+         * joint that connects the arm body to the chassis body. The slide joint will have a default unit of
+         * PIXEL, so that its position can be set by passing in pixels directly.
+         */
+        HashMap<Shape, FixtureData> armMap = new HashMap<>();
+        armMap.put(arm, new FixtureData(ARM_FILTER,1.0, 0, 0.25, 2, 1));
+        armMap.put(hand, new FixtureData(ARM_FILTER, 1.0, 0, 0.25, 1, 2));
+        armBody = Dyn4jUtil.createBody(armGroup, this, 9, 9, armMap);
+        world.addBody(armBody);
+        armSlide = new Slide(chassisBody, armBody, new Vector2(0,0), new Vector2(0,-1),
+                VirtualField.Unit.PIXEL);
+        world.addJoint(armSlide);
+
+        /*
+         * Create dyn4j Bodys for each finger. Each body will have two BodyFixtures (proximal and distal phalanges).
+         * Each of those BodyFixtures will be created using a different FixtureData object, to allow the dyn4j shapes
+         * to have twice the short-axis thickness of the very thin javafx shapes. Then for each finger, create a
+         * Slide joint that connects the finger body to the arm body.
+         */
+        HashMap<Shape, FixtureData> leftFingerMap = new HashMap();
+        leftFingerMap.put(leftProximalPhalanx, new FixtureData(ARM_FILTER,1.0, 0, 0.25, 2, 1));
+        leftFingerMap.put(leftDistalPhalanx, new FixtureData(ARM_FILTER, 1.0, 0, 0.25, 1, 2));
+        leftFingerBody = Dyn4jUtil.createBody(leftFingerGroup, this, 9, 9, leftFingerMap);
+        world.addBody(leftFingerBody);
+        leftFingerSlide = new Slide(armBody, leftFingerBody, new Vector2(0,0), new Vector2(-1, 0),
+                VirtualField.Unit.PIXEL);
+        world.addJoint(leftFingerSlide);
+
+        HashMap<Shape, FixtureData> rightFingerMap = new HashMap();
+        rightFingerMap.put(rightProximalPhalanx, new FixtureData(ARM_FILTER,1.0, 0, 0.25, 2, 1));
+        rightFingerMap.put(rightDistalPhalanx, new FixtureData(ARM_FILTER, 1.0, 0, 0.25, 1, 2));
+        rightFingerBody = Dyn4jUtil.createBody(rightFingerGroup, this, 9, 9, rightFingerMap);
+        world.addBody(rightFingerBody);
+        rightFingerSlide = new Slide(armBody, rightFingerBody, new Vector2(0, 0), new Vector2(-1, 0),
+                VirtualField.Unit.PIXEL);
+        world.addJoint(rightFingerSlide);
     }
 
     /**
@@ -132,15 +199,26 @@ public class ArmBot extends MechanumBase {
      * @param millis milliseconds since the previous update
      */
     public synchronized void updateStateAndSensors(double millis){
-        super.updateStateAndSensors(millis);
+        super.updateStateAndSensors(millis);    // Handles update for drivetrain and standard sensors.
 
         /*
-        Calculate the new value of armScale based on interval motion of the arm motor. BUT, do not manipulate
-        the arm UI here. Do that in the updateDisplay method, which will ultimately be called from the UI Thread.
+         * Update the arm motor and calculate the new value of armTranslation (in pixels). Then, set the position
+         * of the arm slide object to armTranslation, in pixels. This positions the arm in the dyn4j physics engine.
+         * It does not handle the display, of the arm--that will be done in the updateDisplay method, using the
+         * new value of armTranslation.
          */
-        double armTicks = armMotor.update(millis);
-        double newArmScale = armScale + armTicks / 1120.;
-        if (newArmScale >= 1.0 && newArmScale <= 4) armScale = newArmScale;
+        armMotor.update(millis);
+        armTranslation = armMotor.getActualPosition() * 50.0 / 2240.0 * (botWidth / 75.0);
+        armSlide.setPosition(armTranslation);
+
+        /*
+         * Update the value of fingerPos, using the current position of the hand servo. Then set the position
+         * of each finger slide joint using this value.
+         */
+        fingerPos =  15 * handServo.getInternalPosition();
+        leftFingerSlide.setPosition(fingerPos);
+        rightFingerSlide.setPosition(-fingerPos);
+
     }
 
     /**
@@ -157,23 +235,17 @@ public class ArmBot extends MechanumBase {
 
         // Extend or retract the arm based on the value of armScale.
 
-        if (Math.abs(armScale - armScaleTransform.getY()) > 0.001) {
-            armScaleTransform.setY(armScale);
-
-            // Move the hand based on the position of armScale.
-            handTranslateTransform.setY(-40.0 * (armScale - 1.0));
-
-            // Move the fingers in the Y-direction based on the position of armScale.
-            leftFingerTranslateTransform.setY(-40.0 * (armScale - 1.0));
-            rightFingerTranslateTransform.setY(-40.0 * (armScale - 1.0));
-        }
+        armTranslateTransform.setY(-armTranslation);
+        leftFingerTranslateTransform.setY(-armTranslation);
+        rightFingerTranslateTransform.setY(-armTranslation);
 
         // Mover fingers in the X-direction (i.e., open/close fingers) based on position of the handServo.
-        double fingerPos =  7.5 * handServo.getInternalPosition();
+
         if (Math.abs(fingerPos - leftFingerTranslateTransform.getX()) > 0.001) {
             leftFingerTranslateTransform.setX(fingerPos);
             rightFingerTranslateTransform.setX(-fingerPos);
         }
+
 
     }
 
@@ -184,4 +256,5 @@ public class ArmBot extends MechanumBase {
         super.powerDownAndReset();
         armMotor.stopAndReset();
     }
+
 }

@@ -13,6 +13,7 @@ public class Filters {
 
     public static long WALL = 0b1;
     public static long CHASSIS = 0b10;
+    public static long ARM = 0b100;
 
     // Filter for the field walls: collides with anything that includes WALL in its mask
     public static final CategoryFilter WALL_FILTER = new CategoryFilter(WALL, MASK_ALL);

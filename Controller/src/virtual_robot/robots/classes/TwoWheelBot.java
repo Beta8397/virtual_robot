@@ -5,9 +5,12 @@ import com.qualcomm.robotcore.hardware.configuration.MotorType;
 import javafx.fxml.FXML;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Rotate;
-import virtual_robot.controller.BotConfig;
-import virtual_robot.controller.VirtualBot;
-import virtual_robot.controller.VirtualRobotController;
+import org.dyn4j.dynamics.Body;
+import org.dyn4j.geometry.Vector2;
+import virtual_robot.controller.*;
+import virtual_robot.dyn4j.Dyn4jUtil;
+import virtual_robot.dyn4j.FixtureData;
+import virtual_robot.dyn4j.Hinge;
 import virtual_robot.util.AngleUtils;
 
 /**
@@ -21,8 +24,17 @@ public class TwoWheelBot extends TwoWheelPhysicsBase {
 
     private ServoImpl servo = null;
 
-    //The backServoArm object is instantiated during loading via a fx:id property.
+    // The backServoArm object is instantiated during loading via a fx:id property.
     @FXML Rectangle backServoArm;
+
+    // dyn4j Body for the arm
+    Body armBody;
+
+    // Hinge joint for the arm
+    Hinge armHinge;
+
+    // Arm Angle in degrees
+    double armAngleDegrees = 0;
 
     public TwoWheelBot(){
         super();
@@ -35,6 +47,12 @@ public class TwoWheelBot extends TwoWheelPhysicsBase {
         hardwareMap.setActive(false);
 
         backServoArm.getTransforms().add(new Rotate(0, 37.5, 67.5));
+
+        armBody = Dyn4jUtil.createBody(backServoArm, this, 9, 9,
+                new FixtureData(Filters.CHASSIS_FILTER, 1, 0, 0.25));
+        world.addBody(armBody);
+        armHinge = new Hinge(chassisBody, armBody, new Vector2(0, -30), VirtualField.Unit.PIXEL);
+        world.addJoint(armHinge);
     }
 
     protected void createHardwareMap(){
@@ -44,11 +62,13 @@ public class TwoWheelBot extends TwoWheelPhysicsBase {
 
     public synchronized void updateStateAndSensors(double millis){
         super.updateStateAndSensors(millis);
+        armAngleDegrees = -180.0 * servo.getInternalPosition();
+        armHinge.setPosition(Math.toRadians(armAngleDegrees));
     }
 
     public synchronized void updateDisplay(){
         super.updateDisplay();
-        ((Rotate)backServoArm.getTransforms().get(0)).setAngle(-180.0 * servo.getInternalPosition());
+        ((Rotate)backServoArm.getTransforms().get(0)).setAngle(armAngleDegrees);
     }
 
     public void powerDownAndReset(){

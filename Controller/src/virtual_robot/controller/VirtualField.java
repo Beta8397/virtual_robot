@@ -15,8 +15,6 @@ public class VirtualField {
 
     public enum Unit {PIXEL, METER, INCH}
 
-    private static VirtualField instance = null;
-
     public static final double FIELD_WIDTH = Config.FIELD_WIDTH;         // Field width in Pixels
     public static final double HALF_FIELD_WIDTH = FIELD_WIDTH / 2.0;     // Half field width in Pixels
 

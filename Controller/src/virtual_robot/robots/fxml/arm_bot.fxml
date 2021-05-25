@@ -2,6 +2,10 @@
 
 <!--Markup file for the ArmBot robot graphics-->
 
+<?import java.lang.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.shape.*?>
 <?import javafx.scene.Group?>
 <?import javafx.scene.paint.RadialGradient?>
 <?import javafx.scene.paint.Stop?>
@@ -11,7 +15,7 @@
 <!--The root node is a Group object; this object has a stack of multiple children.  Tne
     fx:controller attribute indicates that ArmBot is the controller class-->
 
-<Group xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="virtual_robot.robots.classes.ArmBot">
+<Group xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="virtual_robot.robots.classes.ArmBot">
     <children>
 
         <!--The lowest child objecet is a yellow rectangle measuring 75x75-->
@@ -48,14 +52,29 @@
                 </RadialGradient>
             </fill>
         </Circle>
-
-        <!-- The arm: note the fx:id attribute. This will instantiate a variable named "arm" in the ArmBot class. That
-             variable is of type Rectangle and is annotated with @FXML-->
-        <Rectangle fx:id="arm" arcHeight="5.0" arcWidth="5.0" fill="MAGENTA" height="40.0" stroke="BLACK" strokeType="INSIDE" width="5.0" x="35.0" y="35.0" />
-
-        <!-- The hand and fingers: note the fx:id attributes-->
-        <Rectangle fx:id="hand" arcHeight="5.0" arcWidth="5.0" fill="MAGENTA" height="5.0" stroke="BLACK" strokeType="INSIDE" width="30.0" x="22.5" y="35.0" />
-        <Rectangle fx:id="leftFinger" arcHeight="5.0" arcWidth="5.0" fill="MAGENTA" height="20.0" stroke="BLACK" strokeType="INSIDE" width="5.0" x="22.5" y="20.0" />
-        <Rectangle fx:id="rightFinger" arcHeight="5.0" arcWidth="5.0" fill="MAGENTA" height="20.0" stroke="BLACK" strokeType="INSIDE" width="5.0" x="47.5" y="20.0" />
+      <Rectangle fx:id="arm1" arcHeight="5.0" arcWidth="5.0" fill="SILVER" height="57.5" stroke="BLACK" strokeType="INSIDE" width="5.0" x="35.0" y="17.5" />
+      <Group fx:id="armGroup">
+         <children>
+      
+              <!-- The arm: note the fx:id attribute. This will instantiate a variable named "arm" in the ArmBot class. That
+                   variable is of type Rectangle and is annotated with @FXML-->
+              <Rectangle fx:id="arm" arcHeight="5.0" arcWidth="5.0" fill="MAGENTA" height="57.5" stroke="BLACK" strokeType="INSIDE" width="5.0" x="35.0" y="17.5" />
+      
+              <!-- The hand and fingers: note the fx:id attributes-->
+              <Rectangle fx:id="hand" arcHeight="5.0" arcWidth="5.0" fill="MAGENTA" height="5.0" stroke="BLACK" strokeType="INSIDE" width="45.0" x="15.0" y="17.5" />
+         </children>
+      </Group>
+      <Group fx:id="leftFingerGroup">
+         <children>
+              <Rectangle fx:id="leftProximalPhalanx" arcHeight="5.0" arcWidth="5.0" fill="MAGENTA" height="20.0" stroke="BLACK" strokeType="INSIDE" width="5.0" x="15.0" />
+            <Rectangle fx:id="leftDistalPhalanx" arcHeight="5.0" arcWidth="5.0" fill="MAGENTA" height="5.0" stroke="BLACK" strokeType="INSIDE" width="10.0" x="15.0" />
+         </children>
+      </Group>
+      <Group fx:id="rightFingerGroup">
+         <children>
+              <Rectangle fx:id="rightProximalPhalanx" arcHeight="5.0" arcWidth="5.0" fill="MAGENTA" height="20.0" stroke="BLACK" strokeType="INSIDE" width="5.0" x="55.0" />
+            <Rectangle fx:id="rightDistalPhalanx" arcHeight="5.0" arcWidth="5.0" fill="MAGENTA" height="5.0" stroke="BLACK" strokeType="INSIDE" width="10.0" x="50.0" />
+         </children>
+      </Group>
     </children>
 </Group>

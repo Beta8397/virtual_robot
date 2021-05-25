@@ -16,7 +16,7 @@
 
         <!--The wobble goal-->
         <Circle fx:id="outerCircle" centerX="0" centerY="0" fill="#ba0000" radius="16.7" stroke="BLACK" strokeType="INSIDE" />
-        <Circle centerX="0" centerY="0" fill="#ba0000" radius="3.0" stroke="BLACK" strokeType="INSIDE" />
+        <Circle fx:id="innerCircle" centerX="0" centerY="0" fill="#ba0000" radius="3.0" stroke="BLACK" strokeType="INSIDE" />
 
     </children>
 </Group>

@@ -25,20 +25,30 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
 
     public final MotorType MOTOR_TYPE;
     private DcMotorExImpl[] motors = null;
-    //private VirtualRobotController.GyroSensorImpl gyro = null;
     private BNO055IMUImpl imu = null;
     private VirtualRobotController.ColorSensorImpl colorSensor = null;
     private VirtualRobotController.DistanceSensorImpl[] distanceSensors = null;
 
-    private double wheelCircumference;
+    /*
+     * Gear ratio for any external gears added in drive train. For now, this is just 1.0. Could easily
+     * add a constructor to MecanumPhysicsBase that allows this to be set to some other value.
+     */
     protected double gearRatioWheel = 1.0;
+
+    /*
+     * Robot geometry, in pixels. These will be calculated in the initialize() method. They cannot be computed
+     * here, because botwidth is not known until the time of construction.
+     */
+    private double wheelCircumference;
     private double interWheelWidth;
     private double interWheelLength;
     private double wlAverage;
 
-    private double[][] tWR; //Transform from wheel motion to robot motion (KINETIC MODEL)
-
-
+    /*
+     * Transform from wheel motion to robot motion (KINETIC MODEL). This will be computed in the initialize()
+     * method, after basic robot geometry is computed.
+     */
+    private double[][] tWR;
 
     GeneralMatrixF M_ForceWheelToRobot; // Converts from individual wheel forces to total force/torque on robot
     MatrixF M_ForceRobotToWheel;  // Converts from total force/torque on robot to individual wheel forces
@@ -88,12 +98,20 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
         float RRt2 = 0.5f * (float)Math.sqrt(interWheelLength*interWheelLength + interWheelWidth*interWheelWidth)
                 * (float)Math.sqrt(2.0) / (float)VirtualField.PIXELS_PER_METER;
 
+        /*
+         * Converts from the frictional X-component forces at each wheel to the X, Y forces, Torque, and "Fail"
+         * forces on the robot. (in the ROBOT coordinate system)
+         */
         M_ForceWheelToRobot = new GeneralMatrixF(4, 4, new float[]{
                 1, 1, 1, 1,
                 -1, 1, -1, 1,
                 RRt2, -RRt2, -RRt2, RRt2,
                 1, 1, -1, -1});
 
+        /*
+         * Converts from X & Y Forces, Torque, and "Fail" force on robot to the corresponding forces (X-component)
+         * at each wheel. (in the ROBOT coordinate system)
+         */
         M_ForceRobotToWheel = M_ForceWheelToRobot.inverted();
 
         // Maximum possible frictional force (in robot-X direction) between field and any individual robot wheel.
@@ -106,17 +124,31 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
 
     }
 
+    /**
+     * Create the hardware map for this robot. This will include the drive motors, distance sensors, BNO055IMU,
+     * and color sensor. Child classes can override this method to add additional hardware. In that case,
+     * the first statement in the override method should be: super.createHardwareMap().
+     */
     protected void createHardwareMap() {
         hardwareMap = new HardwareMap();
         String[] motorNames = new String[]{"back_left_motor", "front_left_motor", "front_right_motor", "back_right_motor"};
         for (String name : motorNames) hardwareMap.put(name, new DcMotorExImpl(MOTOR_TYPE));
         String[] distNames = new String[]{"front_distance", "left_distance", "back_distance", "right_distance"};
         for (String name : distNames) hardwareMap.put(name, controller.new DistanceSensorImpl());
-        //hardwareMap.put("gyro_sensor", controller.new GyroSensorImpl());
         hardwareMap.put("imu", new BNO055IMUImpl(this, 10));
         hardwareMap.put("color_sensor", controller.new ColorSensorImpl());
     }
 
+    /**
+     * Update the position of the robot on the field, as well as the distance, BNO055IMU, and color sensors.
+     *
+     * Updating robot position involves:
+     *     1) Get new position and orientation from the dyn4j physics engine.
+     *     2) Using kinetic model, "preload" the chassis body with force and torque to be applied
+     *        during the next update of the physics engine.
+     *
+     * @param millis milliseconds since the previous update
+     */
     public synchronized void updateStateAndSensors(double millis) {
 
         /*
@@ -249,6 +281,9 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
 
     }
 
+    /**
+     * Display the robot in the current orientation and position.
+     */
     public synchronized void updateDisplay() {
         super.updateDisplay();
     }
