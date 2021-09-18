@@ -1,7 +1,7 @@
 # A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
 
-New: Modification to allow game elements from Daniel McDonald, BotsOfPrey. In addition, modified to 
-incorporate the dyn4j 2D physics and collision engine.
+New: Changed field to Freight Frenzy field. Coming Soon: Adaptation to use Freight Frenzy Game Elements. Currently, 
+the game is set to "NoGame", and there is no interaction with game elements.
 
 Includes Programming Board configuration to serve as a companion to the book "Learn Java For FTC", by Alan Smith. The
 PDF can be [downloaded for free](https://github.com/alan412/LearnJavaForFTC) or you can purchase the paperback on
