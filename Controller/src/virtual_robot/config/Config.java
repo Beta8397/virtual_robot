@@ -12,10 +12,10 @@ public class Config {
     /**
      * FRACTION OF TOTAL FIELD TO CONSTRAIN ROBOT MOTION
      */
-    public static final double X_MIN_FRACTION = 0.03; //0 for WHOLE FIELD OR BLUE REMOTE, 0.3333 for RED REMOTE FIELD
-    public static final double X_MAX_FRACTION = 0.97; //1 for WHOLE FIELD OR RED REMOTE, 0.6667 for BLUE REMOTE FIELD
-    public static final double Y_MIN_FRACTION = 0.03;  //Leave this alone for Ultimate Goal
-    public static final double Y_MAX_FRACTION = 0.97;  //Leave this alone for Ultimate Goal
+    public static final double X_MIN_FRACTION = 0; //0 for WHOLE FIELD OR BLUE REMOTE, 0.3333 for RED REMOTE FIELD
+    public static final double X_MAX_FRACTION = 1; //1 for WHOLE FIELD OR RED REMOTE, 0.6667 for BLUE REMOTE FIELD
+    public static final double Y_MIN_FRACTION = 0;  //Leave this alone for Ultimate Goal
+    public static final double Y_MAX_FRACTION = 1;  //Leave this alone for Ultimate Goal
 
     /**
      *  Width of the field, in pixels
