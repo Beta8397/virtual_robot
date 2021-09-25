@@ -47,6 +47,8 @@ public abstract class VirtualGameElement {
     private Translate translate = null;
     private Rotate rotate = null;
 
+    protected boolean onField = false;
+
     /**
      * Obtain a reference to the VirtualRobotController.
      * This must be called before creating instances of game elements.
@@ -302,6 +304,28 @@ public abstract class VirtualGameElement {
         }
     }
 
+
+    /**
+     * Add or remove the VirtualGameElement to/from field, which includes the following actions:
+     *   1) set the value of onField
+     *   2) Remove body from world, or add body to world.
+     *   3) Remove or add the element displayGroup from/to the display.
+     *
+     * @param onField
+     */
+    public void setOnField(boolean onField){
+        this.onField = onField;
+        if (onField && !world.containsBody(elementBody)) world.addBody(elementBody);
+        else if (!onField && world.containsBody(elementBody)) world.removeBody(elementBody);
+        if (onField) addToDisplay();
+        else removeFromDisplay();
+    }
+
+    public boolean isOnField(){
+        return this.onField;
+    }
+
+
     /**
      *  Set up the dyn4j Body, if any, for the game element. A physics body is not mandatory, but in the large
      *  majority of cases would be used. It should be assigned to elementBody.
@@ -313,7 +337,11 @@ public abstract class VirtualGameElement {
 
     /**
      *  Set linear and angular speeds of all dyn4j Bodys in the game element to zero.
+     *  Default implementation assumes one dyn4j Body in game element. Override if more Bodys needed.
      */
-    public abstract void stop();
+    public void stop(){
+        elementBody.setLinearVelocity(0,0);
+        elementBody.setAngularVelocity(0);
+    }
 
 }

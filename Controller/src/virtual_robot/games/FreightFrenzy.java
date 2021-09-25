@@ -31,6 +31,8 @@ public class FreightFrenzy extends Game {
                 Duck.ducks.add((Duck)e);
             } else if (e instanceof ShippingHub){
                 ShippingHub.shippingHubs.add((ShippingHub) e);
+            } else if (e instanceof Barrier){
+                Barrier.theBarrier = (Barrier) e;
             }
         }
 
@@ -92,6 +94,9 @@ public class FreightFrenzy extends Game {
         ShippingHub.shippingHubs.get(0).setLocationInches(24, -12);
         ShippingHub.shippingHubs.get(1).setLocationInches(-24, -12);
         ShippingHub.shippingHubs.get(2).setLocationInches(0, 48);
+
+        Barrier.theBarrier.setOnField(true);
+        Barrier.theBarrier.setLocationInches(0, 24);
 
         updateDisplay();
     }

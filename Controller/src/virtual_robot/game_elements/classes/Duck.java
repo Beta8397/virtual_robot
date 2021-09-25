@@ -20,8 +20,4 @@ public class Duck extends VirtualGameElement {
 
     }
 
-    @Override
-    public void stop() {
-
-    }
 }

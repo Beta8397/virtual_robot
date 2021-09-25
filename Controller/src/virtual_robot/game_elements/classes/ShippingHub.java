@@ -24,8 +24,6 @@ public class ShippingHub extends VirtualGameElement {
 
     public static final List<ShippingHub> shippingHubs = new ArrayList<>();
 
-    private boolean onField = false;
-
     Body shippingHubBody = null;
 
     // Category and filter for collisions
@@ -75,32 +73,6 @@ public class ShippingHub extends VirtualGameElement {
 
         shippingHubBody = elementBody;       // Alias for elementBody
         shippingHubBody.setLinearDamping(100.0);     // Lots of damping (simulates floor-wobble friction)
-    }
-
-    /**
-     * Add or remove the wobble to/from field, which includes the following actions:
-     *   1) set the value of onField
-     *   2) Remove body from world, or add body to world.
-     *   3) Remove or add the element displayGroup from/to the display.
-     *
-     * @param onField
-     */
-    public void setOnField(boolean onField){
-        this.onField = onField;
-        if (onField && !world.containsBody(shippingHubBody)) world.addBody(shippingHubBody);
-        else if (!onField && world.containsBody(shippingHubBody)) world.removeBody(shippingHubBody);
-        if (onField) addToDisplay();
-        else removeFromDisplay();
-    }
-
-    public boolean isOnField(){
-        return this.onField;
-    }
-
-    @Override
-    public void stop(){
-        shippingHubBody.setLinearVelocity(0,0);
-        shippingHubBody.setAngularVelocity(0);
     }
 
     public Circle getOuterCircle(){ return outerCircle; }

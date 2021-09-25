@@ -23,8 +23,4 @@ public class Box extends VirtualGameElement {
 
     }
 
-    @Override
-    public void stop() {
-
-    }
 }
