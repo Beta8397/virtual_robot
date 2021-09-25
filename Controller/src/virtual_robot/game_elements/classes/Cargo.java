@@ -8,7 +8,7 @@ import virtual_robot.games.UltimateGoal;
 import java.util.ArrayList;
 import java.util.List;
 
-@GameElementConfig(name = "Cargo", filename = "cargo", forGame = FreightFrenzy.class, numInstances = 10)
+//@GameElementConfig(name = "Cargo", filename = "cargo", forGame = FreightFrenzy.class, numInstances = 10)
 public class Cargo extends VirtualGameElement {
 
     public static final List<Cargo> cargos = new ArrayList<>();

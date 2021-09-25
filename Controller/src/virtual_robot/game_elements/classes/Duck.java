@@ -5,6 +5,7 @@ import virtual_robot.controller.VirtualGameElement;
 import java.util.ArrayList;
 import java.util.List;
 
+//@GameElementConfig(name = "Cargo", filename = "cargo", forGame = FreightFrenzy.class, numInstances = 10)
 public class Duck extends VirtualGameElement {
 
     public static List<Duck> ducks = new ArrayList<>();

@@ -1,5 +1,9 @@
 package virtual_robot.games;
 
+import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.Stop;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.world.NarrowphaseCollisionData;
@@ -25,8 +29,23 @@ public class FreightFrenzy extends Game {
                 Box.boxes.add((Box)e);
             } else if (e instanceof Duck){
                 Duck.ducks.add((Duck)e);
+            } else if (e instanceof ShippingHub){
+                ShippingHub.shippingHubs.add((ShippingHub) e);
             }
         }
+
+        /*
+         * Set the Shipping Hub Colors -- Red, Blue, and Green (for neutral)
+         */
+        ShippingHub.shippingHubs.get(0).getOuterCircle().setFill(Color.valueOf("FF0000"));
+        ShippingHub.shippingHubs.get(1).getOuterCircle().setFill(Color.valueOf("0000FF"));
+
+        Stop blueStop = new Stop(0.49, Color.BLUE);
+        Stop redStop = new Stop(0.51, Color.RED);
+        LinearGradient gradient = new LinearGradient(0, 0, 1, 0, true,
+                CycleMethod.NO_CYCLE, blueStop, redStop);
+        ShippingHub.shippingHubs.get(2).getOuterCircle().setFill(gradient);
+
 
         /*
          * Add a collision listener to implement "special" handling of certain types of collision. For example,
@@ -68,6 +87,13 @@ public class FreightFrenzy extends Game {
     @Override
     public void resetGameElements() {
         //TODO: ADD CODE TO RESET GAME ELEMENTS
+
+        for (ShippingHub sh: ShippingHub.shippingHubs) sh.setOnField(true);
+        ShippingHub.shippingHubs.get(0).setLocationInches(24, -12);
+        ShippingHub.shippingHubs.get(1).setLocationInches(-24, -12);
+        ShippingHub.shippingHubs.get(2).setLocationInches(0, 48);
+
+        updateDisplay();
     }
 
     /**
