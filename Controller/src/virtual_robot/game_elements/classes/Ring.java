@@ -202,7 +202,7 @@ public class Ring extends VirtualGameElement {
         this.status = status;
         this.nextStatus = status;
         // Add/remove to/from the physics world and the display, depending on the value of inPlay for the new status.
-        setInPlay(status.isInPlay());
+        setOnField(status.isInPlay());
         // Update the ringsOffField list if necessary (it keeps track of which rings are available to human player)
         if (status == RingStatus.OFF_FIELD && !ringsOffField.contains(this)) {
             ringsOffField.add(this);
@@ -212,27 +212,6 @@ public class Ring extends VirtualGameElement {
         // Set the linearDamping and the collision filter corresponding to the new status.
         ringBody.setLinearDamping(status.getLinearDamping());
         ringFixture.setFilter(status.getFilter());
-    }
-
-    /**
-     * Setting a ring in play entails: add to physics world and add to display.
-     * Removing a ring from play entails: remove from physics world and remove from display.
-     * @param inPlay
-     */
-    public void setInPlay(boolean inPlay) {
-        if (inPlay && !world.containsBody(elementBody)) world.addBody(elementBody);
-        else if (!inPlay && world.containsBody(elementBody)) world.removeBody(elementBody);
-        if (inPlay) addToDisplay();
-        else removeFromDisplay();
-    }
-
-    /**
-     * Stop motion of the ring.
-     */
-    @Override
-    public void stop(){
-        ringBody.setLinearVelocity(0,0);
-        ringBody.setAngularVelocity(0);
     }
 
 }

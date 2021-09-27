@@ -20,8 +20,4 @@ public class CargoFreight extends Freight {
         //TODO: Set up a dyn4j Body for the cargo elements and assign it to elementBody
     }
 
-    @Override
-    public void stop() {
-        //
-    }
 }

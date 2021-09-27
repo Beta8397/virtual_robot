@@ -20,8 +20,4 @@ public class DuckFreight extends Freight {
 
     }
 
-    @Override
-    public void stop() {
-
-    }
 }
