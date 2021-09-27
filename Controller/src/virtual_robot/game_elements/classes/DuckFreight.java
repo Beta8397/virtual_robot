@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 //@GameElementConfig(name = "Cargo", filename = "cargo", forGame = FreightFrenzy.class, numInstances = 10)
-public class Duck extends VirtualGameElement {
+public class DuckFreight extends Freight {
 
-    public static List<Duck> ducks = new ArrayList<>();
+    public static List<DuckFreight> ducks = new ArrayList<>();
 
     @Override
     public void updateState(double millis) {

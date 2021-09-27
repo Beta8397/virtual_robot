@@ -1,17 +1,14 @@
 package virtual_robot.game_elements.classes;
 
-import virtual_robot.controller.GameElementConfig;
 import virtual_robot.controller.VirtualGameElement;
-import virtual_robot.games.FreightFrenzy;
-import virtual_robot.games.UltimateGoal;
 
 import java.util.ArrayList;
 import java.util.List;
 
 //@GameElementConfig(name = "Cargo", filename = "cargo", forGame = FreightFrenzy.class, numInstances = 10)
-public class Cargo extends VirtualGameElement {
+public class CargoFreight extends Freight {
 
-    public static final List<Cargo> cargos = new ArrayList<>();
+    public static final List<CargoFreight> cargos = new ArrayList<>();
 
     @Override
     public void updateState(double millis) {

@@ -23,12 +23,12 @@ public class FreightFrenzy extends Game {
 
         //Assign the game elements to the appropriate static final lists.
         for (VirtualGameElement e: gameElements){
-            if (e instanceof Cargo){
-                Cargo.cargos.add((Cargo)e);
-            } else if (e instanceof Box){
-                Box.boxes.add((Box)e);
-            } else if (e instanceof Duck){
-                Duck.ducks.add((Duck)e);
+            if (e instanceof CargoFreight){
+                CargoFreight.cargos.add((CargoFreight)e);
+            } else if (e instanceof BoxFreight){
+                BoxFreight.boxes.add((BoxFreight)e);
+            } else if (e instanceof DuckFreight){
+                DuckFreight.ducks.add((DuckFreight)e);
             } else if (e instanceof ShippingHub){
                 ShippingHub.shippingHubs.add((ShippingHub) e);
             }
