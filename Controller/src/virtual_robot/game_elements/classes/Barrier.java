@@ -27,10 +27,6 @@ public class Barrier extends VirtualGameElement {
         super.initialize();
     }
 
-    @Override
-    public void setUpDisplayGroup(Group group) {
-        super.setUpDisplayGroup(group);
-    }
 
     /**
      * The implementation of updateState for ShippingHub is simple: just obtain (x, y, headingRadians)

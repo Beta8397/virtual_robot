@@ -6,6 +6,7 @@ import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Stop;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.NarrowphaseCollisionData;
 import org.dyn4j.world.listener.CollisionListenerAdapter;
 import virtual_robot.controller.Game;
@@ -13,6 +14,12 @@ import virtual_robot.controller.VirtualGameElement;
 import virtual_robot.game_elements.classes.*;
 
 public class FreightFrenzy extends Game {
+
+    public static final Vector2[] hubPositionsInches = new Vector2[]{
+            new Vector2(24, -12),       // Red hub
+            new Vector2(-24, -12),      // Blue hub
+            new Vector2(0, 48)          // Neutral hub
+    };
 
     private boolean humanPlayerActive = false;
 
@@ -25,10 +32,13 @@ public class FreightFrenzy extends Game {
         for (VirtualGameElement e: gameElements){
             if (e instanceof CargoFreight){
                 CargoFreight.cargos.add((CargoFreight)e);
+                Freight.freightItems.add((Freight)e);
             } else if (e instanceof BoxFreight){
                 BoxFreight.boxes.add((BoxFreight)e);
+                Freight.freightItems.add((Freight)e);
             } else if (e instanceof DuckFreight){
                 DuckFreight.ducks.add((DuckFreight)e);
+                Freight.freightItems.add((Freight)e);
             } else if (e instanceof ShippingHub){
                 ShippingHub.shippingHubs.add((ShippingHub) e);
             } else if (e instanceof Barrier){
@@ -88,15 +98,32 @@ public class FreightFrenzy extends Game {
 
     @Override
     public void resetGameElements() {
-        //TODO: ADD CODE TO RESET GAME ELEMENTS
 
-        for (ShippingHub sh: ShippingHub.shippingHubs) sh.setOnField(true);
-        ShippingHub.shippingHubs.get(0).setLocationInches(24, -12);
-        ShippingHub.shippingHubs.get(1).setLocationInches(-24, -12);
-        ShippingHub.shippingHubs.get(2).setLocationInches(0, 48);
+        for (int i=0; i<3; i++){
+            ShippingHub.shippingHubs.get(i).setOnField(true);
+            ShippingHub.shippingHubs.get(i).setLocationInches(hubPositionsInches[i]);
+        }
 
         Barrier.theBarrier.setOnField(true);
         Barrier.theBarrier.setLocationInches(0, 24);
+
+        for (int i=0; i<30; i++){
+            int row = i / 5;
+            int col = i % 5;
+            float x = row<3? -66 + col * 8 : 34 + col * 8;
+            float y = 32 + (row % 3) * 16;
+            BoxFreight.boxes.get(i).setOnField(true);
+            BoxFreight.boxes.get(i).setLocationInches(x, y);
+        }
+
+        for (int i=0; i<20; i++){
+            int row = i / 5;
+            int col = i % 5;
+            float x = row<2? -66 + col * 8 : 34 + col * 8;
+            float y = 40 + (row % 2) * 16;
+            CargoFreight.cargos.get(i).setOnField(true);
+            CargoFreight.cargos.get(i).setLocationInches(x, y);
+        }
 
         updateDisplay();
     }
