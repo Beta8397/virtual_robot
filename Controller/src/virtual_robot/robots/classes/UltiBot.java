@@ -37,10 +37,10 @@ import static virtual_robot.game_elements.classes.Ring.RingStatus.OFF_FIELD;
  * This configuration controlled by the dyn4j physics/collision engine, and configured to
  * interact with game elements in the UltimateGoal game.
  *
- * BetaBot is the controller class for the "beta_bot.fxml" markup file.
+ * BetaBot is the controller class for the "ulti_bot.fxml" markup file.
  */
-@BotConfig(name = "Beta Bot", filename = "beta_bot")
-public class BetaBot extends MecanumPhysicsBase implements ControlsElements {
+@BotConfig(name = "Ulti Bot", filename = "ulti_bot")
+public class UltiBot extends MecanumPhysicsBase implements ControlsElements {
 
     //Fixture to hold the collision geometry of the ring intake
     private BodyFixture intakeFixture = null;
@@ -68,7 +68,7 @@ public class BetaBot extends MecanumPhysicsBase implements ControlsElements {
     Translate scoopTranslate = new Translate(0, 0);   // Transform to control position of scoopGroup
     double scoopPosition = 0;   // Current position of scoop in pixel units
 
-    public BetaBot() {
+    public UltiBot() {
         super();
     }
 
