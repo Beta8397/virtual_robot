@@ -1,6 +1,7 @@
 package virtual_robot.game_elements.classes;
 
 import org.dyn4j.collision.CategoryFilter;
+import org.dyn4j.dynamics.Body;
 import virtual_robot.controller.Filters;
 import virtual_robot.controller.VirtualGameElement;
 import virtual_robot.dyn4j.Dyn4jUtil;
@@ -25,5 +26,7 @@ public abstract class Freight extends VirtualGameElement {
                 new FixtureData(FREIGHT_FILTER, 1, 0, 0));
         elementBody.setLinearDamping(100);
     }
+
+    public Body getBody(){ return elementBody; }
 
 }

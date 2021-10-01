@@ -14,6 +14,7 @@ import javafx.scene.transform.Translate;
 import org.dyn4j.collision.CategoryFilter;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.dynamics.joint.WeldJoint;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.NarrowphaseCollisionData;
 import org.dyn4j.world.listener.CollisionListenerAdapter;
@@ -23,6 +24,8 @@ import virtual_robot.controller.VirtualField;
 import virtual_robot.dyn4j.Dyn4jUtil;
 import virtual_robot.dyn4j.FixtureData;
 import virtual_robot.dyn4j.Slide;
+import virtual_robot.game_elements.classes.Barrier;
+import virtual_robot.game_elements.classes.Freight;
 import virtual_robot.game_elements.classes.Ring;
 import virtual_robot.game_elements.classes.WobbleGoal;
 
@@ -92,12 +95,17 @@ public class FreightBot extends MecanumPhysicsBase {
     private Body armBody;
     private Body leftFingerBody;
     private Body rightFingerBody;
-    Slide armSlide;
-    Slide leftFingerSlide;
-    Slide rightFingerSlide;
-    BodyFixture armSensorFixture;
+    private Slide armSlide;
+    private Slide leftFingerSlide;
+    private Slide rightFingerSlide;
 
-    private CategoryFilter ARM_FILTER = new CategoryFilter(Filters.ARM, WobbleGoal.WOBBLE_HANDLE_CATEGORY | Filters.WALL);
+    private BodyFixture armSensorFixture;
+    private Freight freightToLoad = null;
+    private Freight loadedFreight = null;
+    private boolean fingersClosed = false;
+    private WeldJoint<Body> loadedFreightJoint = null;
+
+    private CategoryFilter ARM_FILTER = new CategoryFilter(Filters.ARM, Filters.MASK_ALL & ~Barrier.BARRIER_CATEGORY);
 
     /**
      * Constructor.
@@ -227,12 +235,38 @@ public class FreightBot extends MecanumPhysicsBase {
         armSlide.setPosition(armTranslation);
 
         /*
+         * Save prior value of fingersClosed, then
          * Update the value of fingerPos, using the current position of the hand servo. Then set the position
-         * of each finger slide joint using this value.
+         * of each finger slide joint using this value, then
+         * Set new value of fingersClosed
          */
+        boolean priorFingersClosed = fingersClosed;
         fingerPos =  15 * handServo.getInternalPosition();
         leftFingerSlide.setPosition(fingerPos);
         rightFingerSlide.setPosition(-fingerPos);
+        fingersClosed = fingerPos > 10;
+
+        /*
+         * If fingers have transitioned from open to closed, check for freightToLoad, and if not null, load the
+         * freight by creating a fixed joint between the arm and the freight.
+         * But, if fingers have transitioned from closed to open, check for a loaded freight. If one exists then set
+         * loadedFreight to null and delete the fixed joint between the arm and the loaded freight.
+         * Finally, leave freightToLoad null.
+         */
+
+        System.out.println("Freight to load? " + freightToLoad);
+
+        if (!priorFingersClosed && fingersClosed && freightToLoad != null){
+            loadedFreightJoint = new WeldJoint(armBody, freightToLoad.getBody(),
+                    armBody.getTransform().getTranslation());
+            world.addJoint(loadedFreightJoint);
+            loadedFreight = freightToLoad;
+        } else if (priorFingersClosed && !fingersClosed && loadedFreight != null){
+            world.removeJoint(loadedFreightJoint);
+            loadedFreightJoint = null;
+            loadedFreight = null;
+        }
+        freightToLoad = null;
 
     }
 
@@ -284,20 +318,14 @@ public class FreightBot extends MecanumPhysicsBase {
     private boolean handleNarrowPhaseCollisions(NarrowphaseCollisionData<Body, BodyFixture> collision){
         BodyFixture f1 = collision.getFixture1();
         BodyFixture f2 = collision.getFixture2();
-//        if ((f1 == intakeFixture || f2 == intakeFixture) &&  loadedRings.size() < 3
-//                && ringToLoad == null) {
-//            Body b = f1 == intakeFixture ? collision.getBody2() : collision.getBody1();
-//            double intakeVel = intakeMotor.getVelocity();
-//            boolean intakeFwd = intakeMotor.getDirection() == DcMotorSimple.Direction.FORWARD;
-//            boolean intakeOn = intakeVel>560 && intakeFwd || intakeVel<-560 && !intakeFwd;
-//            if (b.getUserData() instanceof Ring && intakeOn){
-//                Ring r = (Ring)b.getUserData();
-//                if (!(r.getStatus() == Ring.RingStatus.FLYING)) {
-//                    ringToLoad = r;
-//                    return false;
-//                }
-//            }
-//        }
+        if ((f1 == armSensorFixture) || (f2 == armSensorFixture) && freightToLoad == null && loadedFreight == null
+                && fingersClosed == false) {
+            Body b = f1 == armSensorFixture? collision.getBody2() : collision.getBody1();
+            if (b.getUserData() instanceof Freight){
+                freightToLoad = (Freight)b.getUserData();
+            }
+            return false;
+        }
         return true;
     }
 

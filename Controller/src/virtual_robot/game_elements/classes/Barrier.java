@@ -21,7 +21,7 @@ public class Barrier extends VirtualGameElement {
 
     // Category and filter for collisions
     public static final long BARRIER_CATEGORY = 1024;
-    public static final CategoryFilter BARRIER_FILTER = new CategoryFilter(BARRIER_CATEGORY, Filters.MASK_ALL & ~Filters.CHASSIS);
+    public static final CategoryFilter BARRIER_FILTER = new CategoryFilter(BARRIER_CATEGORY, Filters.MASK_ALL & ~Filters.CHASSIS & ~Filters.ARM);
 
     public void initialize(){
         super.initialize();
