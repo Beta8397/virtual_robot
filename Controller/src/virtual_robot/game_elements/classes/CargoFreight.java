@@ -13,11 +13,5 @@ public class CargoFreight extends Freight {
 
     public static final List<CargoFreight> cargos = new ArrayList<>();
 
-    @Override
-    public void updateState(double millis) {
-        x = elementBody.getTransform().getTranslationX() * VirtualField.PIXELS_PER_METER;
-        y = elementBody.getTransform().getTranslationY() * VirtualField.PIXELS_PER_METER;
-        headingRadians = elementBody.getTransform().getRotationAngle();
-    }
 
 }

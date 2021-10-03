@@ -22,6 +22,7 @@ import java.util.List;
 @GameElementConfig(name = "Shipping Hub", filename = "shipping_hub", forGame = FreightFrenzy.class, numInstances = 3)
 public class ShippingHub extends VirtualGameElement {
 
+    public static final double SHIPPING_HUB_RADIUS = 9.0;
     public static final List<ShippingHub> shippingHubs = new ArrayList<>();
 
     Body shippingHubBody = null;

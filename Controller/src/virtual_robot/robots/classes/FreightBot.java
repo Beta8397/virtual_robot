@@ -24,10 +24,7 @@ import virtual_robot.controller.VirtualField;
 import virtual_robot.dyn4j.Dyn4jUtil;
 import virtual_robot.dyn4j.FixtureData;
 import virtual_robot.dyn4j.Slide;
-import virtual_robot.game_elements.classes.Barrier;
-import virtual_robot.game_elements.classes.Freight;
-import virtual_robot.game_elements.classes.Ring;
-import virtual_robot.game_elements.classes.WobbleGoal;
+import virtual_robot.game_elements.classes.*;
 
 import java.util.HashMap;
 
@@ -105,7 +102,8 @@ public class FreightBot extends MecanumPhysicsBase {
     private boolean fingersClosed = false;
     private WeldJoint<Body> loadedFreightJoint = null;
 
-    private CategoryFilter ARM_FILTER = new CategoryFilter(Filters.ARM, Filters.MASK_ALL & ~Barrier.BARRIER_CATEGORY);
+    private CategoryFilter ARM_FILTER = new CategoryFilter(Filters.ARM,
+            Filters.MASK_ALL & ~Barrier.BARRIER_CATEGORY & ~ShippingHub.HUB_CATEGORY);
 
     /**
      * Constructor.
@@ -254,15 +252,32 @@ public class FreightBot extends MecanumPhysicsBase {
          * Finally, leave freightToLoad null.
          */
 
-        System.out.println("Freight to load? " + freightToLoad);
 
         if (!priorFingersClosed && fingersClosed && freightToLoad != null){
-            loadedFreightJoint = new WeldJoint(armBody, freightToLoad.getBody(),
+            freightToLoad.setOwningShippingHub(null);
+            loadedFreightJoint = new WeldJoint(armBody, freightToLoad.getElementBody(),
                     armBody.getTransform().getTranslation());
             world.addJoint(loadedFreightJoint);
             loadedFreight = freightToLoad;
+            loadedFreight.setCategoryFilter(Freight.OWNED_FILTER);
         } else if (priorFingersClosed && !fingersClosed && loadedFreight != null){
             world.removeJoint(loadedFreightJoint);
+            Vector2 loadedFreightTranslation = loadedFreight.getElementBody().getTransform().getTranslation();
+            for (ShippingHub hub: ShippingHub.shippingHubs){
+                Vector2 hubTranslation = hub.getElementBody().getTransform().getTranslation();
+                double hubDist = loadedFreightTranslation.distance(hubTranslation) * VirtualField.INCHES_PER_METER;
+                if (hubDist < ShippingHub.SHIPPING_HUB_RADIUS){
+                    loadedFreight.setOwningShippingHub(hub);
+                    break;
+                }
+            }
+
+            if (loadedFreight.getOwningShippingHub() == null){
+                loadedFreight.setCategoryFilter(Freight.NORMAL_FILTER);
+            } else {
+                loadedFreight.setCategoryFilter(Freight.OWNED_FILTER);
+            }
+
             loadedFreightJoint = null;
             loadedFreight = null;
         }
@@ -324,7 +339,7 @@ public class FreightBot extends MecanumPhysicsBase {
             if (b.getUserData() instanceof Freight){
                 freightToLoad = (Freight)b.getUserData();
             }
-            return false;
+            return true;
         }
         return true;
     }

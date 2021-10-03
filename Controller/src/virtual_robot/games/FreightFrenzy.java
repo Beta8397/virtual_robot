@@ -81,8 +81,7 @@ public class FreightFrenzy extends Game {
      *
      * This will be called for all collisions, but needn't do any special processing for most of them. It
      * will handle:
-     *  1) collision of any body with stacked rings--give stacked ring a nudge and cancel collision.
-     *  2) collision of any body with a rolling ring--set ring to not rolling and continue with collision.
+     * 1) Collision of Freight and FreightHub
      *
      *  Return true to continue processing the collision, false to stop it.
      *
@@ -90,8 +89,6 @@ public class FreightFrenzy extends Game {
      *  be handled by a listener set in the VirtualBot implementation.
      */
     private boolean handleNarrowPhaseCollision(NarrowphaseCollisionData<Body, BodyFixture> collision){
-
-     //TODO: ADD COLLISION-HANDLING CODE HERE
 
         return true;
     }

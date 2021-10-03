@@ -344,4 +344,8 @@ public abstract class VirtualGameElement {
         elementBody.setAngularVelocity(0);
     }
 
+    public Body getElementBody(){
+        return elementBody;
+    }
+
 }
