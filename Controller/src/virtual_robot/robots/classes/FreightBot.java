@@ -15,6 +15,7 @@ import org.dyn4j.collision.CategoryFilter;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.joint.WeldJoint;
+import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.NarrowphaseCollisionData;
 import org.dyn4j.world.listener.CollisionListenerAdapter;
@@ -255,8 +256,15 @@ public class FreightBot extends MecanumPhysicsBase {
 
         if (!priorFingersClosed && fingersClosed && freightToLoad != null){
             freightToLoad.setOwningShippingHub(null);
-            loadedFreightJoint = new WeldJoint(armBody, freightToLoad.getElementBody(),
-                    armBody.getTransform().getTranslation());
+            Transform armTransform = armBody.getTransform();
+            Vector2 armTranslation = armTransform.getTranslation();
+            Vector2 handOffset = new Vector2(-armTransform.getSint(), armTransform.getCost())
+                    .multiply(8.0 / VirtualField.INCHES_PER_METER);
+            Vector2 newFreightTranslation = armTranslation.add(handOffset);
+            world.removeBody(freightToLoad.getElementBody());
+            freightToLoad.getElementBody().getTransform().setTranslation(newFreightTranslation);
+            world.addBody(freightToLoad.getElementBody());
+            loadedFreightJoint = new WeldJoint(armBody, freightToLoad.getElementBody(), armTranslation);
             world.addJoint(loadedFreightJoint);
             loadedFreight = freightToLoad;
             loadedFreight.setCategoryFilter(Freight.OWNED_FILTER);
@@ -339,7 +347,7 @@ public class FreightBot extends MecanumPhysicsBase {
             if (b.getUserData() instanceof Freight){
                 freightToLoad = (Freight)b.getUserData();
             }
-            return true;
+            return false;
         }
         return true;
     }
