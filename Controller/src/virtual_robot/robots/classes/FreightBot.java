@@ -104,7 +104,8 @@ public class FreightBot extends MecanumPhysicsBase {
     private WeldJoint<Body> loadedFreightJoint = null;
 
     private CategoryFilter ARM_FILTER = new CategoryFilter(Filters.ARM,
-            Filters.MASK_ALL & ~Barrier.BARRIER_CATEGORY & ~ShippingHub.HUB_CATEGORY);
+            Filters.MASK_ALL & ~Barrier.BARRIER_CATEGORY & ~ShippingHub.HUB_CATEGORY
+                    & ~Filters.CHASSIS & ~Filters.ARM);
 
     /**
      * Constructor.
