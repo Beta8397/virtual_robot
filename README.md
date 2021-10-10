@@ -1,5 +1,7 @@
 # A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
 
+Branch for adding Freight Frenzy Game Element Interaction -- NOT READY FOR USE
+
 New: Changed field to Freight Frenzy field. Coming Soon: Adaptation to use Freight Frenzy Game Elements. Currently, 
 the game is set to "NoGame", and there is no interaction with game elements.
 

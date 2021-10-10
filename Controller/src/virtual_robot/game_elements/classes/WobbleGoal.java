@@ -30,8 +30,6 @@ public class WobbleGoal extends VirtualGameElement {
     public static final CategoryFilter WOBBLE_HANDLE_FILTER =
             new CategoryFilter(WOBBLE_HANDLE_CATEGORY, Filters.ARM);
 
-    private boolean onField = false;
-
     // Outer circle from the .fxml file; will use to generate dyn4j Body
     @FXML private Circle outerCircle;
     @FXML private Circle innerCircle;
@@ -82,29 +80,4 @@ public class WobbleGoal extends VirtualGameElement {
         wobbleBody.setLinearDamping(100.0);     // Lots of damping (simulates floor-wobble friction)
     }
 
-    /**
-     * Add or remove the wobble to/from field, which includes the following actions:
-     *   1) set the value of onField
-     *   2) Remove body from world, or add body to world.
-     *   3) Remove or add the element displayGroup from/to the display.
-     *
-     * @param onField
-     */
-    public void setOnField(boolean onField){
-        this.onField = onField;
-        if (onField && !world.containsBody(wobbleBody)) world.addBody(wobbleBody);
-        else if (!onField && world.containsBody(wobbleBody)) world.removeBody(wobbleBody);
-        if (onField) addToDisplay();
-        else removeFromDisplay();
-    }
-
-    public boolean isOnField(){
-        return this.onField;
-    }
-
-    @Override
-    public void stop(){
-        wobbleBody.setLinearVelocity(0,0);
-        wobbleBody.setAngularVelocity(0);
-    }
 }

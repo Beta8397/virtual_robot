@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.shape.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<Group xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="virtual_robot.game_elements.classes.DuckFreight">
+   <children>
+      <Circle centerX="-1.3683" centerY="1.3683" fill="ORANGE" radius="4.8817" stroke="BLACK" strokeType="INSIDE" />
+      <Circle centerX="3.8092" centerY="-3.8092" fill="ORANGE" radius="2.4408" stroke="BLACK" strokeType="INSIDE" />
+   </children>
+</Group>
