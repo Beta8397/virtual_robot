@@ -65,7 +65,7 @@ public class SixWheelPhysicsBase extends VirtualBot {
 
         // Maximum possible frictional force between field and any individual robot wheel.
         // Note the division by 6 (assumes each wheel gets 1/6 of robot mass).
-        maxWheelForce = 9.8 * chassisBody.getMass().getMass() * Config.FIELD_FRICTION_COEFF / 6.0;
+        maxWheelForce = 9.8 * chassisBody.getMass().getMass() * Config.FIELD_FRICTION_COEFF / 2.0;
     }
 
     protected void createHardwareMap() {
@@ -84,17 +84,14 @@ public class SixWheelPhysicsBase extends VirtualBot {
     private double calculateWheelSpeed(DcMotorEx frontMotor, DcMotorEx backMotor) {
         double averageVelocity = ((frontMotor.getVelocity(AngleUnit.RADIANS) + backMotor.getVelocity(AngleUnit.RADIANS)) / 2.0);
         double speed = wheelCircumference * averageVelocity / (2.0 * Math.PI);// 2pi = 1 rotation
-        assert (frontMotor.getDirection() == backMotor.getDirection());
-        if (frontMotor.getDirection() == DcMotorSimple.Direction.REVERSE){
-            if (MOTOR_TYPE.REVERSED) {
-                speed = -speed;
-            }
+
+        //Assertion disabled by default in Intellij IDEA
+//        assert (frontMotor.getDirection() == backMotor.getDirection());
+
+        if (frontMotor.getDirection() != backMotor.getDirection()){
+            System.out.println("Front and Back Motors on the same side must have the same direction.");
         }
-        else{
-            if(!MOTOR_TYPE.REVERSED){
-                speed = -speed;
-            }
-        }
+
         return speed;
 
     }
@@ -118,6 +115,10 @@ public class SixWheelPhysicsBase extends VirtualBot {
         rightMotorBack.update(millis);
         double leftWheelSpeed = calculateWheelSpeed(leftMotorFront, leftMotorBack);
         double rightWheelSpeed = calculateWheelSpeed(rightMotorFront, rightMotorBack);
+        boolean ltRev = leftMotorFront.getDirection() == DcMotorSimple.Direction.REVERSE;
+        boolean rtRev = rightMotorFront.getDirection() == DcMotorSimple.Direction.REVERSE;
+        if (MOTOR_TYPE.REVERSED && ltRev || !MOTOR_TYPE.REVERSED && !ltRev) leftWheelSpeed = -leftWheelSpeed;
+        if (MOTOR_TYPE.REVERSED && !rtRev || !MOTOR_TYPE.REVERSED && rtRev) rightWheelSpeed = -rightWheelSpeed;
 
         double targetRobotSpeed = 0.5 * (leftWheelSpeed + rightWheelSpeed) / VirtualField.PIXELS_PER_METER;
         double targetAngularSpeed = (rightWheelSpeed - leftWheelSpeed) / interWheelDistance;

@@ -1,9 +1,11 @@
 # A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
 
-Branch for adding Freight Frenzy Game Element Interaction -- NOT READY FOR USE
-
-New: Changed field to Freight Frenzy field. Coming Soon: Adaptation to use Freight Frenzy Game Elements. Currently, 
-the game is set to "NoGame", and there is no interaction with game elements.
+New: Changed field to Freight Frenzy field. Adaptation to use Freight Frenzy Game Elements. Currently, 
+the Shipping Hubs and Freight are implemented. A robot configuration called FreightBot is capable of 
+grabbing freight (with arm) and depositing it on the Shipping Hubs. The carousel, preloading of Boxes, and 
+Human Player action are not yet implemented (work in progress). The "Game", is currently set to FreightFrenzy. If 
+you prefer not to have game elements littering the field, then set the game to "NoGame" in the 
+virtual_robot.config.Config.java file (in the Controller module).
 
 Includes Programming Board configuration to serve as a companion to the book "Learn Java For FTC", by Alan Smith. The
 PDF can be [downloaded for free](https://github.com/alan412/LearnJavaForFTC) or you can purchase the paperback on

@@ -22,5 +22,13 @@ Virtual Robot, Copyright 2019 Team Beta
 
    Javassist software (Copyright 1999-2019, Shigeru Chiba), Licensed under Apache License, Version 2.0
 
+   Acmerobotics Roadrunner core library (Copyright 2018, Acmerobotics), Licensed under MIT License
+
+   Apache Commons Math 3 Library (included in the RoadRunner Core Library), Licensed under Apache License, Version 2.0
+
+   OpenFTC EasyOpenCV Library, v1.5.0: Individual licenses for each class (see lib/EasyOpenCV_Sources)
+
+   OpenCV Library, v4.5.3 (included in the EasyOpenCV Library), Licensed under Apache License, Version 2.0
+
 
 
