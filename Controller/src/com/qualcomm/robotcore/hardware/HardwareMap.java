@@ -36,6 +36,7 @@ Modified by FTC Team Beta 8397 for use in the Virtual_Robot Simulator
 package com.qualcomm.robotcore.hardware;
 
 import java.util.*;
+import android.content.Context;
 
 /**
  * HardwareMap provides access to the virtual robot hardware
@@ -76,6 +77,8 @@ public class HardwareMap implements Iterable<HardwareDevice>{
      *  List of all hardware devices in this HardwareMap
      */
     private List<HardwareDevice> allDevicesList = new ArrayList<>();
+
+    public Context appContext;
 
     /**
      * INTERNAL USE ONLY!!!

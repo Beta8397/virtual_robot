@@ -44,6 +44,15 @@ import virtual_robot.controller.VirtualGamePadController;
  */
 public class Gamepad {
 
+    //for ps4
+    public volatile boolean circle = false;
+    public volatile boolean cross = false;
+    public volatile boolean triangle = false;
+    public volatile boolean square = false;
+    public volatile boolean share = false;
+    public volatile boolean options = false;
+    public volatile boolean ps = false;
+
     public volatile boolean x = false;
     public volatile boolean y = false;
     public volatile boolean a = false;
@@ -148,6 +157,23 @@ public class Gamepad {
         right_stick_button = false;
         left_trigger = state.left_trigger;
         right_trigger = state.right_trigger;
+        updateButtonAliases();
+    }
+
+    /**
+     * Alias buttons so that XBOX & PS4 native button labels can be used in use code.
+     * Should allow a team to program with whatever controllers they prefer, but
+     * be able swap controllers easily without changing code.
+     */
+    protected void updateButtonAliases(){
+        // There is no assignment for touchpad because there is no equivalent on XBOX controllers.
+        circle = b;
+        cross = a;
+        triangle = y;
+        square = x;
+        share = back;
+        options = start;
+        ps = guide;
     }
 
 }
