@@ -12,6 +12,7 @@ import java.util.List;
 public class DuckFreight extends Freight {
 
     public static List<DuckFreight> ducks = new ArrayList<>();
-
+    public static List<DuckFreight> ducksOffFieldRed = new ArrayList<>();
+    public static List<DuckFreight> ducksOffFieldBlue = new ArrayList<>();
 
 }

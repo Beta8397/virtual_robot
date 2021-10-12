@@ -206,6 +206,7 @@ public class VirtualRobotController {
     private void setupPhysicsWorld(){
         world.setGravity(0, 0);
         world.getSettings().setContinuousDetectionMode(ContinuousDetectionMode.BULLETS_ONLY);
+        world.getSettings().setBaumgarte(0.2);
 
         // Create Rectangles for four 1 meter thick walls
         org.dyn4j.geometry.Rectangle topRect = new org.dyn4j.geometry.Rectangle(

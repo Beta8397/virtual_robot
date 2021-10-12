@@ -6,10 +6,14 @@ import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Stop;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.dynamics.joint.RevoluteJoint;
+import org.dyn4j.geometry.MassType;
+import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.NarrowphaseCollisionData;
 import org.dyn4j.world.listener.CollisionListenerAdapter;
 import virtual_robot.controller.Game;
+import virtual_robot.controller.VirtualField;
 import virtual_robot.controller.VirtualGameElement;
 import virtual_robot.game_elements.classes.*;
 
@@ -20,6 +24,9 @@ public class FreightFrenzy extends Game {
             new Vector2(-24, -12),      // Blue hub
             new Vector2(0, 48)          // Neutral hub
     };
+
+    private Carousel redCarousel = null;
+    private Carousel blueCarousel = null;
 
     private boolean humanPlayerActive = false;
 
@@ -43,6 +50,8 @@ public class FreightFrenzy extends Game {
                 ShippingHub.shippingHubs.add((ShippingHub) e);
             } else if (e instanceof Barrier){
                 Barrier.theBarrier = (Barrier) e;
+            } else if (e instanceof Carousel) {
+                Carousel.carousels.add((Carousel)e);
             }
         }
 
@@ -57,6 +66,23 @@ public class FreightFrenzy extends Game {
         LinearGradient gradient = new LinearGradient(0, 0, 1, 0, true,
                 CycleMethod.NO_CYCLE, blueStop, redStop);
         ShippingHub.shippingHubs.get(2).getOuterCircle().setFill(gradient);
+
+        redCarousel = Carousel.carousels.get(0);
+        blueCarousel = Carousel.carousels.get(1);
+        redCarousel.setOnField(true);
+        redCarousel.setLocationInches(69, -69);
+        blueCarousel.setOnField(true);
+        blueCarousel.setLocationInches(-69, -69);
+        Body carouselAnchor = new Body();
+        carouselAnchor.setMass(MassType.INFINITE);
+        carouselAnchor.getTransform().setTranslation(0, 0 );
+        world.addBody(carouselAnchor);
+        RevoluteJoint redJoint = new RevoluteJoint(redCarousel.getElementBody(), carouselAnchor,
+                new Vector2(69.0 / VirtualField.INCHES_PER_METER, -69.0 / VirtualField.INCHES_PER_METER));
+        RevoluteJoint blueJoint = new RevoluteJoint(blueCarousel.getElementBody(), carouselAnchor,
+                new Vector2(-69.0 / VirtualField.INCHES_PER_METER, -69.0 / VirtualField.INCHES_PER_METER));
+        world.addJoint(redJoint);
+        world.addJoint(blueJoint);
 
 
         /*

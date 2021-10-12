@@ -14,6 +14,7 @@ import javafx.scene.transform.Translate;
 import org.dyn4j.collision.CategoryFilter;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.dynamics.joint.RevoluteJoint;
 import org.dyn4j.dynamics.joint.WeldJoint;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
@@ -70,7 +71,7 @@ public class FreightBot extends MecanumPhysicsBase {
     @FXML private Rectangle rightProximalPhalanx;
     @FXML private Rectangle rightDistalPhalanx;
     @FXML private Rectangle armSensorRect;
-    @FXML private Circle carouselSensorCircle;
+    @FXML private Circle rotorCircle;
 
     /*
      * Transform objects that will be instantiated in the initialize() method, and will be used in the
@@ -102,6 +103,10 @@ public class FreightBot extends MecanumPhysicsBase {
     private Freight loadedFreight = null;
     private boolean fingersClosed = false;
     private WeldJoint<Body> loadedFreightJoint = null;
+
+    private Body rotorBody;
+    private RevoluteJoint rotorJoint;
+
 
     private CategoryFilter ARM_FILTER = new CategoryFilter(Filters.ARM,
             Filters.MASK_ALL & ~Barrier.BARRIER_CATEGORY & ~ShippingHub.HUB_CATEGORY
@@ -191,6 +196,16 @@ public class FreightBot extends MecanumPhysicsBase {
         rightFingerSlide = new Slide(armBody, rightFingerBody, new Vector2(0, 0), new Vector2(-1, 0),
                 VirtualField.Unit.PIXEL);
         world.addJoint(rightFingerSlide);
+
+        FixtureData rotorFixtureData = new FixtureData(Carousel.CAROUSEL_FILTER, 1.0, 0, 1.0, 1, 1);
+        rotorBody = Dyn4jUtil.createBody(rotorCircle, this, 9, 9, rotorFixtureData);
+        world.addBody(rotorBody);
+        rotorJoint = new RevoluteJoint(rotorBody, chassisBody, rotorBody.getTransform().getTranslation());
+        rotorJoint.setMotorEnabled(true);
+        rotorJoint.setMaximumMotorTorque(100);
+        rotorJoint.setMotorSpeed(0);
+        world.addJoint(rotorJoint);
+
 
         /*
          * Add a collision listener to the dyn4j world. This will handle collisions where the bot needs
@@ -342,6 +357,7 @@ public class FreightBot extends MecanumPhysicsBase {
     private boolean handleNarrowPhaseCollisions(NarrowphaseCollisionData<Body, BodyFixture> collision){
         BodyFixture f1 = collision.getFixture1();
         BodyFixture f2 = collision.getFixture2();
+
         if ((f1 == armSensorFixture) || (f2 == armSensorFixture) && freightToLoad == null && loadedFreight == null
                 && fingersClosed == false) {
             Body b = f1 == armSensorFixture? collision.getBody2() : collision.getBody1();
@@ -350,6 +366,15 @@ public class FreightBot extends MecanumPhysicsBase {
             }
             return false;
         }
+
+        Body b1 = collision.getBody1();
+        Body b2 = collision.getBody2();
+        Object o1 = collision.getBody1().getUserData();
+        Object o2 = collision.getBody2().getUserData();
+        if ( (b1 == rotorBody && o2 instanceof Carousel) || (b2 == rotorBody && o1 instanceof Carousel)){
+            System.out.println("Rotor Body Collision");
+        }
+
         return true;
     }
 
