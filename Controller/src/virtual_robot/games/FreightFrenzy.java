@@ -6,10 +6,14 @@ import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Stop;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.dynamics.joint.RevoluteJoint;
+import org.dyn4j.geometry.MassType;
+import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.NarrowphaseCollisionData;
 import org.dyn4j.world.listener.CollisionListenerAdapter;
 import virtual_robot.controller.Game;
+import virtual_robot.controller.VirtualField;
 import virtual_robot.controller.VirtualGameElement;
 import virtual_robot.game_elements.classes.*;
 
@@ -20,6 +24,9 @@ public class FreightFrenzy extends Game {
             new Vector2(-24, -12),      // Blue hub
             new Vector2(0, 48)          // Neutral hub
     };
+
+    private Carousel redCarousel = null;
+    private Carousel blueCarousel = null;
 
     private boolean humanPlayerActive = false;
 
@@ -43,6 +50,8 @@ public class FreightFrenzy extends Game {
                 ShippingHub.shippingHubs.add((ShippingHub) e);
             } else if (e instanceof Barrier){
                 Barrier.theBarrier = (Barrier) e;
+            } else if (e instanceof Carousel) {
+                Carousel.carousels.add((Carousel)e);
             }
         }
 
@@ -58,6 +67,12 @@ public class FreightFrenzy extends Game {
                 CycleMethod.NO_CYCLE, blueStop, redStop);
         ShippingHub.shippingHubs.get(2).getOuterCircle().setFill(gradient);
 
+//        redCarousel = Carousel.carousels.get(0);
+//        blueCarousel = Carousel.carousels.get(1);
+//        redCarousel.setLocationInches(69, -69);
+//        redCarousel.setOnField(true);
+//        blueCarousel.setLocationInches(-69, -69);
+//        blueCarousel.setOnField(true);
 
         /*
          * Add a collision listener to implement "special" handling of certain types of collision. For example,
@@ -104,6 +119,10 @@ public class FreightFrenzy extends Game {
         Barrier.theBarrier.setOnField(true);
         Barrier.theBarrier.setLocationInches(0, 24);
 
+        for (Freight f: Freight.freightItems){
+            f.setOwningShippingHub(null);
+        }
+
         for (int i=0; i<30; i++){
             int row = i / 5;
             int col = i % 5;
@@ -121,6 +140,23 @@ public class FreightFrenzy extends Game {
             CargoFreight.cargos.get(i).setOnField(true);
             CargoFreight.cargos.get(i).setLocationInches(x, y);
         }
+
+//        redCarousel.clearAttachedDuck();
+//        blueCarousel.clearAttachedDuck();
+//
+//        int numDucks = DuckFreight.ducks.size();
+//        DuckFreight.ducksOffFieldRed.clear();
+//        DuckFreight.ducksOffFieldBlue.clear();
+//        for (int i=0; i<numDucks; i++){
+//            DuckFreight.ducks.get(i).setOnField(false);
+//            if (i< numDucks/2) DuckFreight.ducksOffFieldRed.add(DuckFreight.ducks.get(i));
+//            else DuckFreight.ducksOffFieldBlue.add(DuckFreight.ducks.get(i));
+//        }
+//
+//        redCarousel.setDuckToAttach(DuckFreight.ducksOffFieldRed.get(0));
+//        redCarousel.handleDuckAttach();
+//        blueCarousel.setDuckToAttach(DuckFreight.ducksOffFieldBlue.get(0));
+//        blueCarousel.handleDuckAttach();
 
         updateDisplay();
     }

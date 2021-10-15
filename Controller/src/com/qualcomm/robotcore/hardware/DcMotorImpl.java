@@ -268,9 +268,10 @@ public class DcMotorImpl implements DcMotor {
     public synchronized void stopAndReset(){
         power = 0.0;
         actualSpeed = 0.0;
-        actualPosition = 0.0;
-        encoderBasePosition = 0.0;
+//        actualPosition = 0.0;
+//        encoderBasePosition = 0.0;
         direction = Direction.FORWARD;
+        mode = RunMode.RUN_WITHOUT_ENCODER;
     }
 
     //Set target position for RUN_TO_POSITION mode

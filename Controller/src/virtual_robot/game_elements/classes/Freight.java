@@ -32,6 +32,7 @@ public abstract class Freight extends VirtualGameElement {
         elementBody = Dyn4jUtil.createBody(displayGroup, this, 0, 0,
                 new FixtureData(NORMAL_FILTER, 1, 0, 0));
         elementBody.setLinearDamping(100);
+        elementBody.setAngularDamping(100);
     }
 
     @Override
@@ -51,6 +52,7 @@ public abstract class Freight extends VirtualGameElement {
                 world.removeJoint(shippingHubJoint);
                 owningShippingHub = null;
                 shippingHubJoint = null;
+                setCategoryFilter(NORMAL_FILTER);
             }
         } else {
             if (owningShippingHub == hub) return;
@@ -61,6 +63,7 @@ public abstract class Freight extends VirtualGameElement {
                     hub.getElementBody().getTransform().getTranslation());
             world.addJoint(shippingHubJoint);
             owningShippingHub = hub;
+            setCategoryFilter(OWNED_FILTER);
         }
     }
 

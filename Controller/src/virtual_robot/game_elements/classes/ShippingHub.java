@@ -74,6 +74,7 @@ public class ShippingHub extends VirtualGameElement {
 
         shippingHubBody = elementBody;       // Alias for elementBody
         shippingHubBody.setLinearDamping(100.0);     // Lots of damping (simulates floor-wobble friction)
+        shippingHubBody.setAngularDamping(100.0);
     }
 
     public Circle getOuterCircle(){ return outerCircle; }

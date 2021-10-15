@@ -107,8 +107,8 @@ public abstract class VirtualGameElement {
         this.y = yPixels;
         if (elementBody != null){
             Transform t = new Transform();
-            t.translate(x / VirtualField.PIXELS_PER_METER, y / VirtualField.PIXELS_PER_METER);
-            t.rotate(headingRadians);
+            t.setTranslation(x / VirtualField.PIXELS_PER_METER, y / VirtualField.PIXELS_PER_METER);
+            t.setRotation(headingRadians);
             elementBody.setTransform(t);
             elementBody.setLinearVelocity(0,0);
             elementBody.setAngularVelocity(0);
@@ -140,8 +140,8 @@ public abstract class VirtualGameElement {
         this.y = yPixels;
         if (elementBody != null) {
             Transform t = new Transform();
-            t.translate(x / VirtualField.PIXELS_PER_METER, y / VirtualField.PIXELS_PER_METER);
-            t.rotate(thetaRadians);
+            t.setTranslation(x / VirtualField.PIXELS_PER_METER, y / VirtualField.PIXELS_PER_METER);
+            t.setRotation(thetaRadians);
             elementBody.setTransform(t);
             elementBody.setLinearVelocity(0, 0);
             elementBody.setAngularVelocity(0);

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.shape.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+
+<Group xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="virtual_robot.game_elements.classes.Carousel">
+   <children>
+      <Circle fx:id="outerCircle" fill="#9e512e98" radius="31.25" stroke="BLACK" strokeType="INSIDE" />
+      <Circle radius="5.0" stroke="BLACK" strokeType="INSIDE" />
+   </children>
+</Group>

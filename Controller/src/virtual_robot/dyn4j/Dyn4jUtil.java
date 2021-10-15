@@ -8,10 +8,10 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
-import org.dyn4j.geometry.Convex;
-import org.dyn4j.geometry.MassType;
-import org.dyn4j.geometry.Vector2;
+import org.dyn4j.geometry.*;
 import virtual_robot.controller.VirtualField;
+import virtual_robot.util.AngleUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -262,4 +262,37 @@ public class Dyn4jUtil {
         body.setUserData(userData);
         return body;
     }
+
+    /**
+     * Multiply two dyn4j Tranforms
+     * @param t1
+     * @param t2
+     * @return t1 * t2
+     */
+    public static Transform multiplyTransforms(Transform t1, Transform t2){
+        double cos = t1.getCost()*t2.getCost() - t1.getSint()*t2.getSint();
+        double sin = t1.getSint()*t2.getCost() + t1.getCost()*t2.getSint();
+        double dx = t1.getTranslationX() + t2.getTranslationX()*t1.getCost() - t2.getTranslationY()*t1.getSint();
+        double dy = t1.getTranslationY() + t2.getTranslationX()*t1.getSint() + t2.getTranslationY()*t1.getCost();
+        Transform t = new Transform();
+        t.setTranslation(dx, dy);
+        t.setRotation(Math.atan2(sin, cos));
+        return t;
+    }
+
+    /**
+     * Get the inverse transform
+     * @param t
+     * @return
+     */
+    public static Transform getInverseTransform(Transform t){
+        double translateX = -t.getTranslationX()*t.getCost() - t.getTranslationY()*t.getSint();
+        double translateY = t.getTranslationX()*t.getSint() - t.getTranslationY()*t.getCost();
+        double inverseRotation = Math.atan2(-t.getSint(), t.getCost());
+        Transform inverseT = new Transform();
+        inverseT.setRotation(inverseRotation);
+        inverseT.setTranslation(translateX, translateY);
+        return inverseT;
+    }
+
 }
