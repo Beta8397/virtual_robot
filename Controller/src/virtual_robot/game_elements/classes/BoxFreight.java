@@ -8,7 +8,7 @@ import virtual_robot.games.FreightFrenzy;
 import java.util.ArrayList;
 import java.util.List;
 
-@GameElementConfig(name = "Box", filename = "box_freight", forGame = FreightFrenzy.class, numInstances = 30)
+@GameElementConfig(name = "Box", filename = "box_freight", forGame = FreightFrenzy.class, numInstances = 31)
 public class BoxFreight extends Freight {
 
     public static List<BoxFreight> boxes = new ArrayList<>();

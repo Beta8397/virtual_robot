@@ -1,12 +1,11 @@
 package virtual_robot.robots.classes;
 
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorExImpl;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.ServoImpl;
+import com.qualcomm.robotcore.hardware.*;
 import com.qualcomm.robotcore.hardware.configuration.MotorType;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
@@ -22,11 +21,14 @@ import org.dyn4j.world.NarrowphaseCollisionData;
 import org.dyn4j.world.listener.CollisionListenerAdapter;
 import virtual_robot.controller.BotConfig;
 import virtual_robot.controller.Filters;
+import virtual_robot.controller.Game;
 import virtual_robot.controller.VirtualField;
 import virtual_robot.dyn4j.Dyn4jUtil;
 import virtual_robot.dyn4j.FixtureData;
 import virtual_robot.dyn4j.Slide;
 import virtual_robot.game_elements.classes.*;
+import virtual_robot.games.FreightFrenzy;
+import virtual_robot.robots.ControlsElements;
 
 import java.util.HashMap;
 
@@ -45,7 +47,7 @@ import java.util.HashMap;
  * Note: the fxml file must be located in the virtual_robot.robots.classes.fxml folder.
  */
 @BotConfig(name = "Freight Bot", filename = "freight_bot")
-public class FreightBot extends MecanumPhysicsBase {
+public class FreightBot extends MecanumPhysicsBase implements ControlsElements {
 
     /*
     The DC Motors.  Note use of the DcMotorImpl class rather than the DcMotor interface. That allows use of
@@ -68,8 +70,6 @@ public class FreightBot extends MecanumPhysicsBase {
     @FXML private Rectangle hand;
     @FXML private Group leftFingerGroup;
     @FXML private Group rightFingerGroup;
-    @FXML private Rectangle rightProximalPhalanx;
-    @FXML private Rectangle rightDistalPhalanx;
     @FXML private Rectangle armSensorRect;
     @FXML private Circle rotorCircle;
 
@@ -91,14 +91,20 @@ public class FreightBot extends MecanumPhysicsBase {
      */
     private double fingerPos = 0;
 
-    private Body armBody;
+    /*
+     * Fields to handle dyn4j physics representation of the arm/fingers
+     */
+    private Body armBody;                   // Will have BodyFixtures for arm and hand
     private Body leftFingerBody;
     private Body rightFingerBody;
-    private Slide armSlide;
-    private Slide leftFingerSlide;
-    private Slide rightFingerSlide;
+    private Slide armSlide;                 // Slide connects arm to chassisBoy
+    private Slide leftFingerSlide;          // Slide connects left finger to arm
+    private Slide rightFingerSlide;         // Slide connects right finger to arm
+    private BodyFixture armSensorFixture;   // Sensor fixture to detect Freight item between fingers
 
-    private BodyFixture armSensorFixture;
+    /*
+     * Fields to handle loading of freight when fingers close around it
+     */
     private Freight freightToLoad = null;
     private Freight loadedFreight = null;
     private boolean fingersClosed = false;
@@ -111,6 +117,8 @@ public class FreightBot extends MecanumPhysicsBase {
     private CategoryFilter ARM_FILTER = new CategoryFilter(Filters.ARM,
             Filters.MASK_ALL & ~Barrier.BARRIER_CATEGORY & ~ShippingHub.HUB_CATEGORY
                     & ~Filters.CHASSIS & ~Filters.ARM);
+
+    private CategoryFilter ROTOR_FILTER = new CategoryFilter(Carousel.CAROUSEL_SPINNER_CATEGORY, Carousel.CAROUSEL_CATEGORY);
 
     /**
      * Constructor.
@@ -197,7 +205,7 @@ public class FreightBot extends MecanumPhysicsBase {
                 VirtualField.Unit.PIXEL);
         world.addJoint(rightFingerSlide);
 
-        FixtureData rotorFixtureData = new FixtureData(Carousel.CAROUSEL_FILTER, 1.0, 0, 1.0, 1, 1);
+        FixtureData rotorFixtureData = new FixtureData(ROTOR_FILTER, 1.0, 0, 1.0, 1, 1);
         rotorBody = Dyn4jUtil.createBody(rotorCircle, this, 9, 9, rotorFixtureData);
         world.addBody(rotorBody);
         rotorJoint = new RevoluteJoint(rotorBody, chassisBody, rotorBody.getTransform().getTranslation());
@@ -270,44 +278,30 @@ public class FreightBot extends MecanumPhysicsBase {
          */
 
 
-        if (!priorFingersClosed && fingersClosed && freightToLoad != null){
-            freightToLoad.setOwningShippingHub(null);
-            Transform armTransform = armBody.getTransform();
-            Vector2 armTranslation = armTransform.getTranslation();
-            Vector2 handOffset = new Vector2(-armTransform.getSint(), armTransform.getCost())
-                    .multiply(8.0 / VirtualField.INCHES_PER_METER);
-            Vector2 newFreightTranslation = armTranslation.add(handOffset);
-            world.removeBody(freightToLoad.getElementBody());
-            freightToLoad.getElementBody().getTransform().setTranslation(newFreightTranslation);
-            world.addBody(freightToLoad.getElementBody());
-            loadedFreightJoint = new WeldJoint(armBody, freightToLoad.getElementBody(), armTranslation);
-            world.addJoint(loadedFreightJoint);
-            loadedFreight = freightToLoad;
-            loadedFreight.setCategoryFilter(Freight.OWNED_FILTER);
+        if (!priorFingersClosed && fingersClosed) {
+            System.out.println("Fingers just closed");if (loadedFreight != null) System.out.println("Loaded Freight");
+            if (freightToLoad != null) System.out.println("FreightToLoad");
+        }
+
+        if (!priorFingersClosed && fingersClosed && freightToLoad != null && loadedFreight == null){
+            loadFreight(freightToLoad);
         } else if (priorFingersClosed && !fingersClosed && loadedFreight != null){
-            world.removeJoint(loadedFreightJoint);
-            Vector2 loadedFreightTranslation = loadedFreight.getElementBody().getTransform().getTranslation();
+            Freight releasedFreight = releaseFreight();
+            Vector2 releasedFreightTranslation = releasedFreight.getElementBody().getTransform().getTranslation();
             for (ShippingHub hub: ShippingHub.shippingHubs){
                 Vector2 hubTranslation = hub.getElementBody().getTransform().getTranslation();
-                double hubDist = loadedFreightTranslation.distance(hubTranslation) * VirtualField.INCHES_PER_METER;
+                double hubDist = releasedFreightTranslation.distance(hubTranslation) * VirtualField.INCHES_PER_METER;
                 if (hubDist < ShippingHub.SHIPPING_HUB_RADIUS){
-                    loadedFreight.setOwningShippingHub(hub);
+                    releasedFreight.setOwningShippingHub(hub);
                     break;
                 }
             }
-
-            if (loadedFreight.getOwningShippingHub() == null){
-                loadedFreight.setCategoryFilter(Freight.NORMAL_FILTER);
-            } else {
-                loadedFreight.setCategoryFilter(Freight.OWNED_FILTER);
-            }
-
-            loadedFreightJoint = null;
-            loadedFreight = null;
         }
+
         freightToLoad = null;
 
     }
+
 
     /**
      *  Update the display of the robot UI. This method will be called from the UI Thread via a call to
@@ -367,15 +361,112 @@ public class FreightBot extends MecanumPhysicsBase {
             return false;
         }
 
-        Body b1 = collision.getBody1();
-        Body b2 = collision.getBody2();
-        Object o1 = collision.getBody1().getUserData();
-        Object o2 = collision.getBody2().getUserData();
-        if ( (b1 == rotorBody && o2 instanceof Carousel) || (b2 == rotorBody && o1 instanceof Carousel)){
-            System.out.println("Rotor Body Collision");
-        }
-
         return true;
     }
 
+    /**
+     * If there is currently no loaded freight item, then load the specified freight item.
+     * Also, if the fingers are not currently closed, then close them.
+     * This does not automatically update the display of the robot or the freight item; it the
+     * physics engine isn't running, that must be done separately, after the call to loadFreight.
+     * @param freight
+     */
+    private void loadFreight(Freight freight){
+        if (loadedFreight != null) return;
+        freight.setOwningShippingHub(null);
+        Transform armTransform = armBody.getTransform();
+        Vector2 armTranslation = armTransform.getTranslation();
+        Vector2 handOffset = new Vector2(-armTransform.getSint(), armTransform.getCost())
+                .product(8.0 / VirtualField.INCHES_PER_METER);
+        Vector2 newFreightTranslation = armTranslation.sum(handOffset);
+        freight.setOnField(false);
+        freight.setLocationMeters(newFreightTranslation);
+        freight.setOnField(true);
+        loadedFreight = freight;
+        loadedFreightJoint = new WeldJoint(armBody, loadedFreight.getElementBody(), armTranslation);
+        world.addJoint(loadedFreightJoint);
+        loadedFreight.setCategoryFilter(Freight.OWNED_FILTER);
+        if (!fingersClosed){
+            handServo.setInternalPosition(0.7);
+            fingerPos = 15 * 0.7;
+            fingersClosed = true;
+        }
+    }
+
+    private Freight releaseFreight(){
+        if (loadedFreight == null) return null;
+        world.removeJoint(loadedFreightJoint);
+        loadedFreightJoint = null;
+        loadedFreight.setCategoryFilter(Freight.NORMAL_FILTER);
+        Freight tempFreight = loadedFreight;
+        loadedFreight = null;
+        return tempFreight;
+    }
+
+    @Override
+    public void preloadElements(Game game) {
+        if ( !(game instanceof FreightFrenzy) ) return;
+        if ( loadedFreight == null ) {
+            Freight freight = BoxFreight.boxes.get(BoxFreight.boxes.size()-1);
+            loadFreight(freight);
+            freight.updateDisplay();
+            this.updateDisplay();
+        }
+    }
+
+    @Override
+    public void clearLoadedElements(Game game) {
+        if ( !(game instanceof FreightFrenzy)) return;
+        if (loadedFreight != null) releaseFreight();
+        freightToLoad = null;
+    }
+
+    /**
+     * Position the FreightBot on the field using a MouseEvent.
+     *
+     * This override of the VirtualBot method is necessary so that the armBody will move appropriately with
+     * mouse-click repositioning, even though the physics engine isn't running at that time.
+     *
+     * @param arg
+     */
+    @Override
+    public synchronized void positionWithMouseClick(MouseEvent arg){
+
+        Freight freight = null;
+
+        /*
+         * Release any loaded freight before repositioning
+         */
+        if (loadedFreight != null) freight = releaseFreight();
+
+        /*
+         * Get the transforms of the arm and fingers (and any loaded Freight item) relative to the chassis
+         */
+        Transform tArmChassis = Dyn4jUtil.multiplyTransforms(Dyn4jUtil.getInverseTransform(chassisBody.getTransform()),
+                armBody.getTransform());
+        Transform tLeftFingerChassis = Dyn4jUtil.multiplyTransforms(Dyn4jUtil.getInverseTransform(chassisBody.getTransform()),
+                leftFingerBody.getTransform());
+        Transform tRightFingerChassis = Dyn4jUtil.multiplyTransforms(Dyn4jUtil.getInverseTransform(chassisBody.getTransform()),
+                rightFingerBody.getTransform());
+
+        /*
+         * the super method repositions the chassis based on mouse click
+         */
+        super.positionWithMouseClick(arg);
+
+        /*
+         * Determine the new transforms of arm and fingers relative to the field
+         */
+        Transform tArm = Dyn4jUtil.multiplyTransforms(chassisBody.getTransform(), tArmChassis);
+        Transform tLeftFinger = Dyn4jUtil.multiplyTransforms(chassisBody.getTransform(), tLeftFingerChassis);
+        Transform tRightFinger = Dyn4jUtil.multiplyTransforms(chassisBody.getTransform(), tRightFingerChassis);
+        armBody.setTransform(tArm);
+        leftFingerBody.setTransform(tLeftFinger);
+        rightFingerBody.setTransform(tRightFinger);
+
+        if (freight != null) {
+            loadFreight(freight);
+            freight.updateDisplay();
+        }
+    }
 }

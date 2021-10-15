@@ -67,23 +67,12 @@ public class FreightFrenzy extends Game {
                 CycleMethod.NO_CYCLE, blueStop, redStop);
         ShippingHub.shippingHubs.get(2).getOuterCircle().setFill(gradient);
 
-        redCarousel = Carousel.carousels.get(0);
-        blueCarousel = Carousel.carousels.get(1);
-        redCarousel.setOnField(true);
-        redCarousel.setLocationInches(69, -69);
-        blueCarousel.setOnField(true);
-        blueCarousel.setLocationInches(-69, -69);
-        Body carouselAnchor = new Body();
-        carouselAnchor.setMass(MassType.INFINITE);
-        carouselAnchor.getTransform().setTranslation(0, 0 );
-        world.addBody(carouselAnchor);
-        RevoluteJoint redJoint = new RevoluteJoint(redCarousel.getElementBody(), carouselAnchor,
-                new Vector2(69.0 / VirtualField.INCHES_PER_METER, -69.0 / VirtualField.INCHES_PER_METER));
-        RevoluteJoint blueJoint = new RevoluteJoint(blueCarousel.getElementBody(), carouselAnchor,
-                new Vector2(-69.0 / VirtualField.INCHES_PER_METER, -69.0 / VirtualField.INCHES_PER_METER));
-        world.addJoint(redJoint);
-        world.addJoint(blueJoint);
-
+//        redCarousel = Carousel.carousels.get(0);
+//        blueCarousel = Carousel.carousels.get(1);
+//        redCarousel.setLocationInches(69, -69);
+//        redCarousel.setOnField(true);
+//        blueCarousel.setLocationInches(-69, -69);
+//        blueCarousel.setOnField(true);
 
         /*
          * Add a collision listener to implement "special" handling of certain types of collision. For example,
@@ -130,6 +119,10 @@ public class FreightFrenzy extends Game {
         Barrier.theBarrier.setOnField(true);
         Barrier.theBarrier.setLocationInches(0, 24);
 
+        for (Freight f: Freight.freightItems){
+            f.setOwningShippingHub(null);
+        }
+
         for (int i=0; i<30; i++){
             int row = i / 5;
             int col = i % 5;
@@ -147,6 +140,23 @@ public class FreightFrenzy extends Game {
             CargoFreight.cargos.get(i).setOnField(true);
             CargoFreight.cargos.get(i).setLocationInches(x, y);
         }
+
+//        redCarousel.clearAttachedDuck();
+//        blueCarousel.clearAttachedDuck();
+//
+//        int numDucks = DuckFreight.ducks.size();
+//        DuckFreight.ducksOffFieldRed.clear();
+//        DuckFreight.ducksOffFieldBlue.clear();
+//        for (int i=0; i<numDucks; i++){
+//            DuckFreight.ducks.get(i).setOnField(false);
+//            if (i< numDucks/2) DuckFreight.ducksOffFieldRed.add(DuckFreight.ducks.get(i));
+//            else DuckFreight.ducksOffFieldBlue.add(DuckFreight.ducks.get(i));
+//        }
+//
+//        redCarousel.setDuckToAttach(DuckFreight.ducksOffFieldRed.get(0));
+//        redCarousel.handleDuckAttach();
+//        blueCarousel.setDuckToAttach(DuckFreight.ducksOffFieldBlue.get(0));
+//        blueCarousel.handleDuckAttach();
 
         updateDisplay();
     }

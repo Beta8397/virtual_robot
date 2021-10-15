@@ -66,6 +66,14 @@ public class ServoImpl implements Servo{
      */
     public synchronized double getInternalPosition(){ return this.position; }
 
+    /**
+     * Set the Internal Position of the Servo -- FOR INTERNAL USE ONLY
+     * @param internalPos
+     */
+    public synchronized void setInternalPosition(double internalPos){
+        this.position = Range.clip(internalPos, MIN_POSITION, MAX_POSITION);
+    }
+
 
     private double reverse(double position) {
         return MAX_POSITION - position + MIN_POSITION;
