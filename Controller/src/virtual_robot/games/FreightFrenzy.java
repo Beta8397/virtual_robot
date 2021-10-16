@@ -153,10 +153,10 @@ public class FreightFrenzy extends Game {
             else DuckFreight.ducksOffFieldBlue.add(DuckFreight.ducks.get(i));
         }
 
-        redCarousel.setDuckToAttach(DuckFreight.ducksOffFieldRed.get(0));
-        redCarousel.handleDuckAttach();
-        blueCarousel.setDuckToAttach(DuckFreight.ducksOffFieldBlue.get(0));
-        blueCarousel.handleDuckAttach();
+        redCarousel.attachDuck(DuckFreight.ducksOffFieldRed.get(0));
+        DuckFreight.ducksOffFieldRed.remove(0);
+        blueCarousel.attachDuck(DuckFreight.ducksOffFieldBlue.get(0));
+        DuckFreight.ducksOffFieldBlue.remove(0);
 
         updateDisplay();
     }
@@ -182,18 +182,19 @@ public class FreightFrenzy extends Game {
 
     @Override
     public void updateHumanPlayerState(double millis) {
-        if (redCarousel.getAttachedDuck() == null && redCarousel.getDuckToAttach() == null
+        if (redCarousel.getAttachedDuck() == null
                 && redCarousel.getTimerMilliseconds() > 1000 && DuckFreight.ducksOffFieldRed.size() > 0
                 && Math.abs(redCarousel.getElementBody().getAngularVelocity()) < 0.01) {
-            redCarousel.setDuckToAttach(DuckFreight.ducksOffFieldRed.get(0));
+            redCarousel.attachDuck(DuckFreight.ducksOffFieldRed.get(0));
             DuckFreight.ducksOffFieldRed.remove(0);
         }
-        if (blueCarousel.getAttachedDuck() == null && blueCarousel.getDuckToAttach() == null
+        if (blueCarousel.getAttachedDuck() == null
                 && blueCarousel.getTimerMilliseconds() > 1000 && DuckFreight.ducksOffFieldBlue.size() > 0
                 && Math.abs(blueCarousel.getElementBody().getAngularVelocity()) < 0.01) {
-            blueCarousel.setDuckToAttach(DuckFreight.ducksOffFieldBlue.get(0));
+            blueCarousel.attachDuck(DuckFreight.ducksOffFieldBlue.get(0));
             DuckFreight.ducksOffFieldBlue.remove(0);
         }
+        humanPlayerActionRequested = false;
     }
 
 }

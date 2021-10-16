@@ -49,7 +49,6 @@ public class Carousel extends VirtualGameElement {
     // Outer circle from the .fxml file; will use to generate dyn4j Body
     @FXML private Circle outerCircle;
 
-    private DuckFreight duckToAttach = null;
     private DuckFreight attachedDuck = null;
     private WeldJoint duckJoint = null;
     private double headingOnAttach = 0;
@@ -79,19 +78,14 @@ public class Carousel extends VirtualGameElement {
         y = carouselBody.getTransform().getTranslationY() * VirtualField.PIXELS_PER_METER;
         headingRadians = carouselBody.getTransform().getRotationAngle();
 
-        if (duckToAttach != null && attachedDuck == null) {
-            attachedDuck = duckToAttach;
-        }
-
-        handleDuckDetach();
-        handleDuckAttach();
-        duckToAttach = null;
+        if (attachedDuck != null) handleAttachedDuck();
     }
 
     @Override
     public synchronized void updateDisplay() {
         super.updateDisplay();
         displayGroup.toFront();
+        if (attachedDuck != null) attachedDuck.getDisplayGroup().toFront();
     }
 
     /**
@@ -112,7 +106,7 @@ public class Carousel extends VirtualGameElement {
                 new FixtureData(ANCHOR_FILTER, 1, 0, 0));
         anchorBody.setMass(MassType.INFINITE);
         anchorJoint = new RevoluteJoint(carouselBody, anchorBody, new Vector2(0,0));
-        carouselBody.setAngularDamping(1.0);
+        carouselBody.setAngularDamping(10.0);
     }
 
     /**
@@ -165,25 +159,12 @@ public class Carousel extends VirtualGameElement {
         else removeFromDisplay();
     }
 
-    public DuckFreight getDuckToAttach() { return duckToAttach; }
-
-    public void setDuckToAttach(DuckFreight duck) {
-        duckToAttach = duck;
-        if (this == redCarousel) {
-            System.out.println("SetDuckToAttach: duckToAttach = " + duckToAttach);
-        }
-    }
 
     public DuckFreight getAttachedDuck() { return attachedDuck; }
 
-    public void handleDuckAttach(){
-        if (this == redCarousel){
-            System.out.println("HandleDuckAttach: dta = " + duckToAttach);
-        }
-        if (duckToAttach == null || attachedDuck != null) return;
-        attachedDuck = duckToAttach;
-        DuckFreight.ducksOffFieldRed.remove(attachedDuck);
-        DuckFreight.ducksOffFieldBlue.remove(attachedDuck);
+    public boolean attachDuck(DuckFreight duck){
+        if (attachedDuck != null) return false;
+        attachedDuck = duck;
         attachedDuck.setOnField(false);
         Vector2 anchor = this == redCarousel?
                 new Vector2(71.0 / VirtualField.INCHES_PER_METER, -66.0 / VirtualField.INCHES_PER_METER)
@@ -195,10 +176,7 @@ public class Carousel extends VirtualGameElement {
         attachedDuck.setOnField(true);
         world.addJoint(duckJoint);
         headingOnAttach = getHeadingRadians();
-        if (this == redCarousel) {
-            System.out.println();
-            System.out.println("Just attached duck. Heading on attach = " + Math.toDegrees(headingOnAttach));
-        }
+        return true;
     }
 
     public void clearAttachedDuck(){
@@ -210,7 +188,7 @@ public class Carousel extends VirtualGameElement {
         }
     }
 
-    private void handleDuckDetach(){
+    private void handleAttachedDuck(){
         // Can only detach a duck if there is already one attached
         if (attachedDuck == null) return;
 
@@ -230,17 +208,7 @@ public class Carousel extends VirtualGameElement {
 
 
         //If we aren't releasing or ejecting, stop here
-        if (!releaseToField && !eject) {
-            if (this == redCarousel) {
-                System.out.println("Duck remains attached. Heading = " + Math.toDegrees(heading)
-                        + "  headingChange = " + Math.toDegrees(headingChange) + "  Release: " + releaseToField);
-            }
-            return;
-        }
-
-        if (this == redCarousel){
-            System.out.println("Detaching duck");
-        }
+        if (!releaseToField && !eject) return;
 
         //Now we are either releasing duck to the field or ejecting it off the field
         DuckFreight releasedDuck = attachedDuck;
