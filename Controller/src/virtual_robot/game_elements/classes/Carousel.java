@@ -22,9 +22,12 @@ import virtual_robot.util.AngleUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
-//@GameElementConfig(name = "Carousel", filename = "carousel", forGame = FreightFrenzy.class, numInstances = 2)
+@GameElementConfig(name = "Carousel", filename = "carousel", forGame = FreightFrenzy.class, numInstances = 2)
 public class Carousel extends VirtualGameElement {
+
+    private Random random = new Random();
 
     public static final double CAROUSEL_RADIUS = 7.5;
     public static final List<Carousel> carousels = new ArrayList<>();
@@ -46,7 +49,6 @@ public class Carousel extends VirtualGameElement {
     // Outer circle from the .fxml file; will use to generate dyn4j Body
     @FXML private Circle outerCircle;
 
-    private DuckFreight duckToAttach = null;
     private DuckFreight attachedDuck = null;
     private WeldJoint duckJoint = null;
     private double headingOnAttach = 0;
@@ -76,25 +78,14 @@ public class Carousel extends VirtualGameElement {
         y = carouselBody.getTransform().getTranslationY() * VirtualField.PIXELS_PER_METER;
         headingRadians = carouselBody.getTransform().getRotationAngle();
 
-        if (this == redCarousel){
-            System.out.println("Red carousel: theta = " + headingRadians + "  omega = " + carouselBody.getAngularVelocity());
-        } else {
-            System.out.println("Blue carousel: theta = " + headingRadians + "  omega = " + carouselBody.getAngularVelocity());
-        }
-
-        if (duckToAttach != null && attachedDuck == null) {
-            attachedDuck = duckToAttach;
-        }
-
-        handleDuckDetach();
-        handleDuckAttach();
-        duckToAttach = null;
+        if (attachedDuck != null) handleAttachedDuck();
     }
 
     @Override
     public synchronized void updateDisplay() {
         super.updateDisplay();
         displayGroup.toFront();
+        if (attachedDuck != null) attachedDuck.getDisplayGroup().toFront();
     }
 
     /**
@@ -115,7 +106,7 @@ public class Carousel extends VirtualGameElement {
                 new FixtureData(ANCHOR_FILTER, 1, 0, 0));
         anchorBody.setMass(MassType.INFINITE);
         anchorJoint = new RevoluteJoint(carouselBody, anchorBody, new Vector2(0,0));
-        carouselBody.setAngularDamping(100.0);
+        carouselBody.setAngularDamping(10.0);
     }
 
     /**
@@ -140,7 +131,7 @@ public class Carousel extends VirtualGameElement {
         Transform tCarousel = new Transform();
         tCarousel.setTranslation(x / VirtualField.PIXELS_PER_METER, y / VirtualField.PIXELS_PER_METER);
         tCarousel.setRotation(headingRadians);
-        carouselBody.setTransform(tAnchor);
+        carouselBody.setTransform(tCarousel);
         carouselBody.setLinearVelocity(0,0);
         carouselBody.setAngularVelocity(0);
         carouselBody.clearAccumulatedForce();
@@ -168,21 +159,16 @@ public class Carousel extends VirtualGameElement {
         else removeFromDisplay();
     }
 
-    public DuckFreight getDuckToAttach() { return attachedDuck; }
-
-    public void setDuckToAttach(DuckFreight duck) { duckToAttach = duck; }
 
     public DuckFreight getAttachedDuck() { return attachedDuck; }
 
-    public void handleDuckAttach(){
-        if (duckToAttach == null || attachedDuck != null) return;
-        attachedDuck = duckToAttach;
-        DuckFreight.ducksOffFieldRed.remove(attachedDuck);
-        DuckFreight.ducksOffFieldBlue.remove(attachedDuck);
+    public boolean attachDuck(DuckFreight duck){
+        if (attachedDuck != null) return false;
+        attachedDuck = duck;
         attachedDuck.setOnField(false);
         Vector2 anchor = this == redCarousel?
-                new Vector2(72.0 / VirtualField.INCHES_PER_METER, -67.0 / VirtualField.INCHES_PER_METER)
-                : new Vector2(-72.0 / VirtualField.INCHES_PER_METER, -67.0 / VirtualField.INCHES_PER_METER);
+                new Vector2(71.0 / VirtualField.INCHES_PER_METER, -66.0 / VirtualField.INCHES_PER_METER)
+                : new Vector2(-71.0 / VirtualField.INCHES_PER_METER, -66.0 / VirtualField.INCHES_PER_METER);
         attachedDuck.setLocationMeters(anchor);
         if (duckJoint != null) world.removeJoint(duckJoint);
         duckJoint = new WeldJoint(attachedDuck.getElementBody(), this.getElementBody(), anchor);
@@ -190,6 +176,7 @@ public class Carousel extends VirtualGameElement {
         attachedDuck.setOnField(true);
         world.addJoint(duckJoint);
         headingOnAttach = getHeadingRadians();
+        return true;
     }
 
     public void clearAttachedDuck(){
@@ -201,7 +188,7 @@ public class Carousel extends VirtualGameElement {
         }
     }
 
-    private void handleDuckDetach(){
+    private void handleAttachedDuck(){
         // Can only detach a duck if there is already one attached
         if (attachedDuck == null) return;
 
@@ -217,6 +204,8 @@ public class Carousel extends VirtualGameElement {
             releaseToField = headingChange > Math.toRadians(-60) && headingChange < Math.toRadians(-30);
             eject = headingChange > Math.toRadians(-30) && headingChange < Math.toRadians(-10);
         }
+
+
 
         //If we aren't releasing or ejecting, stop here
         if (!releaseToField && !eject) return;
@@ -243,12 +232,14 @@ public class Carousel extends VirtualGameElement {
         // give it a new CollisionFilter, and add it back to field.
 
         Vector2 duckPosition = this == redCarousel?
-                new Vector2(68.0 / VirtualField.INCHES_PER_METER, -62.0 / VirtualField.INCHES_PER_METER) :
-                new Vector2(-68.0 / VirtualField.INCHES_PER_METER, -62.0 / VirtualField.INCHES_PER_METER);
+                new Vector2(68.0 / VirtualField.INCHES_PER_METER,
+                        (-60.0 + 20*random.nextDouble()) / VirtualField.INCHES_PER_METER) :
+                new Vector2(-68.0 / VirtualField.INCHES_PER_METER,
+                        (-60.0 + 20*random.nextDouble()) / VirtualField.INCHES_PER_METER );
         releasedDuck.setOnField(true);
         releasedDuck.setCategoryFilter(Freight.NORMAL_FILTER);
         releasedDuck.getElementBody().getTransform().setTranslation(duckPosition);
-        releasedDuck.getElementBody().setLinearVelocity(0, 0.05);
+        releasedDuck.getElementBody().setLinearVelocity(0, 0.2);
     }
 
     public double getTimerMilliseconds(){

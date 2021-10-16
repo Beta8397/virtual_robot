@@ -9,6 +9,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
+import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
 import org.dyn4j.collision.CategoryFilter;
 import org.dyn4j.dynamics.Body;
@@ -19,6 +20,7 @@ import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.NarrowphaseCollisionData;
 import org.dyn4j.world.listener.CollisionListenerAdapter;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import virtual_robot.controller.BotConfig;
 import virtual_robot.controller.Filters;
 import virtual_robot.controller.Game;
@@ -55,6 +57,7 @@ public class FreightBot extends MecanumPhysicsBase implements ControlsElements {
     DcMotor interface. The drive motors are stored in an array of DcMotorImpl.
      */
     private DcMotorExImpl armMotor = null;
+    private DcMotorExImpl rotorMotor = null;
 
     //Servo to control the hand at the end of the arm. Note use of ServoImpl class rather than Servo interface.
     private ServoImpl handServo = null;
@@ -72,6 +75,7 @@ public class FreightBot extends MecanumPhysicsBase implements ControlsElements {
     @FXML private Group rightFingerGroup;
     @FXML private Rectangle armSensorRect;
     @FXML private Circle rotorCircle;
+    @FXML private Group rotorGroup;
 
     /*
      * Transform objects that will be instantiated in the initialize() method, and will be used in the
@@ -80,6 +84,7 @@ public class FreightBot extends MecanumPhysicsBase implements ControlsElements {
     Translate armTranslateTransform;
     Translate leftFingerTranslateTransform;
     Translate rightFingerTranslateTransform;
+    Rotate rotorGroupRotateTransform;
 
     /*
      * Current Y-translation of the arm, in pixels. 0 means fully retracted. 50 means fully extended.
@@ -144,6 +149,8 @@ public class FreightBot extends MecanumPhysicsBase implements ControlsElements {
         armMotor = (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "arm_motor");
         armMotor.setActualPositionLimits(0, 2240);
         armMotor.setPositionLimitsEnabled(true);
+
+        rotorMotor = hardwareMap.get(DcMotorExImpl.class, "rotor_motor");
 
         //Instantiate the hand servo. Note the cast to ServoImpl.
         handServo = (ServoImpl)hardwareMap.servo.get("hand_servo");
@@ -214,6 +221,9 @@ public class FreightBot extends MecanumPhysicsBase implements ControlsElements {
         rotorJoint.setMotorSpeed(0);
         world.addJoint(rotorJoint);
 
+        rotorGroupRotateTransform = new Rotate(0, 22, 63);
+        rotorGroup.getTransforms().add(rotorGroupRotateTransform);
+
 
         /*
          * Add a collision listener to the dyn4j world. This will handle collisions where the bot needs
@@ -238,6 +248,9 @@ public class FreightBot extends MecanumPhysicsBase implements ControlsElements {
 
         //Add the ServoImpl object
         hardwareMap.put("hand_servo", new ServoImpl());
+
+        //Add the Rotor motor
+        hardwareMap.put("rotor_motor", new DcMotorExImpl(MotorType.Neverest40));
     }
 
     /**
@@ -256,6 +269,13 @@ public class FreightBot extends MecanumPhysicsBase implements ControlsElements {
         armMotor.update(millis);
         armTranslation = armMotor.getActualPosition() * 50.0 / 2240.0 * (botWidth / 75.0);
         armSlide.setPosition(armTranslation);
+
+        /*
+         * Check speed of the rotor motor, and use it to adjust the speed of the rotor joint motor
+         */
+        rotorMotor.update(millis);
+        double rotorMotorSpeed = rotorMotor.getVelocity(AngleUnit.RADIANS);
+        rotorJoint.setMotorSpeed(rotorMotorSpeed);
 
         /*
          * Save prior value of fingersClosed, then
@@ -327,6 +347,8 @@ public class FreightBot extends MecanumPhysicsBase implements ControlsElements {
             leftFingerTranslateTransform.setX(fingerPos);
             rightFingerTranslateTransform.setX(-fingerPos);
         }
+
+        rotorGroupRotateTransform.setAngle(-rotorMotor.getCurrentPosition()*360.0/1120.0);
 
 
     }

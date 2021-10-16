@@ -50,7 +50,12 @@
             </fill>
         </Circle>
       <Rectangle fx:id="arm1" arcHeight="5.0" arcWidth="5.0" fill="SILVER" height="57.5" stroke="BLACK" strokeType="INSIDE" width="5.0" x="35.0" y="17.5" />
-      <Circle fx:id="rotorCircle" centerX="22.0" centerY="63.0" fill="DODGERBLUE" radius="12.0" stroke="BLACK" strokeType="INSIDE" />
+      <Group fx:id="rotorGroup">
+         <children>
+            <Circle fx:id="rotorCircle" centerX="22.0" centerY="63.0" fill="DODGERBLUE" radius="12.0" stroke="BLACK" strokeType="INSIDE" />
+            <Circle centerX="22.0" centerY="56.0" radius="3.0" stroke="BLACK" strokeType="INSIDE" />
+         </children>
+      </Group>
 
               <!--Green square indicating the front center of the robot-->
         <Rectangle fx:id="armSensorRect" arcHeight="5.0" fill="LIME" height="10.0" stroke="BLACK" strokeType="INSIDE" width="14.0" x="30.5" y="4.0" />
