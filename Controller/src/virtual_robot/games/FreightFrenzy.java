@@ -6,24 +6,23 @@ import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Stop;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
-import org.dyn4j.dynamics.joint.RevoluteJoint;
-import org.dyn4j.geometry.MassType;
-import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.NarrowphaseCollisionData;
 import org.dyn4j.world.listener.CollisionListenerAdapter;
 import virtual_robot.controller.Game;
-import virtual_robot.controller.VirtualField;
 import virtual_robot.controller.VirtualGameElement;
 import virtual_robot.game_elements.classes.*;
 
 public class FreightFrenzy extends Game {
 
-    public static final Vector2[] hubPositionsInches = new Vector2[]{
+    public static final Vector2[] HUB_POSITIONS_INCHES = new Vector2[]{
             new Vector2(24, -12),       // Red hub
             new Vector2(-24, -12),      // Blue hub
             new Vector2(0, 48)          // Neutral hub
     };
+
+    public static final Vector2 RED_CAROUSEL_POSITION_INCHES = new Vector2(68.75, -68.75);
+    public static final Vector2 BLUE_CAROUSEL_POSITION_INCHES = new Vector2(-68.75, -68.75);
 
     private Carousel redCarousel = null;
     private Carousel blueCarousel = null;
@@ -39,13 +38,13 @@ public class FreightFrenzy extends Game {
         for (VirtualGameElement e: gameElements){
             if (e instanceof CargoFreight){
                 CargoFreight.cargos.add((CargoFreight)e);
-                Freight.freightItems.add((Freight)e);
+                Freight.FREIGHT_ITEMS.add((Freight)e);
             } else if (e instanceof BoxFreight){
                 BoxFreight.boxes.add((BoxFreight)e);
-                Freight.freightItems.add((Freight)e);
+                Freight.FREIGHT_ITEMS.add((Freight)e);
             } else if (e instanceof DuckFreight){
                 DuckFreight.ducks.add((DuckFreight)e);
-                Freight.freightItems.add((Freight)e);
+                Freight.FREIGHT_ITEMS.add((Freight)e);
             } else if (e instanceof ShippingHub){
                 ShippingHub.shippingHubs.add((ShippingHub) e);
             } else if (e instanceof Barrier){
@@ -69,9 +68,9 @@ public class FreightFrenzy extends Game {
 
         redCarousel = Carousel.carousels.get(0);
         blueCarousel = Carousel.carousels.get(1);
-        redCarousel.setLocationInches(69, -69);
+        redCarousel.setLocationInches(RED_CAROUSEL_POSITION_INCHES);
         redCarousel.setOnField(true);
-        blueCarousel.setLocationInches(-69, -69);
+        blueCarousel.setLocationInches(BLUE_CAROUSEL_POSITION_INCHES);
         blueCarousel.setOnField(true);
 
         /*
@@ -92,34 +91,35 @@ public class FreightFrenzy extends Game {
 
     /**
      * Narrowphase Collision event handler
+     * This can be used for game element--game element collisions, as needed.
+     * Robot--game element collisions should be handled in the specific robot config class, not here.
      *
+     * For the current game implementation, no special handling of game element--game element collisions is needed;
+     * the default handling by the physics engine suffices.
      *
-     * This will be called for all collisions, but needn't do any special processing for most of them. It
-     * will handle:
-     * 1) Collision of Freight and FreightHub
-     *
-     *  Return true to continue processing the collision, false to stop it.
-     *
-     *  Note: handling of collisions that result in the robot taking control of a game element should
-     *  be handled by a listener set in the VirtualBot implementation.
+     * However, this method can be useful for logging purposes during debugging.
      */
     private boolean handleNarrowPhaseCollision(NarrowphaseCollisionData<Body, BodyFixture> collision){
 
         return true;
     }
 
+    /*
+     * Set/Reset all game elements to their initial positions
+     */
     @Override
     public void resetGameElements() {
 
         for (int i=0; i<3; i++){
             ShippingHub.shippingHubs.get(i).setOnField(true);
-            ShippingHub.shippingHubs.get(i).setLocationInches(hubPositionsInches[i]);
+            ShippingHub.shippingHubs.get(i).setLocationInches(HUB_POSITIONS_INCHES[i]);
         }
 
         Barrier.theBarrier.setOnField(true);
         Barrier.theBarrier.setLocationInches(0, 24);
 
-        for (Freight f: Freight.freightItems){
+        //Before repositioning freight items, detach from shipping hubs
+        for (Freight f: Freight.FREIGHT_ITEMS){
             f.setOwningShippingHub(null);
         }
 
@@ -141,23 +141,27 @@ public class FreightFrenzy extends Game {
             CargoFreight.cargos.get(i).setLocationInches(x, y);
         }
 
+        // Remove attached ducks from carousels
         redCarousel.clearAttachedDuck();
         blueCarousel.clearAttachedDuck();
 
+        // Clear, then repopulate the red and blue loading docks, each with one half of the ducks
         int numDucks = DuckFreight.ducks.size();
-        DuckFreight.ducksOffFieldRed.clear();
-        DuckFreight.ducksOffFieldBlue.clear();
+        DuckFreight.redLoadingDock.clear();
+        DuckFreight.blueLoadingDock.clear();
         for (int i=0; i<numDucks; i++){
             DuckFreight.ducks.get(i).setOnField(false);
-            if (i< numDucks/2) DuckFreight.ducksOffFieldRed.add(DuckFreight.ducks.get(i));
-            else DuckFreight.ducksOffFieldBlue.add(DuckFreight.ducks.get(i));
+            if (i< numDucks/2) DuckFreight.redLoadingDock.add(DuckFreight.ducks.get(i));
+            else DuckFreight.blueLoadingDock.add(DuckFreight.ducks.get(i));
         }
 
-        redCarousel.attachDuck(DuckFreight.ducksOffFieldRed.get(0));
-        DuckFreight.ducksOffFieldRed.remove(0);
-        blueCarousel.attachDuck(DuckFreight.ducksOffFieldBlue.get(0));
-        DuckFreight.ducksOffFieldBlue.remove(0);
+        // Attach a duck to each carousel, and remove from the corresponding loading dock
+        redCarousel.attachDuck(DuckFreight.redLoadingDock.get(0));
+        DuckFreight.redLoadingDock.remove(0);
+        blueCarousel.attachDuck(DuckFreight.blueLoadingDock.get(0));
+        DuckFreight.blueLoadingDock.remove(0);
 
+        // Simulation isn't running when this method is called, so explicit display update required
         updateDisplay();
     }
 
@@ -180,19 +184,30 @@ public class FreightFrenzy extends Game {
         humanPlayerActive = selected;
     }
 
+    /**
+     * Update the human player state. If humanPlaterActive is true, this method will be called once during
+     * each iteration of the game loop. Otherwise, it will be called during the game loop only if
+     * humanPlayerActionRequested is true (and that is set using the Human Action button).
+     * @param millis milliseconds since the previous update
+     */
     @Override
     public void updateHumanPlayerState(double millis) {
+        /*
+         * For each carousel, attach a duck only if: there is currently no attached duck AND at least 1 second
+         * has passed since prior duck release AND there is at least one duck remaining in the corresponding loading
+         * dock AND the carousel has stopped spinning.
+         */
         if (redCarousel.getAttachedDuck() == null
-                && redCarousel.getTimerMilliseconds() > 1000 && DuckFreight.ducksOffFieldRed.size() > 0
+                && redCarousel.getTimerMilliseconds() > 1000 && DuckFreight.redLoadingDock.size() > 0
                 && Math.abs(redCarousel.getElementBody().getAngularVelocity()) < 0.01) {
-            redCarousel.attachDuck(DuckFreight.ducksOffFieldRed.get(0));
-            DuckFreight.ducksOffFieldRed.remove(0);
+            redCarousel.attachDuck(DuckFreight.redLoadingDock.get(0));
+            DuckFreight.redLoadingDock.remove(0);
         }
         if (blueCarousel.getAttachedDuck() == null
-                && blueCarousel.getTimerMilliseconds() > 1000 && DuckFreight.ducksOffFieldBlue.size() > 0
+                && blueCarousel.getTimerMilliseconds() > 1000 && DuckFreight.blueLoadingDock.size() > 0
                 && Math.abs(blueCarousel.getElementBody().getAngularVelocity()) < 0.01) {
-            blueCarousel.attachDuck(DuckFreight.ducksOffFieldBlue.get(0));
-            DuckFreight.ducksOffFieldBlue.remove(0);
+            blueCarousel.attachDuck(DuckFreight.blueLoadingDock.get(0));
+            DuckFreight.blueLoadingDock.remove(0);
         }
         humanPlayerActionRequested = false;
     }

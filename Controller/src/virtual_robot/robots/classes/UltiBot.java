@@ -39,7 +39,7 @@ import static virtual_robot.game_elements.classes.Ring.RingStatus.OFF_FIELD;
  *
  * BetaBot is the controller class for the "ulti_bot.fxml" markup file.
  */
-@BotConfig(name = "Ulti Bot", filename = "ulti_bot")
+//@BotConfig(name = "Ulti Bot", filename = "ulti_bot")
 public class UltiBot extends MecanumPhysicsBase implements ControlsElements {
 
     //Fixture to hold the collision geometry of the ring intake

@@ -42,8 +42,6 @@ public class BetaBotDemo extends LinearOpMode {
         shooterMotor = hardwareMap.get(DcMotorEx.class, "shooter_motor");
         scoopMotor = hardwareMap.get(DcMotorEx.class, "scoop_motor");
 
-        gamepad1.setJoystickDeadzone(0.05f);
-
         intakeMotor.setPower(0.75);
         shooterMotor.setPower(0.75);
 

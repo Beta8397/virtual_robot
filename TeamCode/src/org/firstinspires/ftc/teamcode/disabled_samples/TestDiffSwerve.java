@@ -14,7 +14,6 @@ public class TestDiffSwerve extends OpMode {
 
         bot.init(hardwareMap);
 
-        gamepad1.setJoystickDeadzone(0.05f);
     }
 
     public void loop(){

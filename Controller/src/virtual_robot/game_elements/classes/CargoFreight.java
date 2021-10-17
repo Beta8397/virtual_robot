@@ -8,10 +8,13 @@ import virtual_robot.games.FreightFrenzy;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The Cargo game elements. Behavior is derived from the Freight superclass.
+ */
 @GameElementConfig(name = "Cargo", filename = "cargo_freight", forGame = FreightFrenzy.class, numInstances = 20)
 public class CargoFreight extends Freight {
 
-    public static final List<CargoFreight> cargos = new ArrayList<>();
+    public static final List<CargoFreight> cargos = new ArrayList<>();  // All CargoFreight objects
 
 
 }

@@ -16,7 +16,6 @@ public class TestOdom extends LinearOpMode {
     double[] pose;
 
     public void runOpMode(){
-        gamepad1.setJoystickDeadzone(0.05f);
         bot.init(hardwareMap);
         bot.resetOdometry(0, 0, Math.PI/2.0);
 

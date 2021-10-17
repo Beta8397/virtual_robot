@@ -63,8 +63,6 @@ public class FreightBotDemo extends LinearOpMode {
         telemetry.addData("Press Start When Ready","");
         telemetry.update();
 
-        gamepad1.setJoystickDeadzone(0.05f);
-
         waitForStart();
 
         while (opModeIsActive()){

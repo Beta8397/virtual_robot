@@ -9,17 +9,14 @@ import virtual_robot.games.FreightFrenzy;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The Duck game elements. Behavior is derived from the Freight parent class.
+ */
 @GameElementConfig(name = "Duck", filename = "duck_freight", forGame = FreightFrenzy.class, numInstances = 20)
 public class DuckFreight extends Freight {
 
-    public static List<DuckFreight> ducks = new ArrayList<>();
-    public static List<DuckFreight> ducksOffFieldRed = new ArrayList<>();
-    public static List<DuckFreight> ducksOffFieldBlue = new ArrayList<>();
-
-    @Override
-    public void setCategoryFilter(CategoryFilter f){
-        this.elementBody.getFixture(0).setFilter(f);
-        this.elementBody.getFixture(1).setFilter(f);
-    }
+    public static List<DuckFreight> ducks = new ArrayList<>();              // All DuckFreight objects
+    public static List<DuckFreight> redLoadingDock = new ArrayList<>();     // DuckFreight objects in red loading dock
+    public static List<DuckFreight> blueLoadingDock = new ArrayList<>();    // DuckFreight objects in blue loading dock
 
 }

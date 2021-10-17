@@ -29,7 +29,7 @@ public class Barrier extends VirtualGameElement {
 
 
     /**
-     * The implementation of updateState for ShippingHub is simple: just obtain (x, y, headingRadians)
+     * The implementation of updateState for Barrier is simple: just obtain (x, y, headingRadians)
      * from the physics body, and translate x and y from meters to pixels.
      * @param millis milliseconds since the previous update
      */

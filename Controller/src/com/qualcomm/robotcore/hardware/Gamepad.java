@@ -74,16 +74,23 @@ public class Gamepad {
     public volatile boolean right_stick_button = false;
     public volatile float left_trigger = 0;
     public volatile float right_trigger = 0;
-    private volatile float deadzone = (float) 0.0;
 
-    public void setJoystickDeadzone(float deadzone) {
-        this.deadzone = deadzone;
-    }
+    /*
+     * NOTE CHANGE IN DEADZONE TO MATCH NEW BEHAVIOR IN FTC SDK v. 7.0
+     * There is no longer a setJoystickDeadzone method.
+     */
+
+    protected float deadzone = 0.2f;
 
     private float setWithDeadzone(float in) {
-        if (Math.abs(in) > deadzone) {
-            return in;
+        float absIn = Math.abs(in);
+
+        if (absIn > deadzone) {
+//            return in;
+            float absResult = (absIn - deadzone) / (1.0f - deadzone);
+            return in > 0? absResult : -absResult;
         }
+
         return (float) 0.0;
     }
 

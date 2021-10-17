@@ -1,10 +1,10 @@
 # A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
 
-New: Changed field to Freight Frenzy field. Adaptation to use Freight Frenzy Game Elements. Currently, 
-the Shipping Hubs and Freight are implemented. A robot configuration called FreightBot is capable of 
-grabbing freight (with arm) and depositing it on the Shipping Hubs. The carousel, preloading of Boxes, and 
-Human Player action are not yet implemented (work in progress). The "Game", is currently set to FreightFrenzy. If 
-you prefer not to have game elements littering the field, then set the game to "NoGame" in the 
+New:  Freight Frenzy game adaptation, including the Freight Frenzy game elements and a new robot 
+configuration (FreightBot) with an arm that can grab and release freight items, and a rotor that can
+turn the carousels. There is a test opmode available for this robot configuration.
+
+If you prefer not to have game elements littering the field, then set the game to "NoGame" in the 
 virtual_robot.config.Config.java file (in the Controller module).
 
 Includes Programming Board configuration to serve as a companion to the book "Learn Java For FTC", by Alan Smith. The
@@ -18,12 +18,10 @@ and unzipped, then opened with IntelliJ. It can also be run using Android Studio
 (see this [video](https://www.youtube.com/watch?v=pmaT9Twbmao)).
 
 Multiple robot configurations are available. MecanumBot has a mecanum drive with a servo-driven arm at the back, 
-and with three dead-wheel encoders.  BetaBot is a mecanum-drive bot with a rear intake, a ring shooter, and a 
-front "scoop" for moving wobble goals. XDriveBot has four corner-mounted Omni-wheels, a rear arm driven by a cr-servo, 
-and three dead-wheel encoders. ArmBot is a mecanum drive bot with a motor-driven arm and servo-driven grabble; it 
-provides a purely kinematic simulation (no interaction with game elements). Several other configurations (SwerveBot, 
-DiffSwerveBot, etc) are available, but are currently disabled. They can be enabled by un-commenting the @Botconfig 
-annotations in their configuration classes (package virtual_robot.robots.classes).
+and with three dead-wheel encoders. XDriveBot has four corner-mounted Omni-wheels, a rear arm driven by a cr-servo, 
+and three dead-wheel encoders. ArmBot is a mecanum drive bot with a motor-driven arm and servo-driven grabber. 
+Several other configurations (SwerveBot, DiffSwerveBot, etc) are available, but are currently disabled. They can be 
+enabled by un-commenting the @Botconfig annotations in their configuration classes (package virtual_robot.robots.classes).
 
 Each robot can be thought of as 18 inches wide.  For the two-wheel bot and mecanum wheel bots, the distance between
 the centers of the right and left wheels is 16 inches. For the mecanum wheel bots, the distance between the centers
@@ -36,10 +34,10 @@ indicates the front of each robot. Wheel diameters are all 4 inches. For the rob
 while the X-direction (i.e., right-left) encoder wheel is mounted at the center. The dead-wheels are two inches in 
 diameter. Positioning of the dead-wheels can be changed easily in the robot configuration classes.
 
-The field can be thought of as 12 feet wide. The field graphic (currently the Ultimate Goal field)
+The field can be thought of as 12 feet wide. The field graphic (currently the Freight Frenzy field)
 is obtained from a bitmap (.bmp) image. The color sensor detects the field color beneath the center of the
 robot. The field graphic is easily changed by providing a different .bmp image in the virtual_robot.config.Config class.
-The .bmp image is the skysone_field648.bmp file in the virtual_robot.assets folder. If a different .bmp image is used,
+The .bmp image is the freight_field648.bmp file in the virtual_robot.assets folder. If a different .bmp image is used,
 it must be at least as wide and as tall as the field dimensions (currently 648 x 648 pixels to fit on the screen of
 most laptops). The Config class also allows selection between the use of "real" hardware gamepads versus a
 "virtual gamepad".
@@ -95,12 +93,19 @@ To use:
 
 LOG OF CHANGES
 
+CHANGES 10/16/2021
+    Implemented the Freight Frenzy game, and FreightBot robot configuration. The NoGame simulation is still available, 
+    and can be set in Config.java (see below). In keeping with the FTC SDK v7.0, the Gamepad.setJoystickDeadzone 
+    method has been removed. The deadzone is fixed at 0.2, and absolute input values from 0.2->1.0 are mapped into the 
+    0.0->1.0 range. The ACME Robotics RoadRunner core is now included as a library. EasyOpenCV is also included 
+    as a library, although only for compatibility with import statements in user classes.
+
 CHANGES 5/7/2021
-    Incorporated changes from Daniel McDonald/Bots Of Prey to allow interaction with game elements. Then, 
+    Incorporated changes from Daniel McDonald/Bots Of Prey to allow interaction with game elements. Then,
     to accommodate future games and simplify collision handling, incorporated the dyn4j physics and collision 
     engine. Most robot configurations have been modified to work with the physics engine (though ArmBot has
     not, and provides a purely kinematic simulation). Only one configuration, BetaBot, actually takes up game
-    elements (rings) and shoots them. A NoGame simulation is available: in Convig.java, just set
+    elements (rings) and shoots them. A NoGame simulation is available: in Config.java, just set
     GAME = NoGame(). For the physics simulation, the friction coefficient between the robot wheels and the field is 
     currently very high (10), so there is virtually no skidding. This can be modified in the Config.java class.
 

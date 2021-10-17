@@ -24,6 +24,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * The Carousel game elements. This consists of a 15 inch (diameter) carousel body attached by a revolute joint
+ * to a 15 inch (diameter) immobile (mass = infinity) carousel anchor. The carousel body has considerable friction
+ * at its edge, so that it can be rotated by robot components (like a rotor).
+ */
 @GameElementConfig(name = "Carousel", filename = "carousel", forGame = FreightFrenzy.class, numInstances = 2)
 public class Carousel extends VirtualGameElement {
 
@@ -34,11 +39,16 @@ public class Carousel extends VirtualGameElement {
     private static Carousel redCarousel = null;
     private static Carousel blueCarousel = null;
 
-    Body carouselBody = null;
-    Body anchorBody = null;
-    RevoluteJoint anchorJoint = null;
+    private Body carouselBody = null;
+    private Body anchorBody = null;
+    private RevoluteJoint anchorJoint = null;
 
-    // Category and filter for collisions
+    /*
+     * Categories and Filters for collisions.
+     * Both the carousel body and the anchor body will be CAROUSEL_CATEGORY.
+     * The CAROUSEL_FILTER collides only with CAROUSEL_SPINNER_CATEGORY (can assign this category to rotor on robot, etc)
+     * The ANCHOR_FILTER collides with both CAROUSEL_SPINNER_CATEGORY and robot chassis.
+     */
     public static final long CAROUSEL_CATEGORY = 4096;
     public static final long CAROUSEL_SPINNER_CATEGORY = 8192;
     public static final CategoryFilter CAROUSEL_FILTER =
@@ -49,6 +59,10 @@ public class Carousel extends VirtualGameElement {
     // Outer circle from the .fxml file; will use to generate dyn4j Body
     @FXML private Circle outerCircle;
 
+    /*
+     * The attached duck (if any), corresponding weld joint, and the heading of the carousel at the
+     * time that the current attached duck was attached.
+     */
     private DuckFreight attachedDuck = null;
     private WeldJoint duckJoint = null;
     private double headingOnAttach = 0;
@@ -68,8 +82,9 @@ public class Carousel extends VirtualGameElement {
     }
 
     /**
-     * The implementation of updateState for ShippingHub is simple: just obtain (x, y, headingRadians)
-     * from the physics body, and translate x and y from meters to pixels.
+     * Update of carousel pose is simple: just obtain new pose from physics engine.
+     * If there is an attached duck, handle it with a call to handleAttachedDuck.
+     *
      * @param millis milliseconds since the previous update
      */
     @Override
@@ -81,6 +96,10 @@ public class Carousel extends VirtualGameElement {
         if (attachedDuck != null) handleAttachedDuck();
     }
 
+    /**
+     * After updating display with superclass method, bring Carousel display group to the front, then bring
+     * the display group for any attached duck to the front.
+     */
     @Override
     public synchronized void updateDisplay() {
         super.updateDisplay();
@@ -97,7 +116,8 @@ public class Carousel extends VirtualGameElement {
          * Use Dyn4jUtil.createBody to create a Body. outerCircle (from the .fxml file) is used to generate
          * two bodies: The carousel body and the anchor body. The anchor body has infinite mass (and is thus
          * immobile). The carousel body is attached to the anchor body by a revolute joint, so it can rotate
-         * around its center, but cannot translate.
+         * around its center, but cannot translate. Note: the Bodys and Joint do not need to be added to the
+         * physics world here. That will happen in a call to setOnField.
          */
         elementBody = Dyn4jUtil.createBody(outerCircle, this, 0, 0,
                 new FixtureData(CAROUSEL_FILTER, 1, 0, 1.0, 1.05, 1.05));
@@ -162,6 +182,13 @@ public class Carousel extends VirtualGameElement {
 
     public DuckFreight getAttachedDuck() { return attachedDuck; }
 
+    /**
+     * If there is not already an attached duck, attach the provided duck to this carousel.
+     * This method also assigns the current heading to headingOnAttach.
+     * This method DOES NOT remove the duck from the loading zone (handle that in the calling method)
+     * @param duck
+     * @return  True if the provided duck gets attached (otherwise false)
+     */
     public boolean attachDuck(DuckFreight duck){
         if (attachedDuck != null) return false;
         attachedDuck = duck;
@@ -179,6 +206,9 @@ public class Carousel extends VirtualGameElement {
         return true;
     }
 
+    /**
+     * Remove any attached duck -- this is called during reset of game elements.
+     */
     public void clearAttachedDuck(){
         if (attachedDuck != null) {
             if (world.containsBody(attachedDuck.getElementBody())) world.removeBody(attachedDuck.getElementBody());
@@ -188,6 +218,14 @@ public class Carousel extends VirtualGameElement {
         }
     }
 
+    /**
+     * Handling for an attached duck. Depending on how far (and in what direction) the carousel has rotated since
+     * the duck was attached, this method will do one of the following:
+     *
+     * 1) Nothing.
+     * 2) Eject the duck back into the loading dock.
+     * 3) Release the duck onto the field.
+     */
     private void handleAttachedDuck(){
         // Can only detach a duck if there is already one attached
         if (attachedDuck == null) return;
@@ -205,8 +243,6 @@ public class Carousel extends VirtualGameElement {
             eject = headingChange > Math.toRadians(-30) && headingChange < Math.toRadians(-10);
         }
 
-
-
         //If we aren't releasing or ejecting, stop here
         if (!releaseToField && !eject) return;
 
@@ -220,10 +256,10 @@ public class Carousel extends VirtualGameElement {
 
         // If ejecting, add duck back to the bucket of available ducks for red or blue, then stop
         if (eject){
-            if (this == redCarousel && !DuckFreight.ducksOffFieldRed.contains(releasedDuck)) {
-                DuckFreight.ducksOffFieldRed.add(releasedDuck);
-            } else if (this == blueCarousel && !DuckFreight.ducksOffFieldBlue.contains(releasedDuck)){
-                DuckFreight.ducksOffFieldBlue.add(releasedDuck);
+            if (this == redCarousel && !DuckFreight.redLoadingDock.contains(releasedDuck)) {
+                DuckFreight.redLoadingDock.add(releasedDuck);
+            } else if (this == blueCarousel && !DuckFreight.blueLoadingDock.contains(releasedDuck)){
+                DuckFreight.blueLoadingDock.add(releasedDuck);
             }
             return;
         }
