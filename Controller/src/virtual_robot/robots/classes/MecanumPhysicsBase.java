@@ -316,8 +316,6 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
         chassisFixture.setFilter(Filters.CHASSIS_FILTER);
         chassisBody.setMass(MassType.NORMAL);
         world.addBody(chassisBody);
-        System.out.println("Chassis Mass = " + chassisBody.getMass().getMass());
-        System.out.println("Chassis Inertia = " + chassisBody.getMass().getInertia());
     }
 
 }

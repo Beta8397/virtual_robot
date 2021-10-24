@@ -14,8 +14,10 @@ public class DcMotorImpl implements DcMotor {
 
     //Proportionate coefficient for RUN_TO_POSITION mode
     private final double COEFF_PROPORTIONATE = 5.0;
+
     //Target position for RUN_TO_POSITION mode
     private int targetPosition = 0;
+    private boolean targetPositionIsSet = false;
 
     private final Random random = new Random();
     private RunMode mode = RunMode.RUN_WITHOUT_ENCODER;
@@ -84,6 +86,10 @@ public class DcMotorImpl implements DcMotor {
         power = 0.0;
         if (mode == RunMode.STOP_AND_RESET_ENCODER){
             encoderBasePosition = actualPosition;
+        } else if (mode == RunMode.RUN_TO_POSITION){
+            if (!targetPositionIsSet) {
+                throw new ActionNotSupportedException("Target position must be set before entering RUN_TO_POSITION mode.");
+            }
         }
     }
 
@@ -268,15 +274,15 @@ public class DcMotorImpl implements DcMotor {
     public synchronized void stopAndReset(){
         power = 0.0;
         actualSpeed = 0.0;
-//        actualPosition = 0.0;
-//        encoderBasePosition = 0.0;
         direction = Direction.FORWARD;
         mode = RunMode.RUN_WITHOUT_ENCODER;
+        targetPositionIsSet = false;
     }
 
     //Set target position for RUN_TO_POSITION mode
     public synchronized void setTargetPosition(int pos){
         targetPosition = pos;
+        targetPositionIsSet = true;
     }
 
     //Get target position

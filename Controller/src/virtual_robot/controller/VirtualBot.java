@@ -83,8 +83,8 @@ public abstract class VirtualBot {
     }
 
     /**
-     * Create the HardwareMap.  Classes extending VirtualBot must have an 'initialize' method which has
-     * as its first statement 'super.init()'
+     * Create the HardwareMap and, if using the physics engine, set up the chassis body.  Classes extending
+     * VirtualBot must have an 'initialize' method which have as its first statement 'super.init()'
      */
     public void initialize(){
         createHardwareMap();
