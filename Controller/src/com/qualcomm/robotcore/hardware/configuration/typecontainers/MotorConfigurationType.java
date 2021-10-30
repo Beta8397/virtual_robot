@@ -43,7 +43,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Rotation;
  * is known about a given type of motor.
  */
 @SuppressWarnings("WeakerAccess")
-public final class MotorConfigurationType {
+public final class MotorConfigurationType implements Cloneable{
     //----------------------------------------------------------------------------------------------
     // State
     //----------------------------------------------------------------------------------------------
@@ -134,6 +134,18 @@ public final class MotorConfigurationType {
         //This may seem a little backward, but note that MotorType.MAX_TICKS_PER_SECOND refers to the
         //maximum ticks per second that can be achieved in RUN_WITH_ENCODER mode
         maxRPM = 60.0 * motorType.MAX_TICKS_PER_SECOND / (achieveableMaxRPMFraction * ticksPerRev);
+    }
+
+    public MotorConfigurationType clone()
+    {
+        try {
+            MotorConfigurationType result = (MotorConfigurationType)super.clone();
+            return result;
+        }
+        catch (CloneNotSupportedException e)
+        {
+            throw new RuntimeException("internal error: Parameters not cloneable");
+        }
     }
 
 }

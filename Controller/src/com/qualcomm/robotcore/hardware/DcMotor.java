@@ -114,4 +114,8 @@ public interface DcMotor extends DcMotorSimple {
      */
     public MotorConfigurationType getMotorType();
 
+    default void setMotorType(MotorConfigurationType type) {}
+
+    default int getPortNumber(){ return 0; }
+
 }

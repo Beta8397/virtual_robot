@@ -30,66 +30,45 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 /*
-Modified by FTC Team Beta 8397 for use in the Virtual_Robot Simulator
+ * Modified by Team Beta for use in the Virtual Robot Simulator
  */
 
 package com.qualcomm.robotcore.hardware;
 
-/**
- * Interface to represent any hardware device that can be managed by HardwareMap.
- */
-public interface HardwareDevice {
-
-    enum Manufacturer {
-        Unknown, Other, Lego, HiTechnic, ModernRobotics, Adafruit, Matrix, Lynx, AMS, STMicroelectronics, Broadcom
-    }
+public interface ServoController extends HardwareDevice {
 
     /**
-     * Returns an indication of the manufacturer of this device.
-     * @return the device's manufacturer
+     * PWM Status - is pwm enabled?
      */
-    default Manufacturer getManufacturer(){
-        return Manufacturer.Unknown;
-    }
+    enum PwmStatus { ENABLED, DISABLED, MIXED }
 
     /**
-     * Returns a string suitable for display to the user as to the type of device.
-     * Note that this is a device-type-specific name; it has nothing to do with the
-     * name by which a user might have configured the device in a robot configuration.
-     *
-     * @return device manufacturer and name
+     * Enables all of the servos connected to this controller
      */
-    default String getDeviceName(){
-        return this.getClass().getSimpleName();
-    }
+    default void pwmEnable() {}
 
     /**
-     * Get connection information about this device in a human readable format
-     *
-     * @return connection info
+     * Disables all of the servos connected to this controller
      */
-    default String getConnectionInfo(){
-        return "No Connection Info";
-    }
+    default void pwmDisable(){}
 
     /**
-     * Version
-     *
-     * @return get the version of this device
+     * Returns the enablement status of the collective set of servos connected to this controller
+     * @return the enablement status of the collective set of servos connected to this controller
      */
-    default int getVersion() {
-        return 1;
-    }
+    default PwmStatus getPwmStatus(){return PwmStatus.ENABLED;}
 
     /**
-     * Resets the device's configuration to that which is expected at the beginning of an OpMode.
-     * For example, motors will reset the their direction to 'forward'.
+     * Set the position of a servo at the given channel
+     * @param servo channel of servo
+     * @param position from 0.0 to 1.0
      */
-    default void resetDeviceConfigurationForOpMode(){}
+    default void setServoPosition(int servo, double position){};
 
     /**
-     * Closes this device
+     * Get the position of a servo at a given channel
+     * @param servo channel of servo
+     * @return position, scaled from 0.0 to 1.0
      */
-    default void close(){}
-
+    default double getServoPosition(int servo) {return 0.0;};
 }
