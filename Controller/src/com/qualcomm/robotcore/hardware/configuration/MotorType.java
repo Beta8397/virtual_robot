@@ -30,12 +30,13 @@ public enum MotorType {
         REVERSED = reversed;
         GEARING = gearing;
         ACHIEVABLE_MAX_RPM_FRACTION = achievableMaxRPMFraction;
+        MAX_RPM = 60.0 * MAX_TICKS_PER_SECOND / (TICKS_PER_ROTATION * ACHIEVABLE_MAX_RPM_FRACTION);
     }
 
     public final double TICKS_PER_ROTATION;
-    public final double MAX_TICKS_PER_SECOND;
+    public final double MAX_TICKS_PER_SECOND;       // Max Ticks Per Sec in RUN_USING_ENCODER mode
     public final boolean REVERSED;
     public final double GEARING;
     public final double ACHIEVABLE_MAX_RPM_FRACTION;
-
+    public final double MAX_RPM;                    // Max RPM in RUN_WITHOUT_ENCODER mode
 }
