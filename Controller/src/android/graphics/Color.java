@@ -32,4 +32,26 @@ public class Color {
         int color = (red << 16 ) | (green << 8) | blue;
         return color;
     }
+
+    public static int HSVToColor(int alpha, float[] hsv){
+        int result = HSVToColor(hsv);
+        result = result | ( alpha << 24 );
+        return result;
+    }
+
+    public static int alpha(int color){
+        return (color >> 24) & 0xFF;
+    }
+
+    public static int red(int color){
+        return (color >> 16) & 0xFF;
+    }
+
+    public static int green(int color){
+        return (color >> 8) & 0xFF;
+    }
+
+    public static int blue(int color){
+        return color & 0xFF;
+    }
 }
