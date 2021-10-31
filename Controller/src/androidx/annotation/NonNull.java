@@ -13,6 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/*
+ * Modified by Team Beta for use in the Virtual Robot simulator.
+ */
+
 package androidx.annotation;
 
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
