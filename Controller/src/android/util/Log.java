@@ -29,6 +29,25 @@ public final class Log {
     public static final int WARN = 5;
 
     
+	public static int d(String tag, String msg) {
+		return println(DEBUG, tag, msg);
+	}
+
+	public static int e(String tag, String msg) {
+		return println(ERROR, tag, msg);
+	}
+    
+    public static int i(String tag, String msg) {
+		return println(INFO, tag, msg);
+	}
+
+	public static int v(String tag, String msg) {
+		return println(VERBOSE, tag, msg);
+	}
+
+	public static int w(String tag, String msg) {
+		return println(WARN, tag, msg);
+	}
 
     public static int println(int priority, String tag, String msg) {
 	
