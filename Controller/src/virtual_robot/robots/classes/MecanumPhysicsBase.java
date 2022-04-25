@@ -63,6 +63,7 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
     }
 
     public MecanumPhysicsBase(MotorType driveMotorType){
+        super();
         MOTOR_TYPE = driveMotorType;
     }
 

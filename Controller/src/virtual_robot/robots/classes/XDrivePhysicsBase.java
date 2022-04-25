@@ -51,6 +51,7 @@ public abstract class XDrivePhysicsBase extends VirtualBot {
     }
 
     public XDrivePhysicsBase(MotorType driveMotorType){
+        super();
         MOTOR_TYPE = driveMotorType;
     }
 

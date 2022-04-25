@@ -33,6 +33,9 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /*
 Modified by FTC Team Beta 8397 for use in the Virtual Robot simulator.
+
+NOTE: the inverse() method does not work properly for 2x2 and 1x1 matrices. This would be easily fixed, but
+will be left the way it is until the method in the FTC SDK version of MatrixF is fixed.
  */
 package org.firstinspires.ftc.robotcore.external.matrices;
 
@@ -777,6 +780,7 @@ public abstract class MatrixF
 
         if (this.numRows == 2)
             {
+                // TODO: change result to a 2x2 (not 4x4) matrix
             MatrixF result = this.emptyMatrix(4,4);
 
             final float m00=get(0,0), m01=get(0,1);
@@ -794,6 +798,7 @@ public abstract class MatrixF
 
         if (this.numRows == 1)
             {
+                // TODO: change result to a 1x1 (not 4x4) matrix
             MatrixF result = this.emptyMatrix(4,4);
             result.put(0,0, 1 / get(0,0));
             return result;

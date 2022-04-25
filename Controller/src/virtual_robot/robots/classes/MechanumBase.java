@@ -40,6 +40,7 @@ public class MechanumBase extends VirtualBot {
     }
 
     public MechanumBase(MotorType driveMotorType){
+        super();
         MOTOR_TYPE = driveMotorType;
     }
 
