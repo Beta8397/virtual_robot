@@ -894,6 +894,7 @@ public class VirtualRobotController {
         public void run() {
             VirtualGamePadController.ControllerState state = virtualGamePadController.getState();
             gamePad1.update(state);
+            virtualGamePadController.setOutputs(gamePad1);
             gamePad2.resetValues();
         }
 

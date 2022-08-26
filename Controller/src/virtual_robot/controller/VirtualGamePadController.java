@@ -1,5 +1,7 @@
 package virtual_robot.controller;
 
+import com.qualcomm.robotcore.hardware.Gamepad;
+
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -8,20 +10,27 @@ import javafx.scene.control.Slider;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
 import virtual_robot.config.Config;
 
 import java.security.Key;
+import java.util.ListIterator;
 
 public class VirtualGamePadController {
 
     @FXML StackPane joyStickLeftPane;
     @FXML StackPane joyStickRightPane;
     @FXML Circle joyStickLeftHandle;
-    @FXML Circle joyStickRightHandle;
-    @FXML Button btnX;
+    @FXML
+    Circle joyStickRightHandle;
+    @FXML
+    HBox gamepadBackground;
+    @FXML
+    Button btnX;
     @FXML Button btnY;
     @FXML Button btnA;
     @FXML Button btnB;
@@ -168,6 +177,18 @@ public class VirtualGamePadController {
         joyStickLeftHandle.setTranslateY(50);
         joyStickRightHandle.setTranslateX(50);
         joyStickRightHandle.setTranslateY(50);
+
+        if (ledThread != null) {
+            ledThread.interrupt();
+        }
+        if (rumbleThread != null) {
+            rumbleThread.interrupt();
+        }
+        String normalStyle = "-fx-background-color: #FFFFFF";
+        sldLeft.setStyle(normalStyle);
+        sldRight.setStyle(normalStyle);
+        gamepadBackground.setStyle(normalStyle);
+
     }
 
 
@@ -210,8 +231,100 @@ public class VirtualGamePadController {
         }
     }
 
-    ControllerState getState(){
+    ControllerState getState() {
         return new ControllerState();
     }
 
+    public class LEDPattern implements Runnable {
+        Gamepad.LedEffect leds;
+        HBox background;
+
+        LEDPattern(Gamepad.LedEffect leds, HBox background) {
+            this.leds = leds;
+            this.background = background;
+        }
+
+        @Override
+        public void run() {
+            do {
+                ListIterator<Gamepad.LedEffect.Step> stepIterator = leds.steps.listIterator();
+                while (stepIterator.hasNext()) {
+                    Gamepad.LedEffect.Step step = stepIterator.next();
+                    String styleString = String.format("-fx-background-color: #%02X%02X%02X", step.r, step.g, step.b);
+                    gamepadBackground.setStyle(styleString);
+
+                    if (step.duration == -1) {
+                        return;
+                    }
+                    try {
+                        Thread.sleep(step.duration);
+                    } catch (InterruptedException e) {
+                        return;  // don't know why it was interrupted, but lets just bail on this sequence
+                    }
+                }
+            } while (leds.repeating);
+        }
+    }
+
+    public class RumblePattern implements Runnable {
+        Gamepad.RumbleEffect rumbles;
+        Slider sldLeft;
+        Slider sldRight;
+        HBox background;
+
+        RumblePattern(Gamepad.RumbleEffect rumbles, Slider sldLeft, Slider sldRight) {
+            this.rumbles = rumbles;
+            this.sldLeft = sldLeft;
+            this.sldRight = sldRight;
+        }
+
+        @Override
+        public void run() {
+            ListIterator<Gamepad.RumbleEffect.Step> stepIterator = rumbles.steps.listIterator();
+            while (stepIterator.hasNext()) {
+                Gamepad.RumbleEffect.Step step = stepIterator.next();
+                String leftStyle = String.format("-fx-background-color: #%02X%02X%02X", 255 - step.large, 255 - step.large, 255 - step.large);
+                String rightStyle = String.format("-fx-background-color: #%02X%02X%02X", 255 - step.small, 255 - step.small, 255 - step.small);
+                sldLeft.setStyle(leftStyle);
+                sldRight.setStyle(rightStyle);
+
+                if (step.duration == -1) {
+                    return;
+                }
+                try {
+                    Thread.sleep(step.duration);
+                } catch (InterruptedException e) {
+                    return;  // don't know why it was interrupted, but lets just bail on this sequence
+                }
+            }
+            sldLeft.setStyle("-fx-background-color: #FFFFFF");
+            sldRight.setStyle("-fx-background-color: #FFFFFF");
+        }
+    }
+
+    Thread ledThread;
+    Thread rumbleThread;
+
+
+    void setOutputs(Gamepad gamepad) {
+        // First, handle LEDs
+        Gamepad.LedEffect leds = gamepad.ledQueue.poll();
+        if (leds != null) {
+            if (this.ledThread != null) {
+                this.ledThread.interrupt();
+            }
+            this.ledThread = new Thread(new LEDPattern(leds, gamepadBackground));
+            this.ledThread.start();
+        }
+        // Second, handle rumbles
+        Gamepad.RumbleEffect rumbles = gamepad.rumbleQueue.poll();
+        if (rumbles != null) {
+            if (this.rumbleThread != null) {
+                this.rumbleThread.interrupt();
+            }
+            // For our rumbles, we will set the background color of sldLeft and sldRight
+            this.rumbleThread = new Thread(new RumblePattern(rumbles, sldLeft, sldRight));
+            this.rumbleThread.start();
+        }
+    }
 }

@@ -14,17 +14,22 @@
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 
-<HBox xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="virtual_robot.controller.VirtualGamePadController">
+<HBox fx:id="gamepadBackground" xmlns="http://javafx.com/javafx/8.0.172-ea"
+    xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="virtual_robot.controller.VirtualGamePadController">
     <children>
-      <VBox alignment="CENTER">
-         <children>
-            <Button fx:id="btnLB" alignment="BOTTOM_RIGHT" contentDisplay="CENTER" mnemonicParsing="false" onMouseExited="#handleGamePadButtonMouseEvent" onMousePressed="#handleGamePadButtonMouseEvent" onMouseReleased="#handleGamePadButtonMouseEvent" text="LB">
-               <VBox.margin>
-                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-               </VBox.margin>
-               <font>
-                  <Font size="14.0" />
-               </font>
+        <VBox alignment="CENTER">
+            <children>
+                <Button fx:id="btnLB" alignment="BOTTOM_RIGHT" contentDisplay="CENTER"
+                    mnemonicParsing="false" onMouseExited="#handleGamePadButtonMouseEvent"
+                    onMousePressed="#handleGamePadButtonMouseEvent"
+                    onMouseReleased="#handleGamePadButtonMouseEvent" text="LB">
+                    <VBox.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                    </VBox.margin>
+                    <font>
+                        <Font size="14.0" />
+                    </font>
             </Button>
             <Slider fx:id="sldLeft" blockIncrement="0.001" majorTickUnit="0.001" max="1.0" maxHeight="75.0" onMousePressed="#handleTriggerMouseEvent" onMouseReleased="#handleTriggerMouseEvent" orientation="VERTICAL">
                <VBox.margin>
