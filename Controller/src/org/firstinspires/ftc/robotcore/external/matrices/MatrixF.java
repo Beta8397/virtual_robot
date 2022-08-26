@@ -780,8 +780,8 @@ public abstract class MatrixF
 
         if (this.numRows == 2)
             {
-                // TODO: change result to a 2x2 (not 4x4) matrix
-            MatrixF result = this.emptyMatrix(4,4);
+                // Error in FTC SDK has been fixed, so fixing it here as well.
+            MatrixF result = this.emptyMatrix(2,2);
 
             final float m00=get(0,0), m01=get(0,1);
             final float m10=get(1,0), m11=get(1,1);
@@ -798,8 +798,8 @@ public abstract class MatrixF
 
         if (this.numRows == 1)
             {
-                // TODO: change result to a 1x1 (not 4x4) matrix
-            MatrixF result = this.emptyMatrix(4,4);
+                // Error in FTC SDK has been fixed, so fixing it here as well.
+            MatrixF result = this.emptyMatrix(1,1);
             result.put(0,0, 1 / get(0,0));
             return result;
             }

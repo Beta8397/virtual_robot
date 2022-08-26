@@ -2,6 +2,7 @@ package virtual_robot.controller;
 
 import com.qualcomm.robotcore.hardware.Gamepad;
 
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -184,10 +185,15 @@ public class VirtualGamePadController {
         if (rumbleThread != null) {
             rumbleThread.interrupt();
         }
-        String normalStyle = "-fx-background-color: #FFFFFF";
-        sldLeft.setStyle(normalStyle);
-        sldRight.setStyle(normalStyle);
-        gamepadBackground.setStyle(normalStyle);
+        final String normalStyle = "-fx-background-color: #FFFFFF";
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                sldLeft.setStyle(normalStyle);
+                sldRight.setStyle(normalStyle);
+                gamepadBackground.setStyle(normalStyle);
+            }
+        });
 
     }
 
@@ -250,8 +256,13 @@ public class VirtualGamePadController {
                 ListIterator<Gamepad.LedEffect.Step> stepIterator = leds.steps.listIterator();
                 while (stepIterator.hasNext()) {
                     Gamepad.LedEffect.Step step = stepIterator.next();
-                    String styleString = String.format("-fx-background-color: #%02X%02X%02X", step.r, step.g, step.b);
-                    gamepadBackground.setStyle(styleString);
+                    final String styleString = String.format("-fx-background-color: #%02X%02X%02X", step.r, step.g, step.b);
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            gamepadBackground.setStyle(styleString);
+                        }
+                    });
 
                     if (step.duration == -1) {
                         return;
@@ -283,10 +294,15 @@ public class VirtualGamePadController {
             ListIterator<Gamepad.RumbleEffect.Step> stepIterator = rumbles.steps.listIterator();
             while (stepIterator.hasNext()) {
                 Gamepad.RumbleEffect.Step step = stepIterator.next();
-                String leftStyle = String.format("-fx-background-color: #%02X%02X%02X", 255 - step.large, 255 - step.large, 255 - step.large);
-                String rightStyle = String.format("-fx-background-color: #%02X%02X%02X", 255 - step.small, 255 - step.small, 255 - step.small);
-                sldLeft.setStyle(leftStyle);
-                sldRight.setStyle(rightStyle);
+                final String leftStyle = String.format("-fx-background-color: #%02X%02X%02X", 255 - step.large, 255 - step.large, 255 - step.large);
+                final String rightStyle = String.format("-fx-background-color: #%02X%02X%02X", 255 - step.small, 255 - step.small, 255 - step.small);
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        sldLeft.setStyle(leftStyle);
+                        sldRight.setStyle(rightStyle);
+                    }
+                });
 
                 if (step.duration == -1) {
                     return;
@@ -297,8 +313,13 @@ public class VirtualGamePadController {
                     return;  // don't know why it was interrupted, but lets just bail on this sequence
                 }
             }
-            sldLeft.setStyle("-fx-background-color: #FFFFFF");
-            sldRight.setStyle("-fx-background-color: #FFFFFF");
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    sldLeft.setStyle("-fx-background-color: #FFFFFF");
+                    sldRight.setStyle("-fx-background-color: #FFFFFF");
+                }
+            });
         }
     }
 
@@ -325,6 +346,15 @@ public class VirtualGamePadController {
             // For our rumbles, we will set the background color of sldLeft and sldRight
             this.rumbleThread = new Thread(new RumblePattern(rumbles, sldLeft, sldRight));
             this.rumbleThread.start();
+        }
+    }
+
+    void interruptLEDandRumbleThreads(){
+        if (ledThread != null){
+            ledThread.interrupt();
+        }
+        if (rumbleThread != null){
+            rumbleThread.interrupt();
         }
     }
 }

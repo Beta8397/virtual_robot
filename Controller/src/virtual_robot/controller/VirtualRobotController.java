@@ -898,7 +898,11 @@ public class VirtualRobotController {
             gamePad2.resetValues();
         }
 
-        public void quit(){}
+        public void quit(){
+            //Make sure that LED and Rumble threads are interrupted if user closes the application while an op mode is
+            //running.
+            virtualGamePadController.interruptLEDandRumbleThreads();
+        }
     }
 
     public class RealGamePadHelper implements  GamePadHelper {
