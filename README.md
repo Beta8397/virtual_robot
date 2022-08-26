@@ -1,11 +1,8 @@
 # A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
 
-New:  Freight Frenzy game adaptation, including the Freight Frenzy game elements and a new robot 
-configuration (FreightBot) with an arm that can grab and release freight items, and a rotor that can
-turn the carousels. There is a test opmode available for this robot configuration.
+New:  LED and Rumble capability added to the Virtual Gamepad, thanks to Alan Smith, FTC team 16072.
 
-If you prefer not to have game elements littering the field, then set the game to "NoGame" in the 
-virtual_robot.config.Config.java file (in the Controller module).
+Coming Soon: PowerPlay game adaptation for the 2022-23 FTC season.
 
 Includes Programming Board configuration to serve as a companion to the book "Learn Java For FTC", by Alan Smith. The
 PDF can be [downloaded for free](https://github.com/alan412/LearnJavaForFTC) or you can purchase the paperback on
@@ -49,21 +46,11 @@ the paperback on [Amazon](https://www.amazon.com/dp/B08DBVKXLZ).) It is a board 
 attached: DcMotor, Servo, Potentiometer, Touch Sensor, and a Color-Distance Sensor. It also has a BNO055 IMU. 
 The board doesn't move around the field, but it can be rotated (to test the IMU) by dragging the board chassis.
 
-An abridged approximation of the FTC SDK is provided.
+An approximation of the FTC SDK is provided.
 
 User-defined OpModes must be placed in the org.firstinspires.ftc.teamcode package, and must extend OpMode 
 (or LinearOpMode). OpModes are registered by placing a @TeleOp or @Autonomous annotation immediately above the class 
 declaration.
-
-The OpMode (and therefore LinearOpMode) class in the simulator provides access to:
-
-  1. A HardwareMap object, which in turn provides access to the DCMotor objects, the BNO055 IMU sensor, distance 
-     sensors, the servo, and the color sensor;
-  2. Two GamePads(actual hardware gamepads, though there is an option to use a "virtual gamepad" -- see Log of 
-     Changes below);
-  3. A Telemetry object.
-
-An approximation of the FTC SDK's ElapsedTime class is provided in the time package.
 
 Several example OpModes are provided in the org.firstinspires.ftc.teamcode package. To minimize clutter, a number 
 of sample op modes are currently disabled; they can be re-enabled by commenting out the @Disabled annotation. A 
@@ -80,9 +67,11 @@ To use:
   3. Write your OpModes in the org.firstinspires.ftc.teamcode package; make sure to include a @TeleOp or @Autonomous 
      annotation. These must extend the OpMode class (may either extend OpMode OR LinearOpMode). OpMode must provide 
      init() and loop() methods; LinearOpMode must provide runOpMode() method.
-  4. Make sure at least one gamepad is plugged in to the computer.
+  4. You can either use the Virtual Gamepad (currently the default), or use one or two real Gamepads; to use real 
+     gamepads, open Controller/src/virtual_robot/config/Config.java and set USE_VIRTUAL_GAMEPAD to false. Then plug 
+     in your gamepad(s). 
   5. Run the application (by clicking the green arrowhead at the toolbar).
-  6. Press start-A or start-B on gamepad(s) to select which is gamepad1 vs. gamepad2.
+  6. If using real gamepad(s), press start-A or start-B on gamepad(s) to select which is gamepad1 vs. gamepad2.
   7. Use Configuration dropdown box to select a robot configuration. The configuration will be displayed.
   8. Use the Op Mode drop down box to select the desired OpMode.
   9. Prior to initialization, position the robot on the field by left-mouse-clicking the field (for robot position),
@@ -92,6 +81,10 @@ To use:
 
 
 LOG OF CHANGES
+
+CHANGES 8/26/2022 
+    Rumble and LED capability added to the Virtual Gamepad, thanks to Alan Smith, FTC 16072. Also, fixed the invert
+    method for 1x1 and 2x2 matrices in MatrixF, now that the corresponding bug has been fixed in the FTC SDK.
 
 CHANGES 10/16/2021
     Implemented the Freight Frenzy game, and FreightBot robot configuration. The NoGame simulation is still available, 
