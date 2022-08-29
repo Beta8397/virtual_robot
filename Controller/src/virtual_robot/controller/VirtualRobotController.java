@@ -2,8 +2,11 @@ package virtual_robot.controller;
 
 import com.qualcomm.robotcore.eventloop.opmode.*;
 import com.qualcomm.robotcore.hardware.*;
+import com.qualcomm.robotcore.util.Range;
+import com.studiohartman.jamepad.ControllerIndex;
 import com.studiohartman.jamepad.ControllerManager;
 import com.studiohartman.jamepad.ControllerState;
+import com.studiohartman.jamepad.ControllerUnpluggedException;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -917,6 +920,8 @@ public class VirtualRobotController {
 
         private ControllerManager controller = null;
 
+        private Thread[] rumbleThreads = new Thread[2];
+
         public RealGamePadHelper(){
             controller = new ControllerManager(2);
             controller.initSDLGamepad();
@@ -983,9 +988,65 @@ public class VirtualRobotController {
             if (gamePad2Index == 0) gamePad2.update(state0);
             else if (gamePad2Index == 1) gamePad2.update(state1);
             else gamePad2.resetValues();
+
+            setOutputs(gamePad1, gamePad1Index);
+            setOutputs(gamePad2, gamePad2Index);
+        }
+
+        public void setOutputs(Gamepad gamepad, int gamePadIndex){
+            if (gamePadIndex <0 || gamePadIndex >1) return;
+            ControllerIndex controllerIndex = controller.getControllerIndex(gamePadIndex);
+            Gamepad.RumbleEffect rumbles = gamepad.rumbleQueue.poll();
+            if (rumbles == null) return;
+            if (rumbleThreads[gamePadIndex] != null){
+                rumbleThreads[gamePadIndex].interrupt();
+            }
+
+            // Make this final so accessable from rumble thread
+            final ListIterator<Gamepad.RumbleEffect.Step> stepIterator = rumbles.steps.listIterator();
+
+            rumbleThreads[gamePadIndex] = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while (stepIterator.hasNext()) {
+                        Gamepad.RumbleEffect.Step step = stepIterator.next();
+                        float leftMagnitude = (float)Range.scale((double)step.large, 0, 255, 0, 1);
+                        float rightMagnitude = (float)Range.scale((double)step.small, 0, 255, 0, 1);
+
+                        try {
+                            controllerIndex.doVibration(leftMagnitude, rightMagnitude, 300000);
+                        } catch (ControllerUnpluggedException ex) {
+                            return;
+                        }
+                        if (step.duration == -1) {
+                            return;
+                        }
+                        try {
+                            Thread.sleep(step.duration);
+                        } catch (InterruptedException e) {
+                            return;  // don't know why it was interrupted, but lets just bail on this sequence
+                        }
+                    }
+
+                    try{
+                        controllerIndex.doVibration(0, 0, 300000);
+                    } catch (ControllerUnpluggedException ex) {
+                        return;
+                    }
+
+                }
+            });
+
+            rumbleThreads[gamePadIndex].start();
         }
 
         public void quit(){
+            if (rumbleThreads[0] != null){
+                rumbleThreads[0].interrupt();
+            }
+            if (rumbleThreads[1] != null){
+                rumbleThreads[1].interrupt();
+            }
             controller.quitSDLGamepad();
         }
 
