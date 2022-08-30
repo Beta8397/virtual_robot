@@ -551,7 +551,7 @@ public class VirtualRobotController {
             bot.getHardwareMap().setActive(false);
             bot.powerDownAndReset();
             Config.GAME.stopGameElements();
-            if (Config.USE_VIRTUAL_GAMEPAD) virtualGamePadController.resetGamePad();
+            gamePadHelper.onOpModeFinished();
             initializeTelemetryTextArea();
             cbxConfig.setDisable(false);
         }
@@ -630,13 +630,13 @@ public class VirtualRobotController {
         if (!executorService.isShutdown()) executorService.shutdown();
         opModeInitialized = false;
         opModeStarted = false;
+        gamePadHelper.onOpModeFinished();
         Platform.runLater(new Runnable() {
             public void run() {
                 driverButton.setText("INIT");
                 //resetGamePad();
                 initializeTelemetryTextArea();
                 cbxConfig.setDisable(false);
-                if (Config.USE_VIRTUAL_GAMEPAD) virtualGamePadController.resetGamePad();
             }
         });
 
@@ -890,6 +890,7 @@ public class VirtualRobotController {
 
     public interface GamePadHelper extends Runnable{
         public void quit();
+        public void onOpModeFinished();
     }
 
     public class VirtualGamePadHelper implements GamePadHelper {
@@ -905,6 +906,10 @@ public class VirtualRobotController {
             //Make sure that LED and Rumble threads are interrupted if user closes the application while an op mode is
             //running.
             virtualGamePadController.interruptLEDandRumbleThreads();
+        }
+
+        public void onOpModeFinished(){
+            virtualGamePadController.resetGamePad();
         }
     }
 
@@ -993,7 +998,7 @@ public class VirtualRobotController {
             setOutputs(gamePad2, gamePad2Index);
         }
 
-        public void setOutputs(Gamepad gamepad, int gamePadIndex){
+        public void setOutputs(Gamepad gamepad, final int gamePadIndex){
             if (gamePadIndex <0 || gamePadIndex >1) return;
             ControllerIndex controllerIndex = controller.getControllerIndex(gamePadIndex);
             Gamepad.RumbleEffect rumbles = gamepad.rumbleQueue.poll();
@@ -1040,14 +1045,23 @@ public class VirtualRobotController {
             rumbleThreads[gamePadIndex].start();
         }
 
+
         public void quit(){
+            interruptRumbleThreads();
+            controller.quitSDLGamepad();
+        }
+
+        public void onOpModeFinished(){
+            interruptRumbleThreads();
+        }
+
+        public void interruptRumbleThreads(){
             if (rumbleThreads[0] != null){
                 rumbleThreads[0].interrupt();
             }
             if (rumbleThreads[1] != null){
                 rumbleThreads[1].interrupt();
             }
-            controller.quitSDLGamepad();
         }
 
     }

@@ -179,21 +179,23 @@ public class VirtualGamePadController {
         joyStickRightHandle.setTranslateX(50);
         joyStickRightHandle.setTranslateY(50);
 
-        if (ledThread != null) {
-            ledThread.interrupt();
-        }
-        if (rumbleThread != null) {
-            rumbleThread.interrupt();
-        }
+        interruptLEDandRumbleThreads();
+
         final String normalStyle = "-fx-background-color: #FFFFFF";
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                sldLeft.setStyle(normalStyle);
-                sldRight.setStyle(normalStyle);
-                gamepadBackground.setStyle(normalStyle);
-            }
-        });
+        if (Platform.isFxApplicationThread()){
+            sldLeft.setStyle(normalStyle);
+            sldRight.setStyle(normalStyle);
+            gamepadBackground.setStyle(normalStyle);
+        } else {
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    sldLeft.setStyle(normalStyle);
+                    sldRight.setStyle(normalStyle);
+                    gamepadBackground.setStyle(normalStyle);
+                }
+            });
+        }
 
     }
 
