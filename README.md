@@ -1,6 +1,7 @@
 # A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
 
 New:  LED and Rumble capability added to the Virtual Gamepad, thanks to Alan Smith, FTC team 16072.
+    Rumble capability has now been added to the real gamepad(s) as well.
 
 Coming Soon: PowerPlay game adaptation for the 2022-23 FTC season.
 
