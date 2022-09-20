@@ -3,7 +3,9 @@
 New:  LED and Rumble capability added to the Virtual Gamepad, thanks to Alan Smith, FTC team 16072.
     Rumble capability has now been added to the real gamepad(s) as well.
 
-Coming Soon: PowerPlay game adaptation for the 2022-23 FTC season.
+Field now changed to Power Play.
+
+Coming soon: Power Play game elements.
 
 Includes Programming Board configuration to serve as a companion to the book "Learn Java For FTC", by Alan Smith. The
 PDF can be [downloaded for free](https://github.com/alan412/LearnJavaForFTC) or you can purchase the paperback on
