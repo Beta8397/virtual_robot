@@ -782,19 +782,33 @@ public class VirtualRobotController {
         return keyState.get(code);
     }
 
-    public class ColorSensorImpl implements ColorSensor {
+    public class ColorSensorImpl implements ColorSensor, ColorRangeSensor {
         private int red = 0;
         private int green = 0;
         private int blue = 0;
         private int alpha = 0;
-        public synchronized int red(){ return red; }
-        public synchronized int green(){ return green; }
-        public synchronized int blue(){ return blue; }
-        public synchronized int alpha() { return alpha; }
+        private double gain = 1.0;
+        private double distanceCM = 0.0;
 
-        public synchronized void updateColor(double x, double y){
-            int colorX = (int)(x + halfFieldWidth);
-            int colorY = (int)(halfFieldWidth - y);
+        public synchronized int red() {
+            return red;
+        }
+
+        public synchronized int green() {
+            return green;
+        }
+
+        public synchronized int blue() {
+            return blue;
+        }
+
+        public synchronized int alpha() {
+            return alpha;
+        }
+
+        public synchronized void updateColor(double x, double y) {
+            int colorX = (int) (x + halfFieldWidth);
+            int colorY = (int) (halfFieldWidth - y);
             double tempRed = 0.0;
             double tempGreen = 0.0;
             double tempBlue = 0.0;
@@ -807,14 +821,63 @@ public class VirtualRobotController {
                 }
             tempRed = Math.floor( tempRed * 256.0 / 81.0 );
             if (tempRed == 256) tempRed = 255;
-            tempGreen = Math.floor( tempGreen * 256.0 / 81.0 );
+            tempGreen = Math.floor(tempGreen * 256.0 / 81.0);
             if (tempGreen == 256) tempGreen = 255;
-            tempBlue = Math.floor( tempBlue * 256.0 / 81.0 );
+            tempBlue = Math.floor(tempBlue * 256.0 / 81.0);
             if (tempBlue == 256) tempBlue = 255;
-            red = (int)tempRed;
-            green = (int)tempGreen;
-            blue = (int)tempBlue;
+            red = (int) tempRed;
+            green = (int) tempGreen;
+            blue = (int) tempBlue;
             alpha = Math.max(red, Math.max(green, blue));
+        }
+
+        public synchronized void setDistance(double distance, DistanceUnit distanceUnit) {
+            distanceCM = distanceUnit.toCm(distance);
+        }
+
+        @Override
+        public double getDistance(DistanceUnit distanceUnit) {
+            return distanceUnit.fromCm(distanceCM);
+        }
+
+        @Override
+        public double getLightDetected() {
+            return 0;
+        }
+
+        @Override
+        public double getRawLightDetected() {
+            return 0;
+        }
+
+        @Override
+        public double getRawLightDetectedMax() {
+            return 1.0;
+        }
+
+        @Override
+        public void enableLed(boolean enable) {
+
+        }
+
+        @Override
+        public String status() {
+            return String.format(Locale.getDefault(), "%s on %s", getDeviceName(), getConnectionInfo());
+        }
+
+        @Override
+        public NormalizedRGBA getNormalizedColors() {
+            return null;
+        }
+
+        @Override
+        public float getGain() {
+            return (float) gain;
+        }
+
+        @Override
+        public void setGain(float newGain) {
+            gain = newGain;
         }
     }
 
