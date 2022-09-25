@@ -74,7 +74,7 @@ public class DcMotorExImpl extends DcMotorImpl implements DcMotorEx{
 
     @Override
     public void setPIDCoefficients(RunMode mode, PIDCoefficients pidCoefficients) {
-        throw new NotImplementedException("setPIDCoefficients method has not been implemented in DcMotorExImpl.");
+        // allows use of code that calls this but doesn't do anything
     }
 
     @Override
@@ -99,7 +99,7 @@ public class DcMotorExImpl extends DcMotorImpl implements DcMotorEx{
 
     @Override
     public PIDFCoefficients getPIDFCoefficients(RunMode mode) {
-        throw new NotImplementedException("getPIDFCoefficients method has not been implemented in DcMotorExImpl.");
+        return new PIDFCoefficients(COEFF_PROPORTIONATE, 0, 0, 0);
     }
 
     @Override
