@@ -13,7 +13,7 @@ public class DcMotorImpl implements DcMotor {
     public final MotorConfigurationType MOTOR_CONFIGURATION_TYPE;
 
     //Proportionate coefficient for RUN_TO_POSITION mode
-    private final double COEFF_PROPORTIONATE = 5.0;
+    protected final double COEFF_PROPORTIONATE = 5.0;
 
     //Target position for RUN_TO_POSITION mode
     private int targetPosition = 0;
