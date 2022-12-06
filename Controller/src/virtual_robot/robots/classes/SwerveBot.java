@@ -1,6 +1,7 @@
 package virtual_robot.robots.classes;
 
 import com.qualcomm.hardware.bosch.BNO055IMUImpl;
+import com.qualcomm.hardware.bosch.BNO055IMUNew;
 import com.qualcomm.robotcore.hardware.*;
 import com.qualcomm.robotcore.hardware.configuration.MotorType;
 import javafx.fxml.FXML;
@@ -30,6 +31,7 @@ public class SwerveBot extends VirtualBot {
     private CRServoImpl[] crServos = null;
     private DeadWheelEncoder[] steerEncoders = null;
     private BNO055IMUImpl imu = null;
+    private BNO055IMUNew imuNew = null;
     private VirtualRobotController.ColorSensorImpl colorSensor = null;
     private ServoImpl servo = null;
     private VirtualRobotController.DistanceSensorImpl[] distanceSensors = null;
@@ -86,8 +88,8 @@ public class SwerveBot extends VirtualBot {
                 hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "back_distance"),
                 hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "right_distance")
         };
-        //gyro = (VirtualRobotController.GyroSensorImpl)hardwareMap.gyroSensor.get("gyro_sensor");
         imu = hardwareMap.get(BNO055IMUImpl.class, "imu");
+        imuNew = hardwareMap.get(BNO055IMUNew.class, "imu");
         colorSensor = (VirtualRobotController.ColorSensorImpl)hardwareMap.colorSensor.get("color_sensor");
 
         servo = (ServoImpl)hardwareMap.servo.get("back_servo");
@@ -119,8 +121,8 @@ public class SwerveBot extends VirtualBot {
         for (String name: encoderNames) hardwareMap.put(name, new DeadWheelEncoder(MOTOR_TYPE));
         String[] distNames = new String[]{"front_distance", "left_distance", "back_distance", "right_distance"};
         for (String name: distNames) hardwareMap.put(name, controller.new DistanceSensorImpl());
-        //hardwareMap.put("gyro_sensor", controller.new GyroSensorImpl());
         hardwareMap.put("imu", new BNO055IMUImpl(this, 10));
+        hardwareMap.put("imu", new BNO055IMUNew(this, 10));
         hardwareMap.put("color_sensor", controller.new ColorSensorImpl());
         hardwareMap.put("back_servo", new ServoImpl());
     }
@@ -173,6 +175,7 @@ public class SwerveBot extends VirtualBot {
         chassisBody.applyTorque(totalTorque);
 
         imu.updateHeadingRadians(headingRadians);
+        imuNew.updateHeadingRadians(headingRadians);
 
         colorSensor.updateColor(x, y);
 

@@ -1,6 +1,7 @@
 package virtual_robot.robots.classes;
 
 import com.qualcomm.hardware.bosch.BNO055IMUImpl;
+import com.qualcomm.hardware.bosch.BNO055IMUNew;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorExImpl;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -31,6 +32,7 @@ public class SixWheelPhysicsBase extends VirtualBot {
     private DcMotorExImpl rightMotorFront = null;
     private DcMotorExImpl rightMotorBack = null;
     private BNO055IMUImpl imu = null;
+    private BNO055IMUNew imuNew = null;
     private VirtualRobotController.ColorSensorImpl colorSensor = null;
     private VirtualRobotController.DistanceSensorImpl[] distanceSensors = null;
 
@@ -58,6 +60,7 @@ public class SixWheelPhysicsBase extends VirtualBot {
                 hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "right_distance")
         };
         imu = hardwareMap.get(BNO055IMUImpl.class, "imu");
+        imuNew = hardwareMap.get(BNO055IMUNew.class, "imu");
         colorSensor = (VirtualRobotController.ColorSensorImpl) hardwareMap.colorSensor.get("color_sensor");
         wheelCircumference = Math.PI * botWidth / 4.5;
         interWheelDistance = botWidth * 8.0 / 9.0;
@@ -77,6 +80,7 @@ public class SixWheelPhysicsBase extends VirtualBot {
         String[] distNames = new String[]{"front_distance", "left_distance", "back_distance", "right_distance"};
         for (String name : distNames) hardwareMap.put(name, controller.new DistanceSensorImpl());
         hardwareMap.put("imu", new BNO055IMUImpl(this, 10));
+        hardwareMap.put("imu", new BNO055IMUNew(this, 10));
         hardwareMap.put("color_sensor", controller.new ColorSensorImpl());
         hardwareMap.put("back_servo", new ServoImpl());
     }
@@ -194,6 +198,7 @@ public class SixWheelPhysicsBase extends VirtualBot {
          * Update sensors.
          */
         imu.updateHeadingRadians(headingRadians);
+        imuNew.updateHeadingRadians(headingRadians);
         colorSensor.updateColor(x, y);
         final double piOver2 = Math.PI / 2.0;
         for (int i = 0; i < 4; i++) {

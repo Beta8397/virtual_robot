@@ -1,28 +1,26 @@
 package com.qualcomm.hardware.bosch;
 
+import com.qualcomm.robotcore.hardware.IMU;
+import org.firstinspires.ftc.robotcore.external.navigation.*;
 import virtual_robot.controller.VirtualBot;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
-/**
- * Implementation of the BNO055IMU interface
- */
-public class BNO055IMUImpl implements BNO055IMU {
+public class BNO055IMUNew implements IMU {
+
     private VirtualBot bot = null;
-    private Parameters parameters = null;
+    private IMU.Parameters parameters = null;
     private double initialHeadingRadians = 0;
     private double headingRadians = 0;
+    private double angularVelocityRadiansPerSec = 0;
     private boolean initialized = false;
 
     private long latencyNanos = 0;
     private long prevNanos = System.nanoTime();
 
-    public BNO055IMUImpl(VirtualBot bot){
+    public BNO055IMUNew(VirtualBot bot){
         this.bot = bot;
     }
 
-    public BNO055IMUImpl(VirtualBot bot, int latencyMillis){
+    public BNO055IMUNew(VirtualBot bot, int latencyMillis){
         this.bot = bot;
         latencyNanos = latencyMillis * 1000000;
     }
@@ -32,37 +30,25 @@ public class BNO055IMUImpl implements BNO055IMU {
      * @param parameters Parameters object
      * @return true to indicate initialization was successful
      */
-    public synchronized boolean initialize(Parameters parameters){
+    public synchronized boolean initialize(IMU.Parameters parameters){
         initialized = true;
         this.parameters = parameters;
         double tempHeadingRadians = bot.getHeadingRadians();
         headingRadians = tempHeadingRadians;
         initialHeadingRadians = tempHeadingRadians;
+        prevNanos = System.nanoTime();
         return true;
     }
 
-    public synchronized Parameters getParameters() { return parameters; }
+    public synchronized IMU.Parameters getParameters() { return parameters; }
 
     /**
      * Close the BNO055IMU
      */
     public synchronized void close(){
-        initialized = false;
-        headingRadians = 0;
-        initialHeadingRadians = 0;
+        angularVelocityRadiansPerSec = 0;
     }
 
-    /**
-     * Get the angular orientation (as an Orientation object), using the AxesReference, AxesOrder, and AngleUnit
-     * specified by the imu's Parameters object
-     * @return angular orientation
-     */
-    public synchronized Orientation getAngularOrientation() {
-        org.firstinspires.ftc.robotcore.external.navigation.AngleUnit angleUnit = parameters.angleUnit == AngleUnit.DEGREES ?
-                org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES :
-                org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.RADIANS;
-        return getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, angleUnit);
-    }
 
     /**
      * Get the angular orientation (as an Orientation object), using the AxesReference, AxesOrder, and AngleUnit
@@ -72,7 +58,7 @@ public class BNO055IMUImpl implements BNO055IMU {
      * @param angleUnit angle unit
      * @return angular orientation
      */
-    public synchronized Orientation getAngularOrientation(AxesReference reference, AxesOrder order, org.firstinspires.ftc.robotcore.external.navigation.AngleUnit angleUnit) {
+    public synchronized Orientation getRobotOrientation(AxesReference reference, AxesOrder order, AngleUnit angleUnit) {
         if (!initialized) return null;
 
         double heading = headingRadians - initialHeadingRadians;
@@ -123,15 +109,54 @@ public class BNO055IMUImpl implements BNO055IMU {
 
     }
 
+    public synchronized YawPitchRollAngles getRobotYawPitchRollAngles(){
+        double heading = headingRadians - initialHeadingRadians;
+        if (heading > Math.PI) heading -= 2.0 * Math.PI;
+        else if (heading < -Math.PI) heading += 2.0 * Math.PI;
+        return new YawPitchRollAngles(AngleUnit.RADIANS, heading, 0, 0, System.nanoTime());
+    }
+
+    public synchronized Quaternion getRobotOrientationAsQuaternion(){
+        double heading = headingRadians - initialHeadingRadians;
+        if (heading > Math.PI) heading -= 2.0 * Math.PI;
+        else if (heading < -Math.PI) heading += 2.0 * Math.PI;
+        return new Quaternion((float)Math.cos(heading/2.0), 0, 0, (float)Math.sin(heading/2.0), System.nanoTime());
+    }
+
+    public synchronized AngularVelocity getRobotAngularVelocity(AngleUnit angleUnit){
+        float velocity = angleUnit == AngleUnit.RADIANS? (float)angularVelocityRadiansPerSec :
+                (float)Math.toDegrees(angularVelocityRadiansPerSec);
+        return new AngularVelocity(AngleUnit.RADIANS, 0, 0,
+                velocity, System.nanoTime());
+    }
+
+    public synchronized void resetYaw(){
+        double tempHeadingRadians = bot.getHeadingRadians();
+        headingRadians = tempHeadingRadians;
+        initialHeadingRadians = tempHeadingRadians;
+    }
+
     /**
      * For internal use only
      * @param heading
      */
     public synchronized void updateHeadingRadians( double heading ){
-        if (!initialized) return;
+        if (!initialized) {
+            initialized = true;
+            double tempHeadingRadians = bot.getHeadingRadians();
+            headingRadians = tempHeadingRadians;
+            initialHeadingRadians = tempHeadingRadians;
+            prevNanos = System.nanoTime();
+        }
         long nanos = System.nanoTime();
         if (nanos < (prevNanos + latencyNanos)) return;
+        double deltaHeadingRadians = heading - headingRadians;
+        if (deltaHeadingRadians > Math.PI) deltaHeadingRadians -= 2.0 * Math.PI;
+        else if (deltaHeadingRadians < -Math.PI) deltaHeadingRadians += 2.0 * Math.PI;
+        double seconds = (nanos - prevNanos) * 1.0E-9;
+        angularVelocityRadiansPerSec = deltaHeadingRadians / seconds;
         headingRadians = heading;
         prevNanos = nanos;
     }
+
 }
