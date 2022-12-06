@@ -1,6 +1,7 @@
 package virtual_robot.robots.classes;
 
 import com.qualcomm.hardware.bosch.BNO055IMUImpl;
+import com.qualcomm.hardware.bosch.BNO055IMUNew;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorExImpl;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -20,6 +21,7 @@ public class MechanumBase extends VirtualBot {
     private DcMotorExImpl[] motors = null;
     //private VirtualRobotController.GyroSensorImpl gyro = null;
     private BNO055IMUImpl imu = null;
+    private BNO055IMUNew imuNew = null;
     private VirtualRobotController.ColorSensorImpl colorSensor = null;
     private VirtualRobotController.DistanceSensorImpl[] distanceSensors = null;
 
@@ -59,8 +61,8 @@ public class MechanumBase extends VirtualBot {
                 hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "back_distance"),
                 hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "right_distance")
         };
-        //gyro = (VirtualRobotController.GyroSensorImpl)hardwareMap.gyroSensor.get("gyro_sensor");
         imu = hardwareMap.get(BNO055IMUImpl.class, "imu");
+        imuNew = hardwareMap.get(BNO055IMUNew.class, "imu");
         colorSensor = (VirtualRobotController.ColorSensorImpl) hardwareMap.colorSensor.get("color_sensor");
         wheelCircumference = Math.PI * botWidth / 4.5;
         interWheelWidth = botWidth * 8.0 / 9.0;
@@ -84,6 +86,7 @@ public class MechanumBase extends VirtualBot {
         for (String name : distNames) hardwareMap.put(name, controller.new DistanceSensorImpl());
         //hardwareMap.put("gyro_sensor", controller.new GyroSensorImpl());
         hardwareMap.put("imu", new BNO055IMUImpl(this, 10));
+        hardwareMap.put("imu", new BNO055IMUNew(this, 10));
         hardwareMap.put("color_sensor", controller.new ColorSensorImpl());
     }
 
@@ -124,6 +127,7 @@ public class MechanumBase extends VirtualBot {
 
 
         imu.updateHeadingRadians(headingRadians);
+        imuNew.updateHeadingRadians(headingRadians);
 
         colorSensor.updateColor(x, y);
 

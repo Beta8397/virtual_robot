@@ -2,6 +2,7 @@ package virtual_robot.robots.classes;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.BNO055IMUImpl;
+import com.qualcomm.hardware.bosch.BNO055IMUNew;
 import com.qualcomm.robotcore.hardware.*;
 import com.qualcomm.robotcore.hardware.configuration.MotorType;
 import javafx.application.Platform;
@@ -37,6 +38,7 @@ public class ProgrammingBoard extends VirtualBot {
     private MotorType MOTOR_TYPE = MotorType.Neverest40;
     private DcMotorExImpl motor = null;
     private BNO055IMUImpl imu = null;
+    private BNO055IMUNew imuNew = null;
     private PassiveColorSensorImpl colorSensor = null;
     private ServoImpl servo = null;
     private DigitalChannelImpl digitalChannel = null;
@@ -100,6 +102,7 @@ public class ProgrammingBoard extends VirtualBot {
         hardwareMap.setActive(true);
         motor = (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "motor");
         imu = (BNO055IMUImpl) hardwareMap.get(BNO055IMU.class, "imu");
+        imuNew = hardwareMap.get(BNO055IMUNew.class, "imu");
         colorSensor = (PassiveColorSensorImpl)hardwareMap.colorSensor.get("sensor_color_distance");
         servo = (ServoImpl)hardwareMap.servo.get("servo");
         digitalChannel = (DigitalChannelImpl) hardwareMap.get(DigitalChannel.class, "touch_sensor");
@@ -124,6 +127,7 @@ public class ProgrammingBoard extends VirtualBot {
         hardwareMap = new HardwareMap();
         hardwareMap.put("motor", new DcMotorExImpl(MOTOR_TYPE));
         hardwareMap.put("imu", new BNO055IMUImpl(this, 10));
+        hardwareMap.put("imu", new BNO055IMUNew(this, 10));
         hardwareMap.put("sensor_color_distance", new PassiveColorSensorImpl());
         hardwareMap.put("servo", new ServoImpl());
         hardwareMap.put("touch_sensor", new DigitalChannelImpl());
@@ -137,6 +141,7 @@ public class ProgrammingBoard extends VirtualBot {
                 motor.update(millis) * 360.0 / motor.MOTOR_TYPE.TICKS_PER_ROTATION);
         analogInput.update(sldPot.getValue());
         imu.updateHeadingRadians(headingRadians);
+        imuNew.updateHeadingRadians(headingRadians);
         colorSensor.updateColor(red, green, blue);
         digitalChannel.update(!btnTouchPushed);
         distanceSensor.update(sldDist.getValue());

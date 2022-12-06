@@ -1,6 +1,7 @@
 package virtual_robot.robots.classes;
 
 import com.qualcomm.hardware.bosch.BNO055IMUImpl;
+import com.qualcomm.hardware.bosch.BNO055IMUNew;
 import com.qualcomm.robotcore.hardware.*;
 import com.qualcomm.robotcore.hardware.configuration.MotorType;
 import javafx.fxml.FXML;
@@ -26,6 +27,7 @@ public class DiffSwerveBot extends VirtualBot {
     private final MotorType MOTOR_TYPE = MotorType.NeverestOrbital20;
     private DcMotorExImpl[] motors = null;
     private BNO055IMUImpl imu = null;
+    private BNO055IMUNew imuNew = null;
     private VirtualRobotController.ColorSensorImpl colorSensor = null;
     private ServoImpl servo = null;
     private VirtualRobotController.DistanceSensorImpl[] distanceSensors = null;
@@ -71,6 +73,7 @@ public class DiffSwerveBot extends VirtualBot {
                 hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "right_distance")
         };
         imu = hardwareMap.get(BNO055IMUImpl.class, "imu");
+        imuNew = hardwareMap.get(BNO055IMUNew.class, "imu");
         colorSensor = (VirtualRobotController.ColorSensorImpl)hardwareMap.colorSensor.get("color_sensor");
         servo = (ServoImpl)hardwareMap.servo.get("back_servo");
         wheelCircumferenceMeters = Math.PI * botWidth / (4.5 * VirtualField.PIXELS_PER_METER);
@@ -92,6 +95,7 @@ public class DiffSwerveBot extends VirtualBot {
         String[] distNames = new String[]{"front_distance", "left_distance", "back_distance", "right_distance"};
         for (String name: distNames) hardwareMap.put(name, controller.new DistanceSensorImpl());
         hardwareMap.put("imu", new BNO055IMUImpl(this, 10));
+        hardwareMap.put("imu", new BNO055IMUNew(this, 10));
         hardwareMap.put("color_sensor", controller.new ColorSensorImpl());
         hardwareMap.put("back_servo", new ServoImpl());
     }
@@ -155,6 +159,7 @@ public class DiffSwerveBot extends VirtualBot {
         chassisBody.applyTorque(totalTorque);
 
         imu.updateHeadingRadians(headingRadians);
+        imuNew.updateHeadingRadians(headingRadians);
 
         colorSensor.updateColor(x, y);
 

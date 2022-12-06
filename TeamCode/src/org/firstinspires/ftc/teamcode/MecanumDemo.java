@@ -3,10 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
-import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.*;
 import org.firstinspires.ftc.robotcore.external.navigation.*;
 
 /**
@@ -37,16 +34,7 @@ public class MecanumDemo extends LinearOpMode {
         DistanceSensor rightDistance = hardwareMap.get(DistanceSensor.class, "right_distance");
         DistanceSensor backDistance = hardwareMap.get(DistanceSensor.class, "back_distance");
 
-        BNO055IMU imu = hardwareMap.get(BNO055IMU.class, "imu");
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.accelerationIntegrationAlgorithm = null;
-        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-        parameters.calibrationData = null;
-        parameters.calibrationDataFile = "";
-        parameters.loggingEnabled = false;
-        parameters.loggingTag = "Who cares.";
-        imu.initialize(parameters);
+        IMU imu = hardwareMap.get(IMU.class, "imu");
 
         ColorSensor colorSensor = hardwareMap.colorSensor.get("color_sensor");
         telemetry.addData("Press Start When Ready","");
@@ -76,9 +64,10 @@ public class MecanumDemo extends LinearOpMode {
             m3.setPower(p3);
             m4.setPower(p4);
             telemetry.addData("Color","R %d  G %d  B %d", colorSensor.red(), colorSensor.green(), colorSensor.blue());
-            Orientation orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
+//            Orientation orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
+            Orientation orientation = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
             telemetry.addData("Heading", " %.1f", orientation.firstAngle * 180.0 / Math.PI);
-
+            telemetry.addData("Angular Velocity", "%.1f", imu.getRobotAngularVelocity(AngleUnit.DEGREES).zRotationRate);
             telemetry.addData("Front Distance", " %.1f", frontDistance.getDistance(DistanceUnit.CM));
             telemetry.addData("Left Distance", " %.1f", leftDistance.getDistance(DistanceUnit.CM));
             telemetry.addData("Right Distance", " %.1f", rightDistance.getDistance(DistanceUnit.CM));
