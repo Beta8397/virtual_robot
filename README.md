@@ -86,8 +86,10 @@ To use:
 
 LOG OF CHANGES
 
-CHANGES 12/6/2022
-    Added IMU interface, ImuOrientationOnRobot interface, RevHubOrientationOnRobot class, Quaternion class.
+CHANGES 12/7/2022
+    Added IMU interface, ImuOrientationOnRobot interface, RevHubOrientationOnRobot class, Quaternion class. Added
+    Square Omniwheel Robot configuration (omniwheels on the sides rather than corners)--This is disabled by default,
+    but can be re-enabled by un-commenting its Botconfig annotation.
 
 CHANGES 8/26/2022 
     Rumble and LED capability added to the Virtual Gamepad, thanks to Alan Smith, FTC 16072. Also, fixed the invert
