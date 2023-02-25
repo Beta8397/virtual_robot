@@ -1,6 +1,5 @@
 package android.graphics;
 
-import com.sun.javafx.util.Utils;
 
 /**
  * Provides an RGBToHSV method with signature identical to that found in the android.graphics.Color class
@@ -15,22 +14,22 @@ public class Color {
      * @param hsv   Output array for return of hue (0..360), sat (0..1), and value (0..1)
      */
     public static void RGBToHSV(int red, int green, int blue, float[] hsv){
-        double[] temp = Utils.RGBtoHSB(red, green, blue);
-        hsv[0] = (float)temp[0];
-        hsv[1] = (float)temp[1];
-        hsv[2] = (float)temp[2];
+        javafx.scene.paint.Color color = javafx.scene.paint.Color.rgb(red, green, blue);
+        hsv[0] = (float)color.getHue();
+        hsv[1] = (float)color.getSaturation();
+        hsv[2] = (float)color.getBrightness();
     }
 
     public static int HSVToColor(float[] hsv){
-        double[] rgb = Utils.HSBtoRGB(hsv[0], hsv[1], hsv[2]);
-        int red = (int)Math.floor(256.0*rgb[0]);
+        javafx.scene.paint.Color color = javafx.scene.paint.Color.hsb(hsv[0], hsv[1], hsv[2]);
+        int red = (int)Math.floor(256.0*color.getRed());
         if (red == 256) red = 255;
-        int green = (int)Math.floor(256.0*rgb[1]);
+        int green = (int)Math.floor(256.0*color.getGreen());
         if (green == 256) green = 255;
-        int blue = (int)Math.floor(256.0*rgb[2]);
+        int blue = (int)Math.floor(256.0*color.getBlue());
         if (blue == 256) blue = 255;
-        int color = (red << 16 ) | (green << 8) | blue;
-        return color;
+        int colorInt = (red << 16 ) | (green << 8) | blue;
+        return colorInt;
     }
 
     public static int HSVToColor(int alpha, float[] hsv){
