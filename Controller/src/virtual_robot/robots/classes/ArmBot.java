@@ -6,12 +6,14 @@ import com.qualcomm.robotcore.hardware.ServoImpl;
 import com.qualcomm.robotcore.hardware.configuration.MotorType;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import org.dyn4j.collision.CategoryFilter;
 import org.dyn4j.dynamics.Body;
+import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import virtual_robot.controller.BotConfig;
 import virtual_robot.controller.Filters;
@@ -19,6 +21,7 @@ import virtual_robot.controller.VirtualField;
 import virtual_robot.dyn4j.Dyn4jUtil;
 import virtual_robot.dyn4j.FixtureData;
 import virtual_robot.dyn4j.Slide;
+import virtual_robot.game_elements.classes.Freight;
 import virtual_robot.game_elements.classes.WobbleGoal;
 
 import java.util.HashMap;
@@ -246,6 +249,55 @@ public class ArmBot extends MecanumPhysicsBase {
             rightFingerTranslateTransform.setX(-fingerPos);
         }
 
+
+    }
+
+    /**
+     * The superclass positionWithMouseClick method only positions the chassis. We need to position the
+     * arm and fingers as well, and set their velocities (linear, angular), accumulated forces, and
+     * accumulated torques to zero.
+     *
+     * @param arg
+     */
+    @Override
+    public synchronized void positionWithMouseClick(MouseEvent arg){
+
+        /*
+         * Get the transforms of the arm and fingers (and any loaded Freight item) relative to the chassis
+         */
+        Transform tArmChassis = Dyn4jUtil.multiplyTransforms(Dyn4jUtil.getInverseTransform(chassisBody.getTransform()),
+                armBody.getTransform());
+        Transform tLeftFingerChassis = Dyn4jUtil.multiplyTransforms(Dyn4jUtil.getInverseTransform(chassisBody.getTransform()),
+                leftFingerBody.getTransform());
+        Transform tRightFingerChassis = Dyn4jUtil.multiplyTransforms(Dyn4jUtil.getInverseTransform(chassisBody.getTransform()),
+                rightFingerBody.getTransform());
+
+        /*
+         * the super method repositions the chassis based on mouse click
+         */
+        super.positionWithMouseClick(arg);
+
+        /*
+         * Determine the new transforms of arm and fingers relative to the field
+         */
+        Transform tArm = Dyn4jUtil.multiplyTransforms(chassisBody.getTransform(), tArmChassis);
+        Transform tLeftFinger = Dyn4jUtil.multiplyTransforms(chassisBody.getTransform(), tLeftFingerChassis);
+        Transform tRightFinger = Dyn4jUtil.multiplyTransforms(chassisBody.getTransform(), tRightFingerChassis);
+        armBody.setTransform(tArm);
+        armBody.setLinearVelocity(0,0);
+        armBody.setAngularVelocity(0);
+        armBody.clearAccumulatedForce();
+        armBody.clearAccumulatedTorque();
+        leftFingerBody.setTransform(tLeftFinger);
+        leftFingerBody.setLinearVelocity(0,0);
+        leftFingerBody.setAngularVelocity(0);
+        leftFingerBody.clearAccumulatedTorque();
+        leftFingerBody.clearAccumulatedForce();;
+        rightFingerBody.setTransform(tRightFinger);
+        rightFingerBody.setLinearVelocity(0,0);
+        rightFingerBody.setAngularVelocity(0);
+        rightFingerBody.clearAccumulatedForce();
+        rightFingerBody.clearAccumulatedTorque();
 
     }
 
