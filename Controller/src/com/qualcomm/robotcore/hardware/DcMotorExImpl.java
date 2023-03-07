@@ -78,18 +78,15 @@ public class DcMotorExImpl extends DcMotorImpl implements DcMotorEx{
     }
 
     @Override
-    public void setPIDFCoefficients(RunMode mode, PIDFCoefficients pidfCoefficients) throws UnsupportedOperationException {
-        throw new NotImplementedException("setPIDFCoefficients method has not been implemented in DcMotorExImpl.");
+    public void setPIDFCoefficients(RunMode mode, PIDFCoefficients pidfCoefficients)  {
     }
 
     @Override
     public void setVelocityPIDFCoefficients(double p, double i, double d, double f) {
-        throw new NotImplementedException("setVelocityPIDFCoefficients method has not been implemented in DcMotorExImpl.");
     }
 
     @Override
     public void setPositionPIDFCoefficients(double p) {
-        throw new NotImplementedException("setPositionPIDFCoefficients method has not been implemented in DcMotorExImpl.");
     }
 
     @Override
@@ -104,12 +101,11 @@ public class DcMotorExImpl extends DcMotorImpl implements DcMotorEx{
 
     @Override
     public void setTargetPositionTolerance(int tolerance) {
-        throw new NotImplementedException("setTargetPositionTolerance method has not been implemented in DcMotorExImpl.");
     }
 
     @Override
     public int getTargetPositionTolerance() {
-        throw new NotImplementedException("getTargetPositionTolerance method has not been implemented in DcMotorExImpl.");
+        return (int)(MOTOR_TYPE.TICKS_PER_ROTATION * MAX_ROT_OFFSET);
     }
 
     @Override

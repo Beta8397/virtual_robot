@@ -32,13 +32,14 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+
 /**
- *  Denotes that a parameter, field or method return value can never be null.
+ *  * Denotes that a parameter, field or method return value can be null.
  *
  * This is a marker annotation and it has no specific attributes.
  */
 @Documented
 @Retention(CLASS)
 @Target({METHOD, PARAMETER, FIELD, LOCAL_VARIABLE, ANNOTATION_TYPE, PACKAGE})
-public @interface NonNull {
+public @interface Nullable {
 }

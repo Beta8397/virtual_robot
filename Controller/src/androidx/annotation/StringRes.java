@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 The Android Open Source Project
+ * Copyright (C) 2014 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/*
- * Modified by Team Beta for use in the Virtual Robot simulator.
- */
-
 package androidx.annotation;
 
-import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.LOCAL_VARIABLE;
 import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.PACKAGE;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.CLASS;
 
@@ -33,12 +26,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- *  Denotes that a parameter, field or method return value can never be null.
- *
- * This is a marker annotation and it has no specific attributes.
+ * Denotes that an integer parameter, field or method return value is expected
+ * to be a String resource reference (e.g. {@code android.R.string.ok}).
  */
 @Documented
 @Retention(CLASS)
-@Target({METHOD, PARAMETER, FIELD, LOCAL_VARIABLE, ANNOTATION_TYPE, PACKAGE})
-public @interface NonNull {
+@Target({METHOD, PARAMETER, FIELD, LOCAL_VARIABLE})
+public @interface StringRes {
 }
