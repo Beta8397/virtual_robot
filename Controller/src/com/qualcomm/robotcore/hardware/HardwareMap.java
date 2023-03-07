@@ -69,6 +69,11 @@ public class HardwareMap implements Iterable<HardwareDevice>{
     public final DeviceMapping<CRServo> crservo = new DeviceMapping(CRServo.class);
 
     /**
+     *  Map of all VoltageSensor devices in this HardwareMap.
+     */
+    public final DeviceMapping<VoltageSensor> voltageSensor = new DeviceMapping(VoltageSensor.class);
+
+    /**
      * Map of all hardware devices in this HardwareMap
      */
     private Map<String, List<HardwareDevice>> allDevicesMap = new HashMap<>(15);
@@ -89,6 +94,10 @@ public class HardwareMap implements Iterable<HardwareDevice>{
     private boolean active = false;
     public void setActive(boolean isActive){ active = isActive; }
 
+    public HardwareMap(){
+        this.put("voltage_sensor", new VoltageSensorImpl());
+    }
+
     /**
      * Add a device to the HardwareMap
      * @param deviceName name of device
@@ -108,6 +117,7 @@ public class HardwareMap implements Iterable<HardwareDevice>{
         if (device instanceof GyroSensor) gyroSensor.put(deviceName, (GyroSensor)device);
         if (device instanceof Servo) servo.put(deviceName, (Servo)device);
         if (device instanceof CRServo) crservo.put(deviceName, (CRServo)device);
+        if (device instanceof VoltageSensor) voltageSensor.put(deviceName, (VoltageSensor)device);
     }
 
 
