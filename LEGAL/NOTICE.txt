@@ -24,6 +24,8 @@ Virtual Robot, Copyright 2019 Team Beta
 
    Acmerobotics Roadrunner core library (Copyright 2018, Acmerobotics), Licensed under MIT License
 
+   Acmerobotics FtcDashboard library (Copyright 2018-2022, Acmerobotics), Licensed under MIT License
+
    Apache Commons Math 3 Library (included in the RoadRunner Core Library), Licensed under Apache License, Version 2.0
 
    OpenFTC EasyOpenCV Library, v1.5.0: Individual licenses for each class (see lib/EasyOpenCV_Sources)
