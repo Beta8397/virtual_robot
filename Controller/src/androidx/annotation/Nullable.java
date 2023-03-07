@@ -35,7 +35,7 @@ import java.lang.annotation.Target;
 
 /**
  *  * Denotes that a parameter, field or method return value can be null.
- * <p>
+ *
  * This is a marker annotation and it has no specific attributes.
  */
 @Documented

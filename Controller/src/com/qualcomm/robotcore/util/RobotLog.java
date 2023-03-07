@@ -28,6 +28,10 @@
  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/*
+ * Modified by Team Beta for use in the virtual_robot simulator.
+ */
+
 package com.qualcomm.robotcore.util;
 
 import android.util.Log;
@@ -226,14 +230,14 @@ public class RobotLog {
     }
 
     public static void internalLog(int priority, String tag, String message) {
-        if (msTimeOffset == 0) {
-            System.out.println(priority + " " + tag + message);
-        }
+//        if (msTimeOffset == 0) {
+//            System.out.println(priority + " " + tag + message);
+//        }
     }
 
     public static void internalLog(int priority, String tag, Throwable throwable, String message) {
-        internalLog(priority, tag, message);
-        logStackTrace(tag, throwable);
+//        internalLog(priority, tag, message);
+//        logStackTrace(tag, throwable);
     }
 
     public static void logExceptionHeader(Exception e, String format, Object... args) {
