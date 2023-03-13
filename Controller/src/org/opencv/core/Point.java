@@ -1,6 +1,6 @@
 package org.opencv.core;
 
-import org.w3c.dom.css.Rect;
+//import org.w3c.dom.css.Rect;
 
 //javadoc:Point_
 public class Point {
