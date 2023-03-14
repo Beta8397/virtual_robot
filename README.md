@@ -4,9 +4,8 @@ New:  Updated to reflect changes in FTC SDK 8.1, with addition of the IMU interf
     RevHubOrientationOnRobot class, and Quaternion class. All robot configurations have an imu which can be used
     either with the old BNO055IMU interface, or with the new IMU interface.
 
-Field now changed to Power Play.
-
-Coming soon: Power Play game elements.
+Want to use virtual_robot to try out AcmeRobotics RoadRunner? Refer to the 
+[Road-Runner-Quickstart-Instructions](Road-Runner-Quickstart-Instructions.pdf) pdf.
 
 Includes Programming Board configuration to serve as a companion to the book "Learn Java For FTC", by Alan Smith. The
 PDF can be [downloaded for free](https://github.com/alan412/LearnJavaForFTC) or you can purchase the paperback on
