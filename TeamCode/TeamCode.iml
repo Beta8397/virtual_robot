@@ -9,22 +9,22 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="Controller" />
     <orderEntry type="module-library">
-          <library>
-            <CLASSES>
-              <root url="jar://$MODULE_DIR$/../lib/road-runner-core-0.5.4.jar!/" />
-            </CLASSES>
-            <JAVADOC />
-            <SOURCES />
-          </library>
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../lib/EasyOpenCV_v1.5.0_OBJ_bundle.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
     </orderEntry>
     <orderEntry type="module-library">
-          <library>
-            <CLASSES>
-              <root url="jar://$MODULE_DIR$/../lib/EasyOpenCV_v1.5.0_OBJ_bundle.jar!/" />
-            </CLASSES>
-            <JAVADOC />
-            <SOURCES />
-          </library>
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../lib/road-runner-core-0.5.6.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
     </orderEntry>
   </component>
 </module>
