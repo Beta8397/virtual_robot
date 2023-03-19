@@ -75,6 +75,7 @@ public class VirtualRobotController {
     @FXML private BorderPane borderPane;
     @FXML private CheckBox cbxShowPath;
     @FXML private CheckBox checkBoxAutoHuman;
+    @FXML private Label lblRunTime;
 
     // dyn4j world
     World<Body> world = new World<>();
@@ -558,8 +559,10 @@ public class VirtualRobotController {
     }
 
     private void runOpModeAndCleanUp(){
+        Platform.runLater(()->lblRunTime.setText("0.00"));
 
         try {
+
             //Activate the hardware map, so that calls to "get" on the hardware map itself, and on dcMotor, etc,
             //will return hardware objects
             bot.getHardwareMap().setActive(true);
@@ -590,14 +593,20 @@ public class VirtualRobotController {
             //will allow waitForStart() to finish executing.
             if (!Thread.currentThread().isInterrupted()) opMode.start();
 
+            long opModeStartNanos = System.nanoTime();
+
             while (opModeStarted && !Thread.currentThread().isInterrupted()) {
-                //For regular opMode, run user-defined loop() method. For Linear opMode, loop() checks whether
-                //runOpMode has exited; if so, it interrupts the opModeThread.
+                // Update the run time display
+                final long opModeRunNanos = System.nanoTime() - opModeStartNanos;
+                Platform.runLater(()->lblRunTime.setText(String.format("%.2f", opModeRunNanos/1000000000.0)));
 
                 // to keep the guarantee that this is updated
                 opMode.time = opMode.getRuntime();
 
+                //For regular opMode, run user-defined loop() method. For Linear opMode, loop() checks whether
+                //runOpMode has exited; if so, it interrupts the opModeThread.
                 opMode.loop();
+
                 //For regular op mode only, update telemetry after each execution of loop()
                 //For linear op mode, do-nothing
                 opMode.internalPostLoop();
