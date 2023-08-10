@@ -278,7 +278,7 @@ public abstract class KiwiPhysicsBase extends VirtualBot {
         for (int i = 0; i < 4; i++) {
             double sensorHeading = AngleUtils.normalizeRadians(headingRadians + i * piOver2);
             distanceSensors[i].updateDistance(x - baseRadius * VirtualField.PIXELS_PER_INCH * Math.sin(sensorHeading),
-                    y + halfBotWidth * VirtualField.PIXELS_PER_INCH * Math.cos(sensorHeading), sensorHeading);
+                    y + baseRadius * VirtualField.PIXELS_PER_INCH * Math.cos(sensorHeading), sensorHeading);
         }
 
     }

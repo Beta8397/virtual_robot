@@ -10,10 +10,10 @@ import virtual_robot.controller.BotConfig;
 import virtual_robot.util.AngleUtils;
 
 /**
- * For internal use only. Represents a robot with four mecanum wheels, color sensor, four distance sensors,
- * a BNO055IMU, a Servo-controlled arm on the back, and three dead-wheel encoder pods
+ * For internal use only. Represents a Kiwi drive robot with three omni wheels arranged around a circle, color sensor,
+ * four distance sensors, a BNO055IMU, a Servo-controlled arm on the back, and three dead-wheel encoder pods
  *
- * MecanumBot is the controller class for the "mecanum_bot.fxml" markup file.
+ * KiwiBot is the controller class for the "kiwi_bot.fxml" markup file.
  *
  */
 @BotConfig(name = "Kiwi Bot", filename = "kiwi_bot")

@@ -1,8 +1,6 @@
 # A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
 
-New:  Updated to reflect changes in FTC SDK 8.1, with addition of the IMU interface, ImuOrientationOnRobot interface,
-    RevHubOrientationOnRobot class, and Quaternion class. All robot configurations have an imu which can be used
-    either with the old BNO055IMU interface, or with the new IMU interface.
+New:  A Kiwi-Drive robot configuration with three omni wheels arranged around a 16 inch diameter circular chassis.
 
 Want to use virtual_robot to try out AcmeRobotics RoadRunner? Refer to the 
 [Road-Runner-Quickstart-Instructions](Road-Runner-Quickstart-Instructions.pdf) pdf.
