@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.Group?>
+<?import javafx.scene.paint.RadialGradient?>
+<?import javafx.scene.paint.Stop?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.shape.Rectangle?>
+
+<Group xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="virtual_robot.robots.classes.KiwiBot">
+    <children>
+        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#ffff0000" height="75.0" stroke="TRANSPARENT" strokeType="INSIDE" width="75.0" />
+      <Circle centerX="37.5" centerY="37.5" fill="YELLOW" radius="33.333" stroke="BLACK" strokeType="INSIDE" />
+        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="20.0" rotate="-30.0" stroke="BLACK" strokeType="INSIDE" width="10.0" x="7.963" y="41.1665" />
+        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="10.0" layoutX="27.5" layoutY="4.167" stroke="BLACK" strokeType="INSIDE" width="20.0" />
+      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="BLUE" height="20.0" rotate="30.0" stroke="BLACK" strokeType="INSIDE" width="10.0" x="57.0374" y="41.1665" />
+        <Rectangle arcHeight="5.0" fill="LIME" height="10.0" stroke="BLACK" strokeType="INSIDE" width="10.0" x="32.5" y="5.0" />
+        <Circle centerX="37.0" centerY="37.0" radius="10.0" strokeType="INSIDE" strokeWidth="0.0">
+            <fill>
+                <RadialGradient centerX="0.4722222222222222" centerY="0.4666666666666667" radius="0.6046511627906976">
+                    <stops>
+                        <Stop color="#3900ff" />
+                        <Stop color="#ff00b6" offset="0.15649563534383953" />
+                        <Stop color="#ff1100" offset="0.32195757791207485" />
+                        <Stop color="#ffee00" offset="0.4880910060433701" />
+                        <Stop color="#18ff00" offset="0.675751471343366" />
+                        <Stop color="#00fffc" offset="0.8281391950073069" />
+                        <Stop color="WHITE" offset="1.0" />
+                    </stops>
+                </RadialGradient>
+            </fill></Circle>
+    </children>
+</Group>
