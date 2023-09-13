@@ -954,7 +954,7 @@ public class VirtualRobotController {
         public final HardwareMap hardwareMap;
         public final Gamepad gamepad1;
         public final Gamepad gamepad2;
-        public final Telemetry telemetry;
+        public Telemetry telemetry;
 
         public OpModeBase() {
             hardwareMap = VirtualRobotController.this.hardwareMap;
