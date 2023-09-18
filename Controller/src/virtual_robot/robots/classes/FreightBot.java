@@ -121,7 +121,7 @@ public class FreightBot extends MecanumPhysicsBase implements ControlsElements {
 
     private CategoryFilter ARM_FILTER = new CategoryFilter(Filters.ARM,
             Filters.MASK_ALL & ~Barrier.BARRIER_CATEGORY & ~ShippingHub.HUB_CATEGORY
-                    & ~Filters.CHASSIS & ~Filters.ARM);
+                    & ~Filters.CHASSIS & ~Filters.ARM & ~Backdrop.BACKDROP_CATEGORY);
 
     private CategoryFilter ROTOR_FILTER = new CategoryFilter(Carousel.CAROUSEL_SPINNER_CATEGORY, Carousel.CAROUSEL_CATEGORY);
 
