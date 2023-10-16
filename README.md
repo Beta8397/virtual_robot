@@ -1,6 +1,9 @@
 # A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
 
-New:  A Kiwi-Drive robot configuration with three omni wheels arranged around a 16 inch diameter circular chassis.
+New:  CenterStage field image added. Physics set up for backdrops and truss legs so that they serve as barriers to 
+robot motion.
+
+Also: A Kiwi-Drive robot configuration with three omni wheels arranged around a 16 inch diameter circular chassis.
 
 Want to use virtual_robot to try out AcmeRobotics RoadRunner? Refer to the 
 [Road-Runner-Quickstart-Instructions](Road-Runner-Quickstart-Instructions.pdf) pdf.
