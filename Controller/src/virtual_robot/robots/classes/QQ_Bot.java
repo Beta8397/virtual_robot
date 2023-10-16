@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.hardware.DigitalChannelImpl;
 import com.qualcomm.robotcore.hardware.ServoImpl;
 import com.qualcomm.robotcore.hardware.configuration.MotorType;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+
 import virtual_robot.controller.BotConfig;
 import virtual_robot.util.AngleUtils;
 
@@ -60,6 +62,7 @@ public class QQ_Bot extends MecanumPhysicsBase {
 
     protected void createHardwareMap() {
         super.createHardwareMap();
+        hardwareMap.put("Webcam", new WebcamName());
         hardwareMap.put("claw", new ServoImpl());
         hardwareMap.put("horizontal", new ServoImpl());
 

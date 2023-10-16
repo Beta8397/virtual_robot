@@ -20,7 +20,7 @@ public class Mat {
 
     // javadoc: Mat::Mat()
     public Mat() {
-        nativeObj = n_Mat();
+        nativeObj = 0; // Changed from n_Mat();
     }
 
     //
