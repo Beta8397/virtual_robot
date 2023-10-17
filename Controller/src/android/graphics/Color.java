@@ -5,6 +5,8 @@ package android.graphics;
  * Provides an RGBToHSV method with signature identical to that found in the android.graphics.Color class
  */
 public class Color {
+    public static int BLUE = argb(0,0,0,255);
+    public static int GREEN = argb(0, 0, 255, 0);
 
     /**
      * Given inputs of red, green, and blue channels, writes the hue, sat, and value to the hsv output array
