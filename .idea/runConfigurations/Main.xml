@@ -2,7 +2,6 @@
   <configuration default="false" name="Main" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="virtual_robot.controller.VirtualRobotApplication" />
     <module name="Controller" />
-    <option name="VM_PARAMETERS" value="--module-path $PROJECT_DIR$/../javafx-sdk-20.0.2/lib --add-modules javafx.controls,javafx.fxml" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

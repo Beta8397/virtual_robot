@@ -21,7 +21,7 @@
          </children></Pane>
    </center>
    <right>
-      <VBox alignment="CENTER" BorderPane.alignment="TOP_CENTER">
+      <VBox fx:id="vbxRight" alignment="CENTER" BorderPane.alignment="TOP_CENTER">
          <children>
             <Label text="Configurations">
                <VBox.margin>
@@ -50,7 +50,7 @@
             <Slider fx:id="sldSystematicMotorError" blockIncrement="0.02" majorTickUnit="0.02" max="0.1" minorTickCount="0" />
             <Label text="Motor Inertia" />
             <Slider fx:id="sldMotorInertia" blockIncrement="0.1" majorTickUnit="0.1" max="2.0" minorTickCount="0" />
-            <HBox prefWidth="200.0">
+            <HBox fx:id="hbxGamePads" prefWidth="200.0">
                <children>
                   <CheckBox fx:id="checkBoxGamePad1" mnemonicParsing="false" text="GamePad1">
                      <HBox.margin>

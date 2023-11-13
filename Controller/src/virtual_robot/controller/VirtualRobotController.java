@@ -19,6 +19,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.shape.Polyline;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Callback;
@@ -76,6 +77,8 @@ public class VirtualRobotController {
     @FXML private CheckBox cbxShowPath;
     @FXML private CheckBox checkBoxAutoHuman;
     @FXML private Label lblRunTime;
+    @FXML private HBox hbxGamePads;
+    @FXML private VBox vbxRight;
 
     // dyn4j world
     World<Body> world = new World<>();
@@ -181,8 +184,9 @@ public class VirtualRobotController {
         sldMotorInertia.valueProperty().addListener(sliderChangeListener);
 
         if (Config.USE_VIRTUAL_GAMEPAD){
-            checkBoxGamePad1.setVisible(false);
-            checkBoxGamePad2.setVisible(false);
+            vbxRight.getChildren().remove(hbxGamePads);
+//            checkBoxGamePad1.setVisible(false);
+//            checkBoxGamePad2.setVisible(false);
             FXMLLoader loader = new FXMLLoader(getClass().getResource("virtual_gamepad.fxml"));
             try{
                 HBox hbox = (HBox)loader.load();
