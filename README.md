@@ -63,8 +63,8 @@ in the virtual_robot.robots.classes package, and un-commenting its @BotConfig an
 
 To use:
 
-  1. Make sure you have the Java 8 JDK installed on your PC. Also, install the free Community Edition of JetBrains
-     IntelliJ IDEA.
+  1. Make sure you have the Java JDK installed on your PC. Also, install the free Community Edition of JetBrains
+     IntelliJ IDEA. (See the Detailed Installation Instructions PDF)
   2. Download the virtual_robot .zip, and extract contents. Open the project in IntelliJ. You'll see three modules in
      the project (Controller, TeamCode, and virtual_robot) -- the only module you'll need to touch is TeamCode. It
      contains the org.firstinspires.ftc.teamcode package.

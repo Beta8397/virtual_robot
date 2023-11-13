@@ -72,7 +72,6 @@ public class TwoWheelPhysicsBase extends VirtualBot {
         hardwareMap.put("imu", new BNO055IMUImpl(this, 10));
         hardwareMap.put("imu", new BNO055IMUNew(this, 10));
         hardwareMap.put("color_sensor", controller.new ColorSensorImpl());
-        hardwareMap.put("back_servo", new ServoImpl());
     }
 
     public synchronized void updateStateAndSensors(double millis){
