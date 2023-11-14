@@ -7,41 +7,33 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DeadWheelEncoder;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
-
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-
+import org.firstinspires.ftc.robotcore.external.navigation.*;
 import virtual_robot.util.Vector2D;
 
 /**
  * Example OpMode. Demonstrates use of gyro, color sensor, encoders, and telemetry.
- *
  */
 @Disabled
 @TeleOp(name = "XDriveOdom demo", group = "XBot")
 public class XDriveOdomDemo extends LinearOpMode {
-    private double wheelCircumference;
-    private double wheelBaseRadius;
-
     private final double ENCODER_WHEEL_DIAMETER = 2.0;
     //Distances of right and left encoder wheels from robot centerline (i.e., the robot-X coordinates of the wheels)
     private final double Y_ENCODER_X = 6.0;
     //Distance of X-Encoder wheel from robot-X axis (i.e., the robot-Y coordinate of the wheel)
     private final double X_ENCODER_Y = -6.0;
-    private double yEncoderX;
-    private double xEncoderY;
-    private double encoderWheelRadius;
     private final double ENCODER_TICKS_PER_REVOLUTION = 1120;
     private final double ENCODER_WHEEL_CIRCUMFERENCE = Math.PI * 1.5;
     public double[] pose = new double[2];
     public int[] prevTicks = new int[3];
+    private double wheelCircumference;
+    private double wheelBaseRadius;
+    private double yEncoderX;
+    private double xEncoderY;
+    private double encoderWheelRadius;
     private DeadWheelEncoder encX;
     private DeadWheelEncoder encY;
 
-    public void runOpMode(){
+    public void runOpMode() {
         DcMotor m1 = hardwareMap.dcMotor.get("back_left_motor");
         DcMotor m2 = hardwareMap.dcMotor.get("front_left_motor");
         DcMotor m3 = hardwareMap.dcMotor.get("front_right_motor");
@@ -69,8 +61,8 @@ public class XDriveOdomDemo extends LinearOpMode {
 //
 
 
-         encY = hardwareMap.get(DeadWheelEncoder.class, "y_enc");
-         encX = hardwareMap.get(DeadWheelEncoder.class, "x_enc");
+        encY = hardwareMap.get(DeadWheelEncoder.class, "y_enc");
+        encX = hardwareMap.get(DeadWheelEncoder.class, "x_enc");
 
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.accelerationIntegrationAlgorithm = null;
@@ -83,10 +75,10 @@ public class XDriveOdomDemo extends LinearOpMode {
 
         imu.initialize(parameters);
 
-        telemetry.addData("Press Start When Ready","");
+        telemetry.addData("Press Start When Ready", "");
         telemetry.update();
         waitForStart();
-        while (opModeIsActive()){
+        while (opModeIsActive()) {
             double px = gamepad1.left_stick_x;
             if (Math.abs(px) < 0.05) px = 0;
             double py = -gamepad1.left_stick_y;
@@ -123,7 +115,7 @@ public class XDriveOdomDemo extends LinearOpMode {
             telemetry.addData("Left Distance", " %.1f", leftDistance.getDistance(DistanceUnit.CM));
             telemetry.addData("Right Distance", " %.1f", rightDistance.getDistance(DistanceUnit.CM));
             telemetry.addData("Back Distance", " %.1f", backDistance.getDistance(DistanceUnit.CM));
-            telemetry.addData("Encoders"," %d %d %d %d", m1.getCurrentPosition(), m2.getCurrentPosition(),
+            telemetry.addData("Encoders", " %d %d %d %d", m1.getCurrentPosition(), m2.getCurrentPosition(),
                     m3.getCurrentPosition(), m4.getCurrentPosition());
             updateOdometry(orientation);
             telemetry.addData("X Odom", pose[0]);
@@ -137,7 +129,7 @@ public class XDriveOdomDemo extends LinearOpMode {
         m4.setPower(0);
     }
 
-    public double[] updateOdometry(Orientation orientation){
+    public double[] updateOdometry(Orientation orientation) {
         int[] ticks = new int[2];
         ticks[0] = encX.getCurrentPosition();
         ticks[1] = -encY.getCurrentPosition();

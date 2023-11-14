@@ -2,8 +2,6 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorExImpl;
 
 /**
  * TeleOp op mode to test odometry with three "dead-wheel" encoders. This op mode will work with
@@ -15,16 +13,16 @@ public class TestOdom extends LinearOpMode {
     EncBot bot = new EncBot();
     double[] pose;
 
-    public void runOpMode(){
+    public void runOpMode() {
         bot.init(hardwareMap);
-        bot.resetOdometry(0, 0, Math.PI/2.0);
+        bot.resetOdometry(0, 0, Math.PI / 2.0);
 
-        while(!opModeIsActive() && !isStopRequested()){
+        while (!opModeIsActive() && !isStopRequested()) {
             telemetry.addData("time", this.time);
             telemetry.update();
         }
 
-        while (opModeIsActive()){
+        while (opModeIsActive()) {
             pose = bot.updateOdometry();
             telemetry.addData("time", this.time);
             telemetry.addData("POSE", "x = %.1f  y = %.1f  h = %.1f", pose[0], pose[1],

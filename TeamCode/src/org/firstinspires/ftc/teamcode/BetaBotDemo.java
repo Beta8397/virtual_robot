@@ -1,14 +1,13 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.*;
-import org.firstinspires.ftc.robotcore.external.navigation.*;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.Servo;
 
 /**
  * Example OpMode. Demonstrates use of gyro, color sensor, encoders, and telemetry.
- *
  */
 @TeleOp(name = "beta bot demo", group = "BetaBot")
 public class BetaBotDemo extends LinearOpMode {
@@ -19,11 +18,11 @@ public class BetaBotDemo extends LinearOpMode {
     private DcMotorEx shooterMotor;
     private DcMotorEx scoopMotor;
 
-    public void runOpMode(){
-        m1 = hardwareMap.get(DcMotorEx.class,"back_left_motor");
-        m2 = hardwareMap.get(DcMotorEx.class,"front_left_motor");
-        m3 = hardwareMap.get(DcMotorEx.class,"front_right_motor");
-        m4 = hardwareMap.get(DcMotorEx.class,"back_right_motor");
+    public void runOpMode() {
+        m1 = hardwareMap.get(DcMotorEx.class, "back_left_motor");
+        m2 = hardwareMap.get(DcMotorEx.class, "front_left_motor");
+        m3 = hardwareMap.get(DcMotorEx.class, "front_right_motor");
+        m4 = hardwareMap.get(DcMotorEx.class, "back_right_motor");
         m1.setDirection(DcMotor.Direction.REVERSE);
         m2.setDirection(DcMotor.Direction.REVERSE);
         m1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -49,16 +48,16 @@ public class BetaBotDemo extends LinearOpMode {
         telemetry.addData("Shoot: ", "'A' (250ms on, 250ms off)");
         telemetry.addData("Scoop: ", "Dpad up/down");
         telemetry.addData("Intake: ", "Back of bot");
-        telemetry.addData("Press 'START' to start.","");
+        telemetry.addData("Press 'START' to start.", "");
         telemetry.update();
 
         waitForStart();
-        while (opModeIsActive()){
+        while (opModeIsActive()) {
 
             telemetry.addData("Drive: ", "Lt and Rt Sticks");
             telemetry.addData("Shoot: ", "'A' (250ms on, 250ms off)");
             telemetry.addData("Scoop: ", "Dpad up/down");
-            telemetry.addData("Intake: ","Back of bot");
+            telemetry.addData("Intake: ", "Back of bot");
             telemetry.update();
 
             double px = gamepad1.left_stick_x;

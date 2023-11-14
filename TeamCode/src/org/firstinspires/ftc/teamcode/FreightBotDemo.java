@@ -8,7 +8,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.*;
 
 /**
  * Example OpMode. Demonstrates use of gyro, color sensor, encoders, and telemetry.
- *
  */
 @TeleOp(name = "freight bot demo", group = "FreightBot")
 public class FreightBotDemo extends LinearOpMode {
@@ -19,7 +18,7 @@ public class FreightBotDemo extends LinearOpMode {
     DistanceSensor frontDistance, leftDistance, rightDistance, backDistance;
     ColorSensor colorSensor;
 
-    public void runOpMode(){
+    public void runOpMode() {
         m1 = hardwareMap.get(DcMotorEx.class, "back_left_motor");
         m2 = hardwareMap.get(DcMotorEx.class, "front_left_motor");
         m3 = hardwareMap.get(DcMotorEx.class, "front_right_motor");
@@ -60,12 +59,12 @@ public class FreightBotDemo extends LinearOpMode {
         imu.initialize(parameters);
 
         colorSensor = hardwareMap.get(ColorSensor.class, "color_sensor");
-        telemetry.addData("Press Start When Ready","");
+        telemetry.addData("Press Start When Ready", "");
         telemetry.update();
 
         waitForStart();
 
-        while (opModeIsActive()){
+        while (opModeIsActive()) {
 
             double px = gamepad1.left_stick_x;
             double py = -gamepad1.left_stick_y;
@@ -93,15 +92,15 @@ public class FreightBotDemo extends LinearOpMode {
             if (gamepad1.x) handServo.setPosition(1);
             else if (gamepad1.b) handServo.setPosition(0);
 
-            if (gamepad1.dpad_up){
+            if (gamepad1.dpad_up) {
                 rotor.setPower(0.7);
-            } else if (gamepad1.dpad_down){
+            } else if (gamepad1.dpad_down) {
                 rotor.setPower(-0.7);
-            } else if (gamepad1.dpad_left){
+            } else if (gamepad1.dpad_left) {
                 rotor.setPower(0);
             }
 
-            telemetry.addData("Color","R %d  G %d  B %d", colorSensor.red(), colorSensor.green(), colorSensor.blue());
+            telemetry.addData("Color", "R %d  G %d  B %d", colorSensor.red(), colorSensor.green(), colorSensor.blue());
             //telemetry.addData("Heading"," %.1f", gyro.getHeading());
             Orientation orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
             telemetry.addData("Heading", " %.1f", orientation.firstAngle * 180.0 / Math.PI);
@@ -110,7 +109,7 @@ public class FreightBotDemo extends LinearOpMode {
             telemetry.addData("Left Distance", " %.1f", leftDistance.getDistance(DistanceUnit.CM));
             telemetry.addData("Right Distance", " %.1f", rightDistance.getDistance(DistanceUnit.CM));
             telemetry.addData("Back Distance", " %.1f", backDistance.getDistance(DistanceUnit.CM));
-            telemetry.addData("Encoders"," %d %d %d %d", m1.getCurrentPosition(), m2.getCurrentPosition(),
+            telemetry.addData("Encoders", " %d %d %d %d", m1.getCurrentPosition(), m2.getCurrentPosition(),
                     m3.getCurrentPosition(), m4.getCurrentPosition());
             telemetry.update();
         }

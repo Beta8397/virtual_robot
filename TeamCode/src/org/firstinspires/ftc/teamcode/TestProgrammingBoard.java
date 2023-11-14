@@ -19,7 +19,7 @@ public class TestProgrammingBoard extends OpMode {
     DigitalChannel digitalChannel = null;
     DistanceSensor distanceSensor = null;
 
-    public void init(){
+    public void init() {
         motor = hardwareMap.get(DcMotor.class, "motor");
 
         servo = hardwareMap.get(Servo.class, "servo");
@@ -54,9 +54,9 @@ public class TestProgrammingBoard extends OpMode {
     }
 
 
-    public void loop(){
+    public void loop() {
         motor.setPower(-gamepad1.left_stick_y);
-        servo.setPosition(0.5*(gamepad1.right_stick_y + 1));
+        servo.setPosition(0.5 * (gamepad1.right_stick_y + 1));
         Orientation orientation = imu.getAngularOrientation();
         telemetry.addData("Heading", "%.1f deg", orientation.firstAngle);
         telemetry.addData("Ticks", motor.getCurrentPosition());

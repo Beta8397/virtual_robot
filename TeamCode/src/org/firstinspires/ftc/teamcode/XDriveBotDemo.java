@@ -3,12 +3,14 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.*;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import org.firstinspires.ftc.robotcore.external.navigation.*;
 
 /**
  * Example OpMode. Demonstrates use of gyro, color sensor, encoders, and telemetry.
- *
  */
 @TeleOp(name = "XDriveBot demo", group = "XBot")
 public class XDriveBotDemo extends LinearOpMode {
@@ -16,7 +18,7 @@ public class XDriveBotDemo extends LinearOpMode {
     DcMotor m1, m2, m3, m4;
     CRServo backServo;
 
-    public void runOpMode(){
+    public void runOpMode() {
         m1 = hardwareMap.dcMotor.get("back_left_motor");
         m2 = hardwareMap.dcMotor.get("front_left_motor");
         m3 = hardwareMap.dcMotor.get("front_right_motor");
@@ -54,10 +56,10 @@ public class XDriveBotDemo extends LinearOpMode {
         imu.initialize(parameters);
 
         ColorSensor colorSensor = hardwareMap.colorSensor.get("color_sensor");
-        telemetry.addData("Press Start When Ready","");
+        telemetry.addData("Press Start When Ready", "");
         telemetry.update();
         waitForStart();
-        while (opModeIsActive()){
+        while (opModeIsActive()) {
             double px = gamepad1.left_stick_x;
             if (Math.abs(px) < 0.05) px = 0;
             double py = -gamepad1.left_stick_y;
@@ -83,14 +85,14 @@ public class XDriveBotDemo extends LinearOpMode {
             double psrv = gamepad1.right_trigger;
             if (Math.abs(psrv) < 0.05) psrv = 0.0;
             backServo.setPower(psrv);
-            telemetry.addData("Color","R %d  G %d  B %d", colorSensor.red(), colorSensor.green(), colorSensor.blue());
+            telemetry.addData("Color", "R %d  G %d  B %d", colorSensor.red(), colorSensor.green(), colorSensor.blue());
             Orientation orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
             telemetry.addData("Heading", " %.1f", orientation.firstAngle * 180.0 / Math.PI);
             telemetry.addData("Front Distance", " %.1f", frontDistance.getDistance(DistanceUnit.CM));
             telemetry.addData("Left Distance", " %.1f", leftDistance.getDistance(DistanceUnit.CM));
             telemetry.addData("Right Distance", " %.1f", rightDistance.getDistance(DistanceUnit.CM));
             telemetry.addData("Back Distance", " %.1f", backDistance.getDistance(DistanceUnit.CM));
-            telemetry.addData("Encoders"," %d %d %d %d", m1.getCurrentPosition(), m2.getCurrentPosition(),
+            telemetry.addData("Encoders", " %d %d %d %d", m1.getCurrentPosition(), m2.getCurrentPosition(),
                     m3.getCurrentPosition(), m4.getCurrentPosition());
             telemetry.update();
         }

@@ -16,7 +16,7 @@ public class SquareOmniDemo extends LinearOpMode {
     private DcMotorEx left, right, front, back;
     private IMU imu;
 
-    public void runOpMode(){
+    public void runOpMode() {
         left = hardwareMap.get(DcMotorEx.class, "left_motor");
         right = hardwareMap.get(DcMotorEx.class, "right_motor");
         front = hardwareMap.get(DcMotorEx.class, "front_motor");
@@ -27,7 +27,7 @@ public class SquareOmniDemo extends LinearOpMode {
 
         waitForStart();
 
-        while (opModeIsActive()){
+        while (opModeIsActive()) {
 
             float px = gamepad1.left_stick_x;
             float py = -gamepad1.left_stick_y;
@@ -43,7 +43,7 @@ public class SquareOmniDemo extends LinearOpMode {
             max = Math.max(max, Math.abs(pFront));
             max = Math.max(max, Math.abs(pBack));
 
-            if (max > 1){
+            if (max > 1) {
                 pLeft /= max;
                 pRight /= max;
                 pFront /= max;

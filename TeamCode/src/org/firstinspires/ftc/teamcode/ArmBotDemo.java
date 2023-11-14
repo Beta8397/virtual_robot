@@ -1,19 +1,21 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.hardware.*;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.navigation.*;
 
 /**
  * Example OpMode. Demonstrates use of gyro, color sensor, encoders, and telemetry.
- *
  */
 @TeleOp(name = "arm bot demo", group = "ArmBot")
 public class ArmBotDemo extends LinearOpMode {
 
-    public void runOpMode(){
+    public void runOpMode() {
         DcMotor m1 = hardwareMap.dcMotor.get("back_left_motor");
         DcMotor m2 = hardwareMap.dcMotor.get("front_left_motor");
         DcMotor m3 = hardwareMap.dcMotor.get("front_right_motor");
@@ -54,12 +56,12 @@ public class ArmBotDemo extends LinearOpMode {
         imu.initialize(parameters);
 
         ColorSensor colorSensor = hardwareMap.colorSensor.get("color_sensor");
-        telemetry.addData("Press Start When Ready","");
+        telemetry.addData("Press Start When Ready", "");
         telemetry.update();
 
         waitForStart();
 
-        while (opModeIsActive()){
+        while (opModeIsActive()) {
 
             double px = gamepad1.left_stick_x;
             double py = -gamepad1.left_stick_y;
@@ -85,7 +87,7 @@ public class ArmBotDemo extends LinearOpMode {
             arm.setPower(-gamepad1.right_stick_y);
             if (gamepad1.x) handServo.setPosition(1);
             else if (gamepad1.b) handServo.setPosition(0);
-            telemetry.addData("Color","R %d  G %d  B %d", colorSensor.red(), colorSensor.green(), colorSensor.blue());
+            telemetry.addData("Color", "R %d  G %d  B %d", colorSensor.red(), colorSensor.green(), colorSensor.blue());
             //telemetry.addData("Heading"," %.1f", gyro.getHeading());
             Orientation orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
             telemetry.addData("Heading", " %.1f", orientation.firstAngle * 180.0 / Math.PI);
@@ -94,7 +96,7 @@ public class ArmBotDemo extends LinearOpMode {
             telemetry.addData("Left Distance", " %.1f", leftDistance.getDistance(DistanceUnit.CM));
             telemetry.addData("Right Distance", " %.1f", rightDistance.getDistance(DistanceUnit.CM));
             telemetry.addData("Back Distance", " %.1f", backDistance.getDistance(DistanceUnit.CM));
-            telemetry.addData("Encoders"," %d %d %d %d", m1.getCurrentPosition(), m2.getCurrentPosition(),
+            telemetry.addData("Encoders", " %d %d %d %d", m1.getCurrentPosition(), m2.getCurrentPosition(),
                     m3.getCurrentPosition(), m4.getCurrentPosition());
             telemetry.update();
         }

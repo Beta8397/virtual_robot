@@ -1,31 +1,30 @@
 package org.firstinspires.ftc.teamcode.disabled_samples;
 
+import android.graphics.Color;
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import android.graphics.Color;
-import com.qualcomm.robotcore.util.ElapsedTime;
 import virtual_robot.util.AngleUtils;
 
 /**
  * Example Autonomous Opmode
- *
+ * <p>
  * Uses Line-following two drive around the tape at the perimeter of the lander.
- *
+ * <p>
  * Requires mechanum bot configuration.
- *
+ * <p>
  * Start with bot in center of lander, facing top of screen.
- *
+ * <p>
  * Disabling for now; it was designed to work with Rover Ruckus field
- *
  */
 @Disabled
 @Autonomous(name = "mechbot auto demo", group = "Mechanum")
@@ -37,7 +36,7 @@ public class MechBotAutoDemo extends LinearOpMode {
     ColorSensor colorSensor;
     Servo backServo;
 
-    public void runOpMode(){
+    public void runOpMode() {
 
         m1 = hardwareMap.dcMotor.get("back_left_motor");
         m2 = hardwareMap.dcMotor.get("front_left_motor");
@@ -61,14 +60,14 @@ public class MechBotAutoDemo extends LinearOpMode {
 
         ElapsedTime waitTime = new ElapsedTime();
         while (!opModeIsActive() && !isStopRequested()) {
-            telemetry.addData("Seconds since init","%d. Press start when ready.", (int)waitTime.seconds());
+            telemetry.addData("Seconds since init", "%d. Press start when ready.", (int) waitTime.seconds());
             telemetry.update();
         }
 
         //Turn 45 degrees.
         setPower(0, 0, 0.5f);
         //while (opModeIsActive() && gyro.getHeading() < 45) continue;
-        while (opModeIsActive()){
+        while (opModeIsActive()) {
             orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             if (orientation.firstAngle >= 45) break;
         }
@@ -77,7 +76,7 @@ public class MechBotAutoDemo extends LinearOpMode {
         float[] hsv = new float[3];
 
         //Drive forward until color sensor touches tape.
-        setPower(0,0.5f,0);
+        setPower(0, 0.5f, 0);
         while (opModeIsActive()) {
             Color.RGBToHSV(colorSensor.red(), colorSensor.green(), colorSensor.blue(), hsv);
             if (hsv[1] > 0.75) break;
@@ -93,31 +92,31 @@ public class MechBotAutoDemo extends LinearOpMode {
         ElapsedTime et = new ElapsedTime();
 
         //Main loop; once per trip around the lander
-        while (opModeIsActive()){
+        while (opModeIsActive()) {
 
             //Turn 90 degrees.
-            setPower(0,0,0.5f);
-            backServo.setPosition(0.333 * (currentHeading - 45.0f)/90.0f);
-            telemetry.addData("Turning 90 degrees","");
+            setPower(0, 0, 0.5f);
+            backServo.setPosition(0.333 * (currentHeading - 45.0f) / 90.0f);
+            telemetry.addData("Turning 90 degrees", "");
             telemetry.update();
 
             //while (opModeIsActive() && AngleUtils.normalizeDegrees(gyro.getHeading() - currentHeading) < 90) continue;
 
-            while (opModeIsActive()){
+            while (opModeIsActive()) {
                 orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
                 if (AngleUtils.normalizeDegrees(orientation.firstAngle - currentHeading) >= 90) break;
             }
 
-            currentHeading = (float)AngleUtils.normalizeDegrees360(currentHeading + 90);
+            currentHeading = (float) AngleUtils.normalizeDegrees360(currentHeading + 90);
 
             //Follow outside edge of tape until color sensor has not seen tape for 0.5 seconds.
-            telemetry.addData("Line Following","");
+            telemetry.addData("Line Following", "");
             telemetry.update();
             et.reset();
             while (opModeIsActive() && et.seconds() < 0.5) {
                 Color.RGBToHSV(colorSensor.red(), colorSensor.green(), colorSensor.blue(), hsv);
                 if (hsv[1] > 0.25) et.reset();
-                setPower( 2.0f * (hsv[1] - 0.5f), 0.5f, 0);
+                setPower(2.0f * (hsv[1] - 0.5f), 0.5f, 0);
             }
 
         }
@@ -128,7 +127,7 @@ public class MechBotAutoDemo extends LinearOpMode {
         m4.setPower(0);
     }
 
-    void setPower(float px, float py, float pa){
+    void setPower(float px, float py, float pa) {
         double p1 = -px + py - pa;
         double p2 = px + py + -pa;
         double p3 = -px + py + pa;

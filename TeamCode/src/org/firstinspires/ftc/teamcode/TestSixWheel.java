@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.*;
 
@@ -27,7 +26,7 @@ public class TestSixWheel extends OpMode {
     private ElapsedTime et = null;
     private int waitForStartTime = 0;
 
-    public void init(){
+    public void init() {
         leftFront = hardwareMap.dcMotor.get("left_motor_front");
         rightFront = hardwareMap.dcMotor.get("right_motor_front");
         leftBack = hardwareMap.dcMotor.get("left_motor_back");
@@ -54,22 +53,22 @@ public class TestSixWheel extends OpMode {
         et = new ElapsedTime();
     }
 
-    public void init_loop(){
+    public void init_loop() {
         if (et.milliseconds() >= 1000) {
             waitForStartTime++;
             et.reset();
         }
-        telemetry.addData("Press Start to Continue"," %d", waitForStartTime);
+        telemetry.addData("Press Start to Continue", " %d", waitForStartTime);
     }
 
-    public void loop(){
+    public void loop() {
 
         float drive = -gamepad1.left_stick_y;
         float steer = gamepad1.right_stick_x;
         float pLeft = drive + steer;
         float pRight = drive - steer;
         float pAbsMax = Math.max(Math.abs(pLeft), Math.abs(pRight));
-        if (pAbsMax > 1){
+        if (pAbsMax > 1) {
             pLeft /= pAbsMax;
             pRight /= pAbsMax;
         }
@@ -79,10 +78,10 @@ public class TestSixWheel extends OpMode {
         rightBack.setPower(pRight);
 
 
-        telemetry.addData("Color","R %d  G %d  B %d", colorSensor.red(), colorSensor.green(), colorSensor.blue());
+        telemetry.addData("Color", "R %d  G %d  B %d", colorSensor.red(), colorSensor.green(), colorSensor.blue());
         Orientation orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        telemetry.addData("Heading"," %.1f", orientation.firstAngle);
-        telemetry.addData("Encoders","LF %d  LB %d  RF %d  RB %d", leftFront.getCurrentPosition(),
+        telemetry.addData("Heading", " %.1f", orientation.firstAngle);
+        telemetry.addData("Encoders", "LF %d  LB %d  RF %d  RB %d", leftFront.getCurrentPosition(),
                 leftBack.getCurrentPosition(), rightFront.getCurrentPosition(), rightBack.getCurrentPosition());
         telemetry.addData("Distance", " Fr %.1f  Lt %.1f  Rt %.1f  Bk %.1f  ",
                 frontDistance.getDistance(DistanceUnit.CM), leftDistance.getDistance(DistanceUnit.CM),

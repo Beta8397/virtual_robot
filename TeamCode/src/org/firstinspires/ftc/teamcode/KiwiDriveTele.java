@@ -12,7 +12,7 @@ public class KiwiDriveTele extends LinearOpMode {
     DcMotorEx mFront, mBackLeft, mBackRight;
     DistanceSensor dF, dR, dL, dB;
 
-    public void runOpMode(){
+    public void runOpMode() {
         mFront = hardwareMap.get(DcMotorEx.class, "front_motor");
         mBackLeft = hardwareMap.get(DcMotorEx.class, "back_left_motor");
         mBackRight = hardwareMap.get(DcMotorEx.class, "back_right_motor");
@@ -24,14 +24,14 @@ public class KiwiDriveTele extends LinearOpMode {
 
         waitForStart();
 
-        while (opModeIsActive()){
+        while (opModeIsActive()) {
             double px = gamepad1.left_stick_x;
             double py = -gamepad1.left_stick_y;
             double pa = -gamepad1.right_stick_x;
 
-            double pF = -px + 0*py + pa;
-            double pBL = 0.5*px - Math.sqrt(3)*py/2 + pa;
-            double pBR = 0.5*px + Math.sqrt(3)*py/2 + pa;
+            double pF = -px + 0 * py + pa;
+            double pBL = 0.5 * px - Math.sqrt(3) * py / 2 + pa;
+            double pBR = 0.5 * px + Math.sqrt(3) * py / 2 + pa;
 
             double max = Math.max(1, Math.max(Math.abs(pF), Math.max(Math.abs(pBL), Math.abs(pBR))));
 
@@ -50,7 +50,7 @@ public class KiwiDriveTele extends LinearOpMode {
             double rDist = dR.getDistance(DistanceUnit.INCH);
             double bDist = dB.getDistance(DistanceUnit.INCH);
 
-            telemetry.addData("Dist","F %.1f  L %.1f  R %.1f  B %.1f", fDist, lDist, rDist, bDist);
+            telemetry.addData("Dist", "F %.1f  L %.1f  R %.1f  B %.1f", fDist, lDist, rDist, bDist);
             telemetry.update();
 
 
