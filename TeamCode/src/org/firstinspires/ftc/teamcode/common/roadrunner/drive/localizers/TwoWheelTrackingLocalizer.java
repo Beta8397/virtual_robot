@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.common.roadrunner.drive.localizers;
 import androidx.annotation.NonNull;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.localization.TwoTrackingWheelLocalizer;
-import org.firstinspires.ftc.teamcode.common.roadrunner.drive.MecanumDrive;
+import org.firstinspires.ftc.teamcode.common.roadrunner.drive.MecanumRoadRunnerDrive;
 import org.firstinspires.ftc.teamcode.common.roadrunner.util.Encoder;
 
 import java.util.Arrays;
@@ -38,9 +38,9 @@ public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
     private final Encoder parallelEncoder;
     private final Encoder perpendicularEncoder;
 
-    private final MecanumDrive drive;
+    private final MecanumRoadRunnerDrive drive;
 
-    public TwoWheelTrackingLocalizer(TwoWheelTrackingLocalizerCoefficients coefficients, Encoder parallelEncoder, Encoder perpendicularEncoder, MecanumDrive drive) {
+    public TwoWheelTrackingLocalizer(TwoWheelTrackingLocalizerCoefficients coefficients, Encoder parallelEncoder, Encoder perpendicularEncoder, MecanumRoadRunnerDrive drive) {
         super(Arrays.asList(
                 new Pose2d(coefficients.PARALLEL_X, coefficients.PARALLEL_Y, 0),
                 new Pose2d(coefficients.PERPENDICULAR_X, coefficients.PERPENDICULAR_Y, Math.toRadians(90))

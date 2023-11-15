@@ -9,11 +9,11 @@ import com.qualcomm.robotcore.hardware.DcMotor;
  * needed as the drive system is developed for a robot.
  *
  * @author Lucas Bubner, 2023
- * @see MecanumDrive
+ * @see OldMecanumDrive
  * @deprecated Deprecated by RoadRunner
  */
 @Deprecated
-public abstract class FieldCentricMecanumDrive extends MecanumDrive {
+public abstract class FieldCentricMecanumDrive extends OldMecanumDrive {
     private final IMUOp imu;
 
     protected FieldCentricMecanumDrive(@NonNull BunyipsOpMode opMode, DcMotor frontLeft, DcMotor backLeft, DcMotor frontRight, DcMotor backRight, IMUOp imu, boolean invalidatePreviousHeading, RelativePose2d startingDirection) {

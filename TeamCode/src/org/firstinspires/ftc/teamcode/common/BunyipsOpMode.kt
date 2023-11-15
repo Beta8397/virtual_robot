@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.robotcore.external.Telemetry.Item
 import org.firstinspires.ftc.teamcode.common.Text.formatString
-import org.firstinspires.ftc.teamcode.common.Text.round
 import kotlin.math.roundToInt
 
 /**

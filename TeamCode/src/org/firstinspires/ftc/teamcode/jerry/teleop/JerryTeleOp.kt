@@ -22,7 +22,7 @@ import org.firstinspires.ftc.teamcode.jerry.components.JerryPolarDrive
 @TeleOp(name = "JERRY: TeleOp", group = "JERRY")
 class JerryTeleOp : BunyipsOpMode() {
     private var config = JerryConfig()
-    private var drive: MecanumDrive? = null
+    private var drive: OldMecanumDrive? = null
     private var imu: IMUOp? = null
     private var lift: JerryLift? = null
     private val selector: UserSelection<String> =

@@ -16,7 +16,7 @@ import java.util.Locale;
  * @deprecated Deprecated by RoadRunner
  */
 @Deprecated
-public abstract class MecanumDrive extends BunyipsComponent {
+public abstract class OldMecanumDrive extends BunyipsComponent {
 
     private final DcMotor frontLeft;
     private final DcMotor backLeft;
@@ -31,7 +31,7 @@ public abstract class MecanumDrive extends BunyipsComponent {
     // Store and declare prioritisation when given instruction to calculate motor powers
     private Priority priority = Priority.NORMALISED;
 
-    protected MecanumDrive(@NonNull BunyipsOpMode opMode, DcMotor frontLeft, DcMotor backLeft, DcMotor frontRight, DcMotor backRight) {
+    protected OldMecanumDrive(@NonNull BunyipsOpMode opMode, DcMotor frontLeft, DcMotor backLeft, DcMotor frontRight, DcMotor backRight) {
         super(opMode);
         this.frontLeft = frontLeft;
         this.backLeft = backLeft;

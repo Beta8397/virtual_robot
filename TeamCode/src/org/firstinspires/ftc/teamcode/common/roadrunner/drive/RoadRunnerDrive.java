@@ -18,7 +18,7 @@ import java.util.List;
  *
  * @author Lucas Bubner, 2023
  */
-public interface Drive {
+public interface RoadRunnerDrive {
     static TrajectoryVelocityConstraint getVelocityConstraint(double maxVel, double maxAngularVel, double trackWidth) {
         return new MinVelocityConstraint(Arrays.asList(
                 new AngularVelocityConstraint(maxAngularVel),

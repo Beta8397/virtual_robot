@@ -7,12 +7,15 @@ import com.acmerobotics.roadrunner.localization.Localizer;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
 import com.qualcomm.robotcore.hardware.*;
-import org.firstinspires.ftc.teamcode.common.roadrunner.drive.Drive;
 import org.firstinspires.ftc.teamcode.common.roadrunner.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.common.roadrunner.drive.MecanumCoefficients;
+import org.firstinspires.ftc.teamcode.common.roadrunner.drive.MecanumRoadRunnerDrive;
+import org.firstinspires.ftc.teamcode.common.roadrunner.drive.RoadRunnerDrive;
 import org.firstinspires.ftc.teamcode.common.roadrunner.trajectorysequence.TrajectorySequence;
 
 import java.util.List;
+
+import static org.firstinspires.ftc.teamcode.common.Text.round;
 
 /**
  * Wrapper component for the RoadRunner Mecanum Drive, bringing RoadRunner functionality
@@ -20,15 +23,36 @@ import java.util.List;
  *
  * @author Lucas Bubner, 2023
  */
-public class Mecanum extends BunyipsComponent implements Drive {
-    private final org.firstinspires.ftc.teamcode.common.roadrunner.drive.MecanumDrive drive;
+public class Mecanum extends BunyipsComponent implements RoadRunnerDrive {
+    private final MecanumRoadRunnerDrive drive;
 
     public Mecanum(@NonNull BunyipsOpMode opMode, DriveConstants constants, MecanumCoefficients mecanumCoefficients, HardwareMap.DeviceMapping<VoltageSensor> voltageSensor, IMU imu, DcMotorEx frontLeft, DcMotorEx backLeft, DcMotorEx frontRight, DcMotorEx backRight) {
         super(opMode);
-        drive = new org.firstinspires.ftc.teamcode.common.roadrunner.drive.MecanumDrive(constants, mecanumCoefficients, voltageSensor, imu, frontLeft, frontRight, backLeft, backRight);
+        drive = new MecanumRoadRunnerDrive(constants, mecanumCoefficients, voltageSensor, imu, frontLeft, frontRight, backLeft, backRight);
+//        if (GlobalStorage.contains("lastPose")) {
+//            drive.setPoseEstimate((Pose2d) GlobalStorage.get("lastPose"));
+//        }
     }
 
-    public org.firstinspires.ftc.teamcode.common.roadrunner.drive.MecanumDrive getInstance() {
+    /**
+     * Cleanup and store the last pose estimate in global storage.
+     * Should be run in BunyipsOpMode.onStop()
+     */
+    public void teardown() {
+        // Store the last pose estimate in global storage
+//        GlobalStorage.put("lastPose", drive.getPoseEstimate());
+    }
+
+    @Override
+    public void update() {
+        getOpMode().addTelemetry("Localizer: X:%cm Y:%cm %deg",
+                round(Inches.toCM(drive.getPoseEstimate().getX()), 1),
+                round(Inches.toCM(drive.getPoseEstimate().getY()), 1),
+                round(Math.toDegrees(drive.getPoseEstimate().getHeading()), 1));
+        drive.update();
+    }
+
+    public MecanumRoadRunnerDrive getInstance() {
         return drive;
     }
 
@@ -94,11 +118,6 @@ public class Mecanum extends BunyipsComponent implements Drive {
     @Override
     public Pose2d getLastError() {
         return drive.getLastError();
-    }
-
-    @Override
-    public void update() {
-        drive.update();
     }
 
     @Override

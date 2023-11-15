@@ -24,7 +24,7 @@ import java.util.List;
  * RoadRunner Tank drive hardware implementation for REV hardware.
  * Reworked to use a builder parameters for multiple robot configurations.
  */
-public class TankDrive extends com.acmerobotics.roadrunner.drive.TankDrive implements Drive {
+public class TankDrive extends com.acmerobotics.roadrunner.drive.TankDrive implements RoadRunnerDrive {
     private final DriveConstants constants;
     private final TankCoefficients coefficients;
 

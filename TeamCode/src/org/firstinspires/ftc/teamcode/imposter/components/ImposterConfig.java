@@ -33,6 +33,9 @@ public class ImposterConfig extends RobotConfig {
         back_left_motor.setDirection(DcMotorEx.Direction.REVERSE);
         front_left_motor.setDirection(DcMotorEx.Direction.REVERSE);
 
+        localizerCoefficients = new TwoWheelTrackingLocalizerCoefficients.Builder()
+                .build();
+
         // TODO: Tune
         driveConstants = new DriveConstants.Builder()
                 .setTicksPerRev(537.6)

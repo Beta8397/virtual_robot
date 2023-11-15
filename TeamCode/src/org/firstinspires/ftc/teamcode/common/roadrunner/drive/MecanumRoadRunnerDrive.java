@@ -24,7 +24,7 @@ import java.util.List;
  * RoadRunner Mecanum drive hardware implementation for REV hardware.
  * Reworked to use builder parameters for multiple robot configurations.
  */
-public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive implements Drive {
+public class MecanumRoadRunnerDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive implements RoadRunnerDrive {
     private final DriveConstants constants;
     private final MecanumCoefficients coefficients;
     private final TrajectoryVelocityConstraint VEL_CONSTRAINT;
@@ -44,14 +44,14 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
     private final List<Integer> lastEncPositions = new ArrayList<>();
     private final List<Integer> lastEncVels = new ArrayList<>();
 
-    public MecanumDrive(DriveConstants constants, MecanumCoefficients coefficients, HardwareMap.DeviceMapping<VoltageSensor> voltageSensor, IMU imu, DcMotorEx fl, DcMotorEx fr, DcMotorEx bl, DcMotorEx br) {
+    public MecanumRoadRunnerDrive(DriveConstants constants, MecanumCoefficients coefficients, HardwareMap.DeviceMapping<VoltageSensor> voltageSensor, IMU imu, DcMotorEx fl, DcMotorEx fr, DcMotorEx bl, DcMotorEx br) {
         super(constants.kV, constants.kA, constants.kStatic, constants.TRACK_WIDTH, constants.TRACK_WIDTH, coefficients.LATERAL_MULTIPLIER);
 
         follower = new HolonomicPIDVAFollower(coefficients.TRANSLATIONAL_PID, coefficients.TRANSLATIONAL_PID, coefficients.HEADING_PID,
                 new Pose2d(0.5, 0.5, Math.toRadians(5.0)), 0.5);
 
-        VEL_CONSTRAINT = Drive.getVelocityConstraint(constants.MAX_VEL, constants.MAX_ANG_VEL, constants.TRACK_WIDTH);
-        ACCEL_CONSTRAINT = Drive.getAccelerationConstraint(constants.MAX_ACCEL);
+        VEL_CONSTRAINT = RoadRunnerDrive.getVelocityConstraint(constants.MAX_VEL, constants.MAX_ANG_VEL, constants.TRACK_WIDTH);
+        ACCEL_CONSTRAINT = RoadRunnerDrive.getAccelerationConstraint(constants.MAX_ACCEL);
 
 //        LynxModuleUtil.ensureMinimumFirmwareVersion(hardwareMap);
 
