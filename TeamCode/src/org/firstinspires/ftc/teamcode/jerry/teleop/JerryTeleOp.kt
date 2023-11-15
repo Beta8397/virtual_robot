@@ -30,22 +30,22 @@ class JerryTeleOp : BunyipsOpMode() {
 
     override fun onInit() {
         // Configure drive and lift subsystems
-        config = RobotConfig.newConfig(this, config, hardwareMap) as JerryConfig
-        selector.start()
-        if (NullSafety.assertNotNull(config.imu)) {
-            imu = IMUOp(this, config.imu!!)
-        }
-        drive?.setToBrake()
-        if (NullSafety.assertNotNull(config.armComponents)) {
-            lift = JerryLift(
-                this,
-                JerryLift.ControlMode.MANUAL,
-                config.claw!!,
-                config.arm1!!,
-                config.arm2!!,
-//                config.limit!!
-            )
-        }
+//        config = RobotConfig.newConfig(this, config, hardwareMap) as JerryConfig
+//        selector.start()
+//        if (NullSafety.assertNotNull(config.imu)) {
+//            imu = IMUOp(this, config.imu!!)
+//        }
+//        drive?.setToBrake()
+//        if (NullSafety.assertNotNull(config.armComponents)) {
+//            lift = JerryLift(
+//                this,
+//                JerryLift.ControlMode.MANUAL,
+//                config.claw!!,
+//                config.arm1!!,
+//                config.arm2!!,
+////                config.limit!!
+//            )
+//        }
     }
 
     private fun initDrive() {
@@ -71,30 +71,30 @@ class JerryTeleOp : BunyipsOpMode() {
     }
 
     override fun activeLoop() {
-        // Set changing variables and gather raw data
-        val x = gamepad1.left_stick_x.toDouble()
-        val y = gamepad1.left_stick_y.toDouble()
-        val r = gamepad1.right_stick_x.toDouble()
-        val v = gamepad2.left_stick_y.toDouble()
-
-//        addTelemetry(String.format(Locale.getDefault(),
-//            "Controller: X: %.2f, Y: %.2f, R: %.2f", x, y, r))
-
-        // Set speeds of motors and interpret any data
-        drive?.setSpeedUsingController(x, y, r)
-        lift?.delta(v)
-        if (gamepad2.a) {
-            lift?.open()
-        } else if (gamepad2.b) {
-            lift?.close()
-        }
-
-        if (gamepad2.left_bumper) {
-            lift?.reset()
-        }
-
-        // Update live movements of all motors
-        drive?.update()
-        lift?.update()
+//        // Set changing variables and gather raw data
+//        val x = gamepad1.left_stick_x.toDouble()
+//        val y = gamepad1.left_stick_y.toDouble()
+//        val r = gamepad1.right_stick_x.toDouble()
+//        val v = gamepad2.left_stick_y.toDouble()
+//
+////        addTelemetry(String.format(Locale.getDefault(),
+////            "Controller: X: %.2f, Y: %.2f, R: %.2f", x, y, r))
+//
+//        // Set speeds of motors and interpret any data
+//        drive?.setSpeedUsingController(x, y, r)
+//        lift?.delta(v)
+//        if (gamepad2.a) {
+//            lift?.open()
+//        } else if (gamepad2.b) {
+//            lift?.close()
+//        }
+//
+//        if (gamepad2.left_bumper) {
+//            lift?.reset()
+//        }
+//
+//        // Update live movements of all motors
+//        drive?.update()
+//        lift?.update()
     }
 }

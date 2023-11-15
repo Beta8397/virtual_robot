@@ -43,16 +43,16 @@ public class NullSafety {
      * @return Whether the component is safe to instantiate
      */
     public static boolean assertComponentArgs(BunyipsOpMode opMode, Class<?> T, Object... objs) {
-        boolean safe = true;
         for (Object o : objs) {
             if (o == null) {
                 opMode.addRetainedTelemetry(formatString("! COM_FAULT: % failed to instantiate due to null constructor arguments", T.getSimpleName()));
-                opMode.log("error: % is null. additional errors from this component are being ignored.", T.getSimpleName());
+                opMode.log("error: % is null. attempting to suppress errors...", T.getSimpleName());
                 Dbg.INSTANCE.error(formatString("% is null, adding to unusable components...", T.getSimpleName()));
-                unusableComponents.add(T.getSimpleName());
-                safe = false;
+                if (!unusableComponents.contains(T.getSimpleName()))
+                    unusableComponents.add(T.getSimpleName());
+                return false;
             }
         }
-        return safe;
+        return true;
     }
 }

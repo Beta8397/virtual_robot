@@ -13,7 +13,7 @@ object ErrorUtil {
     fun handleCatchAllException(e: Throwable, log: (msg: String) -> Unit) {
         if (e is NullPointerException) {
             for (component in NullSafety.unusableComponents) {
-                if (e.message?.contains(component) == true) {
+                if (e.localizedMessage?.contains(component) == true) {
                     // This error is caused by a null component, which is handled by NullSafety
                     // As such, we can swallow it from appearing on the Driver Station
                     Dbg.warn("Attempted to utilise null-aware unusable object: $component")
@@ -21,7 +21,7 @@ object ErrorUtil {
                 }
             }
         }
-        log("encountered exception! <${e.message}>")
+        log("encountered exception! <${e.localizedMessage}>")
         if (e.cause != null) {
             log("caused by: ${e.cause}")
         }

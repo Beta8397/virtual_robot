@@ -37,6 +37,7 @@ enum class RelativePose2d(val vector: Pose2d) {
         /**
          * Convert a robot vector to a relative vector.
          */
+        @JvmStatic
         fun convert(vector: Pose2d): RelativePose2d {
             return when {
                 vector.x > 0.5 && vector.y > 0.5 -> FORWARD_RIGHT

@@ -51,7 +51,7 @@ abstract class BunyipsOpMode : LinearOpMode() {
         movingAverageTimer = MovingAverageTimer(100)
 
         overheadTelemetry =
-            telemetry.addData("", "BOM: idle | T+0s | 0.000ms | u1: (?,?,?) | u2: (?,?,?)").setRetained(true)
+            telemetry.addData("", "BOM: idle | T+0s | 0.000ms | u1: (?) | u2: (?)\n").setRetained(true)
         pushTelemetry()
     }
 
@@ -104,102 +104,112 @@ abstract class BunyipsOpMode : LinearOpMode() {
     @Throws(InterruptedException::class)
     final override fun runOpMode() {
         try {
+//            Dbg.log("=============== BunyipsOpMode ${BuildConfig.GIT_COMMIT} ${BuildConfig.GIT_BRANCH} ${BuildConfig.BUILD_TIME} sdk${BuildConfig.VERSION_NAME} ===============")
+            // Not pushing to FtcDashboard as it is in Logcat
+            telemetry.log()
+                .add("bunyipsopmode abc123-dirty virtual_robot xx-xx-xx@xx:xx:xx sdk8.0.0")
+            updateOpModeStatus("setup")
+            Dbg.log("BunyipsOpMode: setting up...")
+            // Run BunyipsOpMode setup
+            setup()
+
+            updateOpModeStatus("static_init")
+            Dbg.log("BunyipsOpMode: firing onInit()...")
+            // Store telemetry objects raised by onInit() by turning off auto-clear
+            setTelemetryAutoClear(false)
+            pushTelemetry()
+//            if (!gamepad1.atRest() || !gamepad2.atRest()) {
+//                log("warning: a gamepad was not zeroed during init. please ensure controllers zero out correctly.")
+//            }
+            // Run user-defined setup
             try {
-//                Dbg.log("=============== BunyipsOpMode ${BuildConfig.GIT_COMMIT} ${BuildConfig.GIT_BRANCH} ${BuildConfig.BUILD_TIME} sdk${BuildConfig.VERSION_NAME} ===============")
-                // Not pushing to FtcDashboard as it is in Logcat
-                telemetry.log().add("bunyipsopmode aaa123-dirty virtual-robot 00-00-00@00:00:00 sdk8.0.0")
-                updateOpModeStatus("setup")
-                Dbg.log("BunyipsOpMode: setting up...")
-                // Run BunyipsOpMode setup
-                setup()
-                updateOpModeStatus("static_init")
-                Dbg.log("BunyipsOpMode: firing onInit()...")
-                // Store telemetry objects raised by onInit() by turning off auto-clear
-                setTelemetryAutoClear(false)
-                // Run user-defined setup
+                onInit()
+            } catch (e: Throwable) {
+                // All InterruptedExceptions are handled by the FTC SDK and are raised in ErrorUtil
+                ErrorUtil.handleCatchAllException(e, ::log)
+            }
+
+            updateOpModeStatus("dynamic_init")
+            pushTelemetry()
+            Dbg.log("BunyipsOpMode: starting onInitLoop()...")
+            // Run user-defined dynamic initialisation
+            while (!isStopRequested && !isStarted) {
                 try {
-                    onInit()
-                } catch (ie: InterruptedException) {
-                    throw ie
+                    // Run until onInitLoop returns true or the OpMode is continued
+                    if (onInitLoop()) break
                 } catch (e: Throwable) {
                     ErrorUtil.handleCatchAllException(e, ::log)
                 }
-//                if (!gamepad1.atRest() || !gamepad2.atRest()) {
-//                    log("warning: a gamepad was not zeroed during init. please ensure controllers zero out correctly.")
-//                }
+                movingAverageTimer?.update()
                 pushTelemetry()
-                updateOpModeStatus("dynamic_init")
-                Dbg.log("BunyipsOpMode: starting onInitLoop()...")
-                // Run user-defined dynamic initialisation
-                while (!isStarted && !isStopRequested) {
-                    try {
-                        // Run until onInitLoop returns true or the OpMode is continued
-                        if (onInitLoop()) break
-                        pushTelemetry()
-                    } catch (ie: InterruptedException) {
-                        // Don't swallow InterruptedExceptions, let the superclass handle them
-                        throw ie
-                    } catch (e: Throwable) {
-                        ErrorUtil.handleCatchAllException(e, ::log)
-                    }
-                }
-                updateOpModeStatus("finish_init")
-                Dbg.log("BunyipsOpMode: firing onInitDone()...")
-                // Run user-defined final initialisation
+            }
+
+            updateOpModeStatus("finish_init")
+            Dbg.log("BunyipsOpMode: firing onInitDone()...")
+            // Run user-defined final initialisation
+            try {
                 onInitDone()
-                telemetry.addData("BUNYIPSOPMODE : ", "INIT COMPLETE -- PLAY WHEN READY.")
-//                queuedPacket.put("BUNYIPSOPMODE", "INIT COMPLETE -- PLAY WHEN READY.")
-                pushTelemetry()
-            } catch (ie: InterruptedException) {
-                throw ie
             } catch (e: Throwable) {
                 ErrorUtil.handleCatchAllException(e, ::log)
             }
-            updateOpModeStatus("ready")
-            Dbg.log("BunyipsOpMode: ready.")
+
             // Ready to go.
+            updateOpModeStatus("ready")
+            telemetry.addData("BUNYIPSOPMODE : ", "INIT COMPLETE -- PLAY WHEN READY.")
+//            queuedPacket.put("BUNYIPSOPMODE", "INIT COMPLETE -- PLAY WHEN READY.")
+            Dbg.log("BunyipsOpMode: ready.")
+            // Set telemetry to an inert state while we wait for start
+            pushTelemetry()
+            overheadTelemetry.setValue("BOM: ready | T+0s | 0.000ms | u1: (?) | u2: (?)\n")
+
             waitForStart()
+
+            // Play button has been pressed
+            updateOpModeStatus("starting")
             setTelemetryAutoClear(true)
             clearTelemetry()
             movingAverageTimer?.reset()
-            updateOpModeStatus("running")
-            Dbg.log("BunyipsOpMode: starting activeLoop()...")
+            Dbg.log("BunyipsOpMode: firing onStart()...")
             try {
                 // Run user-defined start operations
                 onStart()
-            } catch (ie: InterruptedException) {
-                throw ie
             } catch (e: Throwable) {
                 ErrorUtil.handleCatchAllException(e, ::log)
             }
+
+            updateOpModeStatus("running")
+            Dbg.log("BunyipsOpMode: starting activeLoop()...")
             while (opModeIsActive() && !operationsCompleted) {
                 if (operationsPaused) {
                     // If the OpMode is paused, skip the loop and wait for the next hardware cycle
+                    // Timers and telemetry will remain frozen and have to be controlled externally
                     idle()
                     continue
                 }
                 try {
                     // Run user-defined active loop
                     activeLoop()
-                    // Update telemetry and timers
-                    movingAverageTimer?.update()
-                    pushTelemetry()
-                } catch (ie: InterruptedException) {
-                    throw ie
                 } catch (e: Throwable) {
-                    // Let the error logger handle any other exceptions
                     ErrorUtil.handleCatchAllException(e, ::log)
                 }
+                // Update telemetry and timers
+                movingAverageTimer?.update()
+                pushTelemetry()
             }
+
             updateOpModeStatus("finished")
+            // overheadTelemetry will no longer update, will remain frozen on last value
+            pushTelemetry()
             Dbg.log("BunyipsOpMode: finished.")
-            // Wait for user to hit stop
+            // Wait for user to hit stop or for the OpMode to be terminated
             while (opModeIsActive()) {
                 idle()
             }
         } catch (t: Throwable) {
             Dbg.error("BunyipsOpMode: unhandled throwable! <${t.message}>")
             Dbg.sendStacktrace(t)
+            // As this error occurred somewhere not inside user code, we should not swallow it
+            throw t
         } finally {
             Dbg.log("BunyipsOpMode: cleaning up...")
             updateOpModeStatus("terminating")
@@ -229,19 +239,9 @@ abstract class BunyipsOpMode : LinearOpMode() {
             "BOM: $opModeStatus | T+${
                 movingAverageTimer?.elapsedTime()?.div(1000)?.roundToInt() ?: 0
             }s | ${movingAverageTimer?.movingAverageString() ?: "0.000ms"} | u1: ${
-                formatString(
-                    "(%,%,%)",
-                    round(gamepad1.left_stick_x, 1),
-                    round(gamepad1.left_stick_y, 1),
-                    round(gamepad1.right_stick_x, 1)
-                )
+                Controller.movementString(gamepad1)
             } | u2: ${
-                formatString(
-                    "(%,%,%)",
-                    round(gamepad2.left_stick_x, 1),
-                    round(gamepad2.left_stick_y, 1),
-                    round(gamepad2.right_stick_x, 1)
-                )
+                Controller.movementString(gamepad2)
             }\n"
         )
     }
@@ -344,7 +344,7 @@ abstract class BunyipsOpMode : LinearOpMode() {
         telemetry.clearAll()
         // Must reassign the overhead telemetry item
         overheadTelemetry =
-            telemetry.addData("", "BOM: unknown | T+?s | ?ms | u1: (?,?,?) | u2: (?,?,?)").setRetained(true)
+            telemetry.addData("", "BOM: unknown | T+?s | ?ms | u1: (?) | u2: (?)").setRetained(true)
 //        dashboard.clearTelemetry()
     }
 
