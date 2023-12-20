@@ -1,18 +1,53 @@
 package org.firstinspires.ftc.teamcode.common
 
+import com.acmerobotics.roadrunner.geometry.Pose2d
+import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.hardware.HardwareDevice
 import com.qualcomm.robotcore.hardware.HardwareMap
+import java.util.Objects
 
 /**
  * Abstract class to use as parent to the class you will define to mirror a "saved configuration" on the Robot Controller
+ * ```
+ *     private final YourConfig config = new YourConfig();
+ *
+ *     @Override
+ *     protected void onInit() {
+ *         config.init(this);
+ *     }
+ * ```
  */
 abstract class RobotConfig {
     protected var hardwareMap: HardwareMap? = null
 
     /**
-     * Initialise the hardwareMap and assign the class instance variables to the class they represent.
+     * Assign class instance variables to public HardwareDevices.
      */
-    protected abstract fun init()
+    protected abstract fun configureHardware()
+
+    /**
+     * Use HardwareMap to fetch HardwareDevices and assign instances.
+     * Should be called as the first line in onInit();
+     * @param opMode the OpMode instance - usually the `this` object when at the root OpMode.
+     */
+    fun init(opMode: OpMode) {
+        errors.clear()
+        this.hardwareMap = opMode.hardwareMap
+        Objects.requireNonNull(
+            this.hardwareMap,
+            "HardwareMap was null in ${this.javaClass.simpleName}!"
+        )
+        configureHardware()
+        opMode.telemetry.addData(
+            "",
+            "${this.javaClass.simpleName}: Configuration completed with ${errors.size} error(s).",
+        )
+        if (errors.isNotEmpty()) {
+            for (error in errors) {
+                opMode.telemetry.addData("", "! DEV_FAULT: $error").setRetained(true)
+            }
+        }
+    }
 
     /**
      * Convenience method for reading the device from the hardwareMap without having to check for exceptions.
@@ -31,42 +66,23 @@ abstract class RobotConfig {
             hardwareDevice = hardwareMap?.get(device, name) as HardwareDevice
         } catch (e: Throwable) {
             errors.add(name)
-            e.localizedMessage?.let { Dbg.log(it) }
+            e.localizedMessage?.let { Dbg.warn(it) }
         }
         return hardwareDevice
     }
 
+    // Global storage objects
     companion object {
         /**
          * Static array of hardware errors stored via hardware name.
          */
+        @JvmStatic
         val errors = ArrayList<String>()
 
         /**
-         * Factory method for creating a new instance of a configuration with a HardwareMap.
+         * Static Pose2d to store the robot's last known position after an OpMode has ended.
          */
         @JvmStatic
-        fun newConfig(
-            opMode: BunyipsOpMode,
-            config: RobotConfig?,
-            hardwareMap: HardwareMap
-        ): RobotConfig {
-            // Check to make sure RobotConfig was instantiated, as this is a common error
-            if (config == null) {
-                throw RuntimeException("RobotConfig: OpMode member 'config' is not instantiated, make sure to initialise your config with 'private YourConfig config = new YourConfig();' (Java) or 'private var config = YourConfig()' (Kotlin) in your OpMode class members.")
-            }
-            config.hardwareMap = hardwareMap
-            errors.clear()
-            config.init()
-            opMode.addTelemetry(
-                "${config.javaClass.simpleName}: Configuration completed with ${errors.size} error(s).",
-            )
-            if (errors.isNotEmpty()) {
-                for (error in errors) {
-                    opMode.addRetainedTelemetry("! DEV_FAULT: $error")
-                }
-            }
-            return config
-        }
+        var lastKnownPosition: Pose2d? = null
     }
 }

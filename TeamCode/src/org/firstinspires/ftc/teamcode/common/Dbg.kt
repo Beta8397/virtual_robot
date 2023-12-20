@@ -30,7 +30,8 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 package org.firstinspires.ftc.teamcode.common
 
-import android.util.Log
+import com.qualcomm.robotcore.util.RobotLog
+import org.firstinspires.ftc.teamcode.common.Text.formatString
 
 /**
  * Provide utility methods for debug logging
@@ -39,55 +40,81 @@ object Dbg {
     /**
      * Tag used by logcat
      */
-    private const val TAG = "BELLOWER"
+    const val TAG = "BELLOWER"
     private const val ERR_PREPEND = "!! "
     private const val WRN_PREPEND = "! "
 
     /**
-     * Log an error message
+     * Log an error message.
      * Messages will be prepended with the ERROR_PREPEND string
+     * Best used in a scenario where the program cannot continue normally or at required functionality
      * @param message message to error
      */
+    @JvmStatic
     fun error(message: String) {
-        Log.e(TAG, ERR_PREPEND + message)
+        RobotLog.ee(TAG, ERR_PREPEND + message)
     }
 
+    @JvmStatic
     fun error(format: String, vararg args: Any?) {
-        error(String.format(format, *args))
+        error(formatString(format, *args))
     }
 
     /**
-     * Report out a stacktrace
+     * Report out a stacktrace.
      * @param e throwable
      */
+    @JvmStatic
     fun sendStacktrace(e: Throwable) {
-        Log.e(TAG, e.toString())
+        RobotLog.ee(TAG, e.toString())
         for (el in e.stackTrace) {
-            Log.e(TAG, el.toString())
+            RobotLog.ee(TAG, el.toString())
         }
     }
 
     /**
-     * Log a warning message
+     * Log a warning message.
+     * Messages will be prepended with the WRN_PREPEND string
+     * Best used in a scenario where the program can continue, but the user should be warned
      * @param message message to warn
      */
+    @JvmStatic
     fun warn(message: String) {
-        Log.w(TAG, WRN_PREPEND + message)
+        RobotLog.ww(TAG, WRN_PREPEND + message)
     }
 
+    @JvmStatic
     fun warn(format: String, vararg args: Any?) {
-        warn(String.format(format, *args))
+        warn(formatString(format, *args))
     }
 
     /**
-     * Log a debug message
+     * Log an internal debug message.
+     * Best used from critical classes to log internal state
      * @param message message to log
      */
-    fun log(message: String) {
-        Log.d(TAG, message)
+    @JvmStatic
+    fun logd(message: String) {
+        RobotLog.dd(TAG, message)
     }
 
+    @JvmStatic
+    fun logd(format: String, vararg args: Any?) {
+        logd(formatString(format, *args))
+    }
+
+    /**
+     * Log a user message.
+     * Best used to log a message or value to Logcat from user code
+     * @param message message to log
+     */
+    @JvmStatic
+    fun log(message: String) {
+        RobotLog.ii(TAG, message)
+    }
+
+    @JvmStatic
     fun log(format: String, vararg args: Any?) {
-        log(String.format(format, *args))
+        log(formatString(format, *args))
     }
 }

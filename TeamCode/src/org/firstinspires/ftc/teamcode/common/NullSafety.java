@@ -1,9 +1,9 @@
 package org.firstinspires.ftc.teamcode.common;
 
+import static org.firstinspires.ftc.teamcode.common.Text.formatString;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.firstinspires.ftc.teamcode.common.Text.formatString;
 
 /**
  * Null safety utilities for robot components.
@@ -22,7 +22,7 @@ public class NullSafety {
     public static boolean assertNotNull(Object... objs) {
         for (Object o : objs) {
             if (o == null) {
-                Dbg.INSTANCE.warn("Assertion by NullSafety.assertNotNull() failed.");
+                Dbg.warn("Assertion by NullSafety.assertNotNull() failed.");
                 return false;
             }
         }
@@ -47,7 +47,7 @@ public class NullSafety {
             if (o == null) {
                 opMode.addRetainedTelemetry(formatString("! COM_FAULT: % failed to instantiate due to null constructor arguments", T.getSimpleName()));
                 opMode.log("error: % is null. attempting to suppress errors...", T.getSimpleName());
-                Dbg.INSTANCE.error(formatString("% is null, adding to unusable components...", T.getSimpleName()));
+                Dbg.error(formatString("% is null, adding to unusable components...", T.getSimpleName()));
                 if (!unusableComponents.contains(T.getSimpleName()))
                     unusableComponents.add(T.getSimpleName());
                 return false;

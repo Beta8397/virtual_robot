@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode.common.roadrunner.drive.localizers;
 
 import androidx.annotation.NonNull;
+
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.localization.TwoTrackingWheelLocalizer;
+
 import org.firstinspires.ftc.teamcode.common.roadrunner.drive.MecanumRoadRunnerDrive;
 import org.firstinspires.ftc.teamcode.common.roadrunner.util.Encoder;
 
@@ -51,6 +53,10 @@ public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
 
         this.parallelEncoder = parallelEncoder;
         this.perpendicularEncoder = perpendicularEncoder;
+    }
+
+    public TwoWheelTrackingLocalizerCoefficients getCoefficients() {
+        return coefficients;
     }
 
     public double encoderTicksToInches(double ticks) {

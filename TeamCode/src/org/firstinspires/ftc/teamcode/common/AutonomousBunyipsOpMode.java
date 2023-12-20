@@ -1,13 +1,16 @@
 package org.firstinspires.ftc.teamcode.common;
 
 import androidx.annotation.Nullable;
-import kotlin.Unit;
+
+import org.jetbrains.annotations.NotNull;
 import org.firstinspires.ftc.teamcode.common.tasks.AutoTask;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import kotlin.Unit;
 
 /**
  * OpMode abstraction for Autonomous operation using the BunyipsOpMode ecosystem.
@@ -28,9 +31,12 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
      */
     protected final ArrayList<OpModeSelection> opModes = new ArrayList<>();
     private final ArrayDeque<AutoTask> tasks = new ArrayDeque<>();
+    // Pre and post queues cannot have their tasks removed, so we can rely on their .size() methods
     private final ArrayDeque<AutoTask> postQueue = new ArrayDeque<>();
     private final ArrayDeque<AutoTask> preQueue = new ArrayDeque<>();
+    private int taskCount;
     private UserSelection<OpModeSelection> userSelection;
+    // Init-task does not count as a queued task, so we start at 1
     private int currentTask = 1;
     private AutoTask initTask;
     private boolean hasGottenCallback;
@@ -45,15 +51,25 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
         // Interface Unit to be void
         onQueueReady(selectedOpMode);
         // Add any queued tasks
-        tasks.addAll(postQueue);
-        for (AutoTask task : preQueue) {
-            tasks.addFirst(task);
+        for (AutoTask task : postQueue) {
+            addTask(task);
         }
+        for (AutoTask task : preQueue) {
+            addTaskFirst(task);
+        }
+        preQueue.clear();
+        postQueue.clear();
         return Unit.INSTANCE;
     }
 
+    /**
+     * This method should not be overridden, as it is used internally to handle the
+     * asynchronous task allocation. Use onInitialisation() instead.
+     *
+     * @see #onInitialisation()
+     */
     @Override
-    protected final void onInit() {
+    protected void onInit() {
         // Run user-defined hardware initialisation
         onInitialisation();
         // Set user-defined initTask
@@ -70,7 +86,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
         OpModeSelection[] varargs = opModes.toArray(new OpModeSelection[0]);
         if (varargs.length == 0) {
             log("auto: no OpModeSelections defined, skipping selection phase");
-            opModes.add(new OpModeSelection("DEFAULT"));
+            opModes.add(new OpModeSelection(new DefaultOpMode()));
         }
         if (varargs.length > 1) {
             // Run task allocation if OpModeSelections are defined
@@ -107,12 +123,14 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     protected final void activeLoop() {
         // Run any code defined by the user
         onActiveLoop();
+
         if (!hasGottenCallback) {
             // Not ready to run tasks yet, tell the user selection to terminate if it hasn't
             if (!userSelection.isInterrupted())
                 userSelection.interrupt();
             return;
         }
+
         // Run the queue of tasks
         AutoTask currentTask = tasks.peekFirst();
 
@@ -122,15 +140,13 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
             return;
         }
 
-        // Why does it have to be like this
-        addTelemetry("Running task (%/%): %", this.currentTask, tasks.size(), currentTask.getClass().getSimpleName());
-
+        addTelemetry("Running task (%/%): %", this.currentTask, taskCount, currentTask.getClass().getSimpleName());
         currentTask.run();
 
         // AutonomousBunyipsOpMode is handling all task completion checks, manual checks not required
         if (currentTask.isFinished()) {
             tasks.removeFirst();
-            log("auto: task %/% (%) finished", this.currentTask, tasks.size() + 1, currentTask.getClass().getSimpleName());
+            log("auto: task %/% (%) finished", this.currentTask, taskCount, currentTask.getClass().getSimpleName());
             this.currentTask++;
         }
     }
@@ -138,9 +154,9 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     /**
      * Run code in a loop AFTER onBegin() has completed, until
      * start is pressed on the Driver Station or the {@link #setInitTask initTask} is done.
-     * If not implemented, the opMode will try to run your initTask, and if that is null,
+     * If not implemented, the OpMode will try to run your initTask, and if that is null,
      * the dynamic_init phase will be skipped.
-     * Overriding this method will fully detach your UserSelection from alerting BYO of its runtime,
+     * Overriding this method will fully detach your UserSelection and initTask from runtime,
      * so override with caution or ensure to use a super call.
      *
      * @see #setInitTask
@@ -158,13 +174,19 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
      * Can be called to add custom tasks in a robot's autonomous
      *
      * @param newTask task to add to the run queue
+     * @param ack     suppress the warning that a task was added manually before onReady
      */
-    public void addTask(AutoTask newTask) {
-        if (!hasGottenCallback) {
+    public void addTask(@NotNull AutoTask newTask, boolean ack) {
+        if (!hasGottenCallback && !ack) {
             log("auto: caution! a task was added manually before the onReady callback");
         }
         tasks.add(newTask);
-        log("auto: % has been added as task %/%", newTask.getClass().getSimpleName(), tasks.size(), tasks.size());
+        taskCount++;
+        log("auto: % has been added as task %/%", newTask.getClass().getSimpleName(), taskCount, taskCount);
+    }
+
+    public void addTask(@NotNull AutoTask newTask) {
+        addTask(newTask, false);
     }
 
     /**
@@ -172,14 +194,15 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
      * when working with tasks that should be queued at the very end of the autonomous, while still
      * being able to add tasks asynchronously with user input in onReady().
      */
-    public void addTaskLast(AutoTask newTask) {
+    public void addTaskLast(@NotNull AutoTask newTask) {
         if (!hasGottenCallback) {
             postQueue.add(newTask);
             log("auto: % has been queued as end-init task %/%", newTask.getClass().getSimpleName(), postQueue.size(), postQueue.size());
             return;
         }
         tasks.addLast(newTask);
-        log("auto: % has been added as task %/%", newTask.getClass().getSimpleName(), tasks.size(), tasks.size());
+        taskCount++;
+        log("auto: % has been added as task %/%", newTask.getClass().getSimpleName(), taskCount, taskCount);
     }
 
     /**
@@ -187,20 +210,23 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
      * should be queued at the very start of the autonomous, while still being able to add tasks
      * asynchronously with user input in onReady().
      */
-    public void addTaskFirst(AutoTask newTask) {
+    public void addTaskFirst(@NotNull AutoTask newTask) {
         if (!hasGottenCallback) {
             preQueue.add(newTask);
             log("auto: % has been queued as end-init task 1/%", newTask.getClass().getSimpleName(), preQueue.size());
             return;
         }
         tasks.addFirst(newTask);
-        log("auto: % has been added as task 1/%", newTask.getClass().getSimpleName(), tasks.size());
+        taskCount++;
+        log("auto: % has been added as task 1/%", newTask.getClass().getSimpleName(), taskCount);
     }
 
     /**
-     * Removes whatever task is at the given array index
+     * Removes whatever task is at the given queue position
+     * Note: this will remove the index and shift all other tasks down, meaning that
+     * tasks being added/removed may affect the index of the task you want to remove
      *
-     * @param taskIndex the array index to be removed (did I really need to tell you?)
+     * @param taskIndex the array index to be removed
      */
     public void removeTaskIndex(int taskIndex) {
         if (taskIndex < 0) {
@@ -225,6 +251,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
             if (counter == taskIndex) {
                 iterator.remove();
                 log("auto: task at index % was removed", taskIndex);
+                taskCount--;
                 break;
             }
 
@@ -234,11 +261,29 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     }
 
     /**
+     * Remove a task from the queue
+     * This assumes that the overhead OpMode has instance control over the task, as this method
+     * will search for an object reference to the task and remove it from the queue
+     *
+     * @param task the task to be removed
+     */
+    public void removeTask(@NotNull AutoTask task) {
+        if (tasks.contains(task)) {
+            tasks.remove(task);
+            log("auto: task % was removed", task.getClass().getSimpleName());
+            taskCount--;
+        } else {
+            log("auto: task % was not found in the queue", task.getClass().getSimpleName());
+        }
+    }
+
+    /**
      * Removes the last task in the task queue
      */
     public void removeTaskLast() {
         tasks.removeLast();
-        log("auto: task at index % was removed", tasks.size() + 1);
+        taskCount--;
+        log("auto: task at index % was removed", taskCount + 1);
     }
 
     /**
@@ -246,6 +291,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
      */
     public void removeTaskFirst() {
         tasks.removeFirst();
+        taskCount--;
         log("auto: task at index 0 was removed");
     }
 
@@ -300,7 +346,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
      * in which case it will run immediately after onInitialisation() has completed.
      * This is where you should add your tasks to the run queue.
      *
-     * @param selectedOpMode the OpMode selected by the user, if applicable. Will be "DEFAULT" if no OpModeSelections were defined, or
+     * @param selectedOpMode the OpMode selected by the user, if applicable. Will be DefaultOpMode if no OpModeSelections were defined, or
      *                       NULL if the user did not select an OpMode.
      * @see #addTask(AutoTask)
      */

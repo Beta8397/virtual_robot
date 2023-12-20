@@ -63,7 +63,8 @@ class GetSignalTask(opMode: BunyipsOpMode, private val cam: OpenCVCam) : Task(op
         return
     }
 
-    //    @SuppressLint("DefaultLocale")
+    // Suppression is incompatible with virtual_robot
+//    @SuppressLint("DefaultLocale")
     override fun run() {
         // Caution! ParkingPosition will be null if the camera does not pick up anything in it's task runtime.
         // Be sure to check if ParkingPosition is null before setting up your specific tasks, to handle a fallback value.

@@ -10,6 +10,9 @@ import org.firstinspires.ftc.teamcode.common.roadrunner.drive.MecanumCoefficient
 import org.firstinspires.ftc.teamcode.common.roadrunner.drive.localizers.TwoWheelTrackingLocalizerCoefficients;
 import org.firstinspires.ftc.teamcode.common.roadrunner.util.Encoder;
 
+/**
+ * Running under "Mecanum Bot" config
+ */
 public class ImposterConfig extends RobotConfig {
     public DcMotorEx back_right_motor;
     public DcMotorEx back_left_motor;
@@ -24,7 +27,7 @@ public class ImposterConfig extends RobotConfig {
     public IMU imu;
 
     @Override
-    protected void init() {
+    protected void configureHardware() {
         back_right_motor = (DcMotorEx) getHardware("back_right_motor", DcMotorEx.class);
         back_left_motor = (DcMotorEx) getHardware("back_left_motor", DcMotorEx.class);
         front_right_motor = (DcMotorEx) getHardware("front_right_motor", DcMotorEx.class);
@@ -36,7 +39,6 @@ public class ImposterConfig extends RobotConfig {
         localizerCoefficients = new TwoWheelTrackingLocalizerCoefficients.Builder()
                 .build();
 
-        // TODO: Tune
         driveConstants = new DriveConstants.Builder()
                 .setTicksPerRev(537.6)
                 .setMaxRPM(312.5)
@@ -55,7 +57,6 @@ public class ImposterConfig extends RobotConfig {
                 .setTicksPerRev(2400)
                 .setGearRatio(1)
                 .setWheelRadius(Inches.fromMM(50) / 2)
-                // TODO: Set these values
                 .setParallelX(0)
                 .setParallelY(0)
                 .setPerpendicularX(0)

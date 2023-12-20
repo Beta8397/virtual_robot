@@ -110,6 +110,7 @@ data class AprilTagData(
      * Raw translation vector and orientation matrix returned by the pose solver.
      * This is not useful for most applications, but can be used to compute custom projections.
      */
+    // AprilTagPoseRaw is not available with virtual_robot due to outdated SDK
 //    val rawPose: AprilTagPoseRaw?,
     /**
      * Timestamp of when the image in which this detection was found was acquired.

@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.common.roadrunner.util;
 
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+
 import org.firstinspires.ftc.robotcore.internal.system.Misc;
 
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import java.util.Map;
 /**
  * Collection of utilites for interacting with Lynx modules.
  */
+// Incompatible with virtual_robot, methods have been nullified
 public class LynxModuleUtil {
 
     private static final LynxFirmwareVersion MIN_VERSION = new LynxFirmwareVersion(1, 8, 2);
@@ -46,27 +48,27 @@ public class LynxModuleUtil {
      * @param hardwareMap hardware map containing Lynx modules
      */
     public static void ensureMinimumFirmwareVersion(HardwareMap hardwareMap) {
-        Map<String, LynxFirmwareVersion> outdatedModules = new HashMap<>();
-        for (LynxModule module : hardwareMap.getAll(LynxModule.class)) {
-            LynxFirmwareVersion version = getFirmwareVersion(module);
-            if (version == null || version.compareTo(MIN_VERSION) < 0) {
+//        Map<String, LynxFirmwareVersion> outdatedModules = new HashMap<>();
+//        for (LynxModule module : hardwareMap.getAll(LynxModule.class)) {
+//            LynxFirmwareVersion version = getFirmwareVersion(module);
+//            if (version == null || version.compareTo(MIN_VERSION) < 0) {
 //                for (String name : hardwareMap.getNamesOf(module)) {
 //                    outdatedModules.put(name, version);
 //                }
-            }
-        }
-        if (outdatedModules.size() > 0) {
-            StringBuilder msgBuilder = new StringBuilder();
-            msgBuilder.append("One or more of the attached Lynx modules has outdated firmware\n");
-            msgBuilder.append(Misc.formatInvariant("Mandatory minimum firmware version for Road Runner: %s\n",
-                    MIN_VERSION.toString()));
-            for (Map.Entry<String, LynxFirmwareVersion> entry : outdatedModules.entrySet()) {
-                msgBuilder.append(Misc.formatInvariant(
-                        "\t%s: %s\n", entry.getKey(),
-                        entry.getValue() == null ? "Unknown" : entry.getValue().toString()));
-            }
-            throw new LynxFirmwareVersionException(msgBuilder.toString());
-        }
+//            }
+//        }
+//        if (outdatedModules.size() > 0) {
+//            StringBuilder msgBuilder = new StringBuilder();
+//            msgBuilder.append("One or more of the attached Lynx modules has outdated firmware\n");
+//            msgBuilder.append(Misc.formatInvariant("Mandatory minimum firmware version for Road Runner: %s\n",
+//                    MIN_VERSION.toString()));
+//            for (Map.Entry<String, LynxFirmwareVersion> entry : outdatedModules.entrySet()) {
+//                msgBuilder.append(Misc.formatInvariant(
+//                        "\t%s: %s\n", entry.getKey(),
+//                        entry.getValue() == null ? "Unknown" : entry.getValue().toString()));
+//            }
+//            throw new LynxFirmwareVersionException(msgBuilder.toString());
+//        }
     }
 
     /**

@@ -111,6 +111,7 @@ enum class Controller {
          */
         @JvmStatic
         fun movementString(gamepad: Gamepad): String {
+            // Incompatible with virtual_robot
 //            if (gamepad.id == -1) return "(dc)"
             var str = "("
             for (button in values()) {

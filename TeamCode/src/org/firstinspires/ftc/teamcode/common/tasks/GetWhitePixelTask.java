@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.common.tasks;
 
 import androidx.annotation.NonNull;
+
 import org.firstinspires.ftc.teamcode.common.BunyipsOpMode;
 import org.firstinspires.ftc.teamcode.common.Vision;
 import org.firstinspires.ftc.teamcode.common.vision.TFOD;
@@ -60,12 +61,12 @@ public class GetWhitePixelTask extends Task {
         // We are using the default settings of TFOD for white spike detection
         // We assume that the OpMode has opened a new VisionPortal for us with .init()
         try {
-//            vision.start(tfod);
+            vision.start(tfod);
         } catch (IllegalStateException e) {
             // OpMode did not start the VisionPortal for us, we better do it ourselves
             getOpMode().log("WARNING: TFOD processor not initialised by Vision.init()! Initialising now...");
-//            vision.init(tfod);
-//            vision.start(tfod);
+            vision.init(tfod);
+            vision.start(tfod);
         }
     }
 
@@ -107,7 +108,7 @@ public class GetWhitePixelTask extends Task {
     @Override
     public void onFinish() {
         // We will not need TFOD anymore
-//        vision.stop(tfod);
+        vision.stop(tfod);
     }
 
     enum Aggression {

@@ -10,9 +10,10 @@ import java.util.List;
 /**
  * Utility functions for log files.
  */
+// Incompatible with virtual_robot, methods have been nullified
 public class LoggingUtil {
-    public static final File ROAD_RUNNER_FOLDER =
-            new File("/tmp/");
+//    public static final File ROAD_RUNNER_FOLDER =
+//            new File(AppUtil.ROOT_FOLDER + "/RoadRunner/");
 
     private static final long LOG_QUOTA = 25 * 1024 * 1024; // 25MB log quota for now
 
@@ -28,7 +29,7 @@ public class LoggingUtil {
 
     private static void pruneLogsIfNecessary() {
         List<File> logFiles = new ArrayList<>();
-        buildLogList(logFiles, ROAD_RUNNER_FOLDER);
+//        buildLogList(logFiles, ROAD_RUNNER_FOLDER);
         Collections.sort(logFiles, (lhs, rhs) ->
                 Long.compare(lhs.lastModified(), rhs.lastModified()));
 
@@ -51,10 +52,11 @@ public class LoggingUtil {
      */
     public static File getLogFile(String name) {
         //noinspection ResultOfMethodCallIgnored
-        ROAD_RUNNER_FOLDER.mkdirs();
+//        ROAD_RUNNER_FOLDER.mkdirs();
 
         pruneLogsIfNecessary();
 
-        return new File(ROAD_RUNNER_FOLDER, name);
+//        return new File(ROAD_RUNNER_FOLDER, name);
+        return null;
     }
 }

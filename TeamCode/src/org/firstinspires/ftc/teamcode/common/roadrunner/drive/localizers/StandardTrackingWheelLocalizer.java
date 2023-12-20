@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode.common.roadrunner.drive.localizers;
 
 import androidx.annotation.NonNull;
+
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.localization.ThreeTrackingWheelLocalizer;
+
 import org.firstinspires.ftc.teamcode.common.roadrunner.util.Encoder;
 
 import java.util.Arrays;
@@ -25,7 +27,6 @@ public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer 
     private final Encoder leftEncoder;
     private final Encoder rightEncoder;
     private final Encoder frontEncoder;
-
     private final List<Integer> lastEncPositions;
     private final List<Integer> lastEncVels;
 
@@ -46,6 +47,10 @@ public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer 
         this.leftEncoder = leftEncoder;
         this.rightEncoder = rightEncoder;
         this.frontEncoder = frontEncoder;
+    }
+
+    public StandardTrackingWheelLocalizerCoefficients getCoefficients() {
+        return coefficients;
     }
 
     public double encoderTicksToInches(double ticks) {

@@ -2,8 +2,9 @@ package org.firstinspires.ftc.teamcode.common
 
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
-import com.qualcomm.robotcore.hardware.DcMotorSimple
-import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType
+import com.qualcomm.robotcore.hardware.DcMotorExImpl
+import com.qualcomm.robotcore.hardware.DcMotorImpl
+import com.qualcomm.robotcore.hardware.configuration.MotorType
 
 /**
  * Extension of DcMotor that implements a pivotal encoder for tracking the position of a pivot.
@@ -13,7 +14,8 @@ class PivotMotor(
     override val motor: DcMotorEx,
     override val ticksPerRevolution: Double,
     override var reduction: Double = 1.0,
-) : DcMotor, EncoderTracker {
+    // Hack to get implementation for DcMotor virtual_robot
+) : DcMotorExImpl(MotorType.RevUltraPlanetaryOneToOne), EncoderTracker {
     override val wheelDiameterMM = null
     override var snapshot: Double = 0.0
 
@@ -56,57 +58,5 @@ class PivotMotor(
     fun setRadians(radians: Double) {
         motor.targetPosition =
             ((radians / (2 * Math.PI)) * ticksPerRevolution / reduction).toInt() - snapshot.toInt()
-    }
-
-    override fun setDirection(direction: DcMotorSimple.Direction?) {
-        TODO("Not yet implemented")
-    }
-
-    override fun getDirection(): DcMotorSimple.Direction {
-        TODO("Not yet implemented")
-    }
-
-    override fun setPower(power: Double) {
-        TODO("Not yet implemented")
-    }
-
-    override fun getPower(): Double {
-        TODO("Not yet implemented")
-    }
-
-    override fun setMode(mode: DcMotor.RunMode?) {
-        TODO("Not yet implemented")
-    }
-
-    override fun getMode(): DcMotor.RunMode {
-        TODO("Not yet implemented")
-    }
-
-    override fun getCurrentPosition(): Int {
-        TODO("Not yet implemented")
-    }
-
-    override fun setTargetPosition(pos: Int) {
-        TODO("Not yet implemented")
-    }
-
-    override fun getTargetPosition(): Int {
-        TODO("Not yet implemented")
-    }
-
-    override fun isBusy(): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override fun setZeroPowerBehavior(zeroPowerBehavior: DcMotor.ZeroPowerBehavior?) {
-        TODO("Not yet implemented")
-    }
-
-    override fun getZeroPowerBehavior(): DcMotor.ZeroPowerBehavior {
-        TODO("Not yet implemented")
-    }
-
-    override fun getMotorType(): MotorConfigurationType {
-        TODO("Not yet implemented")
     }
 }

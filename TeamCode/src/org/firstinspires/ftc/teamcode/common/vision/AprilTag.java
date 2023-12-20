@@ -1,29 +1,32 @@
 package org.firstinspires.ftc.teamcode.common.vision;
 
 import android.graphics.Canvas;
+
 import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.teamcode.common.cameras.CameraType;
 import org.firstinspires.ftc.teamcode.common.vision.data.AprilTagData;
-import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.opencv.core.Mat;
+
+import java.util.List;
 
 /**
  * Extension wrapper for AprilTag to interop with the Vision system
  *
  * @author Lucas Bubner, 2023
  */
+// Incompatible with virtual_robot, methods have been nullified
 public class AprilTag extends Processor<AprilTagData> {
-    private final AprilTagProcessor instance;
+//    private final AprilTagProcessor instance;
 
     public AprilTag(CameraType camInfo) {
         super(AprilTagData.class);
-        // camera is impossible
 //        instance = new AprilTagProcessor.Builder()
 //                .setLensIntrinsics(camInfo.getFx(), camInfo.getFy(), camInfo.getCx(), camInfo.getCy())
 //                // Specify custom AprilTag settings here
 //                // By default this will load the current season assets
 //                .build();
-        instance = new AprilTagProcessor();
     }
 
     /**
@@ -31,9 +34,9 @@ public class AprilTag extends Processor<AprilTagData> {
      *
      * @return direct AprilTagProcessor instance
      */
-    public AprilTagProcessor getInstance() {
-        return instance;
-    }
+//    public AprilTagProcessor getInstance() {
+//        return instance;
+//    }
 
     @Override
     public String getName() {
@@ -46,7 +49,7 @@ public class AprilTag extends Processor<AprilTagData> {
 //        if (detections == null) {
 //            return;
 //        }
-//        data.clear();
+        data.clear();
 //        for (AprilTagDetection detection : detections) {
 //            data.add(new AprilTagData(
 //                    detection.id,
@@ -78,16 +81,17 @@ public class AprilTag extends Processor<AprilTagData> {
 
     @Override
     public void init(int width, int height, CameraCalibration calibration) {
-        instance.init(width, height, calibration);
+//        instance.init(width, height, calibration);
     }
 
     @Override
-    public Object processFrame(Mat frame, long captureTimeNanos) {
-        return instance.processFrame(frame, captureTimeNanos);
+    public Object onProcessFrame(Mat frame, long captureTimeNanos) {
+//        return instance.processFrame(frame, captureTimeNanos);
+        return frame;
     }
 
     @Override
     public void onDrawFrame(Canvas canvas, int onscreenWidth, int onscreenHeight, float scaleBmpPxToCanvasPx, float scaleCanvasDensity, Object userContext) {
-        instance.onDrawFrame(canvas, onscreenWidth, onscreenHeight, scaleBmpPxToCanvasPx, scaleCanvasDensity, userContext);
+//        instance.onDrawFrame(canvas, onscreenWidth, onscreenHeight, scaleBmpPxToCanvasPx, scaleCanvasDensity, userContext);
     }
 }

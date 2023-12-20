@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.common.roadrunner.drive;
 
 import androidx.annotation.NonNull;
+
 import com.acmerobotics.roadrunner.drive.DriveSignal;
 import com.acmerobotics.roadrunner.followers.HolonomicPIDVAFollower;
 import com.acmerobotics.roadrunner.followers.TrajectoryFollower;
@@ -9,8 +10,14 @@ import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
 import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryAccelerationConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryVelocityConstraint;
-import com.qualcomm.robotcore.hardware.*;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.common.roadrunner.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.common.roadrunner.trajectorysequence.TrajectorySequenceBuilder;
@@ -26,23 +33,20 @@ import java.util.List;
  */
 public class MecanumRoadRunnerDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive implements RoadRunnerDrive {
     private final DriveConstants constants;
-    private final MecanumCoefficients coefficients;
     private final TrajectoryVelocityConstraint VEL_CONSTRAINT;
     private final TrajectoryAccelerationConstraint ACCEL_CONSTRAINT;
     private final TrajectorySequenceRunner trajectorySequenceRunner;
     private final TrajectoryFollower follower;
-
     private final DcMotorEx leftFront;
     private final DcMotorEx leftRear;
     private final DcMotorEx rightRear;
     private final DcMotorEx rightFront;
     private final List<DcMotorEx> motors;
-
     private final IMU imu;
     private final VoltageSensor batteryVoltageSensor;
-
     private final List<Integer> lastEncPositions = new ArrayList<>();
     private final List<Integer> lastEncVels = new ArrayList<>();
+    private MecanumCoefficients coefficients;
 
     public MecanumRoadRunnerDrive(DriveConstants constants, MecanumCoefficients coefficients, HardwareMap.DeviceMapping<VoltageSensor> voltageSensor, IMU imu, DcMotorEx fl, DcMotorEx fr, DcMotorEx bl, DcMotorEx br) {
         super(constants.kV, constants.kA, constants.kStatic, constants.TRACK_WIDTH, constants.TRACK_WIDTH, coefficients.LATERAL_MULTIPLIER);
@@ -101,6 +105,28 @@ public class MecanumRoadRunnerDrive extends com.acmerobotics.roadrunner.drive.Me
         );
     }
 
+    public MecanumCoefficients getCoefficients() {
+        return coefficients;
+    }
+
+    public void setCoefficients(MecanumCoefficients coefficients) {
+        this.coefficients = coefficients;
+    }
+
+    public DriveConstants getConstants() {
+        return constants;
+    }
+
+    @Override
+    public TrajectorySequenceRunner getTrajectorySequenceRunner() {
+        return trajectorySequenceRunner;
+    }
+
+    @Override
+    public void stop() {
+        setMotorPowers(0, 0, 0, 0);
+    }
+
     public TrajectoryBuilder trajectoryBuilder(Pose2d startPose) {
         return new TrajectoryBuilder(startPose, VEL_CONSTRAINT, ACCEL_CONSTRAINT);
     }
@@ -113,6 +139,7 @@ public class MecanumRoadRunnerDrive extends com.acmerobotics.roadrunner.drive.Me
         return new TrajectoryBuilder(startPose, startHeading, VEL_CONSTRAINT, ACCEL_CONSTRAINT);
     }
 
+    @SuppressWarnings("rawtypes")
     public TrajectorySequenceBuilder trajectorySequenceBuilder(Pose2d startPose) {
         return new TrajectorySequenceBuilder(
                 startPose,
@@ -131,6 +158,7 @@ public class MecanumRoadRunnerDrive extends com.acmerobotics.roadrunner.drive.Me
 
     public void turn(double angle) {
         turnAsync(angle);
+        waitForIdle();
     }
 
     public void followTrajectoryAsync(Trajectory trajectory) {
@@ -143,6 +171,12 @@ public class MecanumRoadRunnerDrive extends com.acmerobotics.roadrunner.drive.Me
 
     public void followTrajectory(Trajectory trajectory) {
         followTrajectoryAsync(trajectory);
+        waitForIdle();
+    }
+
+    public void waitForIdle() {
+        while (!Thread.currentThread().isInterrupted() && isBusy())
+            update();
     }
 
     public void followTrajectorySequenceAsync(TrajectorySequence trajectorySequence) {
@@ -151,6 +185,7 @@ public class MecanumRoadRunnerDrive extends com.acmerobotics.roadrunner.drive.Me
 
     public void followTrajectorySequence(TrajectorySequence trajectorySequence) {
         followTrajectorySequenceAsync(trajectorySequence);
+        waitForIdle();
     }
 
     public Pose2d getLastError() {

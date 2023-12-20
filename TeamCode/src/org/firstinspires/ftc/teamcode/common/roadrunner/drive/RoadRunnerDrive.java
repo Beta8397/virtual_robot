@@ -5,10 +5,18 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.localization.Localizer;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
-import com.acmerobotics.roadrunner.trajectory.constraints.*;
+import com.acmerobotics.roadrunner.trajectory.constraints.AngularVelocityConstraint;
+import com.acmerobotics.roadrunner.trajectory.constraints.MecanumVelocityConstraint;
+import com.acmerobotics.roadrunner.trajectory.constraints.MinVelocityConstraint;
+import com.acmerobotics.roadrunner.trajectory.constraints.ProfileAccelerationConstraint;
+import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryAccelerationConstraint;
+import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryVelocityConstraint;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+
 import org.firstinspires.ftc.teamcode.common.roadrunner.trajectorysequence.TrajectorySequence;
+import org.firstinspires.ftc.teamcode.common.roadrunner.trajectorysequence.TrajectorySequenceBuilder;
+import org.firstinspires.ftc.teamcode.common.roadrunner.trajectorysequence.TrajectorySequenceRunner;
 
 import java.util.Arrays;
 import java.util.List;
@@ -30,11 +38,19 @@ public interface RoadRunnerDrive {
         return new ProfileAccelerationConstraint(maxAccel);
     }
 
+    TrajectorySequenceRunner getTrajectorySequenceRunner();
+
+    void stop();
+
+    void waitForIdle();
+
     TrajectoryBuilder trajectoryBuilder(Pose2d startPose);
 
     TrajectoryBuilder trajectoryBuilder(Pose2d startPose, boolean reversed);
 
     TrajectoryBuilder trajectoryBuilder(Pose2d startPose, double startHeading);
+
+    TrajectorySequenceBuilder trajectorySequenceBuilder(Pose2d startPose);
 
     void turnAsync(double angle);
 
@@ -50,7 +66,6 @@ public interface RoadRunnerDrive {
 
     Pose2d getLastError();
 
-    // waitForIdle was removed as BunyipsOpMode handles all dispatch manually
     void update();
 
     boolean isBusy();

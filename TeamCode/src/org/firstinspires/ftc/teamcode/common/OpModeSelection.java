@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.common;
 
+
 /**
  * OpMode selection options for AutonomousBunyipsOpMode.
  *
@@ -35,11 +36,8 @@ public class OpModeSelection {
         return obj;
     }
 
-    public boolean is(String name) {
-        return this.name.equals(name);
-    }
-
-    public boolean is(Object obj) {
-        return this.obj.equals(obj);
+    @Override
+    public boolean equals(Object o) {
+        return name.equals(o) || obj == o || o == this;
     }
 }

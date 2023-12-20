@@ -43,8 +43,8 @@ class MovingAverageTimer @JvmOverloads constructor(
 
             Resolution.MILLISECONDS -> {
                 this.resolution = MILLIS_IN_NANO
-                avgFormatStr = "%3.3f msecs"
-                toStringFormatStr = """${hdr}msecs
+                avgFormatStr = "%3.3f ms"
+                toStringFormatStr = """${hdr}ms
 %-12d%-12.3f%-12.3f%-12.3f
  min        %-12.3f%-12.3f%-12.3f
  max        %-12.3f%-12.3f%-12.3f"""
@@ -52,8 +52,8 @@ class MovingAverageTimer @JvmOverloads constructor(
 
             else -> {
                 this.resolution = MILLIS_IN_NANO
-                avgFormatStr = "%3.3f msecs"
-                toStringFormatStr = """${hdr}msecs
+                avgFormatStr = "%3.3f ms"
+                toStringFormatStr = """${hdr}ms
 %-12d%-12.3f%-12.3f%-12.3f
  min        %-12.3f%-12.3f%-12.3f
  max        %-12.3f%-12.3f%-12.3f"""

@@ -1,9 +1,11 @@
 package org.firstinspires.ftc.teamcode.common.tasks;
 
 import androidx.annotation.NonNull;
+
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
+
 import org.firstinspires.ftc.teamcode.common.BunyipsOpMode;
-import org.firstinspires.ftc.teamcode.common.Mecanum;
+import org.firstinspires.ftc.teamcode.common.roadrunner.drive.RoadRunnerDrive;
 import org.firstinspires.ftc.teamcode.common.roadrunner.trajectorysequence.TrajectorySequence;
 
 /**
@@ -11,19 +13,19 @@ import org.firstinspires.ftc.teamcode.common.roadrunner.trajectorysequence.Traje
  *
  * @author Lucas Bubner, 2023
  */
-public class RoadRunnerTask extends Task {
-    private final Mecanum drive;
+public class RoadRunnerTask<T extends RoadRunnerDrive> extends Task {
+    private final T drive;
 
     private Trajectory trajectory;
     private TrajectorySequence trajectorySequence;
 
-    public RoadRunnerTask(@NonNull BunyipsOpMode opMode, double time, Mecanum drive, Trajectory trajectory) {
+    public RoadRunnerTask(@NonNull BunyipsOpMode opMode, double time, T drive, Trajectory trajectory) {
         super(opMode, time);
         this.drive = drive;
         this.trajectory = trajectory;
     }
 
-    public RoadRunnerTask(@NonNull BunyipsOpMode opMode, double time, Mecanum drive, TrajectorySequence trajectorySequence) {
+    public RoadRunnerTask(@NonNull BunyipsOpMode opMode, double time, T drive, TrajectorySequence trajectorySequence) {
         super(opMode, time);
         this.drive = drive;
         this.trajectorySequence = trajectorySequence;
@@ -32,9 +34,9 @@ public class RoadRunnerTask extends Task {
     @Override
     public void init() {
         if (trajectory != null) {
-            drive.followTrajectory(trajectory);
+            drive.followTrajectoryAsync(trajectory);
         } else if (trajectorySequence != null) {
-            drive.followTrajectorySequence(trajectorySequence);
+            drive.followTrajectorySequenceAsync(trajectorySequence);
         } else {
             throw new NullPointerException("No trajectory or trajectory sequence was provided to the RoadRunnerTask");
         }
@@ -43,11 +45,12 @@ public class RoadRunnerTask extends Task {
     @Override
     public void run() {
         drive.update();
+        // TODO: Telemetry for RoadRunner progress other than the default telemetry
     }
 
     @Override
     public void onFinish() {
-        // noop
+        drive.stop();
     }
 
     @Override

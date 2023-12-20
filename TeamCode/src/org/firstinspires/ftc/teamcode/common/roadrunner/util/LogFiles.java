@@ -1,21 +1,41 @@
 package org.firstinspires.ftc.teamcode.common.roadrunner.util;
 
 //import android.annotation.SuppressLint;
+import android.content.Context;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+//import com.qualcomm.robotcore.eventloop.opmode.OpModeManagerImpl;
+//import com.qualcomm.robotcore.eventloop.opmode.OpModeManagerNotifier;
+import com.qualcomm.robotcore.util.RobotLog;
+//import com.qualcomm.robotcore.util.WebHandlerManager;
+
+//import org.firstinspires.ftc.ftccommon.external.WebHandlerRegistrar;
+//import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 //import fi.iki.elonen.NanoHTTPD;
 
+// Incompatible with virtual_robot, methods have been nullified
 public final class LogFiles {
-    private static final File ROOT =
-            new File("/tmp/");
+//    private static final File ROOT =
+//            new File(AppUtil.ROOT_FOLDER + "/RoadRunner/logs/");
+//    private static final File ROOT = null;
 
-    public static LogFile log = new LogFile("uninitialized");
-    // not implemented upstream
+//    public static LogFile log = new LogFile("uninitialized");
 //    private static final OpModeManagerNotifier.Notifications notifHandler = new OpModeManagerNotifier.Notifications() {
 //        @SuppressLint("SimpleDateFormat")
 //        final DateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd__HH_mm_ss_SSS");
@@ -74,50 +94,50 @@ public final class LogFiles {
             Pose2d targetPose, Pose2d pose, double voltage,
             List<Integer> lastDriveEncPositions, List<Integer> lastDriveEncVels, List<Integer> lastTrackingEncPositions, List<Integer> lastTrackingEncVels
     ) {
-        long nsTime = System.nanoTime();
-        if (nsTime - log.nsStart > 3 * 60 * 1_000_000_000L) {
-            return;
-        }
-
-        log.nsTimes.add(nsTime);
-
-        log.targetXs.add(targetPose.getX());
-        log.targetYs.add(targetPose.getY());
-        log.targetHeadings.add(targetPose.getHeading());
-
-        log.xs.add(pose.getX());
-        log.ys.add(pose.getY());
-        log.headings.add(pose.getHeading());
-
-        log.voltages.add(voltage);
-
-        while (log.driveEncPositions.size() < lastDriveEncPositions.size()) {
-            log.driveEncPositions.add(new ArrayList<>());
-        }
-        while (log.driveEncVels.size() < lastDriveEncVels.size()) {
-            log.driveEncVels.add(new ArrayList<>());
-        }
-        while (log.trackingEncPositions.size() < lastTrackingEncPositions.size()) {
-            log.trackingEncPositions.add(new ArrayList<>());
-        }
-        while (log.trackingEncVels.size() < lastTrackingEncVels.size()) {
-            log.trackingEncVels.add(new ArrayList<>());
-        }
-
-        for (int i = 0; i < lastDriveEncPositions.size(); i++) {
-            log.driveEncPositions.get(i).add(lastDriveEncPositions.get(i));
-        }
-        for (int i = 0; i < lastDriveEncVels.size(); i++) {
-            log.driveEncVels.get(i).add(lastDriveEncVels.get(i));
-        }
-        for (int i = 0; i < lastTrackingEncPositions.size(); i++) {
-            log.trackingEncPositions.get(i).add(lastTrackingEncPositions.get(i));
-        }
-        for (int i = 0; i < lastTrackingEncVels.size(); i++) {
-            log.trackingEncVels.get(i).add(lastTrackingEncVels.get(i));
-        }
+//        long nsTime = System.nanoTime();
+//        if (nsTime - log.nsStart > 3 * 60 * 1_000_000_000L) {
+//            return;
+//        }
+//
+//        log.nsTimes.add(nsTime);
+//
+//        log.targetXs.add(targetPose.getX());
+//        log.targetYs.add(targetPose.getY());
+//        log.targetHeadings.add(targetPose.getHeading());
+//
+//        log.xs.add(pose.getX());
+//        log.ys.add(pose.getY());
+//        log.headings.add(pose.getHeading());
+//
+//        log.voltages.add(voltage);
+//
+//        while (log.driveEncPositions.size() < lastDriveEncPositions.size()) {
+//            log.driveEncPositions.add(new ArrayList<>());
+//        }
+//        while (log.driveEncVels.size() < lastDriveEncVels.size()) {
+//            log.driveEncVels.add(new ArrayList<>());
+//        }
+//        while (log.trackingEncPositions.size() < lastTrackingEncPositions.size()) {
+//            log.trackingEncPositions.add(new ArrayList<>());
+//        }
+//        while (log.trackingEncVels.size() < lastTrackingEncVels.size()) {
+//            log.trackingEncVels.add(new ArrayList<>());
+//        }
+//
+//        for (int i = 0; i < lastDriveEncPositions.size(); i++) {
+//            log.driveEncPositions.get(i).add(lastDriveEncPositions.get(i));
+//        }
+//        for (int i = 0; i < lastDriveEncVels.size(); i++) {
+//            log.driveEncVels.get(i).add(lastDriveEncVels.get(i));
+//        }
+//        for (int i = 0; i < lastTrackingEncPositions.size(); i++) {
+//            log.trackingEncPositions.get(i).add(lastTrackingEncPositions.get(i));
+//        }
+//        for (int i = 0; i < lastTrackingEncVels.size(); i++) {
+//            log.trackingEncVels.get(i).add(lastTrackingEncVels.get(i));
+//        }
     }
-    // not implemented upstream
+
 //    @WebHandlerRegistrar
 //    public static void registerRoutes(Context context, WebHandlerManager manager) {
 //        //noinspection ResultOfMethodCallIgnored

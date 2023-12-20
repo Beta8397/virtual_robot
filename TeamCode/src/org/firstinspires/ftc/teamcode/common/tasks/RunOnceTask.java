@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.common.tasks;
 
 import androidx.annotation.NonNull;
+
 import org.firstinspires.ftc.teamcode.common.BunyipsOpMode;
 
 public abstract class RunOnceTask extends Task {

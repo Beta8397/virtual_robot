@@ -69,12 +69,12 @@ class UserSelection<T>(
      * @return A HashMap of operation modes to buttons.
      */
     override fun run() {
-        Dbg.log("UserSelection thread: starting...")
+        Dbg.logd("UserSelection thread: starting...")
         try {
             if (opmodes.isEmpty()) {
                 try {
                     callback(null)
-                } catch (e: Exception) {
+                } catch (e: Throwable) {
                     ErrorUtil.handleCatchAllException(e, opMode::log)
                 }
             }
@@ -108,10 +108,11 @@ class UserSelection<T>(
             }
             retainedObjects.add(opMode.addRetainedTelemetry("---------!!!--------"))
 
-            // Must manually call telemetry push as the BYO may not be handling them
+            // Must manually call telemetry push as the BOM may not be handling them
             // This will not clear out any other telemetry as auto clear is disabled
             opMode.pushTelemetry()
 
+            // opModeInInit() incompatible with virtual_robot
             while (selectedOpMode == null && (!opMode.isStarted && !opMode.isStopRequested) && !isInterrupted) {
                 for ((str, button) in buttons) {
                     if (Controller.isSelected(opMode.gamepad1, button)) {
@@ -142,11 +143,11 @@ class UserSelection<T>(
 
             try {
                 callback(selectedOpMode)
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 ErrorUtil.handleCatchAllException(e, opMode::log)
             }
         } finally {
-            Dbg.log("UserSelection thread: ending...")
+            Dbg.logd("UserSelection thread: ending...")
         }
     }
 }
