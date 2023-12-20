@@ -95,12 +95,12 @@ abstract class BunyipsOpMode : LinearOpMode() {
         try {
             // Using log instead of logd as this message is special
             // Incompatible with virtual_robot
-            Dbg.log("=============== BunyipsOpMode abc123 virtual 1234-56-78@12:34:56 id:8ba5c7d5-0118-4c9f-bd51-f35a99b195fc ===============")
+            Dbg.log("=============== BunyipsOpMode a1b2c3 virtual_robot xxxx-xx-xx@xx:xx:xx id:abcdefgh-1234-5678-ABCD-VIRTUAL__BOT ===============")
             // Separate log from telemetry
             telemetry.log().add("")
             // Incompatible with virtual_robot
             telemetry.log()
-                .add("bunyipsopmode abc123 virtual 1234-56-78@12:34:56")
+                .add("bunyipsopmode a1b2c3 virtual_robot xxxx-xx-xx@xx:xx:xx")
             opModeStatus = "setup"
             Dbg.logd("BunyipsOpMode: setting up...")
             // Run BunyipsOpMode setup

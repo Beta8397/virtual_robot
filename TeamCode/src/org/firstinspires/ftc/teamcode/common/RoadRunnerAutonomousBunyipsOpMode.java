@@ -62,6 +62,8 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
      * @return Builder for the trajectory
      */
     public RoadRunnerTrajectoryTaskBuilder addNewTrajectory(Pose2d startPose) {
+        if (drive == null)
+            drive = setDrive();
         if (drive == null) throw new NullPointerException("drive instance is not set!");
         // noinspection rawtypes
         TrajectorySequenceBuilder builder = drive.trajectorySequenceBuilder(startPose);
@@ -78,6 +80,8 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
      * @see #addNewTrajectory(Pose2d)
      */
     public RoadRunnerTrajectoryTaskBuilder addNewTrajectory() {
+        if (drive == null)
+            drive = setDrive();
         if (drive == null) throw new NullPointerException("drive instance is not set!");
         // noinspection rawtypes
         TrajectorySequenceBuilder builder = drive.trajectorySequenceBuilder(drive.getPoseEstimate());
@@ -96,6 +100,8 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
      * @return Builder for the trajectory
      */
     public TrajectoryBuilder newTrajectory(Pose2d startPose) {
+        if (drive == null)
+            drive = setDrive();
         if (drive == null) throw new NullPointerException("drive instance is not set!");
         drive.setPoseEstimate(startPose);
         return drive.trajectoryBuilder(startPose);
@@ -108,6 +114,8 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
      * @see #newTrajectory(Pose2d)
      */
     public TrajectoryBuilder newTrajectory() {
+        if (drive == null)
+            drive = setDrive();
         if (drive == null) throw new NullPointerException("drive instance is not set!");
         return drive.trajectoryBuilder(drive.getPoseEstimate());
     }
@@ -118,6 +126,8 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
      * @param trajectory Trajectory to add
      */
     public void addTrajectory(Trajectory trajectory) {
+        if (drive == null)
+            drive = setDrive();
         if (drive == null) throw new NullPointerException("drive instance is not set!");
         addTask(new RoadRunnerTask<>(this, INFINITE_TIMEOUT, drive, trajectory));
     }
@@ -128,6 +138,8 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
      * @param trajectorySequence Trajectory to add
      */
     public void addTrajectory(TrajectorySequence trajectorySequence) {
+        if (drive == null)
+            drive = setDrive();
         if (drive == null) throw new NullPointerException("drive instance is not set!");
         addTask(new RoadRunnerTask<>(this, INFINITE_TIMEOUT, drive, trajectorySequence));
     }
@@ -139,6 +151,8 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
      * @param timeout    Timeout in seconds
      */
     public void addTrajectory(Trajectory trajectory, double timeout) {
+        if (drive == null)
+            drive = setDrive();
         if (drive == null) throw new NullPointerException("drive instance is not set!");
         addTask(new RoadRunnerTask<>(this, timeout, drive, trajectory));
     }
@@ -150,6 +164,8 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
      * @param timeout            Timeout in seconds
      */
     public void addTrajectory(TrajectorySequence trajectorySequence, double timeout) {
+        if (drive == null)
+            drive = setDrive();
         if (drive == null) throw new NullPointerException("drive instance is not set!");
         addTask(new RoadRunnerTask<>(this, timeout, drive, trajectorySequence));
     }
@@ -188,6 +204,8 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
 
         @Override
         public TrajectorySequence build() {
+            if (drive == null)
+                drive = setDrive();
             if (drive == null) throw new NullPointerException("drive instance is not set!");
             TrajectorySequence builtTrajectory = super.build();
             addTask(new RoadRunnerTask<>(getOpMode(), timeout, drive, builtTrajectory));
@@ -196,6 +214,8 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
 
         // Optional method to build as the first thing the robot will do
         public TrajectorySequence buildWithPriority() {
+            if (drive == null)
+                drive = setDrive();
             if (drive == null) throw new NullPointerException("drive instance is not set!");
             TrajectorySequence builtTrajectory = super.build();
             addTaskFirst(new RoadRunnerTask<>(getOpMode(), timeout, drive, builtTrajectory));
@@ -206,6 +226,8 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
         // This differs from standard build, as it will wait for the init-callback to run first before
         // appending tasks to the queue
         public TrajectorySequence buildWithLowPriority() {
+            if (drive == null)
+                drive = setDrive();
             if (drive == null) throw new NullPointerException("drive instance is not set!");
             TrajectorySequence builtTrajectory = super.build();
             addTaskLast(new RoadRunnerTask<>(getOpMode(), timeout, drive, builtTrajectory));

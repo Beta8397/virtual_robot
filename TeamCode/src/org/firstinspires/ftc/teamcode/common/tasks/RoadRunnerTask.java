@@ -2,11 +2,15 @@ package org.firstinspires.ftc.teamcode.common.tasks;
 
 import androidx.annotation.NonNull;
 
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 
 import org.firstinspires.ftc.teamcode.common.BunyipsOpMode;
+import org.firstinspires.ftc.teamcode.common.Inches;
 import org.firstinspires.ftc.teamcode.common.roadrunner.drive.RoadRunnerDrive;
 import org.firstinspires.ftc.teamcode.common.roadrunner.trajectorysequence.TrajectorySequence;
+
+import static org.firstinspires.ftc.teamcode.common.Text.round;
 
 /**
  * Task for running RoadRunner trajectories using the BunyipsOpMode Task system
@@ -44,8 +48,28 @@ public class RoadRunnerTask<T extends RoadRunnerDrive> extends Task {
 
     @Override
     public void run() {
+        Pose2d endPose;
+        double duration;
+        if (trajectory != null) {
+            endPose = trajectory.end();
+            duration = trajectory.duration();
+        } else {
+            endPose = trajectorySequence.end();
+            duration = trajectorySequence.duration();
+        }
+
+        // Calculate distance from current pose to end pose using the distance formula
+        double distance = Math.sqrt(Math.pow(endPose.getX() - drive.getPoseEstimate().getX(), 2) + Math.pow(endPose.getY() - drive.getPoseEstimate().getY(), 2));
+
+        // Calculate angle from current pose to end pose using the arctangent function
+        double angle = Math.atan2(endPose.getY() - drive.getPoseEstimate().getY(), endPose.getX() - drive.getPoseEstimate().getX());
+
+        // Time to completion
+        getOpMode().addTelemetry("Duration: %/% sec", round(getDeltaTime(), 2), round(duration, 2));
         drive.update();
-        // TODO: Telemetry for RoadRunner progress other than the default telemetry
+
+        getOpMode().addTelemetry("Distance to target: %cm", round(Inches.toCM(distance), 2));
+        getOpMode().addTelemetry("Angle to target: %deg", round(Math.toDegrees(angle), 2));
     }
 
     @Override
