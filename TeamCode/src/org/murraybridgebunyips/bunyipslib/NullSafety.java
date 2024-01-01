@@ -1,5 +1,7 @@
 package org.murraybridgebunyips.bunyipslib;
 
+import org.murraybridgebunyips.bunyipslib.roadrunner.util.Encoder;
+
 import static org.murraybridgebunyips.bunyipslib.Text.formatString;
 
 import java.util.ArrayList;
@@ -40,20 +42,29 @@ public class NullSafety {
      * Components in the unusable components list will not have their errors logged.
      *
      * @param opMode BunyipsOpMode overhead instance
+     * @param T      Class of the component (e.g. Cannon.class)
      * @param objs   Objects to check for null
      * @return Whether the component is safe to instantiate
      */
     public static boolean assertComponentArgs(BunyipsOpMode opMode, Class<?> T, Object... objs) {
         for (Object o : objs) {
             if (o == null) {
-                opMode.addRetainedTelemetry(formatString("! COM_FAULT: % failed to instantiate due to null constructor arguments", T.getSimpleName()));
-                opMode.log("error: % is null. attempting to suppress errors...", T.getSimpleName());
-                Dbg.error(formatString("% is null, adding to unusable components...", T.getSimpleName()));
-                if (!unusableComponents.contains(T.getSimpleName()))
-                    unusableComponents.add(T.getSimpleName());
-                return false;
+                return reportUnusable(opMode, T);
+            } else if (o instanceof Encoder) {
+                if (((Encoder) o).isNull()) {
+                    return reportUnusable(opMode, T);
+                }
             }
         }
         return true;
+    }
+
+    private static boolean reportUnusable(BunyipsOpMode opMode, Class<?> component) {
+        opMode.addRetainedTelemetry(formatString("! COM_FAULT: % failed to instantiate due to null constructor arguments", component.getSimpleName()));
+        opMode.log("error: % is null. attempting to suppress errors...", component.getSimpleName());
+        Dbg.error(formatString("% is null, adding to unusable components...", component.getSimpleName()));
+        if (!unusableComponents.contains(component.getSimpleName()))
+            unusableComponents.add(component.getSimpleName());
+        return false;
     }
 }

@@ -60,7 +60,7 @@ abstract class RobotConfig {
      * @param name   name of device saved in the configuration file
      * @param device the class of the item to configure, in final abstraction extending HardwareDevice
      */
-    protected fun getHardware(name: String, device: Class<*>?): HardwareDevice? {
+    fun getHardware(name: String, device: Class<*>?): HardwareDevice? {
         var hardwareDevice: HardwareDevice? = null
         try {
             hardwareDevice = hardwareMap?.get(device, name) as HardwareDevice
