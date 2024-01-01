@@ -99,5 +99,9 @@ public class LynxModule implements HardwareDevice {
      */
     public void clearBulkCache() {}
 
+    public String getNullableFirmwareVersionString() {
+        return null;
+    }
+
 
 }

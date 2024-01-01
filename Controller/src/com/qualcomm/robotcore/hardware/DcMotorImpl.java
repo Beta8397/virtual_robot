@@ -10,7 +10,8 @@ import java.util.Random;
  */
 public class DcMotorImpl implements DcMotor {
     public final MotorType MOTOR_TYPE;
-    public final MotorConfigurationType MOTOR_CONFIGURATION_TYPE;
+    public MotorConfigurationType MOTOR_CONFIGURATION_TYPE;
+    protected DcMotorController controller = null;
 
     //Proportionate coefficient for RUN_TO_POSITION mode
     protected final double COEFF_PROPORTIONATE = 5.0;
@@ -67,6 +68,12 @@ public class DcMotorImpl implements DcMotor {
         MOTOR_CONFIGURATION_TYPE = new MotorConfigurationType(motorType);
     }
 
+    public DcMotorImpl(DcMotorController controller, int portNumber) {
+        // Hack the motor type since that is what the simulator supports
+        MOTOR_TYPE = MotorType.RevUltraPlanetaryOneToOne;
+        this.controller = controller;
+    }
+
     /**
      * For internal use only
      * @param motorType
@@ -101,6 +108,11 @@ public class DcMotorImpl implements DcMotor {
      * @return mode
      */
     public synchronized RunMode getMode(){ return mode; }
+
+    @Override
+    public DcMotorController getController() {
+        return controller;
+    }
 
     /**
      * Set logical direction

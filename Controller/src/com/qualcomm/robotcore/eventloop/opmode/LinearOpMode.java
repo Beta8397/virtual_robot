@@ -244,4 +244,7 @@ public abstract class LinearOpMode extends OpMode {
         }
     }
 
+    public final boolean opModeInInit() {
+        return !isStarted() && !isStopRequested();
+    }
 }

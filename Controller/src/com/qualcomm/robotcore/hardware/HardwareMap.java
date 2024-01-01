@@ -37,6 +37,7 @@ package com.qualcomm.robotcore.hardware;
 
 import java.util.*;
 import android.content.Context;
+import androidx.annotation.NonNull;
 
 /**
  * HardwareMap provides access to the virtual robot hardware
@@ -161,6 +162,9 @@ public class HardwareMap implements Iterable<HardwareDevice>{
         return result;
     }
 
+    public HardwareDevice get(String deviceName) {
+        return get(HardwareDevice.class, deviceName);
+    }
 
     private synchronized <T> T tryGet(Class<? extends T> classOrInterface, String deviceName){
         if (!active){
@@ -293,6 +297,10 @@ public class HardwareMap implements Iterable<HardwareDevice>{
             return map.keySet();
         }
 
+
+    }
+    public Set<String> getNamesOf(HardwareDevice device) {
+        return null;
     }
 
 }

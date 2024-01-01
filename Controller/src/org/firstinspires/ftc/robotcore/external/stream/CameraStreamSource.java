@@ -1,4 +1,9 @@
 package org.firstinspires.ftc.robotcore.external.stream;
 
-public class CameraStreamSource {
+import android.graphics.Bitmap;
+import org.firstinspires.ftc.robotcore.external.function.Consumer;
+import org.firstinspires.ftc.robotcore.external.function.Continuation;
+
+public interface CameraStreamSource {
+    void getFrameBitmap(Continuation<? extends Consumer<Bitmap>> continuation);
 }

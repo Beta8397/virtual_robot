@@ -2,6 +2,7 @@ package com.acmerobotics.dashboard;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.stream.CameraStreamSource;
 
 public class FtcDashboard {
     private static FtcDashboard instance;
@@ -22,6 +23,10 @@ public class FtcDashboard {
     }
 
     public void setTelemetryTransmissionInterval(int telemetryTransmissionInterval){}
+
+    public void startCameraStream(CameraStreamSource cameraStreamSource, int i) {}
+
+    public void stopCameraStream() {}
 
 
 }

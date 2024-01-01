@@ -394,7 +394,7 @@ public class VirtualRobotController {
 
     private void setupCbxOpModes(){
 //        Reflections reflections = new Reflections("");
-        Reflections reflections = new Reflections("org.firstinspires.ftc.teamcode");
+        Reflections reflections = new Reflections("org.murraybridgebunyips");
         Set<Class<?>> opModes = new HashSet<>();
         opModes.addAll(reflections.getTypesAnnotatedWith(TeleOp.class));
         opModes.addAll(reflections.getTypesAnnotatedWith(Autonomous.class));//Lists of OpMode classes and OpMode Names

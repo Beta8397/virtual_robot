@@ -49,6 +49,11 @@ public class DeadWheelEncoder implements DcMotorEx {
     }
 
     @Override
+    public DcMotorController getController() {
+        return null;
+    }
+
+    @Override
     public synchronized int getCurrentPosition() {
         int result = (int)Math.floor(actualPosition - encoderBasePosition);
         return direction == Direction.FORWARD && MOTOR_TYPE.REVERSED ||

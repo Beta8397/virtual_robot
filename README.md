@@ -52,11 +52,11 @@ The board doesn't move around the field, but it can be rotated (to test the IMU)
 
 An approximation of the FTC SDK is provided.
 
-User-defined OpModes must be placed in the org.firstinspires.ftc.teamcode package, and must extend OpMode 
+User-defined OpModes must be placed in the org.murraybridgebunyips package, and must extend OpMode 
 (or LinearOpMode). OpModes are registered by placing a @TeleOp or @Autonomous annotation immediately above the class 
 declaration.
 
-Several example OpModes are provided in the org.firstinspires.ftc.teamcode package. To minimize clutter, a number 
+Several example OpModes are provided in the org.murraybridgebunyips package. To minimize clutter, a number 
 of sample op modes are currently disabled; they can be re-enabled by commenting out the @Disabled annotation. A 
 number of robot configurations are also disabled. A robot configuration can be re-enabled by finding its class 
 in the virtual_robot.robots.classes package, and un-commenting its @BotConfig annotation.
@@ -67,8 +67,8 @@ To use:
      IntelliJ IDEA. (See the Detailed Installation Instructions PDF)
   2. Download the virtual_robot .zip, and extract contents. Open the project in IntelliJ. You'll see three modules in
      the project (Controller, TeamCode, and virtual_robot) -- the only module you'll need to touch is TeamCode. It
-     contains the org.firstinspires.ftc.teamcode package.
-  3. Write your OpModes in the org.firstinspires.ftc.teamcode package; make sure to include a @TeleOp or @Autonomous 
+     contains the org.murraybridgebunyips package.
+  3. Write your OpModes in the org.murraybridgebunyips package; make sure to include a @TeleOp or @Autonomous 
      annotation. These must extend the OpMode class (may either extend OpMode OR LinearOpMode). OpMode must provide 
      init() and loop() methods; LinearOpMode must provide runOpMode() method.
   4. You can either use the Virtual Gamepad (currently the default), or use one or two real Gamepads; to use real 
@@ -200,7 +200,7 @@ CHANGES 7/06/2019
 CHANGES 7/01/2019
     Now supports two GamePads instead of just one. Use start-A and start-B to select gamepad1 and gamepad2, as
     you would in the FTC SDK. Two op modes for Mecanum Bot contributed by FTC team 16072, including a nice
-    demonstration of field-centric drive using the IMU. These are in the org.firstinspires.ftc.teamcode.ftc16072 package.
+    demonstration of field-centric drive using the IMU. These are in the org.murraybridgebunyips.ftc16072 package.
 
 CHANGES 6/25/2019
     Contribution from Alan Smith (alan412): now supports "regular" op modes in addition to linear op modes.

@@ -72,6 +72,8 @@ public interface DcMotor extends DcMotorSimple {
      */
     public RunMode getMode();
 
+    DcMotorController getController();
+
     /**
      * Get current motor position (i.e., encoder ticks)
      * @return encoder ticks

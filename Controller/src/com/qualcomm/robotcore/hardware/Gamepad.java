@@ -496,4 +496,14 @@ public class Gamepad {
             return time;
         }
     }
+
+    public boolean atRest() {
+        return (
+                left_stick_x == 0f && left_stick_y == 0f &&
+                right_stick_x == 0f && right_stick_y == 0f &&
+                left_trigger == 0f && right_trigger == 0f
+        );
+    }
+
+    public int id = 0;
 }

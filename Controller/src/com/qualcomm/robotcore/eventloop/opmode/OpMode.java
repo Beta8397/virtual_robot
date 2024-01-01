@@ -130,6 +130,10 @@ public abstract class OpMode extends VirtualRobotController.OpModeBase {
         stop();
     }
 
+    public final void terminateOpModeNow() {
+        stop();
+    }
+
     /**
      * Get the number of seconds this op mode has been running
      * <p>
