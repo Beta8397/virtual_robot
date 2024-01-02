@@ -15,7 +15,7 @@ object ErrorUtil {
     private const val MAX_STACKTRACE_CHARS = 250
 
     @Throws(InterruptedException::class)
-    fun handleCatchAllException(e: Throwable, log: (msg: String) -> Unit) {
+    fun handleCatchAllException(e: Exception, log: (msg: String) -> Unit) {
         if (e is NullPointerException) {
             for (component in NullSafety.unusableComponents) {
                 if (e.localizedMessage?.contains(component) == true) {

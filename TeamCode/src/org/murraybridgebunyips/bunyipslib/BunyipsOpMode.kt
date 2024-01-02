@@ -119,7 +119,7 @@ abstract class BunyipsOpMode : LinearOpMode() {
             // Run user-defined setup
             try {
                 onInit()
-            } catch (e: Throwable) {
+            } catch (e: Exception) {
                 // All InterruptedExceptions are handled by the FTC SDK and are raised in ErrorUtil
                 ErrorUtil.handleCatchAllException(e, ::log)
             }
@@ -132,7 +132,7 @@ abstract class BunyipsOpMode : LinearOpMode() {
                 try {
                     // Run until onInitLoop returns true or the OpMode is continued
                     if (onInitLoop()) break
-                } catch (e: Throwable) {
+                } catch (e: Exception) {
                     ErrorUtil.handleCatchAllException(e, ::log)
                 }
                 movingAverageTimer.update()
@@ -145,7 +145,7 @@ abstract class BunyipsOpMode : LinearOpMode() {
             // Run user-defined final initialisation
             try {
                 onInitDone()
-            } catch (e: Throwable) {
+            } catch (e: Exception) {
                 ErrorUtil.handleCatchAllException(e, ::log)
             }
 
@@ -169,7 +169,7 @@ abstract class BunyipsOpMode : LinearOpMode() {
             try {
                 // Run user-defined start operations
                 onStart()
-            } catch (e: Throwable) {
+            } catch (e: Exception) {
                 ErrorUtil.handleCatchAllException(e, ::log)
             }
 
@@ -185,7 +185,7 @@ abstract class BunyipsOpMode : LinearOpMode() {
                 try {
                     // Run user-defined active loop
                     activeLoop()
-                } catch (e: Throwable) {
+                } catch (e: Exception) {
                     ErrorUtil.handleCatchAllException(e, ::log)
                 }
                 // Update telemetry and timers
@@ -204,7 +204,9 @@ abstract class BunyipsOpMode : LinearOpMode() {
         } catch (t: Throwable) {
             Dbg.error("BunyipsOpMode: unhandled throwable! <${t.message}>")
             Dbg.sendStacktrace(t)
-            // As this error occurred somewhere not inside user code, we should not swallow it
+            // As this error occurred somewhere not inside user code, we should not swallow it.
+            // There is also a chance this error is an instance of Error, in which case we should
+            // exit immediately as something has gone very wrong
             throw t
         } finally {
             Dbg.logd("BunyipsOpMode: cleaning up...")

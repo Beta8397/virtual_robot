@@ -74,7 +74,7 @@ class UserSelection<T>(
             if (opmodes.isEmpty()) {
                 try {
                     callback(null)
-                } catch (e: Throwable) {
+                } catch (e: Exception) {
                     ErrorUtil.handleCatchAllException(e, opMode::log)
                 }
             }
@@ -142,7 +142,7 @@ class UserSelection<T>(
 
             try {
                 callback(selectedOpMode)
-            } catch (e: Throwable) {
+            } catch (e: Exception) {
                 ErrorUtil.handleCatchAllException(e, opMode::log)
             }
         } finally {
