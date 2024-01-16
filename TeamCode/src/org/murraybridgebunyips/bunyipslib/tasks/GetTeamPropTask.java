@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
 import org.murraybridgebunyips.bunyipslib.Dbg;
 import org.murraybridgebunyips.bunyipslib.Vision;
+import org.murraybridgebunyips.bunyipslib.tasks.bases.BunyipsTask;
 import org.murraybridgebunyips.bunyipslib.vision.TeamProp;
 
 /**
@@ -14,7 +15,7 @@ import org.murraybridgebunyips.bunyipslib.vision.TeamProp;
  * @author Lucas Bubner, 2023
  * @author Lachlan Paul, 2023
  */
-public class GetTeamPropTask extends Task {
+public class GetTeamPropTask extends BunyipsTask {
     private final Vision vision;
     private TeamProp teamProp;
     private boolean initFired;

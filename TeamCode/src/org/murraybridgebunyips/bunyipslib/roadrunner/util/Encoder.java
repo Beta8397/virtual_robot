@@ -3,13 +3,9 @@ package org.murraybridgebunyips.bunyipslib.roadrunner.util;
 import com.acmerobotics.roadrunner.util.NanoClock;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import org.murraybridgebunyips.bunyipslib.Dbg;
-import org.murraybridgebunyips.bunyipslib.ErrorUtil;
-import org.murraybridgebunyips.bunyipslib.NullSafety;
-import org.murraybridgebunyips.bunyipslib.RobotConfig;
 
-import static org.murraybridgebunyips.bunyipslib.NullSafety.unusableComponents;
-import static org.murraybridgebunyips.bunyipslib.Text.formatString;
+import org.murraybridgebunyips.bunyipslib.Dbg;
+import org.murraybridgebunyips.bunyipslib.RobotConfig;
 
 /**
  * Wraps a motor instance to provide corrected velocity counts and allow reversing independently of the corresponding
@@ -38,15 +34,6 @@ public class Encoder {
 
     public Encoder(DcMotorEx motor) {
         this(motor, NanoClock.system());
-    }
-
-    /**
-     * Checks if the underlying motor for the encoder is null
-     * This is important to check as the encoder will still instantiate, but will not function correctly
-     * NullSafety.assertComponentArgs() will ensure to check for null motors on Encoders.
-     */
-    public boolean isNull() {
-        return motor == null;
     }
 
     public Encoder(String hardwareMapName, RobotConfig configInstance, NanoClock clock) {
@@ -81,6 +68,15 @@ public class Encoder {
         // estimate-based correction: it finds the nearest multiple of 5 to correct the upper bits by
         real += Math.round((estimate - real) / (5 * CPS_STEP)) * 5 * CPS_STEP;
         return real;
+    }
+
+    /**
+     * Checks if the underlying motor for the encoder is null
+     * This is important to check as the encoder will still instantiate, but will not function correctly
+     * NullSafety.assertComponentArgs() will ensure to check for null motors on Encoders.
+     */
+    public boolean isNull() {
+        return motor == null;
     }
 
     public Direction getDirection() {

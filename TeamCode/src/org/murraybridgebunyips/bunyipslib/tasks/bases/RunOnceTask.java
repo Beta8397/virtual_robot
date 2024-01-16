@@ -1,31 +1,27 @@
-package org.murraybridgebunyips.bunyipslib.tasks;
+package org.murraybridgebunyips.bunyipslib.tasks.bases;
 
-import androidx.annotation.NonNull;
-
-import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
+import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
 /**
  * A task that runs once and then immediately completes.
  */
 public abstract class RunOnceTask extends Task {
-    protected RunOnceTask(@NonNull BunyipsOpMode opMode) {
-        // Time will be ignored as this task will only run once
-        super(opMode, 1);
+    public RunOnceTask() {
+        super(0);
     }
 
     @Override
     public final void init() {
+        runOnce();
     }
 
     @Override
     public final void run() {
-        runOnce();
-        setTaskFinished(true);
     }
 
     @Override
     public final boolean isTaskFinished() {
-        return getTaskFinished();
+        return true;
     }
 
     @Override

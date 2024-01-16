@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.murraybridgebunyips.bunyipslib.MecanumDrive;
 import org.murraybridgebunyips.bunyipslib.OpModeSelection;
 import org.murraybridgebunyips.bunyipslib.RoadRunnerAutonomousBunyipsOpMode;
-import org.murraybridgebunyips.bunyipslib.tasks.AutoTask;
+import org.murraybridgebunyips.bunyipslib.tasks.bases.RobotTask;
 import org.murraybridgebunyips.imposter.components.ImposterConfig;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,7 +27,7 @@ public class ImposterRoadRunnerTest extends RoadRunnerAutonomousBunyipsOpMode<Me
     }
 
     @Override
-    protected AutoTask setInitTask() {
+    protected RobotTask setInitTask() {
         return null;
     }
 

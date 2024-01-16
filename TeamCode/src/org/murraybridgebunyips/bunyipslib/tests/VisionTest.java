@@ -8,7 +8,6 @@ import static org.murraybridgebunyips.bunyipslib.personalitycore.CompanionCubeCo
 import static org.murraybridgebunyips.bunyipslib.personalitycore.CompanionCubeColours.RED_ELEMENT_R;
 
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -35,7 +34,7 @@ import kotlin.Unit;
  * @author Lucas Bubner, 2023
  */
 @TeleOp(name = "Vision Test")
-@Disabled
+//@Disabled
 public class VisionTest extends BunyipsOpMode {
     private Vision vision;
     private Telemetry.Item i;

@@ -1,17 +1,19 @@
 package org.murraybridgebunyips.bunyipslib.tasks
 
 import org.murraybridgebunyips.bunyipslib.BunyipsOpMode
+import org.murraybridgebunyips.bunyipslib.tasks.bases.RobotTask
+import org.murraybridgebunyips.bunyipslib.tasks.bases.Task
 
 /**
  * Task to wait for a specific amount of time.
  */
-class WaitTask(opMode: BunyipsOpMode, time: Double) : Task(opMode, time), AutoTask {
+class WaitTask(private val opMode: BunyipsOpMode, time: Double) : Task(time), RobotTask {
     override fun init() {
         return
     }
 
     override fun run() {
-        opMode.addTelemetry("Waiting % seconds...", time)
+        opMode.addTelemetry("Waiting % seconds...", timeout)
         opMode.idle()
     }
 

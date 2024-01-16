@@ -5,21 +5,20 @@ import androidx.annotation.NonNull;
 import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
 import org.murraybridgebunyips.bunyipslib.Dbg;
 import org.murraybridgebunyips.bunyipslib.example.examplerobot.components.ExampleLift;
-import org.murraybridgebunyips.bunyipslib.tasks.Task;
+import org.murraybridgebunyips.bunyipslib.tasks.bases.BunyipsTask;
 
 // Tasks are used to run OpMode code in Autonomous sections. It works by giving each task a specific
 // amount of time to run, where it has it's own loop to run code in. This is useful for running
 // specific tasks, such as moving the drive system for a certain amount of time, or until a certain
-// condition is met.
-public class ExampleTask extends Task {
+// condition is met. Extending BunyipsTask handles the OpMode handling for you, so you don't need to
+// make new variables for the OpMode, or worry about the time.
+public class ExampleTask extends BunyipsTask {
     // You will need to store any COMPONENTS you wish to control in your task as a local instance
     private final ExampleLift lift;
 
-    // If you extend task without `time`, your task will never call itself finished!
     public ExampleTask(@NonNull BunyipsOpMode opMode, double time, ExampleLift lift) {
-        // Here, we allow the superclass to handle time and opMode. These are required.
+        // Here, we allow the superclass to handle time controls and OpMode handling. This is required.
         super(opMode, time);
-
         // Inside the constructor you can pass whatever you wish to control, for example, a drive
         this.lift = lift;
     }

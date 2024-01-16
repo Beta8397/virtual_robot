@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 
 import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
 import org.murraybridgebunyips.bunyipslib.Vision;
+import org.murraybridgebunyips.bunyipslib.tasks.bases.BunyipsTask;
 import org.murraybridgebunyips.bunyipslib.vision.TFOD;
 import org.murraybridgebunyips.bunyipslib.vision.data.TfodData;
 
@@ -18,7 +19,7 @@ import java.util.List;
  *
  * @author Lucas Bubner, 2023
  */
-public class GetWhitePixelTask extends Task {
+public class GetWhitePixelTask extends BunyipsTask {
     /**
      * For use in CAPTURE mode, lock in the spike detection if it is detected for this many frames
      */

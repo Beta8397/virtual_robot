@@ -9,7 +9,7 @@ import org.murraybridgebunyips.bunyipslib.StartingPositions;
 import org.murraybridgebunyips.bunyipslib.example.examplerobot.components.ExampleConfig;
 import org.murraybridgebunyips.bunyipslib.example.examplerobot.components.ExampleLift;
 import org.murraybridgebunyips.bunyipslib.example.examplerobot.tasks.ExampleTask;
-import org.murraybridgebunyips.bunyipslib.tasks.AutoTask;
+import org.murraybridgebunyips.bunyipslib.tasks.bases.RobotTask;
 import org.murraybridgebunyips.bunyipslib.tasks.WaitTask;
 
 import java.util.List;
@@ -72,7 +72,7 @@ public class ExampleAutonomous extends AutonomousBunyipsOpMode {
     }
 
     @Override
-    protected AutoTask setInitTask() {
+    protected RobotTask setInitTask() {
         return null;
     }
 

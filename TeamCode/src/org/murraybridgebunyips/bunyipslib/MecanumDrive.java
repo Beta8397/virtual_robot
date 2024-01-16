@@ -32,7 +32,7 @@ import java.util.List;
  *
  * @author Lucas Bubner, 2023
  */
-public class MecanumDrive extends BunyipsComponent implements RoadRunnerDrive {
+public class MecanumDrive extends BunyipsSubsystem implements RoadRunnerDrive {
     private final MecanumRoadRunnerDrive drive;
     private final IMU imu;
 

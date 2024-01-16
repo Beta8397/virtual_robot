@@ -218,8 +218,7 @@ abstract class BunyipsOpMode : LinearOpMode() {
     }
 
     /**
-     * Update telemetry for both the Driver Station and the FtcDashboard
-     * This will only push dashboard changes made through addTelemetry() and log() calls.
+     * Update and push queued telemetry to the Driver Station.
      */
     fun pushTelemetry() {
         if (telemetry.isAutoClear)

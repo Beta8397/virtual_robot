@@ -1,8 +1,8 @@
 package org.murraybridgebunyips.bunyipslib;
 
-import org.murraybridgebunyips.bunyipslib.roadrunner.util.Encoder;
-
 import static org.murraybridgebunyips.bunyipslib.Text.formatString;
+
+import org.murraybridgebunyips.bunyipslib.roadrunner.util.Encoder;
 
 import java.util.ArrayList;
 import java.util.List;

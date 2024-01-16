@@ -39,7 +39,14 @@ object ErrorUtil {
         Dbg.error("Exception caught! Stacktrace:")
         Dbg.sendStacktrace(e)
         if (e is InterruptedException) {
+            Dbg.error("Interrupted exception called, raising to superclass...")
             // FTC SDK must handle this
+            throw e
+        }
+        if (e is EmergencyStop) {
+            Dbg.error("Emergency stop exception called, raising to superclass...")
+            // This is a special exception where we shouldn't continue running the OpMode
+            // We will let the FTC SDK handle it in terminating the OpMode and displaying the popup
             throw e
         }
     }
