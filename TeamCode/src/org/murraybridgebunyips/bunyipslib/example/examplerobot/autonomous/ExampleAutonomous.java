@@ -3,7 +3,7 @@ package org.murraybridgebunyips.bunyipslib.example.examplerobot.autonomous;
 import androidx.annotation.Nullable;
 
 import org.murraybridgebunyips.bunyipslib.AutonomousBunyipsOpMode;
-import org.murraybridgebunyips.bunyipslib.CartesianMecanumDrive;
+import org.murraybridgebunyips.bunyipslib.drive.CartesianMecanumDrive;
 import org.murraybridgebunyips.bunyipslib.OpModeSelection;
 import org.murraybridgebunyips.bunyipslib.StartingPositions;
 import org.murraybridgebunyips.bunyipslib.example.examplerobot.components.ExampleConfig;

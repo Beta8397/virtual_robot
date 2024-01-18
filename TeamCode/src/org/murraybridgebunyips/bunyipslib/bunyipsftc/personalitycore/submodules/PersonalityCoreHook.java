@@ -1,11 +1,11 @@
-package org.murraybridgebunyips.bunyipslib.personalitycore.submodules;
+package org.murraybridgebunyips.bunyipslib.bunyipsftc.personalitycore.submodules;
 
 import androidx.annotation.NonNull;
 
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
-import org.murraybridgebunyips.bunyipslib.BunyipsComponent;
+import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
 
 /**
@@ -13,7 +13,7 @@ import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
  *
  * @author Lucas Bubner, 2023
  */
-public class PersonalityCoreHook extends BunyipsComponent {
+public class PersonalityCoreHook extends BunyipsSubsystem {
     private final Servo hook;
 
     // Assumes a scale range is being used

@@ -1,4 +1,4 @@
-package org.murraybridgebunyips.bunyipslib.personalitycore;
+package org.murraybridgebunyips.bunyipslib.bunyipsftc.personalitycore;
 
 import com.acmerobotics.dashboard.config.Config;
 

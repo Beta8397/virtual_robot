@@ -231,7 +231,28 @@ public class RobotLog {
 
     public static void internalLog(int priority, String tag, String message) {
         if (msTimeOffset == 0) {
-            System.out.println(priority + " " + tag + " " + message);
+            char symbol = 'U';
+            switch (priority) {
+                case Log.VERBOSE:
+                    symbol = 'V';
+                    break;
+                case Log.DEBUG:
+                    symbol = 'D';
+                    break;
+                case Log.INFO:
+                    symbol = 'I';
+                    break;
+                case Log.WARN:
+                    symbol = 'W';
+                    break;
+                case Log.ERROR:
+                    symbol = 'E';
+                    break;
+                case Log.ASSERT:
+                    symbol = 'A';
+                    break;
+            }
+            System.out.println(symbol + " " + tag + " " + message);
         }
     }
 

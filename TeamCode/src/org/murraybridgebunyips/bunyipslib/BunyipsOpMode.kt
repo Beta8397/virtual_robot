@@ -48,7 +48,7 @@ abstract class BunyipsOpMode : LinearOpMode() {
 
     /**
      * Runs upon the pressing of the INIT button on the Driver Station.
-     * This is where your hardware should be initialised.
+     * This is where you should initialise your hardware and other components.
      */
     protected abstract fun onInit()
 
@@ -151,6 +151,8 @@ abstract class BunyipsOpMode : LinearOpMode() {
 
             // Ready to go.
             opModeStatus = "ready"
+            movingAverageTimer.update()
+            Dbg.logd("BunyipsOpMode: init cycle completed in ${movingAverageTimer.movingAverage() / 1000.0} secs")
             telemetry.addData("BunyipsOpMode: ", "INIT COMPLETE -- PLAY WHEN READY.")
             Dbg.logd("BunyipsOpMode: ready.")
             // Set telemetry to an inert state while we wait for start
@@ -196,7 +198,7 @@ abstract class BunyipsOpMode : LinearOpMode() {
             opModeStatus = "finished"
             // overheadTelemetry will no longer update, will remain frozen on last value
             pushTelemetry()
-            Dbg.logd("BunyipsOpMode: finished.")
+            Dbg.logd("BunyipsOpMode: all tasks finished.")
             // Wait for user to hit stop or for the OpMode to be terminated
             while (opModeIsActive()) {
                 idle()
@@ -209,7 +211,7 @@ abstract class BunyipsOpMode : LinearOpMode() {
             // exit immediately as something has gone very wrong
             throw t
         } finally {
-            Dbg.logd("BunyipsOpMode: cleaning up...")
+            Dbg.logd("BunyipsOpMode: opmode stop requested. cleaning up...")
             opModeStatus = "terminating"
             pushTelemetry()
             onStop()
@@ -314,6 +316,44 @@ abstract class BunyipsOpMode : LinearOpMode() {
      */
     fun log(fstring: String, vararg objs: Any) {
         return log(formatString(fstring, objs.asList()))
+    }
+
+    /**
+     * Log a message to the telemetry log
+     * @param obj Class where this log was called (name will be prepended to message in lowercase)
+     * @param message The message to log
+     */
+    fun log(obj: Class<*>, message: String) {
+        telemetry.log().add("[${obj.simpleName.toLowerCase()}] $message")
+    }
+
+    /**
+     * Log a message into the telemetry log
+     * @param stck StackTraceElement with information about where this log was called (see Text.getCallingUserCodeFunction())
+     * @param message The message to log
+     */
+    fun log(stck: StackTraceElement, message: String) {
+        telemetry.log().add("[${stck}] $message")
+    }
+
+    /**
+     * Log a message to the telemetry log using a format string
+     * @param obj Class where this log was called (name will be prepended to message in lowercase)
+     * @param fstring A format string to add to telemetry
+     * @param objs The objects to format into the string
+     */
+    fun log(obj: Class<*>, fstring: String, vararg objs: Any) {
+        return log(obj, formatString(fstring, objs.asList()))
+    }
+
+    /**
+     * Log a message into the telemetry log using a format string
+     * @param stck StackTraceElement with information about where this log was called (see Text.getCallingUserCodeFunction())
+     * @param fstring A format string to add to telemetry
+     * @param objs The objects to format into the string
+     */
+    fun log(stck: StackTraceElement, fstring: String, vararg objs: Any) {
+        return log(stck, formatString(fstring, objs.asList()))
     }
 
     /**

@@ -9,7 +9,7 @@ import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem
  * @author Lucas Bubner, 2022-2024
  */
 abstract class Task(timeoutSeconds: Double) : RobotTask {
-    private var overrideOnConflict: Boolean? = null
+    protected var overrideOnConflict: Boolean? = null
 
     fun shouldOverrideOnConflict(): Boolean? {
         return overrideOnConflict
@@ -21,9 +21,9 @@ abstract class Task(timeoutSeconds: Double) : RobotTask {
             overrideOnConflict = false
     }
 
-    constructor(timeoutSeconds: Double, dependencySubsystem: BunyipsSubsystem, shouldOverrideOtherTasks: Boolean) : this(timeoutSeconds) {
+    constructor(timeoutSeconds: Double, dependencySubsystem: BunyipsSubsystem, shouldOverrideConflictingTasks: Boolean) : this(timeoutSeconds) {
         addDependency(dependencySubsystem)
-        overrideOnConflict = shouldOverrideOtherTasks
+        overrideOnConflict = shouldOverrideConflictingTasks
     }
 
     /**
@@ -46,11 +46,27 @@ abstract class Task(timeoutSeconds: Double) : RobotTask {
 
     /**
      * To run as an activeLoop during this task's duration.
-     * Somewhere in your polling loop you must call isFinished() to determine when the task is finished, and to fire init() and onFinish() accordingly.
-     * Both Scheduler and AutonomousBunyipsOpMode will handle this for you.
-     * @see onFinish()
      */
-    abstract override fun run()
+    abstract fun periodic()
+
+    /**
+     * Should be called by your polling loop to run the task and manage all state properly.
+     */
+    final override fun run() {
+        if (startTime == 0.0) {
+            init()
+            startTime = currentTime
+            // Must poll finished on the first iteration to ensure that the task does not overrun
+            pollFinished()
+        }
+        // Here we check the taskFinished condition but don't poll updateFinishedState(), to ensure that the task is only
+        // updated with latest finish information at the user's discretion
+        if (taskFinished && !finisherFired) {
+            onFinish()
+            finisherFired = true
+        }
+        periodic()
+    }
 
     /**
      * Finalising function to run once the task is finished.
@@ -64,27 +80,29 @@ abstract class Task(timeoutSeconds: Double) : RobotTask {
     abstract fun isTaskFinished(): Boolean
 
     /**
-     * Must be called in a polling loop before run() to ensure init() is called first.
+     * Query (but not update) the finished state of the task.
      */
-    final override fun isFinished(): Boolean {
-        if (startTime == 0.0) {
-            init()
-            startTime = currentTime
-        }
-        if (taskFinished || isTaskFinished()) {
-            if (!finisherFired)
-                onFinish()
-            finisherFired = true
+    override fun isFinished(): Boolean {
+        return taskFinished && finisherFired
+    }
+
+    /**
+     * Update and query the state of the task if it is finished.
+     */
+    override fun pollFinished(): Boolean {
+        // Early return
+        if (taskFinished) return true
+
+        // User defined task finished condition
+        if (isTaskFinished())
             taskFinished = true
-            return true
-        }
+
         // Finish tasks that exceed a time limit defined by the task
         if (timeout != 0.0 && currentTime > startTime + timeout) {
-            if (!finisherFired)
-                onFinish()
-            finisherFired = true
             taskFinished = true
         }
+
+        // run() will handle firing the finisher, in which case we can return true and the polling loop can stop
         return taskFinished && finisherFired
     }
 
@@ -118,13 +136,18 @@ abstract class Task(timeoutSeconds: Double) : RobotTask {
     /**
      * @return Whether the task is currently running (calls to run() should be made)
      */
-    val isRunning: Boolean = startTime != 0.0 && !taskFinished
+    val isRunning: Boolean
+        get() = startTime != 0.0 && !taskFinished
 
-    val currentTime: Double
+    private val currentTime: Double
         get() = System.nanoTime() / NANOS_IN_SECONDS
 
     val deltaTime: Double
-        get() = currentTime - startTime
+        get() {
+            if (startTime == 0.0)
+                return 0.0
+            return currentTime - startTime
+        }
 
     companion object {
         const val NANOS_IN_SECONDS = 1000000000.0

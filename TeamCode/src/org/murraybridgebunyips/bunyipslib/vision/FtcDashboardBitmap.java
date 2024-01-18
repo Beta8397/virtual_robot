@@ -63,7 +63,7 @@ public class FtcDashboardBitmap extends Processor<NoData> implements CameraStrea
     }
 
     @Override
-    public void tick() {
+    public void update() {
         // noop
     }
 }

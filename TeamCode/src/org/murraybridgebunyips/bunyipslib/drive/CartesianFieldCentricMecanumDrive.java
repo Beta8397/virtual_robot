@@ -1,8 +1,12 @@
-package org.murraybridgebunyips.bunyipslib;
+package org.murraybridgebunyips.bunyipslib.drive;
 
 import androidx.annotation.NonNull;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
+import org.murraybridgebunyips.bunyipslib.Controller;
+import org.murraybridgebunyips.bunyipslib.IMUOp;
+import org.murraybridgebunyips.bunyipslib.RelativePose2d;
 
 /**
  * Variant of the Cartesian MecanumDrive that uses field-centric controls, accounting for robot heading.
@@ -47,7 +51,7 @@ public class CartesianFieldCentricMecanumDrive extends CartesianMecanumDrive {
      */
     @Override
     public void setSpeedUsingController(double left_stick_x, double left_stick_y, double right_stick_x) {
-        imu.tick();
+        imu.update();
 
         // Account for the rotated vector of the gamepad
         double heading = imu.getRawHeading() - 90;
@@ -82,7 +86,7 @@ public class CartesianFieldCentricMecanumDrive extends CartesianMecanumDrive {
      */
     @Override
     public void setSpeedXYR(double x, double y, double r) {
-        imu.tick();
+        imu.update();
 
         double heading = imu.getRawHeading();
         x = -x;
@@ -107,7 +111,7 @@ public class CartesianFieldCentricMecanumDrive extends CartesianMecanumDrive {
      */
     @Override
     public void setSpeedPolarR(double speed, double direction_degrees, double speedR) {
-        imu.tick();
+        imu.update();
 
         double heading = imu.getRawHeading();
         double direction = Math.toRadians(direction_degrees);

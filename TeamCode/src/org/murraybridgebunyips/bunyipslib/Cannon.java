@@ -13,7 +13,7 @@ import com.qualcomm.robotcore.hardware.Servo;
  * @author Lachlan Paul, 2023
  * @author Lucas Bubner, 2023
  */
-public class Cannon extends BunyipsComponent {
+public class Cannon extends BunyipsSubsystem {
     // NOTE: Servos go from 1 to 0, 1 being right as set on the servo programmer and vice versa.
     private static final double FIRED = 1.0;
     private static final double RESET = 0.0;

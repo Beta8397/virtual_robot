@@ -82,7 +82,7 @@ public abstract class Processor<T extends VisionData> implements VisionProcessor
      * refresh `this.data` with the latest information from the vision system to be accessed
      * with your methods on .getData().T (your VisionData class).
      */
-    public abstract void tick();
+    public abstract void update();
 
     /**
      * Called by the vision system to process a frame

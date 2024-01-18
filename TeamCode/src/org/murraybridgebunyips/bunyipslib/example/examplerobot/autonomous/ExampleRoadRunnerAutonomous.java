@@ -7,7 +7,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import org.murraybridgebunyips.bunyipslib.Inches;
 import org.murraybridgebunyips.bunyipslib.OpModeSelection;
 import org.murraybridgebunyips.bunyipslib.RoadRunnerAutonomousBunyipsOpMode;
-import org.murraybridgebunyips.bunyipslib.TankDrive;
+import org.murraybridgebunyips.bunyipslib.drive.TankDrive;
 import org.murraybridgebunyips.bunyipslib.example.examplerobot.components.ExampleConfig;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.RobotTask;
 

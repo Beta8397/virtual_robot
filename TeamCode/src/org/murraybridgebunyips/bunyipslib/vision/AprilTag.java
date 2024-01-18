@@ -43,7 +43,7 @@ public class AprilTag extends Processor<AprilTagData> {
     }
 
     @Override
-    public void tick() {
+    public void update() {
         List<AprilTagDetection> detections = instance.getFreshDetections();
         if (detections == null) {
             return;

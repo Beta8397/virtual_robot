@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 /**
  * Control a set of two servo claws together.
  */
-public class DualClaws extends BunyipsComponent {
+public class DualClaws extends BunyipsSubsystem {
     private final Servo left;
     private final Servo right;
     private final double LEFT_SERVO_CLOSED_POSITION;

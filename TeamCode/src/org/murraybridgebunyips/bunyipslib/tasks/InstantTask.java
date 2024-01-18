@@ -11,11 +11,13 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.RunOnceTask;
 public class InstantTask extends RunOnceTask {
     private final Runnable callback;
 
-    public InstantTask(Runnable callback, BunyipsSubsystem... dependencies) {
+    public InstantTask(Runnable callback) {
         this.callback = callback;
-        for (BunyipsSubsystem dependency : dependencies) {
-            addDependency(dependency);
-        }
+    }
+
+    public InstantTask(Runnable callback, BunyipsSubsystem dependencySubsystem, boolean shouldOverrideConflictingTasks) {
+        super(dependencySubsystem, shouldOverrideConflictingTasks);
+        this.callback = callback;
     }
 
     @Override

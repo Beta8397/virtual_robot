@@ -8,6 +8,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 
 import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
+import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 import org.murraybridgebunyips.bunyipslib.Inches;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.TrajectorySequence;
@@ -37,6 +38,18 @@ public class RoadRunnerTask<T extends RoadRunnerDrive> extends BunyipsTask {
         this.trajectorySequence = trajectorySequence;
     }
 
+    public RoadRunnerTask(@NonNull BunyipsOpMode opMode, double time, T drive, Trajectory trajectory, BunyipsSubsystem dependency, boolean shouldOverrideConflictingTasks) {
+        super(opMode, time, dependency, shouldOverrideConflictingTasks);
+        this.drive = drive;
+        this.trajectory = trajectory;
+    }
+
+    public RoadRunnerTask(@NonNull BunyipsOpMode opMode, double time, T drive, TrajectorySequence trajectorySequence, BunyipsSubsystem dependency, boolean shouldOverrideConflictingTasks) {
+        super(opMode, time, dependency, shouldOverrideConflictingTasks);
+        this.drive = drive;
+        this.trajectorySequence = trajectorySequence;
+    }
+
     @Override
     public void init() {
         if (trajectory != null) {
@@ -49,7 +62,7 @@ public class RoadRunnerTask<T extends RoadRunnerDrive> extends BunyipsTask {
     }
 
     @Override
-    public void run() {
+    public void periodic() {
         Pose2d endPose;
         double duration;
         if (trajectory != null) {

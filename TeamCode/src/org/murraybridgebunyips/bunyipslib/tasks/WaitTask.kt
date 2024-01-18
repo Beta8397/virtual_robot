@@ -12,7 +12,7 @@ class WaitTask(private val opMode: BunyipsOpMode, time: Double) : Task(time), Ro
         return
     }
 
-    override fun run() {
+    override fun periodic() {
         opMode.addTelemetry("Waiting % seconds...", timeout)
         opMode.idle()
     }

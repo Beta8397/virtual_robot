@@ -6,7 +6,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.Range;
 
-import org.murraybridgebunyips.bunyipslib.BunyipsComponent;
+import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
 import org.murraybridgebunyips.bunyipslib.RelativePose2d;
 
@@ -15,8 +15,8 @@ import java.util.Locale;
 /**
  * Example code for a drive system using the BunyipsOpMode ecosystem.
  */
-// Extend the `BunyipsComponent` class when making a new component, as shown below.
-public class ExampleMecanumDrive extends BunyipsComponent {
+// Extend the `BunyipsSubsystem` class when making a new component, as shown below.
+public class ExampleMecanumDrive extends BunyipsSubsystem {
 
     // View ExampleDrive.java for more information on how to make a component.
 

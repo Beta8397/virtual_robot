@@ -7,5 +7,6 @@ interface RobotTask {
     fun init()
     fun run()
     fun isFinished(): Boolean
+    fun pollFinished(): Boolean
     fun onFinish()
 }

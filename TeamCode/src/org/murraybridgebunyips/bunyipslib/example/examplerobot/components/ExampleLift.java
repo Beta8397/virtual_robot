@@ -4,11 +4,11 @@ import androidx.annotation.NonNull;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.murraybridgebunyips.bunyipslib.BunyipsComponent;
+import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
 
 // See ExampleDrive before looking at this file.
-public class ExampleLift extends BunyipsComponent {
+public class ExampleLift extends BunyipsSubsystem {
     // Run similar initialisation to ExampleDrive. This will be the same for all components.
     private final DcMotor liftMotor;
 

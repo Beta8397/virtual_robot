@@ -20,7 +20,7 @@ public class SequentialTaskGroup extends TaskGroup {
     }
 
     @Override
-    public final void run() {
+    public final void periodic() {
         if (currentTask.isFinished()) {
             if (!taskIterator.hasNext()) {
                 finishNow();

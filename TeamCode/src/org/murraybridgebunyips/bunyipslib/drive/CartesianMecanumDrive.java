@@ -1,9 +1,12 @@
-package org.murraybridgebunyips.bunyipslib;
+package org.murraybridgebunyips.bunyipslib.drive;
 
 import androidx.annotation.NonNull;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.Range;
+import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
+import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
+import org.murraybridgebunyips.bunyipslib.Controller;
 
 import java.util.Locale;
 
@@ -15,7 +18,7 @@ import java.util.Locale;
  * @author Lucas Bubner, 2023
  * @see MecanumDrive
  */
-public class CartesianMecanumDrive extends BunyipsComponent {
+public class CartesianMecanumDrive extends BunyipsSubsystem {
 
     private final DcMotor frontLeft;
     private final DcMotor backLeft;
@@ -123,11 +126,10 @@ public class CartesianMecanumDrive extends BunyipsComponent {
             backRightPower = backRightPower / maxPower;
         }
 
-        // All powers are reversed when sent to the motors
-        frontLeft.setPower(-frontLeftPower);
-        frontRight.setPower(-frontRightPower);
-        backLeft.setPower(-backLeftPower);
-        backRight.setPower(-backRightPower);
+        frontLeft.setPower(frontLeftPower);
+        frontRight.setPower(frontRightPower);
+        backLeft.setPower(backLeftPower);
+        backRight.setPower(backRightPower);
 
         getOpMode().addTelemetry(String.format(Locale.getDefault(), "Mecanum Drive: X: %.2f, Y: %.2f, R: %.2f", speedX, speedY, speedR));
     }

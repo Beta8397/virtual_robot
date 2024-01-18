@@ -1,5 +1,6 @@
 package org.murraybridgebunyips.bunyipslib.tasks;
 
+import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
 /**
@@ -15,13 +16,18 @@ public class RunForTask extends Task {
         this.callback = callback;
     }
 
+    public RunForTask(double timeout, Runnable callback, BunyipsSubsystem dependency, boolean shouldOverrideConflictingTasks) {
+        super(timeout, dependency, shouldOverrideConflictingTasks);
+        this.callback = callback;
+    }
+
     @Override
     public void init() {
         // noop
     }
 
     @Override
-    public void run() {
+    public void periodic() {
         callback.run();
     }
 

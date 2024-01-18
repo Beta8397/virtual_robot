@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.function.BooleanSupplier;
 
 /**
- * Task scheduler for use with BunyipsLib.
+ * Scheduler and command plexus for use with the BunyipsLib task system.
  * @author Lucas Bubner, 2024
  */
 public class Scheduler {
@@ -21,35 +21,64 @@ public class Scheduler {
         this.opMode = opMode;
     }
 
+    /**
+     * Add subsystems to the scheduler. This will ensure the update() method of the subsystems is called.
+     * @param dispatch The subsystems to add.
+     */
     public void addSubsystems(BunyipsSubsystem... dispatch) {
         subsystems.addAll(Arrays.asList(dispatch));
     }
 
+    /**
+     * Run the scheduler. This will run all subsystems and tasks allocated to the scheduler.
+     * This should be called in the activeLoop() method of the OpMode.
+     */
     public void run() {
         for (ConditionalTask task : allocatedTasks) {
-            if (task.condition.getAsBoolean()) {
-                task.activeSince = System.currentTimeMillis();
-                if (
-                    // While the time criterion is positive, the task will run for that many seconds
-                    (task.timeCriterion > 0 && task.activeSince + task.timeCriterion * 1000 < System.currentTimeMillis()) ||
-                    // While the time criterion is negative, the task will run in that many seconds
-                    (task.timeCriterion < 0 && task.activeSince - task.timeCriterion * 1000 > System.currentTimeMillis()) ||
-                    // While the time criterion is zero, the task will run immediately
-                    (task.timeCriterion == 0)
-                ) {
+            boolean condition = task.condition.getAsBoolean();
+            if (condition || task.task.isRunning()) {
+                // Latch current timing of truthy condition
+                if (task.activeSince == -1) {
+                    task.activeSince = System.currentTimeMillis();
+                }
+                // Update controller states for determining whether they need to be continued to be run
+                boolean timeoutExceeded = task.time * 1000.0 + task.activeSince < System.currentTimeMillis();
+                if (task.condition instanceof ControllerStateHandler && task.time != 0.0) {
+                    ((ControllerStateHandler) task.condition).setTimeoutCondition(timeoutExceeded);
+                }
+                // Trigger upon timeout goal or if the task does not have one
+                if (task.time == 0.0 || timeoutExceeded) {
                     if (task.task.shouldOverrideOnConflict() == null) {
-                        if (task.task.isFinished()) allocatedTasks.remove(task);
+                        if (task.stopCondition.getAsBoolean()) {
+                            // Finish handler will be called below
+                            task.task.finishNow();
+                        }
+                        // Check for a debouncing situation and skip if it is not met
+                        if (task.debouncing && !debouncingCheck(task, condition))
+                            continue;
                         // This is a non-command task, run it now as it will not be run by any subsystem
                         task.task.run();
+                        if (task.task.pollFinished()) {
+                            // Reset the task as it is not attached to a subsystem and will not be reintegrated by one
+                            task.task.reset();
+                        }
                         continue;
                     }
+                    // If it has a dependency, set the current task of the subsystems that depend on it
+                    // Tasks may only have one subsystem dependency, where this dependency represents where the task
+                    // will be executed by the scheduler.
                     for (BunyipsSubsystem subsystem : subsystems) {
+                        if (task.stopCondition.getAsBoolean()) {
+                            // Finish handler will be called on the subsystem
+                            task.task.finishNow();
+                        }
                         if (subsystem.getTaskDependencies().contains(task.task.hashCode())) {
                             subsystem.setCurrentTask(task.task);
                         }
                     }
                 }
             } else {
+                task.lastState = false;
                 task.activeSince = -1;
             }
         }
@@ -59,6 +88,23 @@ public class Scheduler {
         }
     }
 
+    private boolean debouncingCheck(ConditionalTask task, boolean condition) {
+        if (condition && !task.lastState) {
+            task.lastState = true;
+            return true;
+        } else if (!condition) {
+            // This reset is also handled if the condition is false by the main loop
+            task.lastState = false;
+        }
+        return false;
+    }
+
+    /**
+     * Run a task when a controller button is held.
+     * @param user The user of the controller.
+     * @param button The button of the controller.
+     * @return Timing/stop control for allocation.
+     */
     public ConditionalTask whenHeld(Controller.User user, Controller button) {
         return new ConditionalTask(
                 new ControllerStateHandler(
@@ -70,6 +116,12 @@ public class Scheduler {
         );
     }
 
+    /**
+     * Run a task when a controller button is pressed (will run once when pressing the desired input).
+     * @param user The user of the controller.
+     * @param button The button of the controller.
+     * @return Timing/stop control for allocation.
+     */
     public ConditionalTask whenPressed(Controller.User user, Controller button) {
         return new ConditionalTask(
                 new ControllerStateHandler(
@@ -81,6 +133,12 @@ public class Scheduler {
         );
     }
 
+    /**
+     * Run a task when a controller button is released (will run once letting go of the desired input).
+     * @param user The user of the controller.
+     * @param button The button of the controller.
+     * @return Timing/stop control for allocation.
+     */
     public ConditionalTask whenReleased(Controller.User user, Controller button) {
         return new ConditionalTask(
                 new ControllerStateHandler(
@@ -92,14 +150,67 @@ public class Scheduler {
         );
     }
 
+    /**
+     * Run a task when a condition is met.
+     * @param condition Supplier to provide a boolean value of when the task should be run.
+     * @return Timing/stop control for allocation.
+     */
     public ConditionalTask when(BooleanSupplier condition) {
         return new ConditionalTask(condition);
     }
 
+    /**
+     * Run a task when a condition is met, debouncing the task from running more than once the condition is met.
+     * @param condition Supplier to provide a boolean value of when the task should be run.
+     * @return Timing/stop control for allocation.
+     * @see DebounceCondition
+     */
+    public ConditionalTask whenDebounced(BooleanSupplier condition) {
+        return new ConditionalTask(
+                new DebounceCondition(condition)
+        );
+    }
+
+    /**
+     * Run a task always. This is the same as calling .when(() -> true).
+     * @return Timing/stop control for allocation.
+     */
     public ConditionalTask always() {
         return new ConditionalTask(
                 () -> true
         );
+    }
+
+    private static class DebounceCondition implements BooleanSupplier {
+        private boolean lastState = false;
+        private final BooleanSupplier condition;
+
+        public DebounceCondition(BooleanSupplier condition) {
+            this.condition = condition;
+        }
+
+        @Override
+        public boolean getAsBoolean() {
+            boolean currentState = condition.getAsBoolean();
+            if (currentState && !lastState) {
+                lastState = true;
+                return true;
+            } else if (!currentState) {
+                lastState = false;
+            }
+            return false;
+        }
+
+        public boolean getReversedAsBoolean() {
+            boolean currentState = condition.getAsBoolean();
+            if (!currentState && lastState) {
+                lastState = false;
+                return true;
+            } else if (currentState) {
+                lastState = true;
+            }
+            return false;
+        }
     }
 
     private static class ControllerStateHandler implements BooleanSupplier {
@@ -109,50 +220,55 @@ public class Scheduler {
             HELD
         }
 
-        private OpMode opMode;
+        private final OpMode opMode;
         private final State state;
         private final Controller.User user;
         private final Controller button;
 
-        private boolean lockout = false;
+        private DebounceCondition debounceCondition;
+        private boolean timerIsRunning = false;
+
+        public void setTimeoutCondition(boolean timerNotFinished) {
+            this.timerIsRunning = !timerNotFinished;
+        }
 
         public ControllerStateHandler(OpMode opMode, Controller.User user, Controller button, State state) {
+            this.opMode = opMode;
             this.user = user;
             this.button = button;
             this.state = state;
+            this.debounceCondition = new DebounceCondition(
+                    () -> Controller.isSelected(Controller.getGamepad(user, opMode), button)
+            );
         }
 
         @Override
         public boolean getAsBoolean() {
-            boolean isPressed = Controller.isSelected(user == Controller.User.ONE ? opMode.gamepad1 : opMode.gamepad2, button);
             switch (state) {
                 case PRESSED:
-                    if (isPressed && !lockout) {
-                        lockout = true;
-                        return true;
-                    } else if (!isPressed) {
-                        lockout = false;
-                    }
+                    // Allow timers to run if they exist by not locking out but returning true for the duration
+                    // This also ensures that repeated calls will not trigger the task multiple times, as this adds
+                    // way too much unnecessary complexity to the task allocation system and to the OpMode itself.
+                    // There is realistically no reason for a task to have such a delay between allocation and execution
+                    // where it will be called multiple times, in which case the task itself should be the one waiting.
+                    return debounceCondition.getAsBoolean() || timerIsRunning;
                 case RELEASED:
-                    if (!isPressed && lockout) {
-                        lockout = false;
-                        return true;
-                    } else if (isPressed) {
-                        lockout = true;
-                    }
+                    return debounceCondition.getReversedAsBoolean() || timerIsRunning;
                 case HELD:
-                    return isPressed;
-                default:
-                    return false;
+                    return Controller.isSelected(Controller.getGamepad(user, opMode), button);
             }
+            return false;
         }
     }
 
     public class ConditionalTask {
         protected Task task = null;
-        protected double timeCriterion;
-        protected BooleanSupplier condition;
-        protected double activeSince;
+        protected double time = 0.0;
+        protected boolean debouncing = false;
+        protected boolean lastState = false;
+        protected final BooleanSupplier condition;
+        protected BooleanSupplier stopCondition = () -> false;
+        protected long activeSince = -1;
 
         public ConditionalTask(BooleanSupplier condition) {
             this.condition = condition;
@@ -166,24 +282,56 @@ public class Scheduler {
          */
         public ConditionalTask run(Task task) {
             if (this.task != null) {
-                throw new EmergencyStop("A run() method has been called more than once on a scheduler task. If you wish to run multiple tasks see about using a task group as your task.");
+                throw new EmergencyStop("A run(Task) method has been called more than once on a scheduler task. If you wish to run multiple tasks see about using a task group as your task.");
             }
             this.task = task;
             return this;
         }
 
-        public void forSeconds(double time) {
-            timeCriterion = time;
-            allocatedTasks.add(this);
+        public ConditionalTask runDebounced(Task task) {
+            this.debouncing = true;
+            return run(task);
         }
 
+        /**
+         * Run a task assigned to in run() in a certain amount of seconds of the condition remaining true.
+         * If on a controller, this will delay the activation of the task by the specified amount of seconds.
+         * @param time The amount of seconds to wait before running the task.
+         */
         public void inSeconds(double time) {
-            timeCriterion = -time;
+            this.time = Math.abs(time);
             allocatedTasks.add(this);
         }
 
+        /**
+         * Run the task assigned to in run() until this condition is met. Once this condition is met, the task will
+         * be forcefully stopped and the scheduler will move on. This is useful for continuous tasks.
+         * @param condition The condition to stop the task.
+         */
+        public void finishingWhen(BooleanSupplier condition) {
+            this.stopCondition = condition;
+            allocatedTasks.add(this);
+        }
+
+        /**
+         * Run the task assigned to in run() in a certain amount of seconds of the condition remaining true.
+         * If on a controller, this will delay the activation of the task by the specified amount of seconds.
+         * Once this condition is met, the task will be forcefully stopped and the scheduler will move on.
+         * This is useful for continuous tasks.
+         * @param time The amount of seconds to wait before running the task.
+         * @param condition The condition to stop the task.
+         */
+        public void inSecondsFinishingWhen(double time, BooleanSupplier condition) {
+            this.time = Math.abs(time);
+            this.stopCondition = condition;
+            allocatedTasks.add(this);
+        }
+
+        /**
+         * Run the task assigned to in run() immediately once the condition is true.
+         */
         public void immediately() {
-            timeCriterion = 0;
+            this.time = 0.0;
             allocatedTasks.add(this);
         }
     }

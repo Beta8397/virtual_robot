@@ -23,11 +23,11 @@ package and the `robot` package.
 Each robot has its own `robot` package, and the `BunyipsLib` package is shared between all robots.
 BunyipsLib is the current library that is used to write OpModes, and is a collection of classes and
 objects that are used to make writing OpModes easier, with built in error handling, RoadRunner,
-vision,
-and more.
+vision, command-based paradigms, and more.
 
 View the BYOEcosystem.png image in this directory to view what methods are available to use in a
-BunyipsOpMode.
+BunyipsOpMode, or look at specific implementations of OpModes such as AutonomousBunyipsOpMode, CommandBasedBunyipsOpMode,
+and RoadRunnerAutonomousBunyipsOpMode.
 
 Each `robot` package contains classes and objects that are specific to that robot. This includes
 their configuration, OpModes, and components specific to that robot.
@@ -44,7 +44,7 @@ error handling, ensuring your OpModes never crash due to a hardware error.
 A major section of the BunyipsOpMode ecosystem is the theory of using Components. Components are
 classes that are used to control a specific part of the robot, such as a motor or a sensor. These
 components are then used in the OpMode to control the robot. Components are created by extending
-`BunyipsComponent`, which will give that component access to the robot's overhead OpMode. You can
+`BunyipsSubsystem`, which will give that component access to the robot's overhead OpMode. You can
 pass HardwareDevice types as constructor arguments to then make your component control that device.
 
 Some components have common usage throughout robots, such as the preexisting IMUOp or Vision, which

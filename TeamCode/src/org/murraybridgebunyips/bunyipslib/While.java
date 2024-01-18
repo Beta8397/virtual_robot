@@ -2,6 +2,8 @@ package org.murraybridgebunyips.bunyipslib;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import java.util.function.BooleanSupplier;
+
 /**
  * Perform non-blocking loops using an evaluator callback to run the loop.
  * This should be paired with an update(), activeLoop() or onInitLoop(),
@@ -18,7 +20,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * @author Lucas Bubner, 2023
  */
 public class While {
-    private final Condition condition;
+    private final BooleanSupplier condition;
     private final Runnable runThis;
     private final Runnable callback;
     private double timeoutSeconds;
@@ -32,7 +34,7 @@ public class While {
      * @param callback       The callback to run once [condition] is met.
      * @param timeoutSeconds Optional timeout in seconds. If the timeout is reached, the loop will exit.
      */
-    public While(Condition condition, Runnable runThis, Runnable callback, double timeoutSeconds) {
+    public While(BooleanSupplier condition, Runnable runThis, Runnable callback, double timeoutSeconds) {
         this.condition = condition;
         this.runThis = runThis;
         this.callback = callback;
@@ -77,7 +79,7 @@ public class While {
             timer = new ElapsedTime();
         }
 
-        if (condition.check() && timer.seconds() < timeoutSeconds) {
+        if (condition.getAsBoolean() && timer.seconds() < timeoutSeconds) {
             runThis.run();
             return true;
         }

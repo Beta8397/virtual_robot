@@ -16,7 +16,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
  * @author Lachlan Paul, 2023
  */
 
-public class Suspender extends BunyipsComponent {
+public class Suspender extends BunyipsSubsystem {
 
     private final PivotMotor rotation;
     private final DcMotor extension;

@@ -18,7 +18,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation
  *
  * @author Lucas Bubner, 2022-2023
  */
-class IMUOp(opMode: BunyipsOpMode, private val imu: IMU) : BunyipsComponent(opMode) {
+class IMUOp(opMode: BunyipsOpMode, private val imu: IMU) : BunyipsSubsystem(opMode) {
     @Volatile
     var currentAngles: Orientation? = null
 
@@ -99,7 +99,7 @@ class IMUOp(opMode: BunyipsOpMode, private val imu: IMU) : BunyipsComponent(opMo
     /**
      * Update the latest state in the IMU to current data
      */
-    fun tick() {
+    override fun update() {
         this.currentAngles = imu.getRobotOrientation(
             AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES
         )
@@ -148,7 +148,7 @@ class IMUOp(opMode: BunyipsOpMode, private val imu: IMU) : BunyipsComponent(opMo
      * Start PrecisionDrive IMU alignment algorithm and capture the original angle
      */
     fun startCapture() {
-        this.tick()
+        this.update()
         this.capture = this.heading
     }
 
@@ -169,7 +169,7 @@ class IMUOp(opMode: BunyipsOpMode, private val imu: IMU) : BunyipsComponent(opMo
         // If we're not capturing, return the original speed
         if (this.capture == null) return originalSpeed
 
-        this.tick()
+        this.update()
         val current = this.heading
 
         // If we're at the minimum tolerance, increase turn rate

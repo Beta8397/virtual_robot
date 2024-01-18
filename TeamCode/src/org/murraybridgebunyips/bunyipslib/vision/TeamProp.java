@@ -107,7 +107,7 @@ public class TeamProp extends Processor<TeamPropData> {
     }
 
     @Override
-    public void tick() {
+    public void update() {
         data.clear();
         if (max_distance == distance1) {
             data.add(new TeamPropData(Positions.RIGHT, distance1, distance2, distance3, max_distance));

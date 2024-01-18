@@ -90,8 +90,8 @@ public class GetWhitePixelTask extends BunyipsTask {
     }
 
     @Override
-    public void run() {
-        tfod.tick();
+    public void periodic() {
+        tfod.update();
         List<TfodData> tfodData = tfod.getData();
         if (tfodData.size() == 0) {
             foundSpike = false;

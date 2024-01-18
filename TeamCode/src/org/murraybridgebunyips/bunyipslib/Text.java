@@ -27,17 +27,16 @@ public class Text {
                 try {
                     newString.append(objs.get(occurrences));
                 } catch (IndexOutOfBoundsException e) {
-                    throw new IllegalFormatFlagsException("Missing '%' placeholders!");
+                    throw new IllegalFormatFlagsException("Missing args for '%' formatString() placeholders!");
                 }
                 occurrences++;
                 continue;
             }
             newString.append(fstring.charAt(i));
         }
-        // Ignoring this corner case as it is not critical and can crash the robot
-//        if (occurrences != objs.size()) {
-//            throw new IllegalFormatFlagsException("Missing args for '%' placeholders!");
-//        }
+        if (occurrences != objs.size()) {
+            Dbg.warn(getCallingUserCodeFunction(), "Missing '%' placeholders for formatString() objects!");
+        }
         return newString.toString();
     }
 
@@ -59,5 +58,20 @@ public class Text {
     public static float round(float num, int toDecimalPlaces) {
         // noinspection MalformedFormatString
         return Float.parseFloat(String.format(Locale.getDefault(), "%." + toDecimalPlaces + "f", num));
+    }
+
+    /**
+     * Get the calling function of the current context.
+     */
+    public static StackTraceElement getCallingUserCodeFunction() {
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        // Keep going down the stack trace until we leave the BunyipsLib package
+        for (StackTraceElement stackTraceElement : stackTrace) {
+            if (stackTraceElement.getMethodName().equals("getStackTrace")) continue;
+            if (!stackTraceElement.getClassName().startsWith("org.murraybridgebunyips.bunyipslib")) {
+                return stackTraceElement;
+            }
+        }
+        return null;
     }
 }

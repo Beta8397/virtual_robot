@@ -31,17 +31,21 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
             return true;
 
         // Lockout if a task is currently running that is not the default task
-        if (currentTask != defaultTask) {
+        if (this.currentTask != defaultTask) {
             // Override if the task is designed to override
             // shouldOverrideOnConflict might be null if it is a non-command task
             if (Boolean.TRUE.equals(currentTask.shouldOverrideOnConflict())) {
                 setHighPriorityCurrentTask(currentTask);
                 return true;
             }
-            Dbg.warn("Attempted to set a task while another task was running in %, this was ignored.", this.getClass().getCanonicalName());
+            Dbg.warn("Attempted to set a task while another task was running in %, this was ignored.", this.getClass().getSimpleName());
             return false;
         }
 
+        currentTask.reset();
+        // Default task technically can't finish, but it can be interrupted, so we will just run the finish callback
+        if (this.currentTask == defaultTask)
+            defaultTask.onFinish();
         this.currentTask = currentTask;
         return true;
     }
@@ -56,20 +60,26 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
 
     public final void setHighPriorityCurrentTask(Task currentTask) {
         // Task will be cancelled abruptly, run the finish callback now
-        if (currentTask != defaultTask) {
-            Dbg.warn("A high-priority task has forcefully interrupted the current task in %.", this.getClass().getCanonicalName());
-            currentTask.forceFinish();
+        if (this.currentTask != defaultTask) {
+            Dbg.warn("A high-priority task has forcefully interrupted the current task in %.", this.getClass().getSimpleName());
+            this.currentTask.forceFinish();
         }
+        currentTask.reset();
+        // Default task technically can't finish, but it can be interrupted, so we will just run the finish callback
+        if (this.currentTask == defaultTask)
+            defaultTask.onFinish();
         this.currentTask = currentTask;
     }
 
     public final void run() {
         Task task = getCurrentTask();
         if (task != null) {
-            if (task == defaultTask && defaultTask.isFinished()) {
+            if (task == defaultTask && defaultTask.pollFinished()) {
                 throw new EmergencyStop("Default task should never finish!");
             }
             task.run();
+            // Update the state of isFinished() after running the task as it may have changed
+            task.pollFinished();
         }
         update();
     }

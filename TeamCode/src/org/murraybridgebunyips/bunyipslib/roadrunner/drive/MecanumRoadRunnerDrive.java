@@ -124,6 +124,7 @@ public class MecanumRoadRunnerDrive extends com.acmerobotics.roadrunner.drive.Me
 
     @Override
     public void stop() {
+        setWeightedDrivePower(new Pose2d(0, 0, 0));
         setMotorPowers(0, 0, 0, 0);
     }
 

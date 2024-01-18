@@ -41,7 +41,7 @@ public class TFOD extends Processor<TfodData> {
         return "tfod";
     }
 
-    public void tick() {
+    public void update() {
         List<Recognition> recognitions = instance.getFreshRecognitions();
         if (recognitions == null) {
             return;

@@ -1,4 +1,4 @@
-package org.murraybridgebunyips.bunyipslib.personalitycore;
+package org.murraybridgebunyips.bunyipslib.bunyipsftc.personalitycore;
 
 import androidx.annotation.NonNull;
 
@@ -7,14 +7,14 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.murraybridgebunyips.bunyipslib.BunyipsComponent;
+import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
 import org.murraybridgebunyips.bunyipslib.DualClaws;
 import org.murraybridgebunyips.bunyipslib.NullSafety;
-import org.murraybridgebunyips.bunyipslib.personalitycore.submodules.PersonalityCoreClawMover;
-import org.murraybridgebunyips.bunyipslib.personalitycore.submodules.PersonalityCoreClawRotator;
-import org.murraybridgebunyips.bunyipslib.personalitycore.submodules.PersonalityCoreHook;
-import org.murraybridgebunyips.bunyipslib.personalitycore.submodules.PersonalityCoreManagementRail;
+import org.murraybridgebunyips.bunyipslib.bunyipsftc.personalitycore.submodules.PersonalityCoreClawMover;
+import org.murraybridgebunyips.bunyipslib.bunyipsftc.personalitycore.submodules.PersonalityCoreClawRotator;
+import org.murraybridgebunyips.bunyipslib.bunyipsftc.personalitycore.submodules.PersonalityCoreManagementRail;
+import org.murraybridgebunyips.bunyipslib.bunyipsftc.personalitycore.submodules.PersonalityCoreHook;
 
 /**
  * Overhead class that handles a single instantiation of other PersonalityCore components.
@@ -24,7 +24,7 @@ import org.murraybridgebunyips.bunyipslib.personalitycore.submodules.Personality
  * @noinspection UnusedReturnValue
  */
 @Config
-public class PersonalityCoreArm extends BunyipsComponent {
+public class PersonalityCoreArm extends BunyipsSubsystem {
     // Servo values for the dual claw at the front
     public static double LEFT_CLAW_OPEN = 1.0;
     public static double RIGHT_CLAW_OPEN;

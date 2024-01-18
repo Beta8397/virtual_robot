@@ -1,42 +1,118 @@
 package org.murraybridgebunyips.bunyipslib
 
 import com.acmerobotics.roadrunner.geometry.Pose2d
+import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.hardware.Gamepad
+import java.util.*
+import kotlin.collections.HashMap
 
 /**
- * Enum control class for the different button controls on the gamepad.
- * Used for adding additional abstraction to the current gamepad control system.
+ * Utility class for the different button and analog controls on the gamepad.
+ * Used for adding additional abstraction to the current gamepad control system, used across BunyipsLib.
+ * @author Lucas Bubner, 2023-2024
  */
 enum class Controller {
     A, B, X, Y, START, BACK, DPAD_UP, DPAD_DOWN, DPAD_LEFT, DPAD_RIGHT, LEFT_BUMPER, RIGHT_BUMPER, LEFT_STICK_BUTTON, RIGHT_STICK_BUTTON, NONE;
 
+    /**
+     * Represents the analog inputs on a gamepad.
+     */
+    enum class Analog {
+        LEFT_STICK_X, LEFT_STICK_Y, RIGHT_STICK_X, RIGHT_STICK_Y, LEFT_TRIGGER, RIGHT_TRIGGER;
+
+        companion object {
+            /**
+             * Get the value of an analog input on a gamepad.
+             */
+            @JvmStatic
+            fun get(gamepad: Gamepad, analog: Analog): Float {
+                return when (analog) {
+                    LEFT_STICK_X -> gamepad.left_stick_x
+                    LEFT_STICK_Y -> gamepad.left_stick_y
+                    RIGHT_STICK_X -> gamepad.right_stick_x
+                    RIGHT_STICK_Y -> gamepad.right_stick_y
+                    LEFT_TRIGGER -> gamepad.left_trigger
+                    RIGHT_TRIGGER -> gamepad.right_trigger
+                }
+            }
+
+            /**
+             * Get the value of an analog input on a gamepad, with the Y axis inverted for the left and right sticks.
+             */
+            @JvmStatic
+            fun getCartesian(gamepad: Gamepad, analog: Analog): Float {
+                return when (analog) {
+                    LEFT_STICK_X -> gamepad.left_stick_x
+                    LEFT_STICK_Y -> -gamepad.left_stick_y
+                    RIGHT_STICK_X -> gamepad.right_stick_x
+                    RIGHT_STICK_Y -> -gamepad.right_stick_y
+                    LEFT_TRIGGER -> gamepad.left_trigger
+                    RIGHT_TRIGGER -> gamepad.right_trigger
+                }
+            }
+        }
+    }
+
+    /**
+     * Represents a user of a gamepad.
+     */
     enum class User {
         ONE, TWO
     }
 
     companion object {
+        /**
+         * Determine the user of a gamepad.
+         * Sometimes, this cannot be determined, and null is returned.
+         */
         @JvmStatic
-        fun isSelected(gamepad: Gamepad, buttonControl: Controller?): Boolean {
+        fun determineUser(gamepad: Gamepad): User? {
+            return if (gamepad.id == 0) User.ONE else if (gamepad.id == 1) User.TWO else null
+        }
+
+        /**
+         * Get the gamepad of a user.
+         */
+        @JvmStatic
+        fun getGamepad(user: User, opMode: OpMode): Gamepad {
+            return if (user == User.ONE) opMode.gamepad1 else opMode.gamepad2
+        }
+
+        // Static map of buttons to their debounce state, storing hashcode of gamepad and button
+        private val debounces = HashMap<Int, Boolean>()
+
+        /**
+         * Check if a button is currently pressed on a gamepad, with debounce to ignore a press that was already detected
+         * upon the first call of this function and pair.
+         */
+        @JvmStatic
+        fun isSelectedAfterDebounce(gamepad: Gamepad, button: Controller): Boolean {
+            val buttonPressed = isSelected(gamepad, button)
+            // Default value will be true as it won't be in the map, to avoid debouncing a value that was never pressed
+            val isPressed = debounces.getOrDefault(Objects.hash(gamepad, button), true)
+            if (buttonPressed && !isPressed) {
+                debounces[Objects.hash(gamepad, button)] = true
+                return true
+            } else if (!buttonPressed) {
+                debounces[Objects.hash(gamepad, button)] = false
+            }
+            return false
+        }
+
+        /**
+         * Check if a button is currently pressed on a gamepad.
+         */
+        @JvmStatic
+        fun isSelected(gamepad: Gamepad, button: Controller): Boolean {
             var buttonPressed = false
-            when (buttonControl) {
+            when (button) {
                 DPAD_UP -> buttonPressed = gamepad.dpad_up
                 DPAD_DOWN -> buttonPressed = gamepad.dpad_down
                 DPAD_LEFT -> buttonPressed = gamepad.dpad_left
                 DPAD_RIGHT -> buttonPressed = gamepad.dpad_right
-                A ->
-                    // Ignore if start is also pressed to avoid triggering when initialising the
-                    // controllers
-                    if (!gamepad.start) {
-                        buttonPressed = gamepad.a
-                    }
-
-                B ->
-                    // Ignore if start is also pressed to avoid triggering when initialising the
-                    // controllers
-                    if (!gamepad.start) {
-                        buttonPressed = gamepad.b
-                    }
-
+                // Controller initialisation trigger safeguard
+                A -> if (!gamepad.start) buttonPressed = gamepad.a
+                B -> if (!gamepad.start) buttonPressed = gamepad.b
                 X -> buttonPressed = gamepad.x
                 Y -> buttonPressed = gamepad.y
                 START -> buttonPressed = gamepad.start
@@ -47,11 +123,13 @@ enum class Controller {
                 RIGHT_STICK_BUTTON -> buttonPressed = gamepad.right_stick_button
 
                 NONE -> {}
-                else -> {}
             }
             return buttonPressed
         }
 
+        /**
+         * Get the character representation of a button.
+         */
         @JvmStatic
         fun getChar(button: Controller): Char {
             when (button) {
@@ -75,7 +153,6 @@ enum class Controller {
 
         /**
          * Map an array of arguments to controller buttons in order of the enum.
-         * @author Lucas Bubner, 2023
          */
         @JvmStatic
         fun <T> mapArgs(args: Array<out T>): HashMap<T, Controller> {

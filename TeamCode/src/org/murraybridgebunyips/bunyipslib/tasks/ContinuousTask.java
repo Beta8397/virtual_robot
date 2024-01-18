@@ -1,12 +1,12 @@
 package org.murraybridgebunyips.bunyipslib.tasks;
 
+import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.RunForeverTask;
-import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
 /**
  * A task to run continuously and will never finish.
  * <p>
- * {@code new ContinuousTask(() -> drive.update());}
+ * {@code new ContinuousTask(() -> addTelemetry("I will run forever"));}
  */
 public class ContinuousTask extends RunForeverTask {
     private final Runnable callback;
@@ -15,8 +15,13 @@ public class ContinuousTask extends RunForeverTask {
         this.callback = callback;
     }
 
+    public ContinuousTask(Runnable callback, BunyipsSubsystem dependency, boolean shouldOverrideConflictingTasks) {
+        super(dependency, shouldOverrideConflictingTasks);
+        this.callback = callback;
+    }
+
     @Override
-    public void run() {
+    public void periodic() {
         callback.run();
     }
 

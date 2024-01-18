@@ -1,4 +1,4 @@
-package org.murraybridgebunyips.bunyipslib;
+package org.murraybridgebunyips.bunyipslib.drive;
 
 import androidx.annotation.NonNull;
 
@@ -12,6 +12,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
+import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
+import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.DriveConstants;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.TankCoefficients;
@@ -24,11 +26,11 @@ import java.util.List;
 
 /**
  * Wrapper component for the RoadRunner Tank Drive, integrating RoadRunner and BunyipsLib to be used
- * as a BunyipsComponent.
+ * as a BunyipsSubsystem.
  *
  * @author Lucas Bubner, 2023
  */
-public class TankDrive extends BunyipsComponent implements RoadRunnerDrive {
+public class TankDrive extends BunyipsSubsystem implements RoadRunnerDrive {
     private final TankRoadRunnerDrive instance;
 
     public TankDrive(@NonNull BunyipsOpMode opMode, DriveConstants constants, TankCoefficients coefficients, IMU imu, DcMotorEx frontLeft, DcMotorEx frontRight, DcMotorEx backLeft, DcMotorEx backRight) {

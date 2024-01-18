@@ -14,7 +14,7 @@ class MessageTask(private val opMode: BunyipsOpMode, time: Double, private val m
         return
     }
 
-    override fun run() {
+    override fun periodic() {
         opMode.addTelemetry(message)
     }
 

@@ -12,6 +12,8 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.BunyipsTask;
 // specific tasks, such as moving the drive system for a certain amount of time, or until a certain
 // condition is met. Extending BunyipsTask handles the OpMode handling for you, so you don't need to
 // make new variables for the OpMode, or worry about the time.
+// More recently, the Task system has expanded into TeleOp, where these Tasks represent commands when used with the Scheduler.
+// See ExampleCommandBasedTeleOp.java for more information.
 public class ExampleTask extends BunyipsTask {
     // You will need to store any COMPONENTS you wish to control in your task as a local instance
     private final ExampleLift lift;
@@ -33,7 +35,7 @@ public class ExampleTask extends BunyipsTask {
 
     // The run() method will run until the task timer runs out, or the finished state is set to true.
     @Override
-    public void run() {
+    public void periodic() {
         lift.update();
     }
 

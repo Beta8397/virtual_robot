@@ -86,7 +86,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
         OpModeSelection[] varargs = opModes.toArray(new OpModeSelection[0]);
         if (varargs.length == 0) {
             log("auto: no OpModeSelections defined, skipping selection phase");
-            opModes.add(new OpModeSelection(new DefaultOpMode()));
+            opModes.add(new OpModeSelection(new UserDefaultSelection()));
         }
         if (varargs.length > 1) {
             // Run task allocation if OpModeSelections are defined
@@ -144,13 +144,12 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
         addTelemetry("Running task (%/%): %", this.currentTask, taskCount, currentTask.getClass().getSimpleName());
 
         // AutonomousBunyipsOpMode is handling all task completion checks, manual checks not required
-        if (currentTask.isFinished()) {
+        if (currentTask.pollFinished()) {
             tasks.removeFirst();
             log("auto: task %/% (%) finished", this.currentTask, taskCount, currentTask.getClass().getSimpleName());
             this.currentTask++;
         }
 
-        // Ensure we run the task after checking if it is finished, to ensure init() is called
         currentTask.run();
     }
 
@@ -168,7 +167,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     protected boolean onInitLoop() {
         if (initTask != null) {
             initTask.run();
-            return initTask.isFinished() && (userSelection == null || !userSelection.isAlive());
+            return initTask.pollFinished() && (userSelection == null || !userSelection.isAlive());
         }
         return userSelection == null || !userSelection.isAlive();
     }

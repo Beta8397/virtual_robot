@@ -2,7 +2,7 @@ package org.murraybridgebunyips.bunyipslib.example.examplerobot.teleop;
 
 import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
 import org.murraybridgebunyips.bunyipslib.Controller;
-import org.murraybridgebunyips.bunyipslib.TankDrive;
+import org.murraybridgebunyips.bunyipslib.drive.TankDrive;
 import org.murraybridgebunyips.bunyipslib.example.examplerobot.components.ExampleConfig;
 
 /**

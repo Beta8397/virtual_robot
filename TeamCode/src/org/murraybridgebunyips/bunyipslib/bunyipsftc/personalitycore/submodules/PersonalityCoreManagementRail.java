@@ -1,4 +1,4 @@
-package org.murraybridgebunyips.bunyipslib.personalitycore.submodules;
+package org.murraybridgebunyips.bunyipslib.bunyipsftc.personalitycore.submodules;
 
 import androidx.annotation.NonNull;
 
@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-import org.murraybridgebunyips.bunyipslib.BunyipsComponent;
+import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
 
 /**
@@ -15,7 +15,7 @@ import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
  *
  * @author Lucas Bubner, 2023
  */
-public class PersonalityCoreManagementRail extends BunyipsComponent {
+public class PersonalityCoreManagementRail extends BunyipsSubsystem {
     private static final double HOLDING_POWER = 0.3;
     private final DcMotorEx motor;
     private final ElapsedTime timer = new ElapsedTime();

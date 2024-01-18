@@ -18,7 +18,7 @@ public abstract class TaskGroup extends Task {
     protected final ArrayDeque<Task> tasks = new ArrayDeque<>();
 
     protected TaskGroup(Task... tasks) {
-        super(0);
+        super(0.0);
         this.tasks.addAll(Arrays.asList(tasks));
     }
 

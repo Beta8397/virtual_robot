@@ -10,7 +10,7 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
  */
 public class RaceTaskGroup extends TaskGroup {
     @Override
-    public final void run() {
+    public final void periodic() {
         for (Task task : tasks) {
             task.run();
         }

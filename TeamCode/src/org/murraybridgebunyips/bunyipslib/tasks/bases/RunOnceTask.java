@@ -1,13 +1,17 @@
 package org.murraybridgebunyips.bunyipslib.tasks.bases;
 
-import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
+import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 
 /**
  * A task that runs once and then immediately completes.
  */
 public abstract class RunOnceTask extends Task {
     public RunOnceTask() {
-        super(0);
+        super(0.0);
+    }
+
+    public RunOnceTask(BunyipsSubsystem dependencySubsystem, boolean shouldOverrideConflictingTasks) {
+       super(0.0, dependencySubsystem, shouldOverrideConflictingTasks);
     }
 
     @Override
@@ -16,7 +20,7 @@ public abstract class RunOnceTask extends Task {
     }
 
     @Override
-    public final void run() {
+    public final void periodic() {
     }
 
     @Override
