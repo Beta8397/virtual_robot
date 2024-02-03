@@ -20,11 +20,9 @@ import org.murraybridgebunyips.bunyipslib.tasks.RoadRunnerTask;
 public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDrive> extends AutonomousBunyipsOpMode {
 
     /**
-     * Default timeout for RoadRunner tasks, set high to avoid the task being killed.
-     * I suppose this value is not really "infinite", but if your task takes longer than 277.8 hours,
-     * you have bigger problems than this.
+     * Default timeout for RoadRunner tasks, a value of 0.0 will run the task until it is finished.
      */
-    public static final double INFINITE_TIMEOUT = 999999;
+    public static final double DEFAULT_TIMEOUT = 0.0;
 
     /**
      * Drive instance to be used for RoadRunner trajectories.
@@ -178,7 +176,7 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
         if (drive == null)
             drive = setDrive();
         if (drive == null) throw new NullPointerException("drive instance is not set!");
-        addTask(new RoadRunnerTask<>(this, INFINITE_TIMEOUT, drive, trajectory));
+        addTask(new RoadRunnerTask<>(this, DEFAULT_TIMEOUT, drive, trajectory));
     }
 
     /**
@@ -194,13 +192,13 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
         if (drive == null) throw new NullPointerException("drive instance is not set!");
         switch (priority) {
             case LAST:
-                addTaskLast(new RoadRunnerTask<>(this, INFINITE_TIMEOUT, drive, trajectory));
+                addTaskLast(new RoadRunnerTask<>(this, DEFAULT_TIMEOUT, drive, trajectory));
                 break;
             case NORMAL:
-                addTask(new RoadRunnerTask<>(this, INFINITE_TIMEOUT, drive, trajectory));
+                addTask(new RoadRunnerTask<>(this, DEFAULT_TIMEOUT, drive, trajectory));
                 break;
             case FIRST:
-                addTaskFirst(new RoadRunnerTask<>(this, INFINITE_TIMEOUT, drive, trajectory));
+                addTaskFirst(new RoadRunnerTask<>(this, DEFAULT_TIMEOUT, drive, trajectory));
                 break;
         }
     }
@@ -255,7 +253,7 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
         if (drive == null)
             drive = setDrive();
         if (drive == null) throw new NullPointerException("drive instance is not set!");
-        addTask(new RoadRunnerTask<>(this, INFINITE_TIMEOUT, drive, trajectorySequence));
+        addTask(new RoadRunnerTask<>(this, DEFAULT_TIMEOUT, drive, trajectorySequence));
     }
 
     /**
@@ -271,13 +269,13 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
         if (drive == null) throw new NullPointerException("drive instance is not set!");
         switch (priority) {
             case LAST:
-                addTaskLast(new RoadRunnerTask<>(this, INFINITE_TIMEOUT, drive, trajectorySequence));
+                addTaskLast(new RoadRunnerTask<>(this, DEFAULT_TIMEOUT, drive, trajectorySequence));
                 break;
             case NORMAL:
-                addTask(new RoadRunnerTask<>(this, INFINITE_TIMEOUT, drive, trajectorySequence));
+                addTask(new RoadRunnerTask<>(this, DEFAULT_TIMEOUT, drive, trajectorySequence));
                 break;
             case FIRST:
-                addTaskFirst(new RoadRunnerTask<>(this, INFINITE_TIMEOUT, drive, trajectorySequence));
+                addTaskFirst(new RoadRunnerTask<>(this, DEFAULT_TIMEOUT, drive, trajectorySequence));
                 break;
         }
     }
@@ -336,7 +334,7 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
      * Builder class for a RoadRunner trajectory, which supports adding the trajectory to the Task queue.
      */
     protected class RoadRunnerTrajectoryTaskBuilder extends TrajectorySequenceBuilder<RoadRunnerTrajectoryTaskBuilder> {
-        private double timeout = INFINITE_TIMEOUT;
+        private double timeout = DEFAULT_TIMEOUT;
 
         public RoadRunnerTrajectoryTaskBuilder(Pose2d startPose, Double startTangent, TrajectoryVelocityConstraint baseVelConstraint, TrajectoryAccelerationConstraint baseAccelConstraint, double baseTurnConstraintMaxAngVel, double baseTurnConstraintMaxAngAccel) {
             super(startPose, startTangent, baseVelConstraint, baseAccelConstraint, baseTurnConstraintMaxAngVel, baseTurnConstraintMaxAngAccel);
