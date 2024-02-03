@@ -4,9 +4,9 @@ import androidx.annotation.NonNull;
 
 import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
 import org.murraybridgebunyips.bunyipslib.Dbg;
-import org.murraybridgebunyips.bunyipslib.Vision;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.BunyipsTask;
-import org.murraybridgebunyips.bunyipslib.vision.TeamProp;
+import org.murraybridgebunyips.bunyipslib.vision.Vision;
+import org.murraybridgebunyips.bunyipslib.vision.processors.TeamProp;
 
 /**
  * Task for detecting on which spike the Team Prop is placed on.

@@ -7,14 +7,14 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
+import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 import org.murraybridgebunyips.bunyipslib.DualClaws;
 import org.murraybridgebunyips.bunyipslib.NullSafety;
 import org.murraybridgebunyips.bunyipslib.bunyipsftc.personalitycore.submodules.PersonalityCoreClawMover;
 import org.murraybridgebunyips.bunyipslib.bunyipsftc.personalitycore.submodules.PersonalityCoreClawRotator;
-import org.murraybridgebunyips.bunyipslib.bunyipsftc.personalitycore.submodules.PersonalityCoreManagementRail;
 import org.murraybridgebunyips.bunyipslib.bunyipsftc.personalitycore.submodules.PersonalityCoreHook;
+import org.murraybridgebunyips.bunyipslib.bunyipsftc.personalitycore.submodules.PersonalityCoreManagementRail;
 
 /**
  * Overhead class that handles a single instantiation of other PersonalityCore components.

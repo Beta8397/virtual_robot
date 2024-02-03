@@ -41,22 +41,22 @@ public class InterpolatedLookupTable {
      */
     //public static LUTWithInterpolator createLUT(List<Double> x, List<Double> y) {
     public void createLUT() {
-        List<Double> x = this.mX;
-        List<Double> y = this.mY;
+        List<Double> x = mX;
+        List<Double> y = mY;
 
         if (x == null || y == null || x.size() != y.size() || x.size() < 2) {
             throw new IllegalArgumentException("There must be at least two control "
                     + "points and the arrays must be of equal length.");
         }
 
-        final int n = x.size();
+        int n = x.size();
         Double[] d = new Double[n - 1]; // could optimize this out
         Double[] m = new Double[n];
 
         // Compute slopes of secant lines between successive points.
         for (int i = 0; i < n - 1; i++) {
             Double h = x.get(i + 1) - x.get(i);
-            if (h <= 0f) {
+            if (h <= 0.0f) {
                 throw new IllegalArgumentException("The control points must all "
                         + "have strictly increasing X values.");
             }
@@ -72,15 +72,15 @@ public class InterpolatedLookupTable {
 
         // Update the tangents to preserve monotonicity.
         for (int i = 0; i < n - 1; i++) {
-            if (d[i] == 0f) { // successive Y values are equal
-                m[i] = Double.valueOf(0f);
-                m[i + 1] = Double.valueOf(0f);
+            if (d[i] == 0.0f) { // successive Y values are equal
+                m[i] = Double.valueOf(0.0f);
+                m[i + 1] = Double.valueOf(0.0f);
             } else {
                 double a = m[i] / d[i];
                 double b = m[i + 1] / d[i];
                 double h = Math.hypot(a, b);
-                if (h > 9f) {
-                    double t = 3f / h;
+                if (h > 9.0f) {
+                    double t = 3.0f / h;
                     m[i] = t * a * d[i];
                     m[i + 1] = t * b * d[i];
                 }
@@ -99,7 +99,7 @@ public class InterpolatedLookupTable {
      */
     public double get(double input) {
         // Handle the boundary cases.
-        final int n = mX.size();
+        int n = mX.size();
         if (Double.isNaN(input)) {
             return input;
         }
@@ -131,7 +131,7 @@ public class InterpolatedLookupTable {
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder();
-        final int n = mX.size();
+        int n = mX.size();
         str.append("[");
         for (int i = 0; i < n; i++) {
             if (i != 0) {

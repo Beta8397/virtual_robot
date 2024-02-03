@@ -1,4 +1,4 @@
-package org.murraybridgebunyips.bunyipslib;
+package org.murraybridgebunyips.bunyipslib.vision;
 
 
 import android.util.Size;
@@ -9,7 +9,8 @@ import com.acmerobotics.dashboard.config.Config;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraName;
 import org.firstinspires.ftc.vision.VisionPortal;
-import org.murraybridgebunyips.bunyipslib.vision.Processor;
+import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
+import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 import org.murraybridgebunyips.bunyipslib.vision.data.VisionData;
 
 import java.util.ArrayList;
@@ -65,8 +66,7 @@ public class Vision extends BunyipsSubsystem {
     public void init(Processor... processors) {
         if (visionPortal != null) {
             getOpMode().log("WARNING: Vision already initialised! Tearing down...");
-            visionPortal.close();
-            visionPortal = null;
+            terminate();
         }
 
         if (processors.length == 0) {
@@ -91,6 +91,7 @@ public class Vision extends BunyipsSubsystem {
                 }
             }
             builder.addProcessor(processor);
+            processor.setAttached(true);
             getOpMode().log("vision processor '%' initialised.", processor.getClass().getSimpleName());
         }
 
@@ -235,9 +236,13 @@ public class Vision extends BunyipsSubsystem {
      * use the {@code start()} and {@code stop()} methods to enable/disable the VisionPortal.
      * Repeated calls to {@code init()} will also cause a termination of the VisionPortal.
      */
+    @SuppressWarnings("rawtypes")
     public void terminate() {
         if (visionPortal == null) {
             throw new IllegalStateException("Vision: VisionPortal is not initialised from init()!");
+        }
+        for (Processor processor : processors) {
+            processor.setAttached(false);
         }
         visionPortal.close();
         visionPortal = null;

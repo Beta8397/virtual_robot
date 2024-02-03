@@ -68,10 +68,14 @@ public class Text {
         // Keep going down the stack trace until we leave the BunyipsLib package
         for (StackTraceElement stackTraceElement : stackTrace) {
             if (stackTraceElement.getMethodName().equals("getStackTrace")) continue;
+            // If porting, ensure the string below is set to the package name of BunyipsLib
             if (!stackTraceElement.getClassName().startsWith("org.murraybridgebunyips.bunyipslib")) {
                 return stackTraceElement;
             }
         }
-        return null;
+        // If we can't find the calling function, we'll settle for the first stack trace element
+        // This is likely going to be the getStackTrace() function, and we will warn the user as well
+        Dbg.warn("Could not find calling function in getCallingUserCodeFunction()!");
+        return stackTrace[0];
     }
 }

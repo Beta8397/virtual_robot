@@ -18,6 +18,7 @@ import org.murraybridgebunyips.bunyipslib.roadrunner.util.Encoder;
  * RoadRunner Mecanum Drive with two tracking dead wheels for localization
  *
  * @author Lucas Bubner, 2023
+ * @see MecanumDrive
  */
 public class DualDeadwheelMecanumDrive extends MecanumDrive {
     public DualDeadwheelMecanumDrive(@NonNull BunyipsOpMode opMode, DriveConstants constants, MecanumCoefficients mecanumCoefficients, HardwareMap.DeviceMapping<VoltageSensor> voltageSensor, IMU imu, DcMotorEx frontLeft, DcMotorEx frontRight, DcMotorEx backLeft, DcMotorEx backRight, TwoWheelTrackingLocalizerCoefficients localizerCoefficients, Encoder parallel, Encoder perpendicular) {

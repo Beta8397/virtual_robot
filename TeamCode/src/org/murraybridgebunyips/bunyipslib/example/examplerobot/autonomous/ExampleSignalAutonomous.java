@@ -2,11 +2,11 @@ package org.murraybridgebunyips.bunyipslib.example.examplerobot.autonomous;
 
 import org.murraybridgebunyips.bunyipslib.AutonomousBunyipsOpMode;
 import org.murraybridgebunyips.bunyipslib.OpModeSelection;
-import org.murraybridgebunyips.bunyipslib.Vision;
 import org.murraybridgebunyips.bunyipslib.example.examplerobot.components.ExampleConfig;
 import org.murraybridgebunyips.bunyipslib.tasks.GetSignalTask;
-import org.murraybridgebunyips.bunyipslib.tasks.bases.RobotTask;
 import org.murraybridgebunyips.bunyipslib.tasks.WaitTask;
+import org.murraybridgebunyips.bunyipslib.tasks.bases.RobotTask;
+import org.murraybridgebunyips.bunyipslib.vision.Vision;
 
 import java.util.List;
 

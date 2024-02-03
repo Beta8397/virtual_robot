@@ -1,9 +1,10 @@
-package org.murraybridgebunyips.bunyipslib.vision;
+package org.murraybridgebunyips.bunyipslib.vision.processors;
 
 import android.graphics.Canvas;
 
 import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
-import org.murraybridgebunyips.bunyipslib.Vision;
+import org.murraybridgebunyips.bunyipslib.vision.Processor;
+import org.murraybridgebunyips.bunyipslib.vision.Vision;
 import org.murraybridgebunyips.bunyipslib.vision.data.TeamPropData;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -39,16 +40,11 @@ public class TeamProp extends Processor<TeamPropData> {
     private Scalar avgColor3;
 
     /**
-     * Vision Processor Wrapper
-     * Parameterized type T must be a subclass extension of VisionData
-     * Super-call: {@code super([yourVisionDataClass].class)}
-     *
      * @param r Red value of the element color (0-255)
      * @param g Green value of the element color (0-255)
      * @param b Blue value of the element color (0-255)
      */
     public TeamProp(int r, int g, int b) {
-        super(TeamPropData.class);
         ELEMENT_COLOR = Arrays.asList(r, g, b);
     }
 

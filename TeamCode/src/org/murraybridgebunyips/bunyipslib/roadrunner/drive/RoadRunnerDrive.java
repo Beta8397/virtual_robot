@@ -113,4 +113,6 @@ public interface RoadRunnerDrive {
     void setDriveSignal(DriveSignal driveSignal);
 
     void setDrivePower(Pose2d drivePower);
+
+    void setWeightedDrivePowerFieldCentric(Pose2d pose);
 }

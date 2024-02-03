@@ -1,4 +1,4 @@
-package org.murraybridgebunyips.bunyipslib.vision;
+package org.murraybridgebunyips.bunyipslib.vision.processors;
 
 import android.graphics.Canvas;
 
@@ -6,6 +6,7 @@ import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibra
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.murraybridgebunyips.bunyipslib.cameras.CameraType;
+import org.murraybridgebunyips.bunyipslib.vision.Processor;
 import org.murraybridgebunyips.bunyipslib.vision.data.AprilTagData;
 import org.opencv.core.Mat;
 
@@ -20,7 +21,6 @@ public class AprilTag extends Processor<AprilTagData> {
     private final AprilTagProcessor instance;
 
     public AprilTag(CameraType camInfo) {
-        super(AprilTagData.class);
         instance = new AprilTagProcessor.Builder()
                 .setLensIntrinsics(camInfo.getFx(), camInfo.getFy(), camInfo.getCx(), camInfo.getCy())
                 // Specify custom AprilTag settings here

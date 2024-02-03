@@ -12,8 +12,9 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
-import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
+import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
+import org.murraybridgebunyips.bunyipslib.Controller;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.DriveConstants;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.TankCoefficients;
@@ -25,8 +26,9 @@ import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.Trajecto
 import java.util.List;
 
 /**
- * Wrapper component for the RoadRunner Tank Drive, integrating RoadRunner and BunyipsLib to be used
- * as a BunyipsSubsystem.
+ * This is the standard TankDrive class for modern BunyipsFTC robots.
+ * This is a component for the RoadRunner Tank Drive, integrating RoadRunner and BunyipsLib to be used
+ * as a BunyipsSubsystem. As such, this allows for integrated trajectory and pose management.
  *
  * @author Lucas Bubner, 2023
  */
@@ -212,6 +214,15 @@ public class TankDrive extends BunyipsSubsystem implements RoadRunnerDrive {
     @Override
     public void setDrivePower(Pose2d drivePower) {
         instance.setDrivePower(drivePower);
+    }
+
+    @Override
+    public void setWeightedDrivePowerFieldCentric(Pose2d pose) {
+        instance.setWeightedDrivePowerFieldCentric(pose);
+    }
+
+    public void setSpeedUsingControllerFieldCentric(double x, double y, double r) {
+        setWeightedDrivePowerFieldCentric(Controller.makeRobotPose(x, y, r));
     }
 
     @Override

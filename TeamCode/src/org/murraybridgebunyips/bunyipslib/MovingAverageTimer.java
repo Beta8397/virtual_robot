@@ -3,6 +3,7 @@ package org.murraybridgebunyips.bunyipslib;
 /**
  * Time utilities for robot operation.
  * <a href="https://github.com/Paladins-of-St-Pauls/GameChangers/blob/master/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/paladins/utils/MovingAverageTimer.java">Source</a>
+ *
  * @author Shaun, 11/06/2017
  */
 public class MovingAverageTimer {
@@ -15,15 +16,15 @@ public class MovingAverageTimer {
     private final double resolution;
     private final String avgFormatStr;
     private final String toStringFormatStr;
-    private int ringBufferIndex = 0;
-    private long loopCount = 0;
-    private long movingTotal = 0;
-    private long runningTotal = 0;
-    private long previousTime = 0;
-    private double movingAverage = 0;
+    private int ringBufferIndex;
+    private long loopCount;
+    private long movingTotal;
+    private long runningTotal;
+    private long previousTime;
+    private double movingAverage;
     private double minMovingAverage = Double.MAX_VALUE;
     private double maxMovingAverage = Double.MIN_VALUE;
-    private double average = 0.0;
+    private double average;
     private double minAverage = Double.MAX_VALUE;
     private double maxAverage = Double.MIN_VALUE;
     private double minLoopTime = Double.MAX_VALUE;
@@ -95,14 +96,14 @@ public class MovingAverageTimer {
             if (loopCount == 0) {
                 movingAverage = 0.0;
             } else {
-                movingAverage = (double) movingTotal / (double) loopCount / resolution;
+                movingAverage = (double) movingTotal / loopCount / resolution;
             }
             // Temporarily fill the min/max movingAverage
             minMovingAverage = Math.min(minMovingAverage, movingAverage);
             maxMovingAverage = Math.max(maxMovingAverage, movingAverage);
 
         } else {
-            movingAverage = (double) movingTotal / (double) ringBufferSize / resolution;
+            movingAverage = (double) movingTotal / ringBufferSize / resolution;
 
             // Reset the min/max movingAverage values the each time the buffer is filled
             if (ringBufferIndex == 0) {

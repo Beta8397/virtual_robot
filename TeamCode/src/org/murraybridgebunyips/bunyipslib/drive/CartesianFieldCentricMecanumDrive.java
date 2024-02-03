@@ -3,6 +3,7 @@ package org.murraybridgebunyips.bunyipslib.drive;
 import androidx.annotation.NonNull;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+
 import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
 import org.murraybridgebunyips.bunyipslib.Controller;
 import org.murraybridgebunyips.bunyipslib.IMUOp;
@@ -13,7 +14,7 @@ import org.murraybridgebunyips.bunyipslib.RelativePose2d;
  * This system is deprecated by RoadRunner, but remains for legacy/non-RoadRunner purposes.
  *
  * @author Lucas Bubner, 2023
- * @see FieldCentricMecanumDrive
+ * @see MecanumDrive
  */
 public class CartesianFieldCentricMecanumDrive extends CartesianMecanumDrive {
     private final IMUOp imu;

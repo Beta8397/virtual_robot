@@ -1,6 +1,7 @@
 package org.murraybridgebunyips.bunyipslib.tasks;
 
 import com.qualcomm.robotcore.hardware.Gamepad;
+
 import org.jetbrains.annotations.NotNull;
 import org.murraybridgebunyips.bunyipslib.Controller;
 import org.murraybridgebunyips.bunyipslib.drive.TankDrive;
@@ -10,6 +11,7 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.RunForeverTask;
  * Standard gamepad drive for all differential drivetrains.
  * Left stick Y controls forward translation, right stick controls rotation.
  * This task is designed to be used as a default task, other tasks will override it.
+ *
  * @author Lucas Bubner, 2024
  */
 public class DifferentialDriveTask extends RunForeverTask {

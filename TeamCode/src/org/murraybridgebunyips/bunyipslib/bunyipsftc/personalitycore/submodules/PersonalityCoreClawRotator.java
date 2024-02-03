@@ -7,8 +7,8 @@ import androidx.annotation.NonNull;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
-import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
+import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 
 /**
  * Rotation/claw rotational alignment for the GLaDOS/Wheatley robot

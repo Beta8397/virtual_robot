@@ -12,7 +12,7 @@ import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.Trajecto
 import org.murraybridgebunyips.bunyipslib.tasks.RoadRunnerTask;
 
 /**
- * Road Runner Autonomous Bunyips Op Mode (RRABOM, "rabone")
+ * RoadRunnerAutonomousBunyipsOpMode (RRABOM, nickname "Rabone")
  * Additional abstraction for RoadRunner drives to integrate trajectories seamlessly into Autonomous.
  *
  * @author Lucas Bubner, 2023

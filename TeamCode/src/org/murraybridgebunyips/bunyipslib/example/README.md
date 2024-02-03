@@ -26,7 +26,8 @@ objects that are used to make writing OpModes easier, with built in error handli
 vision, command-based paradigms, and more.
 
 View the BYOEcosystem.png image in this directory to view what methods are available to use in a
-BunyipsOpMode, or look at specific implementations of OpModes such as AutonomousBunyipsOpMode, CommandBasedBunyipsOpMode,
+BunyipsOpMode, or look at specific implementations of OpModes such as AutonomousBunyipsOpMode,
+CommandBasedBunyipsOpMode,
 and RoadRunnerAutonomousBunyipsOpMode.
 
 Each `robot` package contains classes and objects that are specific to that robot. This includes

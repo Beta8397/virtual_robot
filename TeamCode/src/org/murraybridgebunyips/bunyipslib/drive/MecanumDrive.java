@@ -16,9 +16,11 @@ import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
-import org.murraybridgebunyips.bunyipslib.*;
-import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
+import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
+import org.murraybridgebunyips.bunyipslib.Controller;
+import org.murraybridgebunyips.bunyipslib.Inches;
+import org.murraybridgebunyips.bunyipslib.RobotConfig;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.DriveConstants;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.MecanumCoefficients;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.MecanumRoadRunnerDrive;
@@ -30,8 +32,10 @@ import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.Trajecto
 import java.util.List;
 
 /**
- * Wrapper component for the RoadRunner Mecanum Drive, integrating RoadRunner and BunyipsLib to be used
- * as a BunyipsSubsystem.
+ * This is the standard MecanumDrive class for modern BunyipsFTC robots.
+ * This is a component for the RoadRunner Mecanum Drive, integrating RoadRunner and BunyipsLib to be used
+ * as a BunyipsSubsystem. As such, this allows for integrated trajectory and pose management,
+ * as well as the ability to use Field Centric Drive as a native method.
  *
  * @author Lucas Bubner, 2023
  */
@@ -92,7 +96,7 @@ public class MecanumDrive extends BunyipsSubsystem implements RoadRunnerDrive {
     @Override
     public void update() {
         getOpMode().addTelemetry("Localizer: X:%cm Y:%cm %deg",
-                Text.round(Inches.toCM(drive.getPoseEstimate().getX()), 1),
+                round(Inches.toCM(drive.getPoseEstimate().getX()), 1),
                 round(Inches.toCM(drive.getPoseEstimate().getY()), 1),
                 round(Math.toDegrees(drive.getPoseEstimate().getHeading()), 1));
 
@@ -206,6 +210,15 @@ public class MecanumDrive extends BunyipsSubsystem implements RoadRunnerDrive {
     @Override
     public void setDrivePower(Pose2d drivePower) {
         drive.setDrivePower(drivePower);
+    }
+
+    @Override
+    public void setWeightedDrivePowerFieldCentric(Pose2d pose) {
+        drive.setWeightedDrivePowerFieldCentric(pose);
+    }
+
+    public void setSpeedUsingControllerFieldCentric(double x, double y, double r) {
+        setWeightedDrivePowerFieldCentric(Controller.makeRobotPose(x, y, r));
     }
 
     @Override

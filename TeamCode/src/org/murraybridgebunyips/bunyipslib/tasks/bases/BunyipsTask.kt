@@ -8,7 +8,12 @@ import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem
  */
 abstract class BunyipsTask(open val opMode: BunyipsOpMode, time: Double) : Task(time) {
     constructor(opMode: BunyipsOpMode) : this(opMode, 0.0)
-    constructor(opMode: BunyipsOpMode, time: Double, dependencySubsystem: BunyipsSubsystem, shouldOverrideConflictingTasks: Boolean) : this(opMode, time) {
+    constructor(
+        opMode: BunyipsOpMode,
+        time: Double,
+        dependencySubsystem: BunyipsSubsystem,
+        shouldOverrideConflictingTasks: Boolean
+    ) : this(opMode, time) {
         addDependency(dependencySubsystem)
         overrideOnConflict = shouldOverrideConflictingTasks
     }

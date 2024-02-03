@@ -21,7 +21,11 @@ abstract class Task(timeoutSeconds: Double) : RobotTask {
             overrideOnConflict = false
     }
 
-    constructor(timeoutSeconds: Double, dependencySubsystem: BunyipsSubsystem, shouldOverrideConflictingTasks: Boolean) : this(timeoutSeconds) {
+    constructor(
+        timeoutSeconds: Double,
+        dependencySubsystem: BunyipsSubsystem,
+        shouldOverrideConflictingTasks: Boolean
+    ) : this(timeoutSeconds) {
         addDependency(dependencySubsystem)
         overrideOnConflict = shouldOverrideConflictingTasks
     }
@@ -98,7 +102,7 @@ abstract class Task(timeoutSeconds: Double) : RobotTask {
             taskFinished = true
 
         // Finish tasks that exceed a time limit defined by the task
-        if (timeout != 0.0 && currentTime > startTime + timeout) {
+        if (startTime != 0.0 && timeout != 0.0 && currentTime > startTime + timeout) {
             taskFinished = true
         }
 

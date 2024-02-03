@@ -4,6 +4,7 @@ package org.murraybridgebunyips.bunyipslib;
  * Command-based structure for a BunyipsOpMode utilising the Scheduler.
  * This can be used for seamless/zero-step integration with the Scheduler in TeleOp, for Autonomous it is
  * recommended to use the AutonomousBunyipsOpMode classes as Tasks there are used in a different context.
+ *
  * @author Lucas Bubner, 2024
  */
 public abstract class CommandBasedBunyipsOpMode extends BunyipsOpMode {
@@ -22,8 +23,8 @@ public abstract class CommandBasedBunyipsOpMode extends BunyipsOpMode {
 
     @Override
     protected final void activeLoop() {
-        scheduler.run();
         periodic();
+        scheduler.run();
     }
 
     // Access to the other BunyipsOpMode methods (onInitLoop() etc.) are handled by the user of this class, as
@@ -38,6 +39,7 @@ public abstract class CommandBasedBunyipsOpMode extends BunyipsOpMode {
 
     /**
      * Populate with the BunyipsSubsystems that need to be updated and managed by the Scheduler.
+     *
      * @return {@code return new BunyipsSubsystem[] { ... };}
      */
     protected abstract BunyipsSubsystem[] setSubsystems();
@@ -48,7 +50,7 @@ public abstract class CommandBasedBunyipsOpMode extends BunyipsOpMode {
     protected abstract void assignCommands();
 
     /**
-     * Override this method to run any additional activeLoop() code after the Scheduler runs.
+     * Override this method to run any additional activeLoop() code before the Scheduler runs.
      */
     protected void periodic() {
     }

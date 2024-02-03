@@ -1,10 +1,10 @@
 package org.murraybridgebunyips.bunyipslib.tasks
 
 import com.qualcomm.robotcore.util.ElapsedTime
-import org.murraybridgebunyips.bunyipslib.Vision
 import org.murraybridgebunyips.bunyipslib.tasks.bases.RobotTask
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task
-import org.murraybridgebunyips.bunyipslib.vision.AprilTag
+import org.murraybridgebunyips.bunyipslib.vision.Vision
+import org.murraybridgebunyips.bunyipslib.vision.processors.AprilTag
 
 /**
  * Intermediate task for using AprilTag detections to detect a Signal position during an initLoop.

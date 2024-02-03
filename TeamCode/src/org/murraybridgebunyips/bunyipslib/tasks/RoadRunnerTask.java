@@ -26,6 +26,10 @@ public class RoadRunnerTask<T extends RoadRunnerDrive> extends BunyipsTask {
     private Trajectory trajectory;
     private TrajectorySequence trajectorySequence;
 
+    // Needed as the pre-check condition for task finishing will fire since the initialisation routine
+    // may not have fired which assigns the drive a task
+    private boolean taskStartedRunning;
+
     public RoadRunnerTask(@NonNull BunyipsOpMode opMode, double time, T drive, Trajectory trajectory) {
         super(opMode, time);
         this.drive = drive;
@@ -59,6 +63,7 @@ public class RoadRunnerTask<T extends RoadRunnerDrive> extends BunyipsTask {
         } else {
             throw new NullPointerException("No trajectory or trajectory sequence was provided to the RoadRunnerTask");
         }
+        taskStartedRunning = true;
     }
 
     @Override
@@ -90,10 +95,11 @@ public class RoadRunnerTask<T extends RoadRunnerDrive> extends BunyipsTask {
     @Override
     public void onFinish() {
         drive.stop();
+        taskStartedRunning = false;
     }
 
     @Override
     public boolean isTaskFinished() {
-        return !drive.isBusy();
+        return !drive.isBusy() && taskStartedRunning;
     }
 }

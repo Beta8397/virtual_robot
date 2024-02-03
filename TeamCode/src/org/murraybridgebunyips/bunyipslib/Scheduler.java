@@ -10,6 +10,7 @@ import java.util.function.BooleanSupplier;
 
 /**
  * Scheduler and command plexus for use with the BunyipsLib task system.
+ *
  * @author Lucas Bubner, 2024
  */
 public class Scheduler {
@@ -23,6 +24,7 @@ public class Scheduler {
 
     /**
      * Add subsystems to the scheduler. This will ensure the update() method of the subsystems is called.
+     *
      * @param dispatch The subsystems to add.
      */
     public void addSubsystems(BunyipsSubsystem... dispatch) {
@@ -101,7 +103,8 @@ public class Scheduler {
 
     /**
      * Run a task when a controller button is held.
-     * @param user The user of the controller.
+     *
+     * @param user   The user of the controller.
      * @param button The button of the controller.
      * @return Timing/stop control for allocation.
      */
@@ -118,7 +121,8 @@ public class Scheduler {
 
     /**
      * Run a task when a controller button is pressed (will run once when pressing the desired input).
-     * @param user The user of the controller.
+     *
+     * @param user   The user of the controller.
      * @param button The button of the controller.
      * @return Timing/stop control for allocation.
      */
@@ -135,7 +139,8 @@ public class Scheduler {
 
     /**
      * Run a task when a controller button is released (will run once letting go of the desired input).
-     * @param user The user of the controller.
+     *
+     * @param user   The user of the controller.
      * @param button The button of the controller.
      * @return Timing/stop control for allocation.
      */
@@ -152,6 +157,7 @@ public class Scheduler {
 
     /**
      * Run a task when a condition is met.
+     *
      * @param condition Supplier to provide a boolean value of when the task should be run.
      * @return Timing/stop control for allocation.
      */
@@ -161,6 +167,7 @@ public class Scheduler {
 
     /**
      * Run a task when a condition is met, debouncing the task from running more than once the condition is met.
+     *
      * @param condition Supplier to provide a boolean value of when the task should be run.
      * @return Timing/stop control for allocation.
      * @see DebounceCondition
@@ -173,6 +180,7 @@ public class Scheduler {
 
     /**
      * Run a task always. This is the same as calling .when(() -> true).
+     *
      * @return Timing/stop control for allocation.
      */
     public ConditionalTask always() {
@@ -182,8 +190,8 @@ public class Scheduler {
     }
 
     private static class DebounceCondition implements BooleanSupplier {
-        private boolean lastState = false;
         private final BooleanSupplier condition;
+        private boolean lastState;
 
         public DebounceCondition(BooleanSupplier condition) {
             this.condition = condition;
@@ -214,32 +222,25 @@ public class Scheduler {
     }
 
     private static class ControllerStateHandler implements BooleanSupplier {
-        enum State {
-            PRESSED,
-            RELEASED,
-            HELD
-        }
-
         private final OpMode opMode;
         private final State state;
         private final Controller.User user;
         private final Controller button;
-
-        private DebounceCondition debounceCondition;
-        private boolean timerIsRunning = false;
-
-        public void setTimeoutCondition(boolean timerNotFinished) {
-            this.timerIsRunning = !timerNotFinished;
-        }
+        private final DebounceCondition debounceCondition;
+        private boolean timerIsRunning;
 
         public ControllerStateHandler(OpMode opMode, Controller.User user, Controller button, State state) {
             this.opMode = opMode;
             this.user = user;
             this.button = button;
             this.state = state;
-            this.debounceCondition = new DebounceCondition(
+            debounceCondition = new DebounceCondition(
                     () -> Controller.isSelected(Controller.getGamepad(user, opMode), button)
             );
+        }
+
+        public void setTimeoutCondition(boolean timerNotFinished) {
+            timerIsRunning = !timerNotFinished;
         }
 
         @Override
@@ -259,14 +260,20 @@ public class Scheduler {
             }
             return false;
         }
+
+        enum State {
+            PRESSED,
+            RELEASED,
+            HELD
+        }
     }
 
     public class ConditionalTask {
-        protected Task task = null;
-        protected double time = 0.0;
-        protected boolean debouncing = false;
-        protected boolean lastState = false;
         protected final BooleanSupplier condition;
+        protected Task task;
+        protected double time;
+        protected boolean debouncing;
+        protected boolean lastState;
         protected BooleanSupplier stopCondition = () -> false;
         protected long activeSince = -1;
 
@@ -277,6 +284,7 @@ public class Scheduler {
         /**
          * Run a task when the condition is met.
          * This method can only be called once per ConditionalTask.
+         *
          * @param task The task to run.
          * @return Timing control for allocation (to queue this Task call forSeconds(), inSeconds(), or immediately()).
          */
@@ -289,13 +297,14 @@ public class Scheduler {
         }
 
         public ConditionalTask runDebounced(Task task) {
-            this.debouncing = true;
+            debouncing = true;
             return run(task);
         }
 
         /**
          * Run a task assigned to in run() in a certain amount of seconds of the condition remaining true.
          * If on a controller, this will delay the activation of the task by the specified amount of seconds.
+         *
          * @param time The amount of seconds to wait before running the task.
          */
         public void inSeconds(double time) {
@@ -306,10 +315,11 @@ public class Scheduler {
         /**
          * Run the task assigned to in run() until this condition is met. Once this condition is met, the task will
          * be forcefully stopped and the scheduler will move on. This is useful for continuous tasks.
+         *
          * @param condition The condition to stop the task.
          */
         public void finishingWhen(BooleanSupplier condition) {
-            this.stopCondition = condition;
+            stopCondition = condition;
             allocatedTasks.add(this);
         }
 
@@ -318,12 +328,13 @@ public class Scheduler {
          * If on a controller, this will delay the activation of the task by the specified amount of seconds.
          * Once this condition is met, the task will be forcefully stopped and the scheduler will move on.
          * This is useful for continuous tasks.
-         * @param time The amount of seconds to wait before running the task.
+         *
+         * @param time      The amount of seconds to wait before running the task.
          * @param condition The condition to stop the task.
          */
         public void inSecondsFinishingWhen(double time, BooleanSupplier condition) {
             this.time = Math.abs(time);
-            this.stopCondition = condition;
+            stopCondition = condition;
             allocatedTasks.add(this);
         }
 
@@ -331,7 +342,7 @@ public class Scheduler {
          * Run the task assigned to in run() immediately once the condition is true.
          */
         public void immediately() {
-            this.time = 0.0;
+            time = 0.0;
             allocatedTasks.add(this);
         }
     }

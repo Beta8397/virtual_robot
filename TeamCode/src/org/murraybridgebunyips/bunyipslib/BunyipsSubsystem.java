@@ -6,6 +6,13 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
 import java.util.ArrayList;
 
+/**
+ * Base class for all robot subsystems.
+ * Integrates with the Task system to allow for task-based command scheduling.
+ *
+ * @author Lucas Bubner, 2024
+ * @see Scheduler
+ */
 public abstract class BunyipsSubsystem extends BunyipsComponent {
     private final ArrayList<Integer> dependencies = new ArrayList<>();
     private Task currentTask;
@@ -38,7 +45,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
                 setHighPriorityCurrentTask(currentTask);
                 return true;
             }
-            Dbg.warn("Attempted to set a task while another task was running in %, this was ignored.", this.getClass().getSimpleName());
+            Dbg.warn("Attempted to set a task while another task was running in %, this was ignored.", getClass().getSimpleName());
             return false;
         }
 
@@ -61,7 +68,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
     public final void setHighPriorityCurrentTask(Task currentTask) {
         // Task will be cancelled abruptly, run the finish callback now
         if (this.currentTask != defaultTask) {
-            Dbg.warn("A high-priority task has forcefully interrupted the current task in %.", this.getClass().getSimpleName());
+            Dbg.warn("A high-priority task has forcefully interrupted the current task in %.", getClass().getSimpleName());
             this.currentTask.forceFinish();
         }
         currentTask.reset();

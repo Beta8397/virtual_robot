@@ -21,6 +21,7 @@ import java.util.List;
  * RoadRunner Mecanum Drive with three tracking dead wheels for localization
  *
  * @author Lucas Bubner, 2023
+ * @see MecanumDrive
  */
 public class TriDeadwheelMecanumDrive extends MecanumDrive {
     public TriDeadwheelMecanumDrive(@NonNull BunyipsOpMode opMode, DriveConstants constants, MecanumCoefficients mecanumCoefficients, HardwareMap.DeviceMapping<VoltageSensor> voltageSensor, IMU imu, DcMotorEx frontLeft, DcMotorEx frontRight, DcMotorEx backLeft, DcMotorEx backRight, StandardTrackingWheelLocalizerCoefficients localizerCoefficients, Encoder enc_left, Encoder enc_right, Encoder enc_x, List<Integer> lastTrackingEncPositions, List<Integer> lastTrackingEncVels) {

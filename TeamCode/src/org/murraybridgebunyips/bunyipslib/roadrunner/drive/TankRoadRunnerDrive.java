@@ -23,6 +23,7 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.murraybridgebunyips.bunyipslib.Controller;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.TrajectorySequence;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.TrajectorySequenceBuilder;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.TrajectorySequenceRunner;
@@ -289,6 +290,22 @@ public class TankRoadRunnerDrive extends com.acmerobotics.roadrunner.drive.TankD
     @Override
     public Double getExternalHeadingVelocity() {
         return (double) imu.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate;
+    }
+
+    @Override
+    public void setWeightedDrivePowerFieldCentric(Pose2d pose) {
+        double heading = getExternalHeading();
+        double sin = Math.sin(heading);
+        double cos = Math.cos(heading);
+        setWeightedDrivePower(new Pose2d(
+                pose.getX() * cos - pose.getY() * sin,
+                pose.getX() * sin + pose.getY() * cos,
+                pose.getHeading()
+        ));
+    }
+
+    public void setSpeedUsingControllerFieldCentric(double x, double y, double r) {
+        setWeightedDrivePowerFieldCentric(Controller.makeRobotPose(x, y, r));
     }
 
     @Override
