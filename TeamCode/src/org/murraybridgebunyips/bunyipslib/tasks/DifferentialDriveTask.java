@@ -26,7 +26,7 @@ public class DifferentialDriveTask extends RunForeverTask {
 
     @Override
     public void init() {
-        // noop
+        // no-op
     }
 
     @Override

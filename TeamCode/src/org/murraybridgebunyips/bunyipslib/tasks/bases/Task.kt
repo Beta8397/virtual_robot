@@ -95,16 +95,10 @@ abstract class Task(timeoutSeconds: Double) : RobotTask {
      */
     override fun pollFinished(): Boolean {
         // Early return
-        if (taskFinished) return true
+        if (taskFinished) return finisherFired
 
-        // User defined task finished condition
-        if (isTaskFinished())
-            taskFinished = true
-
-        // Finish tasks that exceed a time limit defined by the task
-        if (startTime != 0.0 && timeout != 0.0 && currentTime > startTime + timeout) {
-            taskFinished = true
-        }
+        // Finish on user defined task finished condition, or by timeout
+        taskFinished = (timeout != 0.0 && startTime != 0.0 && currentTime > startTime + timeout) || isTaskFinished()
 
         // run() will handle firing the finisher, in which case we can return true and the polling loop can stop
         return taskFinished && finisherFired
@@ -141,7 +135,7 @@ abstract class Task(timeoutSeconds: Double) : RobotTask {
      * @return Whether the task is currently running (calls to run() should be made)
      */
     val isRunning: Boolean
-        get() = startTime != 0.0 && !taskFinished
+        get() = startTime != 0.0 && !isFinished()
 
     private val currentTime: Double
         get() = System.nanoTime() / NANOS_IN_SECONDS

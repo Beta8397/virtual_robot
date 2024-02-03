@@ -2,9 +2,12 @@ package org.murraybridgebunyips.bunyipslib;
 
 import androidx.annotation.NonNull;
 
+import org.murraybridgebunyips.bunyipslib.tasks.IdleTask;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
 import java.util.ArrayList;
+
+import static org.murraybridgebunyips.bunyipslib.Text.round;
 
 /**
  * Base class for all robot subsystems.
@@ -16,7 +19,7 @@ import java.util.ArrayList;
 public abstract class BunyipsSubsystem extends BunyipsComponent {
     private final ArrayList<Integer> dependencies = new ArrayList<>();
     private Task currentTask;
-    private Task defaultTask;
+    private Task defaultTask = new IdleTask();
 
     protected BunyipsSubsystem(@NonNull BunyipsOpMode opMode) {
         super(opMode);
@@ -87,6 +90,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
             task.run();
             // Update the state of isFinished() after running the task as it may have changed
             task.pollFinished();
+            Scheduler.addSubsystemTaskReport(getClass().getSimpleName(), task.getName(), round(task.getDeltaTime(), 1));
         }
         update();
     }

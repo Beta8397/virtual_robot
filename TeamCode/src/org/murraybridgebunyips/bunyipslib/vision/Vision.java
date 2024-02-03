@@ -92,7 +92,7 @@ public class Vision extends BunyipsSubsystem {
             }
             builder.addProcessor(processor);
             processor.setAttached(true);
-            getOpMode().log("vision processor '%' initialised.", processor.getClass().getSimpleName());
+            getOpMode().log("vision processor '%' initialised.", processor.getName());
         }
 
         visionPortal = builder
@@ -142,7 +142,7 @@ public class Vision extends BunyipsSubsystem {
                 throw new IllegalStateException("Vision: Tried to start a processor that was not initialised!");
             }
             visionPortal.setProcessorEnabled(processor, true);
-            getOpMode().log("vision processor '%' started.", processor.getClass().getSimpleName());
+            getOpMode().log("vision processor '%' started.", processor.getName());
         }
     }
 
@@ -178,7 +178,7 @@ public class Vision extends BunyipsSubsystem {
                 throw new IllegalStateException("Vision: Tried to stop a processor that was not initialised!");
             }
             visionPortal.setProcessorEnabled(processor, false);
-            getOpMode().log("vision processor '%' paused.", processor.getClass().getSimpleName());
+            getOpMode().log("vision processor '%' paused.", processor.getName());
         }
     }
 
@@ -218,7 +218,7 @@ public class Vision extends BunyipsSubsystem {
     public HashMap<String, List<VisionData>> getAllData() {
         HashMap<String, List<VisionData>> data = new HashMap<>();
         for (Processor processor : processors) {
-            if (processor.getClass().getSimpleName().equals("NoData")) continue;
+            if (processor.getName().equals("NoData")) continue;
             data.put(processor.getName(), processor.getData());
         }
         return data;
@@ -268,7 +268,7 @@ public class Vision extends BunyipsSubsystem {
                 throw new IllegalStateException("Vision: Tried to flip a processor that was not initialised!");
             }
             processor.setFlipped(!processor.isFlipped());
-            getOpMode().log("vision processor '%' flipped %.", processor.getClass().getSimpleName(), processor.isFlipped() ? "upside-down" : "right-side up");
+            getOpMode().log("vision processor '%' flipped %.", processor.getName(), processor.isFlipped() ? "upside-down" : "right-side up");
         }
     }
 
@@ -283,7 +283,7 @@ public class Vision extends BunyipsSubsystem {
         }
         for (Processor processor : processors) {
             processor.setFlipped(!processor.isFlipped());
-            getOpMode().log("vision processor '%' flipped %.", processor.getClass().getSimpleName(), processor.isFlipped() ? "upside-down" : "right-side up");
+            getOpMode().log("vision processor '%' flipped %.", processor.getName(), processor.isFlipped() ? "upside-down" : "right-side up");
         }
     }
 

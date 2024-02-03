@@ -1,12 +1,14 @@
 package org.murraybridgebunyips.bunyipslib;
 
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.function.BooleanSupplier;
+
+import static org.murraybridgebunyips.bunyipslib.Text.formatString;
+import static org.murraybridgebunyips.bunyipslib.Text.round;
 
 /**
  * Scheduler and command plexus for use with the BunyipsLib task system.
@@ -14,11 +16,11 @@ import java.util.function.BooleanSupplier;
  * @author Lucas Bubner, 2024
  */
 public class Scheduler {
-    private final OpMode opMode;
+    private final BunyipsOpMode opMode;
     private final ArrayList<BunyipsSubsystem> subsystems = new ArrayList<>();
     private final ArrayList<ConditionalTask> allocatedTasks = new ArrayList<>();
 
-    public Scheduler(OpMode opMode) {
+    public Scheduler(BunyipsOpMode opMode) {
         this.opMode = opMode;
     }
 
@@ -31,11 +33,41 @@ public class Scheduler {
         subsystems.addAll(Arrays.asList(dispatch));
     }
 
+    private static final ArrayList<String> subsystemReports = new ArrayList<>();
+
+    /**
+     * Used internally by subsystems to report their task-running status.
+     */
+    public static void addSubsystemTaskReport(String className, String taskName, double deltaTime) {
+        subsystemReports.add(formatString("    % | % -> %s", className, taskName, deltaTime));
+    }
+
     /**
      * Run the scheduler. This will run all subsystems and tasks allocated to the scheduler.
-     * This should be called in the activeLoop() method of the OpMode.
+     * This should be called in the activeLoop() method of the BunyipsOpMode.
      */
     public void run() {
+        opMode.addTelemetry("Managing % task% (%sys, %cmd) on % subsystem%",
+                // Subsystem count will account for default tasks
+                allocatedTasks.size() + subsystems.size(),
+                allocatedTasks.size() + subsystems.size() == 1 ? "" : "s",
+                allocatedTasks.stream().filter(task -> task.task.shouldOverrideOnConflict() != null).count() + subsystems.size(),
+                allocatedTasks.stream().filter(task -> task.task.shouldOverrideOnConflict() == null).count(),
+                subsystems.size(),
+                subsystems.size() == 1 ? "" : "s"
+        );
+        for (String item : subsystemReports) {
+            opMode.addTelemetry(item);
+        }
+        for (ConditionalTask task : allocatedTasks) {
+            if (task.task.shouldOverrideOnConflict() != null)
+                continue;
+            if (task.task.isRunning() || task.condition.getAsBoolean())
+                opMode.addTelemetry("    Scheduler | % -> %s", task.task.getName(), round(task.task.getDeltaTime(), 1));
+        }
+        opMode.addTelemetry("");
+        subsystemReports.clear();
+
         for (ConditionalTask task : allocatedTasks) {
             boolean condition = task.condition.getAsBoolean();
             if (condition || task.task.isRunning()) {
@@ -56,8 +88,9 @@ public class Scheduler {
                             task.task.finishNow();
                         }
                         // Check for a debouncing situation and skip if it is not met
-                        if (task.debouncing && !debouncingCheck(task, condition))
+                        if (task.debouncing && !debouncingCheck(task, condition)) {
                             continue;
+                        }
                         // This is a non-command task, run it now as it will not be run by any subsystem
                         task.task.run();
                         if (task.task.pollFinished()) {
@@ -222,14 +255,14 @@ public class Scheduler {
     }
 
     private static class ControllerStateHandler implements BooleanSupplier {
-        private final OpMode opMode;
+        private final BunyipsOpMode opMode;
         private final State state;
         private final Controller.User user;
         private final Controller button;
         private final DebounceCondition debounceCondition;
         private boolean timerIsRunning;
 
-        public ControllerStateHandler(OpMode opMode, Controller.User user, Controller button, State state) {
+        public ControllerStateHandler(BunyipsOpMode opMode, Controller.User user, Controller button, State state) {
             this.opMode = opMode;
             this.user = user;
             this.button = button;
@@ -249,7 +282,7 @@ public class Scheduler {
                 case PRESSED:
                     // Allow timers to run if they exist by not locking out but returning true for the duration
                     // This also ensures that repeated calls will not trigger the task multiple times, as this adds
-                    // way too much unnecessary complexity to the task allocation system and to the OpMode itself.
+                    // way too much unnecessary complexity to the task allocation system and to the BunyipsOpMode itself.
                     // There is realistically no reason for a task to have such a delay between allocation and execution
                     // where it will be called multiple times, in which case the task itself should be the one waiting.
                     return debounceCondition.getAsBoolean() || timerIsRunning;

@@ -24,11 +24,11 @@ public abstract class TaskGroup extends Task {
 
     @Override
     public final void init() {
-        // noop
+        // no-op
     }
 
     @Override
     public final void onFinish() {
-        // noop
+        // no-op
     }
 }

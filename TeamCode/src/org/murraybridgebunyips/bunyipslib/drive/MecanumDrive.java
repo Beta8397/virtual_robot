@@ -55,6 +55,7 @@ public class MecanumDrive extends BunyipsSubsystem implements RoadRunnerDrive {
 
     public void resetYaw() {
         imu.resetYaw();
+        setExternalHeading(0);
     }
 
     @Override

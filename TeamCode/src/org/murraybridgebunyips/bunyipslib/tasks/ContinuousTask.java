@@ -27,11 +27,11 @@ public class ContinuousTask extends RunForeverTask {
 
     @Override
     public void init() {
-        // noop
+        // no-op
     }
 
     @Override
     public void onFinish() {
-        // noop
+        // no-op
     }
 }

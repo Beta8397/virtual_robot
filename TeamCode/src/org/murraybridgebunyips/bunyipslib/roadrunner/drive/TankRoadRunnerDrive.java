@@ -298,8 +298,8 @@ public class TankRoadRunnerDrive extends com.acmerobotics.roadrunner.drive.TankD
         double sin = Math.sin(heading);
         double cos = Math.cos(heading);
         setWeightedDrivePower(new Pose2d(
-                pose.getX() * cos - pose.getY() * sin,
-                pose.getX() * sin + pose.getY() * cos,
+                pose.getY() * sin + pose.getX() * cos,
+                pose.getY() * cos - pose.getX() * sin,
                 pose.getHeading()
         ));
     }

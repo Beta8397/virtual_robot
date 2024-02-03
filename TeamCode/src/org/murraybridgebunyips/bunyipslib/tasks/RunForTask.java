@@ -23,7 +23,7 @@ public class RunForTask extends Task {
 
     @Override
     public void init() {
-        // noop
+        // no-op
     }
 
     @Override
@@ -33,7 +33,7 @@ public class RunForTask extends Task {
 
     @Override
     public void onFinish() {
-        // noop
+        // no-op
     }
 
     @Override

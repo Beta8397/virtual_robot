@@ -75,7 +75,7 @@ public class TeamProp extends Processor<TeamPropData> {
 
     @Override
     public void init(int width, int height, CameraCalibration calibration) {
-        // noop
+        // no-op
     }
 
     @SuppressWarnings("rawtypes")
@@ -94,7 +94,7 @@ public class TeamProp extends Processor<TeamPropData> {
 
     @Override
     public void onDrawFrame(Canvas canvas, int onscreenWidth, int onscreenHeight, float scaleBmpPxToCanvasPx, float scaleCanvasDensity, Object userContext) {
-        // noop
+        // no-op
     }
 
     @Override

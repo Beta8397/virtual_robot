@@ -141,12 +141,12 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
             return;
         }
 
-        addTelemetry("Running task (%/%): %", this.currentTask, taskCount, currentTask.getClass().getSimpleName());
+        addTelemetry("Running task (%/%): %", this.currentTask, taskCount, currentTask.getName());
 
         // AutonomousBunyipsOpMode is handling all task completion checks, manual checks not required
         if (currentTask.pollFinished()) {
             tasks.removeFirst();
-            log("auto: task %/% (%) finished", this.currentTask, taskCount, currentTask.getClass().getSimpleName());
+            log("auto: task %/% (%) finished", this.currentTask, taskCount, currentTask.getName());
             this.currentTask++;
         }
 
@@ -184,7 +184,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
         }
         tasks.add(newTask);
         taskCount++;
-        log("auto: % has been added as task %/%", newTask.getClass().getSimpleName(), taskCount, taskCount);
+        log("auto: % has been added as task %/%", newTask.getName(), taskCount, taskCount);
     }
 
     public void addTask(@NotNull RobotTask newTask) {
@@ -199,12 +199,12 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     public void addTaskLast(@NotNull RobotTask newTask) {
         if (!hasGottenCallback) {
             postQueue.add(newTask);
-            log("auto: % has been queued as end-init task %/%", newTask.getClass().getSimpleName(), postQueue.size(), postQueue.size());
+            log("auto: % has been queued as end-init task %/%", newTask.getName(), postQueue.size(), postQueue.size());
             return;
         }
         tasks.addLast(newTask);
         taskCount++;
-        log("auto: % has been added as task %/%", newTask.getClass().getSimpleName(), taskCount, taskCount);
+        log("auto: % has been added as task %/%", newTask.getName(), taskCount, taskCount);
     }
 
     /**
@@ -215,12 +215,12 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     public void addTaskFirst(@NotNull RobotTask newTask) {
         if (!hasGottenCallback) {
             preQueue.add(newTask);
-            log("auto: % has been queued as end-init task 1/%", newTask.getClass().getSimpleName(), preQueue.size());
+            log("auto: % has been queued as end-init task 1/%", newTask.getName(), preQueue.size());
             return;
         }
         tasks.addFirst(newTask);
         taskCount++;
-        log("auto: % has been added as task 1/%", newTask.getClass().getSimpleName(), taskCount);
+        log("auto: % has been added as task 1/%", newTask.getName(), taskCount);
     }
 
     /**
@@ -272,10 +272,10 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     public void removeTask(@NotNull RobotTask task) {
         if (tasks.contains(task)) {
             tasks.remove(task);
-            log("auto: task % was removed", task.getClass().getSimpleName());
+            log("auto: task % was removed", task.getName());
             taskCount--;
         } else {
-            log("auto: task % was not found in the queue", task.getClass().getSimpleName());
+            log("auto: task % was not found in the queue", task.getName());
         }
     }
 
