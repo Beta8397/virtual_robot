@@ -152,7 +152,7 @@ abstract class BunyipsOpMode : LinearOpMode() {
             // Ready to go.
             opModeStatus = "ready"
             movingAverageTimer.update()
-            Dbg.logd("BunyipsOpMode: init cycle completed in ${movingAverageTimer.movingAverage() / 1000.0} secs")
+            Dbg.logd("BunyipsOpMode: init cycle completed in ${movingAverageTimer.elapsedTime() / 1000.0} secs")
             telemetry.addData("BunyipsOpMode: ", "INIT COMPLETE -- PLAY WHEN READY.")
             Dbg.logd("BunyipsOpMode: ready.")
             // Set telemetry to an inert state while we wait for start
