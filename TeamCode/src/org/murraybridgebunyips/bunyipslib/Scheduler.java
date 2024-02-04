@@ -1,14 +1,13 @@
 package org.murraybridgebunyips.bunyipslib;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
+import static org.murraybridgebunyips.bunyipslib.Text.formatString;
+import static org.murraybridgebunyips.bunyipslib.Text.round;
+
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.function.BooleanSupplier;
-
-import static org.murraybridgebunyips.bunyipslib.Text.formatString;
-import static org.murraybridgebunyips.bunyipslib.Text.round;
 
 /**
  * Scheduler and command plexus for use with the BunyipsLib task system.
@@ -16,6 +15,7 @@ import static org.murraybridgebunyips.bunyipslib.Text.round;
  * @author Lucas Bubner, 2024
  */
 public class Scheduler {
+    private static final ArrayList<String> subsystemReports = new ArrayList<>();
     private final BunyipsOpMode opMode;
     private final ArrayList<BunyipsSubsystem> subsystems = new ArrayList<>();
     private final ArrayList<ConditionalTask> allocatedTasks = new ArrayList<>();
@@ -25,21 +25,19 @@ public class Scheduler {
     }
 
     /**
+     * Used internally by subsystems to report their task-running status.
+     */
+    public static void addSubsystemTaskReport(String className, String taskName, double deltaTime) {
+        subsystemReports.add(formatString("    % | % -> %s", className, taskName, deltaTime));
+    }
+
+    /**
      * Add subsystems to the scheduler. This will ensure the update() method of the subsystems is called.
      *
      * @param dispatch The subsystems to add.
      */
     public void addSubsystems(BunyipsSubsystem... dispatch) {
         subsystems.addAll(Arrays.asList(dispatch));
-    }
-
-    private static final ArrayList<String> subsystemReports = new ArrayList<>();
-
-    /**
-     * Used internally by subsystems to report their task-running status.
-     */
-    public static void addSubsystemTaskReport(String className, String taskName, double deltaTime) {
-        subsystemReports.add(formatString("    % | % -> %s", className, taskName, deltaTime));
     }
 
     /**

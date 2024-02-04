@@ -1,13 +1,13 @@
 package org.murraybridgebunyips.bunyipslib;
 
+import static org.murraybridgebunyips.bunyipslib.Text.round;
+
 import androidx.annotation.NonNull;
 
 import org.murraybridgebunyips.bunyipslib.tasks.IdleTask;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
 import java.util.ArrayList;
-
-import static org.murraybridgebunyips.bunyipslib.Text.round;
 
 /**
  * Base class for all robot subsystems.

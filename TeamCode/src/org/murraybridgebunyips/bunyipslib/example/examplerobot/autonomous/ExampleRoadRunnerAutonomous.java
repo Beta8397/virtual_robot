@@ -25,7 +25,7 @@ public class ExampleRoadRunnerAutonomous extends RoadRunnerAutonomousBunyipsOpMo
     private final ExampleConfig config = new ExampleConfig();
 
     @Override
-    protected void onInitialisation() {
+    protected void onInitialise() {
         config.init(this);
         // No further configuration is required here for setting up drive systems, see setDrive()
         // You can also define your drive here if you wish, but using setDrive() is recommended

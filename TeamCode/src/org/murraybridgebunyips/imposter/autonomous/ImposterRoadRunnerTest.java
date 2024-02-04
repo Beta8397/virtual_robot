@@ -17,7 +17,7 @@ public class ImposterRoadRunnerTest extends RoadRunnerAutonomousBunyipsOpMode<Me
     private final ImposterConfig config = new ImposterConfig();
 
     @Override
-    protected void onInitialisation() {
+    protected void onInitialise() {
         config.init(this);
     }
 

@@ -27,9 +27,18 @@ import java.util.ArrayList;
  * Ensure to verify paths with a visualiser such as BunyipsLib_RRPathVisualiser.
  * <p>
  * You will need to make a new OpMode that extends this class.
+ *
  * @author Lucas Bubner, 2024
  */
 public abstract class PathRecorder extends BunyipsOpMode {
+
+    private final ArrayList<Pose2d> path = new ArrayList<>();
+    private final ElapsedTime timer = new ElapsedTime();
+    protected RoadRunnerDrive drive;
+    protected int snapshotDuration;
+    protected Vector2d deltaThreshold;
+    protected Pose2d startPose;
+    private Pose2d currentPose;
 
     /**
      * Initialise your config here.
@@ -38,36 +47,31 @@ public abstract class PathRecorder extends BunyipsOpMode {
 
     /**
      * Set/configure the drive that will be used to record the path.
+     *
      * @return the drive that will be used to record the path, will be called after configureRobot()
      */
     protected abstract RoadRunnerDrive setDrive();
 
     /**
      * Set the starting pose of the robot.
+     *
      * @return the starting pose of the robot, this should be in the inches coordinate system used by RoadRunner/FtcDashboard/RRPathGen
      */
     protected abstract Pose2d setStartPose();
 
     /**
      * Set the delta threshold for the robot to move before a new snapshot is taken.
+     *
      * @return a pose representing the delta threshold, in inches
      */
     protected abstract Vector2d setDeltaThreshold();
 
     /**
      * Set the duration at which Pose snapshots will be taken (a path will be generated from these snapshots).
+     *
      * @return the duration at which Pose snapshots will be taken, in milliseconds
      */
     protected abstract int setSnapshotDurationMs();
-
-    protected RoadRunnerDrive drive;
-    protected int snapshotDuration;
-    protected Vector2d deltaThreshold;
-    protected Pose2d startPose;
-
-    private final ArrayList<Pose2d> path = new ArrayList<>();
-    private final ElapsedTime timer = new ElapsedTime();
-    private Pose2d currentPose;
 
     @Override
     protected final void onInit() {
@@ -130,7 +134,7 @@ public abstract class PathRecorder extends BunyipsOpMode {
         );
         currentPose = drive.getPoseEstimate();
         if (timer.milliseconds() >= snapshotDuration) {
-           captureSnapshot();
+            captureSnapshot();
         }
         drive.update();
     }

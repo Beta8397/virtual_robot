@@ -98,7 +98,8 @@ abstract class Task(timeoutSeconds: Double) : RobotTask {
         if (taskFinished) return finisherFired
 
         // Finish on user defined task finished condition, or by timeout
-        taskFinished = (timeout != 0.0 && startTime != 0.0 && currentTime > startTime + timeout) || isTaskFinished()
+        taskFinished = (timeout != 0.0 && startTime != 0.0 && currentTime > startTime + timeout)
+                || isTaskFinished()
 
         // run() will handle firing the finisher, in which case we can return true and the polling loop can stop
         return taskFinished && finisherFired

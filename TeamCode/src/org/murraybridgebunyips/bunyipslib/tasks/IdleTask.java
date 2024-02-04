@@ -9,7 +9,7 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.RunForeverTask;
 public class IdleTask extends RunForeverTask {
     @Override
     public void init() {
-       // no-op
+        // no-op
     }
 
     @Override

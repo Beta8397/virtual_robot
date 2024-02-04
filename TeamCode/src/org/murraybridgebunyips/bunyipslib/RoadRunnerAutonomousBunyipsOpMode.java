@@ -34,6 +34,13 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
     protected T drive;
 
     /**
+     * Runs upon the pressing of the INIT button on the Driver Station.
+     * This is where your hardware should be initialised. You may also add specific tasks to the queue
+     * here, but it is recommended to use {@link #setInitTask()} or {@link #onQueueReady(OpModeSelection)} instead.
+     */
+    protected abstract void onInitialise();
+
+    /**
      * Set the drive instance to be used for RoadRunner trajectories. This method ensures
      * that the drive instance is set to avoid accidental NullPointerExceptions, similar to how
      * setOpModes and setInitTask are handled. This is called after initialisation, so your config
@@ -44,8 +51,8 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
     protected abstract T setDrive();
 
     @Override
-    protected final void onInit() {
-        super.onInit();
+    protected final void onInitialisation() {
+        onInitialise();
         if (drive == null)
             drive = setDrive();
     }

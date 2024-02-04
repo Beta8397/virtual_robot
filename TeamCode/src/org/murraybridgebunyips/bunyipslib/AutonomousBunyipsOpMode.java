@@ -18,7 +18,6 @@ import kotlin.Unit;
  * @author Lucas Bubner, 2023
  * @author Lachlan Paul, 2023
  */
-
 public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
 
     /**
@@ -62,14 +61,8 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
         return Unit.INSTANCE;
     }
 
-    /**
-     * This method should not be overridden, as it is used internally to handle the
-     * asynchronous task allocation. Use onInitialisation() instead.
-     *
-     * @see #onInitialisation()
-     */
     @Override
-    protected void onInit() {
+    protected final void onInit() {
         // Run user-defined hardware initialisation
         onInitialisation();
         // Set user-defined initTask
@@ -122,7 +115,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     @Override
     protected final void activeLoop() {
         // Run any code defined by the user
-        onActiveLoop();
+        periodic();
 
         if (!hasGottenCallback) {
             // Not ready to run tasks yet, tell the user selection to terminate if it hasn't
@@ -210,7 +203,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     /**
      * Add a task to the very start of the queue. This is useful to call when working with tasks that
      * should be queued at the very start of the autonomous, while still being able to add tasks
-     * asynchronously with user input in onReady().
+     * asynchronously with user input in onQueueReady().
      */
     public void addTaskFirst(@NotNull RobotTask newTask) {
         if (!hasGottenCallback) {
@@ -302,8 +295,6 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
      * Runs upon the pressing of the INIT button on the Driver Station.
      * This is where your hardware should be initialised. You may also add specific tasks to the queue
      * here, but it is recommended to use {@link #setInitTask()} or {@link #onQueueReady(OpModeSelection)} instead.
-     *
-     * @see #onInit()
      */
     protected abstract void onInitialisation();
 
@@ -314,11 +305,12 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
      * <pre><code>
      *     protected List<OpModeSelection> setOpModes() {
      *         return Arrays.asList(
-     *                 new OpModeSelection("LEFT_BLUE"),
-     *                 new OpModeSelection("RIGHT_BLUE"),
-     *                 new OpModeSelection("LEFT_RED"),
-     *                 new OpModeSelection("RIGHT_RED")
+     *                 new OpModeSelection("GO_PARK"),
+     *                 new OpModeSelection("GO_SHOOT"),
+     *                 new OpModeSelection("GO_SHOOT_AND_PARK"),
+     *                 new OpModeSelection("SABOTAGE_ALLIANCE")
      *         );
+     *         // Use `StartingPositions.use();` for using the four Robot starting positions
      *     }
      * </code></pre>
      */
@@ -357,8 +349,9 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     protected abstract void onQueueReady(@Nullable OpModeSelection selectedOpMode);
 
     /**
-     * Override to this method to add extra code to the activeLoop.
+     * Override to this method to add extra code to the activeLoop, which will be run before
+     * the task queue is processed.
      */
-    protected void onActiveLoop() {
+    protected void periodic() {
     }
 }
