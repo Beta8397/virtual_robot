@@ -1,7 +1,6 @@
 package org.murraybridgebunyips.bunyipslib.roadrunner.drive.tuning;
 
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.localization.Localizer;
@@ -34,7 +33,7 @@ import org.murraybridgebunyips.bunyipslib.roadrunner.drive.localizers.StandardTr
  * for the forward offset. You can run this procedure as many times as necessary until a
  * satisfactory result is produced.
  */
-@Config
+//@Config
 public abstract class TrackingWheelForwardOffsetTuner extends LinearOpMode {
     public static double ANGLE = 180; // deg
     public static int NUM_TRIALS = 5;

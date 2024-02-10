@@ -12,19 +12,15 @@ data class TeamPropData(
      */
     val position: TeamProp.Positions,
     /**
-     * Colour distance of section 1.
+     * Colour distance of section 1 (left).
      */
     val section1: Double,
     /**
-     * Colour distance of section 2.
+     * Colour distance of section 2 (right).
      */
     val section2: Double,
     /**
-     * Colour distance of section 3.
-     */
-    val section3: Double,
-    /**
-     * Maximum colour distance of all three sections.
+     * Maximum colour distance of both sections.
      */
     val maxDistance: Double
 ) : VisionData()

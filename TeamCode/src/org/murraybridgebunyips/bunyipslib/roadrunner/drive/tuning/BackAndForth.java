@@ -1,6 +1,5 @@
 package org.murraybridgebunyips.bunyipslib.roadrunner.drive.tuning;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -24,7 +23,7 @@ import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
  * This opmode is designed as a convenient, coarse tuning for the follower PID coefficients. It
  * is recommended that you use the FollowerPIDTuner opmode for further fine tuning.
  */
-@Config
+//@Config
 public abstract class BackAndForth extends LinearOpMode {
 
     public static double DISTANCE = Inches.fromM(1);

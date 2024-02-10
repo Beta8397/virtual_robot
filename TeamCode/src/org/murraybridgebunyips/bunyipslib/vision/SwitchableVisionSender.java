@@ -1,38 +1,41 @@
 package org.murraybridgebunyips.bunyipslib.vision;
 
-import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 
-import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
-import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 import org.murraybridgebunyips.bunyipslib.Dbg;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Utility component to switch between different feeds and processors with FtcDashboard.
- * The Driver Station usually culminates in a single feed preview, but FtcDashboard
- * requires a bitmap to be sent to it, and it is not very helpful to see the same feed when
- * debugging across different processors.
+ * The Driver Station usually culminates all processors into  a single feed preview, and it is not very helpful
+ * to see the same feed when debugging across different processors. FtcDashboard allows us to send
+ * custom bitmaps, and we can use this to send the feed from different processors to the dashboard.
+ * <p>
+ * This sender is not a traditional subsystem, as it is designed to run on another thread not a part of the main loop,
+ * similar to how Vision is handled. When started, SwitchableVisionSender will automatically
+ * manage the FtcDashboard feed and processor switching, and should be interrupted automatically if used
+ * with the Threads utility at the end of a BunyipsOpMode. Ensure to manage your threads properly if
+ * not using the Threads utility.
  *
  * @author Lucas Bubner, 2024
  */
 @SuppressWarnings("rawtypes")
 @Config
-public class SwitchableVisionSender extends BunyipsSubsystem {
+public class SwitchableVisionSender implements Runnable {
     // Can be changed via FtcDashboard
-    public static String CURRENT_PROCESSOR_NAME;
+    public static String CURRENT_PROCESSOR_NAME = "";
     public static int MAX_FPS;
-    private final ArrayList<Processor> processors = new ArrayList<>();
+    private final Vision vision;
     private String lastProcessorName;
 
-    public SwitchableVisionSender(@NonNull BunyipsOpMode opMode, Processor... processors) {
-        super(opMode);
+    public SwitchableVisionSender(Vision vision) {
         FtcDashboard.getInstance().stopCameraStream();
-        this.processors.addAll(Arrays.asList(processors));
+        this.vision = vision;
+        if (vision.getAttachedProcessors().size() > 0)
+            CURRENT_PROCESSOR_NAME = vision.getAttachedProcessors().get(0).getName();
     }
 
     /**
@@ -42,27 +45,28 @@ public class SwitchableVisionSender extends BunyipsSubsystem {
      */
     public void setStreamingProcessor(String processorName) {
         CURRENT_PROCESSOR_NAME = processorName;
-        // Will force an update as we shouldn't need to wait for the activeLoop to do this
-        update();
     }
 
     @Override
-    public void update() {
-        if (CURRENT_PROCESSOR_NAME == null || CURRENT_PROCESSOR_NAME.equals(lastProcessorName))
-            return;
+    public void run() {
+        while (!Thread.currentThread().isInterrupted()) {
+            if (Objects.equals(CURRENT_PROCESSOR_NAME, "") || CURRENT_PROCESSOR_NAME.equals(lastProcessorName))
+                continue;
 
-        Processor currentProcessor = processors.stream()
-                .filter(p -> p.getName().equals(CURRENT_PROCESSOR_NAME))
-                .findFirst()
-                .orElse(null);
+            Processor currentProcessor = vision.getAttachedProcessors().stream()
+                    .filter(p -> p.getName().equals(CURRENT_PROCESSOR_NAME))
+                    .findFirst()
+                    .orElse(null);
 
-        if (currentProcessor == null || !currentProcessor.isAttached()) {
-            Dbg.error(getClass(), "Unable to find a processor '%' to attached to a Vision system, FtcDashboard sending cancelled.", CURRENT_PROCESSOR_NAME);
-            FtcDashboard.getInstance().stopCameraStream();
-            return;
+            lastProcessorName = CURRENT_PROCESSOR_NAME;
+
+            if (currentProcessor == null) {
+                Dbg.error(getClass(), "Unable to find a processor '%' to attached to a Vision system, FtcDashboard sending cancelled.", CURRENT_PROCESSOR_NAME);
+                FtcDashboard.getInstance().stopCameraStream();
+                continue;
+            }
+
+            FtcDashboard.getInstance().startCameraStream(currentProcessor, MAX_FPS);
         }
-
-        FtcDashboard.getInstance().startCameraStream(currentProcessor, MAX_FPS);
-        lastProcessorName = CURRENT_PROCESSOR_NAME;
     }
 }

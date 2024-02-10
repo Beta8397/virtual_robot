@@ -1,7 +1,6 @@
 package org.murraybridgebunyips.bunyipslib.roadrunner.drive.tuning;
 
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -23,7 +22,7 @@ import org.murraybridgebunyips.bunyipslib.roadrunner.drive.MecanumRoadRunnerDriv
  * were to rotate the gamepad 45deg°. x/square is the front left
  * and each button corresponds to the wheel as you go clockwise
  */
-@Config
+//@Config
 public abstract class MotorDirectionDebugger extends LinearOpMode {
     public static double MOTOR_POWER = 0.7;
 

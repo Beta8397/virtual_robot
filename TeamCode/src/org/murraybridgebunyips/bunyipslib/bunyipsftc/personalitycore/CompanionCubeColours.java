@@ -1,12 +1,11 @@
 package org.murraybridgebunyips.bunyipslib.bunyipsftc.personalitycore;
 
-import com.acmerobotics.dashboard.config.Config;
 
 /**
  * Companion Cube Game Element, FTC 2023-2024 CENTERSTAGE
  * FTC 15215, 22407
  */
-@Config
+//@Config
 public class CompanionCubeColours {
     public static int RED_ELEMENT_R = 160;
     public static int RED_ELEMENT_G = 124;

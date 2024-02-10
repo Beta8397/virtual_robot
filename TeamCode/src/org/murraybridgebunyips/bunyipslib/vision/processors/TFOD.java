@@ -42,11 +42,7 @@ public class TFOD extends Processor<TfodData> {
     }
 
     public void update() {
-        List<Recognition> recognitions = instance.getFreshRecognitions();
-        if (recognitions == null) {
-            return;
-        }
-        data.clear();
+        List<Recognition> recognitions = instance.getRecognitions();
         for (Recognition recognition : recognitions) {
             data.add(new TfodData(
                     recognition.getLabel(),
@@ -79,7 +75,7 @@ public class TFOD extends Processor<TfodData> {
     }
 
     @Override
-    public void onDrawFrame(Canvas canvas, int onscreenWidth, int onscreenHeight, float scaleBmpPxToCanvasPx, float scaleCanvasDensity, Object userContext) {
+    public void onFrameDraw(Canvas canvas, int onscreenWidth, int onscreenHeight, float scaleBmpPxToCanvasPx, float scaleCanvasDensity, Object userContext) {
         instance.onDrawFrame(canvas, onscreenWidth, onscreenHeight, scaleBmpPxToCanvasPx, scaleCanvasDensity, userContext);
     }
 }

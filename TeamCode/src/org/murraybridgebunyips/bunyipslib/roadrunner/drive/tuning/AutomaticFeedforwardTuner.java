@@ -2,7 +2,6 @@ package org.murraybridgebunyips.bunyipslib.roadrunner.drive.tuning;
 
 
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.util.NanoClock;
@@ -28,7 +27,7 @@ import java.util.List;
  *   4. Adjust the encoder data based on the velocity tuning data and find kA with another linear
  *      regression.
  */
-@Config
+//@Config
 public abstract class AutomaticFeedforwardTuner extends LinearOpMode {
     public static double MAX_POWER = 0.7;
     public static double DISTANCE = 100; // in

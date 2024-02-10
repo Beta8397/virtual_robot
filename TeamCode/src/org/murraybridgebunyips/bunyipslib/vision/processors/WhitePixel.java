@@ -8,6 +8,8 @@ public class WhitePixel extends YCbCrColourThreshold {
         return "whitepixel";
     }
 
+    // TODO: Think about making these colour thresholds configurable dynamically through FtcDashboard
+
     @Override
     public Scalar getLower() {
         return new Scalar(192.7, 123.3, 106.3);

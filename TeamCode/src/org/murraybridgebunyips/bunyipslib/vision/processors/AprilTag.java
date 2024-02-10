@@ -44,11 +44,7 @@ public class AprilTag extends Processor<AprilTagData> {
 
     @Override
     public void update() {
-        List<AprilTagDetection> detections = instance.getFreshDetections();
-        if (detections == null) {
-            return;
-        }
-        data.clear();
+        List<AprilTagDetection> detections = instance.getDetections();
         for (AprilTagDetection detection : detections) {
             data.add(new AprilTagData(
                     detection.id,
@@ -89,7 +85,7 @@ public class AprilTag extends Processor<AprilTagData> {
     }
 
     @Override
-    public void onDrawFrame(Canvas canvas, int onscreenWidth, int onscreenHeight, float scaleBmpPxToCanvasPx, float scaleCanvasDensity, Object userContext) {
+    public void onFrameDraw(Canvas canvas, int onscreenWidth, int onscreenHeight, float scaleBmpPxToCanvasPx, float scaleCanvasDensity, Object userContext) {
         instance.onDrawFrame(canvas, onscreenWidth, onscreenHeight, scaleBmpPxToCanvasPx, scaleCanvasDensity, userContext);
     }
 }

@@ -87,7 +87,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
             // when the user has selected an OpMode
             log("auto: waiting for user input...");
             userSelection = new UserSelection<>(this, this::callback, varargs);
-            userSelection.start();
+            Threads.start(userSelection);
         } else {
             // There are no OpMode selections, so just run the callback with the default OpMode
             callback(opModes.get(0));
@@ -106,24 +106,22 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     protected void onStart() {
         if (userSelection != null) {
             // UserSelection will internally check opMode.isInInit() to see if it should terminate itself
-            // automatically, but this is to ensure that the thread receives the message immediately
-            // upon start as user input is now impossible to retrieve and we need a callback ASAP
-            userSelection.interrupt();
+            // automatically, but this is to ensure that the thread receives the message and that
+            // Threads is aware that we are killing the thread
+            Threads.stop(userSelection);
         }
     }
 
     @Override
     protected final void activeLoop() {
-        // Run any code defined by the user
-        periodic();
-
         if (!hasGottenCallback) {
-            // Not ready to run tasks yet, tell the user selection to terminate if it hasn't
-            if (!userSelection.isInterrupted())
-                userSelection.interrupt();
+            // Not ready to run tasks yet, we can't do much
             Dbg.logd("AutonomousBunyipsOpMode is busy-waiting for a late UserSelection callback...");
             return;
         }
+
+        // Run any code defined by the user
+        periodic();
 
         // Run the queue of tasks
         RobotTask currentTask = tasks.peekFirst();
@@ -160,9 +158,9 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     protected boolean onInitLoop() {
         if (initTask != null) {
             initTask.run();
-            return initTask.pollFinished() && (userSelection == null || !userSelection.isAlive());
+            return initTask.pollFinished() && (userSelection == null || !Threads.isRunning(userSelection));
         }
-        return userSelection == null || !userSelection.isAlive();
+        return userSelection == null || !Threads.isRunning(userSelection);
     }
 
     /**

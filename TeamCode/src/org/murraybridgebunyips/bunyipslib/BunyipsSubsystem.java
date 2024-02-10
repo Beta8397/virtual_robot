@@ -20,6 +20,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
     private final ArrayList<Integer> dependencies = new ArrayList<>();
     private Task currentTask;
     private Task defaultTask = new IdleTask();
+    private boolean mutedReports;
 
     protected BunyipsSubsystem(@NonNull BunyipsOpMode opMode) {
         super(opMode);
@@ -30,6 +31,13 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
             currentTask = defaultTask;
         }
         return currentTask;
+    }
+
+    /**
+     * Call to mute the Scheduler from reporting task status for this subsystem.
+     */
+    public void muteTaskReports() {
+        mutedReports = true;
     }
 
     public final void setDefaultTask(Task defaultTask) {
@@ -90,7 +98,13 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
             task.run();
             // Update the state of isFinished() after running the task as it may have changed
             task.pollFinished();
-            Scheduler.addSubsystemTaskReport(getClass().getSimpleName(), task.getName(), round(task.getDeltaTime(), 1));
+            if (!mutedReports) {
+                Scheduler.addSubsystemTaskReport(
+                        getClass().getSimpleName(),
+                        task.getName(),
+                        round(task.getDeltaTime(), 1)
+                );
+            }
         }
         update();
     }

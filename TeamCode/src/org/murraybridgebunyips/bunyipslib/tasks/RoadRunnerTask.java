@@ -102,4 +102,12 @@ public class RoadRunnerTask<T extends RoadRunnerDrive> extends BunyipsTask {
     public boolean isTaskFinished() {
         return !drive.isBusy() && taskStartedRunning;
     }
+
+    public Pose2d getEndPose() {
+        if (trajectory != null) {
+            return trajectory.end();
+        } else {
+            return trajectorySequence.end();
+        }
+    }
 }

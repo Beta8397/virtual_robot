@@ -1,7 +1,6 @@
 package org.murraybridgebunyips.bunyipslib.roadrunner.drive.tuning;
 
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
@@ -14,7 +13,7 @@ import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
 /*
  * This is a simple routine to test translational drive capabilities.
  */
-@Config
+//@Config
 public abstract class StraightTest extends LinearOpMode {
     public static double DISTANCE = Inches.fromM(1);
     protected RoadRunnerDrive drive;

@@ -85,7 +85,8 @@ You can make your own robot by copying the `../Template` directory and doing the
 2. Uncommenting the contents of build.gradle, and renaming the namespace to your robot name package
 3. Editing the package namespace in src/main/AndroidManifest.xml
 4. Editing the package name src/main/java/org/murraybridgebunyips/template to your robot name
-5. Removing the tmp file and populating the folder with your own code
+5. Adding your robot to /settings.gradle
+6. Removing the tmp file and populating the folder with your own code
 
 Ensure to run a Gradle sync (Ctrl + Shift + O) after making these changes.
 

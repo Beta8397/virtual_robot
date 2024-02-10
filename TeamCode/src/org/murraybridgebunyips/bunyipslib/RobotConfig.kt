@@ -50,6 +50,29 @@ abstract class RobotConfig {
     }
 
     /**
+     * Use HardwareMap to fetch HardwareDevices and assign instances.
+     * Should be called as the first line in onInit();
+     * @param opMode the OpMode instance - usually the `this` object when at the root OpMode.
+     */
+    fun init(opMode: BunyipsOpMode) {
+        errors.clear()
+        this.hardwareMap = opMode.hardwareMap
+        Objects.requireNonNull(
+            this.hardwareMap,
+            "HardwareMap was null in ${this.javaClass.simpleName}!"
+        )
+        configureHardware()
+        opMode.addTelemetry(
+            "${this.javaClass.simpleName}: Configuration completed with ${errors.size} error(s).",
+        )
+        if (errors.isNotEmpty()) {
+            for (error in errors) {
+                opMode.addTelemetry("! DEV_FAULT: $error").setRetained(true)
+            }
+        }
+    }
+
+    /**
      * Convenience method for reading the device from the hardwareMap without having to check for exceptions.
      * Uses class initialistion instead of hardwareMap initialistion to widen the range of devices, supporting
      * custom classes for dead wheels, etc.

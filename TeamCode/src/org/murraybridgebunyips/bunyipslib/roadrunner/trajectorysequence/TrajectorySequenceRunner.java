@@ -4,7 +4,6 @@ import androidx.annotation.Nullable;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.canvas.Canvas;
-import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.control.PIDFController;
@@ -29,7 +28,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-@Config
+//@Config
 public class TrajectorySequenceRunner {
     public static String COLOR_INACTIVE_TRAJECTORY = "#4caf507a";
     public static String COLOR_INACTIVE_TURN = "#7c4dff7a";

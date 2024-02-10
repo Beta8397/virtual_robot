@@ -34,13 +34,13 @@ public class MovingAverageTimer {
         this(100, Resolution.MILLISECONDS);
     }
 
-    public MovingAverageTimer(int num) {
-        this(num, Resolution.MILLISECONDS);
+    public MovingAverageTimer(int bufSize) {
+        this(bufSize, Resolution.MILLISECONDS);
     }
 
-    public MovingAverageTimer(int num, Resolution resolution) {
+    public MovingAverageTimer(int bufSize, Resolution resolution) {
         reset();
-        ringBufferSize = num;
+        ringBufferSize = bufSize;
         loopTimeRingBuffer = new long[ringBufferSize];
 
         String hdr = String.format("\n%-12s%-12s%-12s%-12s", "Loops", "TotalTime", "MovAvg", "Avg");
@@ -122,6 +122,10 @@ public class MovingAverageTimer {
 
     public long count() {
         return loopCount;
+    }
+
+    public double loopsSec() {
+        return loopCount / (runningTotal / SECOND_IN_NANO);
     }
 
     public double movingAverage() {

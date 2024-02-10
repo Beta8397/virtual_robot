@@ -14,12 +14,13 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
 import org.murraybridgebunyips.bunyipslib.EmergencyStop;
+import org.murraybridgebunyips.bunyipslib.Threads;
 import org.murraybridgebunyips.bunyipslib.UserSelection;
 import org.murraybridgebunyips.bunyipslib.cameras.C920;
 import org.murraybridgebunyips.bunyipslib.vision.Processor;
-import org.murraybridgebunyips.bunyipslib.vision.SwitchableVisionSender;
 import org.murraybridgebunyips.bunyipslib.vision.Vision;
 import org.murraybridgebunyips.bunyipslib.vision.processors.AprilTag;
+import org.murraybridgebunyips.bunyipslib.vision.processors.RawFeed;
 import org.murraybridgebunyips.bunyipslib.vision.processors.TFOD;
 import org.murraybridgebunyips.bunyipslib.vision.processors.TeamProp;
 import org.murraybridgebunyips.bunyipslib.vision.processors.WhitePixel;
@@ -37,7 +38,6 @@ import kotlin.Unit;
 public class VisionTest extends BunyipsOpMode {
     private Vision vision;
     private Telemetry.Item i;
-    private SwitchableVisionSender visionSender;
     private final UserSelection<Procs> procChooser = new UserSelection<>(this, this::callback, Procs.values());
 
     @SuppressWarnings("rawtypes")
@@ -64,10 +64,10 @@ public class VisionTest extends BunyipsOpMode {
                 break;
         }
 
-        vision.init(chosenProcessor);
-        vision.start(chosenProcessor);
-        visionSender = new SwitchableVisionSender(this, chosenProcessor);
-        visionSender.setStreamingProcessor(chosenProcessor.getName());
+        RawFeed rf = new RawFeed();
+        vision.init(chosenProcessor, rf);
+        vision.start(chosenProcessor, rf);
+        vision.startDashboardSender();
 
         i = addRetainedTelemetry("Camera Stream available.");
         return Unit.INSTANCE;
@@ -75,7 +75,7 @@ public class VisionTest extends BunyipsOpMode {
 
     @Override
     protected boolean onInitLoop() {
-        return !procChooser.isAlive();
+        return !Threads.isRunning(procChooser);
     }
 
     @Override
@@ -86,7 +86,7 @@ public class VisionTest extends BunyipsOpMode {
         } catch (IllegalArgumentException e) {
             throw new EmergencyStop("VisionTest is missing a webcam called 'webcam'!");
         }
-        procChooser.start();
+        Threads.start(procChooser);
     }
 
     @Override
@@ -99,8 +99,6 @@ public class VisionTest extends BunyipsOpMode {
 
     @Override
     protected void activeLoop() {
-        vision.update();
-        visionSender.update();
         addTelemetry(String.valueOf(vision.getAllData()));
     }
 

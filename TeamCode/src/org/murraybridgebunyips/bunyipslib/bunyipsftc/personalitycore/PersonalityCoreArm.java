@@ -2,7 +2,6 @@ package org.murraybridgebunyips.bunyipslib.bunyipsftc.personalitycore;
 
 import androidx.annotation.NonNull;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -23,7 +22,7 @@ import org.murraybridgebunyips.bunyipslib.bunyipsftc.personalitycore.submodules.
  * @author Lucas Bubner, 2023
  * @noinspection UnusedReturnValue
  */
-@Config
+//@Config
 public class PersonalityCoreArm extends BunyipsSubsystem {
     // Servo values for the dual claw at the front
     public static double LEFT_CLAW_OPEN = 1.0;

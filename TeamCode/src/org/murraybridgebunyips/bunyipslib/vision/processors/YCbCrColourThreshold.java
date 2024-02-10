@@ -1,9 +1,13 @@
 package org.murraybridgebunyips.bunyipslib.vision.processors;
 
 import android.graphics.Canvas;
+import android.graphics.Paint;
+
+import com.acmerobotics.dashboard.config.Config;
 
 import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
 import org.murraybridgebunyips.bunyipslib.vision.Processor;
+import org.murraybridgebunyips.bunyipslib.vision.Vision;
 import org.murraybridgebunyips.bunyipslib.vision.data.ContourData;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -20,7 +24,10 @@ import java.util.List;
  *
  * @author Lucas Bubner, 2024
  */
+@Config
 public abstract class YCbCrColourThreshold extends Processor<ContourData> {
+    public static double CONTOUR_AREA_THRESHOLD_PERCENT = 20;
+
     private final Scalar lower = getLower();
     private final Scalar upper = getUpper();
     private final Mat ycrcbMat = new Mat();
@@ -35,18 +42,10 @@ public abstract class YCbCrColourThreshold extends Processor<ContourData> {
 
     @Override
     public void update() {
-        MatOfPoint largestContour = null;
-        double largestArea = 0;
         for (MatOfPoint contour : contours) {
-            double area = Imgproc.contourArea(contour);
-            if (area > largestArea) {
-                largestArea = area;
-                largestContour = contour;
-            }
-        }
-        data.clear();
-        if (largestContour != null) {
-            Rect boundingRect = Imgproc.boundingRect(largestContour);
+            Rect boundingRect = Imgproc.boundingRect(contour);
+            if (boundingRect.area() < (CONTOUR_AREA_THRESHOLD_PERCENT / 100) * (Vision.CAMERA_WIDTH * Vision.CAMERA_HEIGHT))
+                continue;
             data.add(new ContourData(boundingRect));
         }
     }
@@ -101,6 +100,7 @@ public abstract class YCbCrColourThreshold extends Processor<ContourData> {
          * populate the "contours" list with the contours
          * found in the binary Mat.
          */
+        contours.clear();
         Imgproc.findContours(binaryMat, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
         /*
@@ -119,6 +119,22 @@ public abstract class YCbCrColourThreshold extends Processor<ContourData> {
     }
 
     @Override
-    public void onDrawFrame(Canvas canvas, int onscreenWidth, int onscreenHeight, float scaleBmpPxToCanvasPx, float scaleCanvasDensity, Object userContext) {
+    public void onFrameDraw(Canvas canvas, int onscreenWidth, int onscreenHeight, float scaleBmpPxToCanvasPx, float scaleCanvasDensity, Object userContext) {
+        // Draw borders around the contours
+        synchronized (data) {
+            for (ContourData contour : data) {
+                canvas.drawRect(
+                        contour.getBoundingRect().x * scaleBmpPxToCanvasPx,
+                        contour.getBoundingRect().y * scaleBmpPxToCanvasPx,
+                        (contour.getBoundingRect().x + contour.getBoundingRect().width) * scaleBmpPxToCanvasPx,
+                        (contour.getBoundingRect().y + contour.getBoundingRect().height) * scaleBmpPxToCanvasPx,
+                        new Paint() {{
+                            setColor(0xFF00FF00);
+                            setStyle(Style.STROKE);
+                            setStrokeWidth(5);
+                        }}
+                );
+            }
+        }
     }
 }

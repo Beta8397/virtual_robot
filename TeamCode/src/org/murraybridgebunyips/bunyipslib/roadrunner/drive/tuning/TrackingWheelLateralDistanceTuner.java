@@ -1,6 +1,5 @@
 package org.murraybridgebunyips.bunyipslib.roadrunner.drive.tuning;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.localization.Localizer;
 import com.acmerobotics.roadrunner.util.Angle;
@@ -61,7 +60,7 @@ import org.murraybridgebunyips.bunyipslib.roadrunner.drive.localizers.StandardTr
  * slightly but your heading will still be fine. This does not affect your overall tracking
  * precision. The heading should still line up.
  */
-@Config
+//@Config
 public abstract class TrackingWheelLateralDistanceTuner extends LinearOpMode {
     public static int NUM_TURNS = 10;
     protected RoadRunnerDrive drive;

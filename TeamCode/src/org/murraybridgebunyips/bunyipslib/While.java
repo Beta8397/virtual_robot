@@ -18,6 +18,7 @@ import java.util.function.BooleanSupplier;
  * }</pre>
  *
  * @author Lucas Bubner, 2023
+ * @see Threads
  */
 public class While {
     private final BooleanSupplier condition;

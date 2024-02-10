@@ -1,7 +1,6 @@
 package org.murraybridgebunyips.bunyipslib.roadrunner.drive.tuning;
 
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -23,7 +22,7 @@ import java.util.Objects;
  * <p>
  * Further fine tuning of kF may be desired.
  */
-@Config
+//@Config
 public abstract class MaxVelocityTuner extends LinearOpMode {
     public static double RUNTIME = 2.0;
     protected RoadRunnerDrive drive;

@@ -1,6 +1,5 @@
 package org.murraybridgebunyips.bunyipslib.roadrunner.drive.tuning;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
@@ -9,7 +8,7 @@ import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
 /*
  * This is a simple routine to test turning capabilities.
  */
-@Config
+//@Config
 public abstract class TurnTest extends LinearOpMode {
     public static double ANGLE = 90; // deg
     protected RoadRunnerDrive drive;

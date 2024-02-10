@@ -1,6 +1,5 @@
 package org.murraybridgebunyips.bunyipslib.roadrunner.drive.tuning;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -20,7 +19,7 @@ import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.Trajecto
  * If you are using SampleTankDrive, you should be tuning AXIAL_PID, CROSS_TRACK_PID, and HEADING_PID.
  * These coefficients can be tuned live in dashboard.
  */
-@Config
+//@Config
 public abstract class FollowerPIDTuner extends LinearOpMode {
     public static double DISTANCE = 48; // in
     protected RoadRunnerDrive drive;
