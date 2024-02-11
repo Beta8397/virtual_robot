@@ -15,13 +15,14 @@ import org.murraybridgebunyips.imposter.components.ImposterConfig;
 public class ImposterTeleOpSimple extends BunyipsOpMode {
     private final ImposterConfig config = new ImposterConfig();
     private CartesianMecanumDrive drive;
-    private Scheduler scheduler = new Scheduler(this);
+    private Scheduler scheduler;
 
     @Override
     protected void onInit() {
-        config.init(this);
+        config.init();
+        scheduler = new Scheduler();
 //        drive = new TriDeadwheelMecanumDrive(this, config.driveConstants, config.mecanumCoefficients, hardwareMap.voltageSensor, config.imu, config.front_left_motor, config.front_right_motor, config.back_left_motor, config.back_right_motor, config.localizerCoefficients, config.enc_left, config.enc_right, config.enc_x);
-        drive = new CartesianFieldCentricMecanumDrive(this, config.front_left_motor, config.front_right_motor, config.back_left_motor, config.back_right_motor, new IMUOp(this, config.imu), false, RelativePose2d.FORWARD);
+        drive = new CartesianFieldCentricMecanumDrive(config.front_left_motor, config.front_right_motor, config.back_left_motor, config.back_right_motor, new IMUOp(config.imu), false, RelativePose2d.FORWARD);
         scheduler.addSubsystems(drive);
         drive.setDefaultTask(new HolonomicDriveTask<>(gamepad1, drive, () -> false));
 //        scheduler.when(() -> drive.speedX != 0.0 || drive.speedY != 0.0 || drive.speedR != 0.0)

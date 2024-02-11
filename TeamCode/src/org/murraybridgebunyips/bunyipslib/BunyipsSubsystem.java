@@ -22,10 +22,6 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
     private Task defaultTask = new IdleTask();
     private boolean mutedReports;
 
-    protected BunyipsSubsystem(@NonNull BunyipsOpMode opMode) {
-        super(opMode);
-    }
-
     public Task getCurrentTask() {
         if (currentTask == null || currentTask.isFinished()) {
             currentTask = defaultTask;

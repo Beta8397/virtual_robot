@@ -23,8 +23,7 @@ public class PersonalityCoreClawRotator extends BunyipsSubsystem {
     private final double FACING_BOARD = 1.0;
     private double target;
 
-    public PersonalityCoreClawRotator(@NonNull BunyipsOpMode opMode, Servo rotator) {
-        super(opMode);
+    public PersonalityCoreClawRotator(Servo rotator) {
         this.rotator = rotator;
     }
 

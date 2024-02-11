@@ -31,6 +31,20 @@ abstract class BunyipsOpMode : LinearOpMode() {
 
     private lateinit var telem: MultipleTelemetry
 
+    companion object {
+        /**
+         * The instance of the current BunyipsOpMode. This is set automatically by the OpMode lifecycle.
+         * This can be used instead of dependency injection to access the current OpMode, as it is a singleton.
+         *
+         * BunyipsComponent and Task internally use this to grant access to the current OpMode through
+         * the `opMode` property. Ensure all Tasks and BunyipsComponents are instantiated during the onInit() cycle,
+         * otherwise this property will be null.
+         */
+        @JvmStatic
+        lateinit var instance: BunyipsOpMode
+            private set
+    }
+
     /**
      * Runs upon the pressing of the INIT button on the Driver Station.
      * This is where you should initialise your hardware and other components.
@@ -80,6 +94,7 @@ abstract class BunyipsOpMode : LinearOpMode() {
     @Throws(InterruptedException::class)
     final override fun runOpMode() {
         // BunyipsOpMode
+        instance = this
         try {
             Dbg.log("=============== BunyipsOpMode ${BuildConfig.GIT_COMMIT} ${BuildConfig.GIT_BRANCH} ${BuildConfig.BUILD_TIME} id:${BuildConfig.ID} ===============")
             LynxModuleUtil.ensureMinimumFirmwareVersion(hardwareMap)

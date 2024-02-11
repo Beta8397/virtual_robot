@@ -18,6 +18,7 @@ public class ExampleTeleOp extends BunyipsOpMode {
     // You MUST make a new instance of ExampleConfig as a class member
     // This is because the newConfig static method does not make an instance to work with
     private final ExampleConfig config = new ExampleConfig();
+    // All components and tasks must be instantiated in the onInit() method, and not in the constructor or member fields.
     private TankDrive drive;
 
     // onInit and activeLoop are the two functions that you will need to implement.
@@ -25,10 +26,10 @@ public class ExampleTeleOp extends BunyipsOpMode {
     protected void onInit() {
         // This line is required to initialise config and allow you to access all your instance
         // variables declared in the config class. This is required for all OpMode classes.
-        config.init(this);
+        config.init();
 
         // Initialise all your components! e.g.
-        drive = new TankDrive(this, config.driveConstants, config.coefficients, config.imu, config.leftFrontMotor, config.leftBackMotor, config.leftBackMotor, config.rightBackMotor);
+        drive = new TankDrive(config.driveConstants, config.coefficients, config.imu, config.leftFrontMotor, config.leftBackMotor, config.leftBackMotor, config.rightBackMotor);
     }
 
     @Override

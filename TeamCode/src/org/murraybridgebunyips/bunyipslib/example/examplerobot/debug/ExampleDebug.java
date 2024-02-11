@@ -14,12 +14,13 @@ public class ExampleDebug extends BunyipsOpMode {
     // heading constantly to the Driver Station
 
     private final ExampleConfig config = new ExampleConfig();
+    // All components and tasks must be instantiated in the onInit() method, and not in the constructor or member fields.
     private IMUOp imu;
 
     @Override
     protected void onInit() {
-        config.init(this);
-        imu = new IMUOp(this, config.imu);
+        config.init();
+        imu = new IMUOp(config.imu);
     }
 
     @Override

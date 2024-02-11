@@ -1,5 +1,6 @@
 package org.murraybridgebunyips.bunyipslib.tasks.bases
 
+import org.murraybridgebunyips.bunyipslib.BunyipsOpMode
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem
 
 /**
@@ -9,6 +10,13 @@ import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem
  * @author Lucas Bubner, 2024
  */
 abstract class Task(timeoutSeconds: Double) : RobotTask {
+    // Since the OpMode is static, this means ** ALL tasks MUST be instantiated in the init phase **, and not
+    // in the constructor/member fields. You will experience extremely strange behaviour if you do not follow this.
+    // This should not be a problem as all tasks are usually instantiated in the init phase anyway as tasks usually need
+    // subsystems which need motors that are only available at runtime.
+    @JvmField
+    protected val opMode: BunyipsOpMode = BunyipsOpMode.instance
+
     private var overrideOnConflict: Boolean? = null
 
     fun shouldOverrideOnConflict(): Boolean? {

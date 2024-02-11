@@ -22,8 +22,7 @@ public class PersonalityCoreHook extends BunyipsSubsystem {
     private final double RETRACTED = 0.0;
     private double target;
 
-    public PersonalityCoreHook(@NonNull BunyipsOpMode opMode, Servo hook) {
-        super(opMode);
+    public PersonalityCoreHook(Servo hook) {
         this.hook = hook;
         target = RETRACTED;
         update();

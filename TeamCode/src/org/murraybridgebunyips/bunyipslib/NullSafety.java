@@ -41,25 +41,25 @@ public class NullSafety {
      * Errors caused by null objects are logged and the component is added to the unusable components list.
      * Components in the unusable components list will not have their errors logged.
      *
-     * @param opMode BunyipsOpMode overhead instance
      * @param T      Class of the component (e.g. Cannon.class)
      * @param objs   Objects to check for null
      * @return Whether the component is safe to instantiate
      */
-    public static boolean assertComponentArgs(BunyipsOpMode opMode, Class<?> T, Object... objs) {
+    public static boolean assertComponentArgs(Class<?> T, Object... objs) {
         for (Object o : objs) {
             if (o == null) {
-                return reportUnusable(opMode, T);
+                return reportUnusable(T);
             } else if (o instanceof Encoder) {
                 if (((Encoder) o).isNull()) {
-                    return reportUnusable(opMode, T);
+                    return reportUnusable(T);
                 }
             }
         }
         return true;
     }
 
-    private static boolean reportUnusable(BunyipsOpMode opMode, Class<?> component) {
+    private static boolean reportUnusable(Class<?> component) {
+        BunyipsOpMode opMode = BunyipsOpMode.getInstance();
         opMode.addRetainedTelemetry(formatString("! COM_FAULT: % failed to instantiate due to null constructor arguments", component.getSimpleName()));
         opMode.log("error: % is null. attempting to suppress errors...", component.getSimpleName());
         Dbg.error(formatString("% is null, adding to unusable components...", component.getSimpleName()));

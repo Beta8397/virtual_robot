@@ -12,7 +12,7 @@ import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 import org.murraybridgebunyips.bunyipslib.Inches;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.TrajectorySequence;
-import org.murraybridgebunyips.bunyipslib.tasks.bases.BunyipsTask;
+import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
 /**
  * Task for running RoadRunner trajectories using the BunyipsOpMode Task system.
@@ -20,7 +20,7 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.BunyipsTask;
  *
  * @author Lucas Bubner, 2023
  */
-public class RoadRunnerTask<T extends RoadRunnerDrive> extends BunyipsTask {
+public class RoadRunnerTask<T extends RoadRunnerDrive> extends Task {
     private final T drive;
 
     private Trajectory trajectory;
@@ -30,26 +30,26 @@ public class RoadRunnerTask<T extends RoadRunnerDrive> extends BunyipsTask {
     // may not have fired which assigns the drive a task
     private boolean taskStartedRunning;
 
-    public RoadRunnerTask(@NonNull BunyipsOpMode opMode, double time, T drive, Trajectory trajectory) {
-        super(opMode, time);
+    public RoadRunnerTask(double time, T drive, Trajectory trajectory) {
+        super(time);
         this.drive = drive;
         this.trajectory = trajectory;
     }
 
-    public RoadRunnerTask(@NonNull BunyipsOpMode opMode, double time, T drive, TrajectorySequence trajectorySequence) {
-        super(opMode, time);
+    public RoadRunnerTask(double time, T drive, TrajectorySequence trajectorySequence) {
+        super(time);
         this.drive = drive;
         this.trajectorySequence = trajectorySequence;
     }
 
-    public RoadRunnerTask(@NonNull BunyipsOpMode opMode, double time, T drive, Trajectory trajectory, BunyipsSubsystem dependency, boolean shouldOverrideConflictingTasks) {
-        super(opMode, time, dependency, shouldOverrideConflictingTasks);
+    public RoadRunnerTask(double time, T drive, Trajectory trajectory, BunyipsSubsystem dependency, boolean shouldOverrideConflictingTasks) {
+        super(time, dependency, shouldOverrideConflictingTasks);
         this.drive = drive;
         this.trajectory = trajectory;
     }
 
-    public RoadRunnerTask(@NonNull BunyipsOpMode opMode, double time, T drive, TrajectorySequence trajectorySequence, BunyipsSubsystem dependency, boolean shouldOverrideConflictingTasks) {
-        super(opMode, time, dependency, shouldOverrideConflictingTasks);
+    public RoadRunnerTask(double time, T drive, TrajectorySequence trajectorySequence, BunyipsSubsystem dependency, boolean shouldOverrideConflictingTasks) {
+        super(time, dependency, shouldOverrideConflictingTasks);
         this.drive = drive;
         this.trajectorySequence = trajectorySequence;
     }

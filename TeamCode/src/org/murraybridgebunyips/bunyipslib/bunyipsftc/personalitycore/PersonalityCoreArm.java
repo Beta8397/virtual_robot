@@ -35,18 +35,17 @@ public class PersonalityCoreArm extends BunyipsSubsystem {
     private PersonalityCoreManagementRail managementRail;
     private DualClaws claws;
 
-    public PersonalityCoreArm(@NonNull BunyipsOpMode opMode, CRServo pixelMotion, Servo pixelAlignment, Servo suspenderHook, DcMotorEx suspenderActuator, Servo leftPixel, Servo rightPixel) {
-        super(opMode);
-        if (NullSafety.assertComponentArgs(opMode, PersonalityCoreClawMover.class, pixelMotion))
-            clawMover = new PersonalityCoreClawMover(opMode, pixelMotion);
-        if (NullSafety.assertComponentArgs(opMode, PersonalityCoreClawRotator.class, pixelAlignment))
-            clawRotator = new PersonalityCoreClawRotator(opMode, pixelAlignment);
-        if (NullSafety.assertComponentArgs(opMode, PersonalityCoreHook.class, suspenderHook))
-            hook = new PersonalityCoreHook(opMode, suspenderHook);
-        if (NullSafety.assertComponentArgs(opMode, PersonalityCoreManagementRail.class, suspenderActuator))
-            managementRail = new PersonalityCoreManagementRail(opMode, suspenderActuator);
-        if (NullSafety.assertComponentArgs(opMode, DualClaws.class, leftPixel, rightPixel))
-            claws = new DualClaws(opMode, leftPixel, rightPixel, LEFT_CLAW_CLOSED, LEFT_CLAW_OPEN, RIGHT_CLAW_CLOSED, RIGHT_CLAW_OPEN);
+    public PersonalityCoreArm(CRServo pixelMotion, Servo pixelAlignment, Servo suspenderHook, DcMotorEx suspenderActuator, Servo leftPixel, Servo rightPixel) {
+        if (NullSafety.assertComponentArgs(PersonalityCoreClawMover.class, pixelMotion))
+            clawMover = new PersonalityCoreClawMover(pixelMotion);
+        if (NullSafety.assertComponentArgs(PersonalityCoreClawRotator.class, pixelAlignment))
+            clawRotator = new PersonalityCoreClawRotator(pixelAlignment);
+        if (NullSafety.assertComponentArgs(PersonalityCoreHook.class, suspenderHook))
+            hook = new PersonalityCoreHook(suspenderHook);
+        if (NullSafety.assertComponentArgs(PersonalityCoreManagementRail.class, suspenderActuator))
+            managementRail = new PersonalityCoreManagementRail(suspenderActuator);
+        if (NullSafety.assertComponentArgs(DualClaws.class, leftPixel, rightPixel))
+            claws = new DualClaws(leftPixel, rightPixel, LEFT_CLAW_CLOSED, LEFT_CLAW_OPEN, RIGHT_CLAW_CLOSED, RIGHT_CLAW_OPEN);
     }
 
     /**

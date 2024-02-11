@@ -82,7 +82,7 @@ public class VisionTest extends BunyipsOpMode {
     protected void onInit() {
         try {
             WebcamName webcam = (WebcamName) hardwareMap.get("webcam");
-            vision = new Vision(this, webcam);
+            vision = new Vision(webcam);
         } catch (IllegalArgumentException e) {
             throw new EmergencyStop("VisionTest is missing a webcam called 'webcam'!");
         }

@@ -13,7 +13,7 @@ import java.util.Objects
  *
  *     @Override
  *     protected void onInit() {
- *         config.init(this);
+ *         config.init();
  *     }
  * ```
  */
@@ -31,6 +31,10 @@ abstract class RobotConfig {
      * @param opMode the OpMode instance - usually the `this` object when at the root OpMode.
      */
     fun init(opMode: OpMode) {
+        if (opMode is BunyipsOpMode) {
+            init()
+            return
+        }
         errors.clear()
         this.hardwareMap = opMode.hardwareMap
         Objects.requireNonNull(
@@ -52,9 +56,11 @@ abstract class RobotConfig {
     /**
      * Use HardwareMap to fetch HardwareDevices and assign instances.
      * Should be called as the first line in onInit();
-     * @param opMode the OpMode instance - usually the `this` object when at the root OpMode.
+     *
+     * Argument-less init() cannot be used with a non-BunyipsOpMode instance (will throw an UninitializedPropertyAccessException)
      */
-    fun init(opMode: BunyipsOpMode) {
+    fun init() {
+        val opMode = BunyipsOpMode.instance
         errors.clear()
         this.hardwareMap = opMode.hardwareMap
         Objects.requireNonNull(

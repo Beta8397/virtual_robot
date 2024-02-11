@@ -15,15 +15,10 @@ import java.util.function.BooleanSupplier;
  *
  * @author Lucas Bubner, 2024
  */
-public class Scheduler {
+public class Scheduler extends BunyipsComponent {
     private static final ArrayList<String> subsystemReports = new ArrayList<>();
-    private final BunyipsOpMode opMode;
     private final ArrayList<BunyipsSubsystem> subsystems = new ArrayList<>();
     private final ArrayList<ConditionalTask> allocatedTasks = new ArrayList<>();
-
-    public Scheduler(BunyipsOpMode opMode) {
-        this.opMode = opMode;
-    }
 
     /**
      * Used internally by subsystems to report their task-running status.

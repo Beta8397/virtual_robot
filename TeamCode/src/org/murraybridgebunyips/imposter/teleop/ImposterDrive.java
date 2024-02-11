@@ -12,8 +12,8 @@ public class ImposterDrive extends BunyipsOpMode {
 
     @Override
     protected void onInit() {
-        config.init(this);
-        drive = new CartesianMecanumDrive(this, config.front_left_motor, config.front_right_motor, config.back_left_motor, config.back_right_motor);
+        config.init();
+        drive = new CartesianMecanumDrive(config.front_left_motor, config.front_right_motor, config.back_left_motor, config.back_right_motor);
     }
 
     @Override

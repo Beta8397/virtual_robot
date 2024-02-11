@@ -17,8 +17,7 @@ public class ExampleLift extends BunyipsSubsystem {
     private final int[] liftPositions = {0, 100, 200, 300, 400, 500};
     private int liftPositionPointer;
 
-    public ExampleLift(@NonNull BunyipsOpMode opMode, DcMotor liftMotor) {
-        super(opMode);
+    public ExampleLift(DcMotor liftMotor) {
         this.liftMotor = liftMotor;
 
         // In the constructor you are also able to set any other variables that you wish to use in

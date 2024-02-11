@@ -8,10 +8,21 @@ package org.murraybridgebunyips.bunyipslib;
  * @author Lucas Bubner, 2024
  */
 public abstract class CommandBasedBunyipsOpMode extends BunyipsOpMode {
-    protected final Scheduler scheduler = new Scheduler(this);
+    // Components can't be final due to runtime instantiation,
+    // so we cannot expose the scheduler directly and must use a getter.
+    private Scheduler scheduler;
+
+    /**
+     * Call to access the Scheduler from within the OpMode.
+     * @return The Scheduler instance.
+     */
+    public Scheduler scheduler() {
+        return scheduler;
+    }
 
     @Override
     protected final void onInit() {
+        scheduler = new Scheduler();
         onInitialisation();
         BunyipsSubsystem[] subsystems = setSubsystems();
         if (subsystems == null || subsystems.length == 0) {

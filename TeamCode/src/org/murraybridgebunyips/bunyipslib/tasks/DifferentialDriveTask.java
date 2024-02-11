@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import org.jetbrains.annotations.NotNull;
 import org.murraybridgebunyips.bunyipslib.Controller;
 import org.murraybridgebunyips.bunyipslib.drive.TankDrive;
-import org.murraybridgebunyips.bunyipslib.tasks.bases.RunForeverTask;
+import org.murraybridgebunyips.bunyipslib.tasks.bases.ForeverTask;
 
 /**
  * Standard gamepad drive for all differential drivetrains.
@@ -14,7 +14,7 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.RunForeverTask;
  *
  * @author Lucas Bubner, 2024
  */
-public class DifferentialDriveTask extends RunForeverTask {
+public class DifferentialDriveTask extends ForeverTask {
     private final TankDrive drive;
     private final Gamepad gamepad;
 

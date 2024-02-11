@@ -22,8 +22,7 @@ public class PersonalityCoreClawMover extends BunyipsSubsystem {
     private double currentTimeout;
     private ElapsedTime timer;
 
-    public PersonalityCoreClawMover(@NonNull BunyipsOpMode opMode, CRServo servo) {
-        super(opMode);
+    public PersonalityCoreClawMover(CRServo servo) {
         this.servo = servo;
     }
 

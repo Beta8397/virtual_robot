@@ -18,7 +18,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation
  *
  * @author Lucas Bubner, 2022
  */
-class IMUOp(opMode: BunyipsOpMode, private val imu: IMU) : BunyipsSubsystem(opMode) {
+class IMUOp(private val imu: IMU) : BunyipsSubsystem() {
     @Volatile
     var currentAngles: Orientation? = null
 

@@ -1,7 +1,7 @@
 package org.murraybridgebunyips.bunyipslib;
 
 /**
- * Utility to convert between inches and metric units.
+ * Utility to convert between inches and other units.
  */
 public class Inches {
     public static double toCM(double inches) {
@@ -16,6 +16,14 @@ public class Inches {
         return inches * 0.0254;
     }
 
+    public static double toFieldTiles(double inches) {
+        return inches / 23;
+    }
+
+    public static double toHammerUnits(double inches) {
+        return inches / 0.75;
+    }
+
     public static double fromCM(double cm) {
         return cm / 2.54;
     }
@@ -26,5 +34,13 @@ public class Inches {
 
     public static double fromM(double m) {
         return m / 0.0254;
+    }
+
+    public static double fromFieldTiles(double tiles) {
+        return tiles * 23;
+    }
+
+    public static double fromHammerUnits(double units) {
+        return units * 0.75;
     }
 }

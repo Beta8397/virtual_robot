@@ -5,12 +5,12 @@ import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 /**
  * A task that runs forever.
  */
-public abstract class RunForeverTask extends RunNoTimeoutTask {
-    protected RunForeverTask() {
+public abstract class ForeverTask extends NoTimeoutTask {
+    protected ForeverTask() {
         super();
     }
 
-    protected RunForeverTask(BunyipsSubsystem dependencySubsystem, boolean shouldOverrideConflictingTasks) {
+    protected ForeverTask(BunyipsSubsystem dependencySubsystem, boolean shouldOverrideConflictingTasks) {
         super(dependencySubsystem, shouldOverrideConflictingTasks);
     }
 

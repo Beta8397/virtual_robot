@@ -37,14 +37,15 @@ public class ExampleAutonomous extends AutonomousBunyipsOpMode {
     // You will define your components as normal here, and initialise them in onInitialisation()
     // This procedure is exactly the same as a normal BunyipsOpMode
     private final ExampleConfig config = new ExampleConfig();
+    // All components and tasks must be instantiated in the onInit() method, and not in the constructor or member fields.
     private CartesianMecanumDrive drive;
     private ExampleLift lift;
 
     @Override
     protected void onInitialisation() {
-        config.init(this);
-        drive = new CartesianMecanumDrive(this, config.leftFrontMotor, config.rightFrontMotor, config.leftBackMotor, config.rightBackMotor);
-        lift = new ExampleLift(this, config.liftMotor);
+        config.init();
+        drive = new CartesianMecanumDrive(config.leftFrontMotor, config.rightFrontMotor, config.leftBackMotor, config.rightBackMotor);
+        lift = new ExampleLift(config.liftMotor);
     }
 
     // setOpModes is used to define dynamic OpMode selection, using an asynchronous UserSelection
@@ -95,13 +96,13 @@ public class ExampleAutonomous extends AutonomousBunyipsOpMode {
         }
 
         // onQueueReady is where you should assign all of your tasks, using addTask, addTaskFirst, and addTaskLast
-        addTask(new WaitTask(this, 5));
+        addTask(new WaitTask(5));
 
         // This method is called when the UserSelection phase is done, if you have an initTask running
         // a better place to put code for that is in the overridable onInitDone()/onStart() methods from BunyipsOpMode.
         // Ensure to read the overhead definitions for AutonomousBunyipsOpMode to make sure you do not override any important code.
         // If unsure, make sure to always have a supercall to methods that you explicitly override.
-        addTask(new ExampleTask(this, 3, lift));
+        addTask(new ExampleTask(3, lift));
 
         // See the tasks directory for defining your own tasks.
     }

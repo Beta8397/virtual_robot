@@ -73,9 +73,9 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
     private <S> RoadRunnerTask<T> makeTask(double timeout, S sequence) {
         RoadRunnerTask<T> task = null;
         if (sequence instanceof Trajectory) {
-            task = new RoadRunnerTask<>(this, timeout, drive, (Trajectory) sequence);
+            task = new RoadRunnerTask<>(timeout, drive, (Trajectory) sequence);
         } else if (sequence instanceof TrajectorySequence) {
-            task = new RoadRunnerTask<>(this, timeout, drive, (TrajectorySequence) sequence);
+            task = new RoadRunnerTask<>(timeout, drive, (TrajectorySequence) sequence);
         }
         if (task == null)
             throw new EmergencyStop("attempted to make a null/unsupported sequence RoadRunnerTask!");

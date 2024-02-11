@@ -26,7 +26,7 @@ public class ExampleRoadRunnerAutonomous extends RoadRunnerAutonomousBunyipsOpMo
 
     @Override
     protected void onInitialise() {
-        config.init(this);
+        config.init();
         // No further configuration is required here for setting up drive systems, see setDrive()
         // You can also define your drive here if you wish, but using setDrive() is recommended
         // drive = new TankDrive(...);
@@ -59,7 +59,7 @@ public class ExampleRoadRunnerAutonomous extends RoadRunnerAutonomousBunyipsOpMo
         addNewTrajectory()
                 .buildWithLowPriority();
         // These methods are syntactic sugar for the following:
-//        addTask(new RoadRunnerTask<>(this, 999999, drive, drive.trajectoryBuilder().lineToLinearHeading(...).splineTo(...).splineTo(...).splineTo(...).build()));
+//        addTask(new RoadRunnerTask<>(0, drive, drive.trajectoryBuilder().lineToLinearHeading(...).splineTo(...).splineTo(...).splineTo(...).build()));
         // where using buildWithPriority() will add the task to the front of the queue (addTaskFirst()), and
         // buildWithLowPriority() will add the task to the back of the queue (addTaskLast())
 
@@ -75,6 +75,6 @@ public class ExampleRoadRunnerAutonomous extends RoadRunnerAutonomousBunyipsOpMo
     // instance, leading to runtime errors. This method will be called after onInitialisation.
     @Override
     protected TankDrive setDrive() {
-        return new TankDrive(this, config.driveConstants, config.coefficients, config.imu, config.leftFrontMotor, config.rightFrontMotor, config.leftBackMotor, config.rightBackMotor);
+        return new TankDrive(config.driveConstants, config.coefficients, config.imu, config.leftFrontMotor, config.rightFrontMotor, config.leftBackMotor, config.rightBackMotor);
     }
 }

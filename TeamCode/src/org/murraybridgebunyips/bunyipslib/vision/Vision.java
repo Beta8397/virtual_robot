@@ -49,16 +49,14 @@ public class Vision extends BunyipsComponent {
     private VisionPortal visionPortal;
     private SwitchableVisionSender visionSender;
 
-    public Vision(@NonNull BunyipsOpMode opMode, CameraName camera, int cameraWidth, int cameraHeight) {
-        super(opMode);
+    public Vision(CameraName camera, int cameraWidth, int cameraHeight) {
         this.camera = camera;
         // Allow the user to set the camera resolution if they want
         CAMERA_WIDTH = cameraWidth;
         CAMERA_HEIGHT = cameraHeight;
     }
 
-    public Vision(@NonNull BunyipsOpMode opMode, CameraName camera) {
-        super(opMode);
+    public Vision(CameraName camera) {
         this.camera = camera;
     }
 

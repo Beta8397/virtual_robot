@@ -1,10 +1,7 @@
 package org.murraybridgebunyips.bunyipslib.tasks;
 
-import androidx.annotation.NonNull;
-
-import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
 import org.murraybridgebunyips.bunyipslib.Dbg;
-import org.murraybridgebunyips.bunyipslib.tasks.bases.BunyipsNoTimeoutTask;
+import org.murraybridgebunyips.bunyipslib.tasks.bases.NoTimeoutTask;
 import org.murraybridgebunyips.bunyipslib.vision.Vision;
 import org.murraybridgebunyips.bunyipslib.vision.processors.TeamProp;
 
@@ -15,19 +12,17 @@ import org.murraybridgebunyips.bunyipslib.vision.processors.TeamProp;
  * @author Lucas Bubner, 2023
  * @author Lachlan Paul, 2023
  */
-public class GetTeamPropTask extends BunyipsNoTimeoutTask {
+public class GetTeamPropTask extends NoTimeoutTask {
     private final Vision vision;
     private TeamProp teamProp;
     private boolean initFired;
     private TeamProp.Positions position;
 
-    public GetTeamPropTask(@NonNull BunyipsOpMode opMode, Vision vision) {
-        super(opMode);
+    public GetTeamPropTask(Vision vision) {
         this.vision = vision;
     }
 
-    public GetTeamPropTask(@NonNull BunyipsOpMode opMode, Vision vision, TeamProp teamProp) {
-        super(opMode);
+    public GetTeamPropTask(Vision vision, TeamProp teamProp) {
         this.vision = vision;
         this.teamProp = teamProp;
     }

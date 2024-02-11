@@ -19,13 +19,14 @@ public class ExampleSignalAutonomous extends AutonomousBunyipsOpMode {
 
     // Generally, fields you want should always be declared as class members rather than local
     // This is for clarity, memory management, and for consistency with the rest of the codebase.
+    // All components and tasks must be instantiated in the onInit() method, and not in the constructor or member fields.
     @SuppressWarnings("FieldCanBeLocal")
     private Vision cam;
 
     @Override
     protected void onInitialisation() {
-        config.init(this);
-        cam = new Vision(this, config.webcam);
+        config.init();
+        cam = new Vision(config.webcam);
         initTask = new GetSignalTask(cam);
     }
 
@@ -48,12 +49,12 @@ public class ExampleSignalAutonomous extends AutonomousBunyipsOpMode {
         if (initTask.getPosition() == GetSignalTask.ParkingPosition.CENTER) {
             // Do something. Note that the first and last variants of the addTask method respect
             // the asynchronous nature of onQueueReady, and will be queued appropriately.
-            addTaskFirst(new WaitTask(this, 5.0));
+            addTaskFirst(new WaitTask(5.0));
         }
     }
 
     @Override
     protected void onQueueReady(OpModeSelection selectedOpMode) {
-        addTask(new WaitTask(this, 5.0));
+        addTask(new WaitTask(5.0));
     }
 }

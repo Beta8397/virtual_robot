@@ -17,8 +17,7 @@ public class DualClaws extends BunyipsSubsystem {
     private double leftServoPosition;
     private double rightServoPosition;
 
-    public DualClaws(@NonNull BunyipsOpMode opMode, Servo left, Servo right, double leftClosed, double leftOpen, double rightClosed, double rightOpen) {
-        super(opMode);
+    public DualClaws(Servo left, Servo right, double leftClosed, double leftOpen, double rightClosed, double rightOpen) {
         this.left = left;
         this.right = right;
         LEFT_SERVO_CLOSED_POSITION = leftClosed;

@@ -5,12 +5,12 @@ import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 /**
  * A task that runs once and then immediately completes.
  */
-public abstract class RunOnceTask extends Task {
-    protected RunOnceTask() {
+public abstract class OnceTask extends Task {
+    protected OnceTask() {
         super(0.0);
     }
 
-    protected RunOnceTask(BunyipsSubsystem dependencySubsystem, boolean shouldOverrideConflictingTasks) {
+    protected OnceTask(BunyipsSubsystem dependencySubsystem, boolean shouldOverrideConflictingTasks) {
         super(0.0, dependencySubsystem, shouldOverrideConflictingTasks);
     }
 

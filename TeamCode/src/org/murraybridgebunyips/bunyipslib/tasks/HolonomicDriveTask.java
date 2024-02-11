@@ -7,7 +7,7 @@ import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 import org.murraybridgebunyips.bunyipslib.EmergencyStop;
 import org.murraybridgebunyips.bunyipslib.drive.CartesianMecanumDrive;
 import org.murraybridgebunyips.bunyipslib.drive.MecanumDrive;
-import org.murraybridgebunyips.bunyipslib.tasks.bases.RunForeverTask;
+import org.murraybridgebunyips.bunyipslib.tasks.bases.ForeverTask;
 
 import java.util.function.BooleanSupplier;
 
@@ -18,7 +18,7 @@ import java.util.function.BooleanSupplier;
  *
  * @author Lucas Bubner, 2024
  */
-public class HolonomicDriveTask<T extends BunyipsSubsystem> extends RunForeverTask {
+public class HolonomicDriveTask<T extends BunyipsSubsystem> extends ForeverTask {
     private final T drive;
     private final Gamepad gamepad;
     private final BooleanSupplier fieldCentricEnabled;

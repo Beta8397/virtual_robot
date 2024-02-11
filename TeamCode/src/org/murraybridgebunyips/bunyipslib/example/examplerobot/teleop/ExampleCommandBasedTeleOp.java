@@ -22,16 +22,17 @@ public class ExampleCommandBasedTeleOp extends BunyipsOpMode {
     // The Scheduler is responsible for running the subsystems and commands, and is the only thing that should be
     // running in the activeLoop() method. Exceptions to this rule should be made wearily, and in CommandBasedBunyipsOpMode
     // this is by overriding the periodic() method which is not overridden by default.
-    private final Scheduler scheduler = new Scheduler(this);
+    private final Scheduler scheduler = new Scheduler();
 
     // Define subsystems and config
     private final ExampleConfig config = new ExampleConfig();
+    // All components and tasks must be instantiated in the onInit() method, and not in the constructor or member fields.
     private TankDrive drive;
 
     @Override
     protected void onInit() {
-        config.init(this);
-        drive = new TankDrive(this, config.driveConstants, config.coefficients, config.imu, config.leftFrontMotor, config.leftBackMotor, config.leftBackMotor, config.rightBackMotor);
+        config.init();
+        drive = new TankDrive(config.driveConstants, config.coefficients, config.imu, config.leftFrontMotor, config.leftBackMotor, config.leftBackMotor, config.rightBackMotor);
 
         // The scheduler must be initialised with all subsystems that will be used in the OpMode.
         // This is because the scheduler will be responsible for running the subsystems, and will

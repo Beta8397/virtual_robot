@@ -9,7 +9,7 @@ import org.murraybridgebunyips.bunyipslib.Controller;
 import org.murraybridgebunyips.bunyipslib.EmergencyStop;
 import org.murraybridgebunyips.bunyipslib.pid.PIDController;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
-import org.murraybridgebunyips.bunyipslib.tasks.bases.RunForeverTask;
+import org.murraybridgebunyips.bunyipslib.tasks.bases.ForeverTask;
 import org.murraybridgebunyips.bunyipslib.vision.data.ContourData;
 import org.murraybridgebunyips.bunyipslib.vision.processors.YCbCrColourThreshold;
 
@@ -22,7 +22,7 @@ import java.util.List;
  * @author Lucas Bubner, 2024
  */
 @Config
-public class AlignToPixelTask<T extends BunyipsSubsystem> extends RunForeverTask {
+public class AlignToPixelTask<T extends BunyipsSubsystem> extends ForeverTask {
     public static double kP;
     public static double kI;
     public static double kD;

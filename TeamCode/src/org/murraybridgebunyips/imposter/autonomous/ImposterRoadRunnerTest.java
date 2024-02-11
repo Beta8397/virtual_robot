@@ -3,6 +3,7 @@ package org.murraybridgebunyips.imposter.autonomous;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import org.murraybridgebunyips.bunyipslib.Inches;
 import org.murraybridgebunyips.bunyipslib.drive.MecanumDrive;
 import org.murraybridgebunyips.bunyipslib.OpModeSelection;
 import org.murraybridgebunyips.bunyipslib.RoadRunnerAutonomousBunyipsOpMode;
@@ -18,7 +19,7 @@ public class ImposterRoadRunnerTest extends RoadRunnerAutonomousBunyipsOpMode<Me
 
     @Override
     protected void onInitialise() {
-        config.init(this);
+        config.init();
     }
 
     @Override
@@ -34,14 +35,20 @@ public class ImposterRoadRunnerTest extends RoadRunnerAutonomousBunyipsOpMode<Me
     @Override
     protected void onQueueReady(@Nullable OpModeSelection selectedOpMode) {
         // Start on RED_LEFT, forward facing Spike Marks, will park left of the backboard
-        addNewTrajectory(new Pose2d(-36.76, -61.58, Math.toRadians(90.00)))
-                .splineTo(new Vector2d(-34.29, -15.92), Math.toRadians(13.90))
-                .splineTo(new Vector2d(63.66, -11.94), Math.toRadians(0.00))
+//        addNewTrajectory(new Pose2d(-36.76, -61.58, Math.toRadians(90.00)))
+//                .splineTo(new Vector2d(-34.29, -15.92), Math.toRadians(13.90))
+//                .splineTo(new Vector2d(63.66, -11.94), Math.toRadians(0.00))
+//                .build();
+        addNewTrajectory()
+                .forward(Inches.fromFieldTiles(2.2))
+                .build();
+        addNewTrajectory()
+                .strafeRight(Inches.fromFieldTiles(4.2))
                 .build();
     }
 
     @Override
     protected MecanumDrive setDrive() {
-        return new MecanumDrive(this, config.driveConstants, config.mecanumCoefficients, hardwareMap.voltageSensor, config.imu, config.front_left_motor, config.front_right_motor, config.back_left_motor, config.back_right_motor);
+        return new MecanumDrive(config.driveConstants, config.mecanumCoefficients, hardwareMap.voltageSensor, config.imu, config.front_left_motor, config.front_right_motor, config.back_left_motor, config.back_right_motor);
     }
 }
