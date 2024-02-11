@@ -77,7 +77,7 @@ public class DualClaws extends BunyipsSubsystem {
     public void update() {
         left.setPosition(leftServoPosition);
         right.setPosition(rightServoPosition);
-        getOpMode().addTelemetry("Servos: L_% R_%", left.getPosition() == LEFT_SERVO_OPEN_POSITION ? "OPEN" : "CLOSE", right.getPosition() == RIGHT_SERVO_OPEN_POSITION ? "OPEN" : "CLOSE");
+        opMode.addTelemetry("Servos: L_% R_%", left.getPosition() == LEFT_SERVO_OPEN_POSITION ? "OPEN" : "CLOSE", right.getPosition() == RIGHT_SERVO_OPEN_POSITION ? "OPEN" : "CLOSE");
     }
 
     public enum ServoSide {

@@ -116,7 +116,7 @@ public class ExampleMecanumDrive extends BunyipsSubsystem {
         backLeft.setPower(backLeftPower);
         backRight.setPower(backRightPower);
 
-        getOpMode().addTelemetry(String.format(Locale.getDefault(), "Mecanum Drive: Forward: %.2f, Strafe: %.2f, Rotate: %.2f", speedX, speedY, speedR), false);
+        opMode.addTelemetry(String.format(Locale.getDefault(), "Mecanum Drive: Forward: %.2f, Strafe: %.2f, Rotate: %.2f", speedX, speedY, speedR), false);
     }
 
     private void rotationalUpdate() {

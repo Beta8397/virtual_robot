@@ -37,16 +37,16 @@ public class PersonalityCoreArm extends BunyipsSubsystem {
 
     public PersonalityCoreArm(@NonNull BunyipsOpMode opMode, CRServo pixelMotion, Servo pixelAlignment, Servo suspenderHook, DcMotorEx suspenderActuator, Servo leftPixel, Servo rightPixel) {
         super(opMode);
-        if (NullSafety.assertComponentArgs(getOpMode(), PersonalityCoreClawMover.class, pixelMotion))
-            clawMover = new PersonalityCoreClawMover(getOpMode(), pixelMotion);
-        if (NullSafety.assertComponentArgs(getOpMode(), PersonalityCoreClawRotator.class, pixelAlignment))
-            clawRotator = new PersonalityCoreClawRotator(getOpMode(), pixelAlignment);
-        if (NullSafety.assertComponentArgs(getOpMode(), PersonalityCoreHook.class, suspenderHook))
-            hook = new PersonalityCoreHook(getOpMode(), suspenderHook);
-        if (NullSafety.assertComponentArgs(getOpMode(), PersonalityCoreManagementRail.class, suspenderActuator))
-            managementRail = new PersonalityCoreManagementRail(getOpMode(), suspenderActuator);
-        if (NullSafety.assertComponentArgs(getOpMode(), DualClaws.class, leftPixel, rightPixel))
-            claws = new DualClaws(getOpMode(), leftPixel, rightPixel, LEFT_CLAW_CLOSED, LEFT_CLAW_OPEN, RIGHT_CLAW_CLOSED, RIGHT_CLAW_OPEN);
+        if (NullSafety.assertComponentArgs(opMode, PersonalityCoreClawMover.class, pixelMotion))
+            clawMover = new PersonalityCoreClawMover(opMode, pixelMotion);
+        if (NullSafety.assertComponentArgs(opMode, PersonalityCoreClawRotator.class, pixelAlignment))
+            clawRotator = new PersonalityCoreClawRotator(opMode, pixelAlignment);
+        if (NullSafety.assertComponentArgs(opMode, PersonalityCoreHook.class, suspenderHook))
+            hook = new PersonalityCoreHook(opMode, suspenderHook);
+        if (NullSafety.assertComponentArgs(opMode, PersonalityCoreManagementRail.class, suspenderActuator))
+            managementRail = new PersonalityCoreManagementRail(opMode, suspenderActuator);
+        if (NullSafety.assertComponentArgs(opMode, DualClaws.class, leftPixel, rightPixel))
+            claws = new DualClaws(opMode, leftPixel, rightPixel, LEFT_CLAW_CLOSED, LEFT_CLAW_OPEN, RIGHT_CLAW_CLOSED, RIGHT_CLAW_OPEN);
     }
 
     /**

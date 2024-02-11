@@ -43,7 +43,7 @@ public class ExampleTeleOp extends BunyipsOpMode {
         // power to the left stick y value.
 
         // You are also able to use telemetry by directly calling the built-in addTelemetry function
-        // There is no need to call getOpMode() as we are calling from the OpMode.
+        // There is no need to call opMode as we are calling from the OpMode.
         addTelemetry("Left Stick Y: " + gamepad1.left_stick_y);
     }
 

@@ -8,7 +8,7 @@ import java.util.Objects
 /**
  * Utility class for the different button and analog controls on the gamepad.
  * Used for adding additional abstraction to the current gamepad control system, used across BunyipsLib.
- * @author Lucas Bubner, 2023-2024
+ * @author Lucas Bubner, 2024
  */
 enum class Controller {
     A, B, X, Y, START, BACK, DPAD_UP, DPAD_DOWN, DPAD_LEFT, DPAD_RIGHT, LEFT_BUMPER, RIGHT_BUMPER, LEFT_STICK_BUTTON, RIGHT_STICK_BUTTON, NONE;

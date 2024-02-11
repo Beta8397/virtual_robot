@@ -54,9 +54,9 @@ public class PersonalityCoreClawMover extends BunyipsSubsystem {
 
     public void update() {
         servo.setPower(power);
-        getOpMode().addTelemetry("Claw Horizontal: % power", round(servo.getPower(), 1));
+        opMode.addTelemetry("Claw Horizontal: % power", round(servo.getPower(), 1));
         if (currentTimeout != 0) {
-            getOpMode().addTelemetry(" - running for % seconds", currentTimeout);
+            opMode.addTelemetry(" - running for % seconds", currentTimeout);
             if (timer.seconds() >= currentTimeout) {
                 currentTimeout = 0;
                 power = 0;

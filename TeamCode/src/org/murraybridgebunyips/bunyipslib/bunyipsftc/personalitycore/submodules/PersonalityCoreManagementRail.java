@@ -65,6 +65,6 @@ public class PersonalityCoreManagementRail extends BunyipsSubsystem {
             motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             motor.setPower(power);
         }
-        getOpMode().addTelemetry("Management Rail: % at % ticks", power == 0.0 ? "HOLDING" : "MOVING", motor.getCurrentPosition());
+        opMode.addTelemetry("Management Rail: % at % ticks", power == 0.0 ? "HOLDING" : "MOVING", motor.getCurrentPosition());
     }
 }

@@ -37,7 +37,7 @@ public class TankDrive extends BunyipsSubsystem implements RoadRunnerDrive {
 
     public TankDrive(@NonNull BunyipsOpMode opMode, DriveConstants constants, TankCoefficients coefficients, IMU imu, DcMotorEx frontLeft, DcMotorEx frontRight, DcMotorEx backLeft, DcMotorEx backRight) {
         super(opMode);
-        instance = new TankRoadRunnerDrive(constants, coefficients, getOpMode().hardwareMap.voltageSensor, imu, frontLeft, frontRight, backLeft, backRight);
+        instance = new TankRoadRunnerDrive(constants, coefficients, opMode.hardwareMap.voltageSensor, imu, frontLeft, frontRight, backLeft, backRight);
     }
 
     @Override

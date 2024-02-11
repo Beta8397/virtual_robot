@@ -51,6 +51,6 @@ public class PersonalityCoreClawRotator extends BunyipsSubsystem {
 
     public void update() {
         rotator.setPosition(target);
-        getOpMode().addTelemetry("Claw Alignment: % pos (%)", round(target, 1), target == FACING_BOARD ? "FACING_BOARD" : target == FACING_DOWN ? "FACING_DOWN" : "CUSTOM");
+        opMode.addTelemetry("Claw Alignment: % pos (%)", round(target, 1), target == FACING_BOARD ? "FACING_BOARD" : target == FACING_DOWN ? "FACING_DOWN" : "CUSTOM");
     }
 }

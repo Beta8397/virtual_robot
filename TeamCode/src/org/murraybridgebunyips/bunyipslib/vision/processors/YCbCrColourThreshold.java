@@ -26,10 +26,8 @@ import java.util.List;
  */
 @Config
 public abstract class YCbCrColourThreshold extends Processor<ContourData> {
-    public static double CONTOUR_AREA_THRESHOLD_PERCENT = 20;
+    public static double CONTOUR_AREA_THRESHOLD_PERCENT = 10;
 
-    private final Scalar lower = getLower();
-    private final Scalar upper = getUpper();
     private final Mat ycrcbMat = new Mat();
     private final Mat binaryMat = new Mat();
     private final Mat maskedInputMat = new Mat();
@@ -41,7 +39,7 @@ public abstract class YCbCrColourThreshold extends Processor<ContourData> {
     public abstract Scalar getUpper();
 
     @Override
-    public void update() {
+    public final void update() {
         for (MatOfPoint contour : contours) {
             Rect boundingRect = Imgproc.boundingRect(contour);
             if (boundingRect.area() < (CONTOUR_AREA_THRESHOLD_PERCENT / 100) * (Vision.CAMERA_WIDTH * Vision.CAMERA_HEIGHT))
@@ -77,7 +75,7 @@ public abstract class YCbCrColourThreshold extends Processor<ContourData> {
          * 0 represents our pixels that were outside the bounds
          * 255 represents our pixels that are inside the bounds
          */
-        Core.inRange(ycrcbMat, lower, upper, binaryMat);
+        Core.inRange(ycrcbMat, getLower(), getUpper(), binaryMat);
 
         /*
          * Release the reusable Mat so that old data doesn't
@@ -111,15 +109,8 @@ public abstract class YCbCrColourThreshold extends Processor<ContourData> {
         return frame;
     }
 
-    // These methods are optionally overridden by the user
-    // as they are often not used or needed
-
     @Override
-    public void init(int width, int height, CameraCalibration calibration) {
-    }
-
-    @Override
-    public void onFrameDraw(Canvas canvas, int onscreenWidth, int onscreenHeight, float scaleBmpPxToCanvasPx, float scaleCanvasDensity, Object userContext) {
+    public final void onFrameDraw(Canvas canvas, int onscreenWidth, int onscreenHeight, float scaleBmpPxToCanvasPx, float scaleCanvasDensity, Object userContext) {
         // Draw borders around the contours
         synchronized (data) {
             for (ContourData contour : data) {
@@ -136,5 +127,10 @@ public abstract class YCbCrColourThreshold extends Processor<ContourData> {
                 );
             }
         }
+    }
+
+    // init() method usually never used, override is optional
+    @Override
+    public void init(int width, int height, CameraCalibration calibration) {
     }
 }

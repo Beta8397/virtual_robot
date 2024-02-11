@@ -9,7 +9,7 @@ import org.murraybridgebunyips.bunyipslib.vision.processors.AprilTag
 /**
  * Intermediate task for using AprilTag detections to detect a Signal position during an initLoop.
  * Updated 26/12/23 to use the new Vision class.
- * @author Lucas Bubner, 2022-2023
+ * @author Lucas Bubner, 2022
  */
 class GetSignalTask(private val vision: Vision) : Task(0.0),
     RobotTask {

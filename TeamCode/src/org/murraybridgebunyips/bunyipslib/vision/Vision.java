@@ -81,7 +81,7 @@ public class Vision extends BunyipsComponent {
     @SuppressWarnings("rawtypes")
     public void init(Processor... processors) {
         if (visionPortal != null) {
-            getOpMode().log("WARNING: Vision already initialised! Tearing down...");
+            opMode.log("WARNING: Vision already initialised! Tearing down...");
             terminate();
         }
 
@@ -115,7 +115,7 @@ public class Vision extends BunyipsComponent {
             }
             builder.addProcessor(processor);
             processor.setAttached(true);
-            getOpMode().log("vision processor '%' initialised.", processor.getName());
+            opMode.log("vision processor '%' initialised.", processor.getName());
         }
 
         visionPortal = builder
@@ -131,7 +131,7 @@ public class Vision extends BunyipsComponent {
             visionPortal.setProcessorEnabled(processor, false);
         }
 
-        getOpMode().log("visionportal ready.");
+        opMode.log("visionportal ready.");
     }
 
     /**
@@ -151,7 +151,7 @@ public class Vision extends BunyipsComponent {
                 visionPortal.getCameraState() == VisionPortal.CameraState.STOPPING_STREAM) {
             // Note if the camera state is STOPPING_STREAM, it will block the thread until the
             // stream is resumed. This is a documented operation in the SDK.
-            getOpMode().log("visionportal restarting...");
+            opMode.log("visionportal restarting...");
             visionPortal.resumeStreaming();
         }
 
@@ -163,7 +163,7 @@ public class Vision extends BunyipsComponent {
                 throw new IllegalStateException("Vision: Tried to start a processor that was not initialised!");
             }
             visionPortal.setProcessorEnabled(processor, true);
-            getOpMode().log("vision processor '%' started.", processor.getName());
+            opMode.log("vision processor '%' started.", processor.getName());
         }
     }
 
@@ -199,7 +199,7 @@ public class Vision extends BunyipsComponent {
                 throw new IllegalStateException("Vision: Tried to stop a processor that was not initialised!");
             }
             visionPortal.setProcessorEnabled(processor, false);
-            getOpMode().log("vision processor '%' paused.", processor.getName());
+            opMode.log("vision processor '%' paused.", processor.getName());
         }
     }
 
@@ -212,7 +212,7 @@ public class Vision extends BunyipsComponent {
         }
         // Pause the processor, this will also auto-close any VisionProcessors
         visionPortal.stopStreaming();
-        getOpMode().log("visionportal stopped.");
+        opMode.log("visionportal stopped.");
     }
 
     /**
@@ -254,7 +254,7 @@ public class Vision extends BunyipsComponent {
         }
         visionPortal.close();
         visionPortal = null;
-        getOpMode().log("visionportal terminated.");
+        opMode.log("visionportal terminated.");
     }
 
     /**
@@ -276,7 +276,7 @@ public class Vision extends BunyipsComponent {
                 throw new IllegalStateException("Vision: Tried to flip a processor that was not initialised!");
             }
             processor.setFlipped(!processor.isFlipped());
-            getOpMode().log("vision processor '%' flipped %.", processor.getName(), processor.isFlipped() ? "upside-down" : "right-side up");
+            opMode.log("vision processor '%' flipped %.", processor.getName(), processor.isFlipped() ? "upside-down" : "right-side up");
         }
     }
 
@@ -291,7 +291,7 @@ public class Vision extends BunyipsComponent {
         }
         for (Processor processor : processors) {
             processor.setFlipped(!processor.isFlipped());
-            getOpMode().log("vision processor '%' flipped %.", processor.getName(), processor.isFlipped() ? "upside-down" : "right-side up");
+            opMode.log("vision processor '%' flipped %.", processor.getName(), processor.isFlipped() ? "upside-down" : "right-side up");
         }
     }
 

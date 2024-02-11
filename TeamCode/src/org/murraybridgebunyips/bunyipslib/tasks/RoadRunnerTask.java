@@ -85,11 +85,11 @@ public class RoadRunnerTask<T extends RoadRunnerDrive> extends BunyipsTask {
         double angle = Math.atan2(endPose.getY() - drive.getPoseEstimate().getY(), endPose.getX() - drive.getPoseEstimate().getX());
 
         // Time to completion
-        getOpMode().addTelemetry("Duration: %/% sec", round(getDeltaTime(), 2), round(duration, 2));
+        opMode.addTelemetry("Duration: %/% sec", round(getDeltaTime(), 2), round(duration, 2));
         drive.update();
 
-        getOpMode().addTelemetry("Distance to target: %cm", round(Inches.toCM(distance), 2));
-        getOpMode().addTelemetry("Angle to target: %deg", round(Math.toDegrees(angle), 2));
+        opMode.addTelemetry("Distance to target: %cm", round(Inches.toCM(distance), 2));
+        opMode.addTelemetry("Angle to target: %deg", round(Math.toDegrees(angle), 2));
     }
 
     @Override

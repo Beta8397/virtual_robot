@@ -32,13 +32,6 @@ abstract class BunyipsOpMode : LinearOpMode() {
     private lateinit var telem: MultipleTelemetry
 
     /**
-     * One-time setup for operations that need to be done for every OpMode
-     * This method is not exception protected!
-     */
-    private fun setup() {
-    }
-
-    /**
      * Runs upon the pressing of the INIT button on the Driver Station.
      * This is where you should initialise your hardware and other components.
      */

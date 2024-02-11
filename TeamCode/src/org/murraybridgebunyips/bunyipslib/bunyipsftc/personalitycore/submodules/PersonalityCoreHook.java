@@ -52,6 +52,6 @@ public class PersonalityCoreHook extends BunyipsSubsystem {
 
     public void update() {
         hook.setPosition(target);
-        getOpMode().addTelemetry("Hook: %", target == EXTENDED ? "EXTENDED" : target == RETRACTED ? "RETRACTED" : target == UPRIGHT ? "UPRIGHT" : "CUSTOM_POS");
+        opMode.addTelemetry("Hook: %", target == EXTENDED ? "EXTENDED" : target == RETRACTED ? "RETRACTED" : target == UPRIGHT ? "UPRIGHT" : "CUSTOM_POS");
     }
 }

@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 
 import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
 import org.murraybridgebunyips.bunyipslib.Dbg;
-import org.murraybridgebunyips.bunyipslib.tasks.bases.BunyipsTask;
+import org.murraybridgebunyips.bunyipslib.tasks.bases.BunyipsNoTimeoutTask;
 import org.murraybridgebunyips.bunyipslib.vision.Vision;
 import org.murraybridgebunyips.bunyipslib.vision.processors.TeamProp;
 
@@ -15,7 +15,7 @@ import org.murraybridgebunyips.bunyipslib.vision.processors.TeamProp;
  * @author Lucas Bubner, 2023
  * @author Lachlan Paul, 2023
  */
-public class GetTeamPropTask extends BunyipsTask {
+public class GetTeamPropTask extends BunyipsNoTimeoutTask {
     private final Vision vision;
     private TeamProp teamProp;
     private boolean initFired;
@@ -81,7 +81,7 @@ public class GetTeamPropTask extends BunyipsTask {
             // TeamProp will never have more than one data instance
             position = teamProp.getData().get(0).getPosition();
         }
-        getOpMode().addTelemetry("Spike mark reading: %", position);
+        opMode.addTelemetry("Spike mark reading: %", position);
     }
 
     @Override

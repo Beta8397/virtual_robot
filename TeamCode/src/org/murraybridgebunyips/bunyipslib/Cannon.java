@@ -44,7 +44,7 @@ public class Cannon extends BunyipsSubsystem {
     }
 
     public void update() {
-        getOpMode().addTelemetry("Cannon: %", target == FIRED ? "FIRED" : "READY");
+        opMode.addTelemetry("Cannon: %", target == FIRED ? "FIRED" : "READY");
         prolong.setPosition(target);
     }
 }

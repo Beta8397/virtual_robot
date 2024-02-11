@@ -12,19 +12,19 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
  */
 public class FtcDashboardTelemetry implements Telemetry {
     private final Telemetry telemetry;
-    private final Item nullItem = new Item() {
+    private final Telemetry.Item nullItem = new Telemetry.Item() {
         @Override
-        public Item addData(String caption, Object value) {
+        public Telemetry.Item addData(String caption, Object value) {
             return this;
         }
 
         @Override
-        public <T> Item addData(String caption, Func<T> valueProducer) {
+        public <T> Telemetry.Item addData(String caption, Func<T> valueProducer) {
             return this;
         }
 
         @Override
-        public <T> Item addData(String caption, String format, Func<T> valueProducer) {
+        public <T> Telemetry.Item addData(String caption, String format, Func<T> valueProducer) {
             return this;
         }
 
@@ -34,32 +34,32 @@ public class FtcDashboardTelemetry implements Telemetry {
         }
 
         @Override
-        public Item setCaption(String caption) {
+        public Telemetry.Item setCaption(String caption) {
             return this;
         }
 
         @Override
-        public Item setValue(String format, Object... args) {
+        public Telemetry.Item setValue(String format, Object... args) {
             return this;
         }
 
         @Override
-        public Item setValue(Object value) {
+        public Telemetry.Item setValue(Object value) {
             return this;
         }
 
         @Override
-        public <T> Item setValue(Func<T> valueProducer) {
+        public <T> Telemetry.Item setValue(Func<T> valueProducer) {
             return this;
         }
 
         @Override
-        public <T> Item setValue(String format, Func<T> valueProducer) {
+        public <T> Telemetry.Item setValue(String format, Func<T> valueProducer) {
             return this;
         }
 
         @Override
-        public Item setRetained(@Nullable Boolean retained) {
+        public Telemetry.Item setRetained(@Nullable Boolean retained) {
             return this;
         }
 
@@ -69,29 +69,29 @@ public class FtcDashboardTelemetry implements Telemetry {
         }
 
         @Override
-        public Item addData(String caption, String format, Object... args) {
+        public Telemetry.Item addData(String caption, String format, Object... args) {
             return this;
         }
     };
 
-    private final Line nullLine = new Line() {
+    private final Telemetry.Line nullLine = new Telemetry.Line() {
         @Override
-        public Item addData(String caption, String format, Object... args) {
+        public Telemetry.Item addData(String caption, String format, Object... args) {
             return nullItem;
         }
 
         @Override
-        public Item addData(String caption, Object value) {
+        public Telemetry.Item addData(String caption, Object value) {
             return nullItem;
         }
 
         @Override
-        public <T> Item addData(String caption, Func<T> valueProducer) {
+        public <T> Telemetry.Item addData(String caption, Func<T> valueProducer) {
             return nullItem;
         }
 
         @Override
-        public <T> Item addData(String caption, String format, Func<T> valueProducer) {
+        public <T> Telemetry.Item addData(String caption, String format, Func<T> valueProducer) {
             return nullItem;
         }
     };
@@ -101,28 +101,28 @@ public class FtcDashboardTelemetry implements Telemetry {
     }
 
     @Override
-    public Item addData(String caption, String format, Object... args) {
+    public Telemetry.Item addData(String caption, String format, Object... args) {
         return addData(caption, String.format(format, args));
     }
 
     @Override
-    public Item addData(String caption, Object value) {
+    public Telemetry.Item addData(String caption, Object value) {
         telemetry.addData(caption, value);
         return nullItem;
     }
 
     @Override
-    public <T> Item addData(String caption, Func<T> valueProducer) {
+    public <T> Telemetry.Item addData(String caption, Func<T> valueProducer) {
         return nullItem;
     }
 
     @Override
-    public <T> Item addData(String caption, String format, Func<T> valueProducer) {
+    public <T> Telemetry.Item addData(String caption, String format, Func<T> valueProducer) {
         return nullItem;
     }
 
     @Override
-    public boolean removeItem(Item item) {
+    public boolean removeItem(Telemetry.Item item) {
         return false;
     }
 

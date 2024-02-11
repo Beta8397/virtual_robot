@@ -2,6 +2,7 @@ package org.murraybridgebunyips.bunyipslib;
 
 import static org.murraybridgebunyips.bunyipslib.Text.formatString;
 import static org.murraybridgebunyips.bunyipslib.Text.round;
+import static org.murraybridgebunyips.bunyipslib.tasks.bases.Task.NANOS_IN_SECONDS;
 
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
@@ -71,10 +72,10 @@ public class Scheduler {
             if (condition || task.task.isRunning()) {
                 // Latch current timing of truthy condition
                 if (task.activeSince == -1) {
-                    task.activeSince = System.currentTimeMillis();
+                    task.activeSince = System.nanoTime();
                 }
                 // Update controller states for determining whether they need to be continued to be run
-                boolean timeoutExceeded = task.time * 1000.0 + task.activeSince < System.currentTimeMillis();
+                boolean timeoutExceeded = task.time * NANOS_IN_SECONDS + task.activeSince < System.nanoTime();
                 if (task.condition instanceof ControllerStateHandler && task.time != 0.0) {
                     ((ControllerStateHandler) task.condition).setTimeoutCondition(timeoutExceeded);
                 }
