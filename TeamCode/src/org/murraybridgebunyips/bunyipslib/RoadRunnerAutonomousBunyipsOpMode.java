@@ -83,6 +83,21 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
         return task;
     }
 
+    private void addPrioritisedTask(RoadRunnerTask<T> task, PriorityLevel priority) {
+        assertDrive();
+        switch (priority) {
+            case LAST:
+                addTaskLast(task);
+                break;
+            case NORMAL:
+                addTask(task);
+                break;
+            case FIRST:
+                addTaskFirst(task);
+                break;
+        }
+    }
+
     /**
      * STRONGLY RECOMMENDED: Use this method to build a new RoadRunner trajectory to the queue.
      * Creates a new builder for a RoadRunner trajectory, which will automatically add a
@@ -94,7 +109,7 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
      * @param startPose Starting pose of the trajectory, ** WILL SET DRIVE POSE ESTIMATE TO THIS POSE **
      * @return Builder for the trajectory
      */
-    public RoadRunnerTrajectoryTaskBuilder addNewTrajectory(Pose2d startPose) {
+    protected RoadRunnerTrajectoryTaskBuilder addNewTrajectory(Pose2d startPose) {
         assertDrive();
         // noinspection rawtypes
         TrajectorySequenceBuilder builder = drive.trajectorySequenceBuilder(startPose);
@@ -113,16 +128,11 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
      * @return Builder for the trajectory
      * @see #addNewTrajectory(Pose2d)
      */
-    public RoadRunnerTrajectoryTaskBuilder addNewTrajectory() {
+    protected RoadRunnerTrajectoryTaskBuilder addNewTrajectory() {
         assertDrive();
         // noinspection rawtypes
         TrajectorySequenceBuilder builder = drive.trajectorySequenceBuilder(getPreviousPose());
         return new RoadRunnerTrajectoryTaskBuilder(getPreviousPose(), builder.getBaseVelConstraint(), builder.getBaseAccelConstraint(), builder.getBaseTurnConstraintMaxAngVel(), builder.getBaseTurnConstraintMaxAngAccel());
-    }
-
-    // Internal method to get the OpMode instance from an inner class
-    private RoadRunnerAutonomousBunyipsOpMode<T> getOpMode() {
-        return this;
     }
 
     /**
@@ -134,7 +144,7 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
      * @return Builder for the trajectory
      * @see #newTrajectory(Pose2d)
      */
-    public TrajectoryBuilder newTrajectory() {
+    protected TrajectoryBuilder newTrajectory() {
         assertDrive();
         return drive.trajectoryBuilder(getPreviousPose());
     }
@@ -148,7 +158,7 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
      * @param startPose Starting pose of the trajectory, ** WILL SET DRIVE POSE ESTIMATE TO THIS POSE **
      * @return Builder for the trajectory
      */
-    public TrajectoryBuilder newTrajectory(Pose2d startPose) {
+    protected TrajectoryBuilder newTrajectory(Pose2d startPose) {
         assertDrive();
         drive.setPoseEstimate(startPose);
         return drive.trajectoryBuilder(startPose);
@@ -164,7 +174,7 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
      * @see #newTrajectorySequence(Pose2d)
      */
     @SuppressWarnings("rawtypes")
-    public TrajectorySequenceBuilder newTrajectorySequence() {
+    protected TrajectorySequenceBuilder newTrajectorySequence() {
         assertDrive();
         return drive.trajectorySequenceBuilder(getPreviousPose());
     }
@@ -179,7 +189,7 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
      * @return Builder for the trajectory
      */
     @SuppressWarnings("rawtypes")
-    public TrajectorySequenceBuilder newTrajectorySequence(Pose2d startPose) {
+    protected TrajectorySequenceBuilder newTrajectorySequence(Pose2d startPose) {
         assertDrive();
         drive.setPoseEstimate(startPose);
         return drive.trajectorySequenceBuilder(startPose);
@@ -193,7 +203,7 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
      *
      * @param trajectory Trajectory to add
      */
-    public void addTrajectory(Trajectory trajectory) {
+    protected void addTrajectory(Trajectory trajectory) {
         assertDrive();
         addTask(makeTask(DEFAULT_TIMEOUT, trajectory));
     }
@@ -205,19 +215,8 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
      * @param trajectory Trajectory to add
      * @param priority   Priority level of the task, see {@link PriorityLevel}
      */
-    public void addTrajectory(Trajectory trajectory, PriorityLevel priority) {
-        assertDrive();
-        switch (priority) {
-            case LAST:
-                addTaskLast(makeTask(DEFAULT_TIMEOUT, trajectory));
-                break;
-            case NORMAL:
-                addTask(makeTask(DEFAULT_TIMEOUT, trajectory));
-                break;
-            case FIRST:
-                addTaskFirst(makeTask(DEFAULT_TIMEOUT, trajectory));
-                break;
-        }
+    protected void addTrajectory(Trajectory trajectory, PriorityLevel priority) {
+        addPrioritisedTask(makeTask(DEFAULT_TIMEOUT, trajectory), priority);
     }
 
     /**
@@ -227,7 +226,7 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
      * @param trajectory Trajectory to add
      * @param timeout    Timeout in seconds
      */
-    public void addTrajectory(Trajectory trajectory, double timeout) {
+    protected void addTrajectory(Trajectory trajectory, double timeout) {
         assertDrive();
         addTask(makeTask(timeout, trajectory));
     }
@@ -239,19 +238,8 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
      * @param timeout    Timeout in seconds
      * @param priority   Priority level of the task, see {@link PriorityLevel}
      */
-    public void addTrajectory(Trajectory trajectory, PriorityLevel priority, double timeout) {
-        assertDrive();
-        switch (priority) {
-            case LAST:
-                addTaskLast(makeTask(timeout, trajectory));
-                break;
-            case NORMAL:
-                addTask(makeTask(timeout, trajectory));
-                break;
-            case FIRST:
-                addTaskFirst(makeTask(timeout, trajectory));
-                break;
-        }
+    protected void addTrajectory(Trajectory trajectory, PriorityLevel priority, double timeout) {
+        addPrioritisedTask(makeTask(timeout, trajectory), priority);
     }
 
     /**
@@ -262,7 +250,7 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
      *
      * @param trajectorySequence Trajectory to add
      */
-    public void addTrajectory(TrajectorySequence trajectorySequence) {
+    protected void addTrajectory(TrajectorySequence trajectorySequence) {
         assertDrive();
         addTask(makeTask(DEFAULT_TIMEOUT, trajectorySequence));
     }
@@ -274,19 +262,8 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
      * @param trajectorySequence Trajectory to add
      * @param priority           Priority level of the task, see {@link PriorityLevel}
      */
-    public void addTrajectory(TrajectorySequence trajectorySequence, PriorityLevel priority) {
-        assertDrive();
-        switch (priority) {
-            case LAST:
-                addTaskLast(makeTask(DEFAULT_TIMEOUT, trajectorySequence));
-                break;
-            case NORMAL:
-                addTask(makeTask(DEFAULT_TIMEOUT, trajectorySequence));
-                break;
-            case FIRST:
-                addTaskFirst(makeTask(DEFAULT_TIMEOUT, trajectorySequence));
-                break;
-        }
+    protected void addTrajectory(TrajectorySequence trajectorySequence, PriorityLevel priority) {
+        addPrioritisedTask(makeTask(DEFAULT_TIMEOUT, trajectorySequence), priority);
     }
 
     /**
@@ -296,7 +273,7 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
      * @param trajectorySequence Trajectory to add
      * @param timeout            Timeout in seconds
      */
-    public void addTrajectory(TrajectorySequence trajectorySequence, double timeout) {
+    protected void addTrajectory(TrajectorySequence trajectorySequence, double timeout) {
         assertDrive();
         addTask(makeTask(timeout, trajectorySequence));
     }
@@ -308,19 +285,8 @@ public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDriv
      * @param timeout            Timeout in seconds
      * @param priority           Priority level of the task, see {@link PriorityLevel}
      */
-    public void addTrajectory(TrajectorySequence trajectorySequence, PriorityLevel priority, double timeout) {
-        assertDrive();
-        switch (priority) {
-            case LAST:
-                addTaskLast(makeTask(timeout, trajectorySequence));
-                break;
-            case NORMAL:
-                addTask(makeTask(timeout, trajectorySequence));
-                break;
-            case FIRST:
-                addTaskFirst(makeTask(timeout, trajectorySequence));
-                break;
-        }
+    protected void addTrajectory(TrajectorySequence trajectorySequence, PriorityLevel priority, double timeout) {
+        addPrioritisedTask(makeTask(timeout, trajectorySequence), priority);
     }
 
     /**
