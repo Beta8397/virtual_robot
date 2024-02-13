@@ -12,7 +12,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
  */
 public class FtcDashboardTelemetry implements Telemetry {
     private final Telemetry telemetry;
-    private final Telemetry.Item nullItem = new Telemetry.Item() {
+    public static final Telemetry.Item nullItem = new Telemetry.Item() {
         @Override
         public Telemetry.Item addData(String caption, Object value) {
             return this;
@@ -74,7 +74,7 @@ public class FtcDashboardTelemetry implements Telemetry {
         }
     };
 
-    private final Telemetry.Line nullLine = new Telemetry.Line() {
+    public static final Telemetry.Line nullLine = new Telemetry.Line() {
         @Override
         public Telemetry.Item addData(String caption, String format, Object... args) {
             return nullItem;

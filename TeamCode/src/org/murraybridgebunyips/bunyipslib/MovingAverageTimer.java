@@ -48,14 +48,13 @@ public class MovingAverageTimer {
         switch (resolution) {
             case SECONDS:
                 this.resolution = SECOND_IN_NANO;
-                avgFormatStr = "%3.3f secs";
+                avgFormatStr = "%3.3fs";
                 toStringFormatStr = hdr + " seconds\n%-12d%-12.3f%-12.3f%-12.3f\n min        %-12.3f%-12.3f%-12.3f\n max        %-12.3f%-12.3f%-12.3f";
-
                 break;
             case MILLISECONDS:
             default:
                 this.resolution = MILLIS_IN_NANO;
-                avgFormatStr = "%3.3f msecs";
+                avgFormatStr = "%3.3fms";
                 toStringFormatStr = hdr + "msecs\n%-12d%-12.3f%-12.3f%-12.3f\n min        %-12.3f%-12.3f%-12.3f\n max        %-12.3f%-12.3f%-12.3f";
                 break;
         }

@@ -73,7 +73,7 @@ abstract class RobotConfig {
         )
         if (errors.isNotEmpty()) {
             for (error in errors) {
-                opMode.addTelemetry("! DEV_FAULT: $error").setRetained(true)
+                opMode.addRetainedTelemetry("! DEV_FAULT: $error")
             }
         }
     }

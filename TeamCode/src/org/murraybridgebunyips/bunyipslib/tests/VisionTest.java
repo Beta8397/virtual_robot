@@ -35,7 +35,7 @@ import kotlin.Unit;
 //@Disabled
 public class VisionTest extends BunyipsOpMode {
     private Vision vision;
-    private Telemetry.Item i;
+    private int telemId;
     private final UserSelection<Procs> procChooser = new UserSelection<>(this, this::callback, Procs.values());
 
     @SuppressWarnings("rawtypes")
@@ -66,7 +66,7 @@ public class VisionTest extends BunyipsOpMode {
         vision.start(chosenProcessor, Vision.raw);
         vision.startDashboardSender();
 
-        i = addRetainedTelemetry("Camera Stream available.");
+        telemId = addRetainedTelemetry("Camera Stream available.");
         return Unit.INSTANCE;
     }
 
@@ -91,7 +91,7 @@ public class VisionTest extends BunyipsOpMode {
         if (vision == null) {
             exit();
         }
-        removeTelemetryItems(i);
+        removeRetainedTelemetry(telemId);
     }
 
     @Override

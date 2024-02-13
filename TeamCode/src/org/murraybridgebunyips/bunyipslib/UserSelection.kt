@@ -85,7 +85,7 @@ class UserSelection<T>(
         // Disable auto clear if it is enabled, we might accidentally clear out static telemetry
         opMode.setTelemetryAutoClear(false)
 
-        val retainedObjects = mutableListOf<Item>()
+        val retainedObjects = mutableListOf<Int>()
         retainedObjects.add(opMode.addRetainedTelemetry("---------!!!--------"))
         retainedObjects.add(
             opMode.addRetainedTelemetry(
@@ -132,7 +132,7 @@ class UserSelection<T>(
         // - Sorayya, hijacker of laptops
 
         // Clean up telemetry and reset auto clear
-        opMode.removeTelemetryItems(retainedObjects)
+        opMode.removeRetainedTelemetry(retainedObjects)
         opMode.pushTelemetry()
         opMode.setTelemetryAutoClear(true)
 
