@@ -85,7 +85,7 @@ class UserSelection<T>(
         // Disable auto clear if it is enabled, we might accidentally clear out static telemetry
         opMode.setTelemetryAutoClear(false)
 
-        val retainedObjects = mutableListOf<Int>()
+        val retainedObjects = mutableListOf<Item>()
         retainedObjects.add(opMode.addRetainedTelemetry("---------!!!--------"))
         retainedObjects.add(
             opMode.addRetainedTelemetry(
