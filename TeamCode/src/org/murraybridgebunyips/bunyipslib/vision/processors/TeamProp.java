@@ -4,7 +4,6 @@ import android.graphics.Canvas;
 
 import com.acmerobotics.dashboard.config.Config;
 
-import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
 import org.murraybridgebunyips.bunyipslib.vision.Processor;
 import org.murraybridgebunyips.bunyipslib.vision.Vision;
 import org.murraybridgebunyips.bunyipslib.vision.data.TeamPropData;
@@ -69,11 +68,6 @@ public class TeamProp extends Processor<TeamPropData> {
         return frame;
     }
 
-    @Override
-    public void init(int width, int height, CameraCalibration calibration) {
-        // no-op
-    }
-
     @SuppressWarnings("rawtypes")
     public double color_distance(Scalar color1, List color2) {
         double r1 = color1.val[0];
@@ -89,7 +83,7 @@ public class TeamProp extends Processor<TeamPropData> {
 
 
     @Override
-    public void onFrameDraw(Canvas canvas, int onscreenWidth, int onscreenHeight, float scaleBmpPxToCanvasPx, float scaleCanvasDensity, Object userContext) {
+    public void onFrameDraw(Canvas canvas) {
         // no-op
     }
 

@@ -6,6 +6,7 @@ import com.acmerobotics.dashboard.config.Config;
 
 import org.murraybridgebunyips.bunyipslib.Dbg;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -34,8 +35,22 @@ public class SwitchableVisionSender implements Runnable {
     public SwitchableVisionSender(Vision vision) {
         FtcDashboard.getInstance().stopCameraStream();
         this.vision = vision;
-        if (vision.getAttachedProcessors().size() > 0)
-            CURRENT_PROCESSOR_NAME = vision.getAttachedProcessors().get(0).getName();
+
+        List<Processor> processors = vision.getAttachedProcessors();
+        if (processors.size() == 0)
+            return;
+
+        // If there is already a current processor name, we should check to see if it is valid
+        if (!Objects.equals(CURRENT_PROCESSOR_NAME, "")) {
+            for (Processor processor : processors) {
+                if (processor.getName().equals(CURRENT_PROCESSOR_NAME)) {
+                    // Early return if the processor is valid
+                    return;
+                }
+            }
+        }
+
+        CURRENT_PROCESSOR_NAME = vision.getAttachedProcessors().get(0).getName();
     }
 
     /**

@@ -43,4 +43,8 @@ public class Inches {
     public static double fromHammerUnits(double units) {
         return units * 0.75;
     }
+
+    public static double fromFootballFields(double ff) {
+        return ff / 3600.0;
+    }
 }

@@ -57,23 +57,20 @@ public class AlignToPixelTask<T extends BunyipsSubsystem> extends ForeverTask {
         controller.setPID(kP, kI, kD);
 
         Pose2d pose = Controller.makeRobotPose(gamepad.left_stick_x, gamepad.left_stick_y, gamepad.right_stick_x);
-        List<ContourData> data = processor.getData();
 
-        ContourData biggestContour = data.stream()
-                .max((a, b) -> (int) (a.getArea() - b.getArea()))
-                .orElse(null);
+        List<ContourData> data = processor.getData();
+        ContourData biggestContour = ContourData.getLargest(data);
 
         if (biggestContour != null) {
-            drive.setWeightedDrivePower(
+            drive.setWeightedDrivePowerFieldCentric(
                     new Pose2d(
                             pose.getX(),
                             pose.getY(),
-                            -controller.calculate(biggestContour.getYaw(), 0.5)
+                            controller.calculate(biggestContour.getYaw(), 0.0)
                     )
             );
         } else {
-            // TODO: Consider using FCD once testing is done
-            drive.setWeightedDrivePower(pose);
+            drive.setWeightedDrivePowerFieldCentric(pose);
         }
     }
 

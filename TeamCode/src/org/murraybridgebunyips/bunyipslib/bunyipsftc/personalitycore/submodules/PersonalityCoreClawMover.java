@@ -2,13 +2,10 @@ package org.murraybridgebunyips.bunyipslib.bunyipsftc.personalitycore.submodules
 
 import static org.murraybridgebunyips.bunyipslib.Text.round;
 
-import androidx.annotation.NonNull;
-
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 
 /**

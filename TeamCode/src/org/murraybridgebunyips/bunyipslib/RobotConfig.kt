@@ -27,7 +27,7 @@ abstract class RobotConfig {
 
     /**
      * Use HardwareMap to fetch HardwareDevices and assign instances.
-     * Should be called as the first line in onInit();
+     * Should be called as the first line in your init cycle.
      * @param opMode the OpMode instance - usually the `this` object when at the root OpMode.
      */
     fun init(opMode: OpMode) {

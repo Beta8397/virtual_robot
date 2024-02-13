@@ -37,8 +37,8 @@ abstract class BunyipsOpMode : LinearOpMode() {
          * This can be used instead of dependency injection to access the current OpMode, as it is a singleton.
          *
          * BunyipsComponent and Task internally use this to grant access to the current OpMode through
-         * the `opMode` property. Ensure all Tasks and BunyipsComponents are instantiated during the onInit() cycle,
-         * otherwise this property will be null.
+         * the `opMode` property. You must ensure all Tasks and BunyipsComponents are instantiated during runtime,
+         * (such as during onInit()), otherwise this property will be null.
          */
         @JvmStatic
         lateinit var instance: BunyipsOpMode
@@ -168,7 +168,14 @@ abstract class BunyipsOpMode : LinearOpMode() {
             Dbg.logd("BunyipsOpMode: ready.")
             // Set telemetry to an inert state while we wait for start
             pushTelemetry()
-            overheadTelemetry.setValue("BOM: ready | T+0s | 0.000ms | (?) (?)\n")
+            overheadTelemetry.setValue(
+                "BOM: ready | T+0s | ${
+                    round(
+                        movingAverageTimer.elapsedTime() / 1000.0,
+                        2
+                    )
+                }s init | (?) (?)\n"
+            )
 
             waitForStart()
 
@@ -390,6 +397,7 @@ abstract class BunyipsOpMode : LinearOpMode() {
      */
     fun removeTelemetryItems(vararg items: Item) {
         for (item in items) {
+            // TODO: Telemetry removes do not work with Multiple Objects, check the same with normal telem
             val res = telem.removeItem(item)
             if (!res) {
                 Dbg.logd("Could not find telemetry item to remove: $item")

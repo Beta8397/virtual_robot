@@ -1,8 +1,7 @@
 package org.murraybridgebunyips.bunyipslib.cameras;
 
 /**
- * Represents a Logitech C920 camera intrinsic calibration.
- * This is also acceptable to use as a default for other cameras.
+ * Logitech C920
  */
 public class C920 extends CameraType {
     public C920() {

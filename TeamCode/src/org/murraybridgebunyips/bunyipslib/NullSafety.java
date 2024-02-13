@@ -1,6 +1,7 @@
 package org.murraybridgebunyips.bunyipslib;
 
 import static org.murraybridgebunyips.bunyipslib.Text.formatString;
+import static org.murraybridgebunyips.bunyipslib.Text.getCallingUserCodeFunction;
 
 import org.murraybridgebunyips.bunyipslib.roadrunner.util.Encoder;
 
@@ -25,7 +26,7 @@ public class NullSafety {
     public static boolean assertNotNull(Object... objs) {
         for (Object o : objs) {
             if (o == null) {
-                Dbg.warn("Assertion by NullSafety.assertNotNull() failed.");
+                Dbg.warn(getCallingUserCodeFunction(), "Assertion by NullSafety.assertNotNull() failed.");
                 return false;
             }
         }
@@ -40,9 +41,11 @@ public class NullSafety {
      * Ensure a component is safe to instantiate by checking for null objects.
      * Errors caused by null objects are logged and the component is added to the unusable components list.
      * Components in the unusable components list will not have their errors logged.
+     * <p>
+     * This function may only be called within a BunyipsOpMode, and only during OpMode runtime.
      *
-     * @param T      Class of the component (e.g. Cannon.class)
-     * @param objs   Objects to check for null
+     * @param T    Class of the component (e.g. Cannon.class)
+     * @param objs Objects to check for null
      * @return Whether the component is safe to instantiate
      */
     public static boolean assertComponentArgs(Class<?> T, Object... objs) {

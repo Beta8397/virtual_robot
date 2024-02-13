@@ -16,11 +16,9 @@ import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
 import org.murraybridgebunyips.bunyipslib.EmergencyStop;
 import org.murraybridgebunyips.bunyipslib.Threads;
 import org.murraybridgebunyips.bunyipslib.UserSelection;
-import org.murraybridgebunyips.bunyipslib.cameras.C920;
 import org.murraybridgebunyips.bunyipslib.vision.Processor;
 import org.murraybridgebunyips.bunyipslib.vision.Vision;
 import org.murraybridgebunyips.bunyipslib.vision.processors.AprilTag;
-import org.murraybridgebunyips.bunyipslib.vision.processors.RawFeed;
 import org.murraybridgebunyips.bunyipslib.vision.processors.TFOD;
 import org.murraybridgebunyips.bunyipslib.vision.processors.TeamProp;
 import org.murraybridgebunyips.bunyipslib.vision.processors.WhitePixel;
@@ -51,7 +49,7 @@ public class VisionTest extends BunyipsOpMode {
                 chosenProcessor = new TFOD();
                 break;
             case APRILTAG:
-                chosenProcessor = new AprilTag(new C920());
+                chosenProcessor = new AprilTag();
                 break;
             case TEAMPROP_RED:
                 chosenProcessor = new TeamProp(RED_ELEMENT_R, RED_ELEMENT_G, RED_ELEMENT_B);
@@ -64,9 +62,8 @@ public class VisionTest extends BunyipsOpMode {
                 break;
         }
 
-        RawFeed rf = new RawFeed();
-        vision.init(chosenProcessor, rf);
-        vision.start(chosenProcessor, rf);
+        vision.init(chosenProcessor, Vision.raw);
+        vision.start(chosenProcessor, Vision.raw);
         vision.startDashboardSender();
 
         i = addRetainedTelemetry("Camera Stream available.");

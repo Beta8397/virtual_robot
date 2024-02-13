@@ -1,6 +1,5 @@
 package org.murraybridgebunyips.bunyipslib.tasks
 
-import org.murraybridgebunyips.bunyipslib.BunyipsOpMode
 import org.murraybridgebunyips.bunyipslib.tasks.bases.RobotTask
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task
 

@@ -160,18 +160,18 @@ public class FtcDashboardTelemetry implements Telemetry {
     }
 
     @Override
-    public Line addLine() {
+    public Telemetry.Line addLine() {
         return nullLine;
     }
 
     @Override
-    public Line addLine(String lineCaption) {
+    public Telemetry.Line addLine(String lineCaption) {
         telemetry.addLine(lineCaption);
         return nullLine;
     }
 
     @Override
-    public boolean removeLine(Line line) {
+    public boolean removeLine(Telemetry.Line line) {
         return false;
     }
 

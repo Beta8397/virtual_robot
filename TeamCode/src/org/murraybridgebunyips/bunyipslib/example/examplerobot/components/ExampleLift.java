@@ -1,10 +1,7 @@
 package org.murraybridgebunyips.bunyipslib.example.examplerobot.components;
 
-import androidx.annotation.NonNull;
-
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 
 // See ExampleDrive before looking at this file.

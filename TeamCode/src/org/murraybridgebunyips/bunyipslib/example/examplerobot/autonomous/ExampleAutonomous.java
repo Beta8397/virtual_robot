@@ -37,7 +37,7 @@ public class ExampleAutonomous extends AutonomousBunyipsOpMode {
     // You will define your components as normal here, and initialise them in onInitialisation()
     // This procedure is exactly the same as a normal BunyipsOpMode
     private final ExampleConfig config = new ExampleConfig();
-    // All components and tasks must be instantiated in the onInit() method, and not in the constructor or member fields.
+    // All components and tasks must be instantiated during runtime, and not in the constructor or member fields.
     private CartesianMecanumDrive drive;
     private ExampleLift lift;
 

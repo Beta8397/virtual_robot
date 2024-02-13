@@ -18,7 +18,7 @@ public class ExampleTeleOp extends BunyipsOpMode {
     // You MUST make a new instance of ExampleConfig as a class member
     // This is because the newConfig static method does not make an instance to work with
     private final ExampleConfig config = new ExampleConfig();
-    // All components and tasks must be instantiated in the onInit() method, and not in the constructor or member fields.
+    // All components and tasks must be instantiated during runtime, and not in the constructor or member fields.
     private TankDrive drive;
 
     // onInit and activeLoop are the two functions that you will need to implement.

@@ -14,6 +14,7 @@ public abstract class CommandBasedBunyipsOpMode extends BunyipsOpMode {
 
     /**
      * Call to access the Scheduler from within the OpMode.
+     *
      * @return The Scheduler instance.
      */
     public Scheduler scheduler() {

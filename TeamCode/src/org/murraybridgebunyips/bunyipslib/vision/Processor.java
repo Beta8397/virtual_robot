@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import org.firstinspires.ftc.robotcore.external.function.Consumer;
 import org.firstinspires.ftc.robotcore.external.function.Continuation;
 import org.firstinspires.ftc.robotcore.external.stream.CameraStreamSource;
+import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
 import org.firstinspires.ftc.vision.VisionProcessor;
 import org.murraybridgebunyips.bunyipslib.vision.data.VisionData;
 import org.opencv.android.Utils;
@@ -40,7 +41,7 @@ public abstract class Processor<T extends VisionData> implements VisionProcessor
     private final AtomicReference<Bitmap> lastFrame =
             new AtomicReference<>(Bitmap.createBitmap(1, 1, Bitmap.Config.RGB_565));
 
-    private Mat currentFrame;
+    protected volatile Object userContext;
 
     /**
      * Whether the camera stream should be processed with a vertical and horizontal flip
@@ -77,13 +78,16 @@ public abstract class Processor<T extends VisionData> implements VisionProcessor
     public abstract String getName();
 
     /**
-     * Get the list of vision data
+     * Get the list of vision data. You should use this method as the primary way to access
+     * the latest vision data from the processor, otherwise you run the risk of
+     * concurrent modification exceptions.
      *
      * @return list of all vision data detected since the last stateful update
      */
-    public List<T> getData() {
+    public ArrayList<T> getData() {
         synchronized (data) {
-            return data;
+            // Return a copy of the data to prevent concurrent modification
+            return new ArrayList<>(data);
         }
     }
 
@@ -115,6 +119,7 @@ public abstract class Processor<T extends VisionData> implements VisionProcessor
         Bitmap b = Bitmap.createBitmap(frame.width(), frame.height(), Bitmap.Config.RGB_565);
         Utils.matToBitmap(frame, b);
         lastFrame.set(b);
+        onFrameDraw(new Canvas(lastFrame.get()));
         synchronized (data) {
             data.clear();
             update();
@@ -122,22 +127,26 @@ public abstract class Processor<T extends VisionData> implements VisionProcessor
         return procFrame;
     }
 
-    @Override
-    public final void onDrawFrame(Canvas canvas, int onscreenWidth, int onscreenHeight, float scaleBmpPxToCanvasPx, float scaleCanvasDensity, Object userContext) {
-        Bitmap f = lastFrame.get();
-        // Link bitmap to canvas
-        Canvas linkedCanvas = new Canvas(f);
-        onFrameDraw(linkedCanvas, onscreenWidth, onscreenHeight, scaleBmpPxToCanvasPx, scaleCanvasDensity, userContext);
-        // Copy back into the canvas for rendering
-        // On FtcDashboard this causes any drawFrames to flicker, but this is not because it is losing tracking
-        // TODO: test if the Control Hub will still render drawFrames even if the RC screen technically does not exist
-        canvas.drawBitmap(f, 0, 0, null);
-    }
-
-    public abstract void onFrameDraw(Canvas canvas, int onscreenWidth, int onscreenHeight, float scaleBmpPxToCanvasPx, float scaleCanvasDensity, Object userContext);
+    public abstract void onFrameDraw(Canvas canvas);
 
     @Override
     public void getFrameBitmap(Continuation<? extends Consumer<Bitmap>> continuation) {
         continuation.dispatch(bitmapConsumer -> bitmapConsumer.accept(lastFrame.get()));
+    }
+
+    /**
+     * Use {@link #onFrameDraw(Canvas)} instead, polling userContext if required for your processor.
+     * Width and height should be accessed with Vision.CAMERA_WIDTH and Vision.CAMERA_HEIGHT, and
+     * scaleBmpPxToCanvasPx and scaleCanvasDensity should be assumed as 1.0f.
+     */
+    @Override
+    public final void onDrawFrame(Canvas canvas, int onscreenWidth, int onscreenHeight, float scaleBmpPxToCanvasPx, float scaleCanvasDensity, Object userContext) {
+        this.userContext = userContext;
+        canvas.drawBitmap(lastFrame.get(), 0, 0, null);
+    }
+
+    // Optional init method from VisionProcessor
+    @Override
+    public void init(int width, int height, CameraCalibration calibration) {
     }
 }

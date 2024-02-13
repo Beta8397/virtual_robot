@@ -12,4 +12,11 @@ data class ContourData(
     val centerY: Double = boundingRect.y + boundingRect.height / 2.0
     val yaw: Double = (centerX - Vision.CAMERA_WIDTH / 2.0) / Vision.CAMERA_WIDTH
     val pitch: Double = (centerY - Vision.CAMERA_HEIGHT / 2.0) / Vision.CAMERA_HEIGHT
+
+    companion object {
+        @JvmStatic
+        fun getLargest(contours: List<ContourData>): ContourData? {
+            return contours.maxByOrNull { it.area }
+        }
+    }
 }

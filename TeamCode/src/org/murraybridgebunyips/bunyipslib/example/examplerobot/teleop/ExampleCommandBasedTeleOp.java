@@ -18,19 +18,22 @@ import org.murraybridgebunyips.bunyipslib.tasks.InstantTask;
 // will not use it to prove how the command-based system works in unison with BunyipsOpMode.
 public class ExampleCommandBasedTeleOp extends BunyipsOpMode {
 
+    // Define subsystems and config
+    private final ExampleConfig config = new ExampleConfig();
     // Command based OpModes hold onto a Scheduler, which is responsible for allocating tasks, commands, and subsystems.
     // The Scheduler is responsible for running the subsystems and commands, and is the only thing that should be
     // running in the activeLoop() method. Exceptions to this rule should be made wearily, and in CommandBasedBunyipsOpMode
     // this is by overriding the periodic() method which is not overridden by default.
-    private final Scheduler scheduler = new Scheduler();
-
-    // Define subsystems and config
-    private final ExampleConfig config = new ExampleConfig();
-    // All components and tasks must be instantiated in the onInit() method, and not in the constructor or member fields.
+    // Scheduler is also a component, so it has to be instantiated in the onInit() method.
+    // CommandBasedBunyipsOpMode will handle this for you and all you will need to do is call
+    // the scheduler() method to get the scheduler.
+    private Scheduler scheduler;
+    // All components and tasks must be instantiated during runtime, and not in the constructor or member fields.
     private TankDrive drive;
 
     @Override
     protected void onInit() {
+        scheduler = new Scheduler();
         config.init();
         drive = new TankDrive(config.driveConstants, config.coefficients, config.imu, config.leftFrontMotor, config.leftBackMotor, config.leftBackMotor, config.rightBackMotor);
 

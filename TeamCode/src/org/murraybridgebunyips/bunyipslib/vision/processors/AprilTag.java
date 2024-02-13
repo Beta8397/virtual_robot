@@ -7,6 +7,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.murraybridgebunyips.bunyipslib.cameras.CameraType;
 import org.murraybridgebunyips.bunyipslib.vision.Processor;
+import org.murraybridgebunyips.bunyipslib.vision.Vision;
 import org.murraybridgebunyips.bunyipslib.vision.data.AprilTagData;
 import org.opencv.core.Mat;
 
@@ -20,12 +21,29 @@ import java.util.List;
 public class AprilTag extends Processor<AprilTagData> {
     private final AprilTagProcessor instance;
 
+    /**
+     * Will use the provided camera calibration
+     *
+     * @param camInfo CameraType instance with the camera calibration
+     */
     public AprilTag(CameraType camInfo) {
-        instance = new AprilTagProcessor.Builder()
+        instance = makeBuilderWithCommonSettings()
                 .setLensIntrinsics(camInfo.getFx(), camInfo.getFy(), camInfo.getCx(), camInfo.getCy())
-                // Specify custom AprilTag settings here
-                // By default this will load the current season assets
                 .build();
+    }
+
+    /**
+     * Will rely on the SDK to provide camera intrinsics
+     */
+    public AprilTag() {
+        instance = makeBuilderWithCommonSettings().build();
+    }
+
+    private AprilTagProcessor.Builder makeBuilderWithCommonSettings() {
+        return new AprilTagProcessor.Builder()
+                // Specify custom AprilTag settings here, season assets and units are automatic
+                .setDrawAxes(true)
+                .setDrawCubeProjection(true);
     }
 
     /**
@@ -85,7 +103,7 @@ public class AprilTag extends Processor<AprilTagData> {
     }
 
     @Override
-    public void onFrameDraw(Canvas canvas, int onscreenWidth, int onscreenHeight, float scaleBmpPxToCanvasPx, float scaleCanvasDensity, Object userContext) {
-        instance.onDrawFrame(canvas, onscreenWidth, onscreenHeight, scaleBmpPxToCanvasPx, scaleCanvasDensity, userContext);
+    public void onFrameDraw(Canvas canvas) {
+        instance.onDrawFrame(canvas, Vision.CAMERA_WIDTH, Vision.CAMERA_HEIGHT, 1.0f, 1.0f, userContext);
     }
 }

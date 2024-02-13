@@ -5,7 +5,6 @@ import android.graphics.Paint;
 
 import com.acmerobotics.dashboard.config.Config;
 
-import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
 import org.murraybridgebunyips.bunyipslib.vision.Processor;
 import org.murraybridgebunyips.bunyipslib.vision.Vision;
 import org.murraybridgebunyips.bunyipslib.vision.data.ContourData;
@@ -26,7 +25,7 @@ import java.util.List;
  */
 @Config
 public abstract class YCbCrColourThreshold extends Processor<ContourData> {
-    public static double CONTOUR_AREA_THRESHOLD_PERCENT = 10;
+    public static double CONTOUR_AREA_THRESHOLD_PERCENT = 1.2;
 
     private final Mat ycrcbMat = new Mat();
     private final Mat binaryMat = new Mat();
@@ -110,27 +109,24 @@ public abstract class YCbCrColourThreshold extends Processor<ContourData> {
     }
 
     @Override
-    public final void onFrameDraw(Canvas canvas, int onscreenWidth, int onscreenHeight, float scaleBmpPxToCanvasPx, float scaleCanvasDensity, Object userContext) {
-        // Draw borders around the contours
+    public final void onFrameDraw(Canvas canvas) {
+        // Draw borders around the contours, drawing a green rectangle around the biggest one
+        // More often than not the biggest contour will be the one we want to track
         synchronized (data) {
+            ContourData biggest = ContourData.getLargest(data);
             for (ContourData contour : data) {
                 canvas.drawRect(
-                        contour.getBoundingRect().x * scaleBmpPxToCanvasPx,
-                        contour.getBoundingRect().y * scaleBmpPxToCanvasPx,
-                        (contour.getBoundingRect().x + contour.getBoundingRect().width) * scaleBmpPxToCanvasPx,
-                        (contour.getBoundingRect().y + contour.getBoundingRect().height) * scaleBmpPxToCanvasPx,
+                        contour.getBoundingRect().x,
+                        contour.getBoundingRect().y,
+                        contour.getBoundingRect().x + contour.getBoundingRect().width,
+                        contour.getBoundingRect().y + contour.getBoundingRect().height,
                         new Paint() {{
-                            setColor(0xFF00FF00);
+                            setColor(contour == biggest ? 0xFF00FF00 : 0xFFFF0000);
                             setStyle(Style.STROKE);
                             setStrokeWidth(5);
                         }}
                 );
             }
         }
-    }
-
-    // init() method usually never used, override is optional
-    @Override
-    public void init(int width, int height, CameraCalibration calibration) {
     }
 }

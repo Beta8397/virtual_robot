@@ -19,7 +19,7 @@ public class ExampleSignalAutonomous extends AutonomousBunyipsOpMode {
 
     // Generally, fields you want should always be declared as class members rather than local
     // This is for clarity, memory management, and for consistency with the rest of the codebase.
-    // All components and tasks must be instantiated in the onInit() method, and not in the constructor or member fields.
+    // All components and tasks must be instantiated during runtime, and not in the constructor or member fields.
     @SuppressWarnings("FieldCanBeLocal")
     private Vision cam;
 
