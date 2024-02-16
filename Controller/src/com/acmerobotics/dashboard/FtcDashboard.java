@@ -5,7 +5,6 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.stream.CameraStreamSource;
-import org.murraybridgebunyips.bunyipslib.FtcDashboardTelemetry;
 
 public class FtcDashboard {
     private static FtcDashboard instance;
@@ -20,6 +19,8 @@ public class FtcDashboard {
     }
 
     public void sendTelemetryPacket(TelemetryPacket telemetryPacket) {}
+
+    public void clearTelemetry() {}
 
 
     private final Telemetry.Item nullItem = new Telemetry.Item() {

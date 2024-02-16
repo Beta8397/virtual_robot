@@ -11,7 +11,7 @@ import org.murraybridgebunyips.bunyipslib.pid.PIDController;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.ForeverTask;
 import org.murraybridgebunyips.bunyipslib.vision.data.ContourData;
-import org.murraybridgebunyips.bunyipslib.vision.processors.YCbCrColourThreshold;
+import org.murraybridgebunyips.bunyipslib.vision.processors.MultiYCbCrThreshold;
 
 import java.util.List;
 
@@ -28,16 +28,16 @@ public class AlignToPixelTask<T extends BunyipsSubsystem> extends ForeverTask {
     public static double kD;
 
     private final RoadRunnerDrive drive;
-    private final YCbCrColourThreshold processor;
+    private final MultiYCbCrThreshold processors;
     private final Gamepad gamepad;
     private final PIDController controller;
 
-    public AlignToPixelTask(Gamepad gamepad, T drive, YCbCrColourThreshold processor, PIDController controller) {
+    public AlignToPixelTask(Gamepad gamepad, T drive, MultiYCbCrThreshold processors, PIDController controller) {
         super(drive, false);
         if (!(drive instanceof RoadRunnerDrive))
             throw new EmergencyStop("AlignToPixelTask must be used with a drivetrain with X forward Pose/IMU info");
         this.drive = (RoadRunnerDrive) drive;
-        this.processor = processor;
+        this.processors = processors;
         this.gamepad = gamepad;
         this.controller = controller;
         kP = controller.getP();
@@ -47,7 +47,7 @@ public class AlignToPixelTask<T extends BunyipsSubsystem> extends ForeverTask {
 
     @Override
     public void init() {
-        if (!processor.isAttached())
+        if (!processors.isAttached())
             throw new RuntimeException("Vision processor was initialised without being attached to the vision system");
     }
 
@@ -58,11 +58,11 @@ public class AlignToPixelTask<T extends BunyipsSubsystem> extends ForeverTask {
 
         Pose2d pose = Controller.makeRobotPose(gamepad.left_stick_x, gamepad.left_stick_y, gamepad.right_stick_x);
 
-        List<ContourData> data = processor.getData();
+        List<ContourData> data = processors.getData();
         ContourData biggestContour = ContourData.getLargest(data);
 
         if (biggestContour != null) {
-            drive.setWeightedDrivePowerFieldCentric(
+            drive.setWeightedDrivePower(
                     new Pose2d(
                             pose.getX(),
                             pose.getY(),
@@ -70,7 +70,7 @@ public class AlignToPixelTask<T extends BunyipsSubsystem> extends ForeverTask {
                     )
             );
         } else {
-            drive.setWeightedDrivePowerFieldCentric(pose);
+            drive.setWeightedDrivePower(pose);
         }
     }
 

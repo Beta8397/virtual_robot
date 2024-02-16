@@ -19,7 +19,5 @@ public class BunyipsOpModeTest extends BunyipsOpMode {
     @Override
     protected void activeLoop() {
         addTelemetry(getMovingAverageTimer().toString());
-//        addTelemetry(Cartesian.fromPose(Controller.makeRobotPose(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x)).toString());
-//        addTelemetry(Controller.makeRobotPose(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x).toString());
     }
 }

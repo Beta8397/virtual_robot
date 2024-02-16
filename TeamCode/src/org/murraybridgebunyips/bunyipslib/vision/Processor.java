@@ -42,6 +42,7 @@ public abstract class Processor<T extends VisionData> implements VisionProcessor
             new AtomicReference<>(Bitmap.createBitmap(1, 1, Bitmap.Config.RGB_565));
 
     protected volatile Object userContext;
+    private volatile Mat frame = new Mat();
 
     /**
      * Whether the camera stream should be processed with a vertical and horizontal flip
@@ -92,6 +93,15 @@ public abstract class Processor<T extends VisionData> implements VisionProcessor
     }
 
     /**
+     * Manually clear the data list.
+     */
+    public void clearData() {
+        synchronized (data) {
+            data.clear();
+        }
+    }
+
+    /**
      * Called to update new data from the vision system, which involves interpreting,
      * collecting, or otherwise processing new vision data per frame. This method should
      * refresh `this.data` with the latest information from the vision system to be accessed
@@ -112,7 +122,7 @@ public abstract class Processor<T extends VisionData> implements VisionProcessor
 
     @Override
     public final Object processFrame(Mat f, long captureTimeNanos) {
-        Mat frame = f.clone();
+        frame = f.clone();
         if (isFlipped)
             Core.flip(frame, frame, -1);
         Object procFrame = onProcessFrame(frame, captureTimeNanos);
@@ -124,6 +134,7 @@ public abstract class Processor<T extends VisionData> implements VisionProcessor
             data.clear();
             update();
         }
+        frame.release();
         return procFrame;
     }
 

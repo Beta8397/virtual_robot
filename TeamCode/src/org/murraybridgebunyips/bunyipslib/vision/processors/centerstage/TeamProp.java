@@ -1,4 +1,4 @@
-package org.murraybridgebunyips.bunyipslib.vision.processors;
+package org.murraybridgebunyips.bunyipslib.vision.processors.centerstage;
 
 import android.graphics.Canvas;
 
@@ -103,6 +103,9 @@ public class TeamProp extends Processor<TeamPropData> {
             return;
         }
         data.add(new TeamPropData(Positions.CENTER, distance1, distance2, max_distance));
+
+        zone1.release();
+        zone2.release();
     }
 
     public enum Positions {

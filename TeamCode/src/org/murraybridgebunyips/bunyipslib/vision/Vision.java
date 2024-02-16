@@ -36,9 +36,9 @@ import java.util.Objects;
 public class Vision extends BunyipsComponent {
     /**
      * A built-in raw feed Processor that will do nothing but provide the raw camera feed.
-     * Useful for debugging and testing, pass Vision.raw to init() and start() to use it.
+     * Useful for debugging and testing, pass this raw field (vision.raw) to init() and start() to use it.
      */
-    public static RawFeed raw = new RawFeed();
+    public Raw raw = new Raw();
     public static int CAMERA_WIDTH = 640;
     public static int CAMERA_HEIGHT = 480;
     @SuppressWarnings("rawtypes")
@@ -87,13 +87,6 @@ public class Vision extends BunyipsComponent {
 
         // Hand over instance control to the VisionPortal
         this.processors.addAll(Arrays.asList(processors));
-
-        // Use a new raw processor if present as it might be attached to an old Vision instance
-        if (Arrays.stream(processors).anyMatch(p -> p.getName().equals("rawfeed"))) {
-            this.processors.remove(raw);
-            raw = new RawFeed();
-            this.processors.add(raw);
-        }
 
         // Initialise the VisionPortal with our newly created processors
         VisionPortal.Builder builder = new VisionPortal.Builder();
@@ -379,13 +372,13 @@ public class Vision extends BunyipsComponent {
     }
 
     /**
-     * Raw Feed processor. Will stream an unprocessed feed.
-     * To use this, pass Vision.raw as a processor.
+     * Raw feed processor. Will stream an unprocessed feed.
+     * To use this, pass raw as a processor.
      */
-    private static class RawFeed extends Processor<VisionData> {
+    private static class Raw extends Processor<VisionData> {
         @Override
         public String getName() {
-            return "rawfeed";
+            return "raw";
         }
 
         @Override

@@ -1,12 +1,5 @@
 package org.murraybridgebunyips.bunyipslib.tests;
 
-import static org.murraybridgebunyips.bunyipslib.bunyipsftc.personalitycore.CompanionCubeColours.BLUE_ELEMENT_B;
-import static org.murraybridgebunyips.bunyipslib.bunyipsftc.personalitycore.CompanionCubeColours.BLUE_ELEMENT_G;
-import static org.murraybridgebunyips.bunyipslib.bunyipsftc.personalitycore.CompanionCubeColours.BLUE_ELEMENT_R;
-import static org.murraybridgebunyips.bunyipslib.bunyipsftc.personalitycore.CompanionCubeColours.RED_ELEMENT_B;
-import static org.murraybridgebunyips.bunyipslib.bunyipsftc.personalitycore.CompanionCubeColours.RED_ELEMENT_G;
-import static org.murraybridgebunyips.bunyipslib.bunyipsftc.personalitycore.CompanionCubeColours.RED_ELEMENT_R;
-
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -20,8 +13,7 @@ import org.murraybridgebunyips.bunyipslib.vision.Processor;
 import org.murraybridgebunyips.bunyipslib.vision.Vision;
 import org.murraybridgebunyips.bunyipslib.vision.processors.AprilTag;
 import org.murraybridgebunyips.bunyipslib.vision.processors.TFOD;
-import org.murraybridgebunyips.bunyipslib.vision.processors.TeamProp;
-import org.murraybridgebunyips.bunyipslib.vision.processors.WhitePixel;
+import org.murraybridgebunyips.bunyipslib.vision.processors.centerstage.WhitePixel;
 
 import kotlin.Unit;
 
@@ -51,19 +43,13 @@ public class VisionTest extends BunyipsOpMode {
             case APRILTAG:
                 chosenProcessor = new AprilTag();
                 break;
-            case TEAMPROP_RED:
-                chosenProcessor = new TeamProp(RED_ELEMENT_R, RED_ELEMENT_G, RED_ELEMENT_B);
-                break;
-            case TEAMPROP_BLUE:
-                chosenProcessor = new TeamProp(BLUE_ELEMENT_R, BLUE_ELEMENT_G, BLUE_ELEMENT_B);
-                break;
             case WHITE_PIXEL:
                 chosenProcessor = new WhitePixel();
                 break;
         }
 
-        vision.init(chosenProcessor, Vision.raw);
-        vision.start(chosenProcessor, Vision.raw);
+        vision.init(chosenProcessor, vision.raw);
+        vision.start(chosenProcessor, vision.raw);
         vision.startDashboardSender();
 
         cameraStreamNotification = addRetainedTelemetry("Camera Stream available.");
@@ -109,8 +95,6 @@ public class VisionTest extends BunyipsOpMode {
     private enum Procs {
         TFOD,
         APRILTAG,
-        TEAMPROP_RED,
-        TEAMPROP_BLUE,
         WHITE_PIXEL
     }
 }

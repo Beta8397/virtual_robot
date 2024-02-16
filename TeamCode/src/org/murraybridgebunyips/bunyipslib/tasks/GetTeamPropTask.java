@@ -3,7 +3,7 @@ package org.murraybridgebunyips.bunyipslib.tasks;
 import org.murraybridgebunyips.bunyipslib.Dbg;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.NoTimeoutTask;
 import org.murraybridgebunyips.bunyipslib.vision.Vision;
-import org.murraybridgebunyips.bunyipslib.vision.processors.TeamProp;
+import org.murraybridgebunyips.bunyipslib.vision.processors.centerstage.TeamProp;
 
 /**
  * Task for detecting on which spike the Team Prop is placed on.

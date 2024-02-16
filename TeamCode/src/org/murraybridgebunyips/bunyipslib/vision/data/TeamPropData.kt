@@ -1,6 +1,6 @@
 package org.murraybridgebunyips.bunyipslib.vision.data
 
-import org.murraybridgebunyips.bunyipslib.vision.processors.TeamProp
+import org.murraybridgebunyips.bunyipslib.vision.processors.centerstage.TeamProp
 
 /**
  * Utility data structure for Team Prop detections.
