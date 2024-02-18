@@ -11,6 +11,9 @@ import java.util.Locale;
  * @author Lucas Bubner, 2023
  */
 public class Text {
+    private Text() {
+    }
+
     /**
      * Format a string using only '%' placeholders.
      * Differs from String.format() as type can be omitted.
@@ -48,6 +51,9 @@ public class Text {
      * Round a number to a certain number of decimal points.
      */
     public static double round(double num, int toDecimalPlaces) {
+        if (toDecimalPlaces == 0) {
+            return Math.round(num);
+        }
         // noinspection MalformedFormatString
         return Double.parseDouble(String.format(Locale.getDefault(), "%." + toDecimalPlaces + "f", num));
     }
@@ -56,8 +62,7 @@ public class Text {
      * Round a number to a certain number of decimal points.
      */
     public static float round(float num, int toDecimalPlaces) {
-        // noinspection MalformedFormatString
-        return Float.parseFloat(String.format(Locale.getDefault(), "%." + toDecimalPlaces + "f", num));
+        return (float) round((double) num, toDecimalPlaces);
     }
 
     /**

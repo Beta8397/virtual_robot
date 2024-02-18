@@ -11,6 +11,9 @@ import java.util.HashMap;
 public class Threads {
     private static final HashMap<Integer, Thread> threads = new HashMap<>();
 
+    private Threads() {
+    }
+
     /**
      * Start a new thread with the given task.
      *

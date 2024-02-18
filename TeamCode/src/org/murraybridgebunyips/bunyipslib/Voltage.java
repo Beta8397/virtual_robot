@@ -35,6 +35,9 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
  * Utility class for getting the robot voltage from the hardware map
  */
 public class Voltage {
+    private Voltage() {
+    }
+
     public static double getRobotVoltage(BunyipsOpMode opMode) {
         double result = Double.POSITIVE_INFINITY;
         for (VoltageSensor sensor : opMode.hardwareMap.voltageSensor) {

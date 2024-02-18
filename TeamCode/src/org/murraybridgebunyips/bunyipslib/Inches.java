@@ -4,6 +4,9 @@ package org.murraybridgebunyips.bunyipslib;
  * Utility to convert between inches and other units.
  */
 public class Inches {
+    private Inches() {
+    }
+
     public static double toCM(double inches) {
         return inches * 2.54;
     }

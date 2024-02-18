@@ -7,7 +7,6 @@ import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
  */
 public abstract class ForeverTask extends NoTimeoutTask {
     protected ForeverTask() {
-        super();
     }
 
     protected ForeverTask(BunyipsSubsystem dependencySubsystem, boolean shouldOverrideConflictingTasks) {

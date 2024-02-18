@@ -106,16 +106,16 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     protected void onStart() {
         if (userSelection != null) {
             // UserSelection will internally check opMode.isInInit() to see if it should terminate itself
-            // automatically, but this is to ensure that the thread receives the message and that
-            // Threads is aware that we are killing the thread
-            Threads.stop(userSelection);
+            // but we should wait here until it has actually terminated
+            Threads.waitFor(userSelection, true);
         }
     }
 
     @Override
     protected final void activeLoop() {
         if (!hasGottenCallback) {
-            // Not ready to run tasks yet, we can't do much
+            // Not ready to run tasks yet, we can't do much. This shouldn't really happen,
+            // but just in case, we'll log it and wait for the callback to be run
             Dbg.logd("AutonomousBunyipsOpMode is busy-waiting for a late UserSelection callback...");
             return;
         }

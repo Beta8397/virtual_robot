@@ -17,6 +17,9 @@ import java.util.List;
 public class NullSafety {
     public static final List<String> unusableComponents = new ArrayList<>();
 
+    private NullSafety() {
+    }
+
     /**
      * Ensure that all objects are not null.
      *

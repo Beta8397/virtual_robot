@@ -16,8 +16,8 @@ import java.util.ArrayList;
  * combines their draw results. The MASK variable can be used to select which processor's mask
  * is drawn to the frame.
  *
- * @see YCbCrColourThreshold
  * @author Lucas Bubner, 2024
+ * @see YCbCrColourThreshold
  */
 @Config
 public class MultiYCbCrThreshold extends Processor<ContourData> {
@@ -58,9 +58,9 @@ public class MultiYCbCrThreshold extends Processor<ContourData> {
     }
 
     @Override
-    public void onFrameDraw(Canvas canvas) {
+    public void onFrameDraw(Canvas canvas, Object userContext) {
         for (Pair<YCbCrColourThreshold, Mat> processor : colourProcessors) {
-            processor.first.onFrameDraw(canvas);
+            processor.first.onFrameDraw(canvas, userContext);
         }
     }
 }

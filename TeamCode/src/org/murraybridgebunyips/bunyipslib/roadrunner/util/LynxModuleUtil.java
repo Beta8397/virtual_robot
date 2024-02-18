@@ -12,8 +12,10 @@ import java.util.Map;
  * Collection of utilites for interacting with Lynx modules.
  */
 public class LynxModuleUtil {
-
     private static final LynxFirmwareVersion MIN_VERSION = new LynxFirmwareVersion(1, 8, 2);
+
+    private LynxModuleUtil() {
+    }
 
     /**
      * Retrieve and parse Lynx module firmware version.

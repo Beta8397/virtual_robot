@@ -83,7 +83,7 @@ public class TeamProp extends Processor<TeamPropData> {
 
 
     @Override
-    public void onFrameDraw(Canvas canvas) {
+    public void onFrameDraw(Canvas canvas, Object userContext) {
         // no-op
     }
 

@@ -50,7 +50,7 @@ public class VisionTest extends BunyipsOpMode {
 
         vision.init(chosenProcessor, vision.raw);
         vision.start(chosenProcessor, vision.raw);
-        vision.startDashboardSender();
+        vision.startPreview();
 
         cameraStreamNotification = addRetainedTelemetry("Camera Stream available.");
         return Unit.INSTANCE;

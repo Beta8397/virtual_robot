@@ -41,7 +41,6 @@ public abstract class Processor<T extends VisionData> implements VisionProcessor
     private final AtomicReference<Bitmap> lastFrame =
             new AtomicReference<>(Bitmap.createBitmap(1, 1, Bitmap.Config.RGB_565));
 
-    protected volatile Object userContext;
     private volatile Mat frame = new Mat();
 
     /**
@@ -74,7 +73,8 @@ public abstract class Processor<T extends VisionData> implements VisionProcessor
     }
 
     /**
-     * Unique identifier for the processor
+     * Unique identifier for the processor. This will be used to identify the processor
+     * in the Vision system and in the FtcDashboard processor switcher.
      */
     public abstract String getName();
 
@@ -103,10 +103,11 @@ public abstract class Processor<T extends VisionData> implements VisionProcessor
 
     /**
      * Called to update new data from the vision system, which involves interpreting,
-     * collecting, or otherwise processing new vision data per frame. This method should
-     * refresh `this.data` with the latest information from the vision system to be accessed
-     * with your methods on .getData().T (your VisionData class). `this.data` is automatically
-     * cleared upon each iteration, so opt to using realtime data in this method.
+     * collecting, or otherwise processing new vision data per frame.
+     * <p>
+     * This method should refresh `this.data` with the latest information from the vision system to
+     * be accessed with your methods on .getData().T (your VisionData class). `this.data` is
+     * automatically cleared upon each iteration, so opt to using realtime data in this method.
      * This method will be called automatically once attached to a Vision instance.
      */
     public abstract void update();
@@ -116,29 +117,42 @@ public abstract class Processor<T extends VisionData> implements VisionProcessor
      *
      * @param frame            the frame to process
      * @param captureTimeNanos the time the frame was captured
-     * @return the processed frame
+     * @return the processed frame context, which will be passed to onFrameDraw
      */
     public abstract Object onProcessFrame(Mat frame, long captureTimeNanos);
 
     @Override
     public final Object processFrame(Mat f, long captureTimeNanos) {
+        // Copy the frame to prevent it from being modified across processors
         frame = f.clone();
         if (isFlipped)
             Core.flip(frame, frame, -1);
+        // Run user processing
         Object procFrame = onProcessFrame(frame, captureTimeNanos);
+        // Convert to a bitmap for FtcDashboard and DS feed
         Bitmap b = Bitmap.createBitmap(frame.width(), frame.height(), Bitmap.Config.RGB_565);
         Utils.matToBitmap(frame, b);
         lastFrame.set(b);
-        onFrameDraw(new Canvas(lastFrame.get()));
+        // Run user drawing
+        onFrameDraw(new Canvas(lastFrame.get()), procFrame);
+        // Run user update
         synchronized (data) {
             data.clear();
             update();
         }
+        // We're done with the copied frame, we can release it immediately
         frame.release();
         return procFrame;
     }
 
-    public abstract void onFrameDraw(Canvas canvas);
+    /**
+     * Called by the vision system to draw on the frame.
+     *
+     * @param canvas      the canvas to draw on
+     * @param userContext the user context returned from onProcessFrame, used to pass data between methods;
+     *                    this field is used with native processors such as AprilTag.
+     */
+    public abstract void onFrameDraw(Canvas canvas, Object userContext);
 
     @Override
     public void getFrameBitmap(Continuation<? extends Consumer<Bitmap>> continuation) {
@@ -146,14 +160,14 @@ public abstract class Processor<T extends VisionData> implements VisionProcessor
     }
 
     /**
-     * Use {@link #onFrameDraw(Canvas)} instead, polling userContext if required for your processor.
+     * Use {@link #onFrameDraw(Canvas, Object)} instead, which passes a canvas and user context (ret. val from onProcessFrame).
+     * <p>
      * Width and height should be accessed with Vision.CAMERA_WIDTH and Vision.CAMERA_HEIGHT, and
      * scaleBmpPxToCanvasPx and scaleCanvasDensity should be assumed as 1.0f.
      */
     @Override
     public final void onDrawFrame(Canvas canvas, int onscreenWidth, int onscreenHeight, float scaleBmpPxToCanvasPx, float scaleCanvasDensity, Object userContext) {
-        this.userContext = userContext;
-        canvas.drawBitmap(lastFrame.get(), 0, 0, null);
+        // no-op
     }
 
     // Optional init method from VisionProcessor

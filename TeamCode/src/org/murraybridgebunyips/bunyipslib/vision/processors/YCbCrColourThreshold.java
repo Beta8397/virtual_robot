@@ -118,7 +118,7 @@ public abstract class YCbCrColourThreshold extends Processor<ContourData> {
     }
 
     @Override
-    public final void onFrameDraw(Canvas canvas) {
+    public final void onFrameDraw(Canvas canvas, Object userContext) {
         // Draw borders around the contours, with a thicker border for the largest contour
         synchronized (data) {
             ContourData biggest = ContourData.getLargest(data);

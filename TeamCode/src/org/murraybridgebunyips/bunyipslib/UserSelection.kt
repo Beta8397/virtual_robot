@@ -86,15 +86,24 @@ class UserSelection<T>(
         opMode.setTelemetryAutoClear(false)
 
         val retainedObjects = mutableListOf<Item>()
-        retainedObjects.add(opMode.addRetainedTelemetry("---------!!!--------"))
+        retainedObjects.add(opMode.telemetry.addData("", "---------!!!--------"))
         retainedObjects.add(
-            opMode.addRetainedTelemetry(
+            opMode.telemetry.addData(
+                "",
                 "ACTION REQUIRED: INIT YOUR OPMODE USING GAMEPAD1"
             )
         )
+        var packetString = "| "
         for ((name, button) in buttons) {
+            val selection = String.format(
+                "%s: %s",
+                button.name,
+                if (name is OpModeSelection) name.name else name
+            )
+            packetString += "$selection | "
             retainedObjects.add(
-                opMode.addRetainedTelemetry(
+                opMode.telemetry.addData(
+                    "",
                     String.format(
                         "%s: %s",
                         button.name,
@@ -103,7 +112,9 @@ class UserSelection<T>(
                 )
             )
         }
-        retainedObjects.add(opMode.addRetainedTelemetry("---------!!!--------"))
+        retainedObjects.add(opMode.telemetry.addData("", "---------!!!--------"))
+
+        opMode.addDashboardTelemetry("USR", packetString)
 
         // Must manually call telemetry push as the BOM may not be handling them
         // This will not clear out any other telemetry as auto clear is disabled
@@ -120,13 +131,25 @@ class UserSelection<T>(
         }
 
         result = selectedOpMode
+        val opModeName = if (selectedOpMode is OpModeSelection)
+            selectedOpMode.name
+        else
+            selectedOpMode.toString()
+
         if (result == null) {
-            opMode.addRetainedTelemetry("No selection made. Result was handled by the OpMode.")
+            opMode.telemetry.addData("", "No selection made. Result was handled by the OpMode.")
+                .setRetained(true)
         } else {
-            opMode.addRetainedTelemetry(
-                "'${selectedButton?.name}' registered. Running OpMode: '${if (selectedOpMode is OpModeSelection) selectedOpMode.name else selectedOpMode.toString()}'",
-            )
+            opMode.telemetry.addData(
+                "",
+                "'${selectedButton?.name}' registered. Running OpMode: '$opModeName'",
+            ).setRetained(true)
         }
+
+        opMode.addDashboardTelemetry(
+            "USR",
+            if (result == null) "No selection" else "${selectedButton?.name} -> $opModeName"
+        )
 
         //This is code from lucas bubner. He is sad cause hes not important and dosent recieve capital letters. He is lonely except for LACHLAN PAUL  his coding buddy. Now i need to go but always keep this message in mind!!!
         // - Sorayya, hijacker of laptops

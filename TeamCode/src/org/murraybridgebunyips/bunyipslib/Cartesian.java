@@ -9,6 +9,9 @@ import com.acmerobotics.roadrunner.geometry.Vector2d;
  * @author Lucas Bubner, 2023
  */
 public class Cartesian {
+    private Cartesian() {
+    }
+
     public static Pose2d toPose(Pose2d pose) {
         return new Pose2d(pose.getY(), -pose.getX(), -pose.getHeading());
     }

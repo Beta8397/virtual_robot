@@ -4,29 +4,33 @@ package org.murraybridgebunyips.bunyipslib.vision;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 
+import org.firstinspires.ftc.robotcore.external.stream.CameraStreamServer;
 import org.murraybridgebunyips.bunyipslib.Dbg;
 
 import java.util.List;
 import java.util.Objects;
 
 /**
- * Utility component to switch between different feeds and processors with FtcDashboard.
- * The Driver Station usually culminates all processors into  a single feed preview, and it is not very helpful
- * to see the same feed when debugging across different processors. FtcDashboard allows us to send
- * custom bitmaps, and we can use this to send the feed from different processors to the dashboard.
+ * Utility component to switch between different feeds and processors with FtcDashboard & the DS "Camera Stream".
+ * The Driver Station usually culminates all processors into a single feed preview, and it is not very helpful
+ * to see the same feed when debugging across different processors. All processors in BunyipsLib
+ * automatically make their own feeds, and we can use this to send different processors as previews.
+ * This sender will also try and set the DS feed to the same processor as FtcDashboard, but it is
+ * more efficient to use the FtcDashboard feed for debugging -- if available.
  * <p>
  * This sender is not a traditional subsystem, as it is designed to run on another thread not a part of the main loop,
  * similar to how Vision is handled. When started, SwitchableVisionSender will automatically
- * manage the FtcDashboard feed and processor switching, and should be interrupted automatically if used
+ * manage the FtcDashboard/DS feed and processor switching, and should be interrupted automatically if used
  * with the Threads utility at the end of a BunyipsOpMode. Ensure to manage your threads properly if
- * not using the Threads utility.
+ * not using the Threads utility/methods attached to Vision.
  *
  * @author Lucas Bubner, 2024
  */
 @SuppressWarnings("rawtypes")
 @Config
 public class SwitchableVisionSender implements Runnable {
-    // Can be changed via FtcDashboard
+    // Can be changed dynamically via FtcDashboard. This is the processor feed
+    // that will be sent to FtcDashboard and to the Driver Station feed.
     public static String CURRENT_PROCESSOR_NAME = "";
     public static int MAX_FPS;
     private final Vision vision;
@@ -34,6 +38,7 @@ public class SwitchableVisionSender implements Runnable {
 
     public SwitchableVisionSender(Vision vision) {
         FtcDashboard.getInstance().stopCameraStream();
+        // CameraStreamServer will be supplying a raw feed to the DS without this thread
         this.vision = vision;
 
         List<Processor> processors = vision.getAttachedProcessors();
@@ -82,6 +87,9 @@ public class SwitchableVisionSender implements Runnable {
             }
 
             FtcDashboard.getInstance().startCameraStream(currentProcessor, MAX_FPS);
+            CameraStreamServer.getInstance().setSource(currentProcessor);
         }
+        FtcDashboard.getInstance().stopCameraStream();
+        CameraStreamServer.getInstance().setSource(null);
     }
 }
