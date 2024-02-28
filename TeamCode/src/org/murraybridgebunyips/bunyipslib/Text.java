@@ -30,7 +30,15 @@ public class Text {
                 // Remove character and insert new string
                 try {
                     // Check for \ before %, if so, add a % to the string instead of the value
-                    newString.append(i > 0 && fstring.charAt(i - 1) == '\\' ? "%" : objs.get(occurrences));
+                    if (i > 0 && fstring.charAt(i - 1) == '\\') {
+                        newString.append("%");
+                        // Remove the \ from the string, as it is no longer needed
+                        newString.deleteCharAt(newString.length() - 2);
+                        // Skip occurrence incrementation
+                        continue;
+                    } else {
+                        newString.append(objs.get(occurrences));
+                    }
                 } catch (IndexOutOfBoundsException e) {
                     // User did not provide enough arguments, we'll just append a % and continue
                     newString.append("%");

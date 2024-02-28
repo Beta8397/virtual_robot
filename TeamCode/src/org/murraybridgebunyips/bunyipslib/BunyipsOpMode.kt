@@ -359,7 +359,7 @@ abstract class BunyipsOpMode : LinearOpMode() {
      * Create a new telemetry object and add it to the management queue.
      */
     private fun createTelemetryItem(value: String, retained: Boolean): Item {
-        val item = telemetry.addData("", value)
+        val item = telemetry.addData(value, "")
             .setRetained(retained)
         if (value.isNotBlank()) {
             telemetryItems.add(
