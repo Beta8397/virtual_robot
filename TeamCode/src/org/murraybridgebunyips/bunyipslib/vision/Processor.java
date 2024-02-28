@@ -80,8 +80,9 @@ public abstract class Processor<T extends VisionData> implements VisionProcessor
 
     /**
      * Get the list of vision data. You should use this method as the primary way to access
-     * the latest vision data from the processor, otherwise you run the risk of
-     * concurrent modification exceptions.
+     * the latest vision data from the processor from an OpMode, otherwise you run the risk of
+     * concurrent modification exceptions. This does not apply to within a processor as the
+     * methods are synchronized.
      *
      * @return list of all vision data detected since the last stateful update
      */
@@ -117,9 +118,8 @@ public abstract class Processor<T extends VisionData> implements VisionProcessor
      *
      * @param frame            the frame to process
      * @param captureTimeNanos the time the frame was captured
-     * @return the processed frame context, which will be passed to onFrameDraw
      */
-    public abstract Object onProcessFrame(Mat frame, long captureTimeNanos);
+    public abstract void onProcessFrame(Mat frame, long captureTimeNanos);
 
     @Override
     public final Object processFrame(Mat f, long captureTimeNanos) {
@@ -128,31 +128,31 @@ public abstract class Processor<T extends VisionData> implements VisionProcessor
         if (isFlipped)
             Core.flip(frame, frame, -1);
         // Run user processing
-        Object procFrame = onProcessFrame(frame, captureTimeNanos);
+        onProcessFrame(frame, captureTimeNanos);
         // Convert to a bitmap for FtcDashboard and DS feed
         Bitmap b = Bitmap.createBitmap(frame.width(), frame.height(), Bitmap.Config.RGB_565);
         Utils.matToBitmap(frame, b);
         lastFrame.set(b);
-        // Run user drawing
-        onFrameDraw(new Canvas(lastFrame.get()), procFrame);
-        // Run user update
         synchronized (data) {
             data.clear();
+            // Run user data update
             update();
+            // Run user drawing while still having a data lock
+            onFrameDraw(new Canvas(lastFrame.get()));
         }
         // We're done with the copied frame, we can release it immediately
         frame.release();
-        return procFrame;
+        // User context is not needed, as processors that need it should use the data list or
+        // hold a copy of the user context when supplied to them in onProcessFrame
+        return null;
     }
 
     /**
      * Called by the vision system to draw on the frame.
      *
-     * @param canvas      the canvas to draw on
-     * @param userContext the user context returned from onProcessFrame, used to pass data between methods;
-     *                    this field is used with native processors such as AprilTag.
+     * @param canvas the canvas to draw on
      */
-    public abstract void onFrameDraw(Canvas canvas, Object userContext);
+    public abstract void onFrameDraw(Canvas canvas);
 
     @Override
     public void getFrameBitmap(Continuation<? extends Consumer<Bitmap>> continuation) {
@@ -160,7 +160,9 @@ public abstract class Processor<T extends VisionData> implements VisionProcessor
     }
 
     /**
-     * Use {@link #onFrameDraw(Canvas, Object)} instead, which passes a canvas and user context (ret. val from onProcessFrame).
+     * Use {@link #onFrameDraw(Canvas)} instead, which passes a canvas. Your userContext should
+     * be instead acquired by updating the data list in {@link #update()}. If this is not possible,
+     * you can simply hold a copy of the userContext when supplied to you in {@link #onProcessFrame(Mat, long)}.
      * <p>
      * Width and height should be accessed with Vision.CAMERA_WIDTH and Vision.CAMERA_HEIGHT, and
      * scaleBmpPxToCanvasPx and scaleCanvasDensity should be assumed as 1.0f.

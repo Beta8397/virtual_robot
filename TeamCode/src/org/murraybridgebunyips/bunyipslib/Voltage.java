@@ -29,6 +29,7 @@
 
 package org.murraybridgebunyips.bunyipslib;
 
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 /**
@@ -38,7 +39,7 @@ public class Voltage {
     private Voltage() {
     }
 
-    public static double getRobotVoltage(BunyipsOpMode opMode) {
+    public static double getRobotVoltage(OpMode opMode) {
         double result = Double.POSITIVE_INFINITY;
         for (VoltageSensor sensor : opMode.hardwareMap.voltageSensor) {
             double voltage = sensor.getVoltage();

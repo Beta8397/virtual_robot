@@ -1,6 +1,7 @@
 package org.murraybridgebunyips.bunyipslib.roadrunner.drive;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.acmerobotics.roadrunner.drive.DriveSignal;
 import com.acmerobotics.roadrunner.followers.TankPIDVAFollower;
@@ -23,6 +24,7 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
 import org.murraybridgebunyips.bunyipslib.Controller;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.TrajectorySequence;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.TrajectorySequenceBuilder;
@@ -54,7 +56,7 @@ public class TankRoadRunnerDrive extends com.acmerobotics.roadrunner.drive.TankD
 
     private final VoltageSensor batteryVoltageSensor;
 
-    public TankRoadRunnerDrive(DriveConstants constants, TankCoefficients coefficients, HardwareMap.DeviceMapping<VoltageSensor> voltageSensor, IMU imu, DcMotorEx fl, DcMotorEx fr, DcMotorEx bl, DcMotorEx br) {
+    public TankRoadRunnerDrive(@Nullable BunyipsOpMode opMode, DriveConstants constants, TankCoefficients coefficients, HardwareMap.DeviceMapping<VoltageSensor> voltageSensor, IMU imu, DcMotorEx fl, DcMotorEx fr, DcMotorEx bl, DcMotorEx br) {
         super(constants.kV, constants.kA, constants.kStatic, constants.TRACK_WIDTH);
 
         follower = new TankPIDVAFollower(coefficients.AXIAL_PID, coefficients.CROSS_TRACK_PID,
@@ -63,13 +65,7 @@ public class TankRoadRunnerDrive extends com.acmerobotics.roadrunner.drive.TankD
         VEL_CONSTRAINT = getVelocityConstraint(constants.MAX_VEL, constants.MAX_ANG_VEL, constants.TRACK_WIDTH);
         accelConstraint = getAccelerationConstraint(constants.MAX_ACCEL);
 
-//        LynxModuleUtil.ensureMinimumFirmwareVersion(hardwareMap);
-
         batteryVoltageSensor = voltageSensor.iterator().next();
-
-//        for (LynxModule module : hardwareMap.getAll(LynxModule.class)) {
-//            module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
-//        }
 
         this.constants = constants;
         this.coefficients = coefficients;
@@ -100,7 +96,7 @@ public class TankRoadRunnerDrive extends com.acmerobotics.roadrunner.drive.TankD
         }
 
         trajectorySequenceRunner = new TrajectorySequenceRunner(
-                constants.RUN_USING_ENCODER, follower, coefficients.HEADING_PID, batteryVoltageSensor,
+                opMode, constants.RUN_USING_ENCODER, follower, coefficients.HEADING_PID, batteryVoltageSensor,
                 new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()
         );
     }

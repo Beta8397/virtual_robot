@@ -16,33 +16,41 @@ import org.murraybridgebunyips.bunyipslib.vision.processors.MultiColourThreshold
 import java.util.List;
 
 /**
- * Task to align to a pixel using the vision system.
+ * Task to move to and align to a pixel using the vision system.
  *
  * @param <T> the drivetrain to use (must implement RoadRunnerDrive for X pose forward info/FCD)
  * @author Lucas Bubner, 2024
  */
 @Config
-public class AlignToPixelTask<T extends BunyipsSubsystem> extends ForeverTask {
-    public static double kP;
-    public static double kI;
-    public static double kD;
+public class MoveToPixelTask<T extends BunyipsSubsystem> extends ForeverTask {
+    public static double TRANSLATIONAL_kP;
+    public static double TRANSLATIONAL_kI;
+    public static double TRANSLATIONAL_kD;
+    public static double ROTATIONAL_kP;
+    public static double ROTATIONAL_kI;
+    public static double ROTATIONAL_kD;
 
     private final RoadRunnerDrive drive;
     private final MultiColourThreshold processors;
     private final Gamepad gamepad;
-    private final PIDController controller;
+    private final PIDController translationController;
+    private final PIDController rotationController;
 
-    public AlignToPixelTask(Gamepad gamepad, T drive, MultiColourThreshold processors, PIDController controller) {
+    public MoveToPixelTask(Gamepad gamepad, T drive, MultiColourThreshold processors, PIDController translationController, PIDController rotationController) {
         super(drive, false);
         if (!(drive instanceof RoadRunnerDrive))
-            throw new EmergencyStop("AlignToPixelTask must be used with a drivetrain with X forward Pose/IMU info");
+            throw new EmergencyStop("MoveToPixelTask must be used with a drivetrain with X forward Pose/IMU info");
         this.drive = (RoadRunnerDrive) drive;
         this.processors = processors;
         this.gamepad = gamepad;
-        this.controller = controller;
-        kP = controller.getP();
-        kI = controller.getI();
-        kD = controller.getD();
+        this.translationController = translationController;
+        this.rotationController = rotationController;
+        TRANSLATIONAL_kP = translationController.getP();
+        TRANSLATIONAL_kI = translationController.getI();
+        TRANSLATIONAL_kD = translationController.getD();
+        ROTATIONAL_kP = rotationController.getP();
+        ROTATIONAL_kI = rotationController.getI();
+        ROTATIONAL_kD = rotationController.getD();
     }
 
     @Override
@@ -54,7 +62,8 @@ public class AlignToPixelTask<T extends BunyipsSubsystem> extends ForeverTask {
     @Override
     public void periodic() {
         // FtcDashboard live tuning
-        controller.setPID(kP, kI, kD);
+        translationController.setPID(TRANSLATIONAL_kP, TRANSLATIONAL_kI, TRANSLATIONAL_kD);
+        rotationController.setPID(ROTATIONAL_kP, ROTATIONAL_kI, ROTATIONAL_kD);
 
         Pose2d pose = Controller.makeRobotPose(gamepad.left_stick_x, gamepad.left_stick_y, gamepad.right_stick_x);
 
@@ -64,9 +73,9 @@ public class AlignToPixelTask<T extends BunyipsSubsystem> extends ForeverTask {
         if (biggestContour != null) {
             drive.setWeightedDrivePower(
                     new Pose2d(
-                            pose.getX(),
+                            -translationController.calculate(biggestContour.getPitch(), 0.0),
                             pose.getY(),
-                            controller.calculate(biggestContour.getYaw(), 0.0)
+                            rotationController.calculate(biggestContour.getYaw(), 0.0)
                     )
             );
         } else {

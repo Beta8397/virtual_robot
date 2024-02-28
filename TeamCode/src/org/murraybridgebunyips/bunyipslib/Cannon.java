@@ -3,7 +3,7 @@ package org.murraybridgebunyips.bunyipslib;
 import com.qualcomm.robotcore.hardware.Servo;
 
 /**
- * Class for the paper plane launcher.
+ * Class for a generic servo switch.
  * A whole new file is technically unnecessary, but we wanted to make a class named Cannon
  * <p></p>
  * "Fire in the hole!"
@@ -21,7 +21,7 @@ public class Cannon extends BunyipsSubsystem {
     public Cannon(Servo prolong) {
         this.prolong = prolong;
 
-        // We assume there will always be a paper plane in the cannon at the start of a match
+        // We assume there will always be something in the reset position for us to hold
         target = RESET;
         update();
     }
@@ -29,17 +29,20 @@ public class Cannon extends BunyipsSubsystem {
     /**
      * Fire in the hole!
      */
-    public void fire() {
+    public Cannon fire() {
         target = FIRED;
+        return this;
     }
 
     /**
      * Reset the cannon to its initial position
      */
-    public void reset() {
+    public Cannon reset() {
         target = RESET;
+        return this;
     }
 
+    @Override
     public void update() {
         opMode.addTelemetry("Cannon: %", target == FIRED ? "FIRED" : "READY");
         prolong.setPosition(target);

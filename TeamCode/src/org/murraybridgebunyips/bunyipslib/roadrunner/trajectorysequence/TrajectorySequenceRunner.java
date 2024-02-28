@@ -16,6 +16,7 @@ import com.acmerobotics.roadrunner.trajectory.TrajectoryMarker;
 import com.acmerobotics.roadrunner.util.NanoClock;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
+import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.sequencesegment.SequenceSegment;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.sequencesegment.TrajectorySegment;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.sequencesegment.TurnSegment;
@@ -43,6 +44,7 @@ public class TrajectorySequenceRunner {
     private final TrajectoryFollower follower;
 
     private final PIDFController turnController;
+    private final BunyipsOpMode opMode;
 
     private final NanoClock clock;
     private final FtcDashboard dashboard;
@@ -61,9 +63,10 @@ public class TrajectorySequenceRunner {
     private Pose2d lastPoseError = new Pose2d();
 
     public TrajectorySequenceRunner(
-            boolean driveConstantsRunUsingEncoder, TrajectoryFollower follower, PIDCoefficients headingPIDCoefficients, VoltageSensor voltageSensor,
+            @Nullable BunyipsOpMode opMode, boolean driveConstantsRunUsingEncoder, TrajectoryFollower follower, PIDCoefficients headingPIDCoefficients, VoltageSensor voltageSensor,
             List<Integer> lastDriveEncPositions, List<Integer> lastDriveEncVels, List<Integer> lastTrackingEncPositions, List<Integer> lastTrackingEncVels
     ) {
+        this.opMode = opMode;
         this.follower = follower;
         this.driveConstantsRunUsingEncoder = driveConstantsRunUsingEncoder;
 
@@ -94,9 +97,6 @@ public class TrajectorySequenceRunner {
     public DriveSignal update(Pose2d poseEstimate, Pose2d poseVelocity) {
         Pose2d targetPose = null;
         DriveSignal driveSignal = null;
-
-        TelemetryPacket packet = new TelemetryPacket();
-        Canvas fieldOverlay = packet.fieldOverlay();
 
         SequenceSegment currentSegment = null;
 
@@ -214,17 +214,31 @@ public class TrajectorySequenceRunner {
             );
         }
 
-        packet.put("x", poseEstimate.getX());
-        packet.put("y", poseEstimate.getY());
-        packet.put("heading (deg)", Math.toDegrees(poseEstimate.getHeading()));
+        if (opMode != null) {
+            opMode.addDashboardTelemetry("x", poseEstimate.getX());
+            opMode.addDashboardTelemetry("y", poseEstimate.getY());
+            opMode.addDashboardTelemetry("heading (deg)", Math.toDegrees(poseEstimate.getHeading()));
 
-        packet.put("xError", lastPoseError.getX());
-        packet.put("yError", lastPoseError.getY());
-        packet.put("headingError (deg)", Math.toDegrees(lastPoseError.getHeading()));
+            opMode.addDashboardTelemetry("xError", lastPoseError.getX());
+            opMode.addDashboardTelemetry("yError", lastPoseError.getY());
+            opMode.addDashboardTelemetry("headingError (deg)", Math.toDegrees(lastPoseError.getHeading()));
 
-        draw(fieldOverlay, currentTrajectorySequence, currentSegment, targetPose, poseEstimate);
+            draw(opMode.dashboardFieldOverlay(), currentTrajectorySequence, currentSegment, targetPose, poseEstimate);
+        } else {
+            // Using normal OpMode, we can send packets directly
+            TelemetryPacket packet = new TelemetryPacket();
+            Canvas fieldOverlay = packet.fieldOverlay();
 
-        dashboard.sendTelemetryPacket(packet);
+            packet.put("x", poseEstimate.getX());
+            packet.put("y", poseEstimate.getY());
+            packet.put("heading (deg)", Math.toDegrees(poseEstimate.getHeading()));
+            packet.put("xError", lastPoseError.getX());
+            packet.put("yError", lastPoseError.getY());
+            packet.put("headingError (deg)", Math.toDegrees(lastPoseError.getHeading()));
+
+            draw(fieldOverlay, currentTrajectorySequence, currentSegment, targetPose, poseEstimate);
+            dashboard.sendTelemetryPacket(packet);
+        }
 
         return driveSignal;
     }

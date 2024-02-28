@@ -1,7 +1,9 @@
 package org.murraybridgebunyips.bunyipslib
 
 import com.acmerobotics.dashboard.FtcDashboard
+import com.acmerobotics.dashboard.canvas.Canvas
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket
+import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.robotcore.external.Telemetry.Item
@@ -28,9 +30,14 @@ abstract class BunyipsOpMode : LinearOpMode() {
     private var opModeStatus = "idle"
     private lateinit var overheadTelemetry: Item
     private var telemetryQueue = 0
-    private val telemetryObjects = mutableListOf<Item>()
-    private val logItems = mutableListOf<String>()
-    private val extraDashboardItems = mutableListOf<Pair<String, String>>()
+    private val telemetryItems = mutableSetOf<Pair<ItemType, String>>()
+    private var packet: TelemetryPacket? = TelemetryPacket()
+
+    private enum class ItemType {
+        TELEMETRY,
+        RETAINED_TELEMETRY,
+        LOG
+    }
 
     companion object {
         /**
@@ -40,6 +47,9 @@ abstract class BunyipsOpMode : LinearOpMode() {
          * BunyipsComponent and Task internally use this to grant access to the current OpMode through
          * the `opMode` property. You must ensure all Tasks and BunyipsComponents are instantiated during runtime,
          * (such as during onInit()), otherwise this property will be null.
+         *
+         * If you choose to access the current OpMode through this property, you must ensure that the OpMode
+         * is actively running, otherwise this property will be null and you will raise a whole suite of exceptions.
          */
         @JvmStatic
         lateinit var instance: BunyipsOpMode
@@ -99,10 +109,18 @@ abstract class BunyipsOpMode : LinearOpMode() {
         try {
             Dbg.log("=============== BunyipsLib BunyipsOpMode ${BuildConfig.GIT_COMMIT}-${BuildConfig.BUILD_TIME} uid:${BuildConfig.ID} ===============")
             LynxModuleUtil.ensureMinimumFirmwareVersion(hardwareMap)
+            hardwareMap.getAll(LynxModule::class.java).forEach { module ->
+                module.bulkCachingMode = LynxModule.BulkCachingMode.AUTO
+            }
             // Separate log from telemetry on the DS with an empty line
             telemetry.log().add("")
             telemetry.log().add("bunyipslib ${BuildConfig.GIT_COMMIT}-${BuildConfig.BUILD_TIME}")
-            logItems.add("bunyipslib ${BuildConfig.GIT_COMMIT}-${BuildConfig.BUILD_TIME}")
+            telemetryItems.add(
+                Pair(
+                    ItemType.LOG,
+                    "bunyipslib ${BuildConfig.GIT_COMMIT}-${BuildConfig.BUILD_TIME}"
+                )
+            )
 
             opModeStatus = "setup"
             Dbg.logd("BunyipsOpMode: setting up...")
@@ -262,24 +280,37 @@ abstract class BunyipsOpMode : LinearOpMode() {
         overheadTelemetry.setValue("BOM: $overheadStatus")
 
         // FtcDashboard
-        val packet = TelemetryPacket()
-        packet.put("BOM", overheadStatus + "\n")
-        for ((key, value) in extraDashboardItems) {
-            packet.put(key, value)
+        if (packet == null) {
+            packet = TelemetryPacket()
         }
-        // Copy with toList() to avoid ConcurrentModificationExceptions
-        telemetryObjects.toList().forEachIndexed { index, item ->
-            packet.put("DS$index", item.caption)
-        }
-        logItems.toList().forEachIndexed { index, item ->
-            if (index == 0) {
-                // BunyipsLib info, this is an always log
-                packet.put("INFO", item)
-                return@forEachIndexed
+
+        packet?.let {
+            it.put("BOM", overheadStatus + "\n")
+
+            // Copy with toList() to avoid ConcurrentModificationExceptions
+            telemetryItems.toList().forEachIndexed { index, pair ->
+                val (type, value) = pair
+                when (type) {
+                    ItemType.TELEMETRY -> it.put("DS$index", value)
+                    ItemType.RETAINED_TELEMETRY -> it.put("RT$index", value)
+                    ItemType.LOG -> {
+                        if (index == 0) {
+                            // BunyipsLib info, this is an always log and will always
+                            // be the first log in the list as it is added at the start
+                            // of the init cycle
+                            it.put("INFO", value)
+                            return@forEachIndexed
+                        }
+                        it.put("LOG$index", value)
+                    }
+                }
             }
-            packet.put("LOG$index", item)
+
+            FtcDashboard.getInstance().sendTelemetryPacket(it)
+
+            // Invalidate this packet
+            packet = null
         }
-        FtcDashboard.getInstance().sendTelemetryPacket(packet)
 
         if (telemetry.isAutoClear) {
             telemetryQueue = 0
@@ -290,24 +321,36 @@ abstract class BunyipsOpMode : LinearOpMode() {
     /**
      * Add any additional telemetry to the FtcDashboard telemetry packet.
      */
-    fun addDashboardTelemetry(key: String, value: String) {
-        if (extraDashboardItems.contains(Pair(key, value))) {
-            extraDashboardItems.remove(Pair(key, value))
+    fun addDashboardTelemetry(key: String, value: Any?) {
+        if (packet == null) {
+            packet = TelemetryPacket()
         }
-        extraDashboardItems.add(Pair(key, value))
+        packet!!.put(key, value.toString())
     }
 
     /**
-     * Ensure an exception is not thrown due to the telemetry object being bigger than 250 objects.
+     * Add any field overlay data to the FtcDashboard telemetry packet.
+     */
+    fun dashboardFieldOverlay(): Canvas {
+        // This will allow us to attach any field overlay data to the packet
+        // as we will only reassign if the packet is null
+        if (packet == null) {
+            packet = TelemetryPacket()
+        }
+        return packet!!.fieldOverlay()
+    }
+
+    /**
+     * Ensure an exception is not thrown due to the telemetry queue being bigger than 255 objects.
      */
     private fun flushTelemetryQueue() {
         telemetryQueue++
-        if (telemetryQueue >= 250) {
+        if (telemetryQueue >= 255) {
             // We have to flush out telemetry as the queue is too big
             pushTelemetry()
             if (telemetry.isAutoClear) {
                 // Flush successful
-                Dbg.logd("Telemetry queue exceeded 250 messages, auto-pushing to flush...")
+                Dbg.logd("Telemetry queue exceeded 255 messages, auto-pushing to flush...")
             }
         }
     }
@@ -316,11 +359,16 @@ abstract class BunyipsOpMode : LinearOpMode() {
      * Create a new telemetry object and add it to the management queue.
      */
     private fun createTelemetryItem(value: String, retained: Boolean): Item {
-        // Must store everything in the caption as the value cannot be accessed,
-        // and all formatting is already done via BunyipsLib
-        val item = telemetry.addData(value, "")
+        val item = telemetry.addData("", value)
             .setRetained(retained)
-        telemetryObjects.add(item)
+        if (value.isNotBlank()) {
+            telemetryItems.add(
+                Pair(
+                    if (retained) ItemType.RETAINED_TELEMETRY else ItemType.TELEMETRY,
+                    value
+                )
+            )
+        }
         return item
     }
 
@@ -328,68 +376,43 @@ abstract class BunyipsOpMode : LinearOpMode() {
      * Clear all telemetry objects from the management queue just like a telemetry.clear() call.
      */
     private fun clearTelemetryObjects() {
-        val tmp = telemetryObjects.toTypedArray()
+        val tmp = telemetryItems.toTypedArray()
         for (item in tmp) {
-            if (item.isRetained)
+            if (item.first == ItemType.RETAINED_TELEMETRY)
                 continue
-            telemetryObjects.remove(item)
+            telemetryItems.remove(item)
         }
     }
 
     /**
-     * Add data to the telemetry object
-     * @param value A string to add to telemetry
-     * @return The telemetry item added to the Driver Station
+     * Add data to the telemetry object, with integrated formatting.
+     * @param format An object string to add to telemetry
+     * @param args The objects to format into the object format string
+     * @return The telemetry item added to the Driver Station, null if the send failed from overflow
      */
-    fun addTelemetry(value: String): Item? {
+    fun addTelemetry(format: Any, vararg args: Any?): Item? {
         flushTelemetryQueue()
-        if (telemetryQueue >= 250 && !telemetry.isAutoClear) {
+        if (telemetryQueue >= 255 && !telemetry.isAutoClear) {
             // Auto flush will fail as clearing is not permitted
             // We will send telemetry to the debugger instead as a fallback
-            Dbg.log("Telemetry overflow: $value")
+            Dbg.log("Telemetry overflow: $format")
             return null
         }
-        return createTelemetryItem(value, false)
+        return createTelemetryItem(formatString(format.toString(), *args), false)
     }
 
-    /**
-     * Add data to the telemetry object
-     * @param value An object to add to telemetry
-     * @return The telemetry item added to the Driver Station
-     */
-    fun addTelemetry(value: Any): Item? {
-        return addTelemetry(value.toString())
-    }
 
     /**
-     * Add data to the telemetry object using a custom format string
-     * @param fstring A format string to add to telemetry
-     * @param objs The objects to format into the string
+     * Add a data to the telemetry object, with integrated formatting.
+     * @param format An object string to add to telemetry
+     * @param args The objects to format into the object format string
      * @return The telemetry item added to the Driver Station
      */
-    fun addTelemetry(fstring: String, vararg objs: Any): Item? {
-        return addTelemetry(formatString(fstring, objs.asList()))
-    }
-
-    /**
-     * Add retained non-auto-clearing data to the telemetry object
-     * @param value A string to add to telemetry
-     * @return The telemetry item added to the Driver Station
-     */
-    fun addRetainedTelemetry(value: String): Item {
+    fun addRetainedTelemetry(format: Any, vararg args: Any?): Item {
         flushTelemetryQueue()
-        // Retained telemetry will never be auto-cleared so we'll just send the object now
-        return createTelemetryItem(value, true)
-    }
-
-    /**
-     * Add a data to the telemetry object using a custom format string
-     * @param fstring A format string to add to telemetry
-     * @param objs The objects to format into the string
-     * @return The telemetry item added to the Driver Station
-     */
-    fun addRetainedTelemetry(fstring: String, vararg objs: Any): Item {
-        return addRetainedTelemetry(formatString(fstring, objs.asList()))
+        // Retained objects will never be cleared, so we can just add them immediately, as usually
+        // retained messages should be important and not be discarded
+        return createTelemetryItem(formatString(format.toString(), *args), true)
     }
 
     /**
@@ -398,6 +421,11 @@ abstract class BunyipsOpMode : LinearOpMode() {
      */
     fun removeRetainedTelemetry(vararg items: Item) {
         for (item in items) {
+            // We will be able to remove the item from the DS, but objects on FtcDashboard cannot
+            // be removed as we no longer know the index of the object or the contents of the item.
+            // This means all RT objects on the dashboard are permanent, and will respect their
+            // last updated value. This is not a problem as retained objects are usually important
+            // and can serve as a debugging tool.
             val res = telemetry.removeItem(item)
             if (!res) {
                 Dbg.logd("Could not find telemetry item to remove: $item")
@@ -411,63 +439,38 @@ abstract class BunyipsOpMode : LinearOpMode() {
     }
 
     /**
-     * Log a message to the telemetry log
-     * @param message The message to log
+     * Log a message to the telemetry log, with integrated formatting.
+     * @param format An object string to add to telemetry
+     * @param args The objects to format into the object format string
      */
-    fun log(message: String) {
-        telemetry.log().add(message)
-        logItems.add(message)
+    fun log(format: Any, vararg args: Any?) {
+        val fstring = formatString(format.toString(), *args)
+        telemetry.log().add(fstring)
+        telemetryItems.add(Pair(ItemType.LOG, fstring))
     }
 
     /**
-     * Log a message to the telemetry log using a format string
-     * @param fstring A format string to add to telemetry
-     * @param objs The objects to format into the string
+     * Log a message to the telemetry log, with integrated formatting.
+     * @param obj Class where this log was called (name will be prepended to message)
+     * @param format An object string to add to telemetry
+     * @param args The objects to format into the object format string
      */
-    fun log(fstring: String, vararg objs: Any) {
-        log(formatString(fstring, objs.asList()))
-    }
-
-    /**
-     * Log a message to the telemetry log
-     * @param obj Class where this log was called (name will be prepended to message in lowercase)
-     * @param message The message to log
-     */
-    fun log(obj: Class<*>, message: String) {
-        val msg = "[${obj.simpleName.toLowerCase()}] $message"
+    fun log(obj: Class<*>, format: Any, vararg args: Any?) {
+        val msg = "[${obj.simpleName}] ${formatString(format.toString(), *args)}"
         telemetry.log().add(msg)
-        logItems.add(msg)
+        telemetryItems.add(Pair(ItemType.LOG, msg))
     }
 
     /**
      * Log a message into the telemetry log
      * @param stck StackTraceElement with information about where this log was called (see Text.getCallingUserCodeFunction())
-     * @param message The message to log
+     * @param format An object string to add to telemetry
+     * @param args The objects to format into the object format string
      */
-    fun log(stck: StackTraceElement, message: String) {
-        val msg = "[${stck}] $message"
+    fun log(stck: StackTraceElement, format: Any, vararg args: Any?) {
+        val msg = "[${stck}] ${formatString(format.toString(), *args)}"
         telemetry.log().add(msg)
-        logItems.add(msg)
-    }
-
-    /**
-     * Log a message to the telemetry log using a format string
-     * @param obj Class where this log was called (name will be prepended to message in lowercase)
-     * @param fstring A format string to add to telemetry
-     * @param objs The objects to format into the string
-     */
-    fun log(obj: Class<*>, fstring: String, vararg objs: Any) {
-        log(obj, formatString(fstring, objs.asList()))
-    }
-
-    /**
-     * Log a message into the telemetry log using a format string
-     * @param stck StackTraceElement with information about where this log was called (see Text.getCallingUserCodeFunction())
-     * @param fstring A format string to add to telemetry
-     * @param objs The objects to format into the string
-     */
-    fun log(stck: StackTraceElement, fstring: String, vararg objs: Any) {
-        log(stck, formatString(fstring, objs.asList()))
+        telemetryItems.add(Pair(ItemType.LOG, msg))
     }
 
     /**
@@ -476,7 +479,7 @@ abstract class BunyipsOpMode : LinearOpMode() {
     fun resetTelemetry() {
         telemetryQueue = 0
         telemetry.clearAll()
-        telemetryObjects.clear()
+        telemetryItems.clear()
         FtcDashboard.getInstance().clearTelemetry()
         // Must reassign the overhead telemetry item
         overheadTelemetry =

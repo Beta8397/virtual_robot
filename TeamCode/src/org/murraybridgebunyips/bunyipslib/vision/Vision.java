@@ -83,7 +83,7 @@ public class Vision extends BunyipsSubsystem {
      * @param processors Processor instances
      */
     @SuppressWarnings("rawtypes")
-    public void init(Processor... processors) {
+    public Vision init(Processor... processors) {
         if (visionPortal != null) {
             Dbg.logd(getClass(), "WARNING: Vision already initialised! Tearing down...");
             terminate();
@@ -131,8 +131,11 @@ public class Vision extends BunyipsSubsystem {
                 // the startPreview() method to enable the VisionSender. By default, the DS Camera Stream
                 // will show a raw feed from the camera, and the FtcDashboard feed will be disabled.
                 .enableLiveView(false)
+                .setShowStatsOverlay(false)
                 // Set any additional VisionPortal settings here
                 .build();
+
+        visionPortal.stopLiveView();
 
         // Disable the vision processors by default. The OpMode must call start() to enable them.
         for (Processor processor : this.processors) {
@@ -140,6 +143,7 @@ public class Vision extends BunyipsSubsystem {
         }
 
         Dbg.logd(getClass(), "visionportal ready.");
+        return this;
     }
 
     /**
@@ -149,7 +153,7 @@ public class Vision extends BunyipsSubsystem {
      * @param processors Processor instances
      */
     @SuppressWarnings("rawtypes")
-    public void start(Processor... processors) {
+    public Vision start(Processor... processors) {
         if (visionPortal == null) {
             throw new IllegalStateException("Vision: VisionPortal is not initialised from init()!");
         }
@@ -173,6 +177,7 @@ public class Vision extends BunyipsSubsystem {
             visionPortal.setProcessorEnabled(processor, true);
             Dbg.logd(getClass(), "vision processor '%' started.", processor.getName());
         }
+        return this;
     }
 
     /**
@@ -193,7 +198,7 @@ public class Vision extends BunyipsSubsystem {
      * @param processors Processor instances
      */
     @SuppressWarnings("rawtypes")
-    public void stop(Processor... processors) {
+    public Vision stop(Processor... processors) {
         if (visionPortal == null) {
             throw new IllegalStateException("Vision: VisionPortal is not initialised from init()!");
         }
@@ -209,18 +214,20 @@ public class Vision extends BunyipsSubsystem {
             visionPortal.setProcessorEnabled(processor, false);
             Dbg.logd(getClass(), "vision processor '%' paused.", processor.getName());
         }
+        return this;
     }
 
     /**
      * Stop all processors and pause the camera stream (Level 3).
      */
-    public void stop() {
+    public Vision stop() {
         if (visionPortal == null) {
             throw new IllegalStateException("Vision: VisionPortal is not initialised from init()!");
         }
-        // Pause the processor, this will also auto-close any VisionProcessors
+        // Pause the VisionPortal, this will stagnate any attached processors
         visionPortal.stopStreaming();
         Dbg.logd(getClass(), "visionportal stopped.");
+        return this;
     }
 
     /**
@@ -253,7 +260,7 @@ public class Vision extends BunyipsSubsystem {
      * Repeated calls to {@code init()} will also cause a termination of the VisionPortal.
      */
     @SuppressWarnings("rawtypes")
-    public void terminate() {
+    public Vision terminate() {
         if (visionPortal == null) {
             throw new IllegalStateException("Vision: VisionPortal is not initialised from init()!");
         }
@@ -263,6 +270,7 @@ public class Vision extends BunyipsSubsystem {
         visionPortal.close();
         visionPortal = null;
         Dbg.logd(getClass(), "visionportal terminated.");
+        return this;
     }
 
     /**
@@ -272,7 +280,7 @@ public class Vision extends BunyipsSubsystem {
      * @param processors Processor instances
      */
     @SuppressWarnings("rawtypes")
-    public void flip(Processor... processors) {
+    public Vision flip(Processor... processors) {
         if (visionPortal == null) {
             throw new IllegalStateException("Vision: VisionPortal is not initialised from init()!");
         }
@@ -286,6 +294,7 @@ public class Vision extends BunyipsSubsystem {
             processor.setFlipped(!processor.isFlipped());
             Dbg.logd(getClass(), "vision processor '%' flipped %.", processor.getName(), processor.isFlipped() ? "upside-down" : "right-side up");
         }
+        return this;
     }
 
     /**
@@ -293,7 +302,7 @@ public class Vision extends BunyipsSubsystem {
      * Should be called after processors are initialised, and can be called at any time after.
      */
     @SuppressWarnings("rawtypes")
-    public void flip() {
+    public Vision flip() {
         if (visionPortal == null) {
             throw new IllegalStateException("Vision: VisionPortal is not initialised from init()!");
         }
@@ -301,6 +310,7 @@ public class Vision extends BunyipsSubsystem {
             processor.setFlipped(!processor.isFlipped());
             Dbg.logd(getClass(), "vision processor '%' flipped %.", processor.getName(), processor.isFlipped() ? "upside-down" : "right-side up");
         }
+        return this;
     }
 
     /**
@@ -348,56 +358,65 @@ public class Vision extends BunyipsSubsystem {
     }
 
     /**
-     * Start the VisionSender thread to send all processor data to FtcDashboard.
-     * Without the preview active, the DS will display a raw unprocessed feed to save resources,
-     * but activating this sender will set both FtcDashboard and the DS streams to be of a processor
-     * of your choosing.
+     * Start the VisionSender thread to send all processor data to FtcDashboard/DS with dynamic switching.
+     * Without the preview active, the DS will display a raw unprocessed feed to save resources in
+     * Camera Stream, and FtcDashboard will be disabled. This is the default state of Vision.
+     * Activating this sender will set both FtcDashboard and the DS streams to be of a processor
+     * of your choosing, by changing a processor's name with setPreview() or via FtcDashboard.
      *
      * @see SwitchableVisionSender
      */
-    public void startPreview() {
+    public Vision startPreview() {
         visionSender = new SwitchableVisionSender(this);
         Threads.start(visionSender);
+        return this;
     }
 
     /**
-     * Set the processor to display on FtcDashboard.
+     * Set the processor to display on FtcDashboard/DS from startPreview().
      *
      * @param processorName the name of the processor to display on FtcDashboard
      * @see SwitchableVisionSender
      */
-    public void setPreview(String processorName) {
+    public Vision setPreview(String processorName) {
         if (visionSender != null) {
             visionSender.setStreamingProcessor(processorName);
         }
+        return this;
     }
 
     /**
-     * Set the processor to display on FtcDashboard.
+     * Set the processor to display on FtcDashboard/DS from startPreview().
      *
      * @param processor the processor to display on FtcDashboard
      * @see SwitchableVisionSender
      */
     @SuppressWarnings("rawtypes")
-    public void setPreview(Processor processor) {
+    public Vision setPreview(Processor processor) {
         if (visionSender != null) {
             visionSender.setStreamingProcessor(processor.getName());
         }
+        return this;
     }
 
     /**
-     * Stop the VisionSender thread to stop sending all processor data to FtcDashboard.
+     * Stop the VisionSender thread to stop sending all processor data to FtcDashboard/DS.
+     * The DS will return to a raw unprocessed feed, and FtcDashboard feed will be disabled.
      * This method is effectively called automatically when the OpMode is no longer active.
      *
      * @see SwitchableVisionSender
      */
-    public void stopPreview() {
+    public Vision stopPreview() {
         if (visionSender != null) {
             Threads.stop(visionSender);
             visionSender = null;
         }
+        return this;
     }
 
+    /**
+     * Optional telemetry for subsystem attachment
+     */
     @Override
     public void update() {
         if (visionPortal != null) {
@@ -427,12 +446,12 @@ public class Vision extends BunyipsSubsystem {
         }
 
         @Override
-        public Object onProcessFrame(Mat frame, long captureTimeNanos) {
-            return frame;
+        public void onProcessFrame(Mat frame, long captureTimeNanos) {
+            // no-op
         }
 
         @Override
-        public void onFrameDraw(Canvas canvas, Object userContext) {
+        public void onFrameDraw(Canvas canvas) {
             // no-op
         }
     }

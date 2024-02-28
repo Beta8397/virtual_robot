@@ -3,9 +3,9 @@ package org.murraybridgebunyips.bunyipslib;
 import com.qualcomm.robotcore.hardware.Servo;
 
 /**
- * Control a set of two servo claws together.
+ * Control a set of two servos together.
  */
-public class DualClaws extends BunyipsSubsystem {
+public class DualServos extends BunyipsSubsystem {
     private final Servo left;
     private final Servo right;
     private final double LEFT_SERVO_CLOSED_POSITION;
@@ -15,7 +15,7 @@ public class DualClaws extends BunyipsSubsystem {
     private double leftServoPosition;
     private double rightServoPosition;
 
-    public DualClaws(Servo left, Servo right, double leftClosed, double leftOpen, double rightClosed, double rightOpen) {
+    public DualServos(Servo left, Servo right, double leftClosed, double leftOpen, double rightClosed, double rightOpen) {
         this.left = left;
         this.right = right;
         LEFT_SERVO_CLOSED_POSITION = leftClosed;
@@ -29,48 +29,52 @@ public class DualClaws extends BunyipsSubsystem {
         update();
     }
 
-    public void toggleServo(ServoSide servo) {
+    public DualServos toggleServo(ServoSide servo) {
         if (servo == ServoSide.LEFT) {
             leftServoPosition = (leftServoPosition == LEFT_SERVO_OPEN_POSITION) ? LEFT_SERVO_CLOSED_POSITION : LEFT_SERVO_OPEN_POSITION;
-            return;
+            return this;
         }
         if (servo == ServoSide.RIGHT) {
             rightServoPosition = (rightServoPosition == RIGHT_SERVO_OPEN_POSITION) ? RIGHT_SERVO_CLOSED_POSITION : RIGHT_SERVO_OPEN_POSITION;
-            return;
+            return this;
         }
         leftServoPosition = (leftServoPosition == LEFT_SERVO_OPEN_POSITION) ? LEFT_SERVO_CLOSED_POSITION : LEFT_SERVO_OPEN_POSITION;
         rightServoPosition = (rightServoPosition == RIGHT_SERVO_OPEN_POSITION) ? RIGHT_SERVO_CLOSED_POSITION : RIGHT_SERVO_OPEN_POSITION;
+        return this;
     }
 
-    public void openServo(ServoSide servo) {
+    public DualServos openServo(ServoSide servo) {
         if (servo == ServoSide.LEFT) {
             leftServoPosition = LEFT_SERVO_OPEN_POSITION;
-            return;
+            return this;
         }
         if (servo == ServoSide.RIGHT) {
             rightServoPosition = RIGHT_SERVO_OPEN_POSITION;
-            return;
+            return this;
         }
         leftServoPosition = LEFT_SERVO_OPEN_POSITION;
         rightServoPosition = RIGHT_SERVO_OPEN_POSITION;
+        return this;
     }
 
-    public void closeServo(ServoSide servo) {
+    public DualServos closeServo(ServoSide servo) {
         if (servo == ServoSide.LEFT) {
             leftServoPosition = LEFT_SERVO_CLOSED_POSITION;
-            return;
+            return this;
         }
         if (servo == ServoSide.RIGHT) {
             rightServoPosition = RIGHT_SERVO_CLOSED_POSITION;
-            return;
+            return this;
         }
         leftServoPosition = LEFT_SERVO_CLOSED_POSITION;
         rightServoPosition = RIGHT_SERVO_CLOSED_POSITION;
+        return this;
     }
 
     /**
      * Push stateful changes to the servos.
      */
+    @Override
     public void update() {
         left.setPosition(leftServoPosition);
         right.setPosition(rightServoPosition);

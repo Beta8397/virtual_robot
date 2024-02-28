@@ -22,30 +22,35 @@ public class ExampleLift extends BunyipsSubsystem {
         liftPositionPointer = 0;
     }
 
-    public void liftUp() {
+    public ExampleLift liftUp() {
         // Check if the pointer is exceeding the length of the array
         if (liftPositionPointer >= liftPositions.length) {
             // If it is, set the pointer to the last index of the array
             liftPositionPointer = liftPositions.length - 1;
-            return;
+            return this;
         }
         // Increment the pointer
         liftPositionPointer++;
+        // We also use a builder pattern to allow for chaining such as lift.liftUp().update();
+        // This is optional and your methods can have a void return type if you don't want to chain.
+        return this;
     }
 
     public boolean isBusy() {
         return liftMotor.isBusy();
     }
 
-    public void liftDown() {
+    public ExampleLift liftDown() {
         // Do the opposite of liftUp()
         if (liftPositionPointer <= 0) {
             liftPositionPointer = 0;
-            return;
+            return this;
         }
         liftPositionPointer--;
+        return this;
     }
 
+    @Override
     public void update() {
         // Use the array and pointer to determine what position the motor should be set to.
         int position = liftPositions[liftPositionPointer];

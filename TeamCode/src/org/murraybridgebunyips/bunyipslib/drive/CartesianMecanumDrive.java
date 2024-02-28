@@ -41,12 +41,14 @@ public class CartesianMecanumDrive extends BunyipsSubsystem {
     }
 
     // Setters for the prioritisation of the drive system
-    public void setPriority(Priority priority) {
+    public CartesianMecanumDrive setPriority(Priority priority) {
         this.priority = priority;
+        return this;
     }
 
-    public void swapPriority() {
+    public CartesianMecanumDrive swapPriority() {
         priority = priority == Priority.NORMALISED ? Priority.ROTATIONAL : Priority.NORMALISED;
+        return this;
     }
 
     /**
@@ -58,10 +60,11 @@ public class CartesianMecanumDrive extends BunyipsSubsystem {
      * @param right_stick_x R value of the controller
      * @see Controller#Companion
      */
-    public void setSpeedUsingController(double left_stick_x, double left_stick_y, double right_stick_x) {
+    public CartesianMecanumDrive setSpeedUsingController(double left_stick_x, double left_stick_y, double right_stick_x) {
         speedX = Range.clip(left_stick_x, -1.0, 1.0);
         speedY = Range.clip(-left_stick_y, -1.0, 1.0);
         speedR = Range.clip(right_stick_x, -1.0, 1.0);
+        return this;
     }
 
     /**
@@ -77,10 +80,11 @@ public class CartesianMecanumDrive extends BunyipsSubsystem {
      *          Positive is clockwise, negative is anti-clockwise.
      *          Range: -1.0 to 1.0
      */
-    public void setSpeedXYR(double x, double y, double r) {
+    public CartesianMecanumDrive setSpeedXYR(double x, double y, double r) {
         speedX = Range.clip(x, -1.0, 1.0);
         speedY = Range.clip(y, -1.0, 1.0);
         speedR = Range.clip(r, -1.0, 1.0);
+        return this;
     }
 
     /**
@@ -90,17 +94,19 @@ public class CartesianMecanumDrive extends BunyipsSubsystem {
      * @param direction_degrees direction at which the motors will move toward
      * @param speedR            rotation speed - positive: clockwise
      */
-    public void setSpeedPolarR(double speed, double direction_degrees, double speedR) {
+    public CartesianMecanumDrive setSpeedPolarR(double speed, double direction_degrees, double speedR) {
         double radians = Math.toRadians(direction_degrees);
         speedX = Range.clip(speed * Math.cos(radians), -1.0, 1.0);
         speedY = Range.clip(speed * Math.sin(radians), -1.0, 1.0);
         this.speedR = Range.clip(speedR, -1.0, 1.0);
+        return this;
     }
 
     /**
      * Update and reflect the speed of the drive system to the actual motors, and
      * calculate the motor powers based on these variables.
      */
+    @Override
     public void update() {
         if (priority == Priority.ROTATIONAL) {
             rotationalUpdate();
@@ -148,24 +154,26 @@ public class CartesianMecanumDrive extends BunyipsSubsystem {
     /**
      * Set the drive system to brake.
      */
-    public void setToBrake() {
+    public CartesianMecanumDrive setToBrake() {
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        return this;
     }
 
     /**
      * Set the drive system to float.
      */
-    public void setToFloat() {
+    public CartesianMecanumDrive setToFloat() {
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        return this;
     }
 
-    private void rotationalUpdate() {
+    private CartesianMecanumDrive rotationalUpdate() {
         // Calculate translational speeds
         double[] translationValues = {
                 speedY + speedX,
@@ -207,6 +215,7 @@ public class CartesianMecanumDrive extends BunyipsSubsystem {
         frontRight.setPower(frontRightPower);
         backLeft.setPower(backLeftPower);
         backRight.setPower(backRightPower);
+        return this;
     }
 
     enum Priority {

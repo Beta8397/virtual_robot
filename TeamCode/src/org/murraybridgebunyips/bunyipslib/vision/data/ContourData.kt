@@ -5,13 +5,24 @@ import org.opencv.core.Rect
 
 data class ContourData(
     val boundingRect: Rect,
+    val area: Double,
+    val areaPercent: Double,
+    val aspectRatio: Double,
+    val centerX: Double,
+    val centerY: Double,
+    val yaw: Double,
+    val pitch: Double
 ) : VisionData() {
-    val area: Double = boundingRect.area()
-    val aspectRatio: Double = boundingRect.width.toDouble() / boundingRect.height.toDouble()
-    val centerX: Double = boundingRect.x + boundingRect.width / 2.0
-    val centerY: Double = boundingRect.y + boundingRect.height / 2.0
-    val yaw: Double = (centerX - Vision.CAMERA_WIDTH / 2.0) / Vision.CAMERA_WIDTH
-    val pitch: Double = (centerY - Vision.CAMERA_HEIGHT / 2.0) / Vision.CAMERA_HEIGHT
+    constructor(boundingRect: Rect) : this(
+        boundingRect,
+        boundingRect.area(),
+        boundingRect.area() / (Vision.CAMERA_WIDTH * Vision.CAMERA_HEIGHT) * 100.0,
+        boundingRect.width.toDouble() / boundingRect.height.toDouble(),
+        boundingRect.x + boundingRect.width / 2.0,
+        boundingRect.y + boundingRect.height / 2.0,
+        (((boundingRect.x + boundingRect.width / 2.0) - Vision.CAMERA_WIDTH / 2.0) / (Vision.CAMERA_WIDTH / 2.0)),
+        -(((boundingRect.y + boundingRect.height / 2.0) - Vision.CAMERA_HEIGHT / 2.0) / (Vision.CAMERA_HEIGHT / 2.0))
+    )
 
     companion object {
         @JvmStatic

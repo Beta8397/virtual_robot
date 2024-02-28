@@ -20,6 +20,12 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
     private Task defaultTask = new IdleTask();
     private boolean mutedReports;
 
+    /**
+     * Get the current task for this subsystem.
+     * If the current task is null or finished, the default task will be returned.
+     *
+     * @return The current task
+     */
     public Task getCurrentTask() {
         if (currentTask == null || currentTask.isFinished()) {
             currentTask = defaultTask;
@@ -34,10 +40,21 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
         mutedReports = true;
     }
 
+    /**
+     * Set the default task for this subsystem, which will be run when no other task is running.
+     *
+     * @param defaultTask The task to set as the default task
+     */
     public final void setDefaultTask(Task defaultTask) {
         this.defaultTask = defaultTask;
     }
 
+    /**
+     * Set the current task to the given task.
+     *
+     * @param currentTask The task to set as the current task
+     * @return whether the task was successfully set or ignored
+     */
     public final boolean setCurrentTask(Task currentTask) {
         if (this.currentTask == currentTask)
             return true;
@@ -50,7 +67,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
                 setHighPriorityCurrentTask(currentTask);
                 return true;
             }
-            Dbg.warn("Attempted to set a task while another task was running in %, this was ignored.", getClass().getSimpleName());
+            Dbg.log(getClass(), "Ignored task change: %->%", this.currentTask.getName(), currentTask.getName());
             return false;
         }
 
@@ -58,22 +75,38 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
         // Default task technically can't finish, but it can be interrupted, so we will just run the finish callback
         if (this.currentTask == defaultTask)
             defaultTask.onFinish();
+        Dbg.logd(getClass(), "Task changed: %->%", this.currentTask.getName(), currentTask.getName());
         this.currentTask = currentTask;
         return true;
     }
 
+    /**
+     * Add a dependency from another task to this subsystem.
+     *
+     * @param taskHashCode The hash code of the task to add as a dependency
+     */
     public final void addDependencyFromTask(int taskHashCode) {
         dependencies.add(taskHashCode);
     }
 
+    /**
+     * Get the dependencies for this subsystem.
+     *
+     * @return The dependencies for this subsystem
+     */
     public final ArrayList<Integer> getTaskDependencies() {
         return dependencies;
     }
 
+    /**
+     * Set the current task to the given task, overriding any current task.
+     *
+     * @param currentTask The task to set as the current task
+     */
     public final void setHighPriorityCurrentTask(Task currentTask) {
         // Task will be cancelled abruptly, run the finish callback now
         if (this.currentTask != defaultTask) {
-            Dbg.warn("A high-priority task has forcefully interrupted the current task in %.", getClass().getSimpleName());
+            Dbg.warn(getClass(), "Task changed: %(INT)->%", this.currentTask.getName(), currentTask.getName());
             this.currentTask.forceFinish();
         }
         currentTask.reset();
@@ -83,6 +116,9 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
         this.currentTask = currentTask;
     }
 
+    /**
+     * Update the subsystem and run the current task, if tasks are not set up this will be identical to update().
+     */
     public final void run() {
         Task task = getCurrentTask();
         if (task != null) {
@@ -103,5 +139,8 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
         update();
     }
 
+    /**
+     * To be updated periodically on every hardware loop.
+     */
     public abstract void update();
 }

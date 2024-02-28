@@ -15,6 +15,14 @@ public class Paint {
 
     }
 
+    public void setTextSize(float textSize){
+
+    }
+
+    public void setAntiAlias(boolean aa){
+
+    }
+
     public enum Style {
         /**
          * Geometry and text drawn with this style will be filled, ignoring all

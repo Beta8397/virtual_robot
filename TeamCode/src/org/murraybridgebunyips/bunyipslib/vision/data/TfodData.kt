@@ -51,19 +51,42 @@ data class TfodData(
     /**
      * Estimation of the horizontal angle to the detected object in radians.
      */
-    val horizontalAngleRad: Double
-) : VisionData() {
+    val horizontalAngleRad: Double,
     /**
      * Calculate the 0-1 range of which the object is horizontally translated in the image.
      */
-    fun getHorizontalTranslation(): Float {
-        return (left + right) / 2 / imageWidth
-    }
-
+    val horizontalTranslation: Float,
     /**
      * Calculate the 0-1 range of which the object is vertically translated in the image.
      */
-    fun getVerticalTranslation(): Float {
-        return (top + bottom) / 2 / imageHeight
-    }
+    val verticalTranslation: Float
+) : VisionData() {
+    constructor(
+        label: String,
+        confidence: Float,
+        left: Float,
+        right: Float,
+        top: Float,
+        bottom: Float,
+        width: Float,
+        height: Float,
+        imageWidth: Int,
+        imageHeight: Int,
+        horizontalAngleRad: Double
+    ) : this(
+        label,
+        confidence,
+        left,
+        right,
+        top,
+        bottom,
+        width,
+        height,
+        imageWidth,
+        imageHeight,
+        Math.toDegrees(horizontalAngleRad),
+        horizontalAngleRad,
+        (left + right) / 2 / imageWidth,
+        (top + bottom) / 2 / imageHeight
+    )
 }

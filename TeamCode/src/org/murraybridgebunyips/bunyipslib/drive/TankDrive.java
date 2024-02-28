@@ -33,7 +33,7 @@ public class TankDrive extends BunyipsSubsystem implements RoadRunnerDrive {
     private final TankRoadRunnerDrive instance;
 
     public TankDrive(DriveConstants constants, TankCoefficients coefficients, IMU imu, DcMotorEx frontLeft, DcMotorEx frontRight, DcMotorEx backLeft, DcMotorEx backRight) {
-        instance = new TankRoadRunnerDrive(constants, coefficients, opMode.hardwareMap.voltageSensor, imu, frontLeft, frontRight, backLeft, backRight);
+        instance = new TankRoadRunnerDrive(opMode, constants, coefficients, opMode.hardwareMap.voltageSensor, imu, frontLeft, frontRight, backLeft, backRight);
     }
 
     @Override
@@ -217,8 +217,14 @@ public class TankDrive extends BunyipsSubsystem implements RoadRunnerDrive {
         instance.setWeightedDrivePowerFieldCentric(pose);
     }
 
-    public void setSpeedUsingControllerFieldCentric(double x, double y, double r) {
+    public TankDrive setSpeedUsingController(double x, double y, double r) {
+        setWeightedDrivePower(Controller.makeRobotPose(x, y, r));
+        return this;
+    }
+
+    public TankDrive setSpeedUsingControllerFieldCentric(double x, double y, double r) {
         setWeightedDrivePowerFieldCentric(Controller.makeRobotPose(x, y, r));
+        return this;
     }
 
     @Override

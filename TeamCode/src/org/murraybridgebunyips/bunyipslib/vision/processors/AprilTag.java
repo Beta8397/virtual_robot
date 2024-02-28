@@ -11,6 +11,7 @@ import org.murraybridgebunyips.bunyipslib.vision.Vision;
 import org.murraybridgebunyips.bunyipslib.vision.data.AprilTagData;
 import org.opencv.core.Mat;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -20,6 +21,7 @@ import java.util.List;
  */
 public class AprilTag extends Processor<AprilTagData> {
     private final AprilTagProcessor instance;
+    private volatile Object atCtx;
 
     /**
      * Will use the provided camera calibration
@@ -69,7 +71,7 @@ public class AprilTag extends Processor<AprilTagData> {
                     detection.hamming,
                     detection.decisionMargin,
                     detection.center,
-                    detection.corners,
+                    Arrays.asList(detection.corners),
                     detection.metadata != null ? detection.metadata.name : null,
                     detection.metadata != null ? detection.metadata.tagsize : null,
                     detection.metadata != null ? detection.metadata.fieldPosition : null,
@@ -98,12 +100,12 @@ public class AprilTag extends Processor<AprilTagData> {
     }
 
     @Override
-    public Object onProcessFrame(Mat frame, long captureTimeNanos) {
-        return instance.processFrame(frame, captureTimeNanos);
+    public void onProcessFrame(Mat frame, long captureTimeNanos) {
+        atCtx = instance.processFrame(frame, captureTimeNanos);
     }
 
     @Override
-    public void onFrameDraw(Canvas canvas, Object userContext) {
-        instance.onDrawFrame(canvas, Vision.CAMERA_WIDTH, Vision.CAMERA_HEIGHT, 1.0f, 1.0f, userContext);
+    public void onFrameDraw(Canvas canvas) {
+        instance.onDrawFrame(canvas, Vision.CAMERA_WIDTH, Vision.CAMERA_HEIGHT, 1.0f, 1.0f, atCtx);
     }
 }

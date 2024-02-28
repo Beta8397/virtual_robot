@@ -1,7 +1,5 @@
 package org.murraybridgebunyips.bunyipslib.roadrunner;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -193,12 +191,7 @@ public abstract class PathRecorder extends BunyipsOpMode {
         }
         sb.append("    .build();");
 
-        // FtcDashboard
-        TelemetryPacket packet = new TelemetryPacket();
-        packet.put("Generated path:\n", sb.toString());
-        FtcDashboard.getInstance().sendTelemetryPacket(packet);
-
-        // DS
+        // DS + FtcDashboard
         resetTelemetry();
         addRetainedTelemetry("Generated path:\n" + sb);
         pushTelemetry();

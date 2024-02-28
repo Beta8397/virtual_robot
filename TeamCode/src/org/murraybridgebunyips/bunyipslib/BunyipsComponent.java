@@ -11,5 +11,5 @@ public abstract class BunyipsComponent {
     // in the constructor/member fields. You will experience extremely strange behaviour if you do not follow this.
     // This should not be a problem as all components are usually instantiated in the init phase anyway due to
     // the need to access motors and other hardware at runtime.
-    protected BunyipsOpMode opMode = BunyipsOpMode.getInstance();
+    protected final BunyipsOpMode opMode = BunyipsOpMode.getInstance();
 }

@@ -46,7 +46,7 @@ public class TeamProp extends Processor<TeamPropData> {
     }
 
     @Override
-    public Object onProcessFrame(Mat frame, long captureTimeNanos) {
+    public void onProcessFrame(Mat frame, long captureTimeNanos) {
         zone1 = frame.submat(new Rect(0, 0, Vision.CAMERA_WIDTH / 2, Vision.CAMERA_HEIGHT));
         zone2 = frame.submat(new Rect(Vision.CAMERA_WIDTH / 2, 0, Vision.CAMERA_WIDTH / 2, Vision.CAMERA_HEIGHT));
 
@@ -64,8 +64,6 @@ public class TeamProp extends Processor<TeamPropData> {
             // Don't ask
             max_distance = Math.min(distance1, distance2);
         }
-
-        return frame;
     }
 
     @SuppressWarnings("rawtypes")
@@ -83,7 +81,7 @@ public class TeamProp extends Processor<TeamPropData> {
 
 
     @Override
-    public void onFrameDraw(Canvas canvas, Object userContext) {
+    public void onFrameDraw(Canvas canvas) {
         // no-op
     }
 

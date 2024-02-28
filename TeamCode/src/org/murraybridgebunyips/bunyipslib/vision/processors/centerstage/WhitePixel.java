@@ -2,18 +2,20 @@ package org.murraybridgebunyips.bunyipslib.vision.processors.centerstage;
 
 import com.acmerobotics.dashboard.config.Config;
 
-import org.murraybridgebunyips.bunyipslib.vision.processors.YCbCrColourThreshold;
+import org.murraybridgebunyips.bunyipslib.vision.processors.ColourThreshold;
 import org.opencv.core.Scalar;
 
 @Config
-public class WhitePixel extends YCbCrColourThreshold {
-    public static double LOWER_Y = 192.7;
-    public static double LOWER_CB = 120.0;
-    public static double LOWER_CR = 106.3;
-    public static double UPPER_Y = 255;
-    public static double UPPER_CB = 129;
-    public static double UPPER_CR = 255;
+public class WhitePixel extends ColourThreshold {
+    public static Scalar LOWER_YCBCR = new Scalar(192.7, 120.0, 106.3);
+    public static Scalar UPPER_YCBCR = new Scalar(255.0, 129.0, 255.0);
+    public static double MIN_AREA = DEFAULT_MIN_AREA;
+    public static double MAX_AREA = DEFAULT_MAX_AREA;
     public static boolean SHOW_MASKED_INPUT = true;
+
+    public WhitePixel() {
+        super(ColourSpace.YCrCb);
+    }
 
     @Override
     public String getName() {
@@ -21,13 +23,23 @@ public class WhitePixel extends YCbCrColourThreshold {
     }
 
     @Override
+    public double getContourAreaMinPercent() {
+        return MIN_AREA;
+    }
+
+    @Override
+    public double getContourAreaMaxPercent() {
+        return MAX_AREA;
+    }
+
+    @Override
     public Scalar getLower() {
-        return new Scalar(LOWER_Y, LOWER_CB, LOWER_CR);
+        return LOWER_YCBCR;
     }
 
     @Override
     public Scalar getUpper() {
-        return new Scalar(UPPER_Y, UPPER_CB, UPPER_CR);
+        return UPPER_YCBCR;
     }
 
     @Override

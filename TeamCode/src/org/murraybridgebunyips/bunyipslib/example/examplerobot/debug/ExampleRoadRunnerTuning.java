@@ -19,7 +19,8 @@ public class ExampleRoadRunnerTuning extends ManualFeedforwardTuner { // See all
 
         // drive is defined in the superclass, assign it here to a new instance of your drive class
         // Do not use the BunyipsLib drive classes (MecanumDrive, TankDrive), you'll need to use the ones directly from RoadRunner (TankRoadRunnerDrive, MecanumRoadRunnerDrive)
-        drive = new TankRoadRunnerDrive(ROBOT_CONFIG.driveConstants, ROBOT_CONFIG.coefficients, hardwareMap.voltageSensor, ROBOT_CONFIG.imu, ROBOT_CONFIG.leftFrontMotor, ROBOT_CONFIG.rightFrontMotor, ROBOT_CONFIG.leftBackMotor, ROBOT_CONFIG.rightBackMotor);
+        // For OpMode we can pass null
+        drive = new TankRoadRunnerDrive(null, ROBOT_CONFIG.driveConstants, ROBOT_CONFIG.coefficients, hardwareMap.voltageSensor, ROBOT_CONFIG.imu, ROBOT_CONFIG.leftFrontMotor, ROBOT_CONFIG.rightFrontMotor, ROBOT_CONFIG.leftBackMotor, ROBOT_CONFIG.rightBackMotor);
 //        drive.setLocalizer(new TwoWheelTrackingLocalizer(ROBOT_CONFIG.localizerCoefficients, ROBOT_CONFIG.parallelEncoder, ROBOT_CONFIG.perpendicularEncoder, drive));
 
         // Allow the tuning OpMode to handle the rest

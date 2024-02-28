@@ -20,6 +20,7 @@ import java.util.List;
  */
 public class TFOD extends Processor<TfodData> {
     private final TfodProcessor instance;
+    private volatile Object tfodCtx;
 
     public TFOD() {
         instance = new TfodProcessor.Builder()
@@ -42,6 +43,7 @@ public class TFOD extends Processor<TfodData> {
         return "tfod";
     }
 
+    @Override
     public void update() {
         List<Recognition> recognitions = instance.getRecognitions();
         for (Recognition recognition : recognitions) {
@@ -56,7 +58,6 @@ public class TFOD extends Processor<TfodData> {
                     recognition.getHeight(),
                     recognition.getImageWidth(),
                     recognition.getImageHeight(),
-                    recognition.estimateAngleToObject(AngleUnit.DEGREES),
                     recognition.estimateAngleToObject(AngleUnit.RADIANS)
             ));
         }
@@ -71,12 +72,12 @@ public class TFOD extends Processor<TfodData> {
     }
 
     @Override
-    public Object onProcessFrame(Mat frame, long captureTimeNanos) {
-        return instance.processFrame(frame, captureTimeNanos);
+    public void onProcessFrame(Mat frame, long captureTimeNanos) {
+        tfodCtx = instance.processFrame(frame, captureTimeNanos);
     }
 
     @Override
-    public void onFrameDraw(Canvas canvas, Object userContext) {
-        instance.onDrawFrame(canvas, Vision.CAMERA_WIDTH, Vision.CAMERA_HEIGHT, 1.0f, 1.0f, userContext);
+    public void onFrameDraw(Canvas canvas) {
+        instance.onDrawFrame(canvas, Vision.CAMERA_WIDTH, Vision.CAMERA_HEIGHT, 1.0f, 1.0f, tfodCtx);
     }
 }

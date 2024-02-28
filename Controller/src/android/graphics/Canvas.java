@@ -9,5 +9,9 @@ public class Canvas {
 
     }
 
+    public void drawText(String text, float a, float b, Paint paint){
+
+    }
+
     public Canvas(Bitmap b){}
 }

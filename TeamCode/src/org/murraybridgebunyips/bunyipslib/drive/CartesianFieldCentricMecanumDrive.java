@@ -48,7 +48,7 @@ public class CartesianFieldCentricMecanumDrive extends CartesianMecanumDrive {
      * @see Controller#Companion
      */
     @Override
-    public void setSpeedUsingController(double left_stick_x, double left_stick_y, double right_stick_x) {
+    public CartesianFieldCentricMecanumDrive setSpeedUsingController(double left_stick_x, double left_stick_y, double right_stick_x) {
         imu.update();
 
         // Account for the rotated vector of the gamepad
@@ -64,6 +64,8 @@ public class CartesianFieldCentricMecanumDrive extends CartesianMecanumDrive {
         speedY = left_stick_x * cos + left_stick_y * sin;
         speedX = left_stick_x * sin - left_stick_y * cos;
         speedR = right_stick_x;
+
+        return this;
     }
 
     /**
@@ -83,7 +85,7 @@ public class CartesianFieldCentricMecanumDrive extends CartesianMecanumDrive {
      *          Range: -1.0 to 1.0
      */
     @Override
-    public void setSpeedXYR(double x, double y, double r) {
+    public CartesianFieldCentricMecanumDrive setSpeedXYR(double x, double y, double r) {
         imu.update();
 
         double heading = imu.getRawHeading();
@@ -95,6 +97,8 @@ public class CartesianFieldCentricMecanumDrive extends CartesianMecanumDrive {
         speedX = -(x * cos + y * sin);
         speedY = -(x * sin - y * cos);
         speedR = r;
+
+        return this;
     }
 
     /**
@@ -108,7 +112,7 @@ public class CartesianFieldCentricMecanumDrive extends CartesianMecanumDrive {
      * @param speedR            rotation speed - positive: clockwise
      */
     @Override
-    public void setSpeedPolarR(double speed, double direction_degrees, double speedR) {
+    public CartesianFieldCentricMecanumDrive setSpeedPolarR(double speed, double direction_degrees, double speedR) {
         imu.update();
 
         double heading = imu.getRawHeading();
@@ -120,5 +124,7 @@ public class CartesianFieldCentricMecanumDrive extends CartesianMecanumDrive {
         speedX = -(speed * Math.cos(direction) * cos + speed * Math.sin(direction) * sin);
         speedY = -(speed * Math.cos(direction) * sin - speed * Math.sin(direction) * cos);
         this.speedR = speedR;
+
+        return this;
     }
 }

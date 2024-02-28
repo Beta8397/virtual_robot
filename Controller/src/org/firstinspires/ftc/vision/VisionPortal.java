@@ -193,6 +193,10 @@ public class VisionPortal
             return setLiveViewContainerId(viewId);
         }
 
+        public Builder setShowStatsOverlay(boolean s) {
+            return this;
+        }
+
         /**
          * Configure whether the portal should automatically pause the live camera
          * view if all attached processors are disabled; this can save computational resources

@@ -90,10 +90,11 @@ class IMUOp(private val imu: IMU) : BunyipsSubsystem() {
     /**
      * Reset all heading measurements, offsets, and internal measurements to default 0.0
      */
-    fun resetHeading() {
+    fun resetHeading(): IMUOp {
         heading = 0.0
         offset = 0.0
         imu.resetYaw()
+        return this
     }
 
     /**
@@ -147,16 +148,18 @@ class IMUOp(private val imu: IMU) : BunyipsSubsystem() {
     /**
      * Start PrecisionDrive IMU alignment algorithm and capture the original angle
      */
-    fun startCapture() {
+    fun startCapture(): IMUOp {
         this.update()
         this.capture = this.heading
+        return this
     }
 
     /**
      * Stop and reset PrecisionDrive IMU alignment algorithm
      */
-    fun resetCapture() {
+    fun resetCapture(): IMUOp {
         this.capture = null
+        return this
     }
 
     /**

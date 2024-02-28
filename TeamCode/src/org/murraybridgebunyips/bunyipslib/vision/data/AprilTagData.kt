@@ -29,8 +29,7 @@ data class AprilTagData(
     /**
      * The image pixel coordinates of the corners of the tag.
      */
-    @Suppress("ArrayInDataClass")
-    val corners: Array<Point>?,
+    val corners: List<Point>?,
     /**
      * Text name for this tag, if available.
      */
