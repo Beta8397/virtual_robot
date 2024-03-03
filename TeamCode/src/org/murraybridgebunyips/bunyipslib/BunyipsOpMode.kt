@@ -5,6 +5,12 @@ import com.acmerobotics.dashboard.canvas.Canvas
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket
 import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
+import com.qualcomm.robotcore.hardware.DcMotor
+import com.qualcomm.robotcore.hardware.DcMotorSimple
+import com.qualcomm.robotcore.hardware.HardwareDevice
+import com.qualcomm.robotcore.hardware.LightSensor
+import com.qualcomm.robotcore.hardware.RobotCoreLynxUsbDevice
+import com.qualcomm.robotcore.hardware.ServoController
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.robotcore.external.Telemetry.Item
 import org.murraybridgebunyips.bunyipslib.Text.formatString
@@ -12,6 +18,7 @@ import org.murraybridgebunyips.bunyipslib.Text.round
 import org.murraybridgebunyips.bunyipslib.roadrunner.util.LynxModuleUtil
 import org.murraybridgebunyips.deps.BuildConfig
 import kotlin.math.roundToInt
+
 
 /**
  * Base class for all OpModes that provides a number of useful methods and utilities for development.
@@ -26,6 +33,7 @@ abstract class BunyipsOpMode : LinearOpMode() {
 
     private var operationsCompleted = false
     private var operationsPaused = false
+    private var safeHaltHardwareOnStop = false
 
     private var opModeStatus = "idle"
     private lateinit var overheadTelemetry: Item
@@ -92,8 +100,23 @@ abstract class BunyipsOpMode : LinearOpMode() {
     protected abstract fun activeLoop()
 
     /**
+     * Perform one time clean-up operations after the activeLoop() finishes from an uninterrupted
+     * OpMode lifecycle. This method is called after a finish() or exit() call, but may not
+     * be called if the OpMode is terminated by an unhandled exception. This method is useful for
+     * ensuring the robot is in a safe state after the OpMode has finished.
+     * @see onStop
+     */
+    protected open fun onFinish() {
+    }
+
+    /**
      * Perform one time clean-up operations after the OpMode finishes.
+     * This method is called after the OpMode has been requested to stop, and will be the last method
+     * called before the OpMode is terminated, and is *guaranteed* to be called. This method is useful
+     * for releasing resources to prevent memory leaks, as motor controllers will be powered off
+     * as the OpMode is ending.
      * This method is not exception protected!
+     * @see onFinish
      */
     protected open fun onStop() {
     }
@@ -227,12 +250,24 @@ abstract class BunyipsOpMode : LinearOpMode() {
             }
 
             opModeStatus = "finished"
+            try {
+                onFinish()
+            } catch (e: Exception) {
+                ErrorUtil.handleCatchAllException(e, ::log)
+            }
             // overheadTelemetry will no longer update, will remain frozen on last value
+            movingAverageTimer.update()
             pushTelemetry()
             Dbg.logd("BunyipsOpMode: all tasks finished.")
             // Wait for user to hit stop or for the OpMode to be terminated
+            // We will continue running the OpMode as there might be some other user threads
+            // under Threads that can still run, so we will wait indefinitely and simulate
+            // what the FTC SDK does when the OpMode is stopped if they wish.
+            // This has been made optional as users may want to hold a position or keep a motor
+            // running after the OpMode has finished
             while (opModeIsActive()) {
-                // no-op
+                if (safeHaltHardwareOnStop)
+                    safeHaltHardware()
             }
         } catch (t: Throwable) {
             Dbg.error("BunyipsOpMode: unhandled throwable! <${t.message}>")
@@ -515,18 +550,66 @@ abstract class BunyipsOpMode : LinearOpMode() {
      * This is a dangerous method, as the OpMode will no longer be able to run any main thread code.
      * This method should be called when the OpMode is finished and no longer needs to run, and will
      * will put the OpMode in a state where it will not run any more code (including timers & telemetry).
+     * @param safeHaltHardwareOnStop If true (default), all motors/devices will be actively told to stop for the remainder of the OpMode.
      */
-    fun finish() {
+    fun finish(safeHaltHardwareOnStop: Boolean = true) {
         if (operationsCompleted) {
             return
         }
+        this.safeHaltHardwareOnStop = safeHaltHardwareOnStop
         operationsCompleted = true
         Dbg.logd("BunyipsOpMode: activeLoop() terminated by finish().")
         createTelemetryItem(
-            "BunyipsOpMode: Robot is stopped. All operations completed.",
+            "BunyipsOpMode: Robot ${if (safeHaltHardwareOnStop) "is stopped" else "tasks finished"}. All operations completed.",
             true
         )
         pushTelemetry()
+    }
+
+    /**
+     * Call to manually finish the OpMode.
+     * This is a dangerous method, as the OpMode will no longer be able to run any main thread code.
+     * This method should be called when the OpMode is finished and no longer needs to run, and will
+     * will put the OpMode in a state where it will not run any more code (including timers & telemetry).
+     * This method will also actively tell all motors/devices to stop for the remainder of the OpMode.
+     */
+    fun finish() {
+        finish(true)
+    }
+
+    /**
+     * Call to command all motors and sensors on the robot to stop.
+     * This method is continuously called when no OpMode is running, and allows you to do the same while still
+     * in an OpMode (called internally after `finish(true)`).
+     * This method will also power down all LynxModules and disable all servos.
+     */
+    fun safeHaltHardware() {
+        // Set all motor powers to zero, the implementation here will also stop any CRServos
+        for (motor in hardwareMap.getAll(DcMotorSimple::class.java)) {
+            // Avoid enabling servos if they are already zero power
+            if (motor.power != 0.0) motor.power = 0.0
+        }
+        // Shut down all LynxModules
+        for (device in hardwareMap.getAll(RobotCoreLynxUsbDevice::class.java)) {
+            device.failSafe()
+        }
+        // Power down the servos
+        for (servoController in hardwareMap.getAll(ServoController::class.java)) {
+            if (servoController.manufacturer == HardwareDevice.Manufacturer.Lynx) {
+                servoController.pwmDisable()
+            }
+        }
+        // Set motors to safe state
+        for (dcMotor in hardwareMap.getAll(DcMotor::class.java)) {
+            if (dcMotor.manufacturer == HardwareDevice.Manufacturer.Lynx) {
+                dcMotor.power = 0.0
+                dcMotor.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
+            }
+        }
+        // Turn off light sensors
+        for (light in hardwareMap.getAll(LightSensor::class.java)) {
+            light.enableLed(false)
+        }
     }
 
     /**

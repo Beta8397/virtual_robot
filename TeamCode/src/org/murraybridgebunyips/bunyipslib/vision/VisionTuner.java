@@ -12,17 +12,50 @@ import org.murraybridgebunyips.bunyipslib.vision.processors.centerstage.WhitePix
 import org.murraybridgebunyips.bunyipslib.vision.processors.centerstage.YellowPixel;
 import org.opencv.core.Scalar;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
+/**
+ * Manual tuner that allows the user to tune the colour thresholds the camera uses to detect pixels
+ * using gamepad1's left analogue stick.
+ * <p></p>
+ * <p>
+ * Threshold Index:<br>
+ * 0: lower_y<br>
+ * 1: lower_cb<br>
+ * 2: lower_cr<br>
+ * 3: upper_y<br>
+ * 4: upper_cb<br>
+ * 5: upper_cr<br>
+ * <p></p>
+ * <p>
+ * Pixel Index:<br>
+ * 0: White Pixel<br>
+ * 1: Purple Pixel<br>
+ * 2: Yellow Pixel<br>
+ * 3: Green Pixel<br>
+ *
+ * <p></p>
+ * Controls:<br>
+ * dpad_up: Increment selected pixel index<br>
+ * dpad_down: Decrement selected pixel index<br>
+ * dpad_left: Decrement selected Threshold index<br>
+ * dpad_right: Increment selected Threshold index<br>
+ * right_bumper(while held): Changes amount Threshold is changed by. Equation is left stick x and y times by 2<br>
+ * right_trigger: Saves values (to telem maybe? dunno yet)
+ *
+ * @author Lachlan Paul, 2024
+ */
 @TeleOp(name = "Vision Tuner")
 public class VisionTuner extends BunyipsOpMode {
-    int thresholdIndex = 1;
-    int pixelIndex = 1;
+    int thresholdIndex = 0;
+    int pixelIndex = 0;
     double theEquation = 0;
 
     ColourThreshold whitePixel;
     ColourThreshold purplePixel;
     ColourThreshold yellowPixel;
     ColourThreshold greenPixel;
-    ColourThreshold[] pixels;
     ColourThreshold currentPixel;
 
     double lower_y;
@@ -32,6 +65,8 @@ public class VisionTuner extends BunyipsOpMode {
     double upper_cb;
     double upper_cr;
 
+    ArrayList<ColourThreshold> pixels;
+    ArrayList<Double> scalars;
 
     private boolean upPressed;
     private boolean downPressed;
@@ -48,19 +83,18 @@ public class VisionTuner extends BunyipsOpMode {
             yellowPixel = new YellowPixel();
             greenPixel = new GreenPixel();
 
-            // This hasn't been used thus far, and it probably won't be.
-            // But just in case we're keeping it here.
-            pixels = new ColourThreshold[]{whitePixel, purplePixel, yellowPixel, greenPixel};
+            // TODO: Make it so it doesn't start them all at once.
+            //  It's fine for now but for performance's sake.
+            vision.init(whitePixel, purplePixel, yellowPixel, greenPixel);
+            vision.start(whitePixel, purplePixel, yellowPixel, greenPixel);
+            vision.startPreview();
+
+            pixels = new ArrayList<>(Arrays.asList(whitePixel, purplePixel, yellowPixel, greenPixel));
+            scalars = new ArrayList<>(Arrays.asList(lower_y, lower_cb, lower_cr, upper_y, upper_cb, upper_cr));
             currentPixel = whitePixel;  // Set it to white pixel by default
         } catch (IllegalArgumentException e) {
             throw new EmergencyStop("VisionTest is missing a webcam called 'webcam'!");
         }
-
-        addTelemetry("Threshold Index Key:");
-        addTelemetry("1: lower_y\n2: lower_cb\n3: lower_cr\n4: upper_y\n5: upper_cb\n6: upper_cr\n");
-
-        addTelemetry("Pixel Index Key");
-        addTelemetry("1: White Pixel\n2: Purple Pixel\n3: Yellow Pixel\n4: Green Pixel");
     }
 
     @Override
@@ -76,71 +110,41 @@ public class VisionTuner extends BunyipsOpMode {
         }
 
         if (gamepad1.dpad_up && !upPressed && !downPressed) {
-            if (pixelIndex == 1) {
-                pixelIndex = 4;
-            } else {
-                pixelIndex--;
-            }
-        }
-
-        if (gamepad1.dpad_down && !upPressed && !downPressed) {
-            if (pixelIndex == 4) {
-                pixelIndex = 1;
+            if (pixelIndex == 3) {
+                pixelIndex = 0;
             } else {
                 pixelIndex++;
             }
         }
 
+        if (gamepad1.dpad_down && !upPressed && !downPressed) {
+            if (pixelIndex == 0) {
+                pixelIndex = 3;
+            } else {
+                pixelIndex--;
+            }
+        }
+
         if (gamepad1.dpad_left && !leftPressed && !rightPressed) {
-            if (thresholdIndex == 1) {
-                thresholdIndex = 6;
+            if (thresholdIndex == 0) {
+                thresholdIndex = 5;
             } else {
                 thresholdIndex--;
             }
         }
 
         if (gamepad1.dpad_right && !leftPressed && !rightPressed) {
-            if (thresholdIndex == 6) {
-                thresholdIndex = 1;
+            if (thresholdIndex == 5) {
+                thresholdIndex = 0;
             } else {
                 thresholdIndex++;
             }
         }
 
-        switch (pixelIndex) {
-            case 1:
-                currentPixel = whitePixel;
-                break;
-            case 2:
-                currentPixel = purplePixel;
-                break;
-            case 3:
-                currentPixel = yellowPixel;
-                break;
-            case 4:
-                currentPixel = greenPixel;
-        }
-
-        switch (thresholdIndex) {
-            case 1:
-                lower_y += theEquation;
-                break;
-            case 2:
-                lower_cb += theEquation;
-                break;
-            case 3:
-                lower_cr += theEquation;
-                break;
-            case 4:
-                upper_y += theEquation;
-                break;
-            case 5:
-                upper_cb += theEquation;
-                break;
-            case 6:
-                upper_cr += theEquation;
-                break;
-        }
+        // NOTE: If this doesn't work, I have a backup of the original match case string with fixed
+        // index numbers.
+        currentPixel = pixels.get(pixelIndex);
+        scalars.set(thresholdIndex, scalars.get(thresholdIndex) + theEquation);
 
         upPressed = gamepad1.dpad_up;
         downPressed = gamepad1.dpad_down;
@@ -152,6 +156,12 @@ public class VisionTuner extends BunyipsOpMode {
 
         addTelemetry("Current Threshold Index: %", thresholdIndex);
         addTelemetry("Current Pixel Index: %", pixelIndex);
-        addTelemetry("Current Gamepad Thing: %", theEquation);
+        addTelemetry("Current Value to Change Threshold By: %", theEquation);
+
+        addTelemetry("\nThreshold Index Key:");
+        addTelemetry("0: lower_y\n1: lower_cb\n2: lower_cr\n3: upper_y\n4: upper_cb\n5: upper_cr\n");
+
+        addTelemetry("Pixel Index Key");
+        addTelemetry("0: White Pixel\n1: Purple Pixel\n2: Yellow Pixel\n3: Green Pixel");
     }
 }
