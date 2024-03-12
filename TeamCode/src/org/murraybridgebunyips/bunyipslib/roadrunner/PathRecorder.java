@@ -29,7 +29,6 @@ import java.util.ArrayList;
  * @author Lucas Bubner, 2024
  */
 public abstract class PathRecorder extends BunyipsOpMode {
-
     private final ArrayList<Pose2d> path = new ArrayList<>();
     private final ElapsedTime timer = new ElapsedTime();
     protected RoadRunnerDrive drive;

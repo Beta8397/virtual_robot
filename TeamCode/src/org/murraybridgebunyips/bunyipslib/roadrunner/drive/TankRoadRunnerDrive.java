@@ -134,6 +134,7 @@ public class TankRoadRunnerDrive extends com.acmerobotics.roadrunner.drive.TankD
         return new TrajectoryBuilder(startPose, startHeading, VEL_CONSTRAINT, accelConstraint);
     }
 
+    @SuppressWarnings("rawtypes")
     public TrajectorySequenceBuilder trajectorySequenceBuilder(Pose2d startPose) {
         return new TrajectorySequenceBuilder(
                 startPose,

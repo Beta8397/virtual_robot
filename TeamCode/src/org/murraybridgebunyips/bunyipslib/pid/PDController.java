@@ -5,7 +5,6 @@ package org.murraybridgebunyips.bunyipslib.pid;
  * <a href="https://github.com/FTCLib/FTCLib/blob/cedc52cee1bb549324c1ca5059c5feec3c054902/core/src/main/java/com/arcrobotics/ftclib/controller/PDController.java">Source</a>
  */
 public class PDController extends PIDController {
-
     /**
      * Default constructor with just the coefficients
      */

@@ -1,5 +1,7 @@
 package org.murraybridgebunyips.bunyipslib.pid;
 
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+
 /**
  * This is a PID controller (https://en.wikipedia.org/wiki/PID_controller)
  * for your robot. Internally, it performs all the calculations for you.
@@ -14,7 +16,6 @@ package org.murraybridgebunyips.bunyipslib.pid;
  * <a href="https://github.com/FTCLib/FTCLib/blob/cedc52cee1bb549324c1ca5059c5feec3c054902/core/src/main/java/com/arcrobotics/ftclib/controller/PIDFController.java">Source</a>
  */
 public class PIDFController {
-
     private double kP, kI, kD, kF;
     private double setPoint;
     private double measuredValue;
@@ -171,7 +172,7 @@ public class PIDFController {
      * {@link #calculate(double)}.
      */
     public double calculate(double pv, double sp) {
-        // set the setpoint to the provided value
+        // Set the setpoint to the provided value
         setSetPoint(sp);
         return calculate(pv);
     }
@@ -204,13 +205,13 @@ public class PIDFController {
         }
 
         /*
-        if total error is the integral from 0 to t of e(t')dt', and
-        e(t) = sp - pv, then the total error, E(t), equals sp*t - pv*t.
+         * If total error is the integral from 0 to t of e(t')dt', and
+         * e(t) = sp - pv, then the total error, E(t), equals sp*t - pv*t.
          */
         totalError += period * (setPoint - measuredValue);
         totalError = totalError < minIntegral ? minIntegral : Math.min(maxIntegral, totalError);
 
-        // returns u(t)
+        // Returns u(t)
         return kP * errorVal_p + kI * totalError + kD * errorVal_v + kF * setPoint;
     }
 
@@ -219,6 +220,30 @@ public class PIDFController {
         kI = ki;
         kD = kd;
         kF = kf;
+    }
+
+    /**
+     * Set the current controller PID coefficients to the given coefficients.
+     *
+     * @param coefficients the coefficients to set
+     */
+    public void setPIDF(PIDFCoefficients coefficients) {
+        kP = coefficients.p;
+        kI = coefficients.i;
+        kD = coefficients.d;
+        kF = coefficients.f;
+    }
+
+    /**
+     * Update the supplied PID coefficients with the current controller values.
+     *
+     * @param coefficients the coefficients to update
+     */
+    public void updatePIDF(PIDFCoefficients coefficients) {
+        coefficients.p = kP;
+        coefficients.i = kI;
+        coefficients.d = kD;
+        coefficients.f = kF;
     }
 
     public void setIntegrationBounds(double integralMin, double integralMax) {
@@ -265,5 +290,4 @@ public class PIDFController {
     public double getPeriod() {
         return period;
     }
-
 }

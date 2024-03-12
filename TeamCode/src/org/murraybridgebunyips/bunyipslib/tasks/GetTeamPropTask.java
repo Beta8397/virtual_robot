@@ -72,7 +72,7 @@ public class GetTeamPropTask extends NoTimeoutTask {
             init();
         }
         teamProp.update();
-        if (teamProp.getData().size() > 0) {
+        if (!teamProp.getData().isEmpty()) {
             // TeamProp will never have more than one data instance
             position = teamProp.getData().get(0).getPosition();
         }

@@ -4,77 +4,74 @@ import com.acmerobotics.roadrunner.geometry.Pose2d
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.hardware.HardwareDevice
 import com.qualcomm.robotcore.hardware.HardwareMap
-import java.util.Objects
 
 /**
- * Abstract class to use as parent to the class you will define to mirror a "saved configuration" on the Robot Controller
+ * Abstract class to use as parent to the class you will define to mirror a "saved configuration"
+ * on the Robot Controller, and to define any robot related constants.
+ * Supported for use in both BunyipsOpModes and any other normal SDK OpMode.
  * ```
  *     private final YourConfig config = new YourConfig();
- *
- *     @Override
- *     protected void onInit() {
- *         config.init();
- *     }
+ * ```
+ * In your OpMode's init method, call the `init` method of your config class, passing in the OpMode.
+ * ```
+ *     config.init(this);
  * ```
  */
 abstract class RobotConfig {
-    protected var hardwareMap: HardwareMap? = null
+    protected lateinit var hardwareMap: HardwareMap
 
     /**
-     * Assign class instance variables to public HardwareDevices.
+     * Here you will assign class instance variables to public HardwareDevices, and assign any runtime-related
+     * settings and variables for use. This is called from the `init` method.
      */
-    protected abstract fun configureHardware()
+    protected abstract fun onRuntime()
 
     /**
-     * Use HardwareMap to fetch HardwareDevices and assign instances.
+     * Uses the HardwareMap to fetch HardwareDevices and assign instances from `onRuntime`.
      * Should be called as the first line in your init cycle.
      * @param opMode the OpMode instance - usually the `this` object when at the root OpMode.
      */
     fun init(opMode: OpMode) {
-        if (opMode is BunyipsOpMode) {
-            init()
-            return
-        }
         errors.clear()
         this.hardwareMap = opMode.hardwareMap
-        Objects.requireNonNull(
-            this.hardwareMap,
-            "HardwareMap was null in ${this.javaClass.simpleName}!"
-        )
-        configureHardware()
-        opMode.telemetry.addData(
-            "",
-            "${this.javaClass.simpleName}: Configuration completed with ${errors.size} error(s).",
-        )
+        onRuntime()
+        if (opMode is BunyipsOpMode) {
+            opMode.addTelemetry(
+                "${this.javaClass.simpleName}: Configuration completed with ${errors.size} error(s).",
+            )
+        } else {
+            opMode.telemetry.addData(
+                "",
+                "${this.javaClass.simpleName}: Configuration completed with ${errors.size} error(s).",
+            )
+        }
         if (errors.isNotEmpty()) {
             for (error in errors) {
-                opMode.telemetry.addData("", "! DEV_FAULT: $error").setRetained(true)
+                if (opMode is BunyipsOpMode) {
+                    opMode.addRetainedTelemetry("! DEV_FAULT: $error")
+                } else {
+                    opMode.telemetry.addData("", "! DEV_FAULT: $error").setRetained(true)
+                }
             }
         }
     }
 
     /**
-     * Use HardwareMap to fetch HardwareDevices and assign instances.
-     * Should be called as the first line in onInit();
+     * Implicit OpMode config initialisation for use in BunyipsOpModes. This will not work in normal SDK OpModes.
      *
-     * Argument-less init() cannot be used with a non-BunyipsOpMode instance (will throw an UninitializedPropertyAccessException)
+     * Uses the HardwareMap to fetch HardwareDevices and assign instances from `onRuntime`.
+     * Should be called as the first line in your init cycle.
+     *
+     * @throws UnsupportedOperationException if not called from a BunyipsOpMode.
+     * @see init(opMode: OpMode)
      */
     fun init() {
-        val opMode = BunyipsOpMode.instance
-        errors.clear()
-        this.hardwareMap = opMode.hardwareMap
-        Objects.requireNonNull(
-            this.hardwareMap,
-            "HardwareMap was null in ${this.javaClass.simpleName}!"
-        )
-        configureHardware()
-        opMode.addTelemetry(
-            "${this.javaClass.simpleName}: Configuration completed with ${errors.size} error(s).",
-        )
-        if (errors.isNotEmpty()) {
-            for (error in errors) {
-                opMode.addRetainedTelemetry("! DEV_FAULT: $error")
-            }
+        try {
+            // Access the singleton associated with a BunyipsOpMode, if we're not running one Kotlin
+            // will throw a UninitializedPropertyAccessException, so we can tell the user off here.
+            init(BunyipsOpMode.instance)
+        } catch (e: UninitializedPropertyAccessException) {
+            throw UnsupportedOperationException("Argument-less RobotConfig.init() method is only supported in a BunyipsOpMode. Use RobotConfig.init(opMode) instead.")
         }
     }
 
@@ -92,7 +89,7 @@ abstract class RobotConfig {
     fun getHardware(name: String, device: Class<*>?): HardwareDevice? {
         var hardwareDevice: HardwareDevice? = null
         try {
-            hardwareDevice = hardwareMap?.get(device, name) as HardwareDevice
+            hardwareDevice = hardwareMap.get(device, name) as HardwareDevice
         } catch (e: Throwable) {
             errors.add(name)
             e.localizedMessage?.let { Dbg.warn(it) }

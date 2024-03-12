@@ -43,7 +43,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     private Unit callback(@Nullable OpModeSelection selectedOpMode) {
         hasGottenCallback = true;
         if (selectedOpMode != null) {
-            log("auto: mode selected. running opmode " + selectedOpMode.getName());
+            log("auto: mode selected. running opmode " + selectedOpMode);
         } else {
             log("auto: mode selected. running default opmode");
         }

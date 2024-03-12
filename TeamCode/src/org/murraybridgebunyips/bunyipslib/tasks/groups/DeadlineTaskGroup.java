@@ -19,7 +19,7 @@ public class DeadlineTaskGroup extends TaskGroup {
 
     @Override
     public final boolean isTaskFinished() {
-        // noinspection ConstantConditions
-        return tasks.peekFirst() == null || tasks.peekFirst().isFinished();
+        Task firstTask = tasks.peekFirst();
+        return firstTask == null || firstTask.isFinished();
     }
 }

@@ -3,6 +3,7 @@ package org.murraybridgebunyips.bunyipslib.tasks;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.hardware.PIDCoefficients;
 
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 import org.murraybridgebunyips.bunyipslib.Controller;
@@ -24,9 +25,7 @@ import java.util.Optional;
  */
 @Config
 public class AlignToAprilTagTask<T extends BunyipsSubsystem> extends ForeverTask {
-    public static double kP;
-    public static double kI;
-    public static double kD;
+    public static PIDCoefficients PID = new PIDCoefficients();
 
     private final RoadRunnerDrive drive;
     private final AprilTag at;
@@ -41,9 +40,7 @@ public class AlignToAprilTagTask<T extends BunyipsSubsystem> extends ForeverTask
         this.at = at;
         this.gamepad = gamepad;
         this.controller = controller;
-        kP = controller.getP();
-        kI = controller.getI();
-        kD = controller.getD();
+        controller.updatePID(PID);
     }
 
     @Override
@@ -55,7 +52,7 @@ public class AlignToAprilTagTask<T extends BunyipsSubsystem> extends ForeverTask
     @Override
     public void periodic() {
         // FtcDashboard live tuning
-        controller.setPID(kP, kI, kD);
+        controller.setPID(PID);
 
         Pose2d pose = Controller.makeRobotPose(gamepad.left_stick_x, gamepad.left_stick_y, gamepad.right_stick_x);
 

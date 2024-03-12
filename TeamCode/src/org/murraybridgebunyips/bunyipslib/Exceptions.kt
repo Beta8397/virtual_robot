@@ -1,5 +1,6 @@
 package org.murraybridgebunyips.bunyipslib
 
+import com.acmerobotics.dashboard.config.Config
 import java.io.PrintWriter
 import java.io.StringWriter
 
@@ -11,11 +12,13 @@ import java.io.StringWriter
  * while providing full logging in both Logcat and the Driver Station.
  * @see NullSafety
  */
-object ErrorUtil {
-    private const val MAX_STACKTRACE_CHARS = 250
+@Config
+object Exceptions {
+    @JvmField
+    var MAX_DS_STACKTRACE_CHARS = 250
 
     @Throws(InterruptedException::class)
-    fun handleCatchAllException(e: Exception, log: (msg: String) -> Unit) {
+    fun handle(e: Exception, stderr: (msg: String) -> Unit) {
         if (e is NullPointerException) {
             for (component in NullSafety.unusableComponents) {
                 if (e.localizedMessage?.contains(component) == true) {
@@ -26,16 +29,18 @@ object ErrorUtil {
                 }
             }
         }
-        log("encountered exception! <${e.localizedMessage}>")
+        stderr("encountered exception! <${e.localizedMessage}>")
         if (e.cause != null) {
-            log("caused by: ${e.cause}")
+            stderr("caused by: ${e.cause}")
         }
-        var stack = stackTraceAsString(e)
-        if (stack.length > MAX_STACKTRACE_CHARS) {
-            stack = stack.substring(0, MAX_STACKTRACE_CHARS - 4)
+        val sw = StringWriter()
+        e.printStackTrace(PrintWriter(sw))
+        var stack = sw.toString()
+        if (stack.length > MAX_DS_STACKTRACE_CHARS) {
+            stack = stack.substring(0, MAX_DS_STACKTRACE_CHARS - 4)
             stack += " ..."
         }
-        log("stacktrace (max->$MAX_STACKTRACE_CHARS): $stack")
+        stderr("stacktrace (max->$MAX_DS_STACKTRACE_CHARS): $stack")
         Dbg.error("Exception caught! Stacktrace:")
         Dbg.sendStacktrace(e)
         if (e is InterruptedException) {
@@ -49,12 +54,5 @@ object ErrorUtil {
             // We will let the FTC SDK handle it in terminating the OpMode and displaying the popup
             throw e
         }
-    }
-
-    private fun stackTraceAsString(e: Throwable): String {
-        val sw = StringWriter()
-        val pw = PrintWriter(sw)
-        e.printStackTrace(pw)
-        return sw.toString()
     }
 }

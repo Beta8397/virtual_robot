@@ -1,5 +1,7 @@
 package org.murraybridgebunyips.bunyipslib;
 
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -55,7 +57,7 @@ public class InterpolatedLookupTable {
 
         // Compute slopes of secant lines between successive points.
         for (int i = 0; i < n - 1; i++) {
-            Double h = x.get(i + 1) - x.get(i);
+            double h = x.get(i + 1) - x.get(i);
             if (h <= 0.0f) {
                 throw new IllegalArgumentException("The control points must all "
                         + "have strictly increasing X values.");
@@ -73,8 +75,8 @@ public class InterpolatedLookupTable {
         // Update the tangents to preserve monotonicity.
         for (int i = 0; i < n - 1; i++) {
             if (d[i] == 0.0f) { // successive Y values are equal
-                m[i] = Double.valueOf(0.0f);
-                m[i + 1] = Double.valueOf(0.0f);
+                m[i] = 0.0;
+                m[i + 1] = 0.0;
             } else {
                 double a = m[i] / d[i];
                 double b = m[i + 1] / d[i];
@@ -128,6 +130,7 @@ public class InterpolatedLookupTable {
     }
 
     // For debugging.
+    @NonNull
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder();

@@ -72,7 +72,7 @@ class UserSelection<T>(
             try {
                 callback(null)
             } catch (e: Exception) {
-                ErrorUtil.handleCatchAllException(e, opMode::log)
+                Exceptions.handle(e, opMode::log)
             }
         }
 
@@ -98,7 +98,7 @@ class UserSelection<T>(
             val selection = String.format(
                 "%s: %s",
                 button.name,
-                if (name is OpModeSelection) name.name else name
+                name.toString()
             )
             packetString += "$selection | "
             retainedObjects.add(
@@ -107,7 +107,7 @@ class UserSelection<T>(
                     String.format(
                         "%s: %s",
                         button.name,
-                        if (name is OpModeSelection) name.name else name
+                        name.toString()
                     )
                 )
             )
@@ -131,10 +131,7 @@ class UserSelection<T>(
         }
 
         result = selectedOpMode
-        val opModeName = if (selectedOpMode is OpModeSelection)
-            selectedOpMode.name
-        else
-            selectedOpMode.toString()
+        val opModeName = selectedOpMode.toString()
 
         if (result == null) {
             opMode.telemetry.addData("", "No selection made. Result was handled by the OpMode.")
@@ -162,7 +159,7 @@ class UserSelection<T>(
         try {
             callback(selectedOpMode)
         } catch (e: Exception) {
-            ErrorUtil.handleCatchAllException(e, opMode::log)
+            Exceptions.handle(e, opMode::log)
         }
     }
 }

@@ -1,5 +1,7 @@
 package org.murraybridgebunyips.bunyipslib;
 
+import androidx.annotation.NonNull;
+
 /**
  * Time utilities for robot operation.
  * <a href="https://github.com/Paladins-of-St-Pauls/GameChangers/blob/master/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/paladins/utils/MovingAverageTimer.java">Source</a>
@@ -171,6 +173,7 @@ public class MovingAverageTimer {
         return String.format(avgFormatStr, average);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return String.format(toStringFormatStr, loopCount, elapsedTime(), movingAverage, average, minLoopTime(), minMovingAverage, minAverage, maxLoopTime(), maxMovingAverage, maxAverage);

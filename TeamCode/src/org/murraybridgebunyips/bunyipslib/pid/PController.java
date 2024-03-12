@@ -5,7 +5,6 @@ package org.murraybridgebunyips.bunyipslib.pid;
  * <a href="https://github.com/FTCLib/FTCLib/blob/feature-new-pure-pursuit/core/src/main/java/com/arcrobotics/ftclib/controller/PController.java">Source</a>
  */
 public class PController extends PDController {
-
     /**
      * Default constructor, only takes a p-value.
      *
@@ -21,5 +20,4 @@ public class PController extends PDController {
     public PController(double kp, double sp, double pv) {
         super(kp, 0, sp, pv);
     }
-
 }

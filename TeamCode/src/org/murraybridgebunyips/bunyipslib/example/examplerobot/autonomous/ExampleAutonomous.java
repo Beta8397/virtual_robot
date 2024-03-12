@@ -13,7 +13,6 @@ import org.murraybridgebunyips.bunyipslib.tasks.WaitTask;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.RobotTask;
 
 import java.util.List;
-import java.util.Objects;
 
 public class ExampleAutonomous extends AutonomousBunyipsOpMode {
     // This class extends BunyipsOpMode, which is the base class for all OpModes in BunyipsLib
@@ -87,11 +86,11 @@ public class ExampleAutonomous extends AutonomousBunyipsOpMode {
             addRetainedTelemetry("where opmode?");
             return;
         }
-        if (Objects.equals(selectedOpMode.getName(), "Number 1 OpMode")) {
+        if (selectedOpMode.toString().equals("Number 1 OpMode")) {
             // Do something
-        } else if (Objects.equals(selectedOpMode.getName(), "Number 2 OpMode")) {
+        } else if (selectedOpMode.toString().equals("Number 2 OpMode")) {
             // Do something else
-        } else if (Objects.equals(selectedOpMode.getName(), "Number 3 OpMode")) {
+        } else if (selectedOpMode.toString().equals("Number 3 OpMode")) {
             // Do something else again
         }
 

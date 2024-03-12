@@ -71,8 +71,9 @@ abstract class BunyipsOpMode : LinearOpMode() {
     protected abstract fun onInit()
 
     /**
-     * Run code in a loop AFTER onInit has completed, until
+     * Run code in a loop AFTER onInit() has completed, until
      * start is pressed on the Driver Station or true is returned to this method.
+     * This method is called at least once.
      * If not implemented, the OpMode will continue on as normal and wait for start.
      */
     protected open fun onInitLoop(): Boolean {
@@ -81,7 +82,7 @@ abstract class BunyipsOpMode : LinearOpMode() {
 
     /**
      * Allow code to execute once after all initialisation has finished.
-     * Note: this method is always called even if initialisation is cut short by the driver station.
+     * Note: this method is always called even if initialisation is cut short by the Driver Station.
      */
     protected open fun onInitDone() {
     }
@@ -94,8 +95,8 @@ abstract class BunyipsOpMode : LinearOpMode() {
     }
 
     /**
-     * Code to run when the START button is pressed on the Driver Station.
-     * This method will be called on each hardware cycle.
+     * Code to run continuously after the START button is pressed on the Driver Station.
+     * This method will be called on each hardware cycle, and is guaranteed to be called at least once.
      */
     protected abstract fun activeLoop()
 
@@ -171,24 +172,25 @@ abstract class BunyipsOpMode : LinearOpMode() {
             try {
                 onInit()
             } catch (e: Exception) {
+                // Catch all exceptions, log them, and continue running the OpMode
                 // All InterruptedExceptions are handled by the FTC SDK and are raised in ErrorUtil
-                ErrorUtil.handleCatchAllException(e, ::log)
+                Exceptions.handle(e, ::log)
             }
 
             opModeStatus = "dynamic_init"
             pushTelemetry()
             Dbg.logd("BunyipsOpMode: starting onInitLoop()...")
             // Run user-defined dynamic initialisation
-            while (opModeInInit()) {
+            do {
                 try {
                     // Run until onInitLoop returns true or the OpMode is continued
                     if (onInitLoop()) break
                 } catch (e: Exception) {
-                    ErrorUtil.handleCatchAllException(e, ::log)
+                    Exceptions.handle(e, ::log)
                 }
                 movingAverageTimer.update()
                 pushTelemetry()
-            }
+            } while (opModeInInit())
 
             opModeStatus = "finish_init"
             pushTelemetry()
@@ -197,7 +199,7 @@ abstract class BunyipsOpMode : LinearOpMode() {
             try {
                 onInitDone()
             } catch (e: Exception) {
-                ErrorUtil.handleCatchAllException(e, ::log)
+                Exceptions.handle(e, ::log)
             }
 
             // Ready to go.
@@ -225,12 +227,12 @@ abstract class BunyipsOpMode : LinearOpMode() {
                 // Run user-defined start operations
                 onStart()
             } catch (e: Exception) {
-                ErrorUtil.handleCatchAllException(e, ::log)
+                Exceptions.handle(e, ::log)
             }
 
             opModeStatus = "running"
             Dbg.logd("BunyipsOpMode: starting activeLoop()...")
-            while (opModeIsActive() && !operationsCompleted) {
+            do {
                 if (operationsPaused) {
                     // If the OpMode is paused, skip the loop and wait for the next hardware cycle
                     opModeStatus = "halted"
@@ -242,18 +244,18 @@ abstract class BunyipsOpMode : LinearOpMode() {
                     // Run user-defined active loop
                     activeLoop()
                 } catch (e: Exception) {
-                    ErrorUtil.handleCatchAllException(e, ::log)
+                    Exceptions.handle(e, ::log)
                 }
                 // Update telemetry and timers
                 movingAverageTimer.update()
                 pushTelemetry()
-            }
+            } while (opModeIsActive() && !operationsCompleted)
 
             opModeStatus = "finished"
             try {
                 onFinish()
             } catch (e: Exception) {
-                ErrorUtil.handleCatchAllException(e, ::log)
+                Exceptions.handle(e, ::log)
             }
             // overheadTelemetry will no longer update, will remain frozen on last value
             movingAverageTimer.update()

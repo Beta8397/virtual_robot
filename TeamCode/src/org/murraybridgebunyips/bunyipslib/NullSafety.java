@@ -12,7 +12,7 @@ import java.util.List;
  * Null safety utilities for robot components.
  *
  * @author Lucas Bubner, 2023
- * @see ErrorUtil
+ * @see Exceptions
  */
 public class NullSafety {
     public static final List<String> unusableComponents = new ArrayList<>();

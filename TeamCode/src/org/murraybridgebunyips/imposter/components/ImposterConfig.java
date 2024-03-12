@@ -29,7 +29,7 @@ public class ImposterConfig extends RobotConfig {
     public StandardTrackingWheelLocalizerCoefficients localizerCoefficients;
 
     @Override
-    protected void configureHardware() {
+    protected void onRuntime() {
         back_right_motor = (DcMotorEx) getHardware("back_right_motor", DcMotorEx.class);
         back_left_motor = (DcMotorEx) getHardware("back_left_motor", DcMotorEx.class);
         front_right_motor = (DcMotorEx) getHardware("front_right_motor", DcMotorEx.class);

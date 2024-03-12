@@ -42,7 +42,7 @@ public class SwitchableVisionSender implements Runnable {
         this.vision = vision;
 
         List<Processor> processors = vision.getAttachedProcessors();
-        if (processors.size() == 0)
+        if (processors.isEmpty())
             return;
 
         // If there is already a current processor name, we should check to see if it is valid

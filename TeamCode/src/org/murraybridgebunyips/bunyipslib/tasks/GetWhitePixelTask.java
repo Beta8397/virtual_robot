@@ -88,7 +88,7 @@ public class GetWhitePixelTask extends NoTimeoutTask {
     public void periodic() {
         tfod.update();
         List<TfodData> tfodData = tfod.getData();
-        if (tfodData.size() == 0) {
+        if (tfodData.isEmpty()) {
             foundSpike = false;
             return;
         }

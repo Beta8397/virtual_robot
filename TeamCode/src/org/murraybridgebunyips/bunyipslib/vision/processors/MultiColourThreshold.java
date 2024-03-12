@@ -34,7 +34,7 @@ public class MultiColourThreshold extends Processor<ContourData> {
 
     @Override
     public String getName() {
-        return "multiycbcr";
+        return "multicolourthreshold";
     }
 
     @Override

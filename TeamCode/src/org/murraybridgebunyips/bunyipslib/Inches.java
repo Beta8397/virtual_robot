@@ -31,6 +31,10 @@ public class Inches {
         return inches * 3600.0;
     }
 
+    public static double toLightYears(double inches) {
+        return inches / 3.725e+17;
+    }
+
     public static double fromCM(double cm) {
         return cm / 2.54;
     }
@@ -53,5 +57,9 @@ public class Inches {
 
     public static double fromFootballFields(double ff) {
         return ff / 3600.0;
+    }
+
+    public static double fromLightYears(double ly) {
+        return ly * 3.725e+17;
     }
 }

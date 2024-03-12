@@ -1,6 +1,8 @@
 package org.murraybridgebunyips.bunyipslib;
 
 
+import androidx.annotation.NonNull;
+
 /**
  * OpMode selection options for AutonomousBunyipsOpMode.
  *
@@ -28,16 +30,19 @@ public class OpModeSelection {
         this.assignedButton = assignedButton;
     }
 
-    public String getName() {
-        return name;
-    }
-
     public Object getObj() {
         return obj;
     }
 
+    @NonNull
+    @Override
+    public String toString() {
+        return name;
+    }
+
+    @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
     @Override
     public boolean equals(Object o) {
-        return name.equals(o) || obj == o || o == this;
+        return obj == o || o == this || obj.toString().equals(o.toString()) || name.equals(o.toString());
     }
 }

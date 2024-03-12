@@ -50,7 +50,7 @@ import java.util.Arrays;
 public class VisionTuner extends BunyipsOpMode {
     int thresholdIndex = 0;
     int pixelIndex = 0;
-    double theEquation = 0;
+    double scalarDelta = 0;
 
     ColourThreshold whitePixel;
     ColourThreshold purplePixel;
@@ -91,7 +91,7 @@ public class VisionTuner extends BunyipsOpMode {
 
             pixels = new ArrayList<>(Arrays.asList(whitePixel, purplePixel, yellowPixel, greenPixel));
             scalars = new ArrayList<>(Arrays.asList(lower_y, lower_cb, lower_cr, upper_y, upper_cb, upper_cr));
-            currentPixel = whitePixel;  // Set it to white pixel by default
+            currentPixel = whitePixel;  // Set to white pixel by default
         } catch (IllegalArgumentException e) {
             throw new EmergencyStop("VisionTest is missing a webcam called 'webcam'!");
         }
@@ -102,11 +102,23 @@ public class VisionTuner extends BunyipsOpMode {
         // FIXME: This code is crap code, hopefully temp code.
         //  It's hard to expand upon, and could be optimised
 
-        // TODO:
-        //  The value and the variable it was currently writing to should be shown in telemetry.
-
         if (gamepad1.right_bumper) {
-            theEquation = (gamepad1.left_stick_y + gamepad1.left_stick_x) * 2;
+            scalarDelta = (gamepad1.left_stick_y + gamepad1.left_stick_x) * 2;
+        } else {
+            // TODO: Test. Hopefully stops the number infinitely adding up if you release the buttons wrong
+            //  If not, set to 0. Might be inconvenient at times but at least it works that way
+            scalarDelta = scalarDelta;
+        }
+
+        if (gamepad1.a) {
+            addTelemetry("Pixel: %", pixels.get(pixelIndex));
+
+            addTelemetry("lower_y: %", scalars.get(0));
+            addTelemetry("lower_cb: %", scalars.get(1));
+            addTelemetry("lower_cr: %", scalars.get(2));
+            addTelemetry("upper_y: %", scalars.get(3));
+            addTelemetry("upper_cb: %", scalars.get(4));
+            addTelemetry("upper_cr: %", scalars.get(5));
         }
 
         if (gamepad1.dpad_up && !upPressed && !downPressed) {
@@ -144,24 +156,33 @@ public class VisionTuner extends BunyipsOpMode {
         // NOTE: If this doesn't work, I have a backup of the original match case string with fixed
         // index numbers.
         currentPixel = pixels.get(pixelIndex);
-        scalars.set(thresholdIndex, scalars.get(thresholdIndex) + theEquation);
+        scalars.set(thresholdIndex, scalars.get(thresholdIndex) + scalarDelta);
 
+        // Makes it so the button presses are only registered once per press.
         upPressed = gamepad1.dpad_up;
         downPressed = gamepad1.dpad_down;
         leftPressed = gamepad1.dpad_left;
         rightPressed = gamepad1.dpad_right;
 
-        currentPixel.setLower(new Scalar(lower_y, lower_cb, lower_cr));
-        currentPixel.setUpper(new Scalar(upper_y, upper_cb, upper_cr));
+        // Temporary (maybe)
+        // Preferably, use Range.clip() to clip the value
+        if (scalarDelta < 0) {
+            scalarDelta = 0;
+        } else if (scalarDelta > 255) {
+            scalarDelta = 255;
+        }
 
-        addTelemetry("Current Threshold Index: %", thresholdIndex);
-        addTelemetry("Current Pixel Index: %", pixelIndex);
-        addTelemetry("Current Value to Change Threshold By: %", theEquation);
+        // TEST: This is a safety net
+        // It checks it earlier up but just in case
+        // I also might have misinterpreted the message I got about this
+        // Might also be unnecessary with the catch up top
+        if (scalarDelta > 0 && scalars.get(thresholdIndex) > 255) {
+            currentPixel.setLower(new Scalar(scalars.get(0), scalars.get(1), scalars.get(2)));
+            currentPixel.setUpper(new Scalar(scalars.get(3), scalars.get(4), scalars.get(5)));
+        }
 
-        addTelemetry("\nThreshold Index Key:");
-        addTelemetry("0: lower_y\n1: lower_cb\n2: lower_cr\n3: upper_y\n4: upper_cb\n5: upper_cr\n");
-
-        addTelemetry("Pixel Index Key");
-        addTelemetry("0: White Pixel\n1: Purple Pixel\n2: Yellow Pixel\n3: Green Pixel");
+        addTelemetry("Current Threshold: %", scalars.get(thresholdIndex));
+        addTelemetry("Current Pixel : %", pixels.get(pixelIndex));
+        addTelemetry("Current Value to Change Threshold By: %", scalarDelta);
     }
 }

@@ -1,5 +1,7 @@
 package org.murraybridgebunyips.bunyipslib.roadrunner.util;
 
+import androidx.annotation.NonNull;
+
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -57,7 +59,7 @@ public class LynxModuleUtil {
                 }
             }
         }
-        if (outdatedModules.size() > 0) {
+        if (!outdatedModules.isEmpty()) {
             StringBuilder msgBuilder = new StringBuilder();
             msgBuilder.append("One or more of the attached Lynx modules has outdated firmware\n");
             msgBuilder.append(Misc.formatInvariant("Mandatory minimum firmware version for Road Runner: %s\n",
@@ -111,6 +113,7 @@ public class LynxModuleUtil {
             }
         }
 
+        @NonNull
         @Override
         public String toString() {
             return Misc.formatInvariant("%d.%d.%d", major, minor, eng);
