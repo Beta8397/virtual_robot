@@ -53,6 +53,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
     public Task getCurrentTask() {
         if (!shouldRun) return null;
         if (currentTask == null || currentTask.isFinished()) {
+            Dbg.logd(getClass(), "Task changed: %<-%", defaultTask.getName(), currentTask != null ? currentTask.getName() : "IdleTask");
             currentTask = defaultTask;
         }
         return currentTask;
