@@ -10,6 +10,7 @@ import java.util.Objects
  * Used for adding additional abstraction to the current gamepad control system, used across BunyipsLib.
  * @author Lucas Bubner, 2024
  */
+@Suppress("KDocMissingDocumentation")
 enum class Controller {
     A, B, X, Y, START, BACK, DPAD_UP, DPAD_DOWN, DPAD_LEFT, DPAD_RIGHT, LEFT_BUMPER, RIGHT_BUMPER, LEFT_STICK_BUTTON, RIGHT_STICK_BUTTON, NONE;
 

@@ -41,8 +41,9 @@ public class ExampleCommandBasedTeleOp extends BunyipsOpMode {
         // This is because the scheduler will be responsible for running the subsystems, and will
         // need to know what subsystems to call their update() methods on
         scheduler.addSubsystems(drive);
-        // CommandBasedBunyipsOpMode has a dedicated method to ensure your subsystems are added to the scheduler,
-        // by requiring it be passed an array of subsystems in the setSubsystems() method
+        // CommandBasedBunyipsOpMode has a method to ensure your subsystems are added to the scheduler,
+        // by requiring it be passed a vararg or array of subsystems in the addSubsystems() method call,
+        // similar to just using the scheduler.addSubsystems() method.
 
         // Here is where you will assign your commands. In CommandBasedBunyipsOpMode, you will have access to the
         // assignCommands() method, which internally is simply a function that is called after onInit(). Putting them
@@ -68,8 +69,8 @@ public class ExampleCommandBasedTeleOp extends BunyipsOpMode {
         // or based on controller input. These tasks will replace the default tasks when the subsystem is mentioned as a task parameter,
         // or if no subsystem is attached it will run directly on the scheduler.
         scheduler.whenPressed(Controller.User.ONE, Controller.A)
-                .run(new InstantTask(() -> log("A was pressed!")))
-                .immediately();
+                .run(new InstantTask(() -> log("A was pressed!")));
+
 
         // There are plenty of configuration options, including setting a queue delay, stop condition for continuous tasks,
         // and more. See the Scheduler class and implementations for more information.
@@ -83,8 +84,7 @@ public class ExampleCommandBasedTeleOp extends BunyipsOpMode {
                 .finishingWhen(() -> Controller.isSelected(gamepad2, Controller.X));
 
         scheduler.when(() -> drive.isBusy())
-                .run(new InstantTask(() -> addTelemetry("Drive system is busy!")))
-                .immediately();
+                .run(new InstantTask(() -> addTelemetry("Drive system is busy!")));
     }
 
     @Override

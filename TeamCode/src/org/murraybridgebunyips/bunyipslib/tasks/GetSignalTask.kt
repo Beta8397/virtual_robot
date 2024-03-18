@@ -31,8 +31,24 @@ class GetSignalTask(private val vision: Vision) : Task(0.0),
     var position: ParkingPosition? = null
         private set
 
+    /**
+     * Represents the three parking positions based on a POWERPLAY Signal detection.
+     */
     enum class ParkingPosition {
-        LEFT, CENTER, RIGHT
+        /**
+         * Parking position Zone 1
+         */
+        LEFT,
+
+        /**
+         * Parking position Zone 2
+         */
+        CENTER,
+
+        /**
+         * Parking position Zone 3
+         */
+        RIGHT
     }
 
     override fun init() {

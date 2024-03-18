@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.TrajectorySequence;
 
-/*
+/**
  * Op mode for preliminary tuning of the follower PID coefficients (located in the drive base
  * classes). The robot drives in a DISTANCE-by-DISTANCE square indefinitely. Utilization of the
  * dashboard is recommended for this tuning routine. To access the dashboard, connect your computer
@@ -21,6 +21,9 @@ import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.Trajecto
  */
 //@Config
 public abstract class FollowerPIDTuner extends LinearOpMode {
+    /**
+     * The amount of distance the robot drives in a square.
+     */
     public static double DISTANCE = 48; // in
     protected RoadRunnerDrive drive;
 

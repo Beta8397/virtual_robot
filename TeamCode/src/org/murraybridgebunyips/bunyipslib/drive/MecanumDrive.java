@@ -40,7 +40,20 @@ public class MecanumDrive extends BunyipsSubsystem implements RoadRunnerDrive {
     private final MecanumRoadRunnerDrive drive;
     private final IMU imu;
 
+    /**
+     * Constructor for the MecanumDrive class.
+     *
+     * @param constants           The drive constants for the robot.
+     * @param mecanumCoefficients The coefficients for the mecanum drive.
+     * @param voltageSensor       The voltage sensor for the robot from hardwareMap.
+     * @param imu                 The IMU for the robot.
+     * @param fl                  The front left motor.
+     * @param fr                  The front right motor.
+     * @param bl                  The back left motor.
+     * @param br                  The back right motor.
+     */
     public MecanumDrive(DriveConstants constants, MecanumCoefficients mecanumCoefficients, HardwareMap.DeviceMapping<VoltageSensor> voltageSensor, IMU imu, DcMotorEx fl, DcMotorEx fr, DcMotorEx bl, DcMotorEx br) {
+        assertParamsNotNull(constants, mecanumCoefficients, voltageSensor, imu, fl, fr, bl, br);
         drive = new MecanumRoadRunnerDrive(opMode, constants, mecanumCoefficients, voltageSensor, imu, fl, fr, bl, br);
         // If we have a last known position, set the pose estimate to it
         if (RobotConfig.getLastKnownPosition() != null) {
@@ -49,6 +62,9 @@ public class MecanumDrive extends BunyipsSubsystem implements RoadRunnerDrive {
         this.imu = imu;
     }
 
+    /**
+     * Reset the IMU's yaw to 0.
+     */
     public void resetYaw() {
         imu.resetYaw();
         setExternalHeading(0);
@@ -85,6 +101,7 @@ public class MecanumDrive extends BunyipsSubsystem implements RoadRunnerDrive {
      * @param x gamepad.left_stick_x or similar
      * @param y gamepad.left_stick_y or similar
      * @param r gamepad.right_stick_x or similar
+     * @return this
      */
     public MecanumDrive setSpeedUsingController(double x, double y, double r) {
         drive.setWeightedDrivePower(Controller.makeRobotPose(x, y, r));
@@ -92,7 +109,7 @@ public class MecanumDrive extends BunyipsSubsystem implements RoadRunnerDrive {
     }
 
     @Override
-    public void update() {
+    protected void periodic() {
         opMode.addTelemetry("Localizer: X:%cm Y:%cm %deg",
                 round(Inches.toCM(drive.getPoseEstimate().getX()), 1),
                 round(Inches.toCM(drive.getPoseEstimate().getY()), 1),
@@ -115,6 +132,14 @@ public class MecanumDrive extends BunyipsSubsystem implements RoadRunnerDrive {
         drive.setExternalHeading(value);
     }
 
+    /**
+     * Set the raw motor powers for the drive.
+     *
+     * @param v  The power for the front left motor.
+     * @param v1 The power for the front right motor.
+     * @param v2 The power for the back left motor.
+     * @param v3 The power for the back right motor.
+     */
     public void setPowers(double v, double v1, double v2, double v3) {
         drive.setMotorPowers(v, v1, v2, v3);
     }
@@ -215,6 +240,14 @@ public class MecanumDrive extends BunyipsSubsystem implements RoadRunnerDrive {
         drive.setWeightedDrivePowerFieldCentric(pose);
     }
 
+    /**
+     * Set the speed of the robot using field centric drive using a gamepad.
+     *
+     * @param x The x speed.
+     * @param y The y speed.
+     * @param r The rotation speed.
+     * @see #setWeightedDrivePowerFieldCentric(Pose2d)
+     */
     public void setSpeedUsingControllerFieldCentric(double x, double y, double r) {
         setWeightedDrivePowerFieldCentric(Controller.makeRobotPose(x, y, r));
     }

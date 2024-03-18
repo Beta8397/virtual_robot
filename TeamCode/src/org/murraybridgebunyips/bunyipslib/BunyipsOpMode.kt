@@ -28,6 +28,10 @@ import kotlin.math.roundToInt
  * @author Lucas Bubner, 2023
  */
 abstract class BunyipsOpMode : LinearOpMode() {
+    /**
+     * The moving average timer for the OpMode, which is used to calculate the average time
+     * between hardware cycles. This is useful for debugging and performance monitoring.
+     */
     lateinit var movingAverageTimer: MovingAverageTimer
         private set
 
@@ -471,6 +475,10 @@ abstract class BunyipsOpMode : LinearOpMode() {
         }
     }
 
+    /**
+     * Remove retained entries from the telemetry object.
+     * @param items The items to remove from the telemetry object
+     */
     fun removeRetainedTelemetry(items: List<Item>) {
         removeRetainedTelemetry(*items.toTypedArray())
     }

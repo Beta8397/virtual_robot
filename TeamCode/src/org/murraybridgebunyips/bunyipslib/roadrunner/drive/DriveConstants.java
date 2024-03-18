@@ -11,17 +11,25 @@ public class DriveConstants {
     /*
      * These are motor constants that should be listed online for your motors.
      */
+    /**
+     * The number of ticks per revolution of the motor's output shaft.
+     */
     public double TICKS_PER_REV = 1;
+    /**
+     * The maximum RPM of the motor.
+     */
     public double MAX_RPM = 1;
-    /*
+    /**
      * Set RUN_USING_ENCODER to true to enable built-in hub velocity control using drive encoders.
      * Set this flag to false if drive encoders are not present and an alternative localization
      * method is in use (e.g., tracking wheels).
-     *
      * If using the built-in motor velocity PID, update MOTOR_VELO_PID with the tuned coefficients
      * from DriveVelocityPIDTuner.
      */
     public boolean RUN_USING_ENCODER;
+    /**
+     * The PIDF coefficients for the motor velocity PID.
+     */
     public PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(0, 0, 0,
             getMotorVelocityF(MAX_RPM / 60 * TICKS_PER_REV));
     /*
@@ -32,8 +40,17 @@ public class DriveConstants {
      * angular distances although most angular parameters are wrapped in Math.toRadians() for
      * convenience. Make sure to exclude any gear ratio included in MOTOR_CONFIG from GEAR_RATIO.
      */
+    /**
+     * The radius of the wheel in inches.
+     */
     public double WHEEL_RADIUS = 2; // in
+    /**
+     * The gear ratio of the motor. The output (wheel) speed / input (motor) speed.
+     */
     public double GEAR_RATIO = 1; // output (wheel) speed / input (motor) speed
+    /**
+     * The track width is the distance between the left and right wheels on the robot (inches).
+     */
     public double TRACK_WIDTH = 1; // in
     /*
      * These are the feedforward parameters used to model the drive motor behavior. If you are using
@@ -41,8 +58,17 @@ public class DriveConstants {
      * motor encoders or have elected not to use them for velocity control, these values should be
      * empirically tuned.
      */
+    /**
+     * Feedforward kV gain for the velocity PID.
+     */
     public double kV = 1.0 / rpmToVelocity(MAX_RPM);
+    /**
+     * Feedforward kA gain for the velocity PID.
+     */
     public double kA;
+    /**
+     * Feedforward kStatic gain for the velocity PID.
+     */
     public double kStatic;
     /*
      * These values are used to generate the trajectories for you robot. To ensure proper operation,
@@ -51,28 +77,64 @@ public class DriveConstants {
      * small and gradually increase them later after everything is working. All distance units are
      * inches.
      */
+    /**
+     * The maximum velocity of the robot in inches per second.
+     */
     public double MAX_VEL = 30;
+    /**
+     * The maximum acceleration of the robot in inches per second squared.
+     */
     public double MAX_ACCEL = 30;
+    /**
+     * The maximum angular velocity of the robot in radians per second.
+     */
     public double MAX_ANG_VEL = Math.toRadians(60);
+    /**
+     * The maximum angular acceleration of the robot in radians per second squared.
+     */
     public double MAX_ANG_ACCEL = Math.toRadians(60);
 
+    /**
+     * Get the motor velocity feedforward gain.
+     *
+     * @param ticksPerSecond the number of ticks per second
+     * @return the motor velocity feedforward gain
+     */
     public static double getMotorVelocityF(double ticksPerSecond) {
         // see https://docs.google.com/document/d/1tyWrXDfMidwYyP_5H4mZyVgaEswhOC35gvdmP-V-5hA/edit#heading=h.61g9ixenznbx
         return 32767 / ticksPerSecond;
     }
 
+    /**
+     * Convert encoder ticks to wheel distance in inches.
+     *
+     * @param ticks the encoder ticks
+     * @return the wheel distance in inches
+     */
     public double encoderTicksToInches(double ticks) {
         return WHEEL_RADIUS * 2 * Math.PI * GEAR_RATIO * ticks / TICKS_PER_REV;
     }
 
+    /**
+     * Convert motor RPM to wheel velocity in inches per second.
+     *
+     * @param rpm the motor RPM
+     * @return the wheel velocity in inches per second
+     */
     public double rpmToVelocity(double rpm) {
         return rpm * GEAR_RATIO * 2 * Math.PI * WHEEL_RADIUS / 60.0;
     }
 
+    /**
+     * Builder class to assist in making DriveConstants.
+     */
     public static class Builder {
 
         private final DriveConstants driveConstants;
 
+        /**
+         * Begin building a new DriveConstants object.
+         */
         public Builder() {
             driveConstants = new DriveConstants();
         }
@@ -147,6 +209,11 @@ public class DriveConstants {
             return this;
         }
 
+        /**
+         * Finalise your configuration.
+         *
+         * @return the DriveConstants object
+         */
         public DriveConstants build() {
             return driveConstants;
         }

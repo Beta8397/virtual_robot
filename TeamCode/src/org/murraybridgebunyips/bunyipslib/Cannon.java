@@ -2,6 +2,9 @@ package org.murraybridgebunyips.bunyipslib;
 
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.murraybridgebunyips.bunyipslib.tasks.InstantTask;
+import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
+
 /**
  * Class for a generic servo switch.
  * A whole new file is technically unnecessary, but we wanted to make a class named Cannon
@@ -18,7 +21,13 @@ public class Cannon extends BunyipsSubsystem {
     private final Servo prolong;
     private double target;
 
+    /**
+     * Constructs a new Cannon.
+     *
+     * @param prolong the servo to use
+     */
     public Cannon(Servo prolong) {
+        assertParamsNotNull(prolong);
         this.prolong = prolong;
 
         // We assume there will always be something in the reset position for us to hold
@@ -28,6 +37,8 @@ public class Cannon extends BunyipsSubsystem {
 
     /**
      * Fire in the hole!
+     *
+     * @return this
      */
     public Cannon fire() {
         target = FIRED;
@@ -36,14 +47,34 @@ public class Cannon extends BunyipsSubsystem {
 
     /**
      * Reset the cannon to its initial position
+     *
+     * @return this
      */
     public Cannon reset() {
         target = RESET;
         return this;
     }
 
+    /**
+     * Fire the cannon.
+     *
+     * @return Fire cannon task
+     */
+    public Task fireTask() {
+        return new InstantTask(this::fire, this, true).withName("FireCannonTask");
+    }
+
+    /**
+     * Reset the cannon.
+     *
+     * @return Reset cannon task
+     */
+    public Task resetTask() {
+        return new InstantTask(this::reset, this, true).withName("ResetCannonTask");
+    }
+
     @Override
-    public void update() {
+    protected void periodic() {
         opMode.addTelemetry("Cannon: %", target == FIRED ? "FIRED" : "READY");
         prolong.setPosition(target);
     }

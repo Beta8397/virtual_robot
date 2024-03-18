@@ -27,6 +27,14 @@ import java.util.List;
  * @author Lucas Bubner, 2023
  */
 public interface RoadRunnerDrive {
+    /**
+     * Get a velocity constraint for the drive.
+     *
+     * @param maxVel        The maximum velocity of the drive.
+     * @param maxAngularVel The maximum angular velocity of the drive.
+     * @param trackWidth    The track width of the drive.
+     * @return A velocity constraint for the drive.
+     */
     static TrajectoryVelocityConstraint getVelocityConstraint(double maxVel, double maxAngularVel, double trackWidth) {
         return new MinVelocityConstraint(Arrays.asList(
                 new AngularVelocityConstraint(maxAngularVel),
@@ -34,51 +42,134 @@ public interface RoadRunnerDrive {
         ));
     }
 
+    /**
+     * Get an acceleration constraint for the drive.
+     *
+     * @param maxAccel The maximum acceleration of the drive.
+     * @return An acceleration constraint for the drive.
+     */
     static TrajectoryAccelerationConstraint getAccelerationConstraint(double maxAccel) {
         return new ProfileAccelerationConstraint(maxAccel);
     }
 
     TrajectorySequenceRunner getTrajectorySequenceRunner();
 
+    /**
+     * Stop the drive.
+     */
     void stop();
 
+    /**
+     * Run current trajectory blocking until it is complete.
+     */
     void waitForIdle();
 
     DriveConstants getConstants();
 
+    /**
+     * Get a trajectory builder for the drive.
+     *
+     * @param startPose The starting pose of the drive.
+     * @return A trajectory builder for the drive.
+     */
     TrajectoryBuilder trajectoryBuilder(Pose2d startPose);
 
+    /**
+     * Get a trajectory builder for the drive.
+     *
+     * @param startPose The starting pose of the drive.
+     * @param reversed  Whether the drive is reversed.
+     * @return A trajectory builder for the drive.
+     */
     TrajectoryBuilder trajectoryBuilder(Pose2d startPose, boolean reversed);
 
+    /**
+     * Get a trajectory builder for the drive.
+     *
+     * @param startPose    The starting pose of the drive.
+     * @param startHeading The starting heading of the drive.
+     * @return A trajectory builder for the drive.
+     */
     TrajectoryBuilder trajectoryBuilder(Pose2d startPose, double startHeading);
 
+    /**
+     * Get a trajectory builder for the drive.
+     *
+     * @param startPose The starting pose of the drive.
+     * @return A trajectory builder for the drive.
+     */
     @SuppressWarnings("rawtypes")
     TrajectorySequenceBuilder trajectorySequenceBuilder(Pose2d startPose);
 
+    /**
+     * Turn the drive asynchronously.
+     *
+     * @param angle The angle to turn the drive in radians.
+     */
     void turnAsync(double angle);
 
+    /**
+     * Turn the drive.
+     *
+     * @param angle The angle to turn the drive in radians.
+     */
     void turn(double angle);
 
+    /**
+     * Follow a trajectory asynchronously.
+     *
+     * @param trajectory The trajectory to follow.
+     */
     void followTrajectoryAsync(Trajectory trajectory);
 
+    /**
+     * Follow a trajectory.
+     *
+     * @param trajectory The trajectory to follow.
+     */
     void followTrajectory(Trajectory trajectory);
 
+    /**
+     * Follow a trajectory sequence asynchronously.
+     *
+     * @param trajectorySequence The trajectory sequence to follow.
+     */
     void followTrajectorySequenceAsync(TrajectorySequence trajectorySequence);
 
+    /**
+     * Follow a trajectory sequence.
+     *
+     * @param trajectorySequence The trajectory sequence to follow.
+     */
     void followTrajectorySequence(TrajectorySequence trajectorySequence);
 
     Pose2d getLastError();
 
+    /**
+     * Update the drive with latest motor powers.
+     */
     void update();
 
+    /**
+     * @return Whether the drive is busy running a trajectory.
+     */
     boolean isBusy();
 
+    /**
+     * Abort the current trajectory.
+     */
     void cancelTrajectory();
 
     void setMode(DcMotor.RunMode runMode);
 
     void setZeroPowerBehavior(DcMotor.ZeroPowerBehavior zeroPowerBehavior);
 
+    /**
+     * Set the PIDF coefficients for the drive motors.
+     *
+     * @param runMode      The run mode of the drive.
+     * @param coefficients The PIDF coefficients for the motors.
+     */
     void setPIDFCoefficients(DcMotor.RunMode runMode, PIDFCoefficients coefficients);
 
     void setWeightedDrivePower(Pose2d drivePower);
@@ -108,6 +199,9 @@ public interface RoadRunnerDrive {
 
     Pose2d getPoseVelocity();
 
+    /**
+     * Update the pose estimate of the drive.
+     */
     void updatePoseEstimate();
 
     void setDriveSignal(DriveSignal driveSignal);

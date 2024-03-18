@@ -1,8 +1,6 @@
 package org.murraybridgebunyips.bunyipslib.tasks;
 
-import org.murraybridgebunyips.bunyipslib.Dbg;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.NoTimeoutTask;
-import org.murraybridgebunyips.bunyipslib.vision.Vision;
 import org.murraybridgebunyips.bunyipslib.vision.processors.centerstage.TeamProp;
 
 /**
@@ -13,65 +11,31 @@ import org.murraybridgebunyips.bunyipslib.vision.processors.centerstage.TeamProp
  * @author Lachlan Paul, 2023
  */
 public class GetTeamPropTask extends NoTimeoutTask {
-    private final Vision vision;
-    private TeamProp teamProp;
-    private boolean initFired;
+    private final TeamProp teamProp;
     private TeamProp.Positions position;
 
-    public GetTeamPropTask(Vision vision) {
-        this.vision = vision;
-    }
-
-    public GetTeamPropTask(Vision vision, TeamProp teamProp) {
-        this.vision = vision;
+    /**
+     * Constructor for the GetTeamPropTask.
+     *
+     * @param teamProp The TeamProp vision processor to use.
+     */
+    public GetTeamPropTask(TeamProp teamProp) {
         this.teamProp = teamProp;
+        if (!teamProp.isAttached())
+            throw new RuntimeException("Vision processor is not initialised on a vision system");
     }
 
     public TeamProp.Positions getPosition() {
         return position;
     }
 
-    /**
-     * Late init method for dynamically installing a TeamProp processor
-     *
-     * @param teamProp TeamProp Processor to use
-     */
-    public void setTeamProp(TeamProp teamProp) {
-        if (initFired)
-            throw new IllegalStateException("TeamProp has been already set, late init is no longer possible.");
-        this.teamProp = teamProp;
-    }
-
     @Override
     public void init() {
-        if (teamProp == null) {
-            Dbg.log("Cannot start Vision processing yet. Waiting...");
-            return;
-        }
-        initFired = true;
-        // Assumes VisionPortal is already initialised and running with teamProp as one of the processors
-        // If this is not the case, the task will fail
-        if (!vision.isInitialised()) {
-            throw new IllegalStateException("Vision has not been initialised!");
-        }
-        if (!vision.getAttachedProcessors().contains(teamProp)) {
-            throw new IllegalStateException("Vision has not attached the TeamProp processor using init()");
-        }
-        // TeamProp is aboard the processor, we're ready to go
-        vision.start(teamProp);
+        // no-op
     }
 
     @Override
     public void periodic() {
-        if (teamProp == null) {
-            // We can't do anything meaningful right now
-            return;
-        }
-        if (!initFired) {
-            // TeamProp is available and we should try to initialise it now
-            init();
-        }
-        teamProp.update();
         if (!teamProp.getData().isEmpty()) {
             // TeamProp will never have more than one data instance
             position = teamProp.getData().get(0).getPosition();
@@ -81,9 +45,7 @@ public class GetTeamPropTask extends NoTimeoutTask {
 
     @Override
     public void onFinish() {
-        // Pause TeamProp after we're done, we probably don't ever need it again but to remove
-        // it from the processor list would have to involve reinitialising the VisionPortal
-        vision.stop(teamProp);
+        // no-op
     }
 
     @Override

@@ -24,6 +24,9 @@ import java.util.Objects;
  */
 //@Config
 public abstract class MaxVelocityTuner extends LinearOpMode {
+    /**
+     * Time to run the test for (in seconds).
+     */
     public static double RUNTIME = 2.0;
     protected RoadRunnerDrive drive;
     private ElapsedTime timer;

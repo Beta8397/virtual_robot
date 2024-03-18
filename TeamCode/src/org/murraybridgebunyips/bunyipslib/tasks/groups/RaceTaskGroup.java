@@ -12,14 +12,17 @@ public class RaceTaskGroup extends TaskGroup {
     @Override
     public final void periodic() {
         for (Task task : tasks) {
-            task.run();
+            executeTask(task);
         }
     }
 
     @Override
     public final boolean isTaskFinished() {
         for (Task task : tasks) {
-            if (task.isFinished()) return true;
+            if (task.pollFinished()) {
+                finishAllTasksExcluding(task);
+                return true;
+            }
         }
         return false;
     }

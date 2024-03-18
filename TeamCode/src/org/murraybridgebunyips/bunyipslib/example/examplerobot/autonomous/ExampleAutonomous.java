@@ -14,6 +14,9 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.RobotTask;
 
 import java.util.List;
 
+/**
+ * Example autonomous OpMode for a robot with a lift and a mecanum drive.
+ */
 public class ExampleAutonomous extends AutonomousBunyipsOpMode {
     // This class extends BunyipsOpMode, which is the base class for all OpModes in BunyipsLib
     // If you need to use RoadRunner, it is recommended to use RoadRunnerAutonomousBunyipsOpMode,

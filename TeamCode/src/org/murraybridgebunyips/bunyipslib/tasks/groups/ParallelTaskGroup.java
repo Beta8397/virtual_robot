@@ -11,14 +11,14 @@ public class ParallelTaskGroup extends TaskGroup {
     @Override
     public final void periodic() {
         for (Task task : tasks) {
-            task.run();
+            executeTask(task);
         }
     }
 
     @Override
     public final boolean isTaskFinished() {
         for (Task task : tasks) {
-            if (!task.isFinished()) return false;
+            if (!task.pollFinished()) return false;
         }
         return true;
     }

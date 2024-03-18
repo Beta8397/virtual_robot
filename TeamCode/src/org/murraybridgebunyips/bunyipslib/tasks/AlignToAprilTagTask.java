@@ -25,6 +25,9 @@ import java.util.Optional;
  */
 @Config
 public class AlignToAprilTagTask<T extends BunyipsSubsystem> extends ForeverTask {
+    /**
+     * PID coefficients for the alignment controller.
+     */
     public static PIDCoefficients PID = new PIDCoefficients();
 
     private final RoadRunnerDrive drive;
@@ -32,6 +35,12 @@ public class AlignToAprilTagTask<T extends BunyipsSubsystem> extends ForeverTask
     private final Gamepad gamepad;
     private final PIDController controller;
 
+    /**
+     * @param gamepad    the gamepad to use for input
+     * @param drive      the drivetrain to use
+     * @param at         the AprilTag processor to use
+     * @param controller the PID controller to use for aligning to a target
+     */
     public AlignToAprilTagTask(Gamepad gamepad, T drive, AprilTag at, PIDController controller) {
         super(drive, false);
         if (!(drive instanceof RoadRunnerDrive))

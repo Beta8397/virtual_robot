@@ -48,6 +48,9 @@ public class GetWhitePixelTask extends NoTimeoutTask {
         this.aggression = aggression;
     }
 
+    /**
+     * @return Whether a spike mark (white pixel) has been found.
+     */
     public boolean hasFoundSpike() {
         return foundSpike;
     }

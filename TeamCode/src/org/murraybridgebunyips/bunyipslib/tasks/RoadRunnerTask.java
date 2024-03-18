@@ -15,6 +15,7 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
  * Task for running RoadRunner trajectories using the BunyipsOpMode Task system.
  * This is the task that is used for all RoadRunner tasks in RoadRunnerAutonomousBunyipsOpMode.
  *
+ * @param <T> The type of RoadRunnerDrive to be used
  * @author Lucas Bubner, 2023
  */
 public class RoadRunnerTask<T extends RoadRunnerDrive> extends Task {
@@ -27,24 +28,56 @@ public class RoadRunnerTask<T extends RoadRunnerDrive> extends Task {
     // may not have fired which assigns the drive a task
     private boolean taskStartedRunning;
 
+    /**
+     * Create a new RoadRunnerTask with a time, drive, and trajectory.
+     *
+     * @param time       The time to run the task for
+     * @param drive      The drive to use
+     * @param trajectory The trajectory to follow
+     */
     public RoadRunnerTask(double time, T drive, Trajectory trajectory) {
         super(time);
         this.drive = drive;
         this.trajectory = trajectory;
     }
 
+    /**
+     * Create a new RoadRunnerTask with a time, drive, and trajectory sequence.
+     *
+     * @param time               The time to run the task for
+     * @param drive              The drive to use
+     * @param trajectorySequence The trajectory sequence to follow
+     */
     public RoadRunnerTask(double time, T drive, TrajectorySequence trajectorySequence) {
         super(time);
         this.drive = drive;
         this.trajectorySequence = trajectorySequence;
     }
 
+    /**
+     * Create a new RoadRunnerTask with a time, drive, trajectory, and dependency.
+     *
+     * @param time                           The time to run the task for
+     * @param drive                          The drive to use
+     * @param trajectory                     The trajectory to follow
+     * @param dependency                     The subsystem to run this task on
+     * @param shouldOverrideConflictingTasks Whether this task should override conflicting tasks
+     */
     public RoadRunnerTask(double time, T drive, Trajectory trajectory, BunyipsSubsystem dependency, boolean shouldOverrideConflictingTasks) {
         super(time, dependency, shouldOverrideConflictingTasks);
         this.drive = drive;
         this.trajectory = trajectory;
     }
 
+    /**
+     * Create a new RoadRunnerTask with a time, drive, trajectory sequence, and dependency.
+     *
+     * @param time                           The time to run the task for
+     * @param drive                          The drive to use
+     * @param trajectorySequence             The trajectory sequence to follow
+     * @param dependency                     The subsystem to run this task on
+     * @param shouldOverrideConflictingTasks Whether this task should override conflicting tasks
+     */
     public RoadRunnerTask(double time, T drive, TrajectorySequence trajectorySequence, BunyipsSubsystem dependency, boolean shouldOverrideConflictingTasks) {
         super(time, dependency, shouldOverrideConflictingTasks);
         this.drive = drive;

@@ -13,6 +13,11 @@ public class OpModeSelection {
     private final Object obj;
     private Controller assignedButton;
 
+    /**
+     * Wrap an object with a name for selection.
+     *
+     * @param obj the object to wrap
+     */
     public OpModeSelection(Object obj) {
         if (obj instanceof Enum) {
             name = ((Enum<?>) obj).name();

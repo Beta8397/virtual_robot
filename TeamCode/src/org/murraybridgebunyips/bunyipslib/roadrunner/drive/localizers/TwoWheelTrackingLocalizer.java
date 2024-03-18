@@ -11,8 +11,11 @@ import org.murraybridgebunyips.bunyipslib.roadrunner.util.Encoder;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Dual tracking wheel localizer implementation.
+ */
 /*
- * Sample tracking wheel localizer implementation assuming the standard configuration:
+ * Tracking wheel localizer implementation assuming the standard configuration:
  *
  *    ^
  *    |
@@ -42,6 +45,14 @@ public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
 
     private final RoadRunnerDrive drive;
 
+    /**
+     * Create a new TwoWheelTrackingLocalizer
+     *
+     * @param coefficients         The coefficients to use
+     * @param parallelEncoder      The parallel encoder
+     * @param perpendicularEncoder The perpendicular encoder
+     * @param drive                The drivetrain
+     */
     public TwoWheelTrackingLocalizer(TwoWheelTrackingLocalizerCoefficients coefficients, Encoder parallelEncoder, Encoder perpendicularEncoder, RoadRunnerDrive drive) {
         super(Arrays.asList(
                 new Pose2d(coefficients.PARALLEL_X, coefficients.PARALLEL_Y, 0),
@@ -59,6 +70,12 @@ public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
         return coefficients;
     }
 
+    /**
+     * Convert encoder ticks to inches
+     *
+     * @param ticks The ticks to convert
+     * @return The inches traveled
+     */
     public double encoderTicksToInches(double ticks) {
         return coefficients.WHEEL_RADIUS * 2 * Math.PI * coefficients.GEAR_RATIO * ticks / coefficients.TICKS_PER_REV;
     }

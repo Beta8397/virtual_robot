@@ -10,9 +10,10 @@ import org.murraybridgebunyips.bunyipslib.roadrunner.util.Encoder;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Standard 3 tracking wheel localizer implementation.
+ */
 /*
- * Standard tracking wheel localizer implementation assuming the standard configuration:
- *
  *    /--------------\
  *    |     ____     |
  *    |     ----     |
@@ -30,6 +31,16 @@ public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer 
     private final List<Integer> lastEncPositions;
     private final List<Integer> lastEncVels;
 
+    /**
+     * Create a new StandardTrackingWheelLocalizer with coefficients, encoders, and last encoder positions and velocities.
+     *
+     * @param coefficients             The coefficients for the localizer
+     * @param leftEncoder              The left encoder
+     * @param rightEncoder             The right encoder
+     * @param frontEncoder             The front encoder
+     * @param lastTrackingEncPositions The last encoder positions
+     * @param lastTrackingEncVels      The last encoder velocities
+     */
     public StandardTrackingWheelLocalizer(StandardTrackingWheelLocalizerCoefficients coefficients, Encoder leftEncoder, Encoder rightEncoder, Encoder frontEncoder, List<Integer> lastTrackingEncPositions, List<Integer> lastTrackingEncVels) {
         super(Arrays.asList(
                 new Pose2d(0, coefficients.LATERAL_DISTANCE / 2, 0), // left
@@ -53,6 +64,12 @@ public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer 
         return coefficients;
     }
 
+    /**
+     * Convert encoder ticks to inches.
+     *
+     * @param ticks The encoder ticks
+     * @return The inches traveled
+     */
     public double encoderTicksToInches(double ticks) {
         return coefficients.WHEEL_RADIUS * 2 * Math.PI * coefficients.GEAR_RATIO * ticks / coefficients.TICKS_PER_REV;
     }

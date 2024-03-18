@@ -12,9 +12,6 @@ import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * Detection for a custom team prop based on colour ranges,
  * refactored to work with our vision system
@@ -24,8 +21,11 @@ import java.util.List;
  */
 @Config
 public class TeamProp extends Processor<TeamPropData> {
+    /**
+     * The distance threshold where colour should be ignored.
+     */
     public static double NONE_THRESHOLD = 220;
-    private final List<Integer> ELEMENT_COLOR;
+    private int[] ELEMENT_COLOR;
 
     private double distance1;
     private double distance2;
@@ -40,9 +40,11 @@ public class TeamProp extends Processor<TeamPropData> {
      * @param r Red value of the element color (0-255)
      * @param g Green value of the element color (0-255)
      * @param b Blue value of the element color (0-255)
+     * @return The TeamProp instance
      */
-    public TeamProp(int r, int g, int b) {
-        ELEMENT_COLOR = Arrays.asList(r, g, b);
+    public TeamProp setColours(int r, int g, int b) {
+        ELEMENT_COLOR = new int[]{r, g, b};
+        return this;
     }
 
     @Override
@@ -55,8 +57,8 @@ public class TeamProp extends Processor<TeamPropData> {
         zone1.setTo(avgColor1);
         zone2.setTo(avgColor2);
 
-        distance1 = color_distance(avgColor1, ELEMENT_COLOR);
-        distance2 = color_distance(avgColor2, ELEMENT_COLOR);
+        distance1 = colourDistance(avgColor1, ELEMENT_COLOR);
+        distance2 = colourDistance(avgColor2, ELEMENT_COLOR);
 
         if (distance1 > NONE_THRESHOLD && distance2 > NONE_THRESHOLD) {
             max_distance = -1;
@@ -66,15 +68,21 @@ public class TeamProp extends Processor<TeamPropData> {
         }
     }
 
-    @SuppressWarnings("rawtypes")
-    public double color_distance(Scalar color1, List color2) {
+    /**
+     * Calculate the distance between two colours.
+     *
+     * @param color1 The first colour
+     * @param color2 The second colour
+     * @return The distance between the two colours
+     */
+    public double colourDistance(Scalar color1, int[] color2) {
         double r1 = color1.val[0];
         double g1 = color1.val[1];
         double b1 = color1.val[2];
 
-        int r2 = (int) color2.get(0);
-        int g2 = (int) color2.get(1);
-        int b2 = (int) color2.get(2);
+        int r2 = color2[0];
+        int g2 = color2[1];
+        int b2 = color2[2];
 
         return Math.sqrt(Math.pow((r1 - r2), 2) + Math.pow((g1 - g2), 2) + Math.pow((b1 - b2), 2));
     }
@@ -106,9 +114,21 @@ public class TeamProp extends Processor<TeamPropData> {
         zone2.release();
     }
 
+    /**
+     * The position of the team prop, CENTERSTAGE.
+     */
     public enum Positions {
+        /**
+         * The team prop is on the left Spike Mark.
+         */
         LEFT,
+        /**
+         * The team prop is on the center Spike Mark.
+         */
         CENTER,
+        /**
+         * The team prop is on the right Spike Mark.
+         */
         RIGHT
     }
 }

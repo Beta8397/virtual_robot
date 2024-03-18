@@ -18,6 +18,9 @@ import com.qualcomm.robotcore.hardware.HardwareMap
  * ```
  */
 abstract class RobotConfig {
+    /**
+     * OpMode supplied hardwareMap instance.
+     */
     protected lateinit var hardwareMap: HardwareMap
 
     /**

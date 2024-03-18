@@ -24,20 +24,35 @@ public class CartesianMecanumDrive extends BunyipsSubsystem {
     private final DcMotor backRight;
 
     // Axial translation speeds
+
+    /**
+     * Horizontal speed of the robot.
+     */
     public double speedX;
+    /**
+     * Vertical speed of the robot.
+     */
     public double speedY;
+    /**
+     * Rotational speed of the robot.
+     */
     public double speedR;
 
     // Store and declare prioritisation when given instruction to calculate motor powers
     private Priority priority = Priority.NORMALISED;
 
+    /**
+     * @param frontLeft  the front left motor
+     * @param frontRight the front right motor
+     * @param backLeft   the back left motor
+     * @param backRight  the back right motor
+     */
     public CartesianMecanumDrive(DcMotor frontLeft, DcMotor frontRight, DcMotor backLeft, DcMotor backRight) {
+        assertParamsNotNull(frontLeft, frontRight, backLeft, backRight);
         this.frontLeft = frontLeft;
         this.backLeft = backLeft;
         this.frontRight = frontRight;
         this.backRight = backRight;
-        // Critical component, cannot be ignored if null
-        assert frontLeft != null && backLeft != null && frontRight != null && backRight != null;
     }
 
     // Setters for the prioritisation of the drive system
@@ -46,6 +61,11 @@ public class CartesianMecanumDrive extends BunyipsSubsystem {
         return this;
     }
 
+    /**
+     * Swap the priority of the drive system.
+     *
+     * @return this
+     */
     public CartesianMecanumDrive swapPriority() {
         priority = priority == Priority.NORMALISED ? Priority.ROTATIONAL : Priority.NORMALISED;
         return this;
@@ -58,6 +78,7 @@ public class CartesianMecanumDrive extends BunyipsSubsystem {
      * @param left_stick_x  X value of the controller
      * @param left_stick_y  Y value of the controller
      * @param right_stick_x R value of the controller
+     * @return this
      * @see Controller#Companion
      */
     public CartesianMecanumDrive setSpeedUsingController(double left_stick_x, double left_stick_y, double right_stick_x) {
@@ -79,6 +100,7 @@ public class CartesianMecanumDrive extends BunyipsSubsystem {
      * @param r The speed at which the robot will rotate.
      *          Positive is clockwise, negative is anti-clockwise.
      *          Range: -1.0 to 1.0
+     * @return this
      */
     public CartesianMecanumDrive setSpeedXYR(double x, double y, double r) {
         speedX = Range.clip(x, -1.0, 1.0);
@@ -92,13 +114,14 @@ public class CartesianMecanumDrive extends BunyipsSubsystem {
      *
      * @param speed             speed at which the motors will operate
      * @param direction_degrees direction at which the motors will move toward
-     * @param speedR            rotation speed - positive: clockwise
+     * @param rSpeed            rotation speed - positive: clockwise
+     * @return this
      */
-    public CartesianMecanumDrive setSpeedPolarR(double speed, double direction_degrees, double speedR) {
+    public CartesianMecanumDrive setSpeedPolarR(double speed, double direction_degrees, double rSpeed) {
         double radians = Math.toRadians(direction_degrees);
         speedX = Range.clip(speed * Math.cos(radians), -1.0, 1.0);
         speedY = Range.clip(speed * Math.sin(radians), -1.0, 1.0);
-        this.speedR = Range.clip(speedR, -1.0, 1.0);
+        speedR = Range.clip(rSpeed, -1.0, 1.0);
         return this;
     }
 
@@ -107,7 +130,7 @@ public class CartesianMecanumDrive extends BunyipsSubsystem {
      * calculate the motor powers based on these variables.
      */
     @Override
-    public void update() {
+    protected void periodic() {
         if (priority == Priority.ROTATIONAL) {
             rotationalUpdate();
             opMode.addTelemetry(String.format(Locale.getDefault(), "Rotation-priority Mecanum Drive: Forward: %.2f, Strafe: %.2f, Rotate: %.2f", speedX, speedY, speedR));
@@ -153,6 +176,8 @@ public class CartesianMecanumDrive extends BunyipsSubsystem {
 
     /**
      * Set the drive system to brake.
+     *
+     * @return this
      */
     public CartesianMecanumDrive setToBrake() {
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -164,6 +189,8 @@ public class CartesianMecanumDrive extends BunyipsSubsystem {
 
     /**
      * Set the drive system to float.
+     *
+     * @return this
      */
     public CartesianMecanumDrive setToFloat() {
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);

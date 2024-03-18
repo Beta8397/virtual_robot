@@ -23,9 +23,17 @@ import java.util.ArrayList;
  */
 @Config
 public class MultiColourThreshold extends Processor<ContourData> {
+    /**
+     * The index of the processor mask to draw to the frame.
+     */
     public static int MASK;
     private final ArrayList<Pair<ColourThreshold, Mat>> colourProcessors = new ArrayList<>();
 
+    /**
+     * Create a new MultiColourThreshold with the given processors.
+     *
+     * @param thresholdProcessors the colour processors to use
+     */
     public MultiColourThreshold(ColourThreshold... thresholdProcessors) {
         for (ColourThreshold processor : thresholdProcessors) {
             colourProcessors.add(new Pair<>(processor, new Mat()));

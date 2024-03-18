@@ -1,8 +1,8 @@
 package org.murraybridgebunyips.bunyipslib;
 
+import static org.murraybridgebunyips.bunyipslib.MovingAverageTimer.NANOS_IN_SECONDS;
 import static org.murraybridgebunyips.bunyipslib.Text.formatString;
 import static org.murraybridgebunyips.bunyipslib.Text.round;
-import static org.murraybridgebunyips.bunyipslib.tasks.bases.Task.NANOS_IN_SECONDS;
 
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
@@ -22,6 +22,10 @@ public class Scheduler extends BunyipsComponent {
 
     /**
      * Used internally by subsystems to report their task-running status.
+     *
+     * @param className The class name of the subsystem.
+     * @param taskName  The name of the task.
+     * @param deltaTime The time this task has been running
      */
     public static void addSubsystemTaskReport(String className, String taskName, double deltaTime) {
         subsystemReports.add(formatString("    % | % -> %s", className, taskName, deltaTime));
@@ -45,51 +49,52 @@ public class Scheduler extends BunyipsComponent {
                 // Subsystem count will account for default tasks
                 allocatedTasks.size() + subsystems.size(),
                 allocatedTasks.size() + subsystems.size() == 1 ? "" : "s",
-                allocatedTasks.stream().filter(task -> task.task.shouldOverrideOnConflict() != null).count() + subsystems.size(),
-                allocatedTasks.stream().filter(task -> task.task.shouldOverrideOnConflict() == null).count(),
+                allocatedTasks.stream().filter(task -> task.taskToRun.shouldOverrideOnConflict() != null).count() + subsystems.size(),
+                allocatedTasks.stream().filter(task -> task.taskToRun.shouldOverrideOnConflict() == null).count(),
                 subsystems.size(),
                 subsystems.size() == 1 ? "" : "s"
         );
         for (String item : subsystemReports) {
+            if (item.contains("IdleTask")) continue;
             opMode.addTelemetry(item);
         }
         for (ConditionalTask task : allocatedTasks) {
-            if (task.task.shouldOverrideOnConflict() != null)
+            if (task.taskToRun.shouldOverrideOnConflict() != null)
                 continue;
-            if (task.task.isRunning() || task.condition.getAsBoolean())
-                opMode.addTelemetry("    Scheduler | % -> %s", task.task.getName(), round(task.task.getDeltaTime(), 1));
+            if (task.taskToRun.isRunning() || task.runCondition.getAsBoolean())
+                opMode.addTelemetry("    Scheduler | % -> %s", task.taskToRun.getName(), round(task.taskToRun.getDeltaTime(), 1));
         }
         opMode.addTelemetry("");
         subsystemReports.clear();
 
         for (ConditionalTask task : allocatedTasks) {
-            boolean condition = task.condition.getAsBoolean();
-            if (condition || task.task.isRunning()) {
+            boolean condition = task.runCondition.getAsBoolean();
+            if (condition || task.taskToRun.isRunning()) {
                 // Latch current timing of truthy condition
                 if (task.activeSince == -1) {
                     task.activeSince = System.nanoTime();
                 }
                 // Update controller states for determining whether they need to be continued to be run
                 boolean timeoutExceeded = task.time * NANOS_IN_SECONDS + task.activeSince < System.nanoTime();
-                if (task.condition instanceof ControllerStateHandler && task.time != 0.0) {
-                    ((ControllerStateHandler) task.condition).setTimeoutCondition(timeoutExceeded);
+                if (task.runCondition instanceof ControllerStateHandler && task.time != 0.0) {
+                    ((ControllerStateHandler) task.runCondition).setTimeoutCondition(timeoutExceeded);
                 }
                 // Trigger upon timeout goal or if the task does not have one
                 if (task.time == 0.0 || timeoutExceeded) {
-                    if (task.task.shouldOverrideOnConflict() == null) {
+                    if (task.taskToRun.shouldOverrideOnConflict() == null) {
                         if (task.stopCondition.getAsBoolean()) {
                             // Finish handler will be called below
-                            task.task.finishNow();
+                            task.taskToRun.finishNow();
                         }
                         // Check for a debouncing situation and skip if it is not met
                         if (task.debouncing && !debouncingCheck(task, condition)) {
                             continue;
                         }
                         // This is a non-command task, run it now as it will not be run by any subsystem
-                        task.task.run();
-                        if (task.task.pollFinished()) {
+                        task.taskToRun.run();
+                        if (task.taskToRun.pollFinished()) {
                             // Reset the task as it is not attached to a subsystem and will not be reintegrated by one
-                            task.task.reset();
+                            task.taskToRun.reset();
                         }
                         continue;
                     }
@@ -99,10 +104,10 @@ public class Scheduler extends BunyipsComponent {
                     for (BunyipsSubsystem subsystem : subsystems) {
                         if (task.stopCondition.getAsBoolean()) {
                             // Finish handler will be called on the subsystem
-                            task.task.finishNow();
+                            task.taskToRun.finishNow();
                         }
-                        if (subsystem.getTaskDependencies().contains(task.task.hashCode())) {
-                            subsystem.setCurrentTask(task.task);
+                        if (subsystem.getTaskDependencies().contains(task.taskToRun.hashCode())) {
+                            subsystem.setCurrentTask(task.taskToRun);
                         }
                     }
                 }
@@ -113,7 +118,7 @@ public class Scheduler extends BunyipsComponent {
         }
 
         for (BunyipsSubsystem subsystem : subsystems) {
-            subsystem.run();
+            subsystem.update();
         }
     }
 
@@ -295,34 +300,51 @@ public class Scheduler extends BunyipsComponent {
         }
     }
 
+    /**
+     * A task that will run when a condition is met.
+     */
     public class ConditionalTask {
-        protected final BooleanSupplier condition;
-        protected Task task;
-        protected double time;
+        protected final BooleanSupplier runCondition;
+        protected Task taskToRun;
+        protected double time = 0.0;
         protected boolean debouncing;
         protected boolean lastState;
         protected BooleanSupplier stopCondition = () -> false;
         protected long activeSince = -1;
 
-        public ConditionalTask(BooleanSupplier condition) {
-            this.condition = condition;
+        /**
+         * Create and allocate a new conditional task. This will automatically be added to the scheduler.
+         *
+         * @param runCondition The condition to start running the task.
+         */
+        public ConditionalTask(BooleanSupplier runCondition) {
+            this.runCondition = runCondition;
+            allocatedTasks.add(this);
         }
 
         /**
          * Run a task when the condition is met.
          * This method can only be called once per ConditionalTask.
+         * If you do not mention timing control, this task will be run immediately when the condition is met,
+         * ending when the task ends.
          *
          * @param task The task to run.
-         * @return Timing control for allocation (to queue this Task call forSeconds(), inSeconds(), or immediately()).
+         * @return Timing control for allocation (none: immediate, inSeconds(), finishingWhen(), inSecondsFinishingWhen()).
          */
         public ConditionalTask run(Task task) {
-            if (this.task != null) {
+            if (taskToRun != null) {
                 throw new EmergencyStop("A run(Task) method has been called more than once on a scheduler task. If you wish to run multiple tasks see about using a task group as your task.");
             }
-            this.task = task;
+            taskToRun = task;
             return this;
         }
 
+        /**
+         * Run a task when the condition is met, debouncing the task from running more than once the condition is met.
+         *
+         * @param task The task to run.
+         * @return Timing control for allocation (none: immediate, inSeconds(), finishingWhen(), inSecondsFinishingWhen()).
+         */
         public ConditionalTask runDebounced(Task task) {
             debouncing = true;
             return run(task);
@@ -332,11 +354,10 @@ public class Scheduler extends BunyipsComponent {
          * Run a task assigned to in run() in a certain amount of seconds of the condition remaining true.
          * If on a controller, this will delay the activation of the task by the specified amount of seconds.
          *
-         * @param time The amount of seconds to wait before running the task.
+         * @param seconds The amount of seconds to wait before running the task.
          */
-        public void inSeconds(double time) {
-            this.time = Math.abs(time);
-            allocatedTasks.add(this);
+        public void inSeconds(double seconds) {
+            time = Math.abs(seconds);
         }
 
         /**
@@ -347,7 +368,6 @@ public class Scheduler extends BunyipsComponent {
          */
         public void finishingWhen(BooleanSupplier condition) {
             stopCondition = condition;
-            allocatedTasks.add(this);
         }
 
         /**
@@ -356,21 +376,12 @@ public class Scheduler extends BunyipsComponent {
          * Once this condition is met, the task will be forcefully stopped and the scheduler will move on.
          * This is useful for continuous tasks.
          *
-         * @param time      The amount of seconds to wait before running the task.
+         * @param seconds   The amount of seconds to wait before running the task.
          * @param condition The condition to stop the task.
          */
-        public void inSecondsFinishingWhen(double time, BooleanSupplier condition) {
-            this.time = Math.abs(time);
+        public void inSecondsFinishingWhen(double seconds, BooleanSupplier condition) {
+            time = Math.abs(seconds);
             stopCondition = condition;
-            allocatedTasks.add(this);
-        }
-
-        /**
-         * Run the task assigned to in run() immediately once the condition is true.
-         */
-        public void immediately() {
-            time = 0.0;
-            allocatedTasks.add(this);
         }
     }
 }

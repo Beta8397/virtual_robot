@@ -10,11 +10,14 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.murraybridgebunyips.bunyipslib.Inches;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
 
-/*
+/**
  * This is a simple routine to test translational drive capabilities.
  */
 //@Config
 public abstract class StraightTest extends LinearOpMode {
+    /**
+     * The amount of distance to test in inches.
+     */
     public static double DISTANCE = Inches.fromM(1);
     protected RoadRunnerDrive drive;
 
@@ -40,6 +43,8 @@ public abstract class StraightTest extends LinearOpMode {
         telemetry.addData("finalHeading", poseEstimate.getHeading());
         telemetry.update();
 
-        while (!isStopRequested() && opModeIsActive()) ;
+        while (!isStopRequested() && opModeIsActive()) {
+            // no-op
+        }
     }
 }

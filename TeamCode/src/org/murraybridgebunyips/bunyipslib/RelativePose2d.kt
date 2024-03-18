@@ -10,7 +10,13 @@ import com.acmerobotics.roadrunner.geometry.Pose2d
  * Migrated to use Pose2d from RoadRunner 13/11/2023.
  * @author Lucas Bubner, 2023
  */
-enum class RelativePose2d(val vector: Pose2d) {
+@Suppress("KDocMissingDocumentation")
+enum class RelativePose2d(
+    /**
+     * The vector of the relative pose.
+     */
+    val vector: Pose2d
+) {
     // 2D translational vectors
     FORWARD(Pose2d(1.0, 0.0, 0.0)),
     BACKWARD(Pose2d(-1.0, 0.0, 0.0)),

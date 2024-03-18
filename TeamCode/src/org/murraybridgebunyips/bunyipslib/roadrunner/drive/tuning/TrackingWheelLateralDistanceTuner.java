@@ -62,6 +62,9 @@ import org.murraybridgebunyips.bunyipslib.roadrunner.drive.localizers.StandardTr
  */
 //@Config
 public abstract class TrackingWheelLateralDistanceTuner extends LinearOpMode {
+    /**
+     * The number of turns to make during the tuning routine.
+     */
     public static int NUM_TURNS = 10;
     protected RoadRunnerDrive drive;
 

@@ -8,7 +8,7 @@ import java.util.HashMap;
  * @author Lucas Bubner, 2024
  * @see While
  */
-public class Threads {
+public final class Threads {
     private static final HashMap<Integer, Thread> threads = new HashMap<>();
 
     private Threads() {

@@ -22,6 +22,9 @@ public class TFOD extends Processor<TfodData> {
     private final TfodProcessor instance;
     private volatile Object tfodCtx;
 
+    /**
+     * Create a new TFOD processor
+     */
     public TFOD() {
         instance = new TfodProcessor.Builder()
                 // Specify custom TFOD settings here

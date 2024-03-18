@@ -14,9 +14,17 @@ import java.io.StringWriter
  */
 @Config
 object Exceptions {
+    /**
+     * Maximum number of characters to display in the stacktrace on the Driver Station.
+     */
     @JvmField
     var MAX_DS_STACKTRACE_CHARS = 250
 
+    /**
+     * Handle an exception, logging it to the Driver Station and Logcat.
+     * @param e The exception to handle.
+     * @param stderr The function to print logging to the Driver Station or other stderr outputs.
+     */
     @Throws(InterruptedException::class)
     fun handle(e: Exception, stderr: (msg: String) -> Unit) {
         if (e is NullPointerException) {

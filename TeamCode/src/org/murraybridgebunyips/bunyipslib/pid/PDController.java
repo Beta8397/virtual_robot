@@ -7,6 +7,9 @@ package org.murraybridgebunyips.bunyipslib.pid;
 public class PDController extends PIDController {
     /**
      * Default constructor with just the coefficients
+     *
+     * @param kp The value of kP for the coefficients.
+     * @param kd The value of kD for the coefficients.
      */
     public PDController(double kp, double kd) {
         super(kp, 0, kd);
@@ -14,6 +17,11 @@ public class PDController extends PIDController {
 
     /**
      * The extended constructor.
+     *
+     * @param kp The value of kP for the coefficients.
+     * @param kd The value of kD for the coefficients.
+     * @param sp The setpoint for the controller.
+     * @param pv The process variable for the controller.
      */
     public PDController(double kp, double kd, double sp, double pv) {
         super(kp, 0, kd, sp, pv);

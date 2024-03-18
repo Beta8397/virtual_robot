@@ -9,11 +9,14 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
 
-/*
+/**
  * This is a simple routine to test translational drive capabilities.
  */
 //@Config
 public abstract class StrafeTest extends LinearOpMode {
+    /**
+     * The amount of strafe distance to test in inches.
+     */
     public static double DISTANCE = 60; // in
     protected RoadRunnerDrive drive;
 
@@ -39,6 +42,8 @@ public abstract class StrafeTest extends LinearOpMode {
         telemetry.addData("finalHeading", poseEstimate.getHeading());
         telemetry.update();
 
-        while (!isStopRequested() && opModeIsActive()) ;
+        while (!isStopRequested() && opModeIsActive()) {
+            // no-op
+        }
     }
 }

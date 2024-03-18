@@ -55,10 +55,17 @@ import org.firstinspires.ftc.robotcore.external.Telemetry.Item
  */
 class UserSelection<T>(
     private val opMode: BunyipsOpMode,
+    /**
+     * Runs once the user has made a selection or the thread is interrupted. The result will be the selection made by the user.
+     */
     var callback: (res: T?) -> Unit,
     private vararg val opmodes: T
 ) : Runnable {
 
+    /**
+     * The result of the user selection. Will be null if the user did not make a selection.
+     * Passed into the callback.
+     */
     @Volatile
     var result: T? = null
         private set

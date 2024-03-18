@@ -8,9 +8,16 @@ import java.util.TreeMap;
  * <p>
  * Utility from FTCLib
  * <a href="https://github.com/FTCLib/FTCLib/blob/master/core/src/main/java/com/arcrobotics/ftclib/util/LUT.java">Source</a>
+ *
+ * @param <T> the input type
+ * @param <R> the output type
  */
 public class LookupTable<T extends Number, R> extends TreeMap<T, R> {
 
+    /**
+     * @param key the input key
+     * @param out the output value
+     */
     public void add(T key, R out) {
         put(key, out);
     }

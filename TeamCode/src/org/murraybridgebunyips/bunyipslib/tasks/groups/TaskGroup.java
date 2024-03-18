@@ -1,8 +1,10 @@
 package org.murraybridgebunyips.bunyipslib.tasks.groups;
 
+import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -16,10 +18,45 @@ import java.util.Arrays;
  */
 public abstract class TaskGroup extends Task {
     protected final ArrayDeque<Task> tasks = new ArrayDeque<>();
+    private final ArrayList<Task> attachedTasks = new ArrayList<>();
+    private final ArrayList<BunyipsSubsystem> subsystems = new ArrayList<>();
 
     protected TaskGroup(Task... tasks) {
         super(0.0);
         this.tasks.addAll(Arrays.asList(tasks));
+    }
+
+    /**
+     * Add subsystems to the task group to determine which subsystems each task should be attached.
+     *
+     * @param dependencies the subsystems to add, in order of task addition
+     * @return the task group
+     */
+    public final TaskGroup withSubsystems(BunyipsSubsystem... dependencies) {
+        subsystems.addAll(Arrays.asList(dependencies));
+        return this;
+    }
+
+    protected void executeTask(Task task) {
+        // Do not manage a task if it is already attached to a subsystem being managed there
+        if (attachedTasks.contains(task)) return;
+        for (BunyipsSubsystem subsystem : subsystems) {
+            if (subsystem.getTaskDependencies().contains(task.hashCode())) {
+                subsystem.setCurrentTask(task);
+                attachedTasks.add(task);
+                return;
+            }
+        }
+        // Otherwise we can just run the task outright
+        task.run();
+    }
+
+    protected void finishAllTasksExcluding(Task excluded) {
+        for (Task task : tasks) {
+            if (task != excluded) {
+                task.forceFinish();
+            }
+        }
     }
 
     @Override

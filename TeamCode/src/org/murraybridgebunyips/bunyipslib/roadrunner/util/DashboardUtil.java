@@ -10,13 +10,19 @@ import java.util.List;
 /**
  * Set of helper functions for drawing Road Runner paths and trajectories on dashboard canvases.
  */
-public class DashboardUtil {
+public final class DashboardUtil {
     private static final double DEFAULT_RESOLUTION = 2.0; // distance units; presumed inches
     private static final double ROBOT_RADIUS = 9; // in
 
     private DashboardUtil() {
     }
 
+    /**
+     * Draw a filled polygon on the dashboard canvas.
+     *
+     * @param canvas      dashboard canvas
+     * @param poseHistory list of robot poses
+     */
     public static void drawPoseHistory(Canvas canvas, List<Pose2d> poseHistory) {
         double[] xPoints = new double[poseHistory.size()];
         double[] yPoints = new double[poseHistory.size()];
@@ -28,6 +34,13 @@ public class DashboardUtil {
         canvas.strokePolyline(xPoints, yPoints);
     }
 
+    /**
+     * Draw a filled polygon on the dashboard canvas.
+     *
+     * @param canvas     dashboard canvas
+     * @param path       path to draw
+     * @param resolution distance units; presumed inches
+     */
     public static void drawSampledPath(Canvas canvas, Path path, double resolution) {
         int samples = (int) Math.ceil(path.length() / resolution);
         double[] xPoints = new double[samples];
@@ -42,10 +55,22 @@ public class DashboardUtil {
         canvas.strokePolyline(xPoints, yPoints);
     }
 
+    /**
+     * Draw a filled polygon on the dashboard canvas.
+     *
+     * @param canvas dashboard canvas
+     * @param path   path to draw
+     */
     public static void drawSampledPath(Canvas canvas, Path path) {
         drawSampledPath(canvas, path, DEFAULT_RESOLUTION);
     }
 
+    /**
+     * Draw a filled polygon on the dashboard canvas.
+     *
+     * @param canvas dashboard canvas
+     * @param pose   robot pose
+     */
     public static void drawRobot(Canvas canvas, Pose2d pose) {
         canvas.strokeCircle(pose.getX(), pose.getY(), ROBOT_RADIUS);
         Vector2d v = pose.headingVec().times(ROBOT_RADIUS);

@@ -16,7 +16,7 @@ import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
 
 import java.util.List;
 
-/*
+/**
  * This routine is designed to tune the PID coefficients used by the REV Expansion Hubs for closed-
  * loop velocity control. Although it may seem unnecessary, tuning these coefficients is just as
  * important as the positional parameters. Like the other manual tuning routines, this op mode
@@ -28,20 +28,20 @@ import java.util.List;
  * coefficients (note: the tuning variable will not appear until the op mode finishes initializing).
  * Once you've found a satisfactory set of gains, add them to the DriveConstants.java file under the
  * MOTOR_VELO_PID field.
- *
  * Recommended tuning process:
- *
  * 1. Increase kP until any phase lag is eliminated. Concurrently increase kD as necessary to
- *    mitigate oscillations.
+ * mitigate oscillations.
  * 2. Add kI (or adjust kF) until the steady state/constant velocity plateaus are reached.
  * 3. Back off kP and kD a little until the response is less oscillatory (but without lag).
- *
  * Pressing Y/Δ (Xbox/PS4) will pause the tuning process and enter driver override, allowing the
  * user to reset the position of the bot in the event that it drifts off the path.
  * Pressing B/O (Xbox/PS4) will cede control back to the tuning process.
  */
 //@Config
 public abstract class DriveVelocityPIDTuner extends LinearOpMode {
+    /**
+     * The distance the bot will travel back and forth.
+     */
     public static double DISTANCE = 72; // in
     protected RoadRunnerDrive drive;
 
@@ -129,7 +129,7 @@ public abstract class DriveVelocityPIDTuner extends LinearOpMode {
 
                         mode = Mode.TUNING_MODE;
                         movingForwards = true;
-                        activeProfile = generateProfile(movingForwards);
+                        activeProfile = generateProfile(true);
                         profileStart = clock.seconds();
                     }
 

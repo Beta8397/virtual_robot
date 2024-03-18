@@ -29,6 +29,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * RoadRunner Trajectory Builder
+ *
+ * @param <T> The type of the subclass (used for fluent builder pattern)
+ */
 @SuppressWarnings("unchecked")
 public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
     private final double resolution = 0.25;
@@ -60,6 +65,16 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
     private double lastDurationTraj;
     private double lastDisplacementTraj;
 
+    /**
+     * Create a new TrajectorySequenceBuilder
+     *
+     * @param startPose                     The starting pose
+     * @param startTangent                  The starting tangent
+     * @param baseVelConstraint             The base velocity constraint
+     * @param baseAccelConstraint           The base acceleration constraint
+     * @param baseTurnConstraintMaxAngVel   The base turn constraint maximum angular velocity
+     * @param baseTurnConstraintMaxAngAccel The base turn constraint maximum angular acceleration
+     */
     public TrajectorySequenceBuilder(
             Pose2d startPose,
             Double startTangent,
@@ -102,6 +117,15 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
         lastDisplacementTraj = 0.0;
     }
 
+    /**
+     * Create a new TrajectorySequenceBuilder
+     *
+     * @param startPose                     The starting pose
+     * @param baseVelConstraint             The base velocity constraint
+     * @param baseAccelConstraint           The base acceleration constraint
+     * @param baseTurnConstraintMaxAngVel   The base turn constraint maximum angular velocity
+     * @param baseTurnConstraintMaxAngAccel The base turn constraint maximum angular acceleration
+     */
     public TrajectorySequenceBuilder(
             Pose2d startPose,
             TrajectoryVelocityConstraint baseVelConstraint,
@@ -132,10 +156,24 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
         return baseAccelConstraint;
     }
 
+    /**
+     * Move in a straight line to a given position.
+     *
+     * @param endPosition The end position
+     * @return The builder
+     */
     public T lineTo(Vector2d endPosition) {
         return addPath(() -> currentTrajectoryBuilder.lineTo(endPosition, currentVelConstraint, currentAccelConstraint));
     }
 
+    /**
+     * Move in a straight line to a given position with custom velocity and acceleration constraints.
+     *
+     * @param endPosition     The end position
+     * @param velConstraint   The velocity constraint
+     * @param accelConstraint The acceleration constraint
+     * @return The builder
+     */
     public T lineTo(
             Vector2d endPosition,
             TrajectoryVelocityConstraint velConstraint,
@@ -144,10 +182,24 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
         return addPath(() -> currentTrajectoryBuilder.lineTo(endPosition, velConstraint, accelConstraint));
     }
 
+    /**
+     * Move in a straight line to a given position with a constant heading.
+     *
+     * @param endPosition The end position
+     * @return The builder
+     */
     public T lineToConstantHeading(Vector2d endPosition) {
         return addPath(() -> currentTrajectoryBuilder.lineToConstantHeading(endPosition, currentVelConstraint, currentAccelConstraint));
     }
 
+    /**
+     * Move in a straight line to a given position with a constant heading and custom velocity and acceleration constraints.
+     *
+     * @param endPosition     The end position
+     * @param velConstraint   The velocity constraint
+     * @param accelConstraint The acceleration constraint
+     * @return The builder
+     */
     public T lineToConstantHeading(
             Vector2d endPosition,
             TrajectoryVelocityConstraint velConstraint,
@@ -156,10 +208,24 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
         return addPath(() -> currentTrajectoryBuilder.lineToConstantHeading(endPosition, velConstraint, accelConstraint));
     }
 
+    /**
+     * Move in a straight line to a given position with a linear heading.
+     *
+     * @param endPose The end pose
+     * @return The builder
+     */
     public T lineToLinearHeading(Pose2d endPose) {
         return addPath(() -> currentTrajectoryBuilder.lineToLinearHeading(endPose, currentVelConstraint, currentAccelConstraint));
     }
 
+    /**
+     * Move in a straight line to a given position with a linear heading and custom velocity and acceleration constraints.
+     *
+     * @param endPose         The end pose
+     * @param velConstraint   The velocity constraint
+     * @param accelConstraint The acceleration constraint
+     * @return The builder
+     */
     public T lineToLinearHeading(
             Pose2d endPose,
             TrajectoryVelocityConstraint velConstraint,
@@ -168,10 +234,24 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
         return addPath(() -> currentTrajectoryBuilder.lineToLinearHeading(endPose, velConstraint, accelConstraint));
     }
 
+    /**
+     * Move in a straight line to a given position with a spline heading.
+     *
+     * @param endPose The end pose
+     * @return The builder
+     */
     public T lineToSplineHeading(Pose2d endPose) {
         return addPath(() -> currentTrajectoryBuilder.lineToSplineHeading(endPose, currentVelConstraint, currentAccelConstraint));
     }
 
+    /**
+     * Move in a straight line to a given position with a spline heading and custom velocity and acceleration constraints.
+     *
+     * @param endPose         The end pose
+     * @param velConstraint   The velocity constraint
+     * @param accelConstraint The acceleration constraint
+     * @return The builder
+     */
     public T lineToSplineHeading(
             Pose2d endPose,
             TrajectoryVelocityConstraint velConstraint,
@@ -180,10 +260,24 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
         return addPath(() -> currentTrajectoryBuilder.lineToSplineHeading(endPose, velConstraint, accelConstraint));
     }
 
+    /**
+     * Move in a strafe straight line to a given position.
+     *
+     * @param endPosition The end position
+     * @return The builder
+     */
     public T strafeTo(Vector2d endPosition) {
         return addPath(() -> currentTrajectoryBuilder.strafeTo(endPosition, currentVelConstraint, currentAccelConstraint));
     }
 
+    /**
+     * Move in a strafe straight line to a given position with custom velocity and acceleration constraints.
+     *
+     * @param endPosition     The end position
+     * @param velConstraint   The velocity constraint
+     * @param accelConstraint The acceleration constraint
+     * @return The builder
+     */
     public T strafeTo(
             Vector2d endPosition,
             TrajectoryVelocityConstraint velConstraint,
@@ -192,10 +286,24 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
         return addPath(() -> currentTrajectoryBuilder.strafeTo(endPosition, velConstraint, accelConstraint));
     }
 
+    /**
+     * Move forward a given distance.
+     *
+     * @param distance The distance to move
+     * @return The builder
+     */
     public T forward(double distance) {
         return addPath(() -> currentTrajectoryBuilder.forward(distance, currentVelConstraint, currentAccelConstraint));
     }
 
+    /**
+     * Move forward a given distance with custom velocity and acceleration constraints.
+     *
+     * @param distance        The distance to move
+     * @param velConstraint   The velocity constraint
+     * @param accelConstraint The acceleration constraint
+     * @return The builder
+     */
     public T forward(
             double distance,
             TrajectoryVelocityConstraint velConstraint,
@@ -204,10 +312,24 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
         return addPath(() -> currentTrajectoryBuilder.forward(distance, velConstraint, accelConstraint));
     }
 
+    /**
+     * Move backward a given distance.
+     *
+     * @param distance The distance to move
+     * @return The builder
+     */
     public T back(double distance) {
         return addPath(() -> currentTrajectoryBuilder.back(distance, currentVelConstraint, currentAccelConstraint));
     }
 
+    /**
+     * Move backward a given distance with custom velocity and acceleration constraints.
+     *
+     * @param distance        The distance to move
+     * @param velConstraint   The velocity constraint
+     * @param accelConstraint The acceleration constraint
+     * @return The builder
+     */
     public T back(
             double distance,
             TrajectoryVelocityConstraint velConstraint,
@@ -216,10 +338,24 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
         return addPath(() -> currentTrajectoryBuilder.back(distance, velConstraint, accelConstraint));
     }
 
+    /**
+     * Strafe left a given distance.
+     *
+     * @param distance The distance to strafe
+     * @return The builder
+     */
     public T strafeLeft(double distance) {
         return addPath(() -> currentTrajectoryBuilder.strafeLeft(distance, currentVelConstraint, currentAccelConstraint));
     }
 
+    /**
+     * Strafe left a given distance with custom velocity and acceleration constraints.
+     *
+     * @param distance        The distance to strafe
+     * @param velConstraint   The velocity constraint
+     * @param accelConstraint The acceleration constraint
+     * @return The builder
+     */
     public T strafeLeft(
             double distance,
             TrajectoryVelocityConstraint velConstraint,
@@ -228,10 +364,24 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
         return addPath(() -> currentTrajectoryBuilder.strafeLeft(distance, velConstraint, accelConstraint));
     }
 
+    /**
+     * Strafe right a given distance.
+     *
+     * @param distance The distance to strafe
+     * @return The builder
+     */
     public T strafeRight(double distance) {
         return addPath(() -> currentTrajectoryBuilder.strafeRight(distance, currentVelConstraint, currentAccelConstraint));
     }
 
+    /**
+     * Strafe right a given distance with custom velocity and acceleration constraints.
+     *
+     * @param distance        The distance to strafe
+     * @param velConstraint   The velocity constraint
+     * @param accelConstraint The acceleration constraint
+     * @return The builder
+     */
     public T strafeRight(
             double distance,
             TrajectoryVelocityConstraint velConstraint,
@@ -240,10 +390,26 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
         return addPath(() -> currentTrajectoryBuilder.strafeRight(distance, velConstraint, accelConstraint));
     }
 
+    /**
+     * Spline to a given position with a given heading.
+     *
+     * @param endPosition The end position
+     * @param endHeading  The end heading
+     * @return The builder
+     */
     public T splineTo(Vector2d endPosition, double endHeading) {
         return addPath(() -> currentTrajectoryBuilder.splineTo(endPosition, endHeading, currentVelConstraint, currentAccelConstraint));
     }
 
+    /**
+     * Spline to a given position with a given heading and custom velocity and acceleration constraints.
+     *
+     * @param endPosition     The end position
+     * @param endHeading      The end heading
+     * @param velConstraint   The velocity constraint
+     * @param accelConstraint The acceleration constraint
+     * @return The builder
+     */
     public T splineTo(
             Vector2d endPosition,
             double endHeading,
@@ -253,10 +419,26 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
         return addPath(() -> currentTrajectoryBuilder.splineTo(endPosition, endHeading, velConstraint, accelConstraint));
     }
 
+    /**
+     * Spline to a given position with a constant heading.
+     *
+     * @param endPosition The end position
+     * @param endHeading  The end heading
+     * @return The builder
+     */
     public T splineToConstantHeading(Vector2d endPosition, double endHeading) {
         return addPath(() -> currentTrajectoryBuilder.splineToConstantHeading(endPosition, endHeading, currentVelConstraint, currentAccelConstraint));
     }
 
+    /**
+     * Spline to a given position with a constant heading and custom velocity and acceleration constraints.
+     *
+     * @param endPosition     The end position
+     * @param endHeading      The end heading
+     * @param velConstraint   The velocity constraint
+     * @param accelConstraint The acceleration constraint
+     * @return The builder
+     */
     public T splineToConstantHeading(
             Vector2d endPosition,
             double endHeading,
@@ -266,10 +448,26 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
         return addPath(() -> currentTrajectoryBuilder.splineToConstantHeading(endPosition, endHeading, velConstraint, accelConstraint));
     }
 
+    /**
+     * Spline to a given position with a linear heading.
+     *
+     * @param endPose    The end pose
+     * @param endHeading The end heading
+     * @return The builder
+     */
     public T splineToLinearHeading(Pose2d endPose, double endHeading) {
         return addPath(() -> currentTrajectoryBuilder.splineToLinearHeading(endPose, endHeading, currentVelConstraint, currentAccelConstraint));
     }
 
+    /**
+     * Spline to a given position with a linear heading and custom velocity and acceleration constraints.
+     *
+     * @param endPose         The end pose
+     * @param endHeading      The end heading
+     * @param velConstraint   The velocity constraint
+     * @param accelConstraint The acceleration constraint
+     * @return The builder
+     */
     public T splineToLinearHeading(
             Pose2d endPose,
             double endHeading,
@@ -279,10 +477,26 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
         return addPath(() -> currentTrajectoryBuilder.splineToLinearHeading(endPose, endHeading, velConstraint, accelConstraint));
     }
 
+    /**
+     * Spline to a given position with a spline heading.
+     *
+     * @param endPose    The end pose
+     * @param endHeading The end heading
+     * @return The builder
+     */
     public T splineToSplineHeading(Pose2d endPose, double endHeading) {
         return addPath(() -> currentTrajectoryBuilder.splineToSplineHeading(endPose, endHeading, currentVelConstraint, currentAccelConstraint));
     }
 
+    /**
+     * Spline to a given position with a spline heading and custom velocity and acceleration constraints.
+     *
+     * @param endPose         The end pose
+     * @param endHeading      The end heading
+     * @param velConstraint   The velocity constraint
+     * @param accelConstraint The acceleration constraint
+     * @return The builder
+     */
     public T splineToSplineHeading(
             Pose2d endPose,
             double endHeading,
@@ -339,6 +553,13 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
         return reversed ? setTangentOffset(3.141592653589793) : setTangentOffset(0.0);
     }
 
+    /**
+     * Set the velocity and acceleration constraints for the next builder instructions.
+     *
+     * @param velConstraint   The velocity constraint
+     * @param accelConstraint The acceleration constraint
+     * @return The builder
+     */
     public T setConstraints(
             TrajectoryVelocityConstraint velConstraint,
             TrajectoryAccelerationConstraint accelConstraint
@@ -349,6 +570,11 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
         return (T) this;
     }
 
+    /**
+     * Reset the velocity and acceleration constraints to the base constraints.
+     *
+     * @return The builder
+     */
     public T resetConstraints() {
         currentVelConstraint = baseVelConstraint;
         currentAccelConstraint = baseAccelConstraint;
@@ -362,6 +588,11 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
         return (T) this;
     }
 
+    /**
+     * Reset the velocity constraint to the base velocity constraint.
+     *
+     * @return The builder
+     */
     public T resetVelConstraint() {
         currentVelConstraint = baseVelConstraint;
 
@@ -374,12 +605,24 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
         return (T) this;
     }
 
+    /**
+     * Reset the acceleration constraint to the base acceleration constraint.
+     *
+     * @return The builder
+     */
     public T resetAccelConstraint() {
         currentAccelConstraint = baseAccelConstraint;
 
         return (T) this;
     }
 
+    /**
+     * Set the turn constraints for the next builder instructions.
+     *
+     * @param maxAngVel   The maximum angular velocity
+     * @param maxAngAccel The maximum angular acceleration
+     * @return The builder
+     */
     public T setTurnConstraint(double maxAngVel, double maxAngAccel) {
         currentTurnConstraintMaxAngVel = maxAngVel;
         currentTurnConstraintMaxAngAccel = maxAngAccel;
@@ -387,6 +630,11 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
         return (T) this;
     }
 
+    /**
+     * Reset the turn constraints to the base turn constraints.
+     *
+     * @return The builder
+     */
     public T resetTurnConstraint() {
         currentTurnConstraintMaxAngVel = baseTurnConstraintMaxAngVel;
         currentTurnConstraintMaxAngAccel = baseTurnConstraintMaxAngAccel;
@@ -394,58 +642,149 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
         return (T) this;
     }
 
+    /**
+     * Add a temporal marker at the current duration to run a callback at that time.
+     *
+     * @param callback The callback to run
+     * @return The builder
+     */
     public T addTemporalMarker(MarkerCallback callback) {
         return addTemporalMarker(currentDuration, callback);
     }
 
+    /**
+     * Add a temporal marker at the current duration plus an offset to run a callback at that time.
+     *
+     * @param offset   The offset to add to the current duration
+     * @param callback The callback to run
+     * @return The builder
+     */
     public T UNSTABLE_addTemporalMarkerOffset(double offset, MarkerCallback callback) {
         return addTemporalMarker(currentDuration + offset, callback);
     }
 
+    /**
+     * Add a temporal marker at a given time to run a callback at that time.
+     *
+     * @param time     The time to run the callback
+     * @param callback The callback to run
+     * @return The builder
+     */
     public T addTemporalMarker(double time, MarkerCallback callback) {
         return addTemporalMarker(0.0, time, callback);
     }
 
+    /**
+     * Add a temporal marker at a given time to run a callback at that time.
+     *
+     * @param scale    The scale to apply to the time
+     * @param offset   The offset to add to the time
+     * @param callback The callback to run
+     * @return The builder
+     */
     public T addTemporalMarker(double scale, double offset, MarkerCallback callback) {
         return addTemporalMarker(time -> scale * time + offset, callback);
     }
 
+    /**
+     * Add a temporal marker at a given time to run a callback at that time.
+     *
+     * @param time     The time to run the callback
+     * @param callback The callback to run
+     * @return The builder
+     */
     public T addTemporalMarker(TimeProducer time, MarkerCallback callback) {
         temporalMarkers.add(new TemporalMarker(time, callback));
         return (T) this;
     }
 
+    /**
+     * Add a spatial marker at the current position to run a callback at that position.
+     *
+     * @param point    The point to run the callback
+     * @param callback The callback to run
+     * @return The builder
+     */
     public T addSpatialMarker(Vector2d point, MarkerCallback callback) {
         spatialMarkers.add(new SpatialMarker(point, callback));
         return (T) this;
     }
 
+    /**
+     * Add a displacement marker at the current displacement to run a callback at that displacement.
+     *
+     * @param callback The callback to run
+     * @return The builder
+     */
     public T addDisplacementMarker(MarkerCallback callback) {
         return addDisplacementMarker(currentDisplacement, callback);
     }
 
+    /**
+     * Add a displacement marker at the current displacement plus an offset to run a callback at that displacement.
+     *
+     * @param offset   The offset to add to the current displacement
+     * @param callback The callback to run
+     * @return The builder
+     */
     public T UNSTABLE_addDisplacementMarkerOffset(double offset, MarkerCallback callback) {
         return addDisplacementMarker(currentDisplacement + offset, callback);
     }
 
+    /**
+     * Add a displacement marker at a given displacement to run a callback at that displacement.
+     *
+     * @param displacement The displacement to run the callback
+     * @param callback     The callback to run
+     * @return The builder
+     */
     public T addDisplacementMarker(double displacement, MarkerCallback callback) {
         return addDisplacementMarker(0.0, displacement, callback);
     }
 
+    /**
+     * Add a displacement marker at a given displacement to run a callback at that displacement.
+     *
+     * @param scale    The scale to apply to the displacement
+     * @param offset   The offset to add to the displacement
+     * @param callback The callback to run
+     * @return The builder
+     */
     public T addDisplacementMarker(double scale, double offset, MarkerCallback callback) {
         return addDisplacementMarker((displacement -> scale * displacement + offset), callback);
     }
 
+    /**
+     * Add a displacement marker at a given displacement to run a callback at that displacement.
+     *
+     * @param displacement The displacement to run the callback
+     * @param callback     The callback to run
+     * @return The builder
+     */
     public T addDisplacementMarker(DisplacementProducer displacement, MarkerCallback callback) {
         displacementMarkers.add(new DisplacementMarker(displacement, callback));
 
         return (T) this;
     }
 
+    /**
+     * Turn to a given angle.
+     *
+     * @param angle The angle to turn in radians
+     * @return The builder
+     */
     public T turn(double angle) {
         return turn(angle, currentTurnConstraintMaxAngVel, currentTurnConstraintMaxAngAccel);
     }
 
+    /**
+     * Turn to a given angle with custom maximum angular velocity and acceleration.
+     *
+     * @param angle       The angle to turn in radians
+     * @param maxAngVel   The maximum angular velocity
+     * @param maxAngAccel The maximum angular acceleration
+     * @return The builder
+     */
     public T turn(double angle, double maxAngVel, double maxAngAccel) {
         pushPath();
 
@@ -468,6 +807,12 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
         return (T) this;
     }
 
+    /**
+     * Wait for a given number of seconds.
+     *
+     * @param seconds The number of seconds to wait
+     * @return The builder
+     */
     public T waitSeconds(double seconds) {
         pushPath();
         sequenceSegments.add(new WaitSegment(lastPose, seconds, Collections.emptyList()));
@@ -476,6 +821,12 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
         return (T) this;
     }
 
+    /**
+     * Add a trajectory to the sequence.
+     *
+     * @param trajectory The trajectory to add
+     * @return The builder
+     */
     public T addTrajectory(Trajectory trajectory) {
         pushPath();
 
@@ -504,6 +855,11 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
         currentTrajectoryBuilder = new TrajectoryBuilder(lastPose, tangent, currentVelConstraint, currentAccelConstraint, resolution);
     }
 
+    /**
+     * Create a TrajectorySequence from the current builder state.
+     *
+     * @return The TrajectorySequence to run.
+     */
     public TrajectorySequence build() {
         pushPath();
 
@@ -517,24 +873,24 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
     }
 
     private List<TrajectoryMarker> convertMarkersToGlobal(
-            List<SequenceSegment> sequenceSegments,
-            List<TemporalMarker> temporalMarkers,
-            List<DisplacementMarker> displacementMarkers,
-            List<SpatialMarker> spatialMarkers
+            List<? extends SequenceSegment> segments,
+            List<TemporalMarker> temporal,
+            List<DisplacementMarker> displacement,
+            List<SpatialMarker> spatial
     ) {
         ArrayList<TrajectoryMarker> trajectoryMarkers = new ArrayList<>();
 
         // Convert temporal markers
-        for (TemporalMarker marker : temporalMarkers) {
+        for (TemporalMarker marker : temporal) {
             trajectoryMarkers.add(
                     new TrajectoryMarker(marker.getProducer().produce(currentDuration), marker.getCallback())
             );
         }
 
         // Convert displacement markers
-        for (DisplacementMarker marker : displacementMarkers) {
+        for (DisplacementMarker marker : displacement) {
             double time = displacementToTime(
-                    sequenceSegments,
+                    segments,
                     marker.getProducer().produce(currentDisplacement)
             );
 
@@ -547,10 +903,10 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
         }
 
         // Convert spatial markers
-        for (SpatialMarker marker : spatialMarkers) {
+        for (SpatialMarker marker : spatial) {
             trajectoryMarkers.add(
                     new TrajectoryMarker(
-                            pointToTime(sequenceSegments, marker.getPoint()),
+                            pointToTime(segments, marker.getPoint()),
                             marker.getCallback()
                     )
             );
@@ -559,14 +915,14 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
         return trajectoryMarkers;
     }
 
-    private void projectGlobalMarkersToLocalSegments(List<TrajectoryMarker> markers, List<SequenceSegment> sequenceSegments) {
-        if (sequenceSegments.isEmpty()) return;
+    private void projectGlobalMarkersToLocalSegments(List<TrajectoryMarker> markers, List<? extends SequenceSegment> segments) {
+        if (segments.isEmpty()) return;
 
         markers.sort(Comparator.comparingDouble(TrajectoryMarker::getTime));
 
         double timeOffset = 0.0;
         int markerIndex = 0;
-        for (SequenceSegment segment : sequenceSegments) {
+        for (SequenceSegment segment : segments) {
             while (markerIndex < markers.size()) {
                 TrajectoryMarker marker = markers.get(markerIndex);
                 if (marker.getTime() >= timeOffset + segment.getDuration()) {
@@ -581,7 +937,7 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
             timeOffset += segment.getDuration();
         }
 
-        SequenceSegment segment = sequenceSegments.get(sequenceSegments.size() - 1);
+        SequenceSegment segment = segments.get(segments.size() - 1);
         while (markerIndex < markers.size()) {
             TrajectoryMarker marker = markers.get(markerIndex);
             segment.getMarkers().add(new TrajectoryMarker(segment.getDuration(), marker.getCallback()));
@@ -605,11 +961,11 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
         return 0.5 * (tLo + tHi);
     }
 
-    private Double displacementToTime(List<SequenceSegment> sequenceSegments, double s) {
+    private Double displacementToTime(List<? extends SequenceSegment> segments, double s) {
         double currentTime = 0.0;
         double currentDisplacement = 0.0;
 
-        for (SequenceSegment segment : sequenceSegments) {
+        for (SequenceSegment segment : segments) {
             if (segment instanceof TrajectorySegment) {
                 TrajectorySegment thisSegment = (TrajectorySegment) segment;
 
@@ -634,13 +990,13 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
         return currentTime;
     }
 
-    private Double pointToTime(List<SequenceSegment> sequenceSegments, Vector2d point) {
+    private Double pointToTime(List<? extends SequenceSegment> sequences, Vector2d point) {
         class ComparingPoints {
             private final double distanceToPoint;
             private final double totalDisplacement;
             private final double thisPathDisplacement;
 
-            public ComparingPoints(double distanceToPoint, double totalDisplacement, double thisPathDisplacement) {
+            private ComparingPoints(double distanceToPoint, double totalDisplacement, double thisPathDisplacement) {
                 this.distanceToPoint = distanceToPoint;
                 this.totalDisplacement = totalDisplacement;
                 this.thisPathDisplacement = thisPathDisplacement;
@@ -649,7 +1005,7 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
 
         List<ComparingPoints> projectedPoints = new ArrayList<>();
 
-        for (SequenceSegment segment : sequenceSegments) {
+        for (SequenceSegment segment : sequences) {
             if (segment instanceof TrajectorySegment) {
                 TrajectorySegment thisSegment = (TrajectorySegment) segment;
 
@@ -681,9 +1037,11 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
                 closestPoint = comparingPoint;
         }
 
-        return displacementToTime(sequenceSegments, closestPoint.thisPathDisplacement);
+        assert closestPoint != null;
+        return displacementToTime(sequences, closestPoint.thisPathDisplacement);
     }
 
+    @FunctionalInterface
     private interface AddPathCallback {
         void run();
     }

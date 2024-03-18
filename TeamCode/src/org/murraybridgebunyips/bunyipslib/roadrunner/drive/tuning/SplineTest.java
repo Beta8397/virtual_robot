@@ -7,10 +7,9 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
 
-/*
+/**
  * This is an example of a more complex path to really test the tuning.
  */
-
 public abstract class SplineTest extends LinearOpMode {
     protected RoadRunnerDrive drive;
 

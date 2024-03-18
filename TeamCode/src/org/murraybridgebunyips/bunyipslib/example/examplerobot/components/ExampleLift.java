@@ -4,7 +4,9 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 
-// See ExampleDrive before looking at this file.
+/**
+ * Example code for a lift component, see ExampleDrive for more information.
+ */
 public class ExampleLift extends BunyipsSubsystem {
     // Run similar initialisation to ExampleDrive. This will be the same for all components.
     private final DcMotor liftMotor;
@@ -14,7 +16,11 @@ public class ExampleLift extends BunyipsSubsystem {
     private final int[] liftPositions = {0, 100, 200, 300, 400, 500};
     private int liftPositionPointer;
 
+    /**
+     * @param liftMotor the lift motor to control
+     */
     public ExampleLift(DcMotor liftMotor) {
+        assertParamsNotNull(liftMotor);
         this.liftMotor = liftMotor;
 
         // In the constructor you are also able to set any other variables that you wish to use in
@@ -22,6 +28,11 @@ public class ExampleLift extends BunyipsSubsystem {
         liftPositionPointer = 0;
     }
 
+    /**
+     * Move the lift up one position.
+     *
+     * @return this
+     */
     public ExampleLift liftUp() {
         // Check if the pointer is exceeding the length of the array
         if (liftPositionPointer >= liftPositions.length) {
@@ -40,6 +51,11 @@ public class ExampleLift extends BunyipsSubsystem {
         return liftMotor.isBusy();
     }
 
+    /**
+     * Move the lift down one position.
+     *
+     * @return this
+     */
     public ExampleLift liftDown() {
         // Do the opposite of liftUp()
         if (liftPositionPointer <= 0) {
@@ -51,7 +67,7 @@ public class ExampleLift extends BunyipsSubsystem {
     }
 
     @Override
-    public void update() {
+    protected void periodic() {
         // Use the array and pointer to determine what position the motor should be set to.
         int position = liftPositions[liftPositionPointer];
 

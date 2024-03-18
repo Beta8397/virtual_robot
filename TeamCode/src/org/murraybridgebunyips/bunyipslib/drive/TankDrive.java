@@ -32,7 +32,19 @@ import java.util.List;
 public class TankDrive extends BunyipsSubsystem implements RoadRunnerDrive {
     private final TankRoadRunnerDrive instance;
 
+    /**
+     * Create a new TankDrive instance.
+     *
+     * @param constants    The drive constants
+     * @param coefficients The tank coefficients
+     * @param imu          The IMU
+     * @param frontLeft    The front left motor
+     * @param frontRight   The front right motor
+     * @param backLeft     The back left motor
+     * @param backRight    The back right motor
+     */
     public TankDrive(DriveConstants constants, TankCoefficients coefficients, IMU imu, DcMotorEx frontLeft, DcMotorEx frontRight, DcMotorEx backLeft, DcMotorEx backRight) {
+        assertParamsNotNull(constants, coefficients, imu, frontLeft, frontRight, backLeft, backRight);
         instance = new TankRoadRunnerDrive(opMode, constants, coefficients, opMode.hardwareMap.voltageSensor, imu, frontLeft, frontRight, backLeft, backRight);
     }
 
@@ -113,7 +125,7 @@ public class TankDrive extends BunyipsSubsystem implements RoadRunnerDrive {
     }
 
     @Override
-    public void update() {
+    protected void periodic() {
         instance.update();
     }
 
@@ -217,11 +229,27 @@ public class TankDrive extends BunyipsSubsystem implements RoadRunnerDrive {
         instance.setWeightedDrivePowerFieldCentric(pose);
     }
 
+    /**
+     * Set the speed of the drive using the controller input.
+     *
+     * @param x The x value of the controller input
+     * @param y The y value of the controller input
+     * @param r The r value of the controller input
+     * @return The TankDrive instance
+     */
     public TankDrive setSpeedUsingController(double x, double y, double r) {
         setWeightedDrivePower(Controller.makeRobotPose(x, y, r));
         return this;
     }
 
+    /**
+     * Set the speed of the drive using the controller input, field centric.
+     *
+     * @param x The x value of the controller input
+     * @param y The y value of the controller input
+     * @param r The r value of the controller input
+     * @return The TankDrive instance
+     */
     public TankDrive setSpeedUsingControllerFieldCentric(double x, double y, double r) {
         setWeightedDrivePowerFieldCentric(Controller.makeRobotPose(x, y, r));
         return this;

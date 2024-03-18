@@ -9,17 +9,41 @@ import com.acmerobotics.roadrunner.control.PIDCoefficients;
  * @author Lucas Bubner, 2023
  */
 public class MecanumCoefficients {
+    /**
+     * The translational PID coefficients to ensure the robot moves in a straight line.
+     */
     public PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(0, 0, 0);
+    /**
+     * The heading PID coefficients to ensure the robot does not drift while moving.
+     */
     public PIDCoefficients HEADING_PID = new PIDCoefficients(0, 0, 0);
+    /**
+     * The lateral multiplier to ensure the robot moves in a straight line.
+     */
     public double LATERAL_MULTIPLIER = 1;
+    /**
+     * The weight of the x velocity in the drive vector.
+     */
     public double VX_WEIGHT = 1;
+    /**
+     * The weight of the y velocity in the drive vector.
+     */
     public double VY_WEIGHT = 1;
+    /**
+     * The weight of the angular velocity in the drive vector.
+     */
     public double OMEGA_WEIGHT = 1;
 
+    /**
+     * Utility builder to make constructing the coefficients easier.
+     */
     public static class Builder {
 
         private final MecanumCoefficients mecanumCoefficients;
 
+        /**
+         * Begin building the coefficients.
+         */
         public Builder() {
             mecanumCoefficients = new MecanumCoefficients();
         }
@@ -54,6 +78,11 @@ public class MecanumCoefficients {
             return this;
         }
 
+        /**
+         * Build the coefficients.
+         *
+         * @return The coefficients
+         */
         public MecanumCoefficients build() {
             return mecanumCoefficients;
         }

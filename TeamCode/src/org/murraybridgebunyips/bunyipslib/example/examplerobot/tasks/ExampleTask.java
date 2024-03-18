@@ -4,6 +4,9 @@ import org.murraybridgebunyips.bunyipslib.Dbg;
 import org.murraybridgebunyips.bunyipslib.example.examplerobot.components.ExampleLift;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
+/**
+ * Example task for a lift component.
+ */
 // Tasks are used to run OpMode code in Autonomous sections. It works by giving each task a specific
 // amount of time to run, where it has it's own loop to run code in. This is useful for running
 // specific tasks, such as moving the drive system for a certain amount of time, or until a certain
@@ -15,6 +18,10 @@ public class ExampleTask extends Task {
     // You will need to store any COMPONENTS you wish to control in your task as a local instance
     private final ExampleLift lift;
 
+    /**
+     * @param time the time to run the task for
+     * @param lift the lift to control
+     */
     public ExampleTask(double time, ExampleLift lift) {
         // Here, we allow the superclass to handle time controls. This is required.
         super(time);
@@ -30,7 +37,7 @@ public class ExampleTask extends Task {
         lift.liftUp();
     }
 
-    // The run() method will run until the task timer runs out, or the finished state is set to true.
+    // The periodic() method will run until the task timer runs out, or the finished state is set to true.
     @Override
     public void periodic() {
         lift.update();

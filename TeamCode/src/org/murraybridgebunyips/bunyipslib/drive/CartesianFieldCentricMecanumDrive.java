@@ -16,6 +16,17 @@ import org.murraybridgebunyips.bunyipslib.RelativePose2d;
 public class CartesianFieldCentricMecanumDrive extends CartesianMecanumDrive {
     private final IMUOp imu;
 
+    /**
+     * Constructs a new CartesianFieldCentricMecanumDrive.
+     *
+     * @param frontLeft                 the front left motor
+     * @param frontRight                the front right motor
+     * @param backLeft                  the back left motor
+     * @param backRight                 the back right motor
+     * @param imu                       the IMU to use
+     * @param invalidatePreviousHeading whether to invalidate the previous heading of the IMU
+     * @param startingDirection         the starting direction of the robot
+     */
     public CartesianFieldCentricMecanumDrive(DcMotor frontLeft, DcMotor frontRight, DcMotor backLeft, DcMotor backRight, IMUOp imu, boolean invalidatePreviousHeading, RelativePose2d startingDirection) {
         super(frontLeft, frontRight, backLeft, backRight);
         this.imu = imu;
@@ -53,7 +64,7 @@ public class CartesianFieldCentricMecanumDrive extends CartesianMecanumDrive {
 
         // Account for the rotated vector of the gamepad
         double heading = imu.getRawHeading() - 90;
-        left_stick_x = -left_stick_x;
+        double x = -left_stick_x;
 
         double sin = Math.sin(Math.toRadians(heading));
         double cos = Math.cos(Math.toRadians(heading));
@@ -61,8 +72,8 @@ public class CartesianFieldCentricMecanumDrive extends CartesianMecanumDrive {
         // Transform the x and y values to be relative to the field
         // This is done by calculating the current heading to the field then rotating the x
         // and y vectors to be relative to the field, then updating the motor powers as normal
-        speedY = left_stick_x * cos + left_stick_y * sin;
-        speedX = left_stick_x * sin - left_stick_y * cos;
+        speedY = x * cos + left_stick_y * sin;
+        speedX = x * sin - left_stick_y * cos;
         speedR = right_stick_x;
 
         return this;
@@ -89,13 +100,13 @@ public class CartesianFieldCentricMecanumDrive extends CartesianMecanumDrive {
         imu.update();
 
         double heading = imu.getRawHeading();
-        x = -x;
+        double xn = -x;
 
         double sin = Math.sin(Math.toRadians(heading));
         double cos = Math.cos(Math.toRadians(heading));
 
-        speedX = -(x * cos + y * sin);
-        speedY = -(x * sin - y * cos);
+        speedX = -(xn * cos + y * sin);
+        speedY = -(xn * sin - y * cos);
         speedR = r;
 
         return this;
@@ -109,10 +120,10 @@ public class CartesianFieldCentricMecanumDrive extends CartesianMecanumDrive {
      *
      * @param speed             speed at which the motors will operate
      * @param direction_degrees direction at which the motors will move toward relative to the field
-     * @param speedR            rotation speed - positive: clockwise
+     * @param rSpeed            rotation speed - positive: clockwise
      */
     @Override
-    public CartesianFieldCentricMecanumDrive setSpeedPolarR(double speed, double direction_degrees, double speedR) {
+    public CartesianFieldCentricMecanumDrive setSpeedPolarR(double speed, double direction_degrees, double rSpeed) {
         imu.update();
 
         double heading = imu.getRawHeading();
@@ -123,7 +134,7 @@ public class CartesianFieldCentricMecanumDrive extends CartesianMecanumDrive {
 
         speedX = -(speed * Math.cos(direction) * cos + speed * Math.sin(direction) * sin);
         speedY = -(speed * Math.cos(direction) * sin - speed * Math.sin(direction) * cos);
-        this.speedR = speedR;
+        speedR = rSpeed;
 
         return this;
     }

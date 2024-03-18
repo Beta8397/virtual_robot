@@ -2,6 +2,7 @@ package org.murraybridgebunyips.bunyipslib.tasks.bases
 
 import org.murraybridgebunyips.bunyipslib.BunyipsOpMode
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem
+import org.murraybridgebunyips.bunyipslib.MovingAverageTimer.NANOS_IN_SECONDS
 
 /**
  * A task, or command is an action that can be performed by a robot. This has been designed
@@ -14,15 +15,27 @@ abstract class Task(timeoutSeconds: Double) : RobotTask {
     // in the constructor/member fields. You will experience extremely strange behaviour if you do not follow this.
     // This should not be a problem as all tasks are usually instantiated in the init phase anyway as tasks usually need
     // subsystems which need motors that are only available at runtime.
+    /**
+     * The OpMode instance that this task is running in.
+     */
     @JvmField
     protected val opMode: BunyipsOpMode = BunyipsOpMode.instance
 
     private var overrideOnConflict: Boolean? = null
 
+    private var name = this.javaClass.simpleName
+
+    /**
+     * @return Whether this task should override other tasks in the queue if they conflict with this task.
+     */
     fun shouldOverrideOnConflict(): Boolean? {
         return overrideOnConflict
     }
 
+    /**
+     * Add a subsystem that this task is dependent on. This will ensure that the task is only run when the subsystem
+     * is available.
+     */
     fun addDependency(dependencySubsystem: BunyipsSubsystem) {
         dependencySubsystem.addDependencyFromTask(this.hashCode())
         if (overrideOnConflict == null)
@@ -39,11 +52,34 @@ abstract class Task(timeoutSeconds: Double) : RobotTask {
     }
 
     /**
+     * Set the name of this task to be displayed in the OpMode.
+     */
+    fun withName(name: String): Task {
+        this.name = name
+        return this
+    }
+
+    override fun getName(): String {
+        return name
+    }
+
+    /**
      * Maximum timeout (sec) of the task. If set to 0 this will serve as an indefinite task, and
      * will only finish when isTaskFinished() returns true.
      */
     var timeout: Double = timeoutSeconds
 
+    /**
+     * Set the timeout of this task dynamically and return the task.
+     */
+    fun withTimeout(timeout: Double): Task {
+        this.timeout = timeout
+        return this
+    }
+
+    /**
+     * Whether the task is finished or not.
+     */
     @Volatile
     var taskFinished = false
         private set
@@ -147,14 +183,13 @@ abstract class Task(timeoutSeconds: Double) : RobotTask {
     val isRunning: Boolean
         get() = startTime != 0L && !isFinished()
 
+    /**
+     * Time in seconds since the task was started.
+     */
     val deltaTime: Double
         get() {
             if (startTime == 0L)
                 return 0.0
             return (System.nanoTime() - startTime) / NANOS_IN_SECONDS
         }
-
-    companion object {
-        const val NANOS_IN_SECONDS = 1000000000.0
-    }
 }

@@ -15,7 +15,10 @@ import java.util.List;
 /**
  * Various regression utilities.
  */
-public class RegressionUtil {
+public final class RegressionUtil {
+
+    private RegressionUtil() {
+    }
 
     /**
      * Numerically compute dy/dx from the given x and y values. The returned list is padded to match
@@ -52,6 +55,7 @@ public class RegressionUtil {
      * @param powerSamples    power samples
      * @param fitStatic       fit kStatic
      * @param file            log file
+     * @return feedforward parameter estimates and additional summary statistics
      */
     public static RampResult fitRampData(List<Double> timeSamples, List<Double> positionSamples,
                                          List<Double> powerSamples, boolean fitStatic,
@@ -92,6 +96,7 @@ public class RegressionUtil {
      * @param powerSamples    power samples
      * @param rampResult      ramp result
      * @param file            log file
+     * @return feedforward parameter estimates and additional summary statistics
      */
     public static AccelResult fitAccelData(List<Double> timeSamples, List<Double> positionSamples,
                                            List<Double> powerSamples, RampResult rampResult,
@@ -133,8 +138,24 @@ public class RegressionUtil {
      * Feedforward parameter estimates from the ramp regression and additional summary statistics
      */
     public static class RampResult {
-        public final double kV, kStatic, rSquare;
+        /**
+         * Velocity feedforward gain
+         */
+        public final double kV,
+        /**
+         * Static feedforward gain
+         */
+        kStatic,
+        /**
+         * R^2 value of the regression
+         */
+        rSquare;
 
+        /**
+         * @param kV      velocity feedforward gain
+         * @param kStatic static feedforward gain
+         * @param rSquare R^2 value of the regression
+         */
         public RampResult(double kV, double kStatic, double rSquare) {
             this.kV = kV;
             this.kStatic = kStatic;
@@ -146,8 +167,19 @@ public class RegressionUtil {
      * Feedforward parameter estimates from the ramp regression and additional summary statistics
      */
     public static class AccelResult {
-        public final double kA, rSquare;
+        /**
+         * Acceleration feedforward gain
+         */
+        public final double kA,
+        /**
+         * R^2 value of the regression
+         */
+        rSquare;
 
+        /**
+         * @param kA      acceleration feedforward gain
+         * @param rSquare R^2 value of the regression
+         */
         public AccelResult(double kA, double rSquare) {
             this.kA = kA;
             this.rSquare = rSquare;

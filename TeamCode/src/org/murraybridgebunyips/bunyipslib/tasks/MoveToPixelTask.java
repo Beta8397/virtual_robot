@@ -25,8 +25,17 @@ import java.util.List;
  */
 @Config
 public class MoveToPixelTask<T extends BunyipsSubsystem> extends Task {
+    /**
+     * The PID coefficients for the translational controller.
+     */
     public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients();
+    /**
+     * The PID coefficients for the rotational controller.
+     */
     public static PIDCoefficients ROTATIONAL_PID = new PIDCoefficients();
+    /**
+     * The target position of the pixel on the camera pitch axis.
+     */
     public static double PITCH_TARGET = 0.0;
 
     private final RoadRunnerDrive drive;
@@ -35,6 +44,15 @@ public class MoveToPixelTask<T extends BunyipsSubsystem> extends Task {
     private final PIDController rotationController;
     private Gamepad gamepad;
 
+    /**
+     * TeleOp constructor.
+     *
+     * @param gamepad               the gamepad to use for manual control
+     * @param drive                 the drivetrain to use
+     * @param processors            the vision processors to use
+     * @param translationController the PID controller for the translational movement
+     * @param rotationController    the PID controller for the rotational movement
+     */
     public MoveToPixelTask(Gamepad gamepad, T drive, MultiColourThreshold processors, PIDController translationController, PIDController rotationController) {
         super(0, drive, false);
         if (!(drive instanceof RoadRunnerDrive))
@@ -48,6 +66,15 @@ public class MoveToPixelTask<T extends BunyipsSubsystem> extends Task {
         rotationController.updatePID(ROTATIONAL_PID);
     }
 
+    /**
+     * Autonomous constructor.
+     *
+     * @param timeout               the maximum timeout for the task
+     * @param drive                 the drivetrain to use
+     * @param processors            the vision processors to use
+     * @param translationController the PID controller for the translational movement
+     * @param rotationController    the PID controller for the rotational movement
+     */
     public MoveToPixelTask(double timeout, T drive, MultiColourThreshold processors, PIDController translationController, PIDController rotationController) {
         super(timeout, drive, false);
         if (!(drive instanceof RoadRunnerDrive))
@@ -60,6 +87,12 @@ public class MoveToPixelTask<T extends BunyipsSubsystem> extends Task {
         rotationController.updatePID(ROTATIONAL_PID);
     }
 
+    /**
+     * Set the pitch target of where the pixel should be on the camera. 0.0 is the middle.
+     *
+     * @param pitchTarget the target pitch to move to
+     * @return the task
+     */
     public MoveToPixelTask<T> withPitchTarget(double pitchTarget) {
         PITCH_TARGET = pitchTarget;
         return this;
@@ -104,6 +137,6 @@ public class MoveToPixelTask<T extends BunyipsSubsystem> extends Task {
 
     @Override
     public boolean isTaskFinished() {
-        return false;
+        return gamepad == null && translationController.atSetPoint() && rotationController.atSetPoint();
     }
 }

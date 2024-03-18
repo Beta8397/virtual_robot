@@ -39,7 +39,13 @@ import java.util.stream.Collectors;
  */
 @Config
 public class Vision extends BunyipsSubsystem {
+    /**
+     * Camera width resolution to use.
+     */
     public static int CAMERA_WIDTH = 640;
+    /**
+     * Camera height resolution to use.
+     */
     public static int CAMERA_HEIGHT = 480;
     // Static: only one sender can be active at a time
     private static SwitchableVisionSender visionSender;
@@ -51,17 +57,28 @@ public class Vision extends BunyipsSubsystem {
      * Useful for debugging and testing, pass this raw field (vision.raw) to init() and start() to use it.
      */
     public Raw raw = new Raw();
-    private VisionPortal visionPortal;
+    private VisionPortal visionPortal = null;
 
+    /**
+     * Create a new Vision instance with the specified camera and resolution.
+     *
+     * @param camera       The camera to use
+     * @param cameraWidth  The camera width resolution to use
+     * @param cameraHeight The camera height resolution to use
+     */
     public Vision(CameraName camera, int cameraWidth, int cameraHeight) {
+        assertParamsNotNull(camera);
         this.camera = camera;
         // Allow the user to set the camera resolution if they want
         CAMERA_WIDTH = cameraWidth;
         CAMERA_HEIGHT = cameraHeight;
-        // Vision itself is generally never used with tasks, so we can mute the scheduler reports
-        muteTaskReports();
     }
 
+    /**
+     * Create a new Vision instance with the specified camera and default resolution.
+     *
+     * @param camera The camera to use
+     */
     public Vision(CameraName camera) {
         this(camera, CAMERA_WIDTH, CAMERA_HEIGHT);
     }
@@ -80,32 +97,33 @@ public class Vision extends BunyipsSubsystem {
      * terminate the VisionPortal and reinitialise it with the new processors (this is a highly expensive operation).
      * Processors will be STOPPED by default, you must call {@code start()} after initialising.
      *
-     * @param processors Processor instances
+     * @param newProcessors Processor instances
+     * @return the vision instance
      */
     @SuppressWarnings("rawtypes")
-    public Vision init(Processor... processors) {
+    public Vision init(Processor... newProcessors) {
         if (visionPortal != null) {
             Dbg.logd(getClass(), "WARNING: Vision already initialised! Tearing down...");
             terminate();
         }
 
-        if (processors.length == 0) {
+        if (newProcessors.length == 0) {
             throw new IllegalArgumentException("Vision: Must initialise at least one integrated processor!");
         }
 
         // Hand over instance control to the VisionPortal
-        this.processors.addAll(Arrays.asList(processors));
+        processors.addAll(Arrays.asList(newProcessors));
 
         // Initialise the VisionPortal with our newly created processors
         VisionPortal.Builder builder = new VisionPortal.Builder();
-        for (Processor processor : this.processors) {
+        for (Processor processor : processors) {
             if (processor == null) {
                 throw new IllegalStateException("Vision: Processor is not instantiated!");
             }
             if (processor.getName() == null) {
                 throw new IllegalStateException("Vision: Processor name cannot be null!");
             }
-            for (Processor otherProcessor : this.processors) {
+            for (Processor otherProcessor : processors) {
                 if (otherProcessor != processor && otherProcessor.getName().equals(processor.getName())) {
                     throw new IllegalStateException("Vision: Processor name must be unique!");
                 }
@@ -118,7 +136,7 @@ public class Vision extends BunyipsSubsystem {
         // Since Vision is usually called from the init-cycle, we can try to fit in some telemetry
         opMode.addTelemetry(
                 "Vision: % processor(s) initialised.",
-                Arrays.stream(processors).map(Processor::getName).collect(Collectors.toList())
+                Arrays.stream(newProcessors).map(Processor::getName).collect(Collectors.toList())
         );
 
         visionPortal = builder
@@ -138,7 +156,7 @@ public class Vision extends BunyipsSubsystem {
         visionPortal.stopLiveView();
 
         // Disable the vision processors by default. The OpMode must call start() to enable them.
-        for (Processor processor : this.processors) {
+        for (Processor processor : processors) {
             visionPortal.setProcessorEnabled(processor, false);
         }
 
@@ -150,10 +168,11 @@ public class Vision extends BunyipsSubsystem {
      * Start desired processors. This method must be called before trying to extract data from
      * the cameras, and must be already initialised with the init() method.
      *
-     * @param processors Processor instances
+     * @param attachedProcessors Processor instances
+     * @return the vision instance
      */
     @SuppressWarnings("rawtypes")
-    public Vision start(Processor... processors) {
+    public Vision start(Processor... attachedProcessors) {
         if (visionPortal == null) {
             throw new IllegalStateException("Vision: VisionPortal is not initialised from init()!");
         }
@@ -167,11 +186,11 @@ public class Vision extends BunyipsSubsystem {
             visionPortal.resumeStreaming();
         }
 
-        for (Processor processor : processors) {
+        for (Processor processor : attachedProcessors) {
             if (processor == null) {
                 throw new IllegalStateException("Vision: Processor is not instantiated!");
             }
-            if (!this.processors.contains(processor)) {
+            if (!processors.contains(processor)) {
                 throw new IllegalStateException("Vision: Tried to start a processor that was not initialised!");
             }
             visionPortal.setProcessorEnabled(processor, true);
@@ -195,20 +214,21 @@ public class Vision extends BunyipsSubsystem {
      * take some very small time to resume the stream if start() is called again. If you don't plan
      * on using the camera stream again, it is recommended to call terminate() instead.
      *
-     * @param processors Processor instances
+     * @param attachedProcessors Processor instances
+     * @return the vision instance
      */
     @SuppressWarnings("rawtypes")
-    public Vision stop(Processor... processors) {
+    public Vision stop(Processor... attachedProcessors) {
         if (visionPortal == null) {
             throw new IllegalStateException("Vision: VisionPortal is not initialised from init()!");
         }
 
         // Disable processors without pausing the stream
-        for (Processor processor : processors) {
+        for (Processor processor : attachedProcessors) {
             if (processor == null) {
                 throw new IllegalStateException("Vision: Processor is not instantiated!");
             }
-            if (!this.processors.contains(processor)) {
+            if (!processors.contains(processor)) {
                 throw new IllegalStateException("Vision: Tried to stop a processor that was not initialised!");
             }
             visionPortal.setProcessorEnabled(processor, false);
@@ -219,6 +239,8 @@ public class Vision extends BunyipsSubsystem {
 
     /**
      * Stop all processors and pause the camera stream (Level 3).
+     *
+     * @return the vision instance
      */
     public Vision stop() {
         if (visionPortal == null) {
@@ -258,6 +280,8 @@ public class Vision extends BunyipsSubsystem {
      * takes significant time and may cause the OpMode to hang or become unresponsive. Instead,
      * use the {@code start()} and {@code stop()} methods to enable/disable the VisionPortal.
      * Repeated calls to {@code init()} will also cause a termination of the VisionPortal.
+     *
+     * @return the vision instance
      */
     @SuppressWarnings("rawtypes")
     public Vision terminate() {
@@ -277,18 +301,19 @@ public class Vision extends BunyipsSubsystem {
      * Flip a processor feed horizontally and vertically (rotate 180deg).
      * Should be called after processors are initialised, and can be called at any time after.
      *
-     * @param processors Processor instances
+     * @param attachedProcessors Processor instances
+     * @return the vision instance
      */
     @SuppressWarnings("rawtypes")
-    public Vision flip(Processor... processors) {
+    public Vision flip(Processor... attachedProcessors) {
         if (visionPortal == null) {
             throw new IllegalStateException("Vision: VisionPortal is not initialised from init()!");
         }
-        for (Processor processor : processors) {
+        for (Processor processor : attachedProcessors) {
             if (processor == null) {
                 throw new IllegalStateException("Vision: Processor is not instantiated!");
             }
-            if (!this.processors.contains(processor)) {
+            if (!processors.contains(processor)) {
                 throw new IllegalStateException("Vision: Tried to flip a processor that was not initialised!");
             }
             processor.setFlipped(!processor.isFlipped());
@@ -300,6 +325,8 @@ public class Vision extends BunyipsSubsystem {
     /**
      * Flip all processor feeds horizontally and vertically (180deg, useful if your camera is mounted upside-down).
      * Should be called after processors are initialised, and can be called at any time after.
+     *
+     * @return the vision instance
      */
     @SuppressWarnings("rawtypes")
     public Vision flip() {
@@ -364,6 +391,7 @@ public class Vision extends BunyipsSubsystem {
      * Activating this sender will set both FtcDashboard and the DS streams to be of a processor
      * of your choosing, by changing a processor's name with setPreview() or via FtcDashboard.
      *
+     * @return the vision instance
      * @see SwitchableVisionSender
      */
     public Vision startPreview() {
@@ -404,6 +432,7 @@ public class Vision extends BunyipsSubsystem {
      * The DS will return to a raw unprocessed feed, and FtcDashboard feed will be disabled.
      * This method is effectively called automatically when the OpMode is no longer active.
      *
+     * @return the vision instance
      * @see SwitchableVisionSender
      */
     public Vision stopPreview() {
@@ -418,7 +447,7 @@ public class Vision extends BunyipsSubsystem {
      * Optional telemetry for subsystem attachment
      */
     @Override
-    public void update() {
+    protected void periodic() {
         if (visionPortal != null) {
             opMode.addTelemetry(
                     "Vision: % | % fps | %/% processors",

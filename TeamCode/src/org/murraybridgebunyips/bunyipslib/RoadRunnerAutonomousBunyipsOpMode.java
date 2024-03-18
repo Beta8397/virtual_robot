@@ -17,6 +17,7 @@ import java.util.ArrayList;
  * RoadRunnerAutonomousBunyipsOpMode (RRABOM, nickname "Rabone")
  * Additional abstraction for RoadRunner drives to integrate trajectories seamlessly into Autonomous.
  *
+ * @param <T> RoadRunner drive instance
  * @author Lucas Bubner, 2023
  */
 public abstract class RoadRunnerAutonomousBunyipsOpMode<T extends RoadRunnerDrive> extends AutonomousBunyipsOpMode {

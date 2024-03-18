@@ -94,6 +94,9 @@ public class While {
 
     /**
      * Get the last status of the evaluator without running it.
+     * This is useful for checking if the loop is running.
+     *
+     * @return True if the loop is running, false if it is not.
      */
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean running() {

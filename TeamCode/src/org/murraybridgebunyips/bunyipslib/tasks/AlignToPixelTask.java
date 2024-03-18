@@ -24,6 +24,9 @@ import java.util.List;
  */
 @Config
 public class AlignToPixelTask<T extends BunyipsSubsystem> extends Task {
+    /**
+     * PID coefficients for the alignment controller.
+     */
     public static PIDCoefficients PID = new PIDCoefficients();
 
     private final RoadRunnerDrive drive;
@@ -31,6 +34,14 @@ public class AlignToPixelTask<T extends BunyipsSubsystem> extends Task {
     private final PIDController controller;
     private Gamepad gamepad;
 
+    /**
+     * TeleOp constructor
+     *
+     * @param gamepad    the gamepad to use for input
+     * @param drive      the drivetrain to use
+     * @param processors the vision processor to use
+     * @param controller the PID controller to use for aligning to a target
+     */
     public AlignToPixelTask(Gamepad gamepad, T drive, MultiColourThreshold processors, PIDController controller) {
         super(0, drive, false);
         if (!(drive instanceof RoadRunnerDrive))
@@ -42,6 +53,14 @@ public class AlignToPixelTask<T extends BunyipsSubsystem> extends Task {
         controller.updatePID(PID);
     }
 
+    /**
+     * Autonomous constructor
+     *
+     * @param timeout    the maximum time in seconds to run the task for
+     * @param drive      the drivetrain to use
+     * @param processors the vision processor to use
+     * @param controller the PID controller to use for aligning to a target
+     */
     public AlignToPixelTask(double timeout, T drive, MultiColourThreshold processors, PIDController controller) {
         super(timeout, drive, false);
         if (!(drive instanceof RoadRunnerDrive))
@@ -90,7 +109,6 @@ public class AlignToPixelTask<T extends BunyipsSubsystem> extends Task {
 
     @Override
     public boolean isTaskFinished() {
-        // Will be timed out, replaced, or manually stopped
-        return false;
+        return gamepad == null && controller.atSetPoint();
     }
 }

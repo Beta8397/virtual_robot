@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * for tasks to access the latest data from the vision system, without needing to directly
  * interface with the Vision instance.
  *
+ * @param <T> the type of VisionData to be processed
  * @author Lucas Bubner, 2023
  */
 public abstract class Processor<T extends VisionData> implements VisionProcessor, CameraStreamSource {
@@ -41,7 +42,7 @@ public abstract class Processor<T extends VisionData> implements VisionProcessor
     private final AtomicReference<Bitmap> lastFrame =
             new AtomicReference<>(Bitmap.createBitmap(1, 1, Bitmap.Config.RGB_565));
 
-    private volatile Mat frame = new Mat();
+    private volatile Mat currentFrame = new Mat();
 
     /**
      * Whether the camera stream should be processed with a vertical and horizontal flip
@@ -124,14 +125,14 @@ public abstract class Processor<T extends VisionData> implements VisionProcessor
     @Override
     public final Object processFrame(Mat f, long captureTimeNanos) {
         // Copy the frame to prevent it from being modified across processors
-        frame = f.clone();
+        currentFrame = f.clone();
         if (isFlipped)
-            Core.flip(frame, frame, -1);
+            Core.flip(currentFrame, currentFrame, -1);
         // Run user processing
-        onProcessFrame(frame, captureTimeNanos);
+        onProcessFrame(currentFrame, captureTimeNanos);
         // Convert to a bitmap for FtcDashboard and DS feed
-        Bitmap b = Bitmap.createBitmap(frame.width(), frame.height(), Bitmap.Config.RGB_565);
-        Utils.matToBitmap(frame, b);
+        Bitmap b = Bitmap.createBitmap(currentFrame.width(), currentFrame.height(), Bitmap.Config.RGB_565);
+        Utils.matToBitmap(currentFrame, b);
         lastFrame.set(b);
         synchronized (data) {
             data.clear();
@@ -141,7 +142,7 @@ public abstract class Processor<T extends VisionData> implements VisionProcessor
             onFrameDraw(new Canvas(lastFrame.get()));
         }
         // We're done with the copied frame, we can release it immediately
-        frame.release();
+        currentFrame.release();
         // User context is not needed, as processors that need it should use the data list or
         // hold a copy of the user context when supplied to them in onProcessFrame
         return null;

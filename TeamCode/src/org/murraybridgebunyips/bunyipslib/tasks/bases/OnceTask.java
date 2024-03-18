@@ -25,12 +25,15 @@ public abstract class OnceTask extends Task {
 
     @Override
     public final boolean isTaskFinished() {
-        return true;
+        return getTimeout() == 0.0;
     }
 
     @Override
     public final void onFinish() {
     }
 
+    /**
+     * Code to run once.
+     */
     public abstract void runOnce();
 }

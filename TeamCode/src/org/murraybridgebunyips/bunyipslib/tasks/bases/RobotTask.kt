@@ -12,9 +12,28 @@ interface RobotTask {
         return this.javaClass.simpleName
     }
 
+    /**
+     * Runs once when the task is started.
+     */
     fun init()
+
+    /**
+     * Runs every loop of the command system.
+     */
     fun run()
+
+    /**
+     * Returns true if the task is finished, without checking the condition for the task's completion.
+     */
     fun isFinished(): Boolean
+
+    /**
+     * Returns true if the task is finished, polling actively for the condition of the task's completion.
+     */
     fun pollFinished(): Boolean
+
+    /**
+     * Runs once when the task is finished.
+     */
     fun onFinish()
 }

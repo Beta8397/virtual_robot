@@ -18,15 +18,18 @@ public class InterpolatedLookupTable {
     private List<Double> mY = new ArrayList<>();
     private List<Double> mM = new ArrayList<>();
 
-    private InterpolatedLookupTable(List<Double> x, List<Double> y, List<Double> m) {
-        mX = x;
-        mY = y;
-        mM = m;
-    }
-
+    /**
+     * Creates a new instance of InterpolatedLookupTable to add values to.
+     */
     public InterpolatedLookupTable() {
     }
 
+    /**
+     * Adds a control point to the lookup table.
+     *
+     * @param input  x
+     * @param output y
+     */
     public void add(double input, double output) {
         mX.add(input);
         mY.add(output);

@@ -9,7 +9,7 @@ import java.util.Locale;
  *
  * @author Lucas Bubner, 2023
  */
-public class Text {
+public final class Text {
     private Text() {
     }
 
@@ -18,6 +18,10 @@ public class Text {
      * Differs from String.format() as type can be omitted.
      * <p>
      * {@code formatString("Hello %!", "world")} -> {@code "Hello world!"}
+     *
+     * @param fstring The string to format
+     * @param objs    The objects to insert into the string
+     * @return The formatted string
      */
     public static String formatString(String fstring, List<Object> objs) {
         if (objs.isEmpty())
@@ -51,12 +55,23 @@ public class Text {
         return newString.toString();
     }
 
+    /**
+     * Format a string using only '%' placeholders.
+     *
+     * @param fstring The string to format
+     * @param objs    The objects to insert into the string
+     * @return The formatted string
+     */
     public static String formatString(String fstring, Object... objs) {
         return formatString(fstring, Arrays.asList(objs));
     }
 
     /**
      * Round a number to a certain number of decimal points.
+     *
+     * @param num             The number to round
+     * @param toDecimalPlaces The number of decimal places to round to
+     * @return The rounded number
      */
     public static double round(double num, int toDecimalPlaces) {
         if (toDecimalPlaces == 0) {
@@ -68,6 +83,10 @@ public class Text {
 
     /**
      * Round a number to a certain number of decimal points.
+     *
+     * @param num             The number to round
+     * @param toDecimalPlaces The number of decimal places to round to
+     * @return The rounded number
      */
     public static float round(float num, int toDecimalPlaces) {
         return (float) round((double) num, toDecimalPlaces);

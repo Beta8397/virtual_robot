@@ -11,7 +11,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.internal.system.Misc;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
 
-/*
+/**
  * This routine determines the effective track width. The procedure works by executing a point turn
  * with a given angle and measuring the difference between that angle and the actual angle (as
  * indicated by an external IMU/gyro, track wheels, or some other localizer). The quotient
@@ -22,8 +22,17 @@ import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
  */
 //@Config
 public abstract class TrackWidthTuner extends LinearOpMode {
+    /**
+     * The angle to turn for the track width tuning procedure.
+     */
     public static double ANGLE = 180; // deg
+    /**
+     * The number of trials to run for the track width tuning procedure.
+     */
     public static int NUM_TRIALS = 5;
+    /**
+     * The delay in milliseconds between each trial.
+     */
     public static int DELAY = 1000; // ms
     protected RoadRunnerDrive drive;
 

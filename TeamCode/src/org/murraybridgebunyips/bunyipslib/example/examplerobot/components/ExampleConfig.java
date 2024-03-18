@@ -16,19 +16,46 @@ import org.murraybridgebunyips.bunyipslib.roadrunner.drive.TankCoefficients;
 public class ExampleConfig extends RobotConfig {
     // Here you will need to declare all of your instance variables, such as motors, servos, etc.
     // For example, if you have a motor called `leftMotor`, you will need to declare it like this:
+    /**
+     * Specification of the port this device is on.
+     */
     public DcMotorEx leftFrontMotor;
+    /**
+     * Specification of the port this device is on.
+     */
     public DcMotorEx leftBackMotor;
+    /**
+     * Specification of the port this device is on.
+     */
     public DcMotorEx rightFrontMotor;
+    /**
+     * Specification of the port this device is on.
+     */
     public DcMotorEx rightBackMotor;
+    /**
+     * Specification of the port this device is on.
+     */
     public DcMotorEx liftMotor;
+    /**
+     * Specification of the port this device is on.
+     */
     public WebcamName webcam;
+    /**
+     * Specification of the port this device is on.
+     */
     public IMU imu;
     // Put any other motors, servos, etc. here.
     // e.g. public Servo leftServo;
     //      public WebcamName webcam;
 
     // RoadRunner configuration
+    /**
+     * RoadRunner drive constants.
+     */
     public DriveConstants driveConstants;
+    /**
+     * RoadRunner TankDrive coefficients.
+     */
     public TankCoefficients coefficients;
     // See Wheatley or GLaDOS for mecanum+deadwheel configurations
 

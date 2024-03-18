@@ -4,5 +4,28 @@ package org.murraybridgebunyips.bunyipslib.roadrunner.util;
  * A direction for an axis to be remapped to
  */
 public enum AxisDirection {
-    POS_X, NEG_X, POS_Y, NEG_Y, POS_Z, NEG_Z
+    /**
+     * Forward
+     */
+    POS_X,
+    /**
+     * Backward
+     */
+    NEG_X,
+    /**
+     * Right
+     */
+    POS_Y,
+    /**
+     * Left
+     */
+    NEG_Y,
+    /**
+     * Up (anticlockwise)
+     */
+    POS_Z,
+    /**
+     * Down (clockwise)
+     */
+    NEG_Z
 }

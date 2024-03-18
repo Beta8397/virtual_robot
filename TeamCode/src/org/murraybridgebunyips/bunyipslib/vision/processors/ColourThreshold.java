@@ -24,7 +24,13 @@ import java.util.List;
  */
 @Config
 public abstract class ColourThreshold extends Processor<ContourData> {
+    /**
+     * The thickness of the border to draw around the biggest contour.
+     */
     public static int BIGGEST_CONTOUR_BORDER_THICKNESS = 6;
+    /**
+     * The thickness of the border to draw around all contours.
+     */
     public static int CONTOUR_BORDER_THICKNESS = 3;
     // Default fields for convenience when using a mass of ColourThresholds
     // These cannot be tuned dynamically but can be overridden by subclasses
@@ -84,6 +90,9 @@ public abstract class ColourThreshold extends Processor<ContourData> {
 
     public abstract int getBoxColour();
 
+    /**
+     * @return whether to show the masked black and white input on the screen
+     */
     public abstract boolean showMaskedInput();
 
     /**
@@ -201,17 +210,36 @@ public abstract class ColourThreshold extends Processor<ContourData> {
         }
     }
 
+    /**
+     * The colour spaces that can be used for thresholding.
+     */
     public enum ColourSpace {
         /*
          * Define our "conversion codes" in the enum
          * so that we don't have to do a switch
          * statement in the processFrame method.
          */
+
+        /**
+         * Red, Green, Blue.
+         */
         RGB(Imgproc.COLOR_RGBA2RGB),
+        /**
+         * Hue, Saturation, Value.
+         */
         HSV(Imgproc.COLOR_RGB2HSV),
+        /**
+         * Luminance, Chrominance.
+         */
         YCrCb(Imgproc.COLOR_RGB2YCrCb),
+        /**
+         * Lightness, A, B.
+         */
         Lab(Imgproc.COLOR_RGB2Lab);
 
+        /**
+         * OpenCV conversion code for the colour space.
+         */
         public final int cvtCode;
 
         ColourSpace(int cvtCode) {

@@ -7,10 +7,21 @@ import com.acmerobotics.roadrunner.util.Angle;
 
 import java.util.List;
 
+/**
+ * A segment of a trajectory sequence that is a single turn.
+ */
 public final class TurnSegment extends SequenceSegment {
     private final double totalRotation;
     private final MotionProfile motionProfile;
 
+    /**
+     * Create a new turn segment
+     *
+     * @param startPose     The start pose
+     * @param totalRotation The total rotation to turn
+     * @param motionProfile The motion profile to use
+     * @param markers       The markers to use
+     */
     public TurnSegment(Pose2d startPose, double totalRotation, MotionProfile motionProfile, List<TrajectoryMarker> markers) {
         super(
                 motionProfile.duration(),

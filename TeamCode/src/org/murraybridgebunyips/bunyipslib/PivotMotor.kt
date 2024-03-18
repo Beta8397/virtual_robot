@@ -29,29 +29,47 @@ class PivotMotor(
         motor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
     }
 
+    /**
+     * Get the current degrees of the pivot.
+     */
     fun getDegrees(scope: EncoderTracker.Scope = EncoderTracker.Scope.RELATIVE): Double {
         return (position(scope) / ticksPerRevolution) * 360
     }
 
+    /**
+     * Get the current degrees of the pivot.
+     */
     // Java interop
     fun getDegrees(): Double {
         return getDegrees(EncoderTracker.Scope.RELATIVE)
     }
 
+    /**
+     * Get the current radians of the pivot.
+     */
     fun getRadians(scope: EncoderTracker.Scope = EncoderTracker.Scope.RELATIVE): Double {
         return (position(scope) / ticksPerRevolution) * (2 * Math.PI)
     }
 
+    /**
+     * Get the current radians of the pivot.
+     */
     // Java interop
     fun getRadians(): Double {
         return getRadians(EncoderTracker.Scope.RELATIVE)
     }
 
+    /**
+     * Set the target position of the pivot in degrees.
+     */
     fun setDegrees(degrees: Double) {
         motor.targetPosition =
             ((degrees / 360) * ticksPerRevolution / reduction).toInt() - snapshot.toInt()
     }
 
+    /**
+     * Set the target position of the pivot in radians.
+     */
     fun setRadians(radians: Double) {
         motor.targetPosition =
             ((radians / (2 * Math.PI)) * ticksPerRevolution / reduction).toInt() - snapshot.toInt()

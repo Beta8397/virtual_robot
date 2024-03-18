@@ -13,6 +13,9 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.RobotTask;
 
 import java.util.List;
 
+/**
+ * Example RoadRunner autonomous OpMode for a robot with a tank drive.
+ */
 public class ExampleRoadRunnerAutonomous extends RoadRunnerAutonomousBunyipsOpMode<TankDrive> {
     // This class is an extension of AutonomousBunyipsOpMode that allows integrated RoadRunner methods
     // Read ExampleAutonomous.java for more information on AutonomousBunyipsOpMode

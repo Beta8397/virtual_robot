@@ -5,7 +5,25 @@ package org.murraybridgebunyips.bunyipslib
  * which autonomous path to take.
  */
 enum class StartingPositions {
-    STARTING_RED_LEFT, STARTING_RED_RIGHT, STARTING_BLUE_LEFT, STARTING_BLUE_RIGHT;
+    /**
+     * FTC Field starting position Red Alliance, Left side if viewed from the Red Alliance.
+     */
+    STARTING_RED_LEFT,
+
+    /**
+     * FTC Field starting position Red Alliance, Right side if viewed from the Red Alliance.
+     */
+    STARTING_RED_RIGHT,
+
+    /**
+     * FTC Field starting position Blue Alliance, Left side if viewed from the Blue Alliance.
+     */
+    STARTING_BLUE_LEFT,
+
+    /**
+     * FTC Field starting position Blue Alliance, Right side if viewed from the Blue Alliance.
+     */
+    STARTING_BLUE_RIGHT;
 
     companion object {
         /**

@@ -19,17 +19,33 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation
  * @author Lucas Bubner, 2022
  */
 class IMUOp(private val imu: IMU) : BunyipsSubsystem() {
+    init {
+        assertParamsNotNull(imu)
+    }
+
+    /**
+     * Get the current IMU reading from the internal IMU.
+     */
     @Volatile
     var currentAngles: Orientation? = null
 
+    /**
+     * Get the current IMU velocity reading from the internal IMU.
+     */
     @Volatile
     var currentVelocity: AngularVelocity? = null
     private var previousHeading = 0.0
+
+    /**
+     * Get the current PrecisionDrive IMU capture reading from the internal IMU.
+     */
     var capture: Double? = null
         private set
 
-    // Offset the IMU reading for field-centric navigation
-    // Must be an polar angle: v E [0, 360], will be converted to a signed [-180, 180] angle
+    /**
+     * Offset the IMU reading for field-centric navigation
+     * Must be an polar angle: v E [0, 360], will be converted to a signed [-180, 180] angle
+     */
     var offset = 0.0
         set(value) {
             if (value > 180) {
@@ -100,7 +116,7 @@ class IMUOp(private val imu: IMU) : BunyipsSubsystem() {
     /**
      * Update the latest state in the IMU to current data
      */
-    override fun update() {
+    override fun periodic() {
         this.currentAngles = imu.getRobotOrientation(
             AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES
         )

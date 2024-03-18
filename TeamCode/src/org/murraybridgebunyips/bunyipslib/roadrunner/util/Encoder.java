@@ -21,6 +21,12 @@ public class Encoder {
     private int velocityEstimateIdx;
     private double lastUpdateTime;
 
+    /**
+     * Constructs a new Encoder instance.
+     *
+     * @param motor the motor to wrap
+     * @param clock the clock to use
+     */
     public Encoder(DcMotorEx motor, NanoClock clock) {
         this.motor = motor;
         this.clock = clock;
@@ -32,10 +38,22 @@ public class Encoder {
         lastUpdateTime = clock.seconds();
     }
 
+    /**
+     * Constructs a new Encoder instance.
+     *
+     * @param motor the motor to wrap
+     */
     public Encoder(DcMotorEx motor) {
         this(motor, NanoClock.system());
     }
 
+    /**
+     * Constructs a new Encoder instance.
+     *
+     * @param hardwareMapName the name of the motor in the hardware map
+     * @param configInstance  the RobotConfig instance for easy instantiation
+     * @param clock           the clock to use
+     */
     public Encoder(String hardwareMapName, RobotConfig configInstance, NanoClock clock) {
         DcMotorEx motor = (DcMotorEx) configInstance.getHardware(hardwareMapName, DcMotorEx.class);
         if (motor == null) {
@@ -55,6 +73,12 @@ public class Encoder {
         lastUpdateTime = clock.seconds();
     }
 
+    /**
+     * Constructs a new Encoder instance.
+     *
+     * @param hardwareMapName the name of the motor in the hardware map
+     * @param configInstance  the RobotConfig instance for easy instantiation
+     */
     public Encoder(String hardwareMapName, RobotConfig configInstance) {
         this(hardwareMapName, configInstance, NanoClock.system());
     }
@@ -141,8 +165,17 @@ public class Encoder {
         return inverseOverflow(getRawVelocity(), median);
     }
 
+    /**
+     * Direction of encoder counts
+     */
     public enum Direction {
+        /**
+         * Forward direction
+         */
         FORWARD(1),
+        /**
+         * Reverse direction
+         */
         REVERSE(-1);
 
         private final int multiplier;

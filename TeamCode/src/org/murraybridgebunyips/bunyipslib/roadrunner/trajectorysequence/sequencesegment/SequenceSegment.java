@@ -6,6 +6,9 @@ import com.acmerobotics.roadrunner.trajectory.TrajectoryMarker;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A segment of a trajectory sequence.
+ */
 public abstract class SequenceSegment {
     private final double duration;
     private final Pose2d startPose;

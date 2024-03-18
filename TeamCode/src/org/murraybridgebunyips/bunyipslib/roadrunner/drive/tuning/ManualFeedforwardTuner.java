@@ -17,7 +17,7 @@ import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
 
 import java.util.Objects;
 
-/*
+/**
  * This routine is designed to tune the open-loop feedforward coefficients. Although it may seem unnecessary,
  * tuning these coefficients is just as important as the positional parameters. Like the other
  * manual tuning routines, this op mode relies heavily upon the dashboard. To access the dashboard,
@@ -27,17 +27,28 @@ import java.util.Objects;
  * robot will begin moving forward and backward according to a motion profile. Your job is to graph
  * the velocity errors over time and adjust the feedforward coefficients. Once you've found a
  * satisfactory set of gains, add them to the appropriate fields in the DriveConstants.java file.
- *
  * Pressing Y/Δ (Xbox/PS4) will pause the tuning process and enter driver override, allowing the
  * user to reset the position of the bot in the event that it drifts off the path.
  * Pressing B/O (Xbox/PS4) will cede control back to the tuning process.
  */
 //@Config
 public abstract class ManualFeedforwardTuner extends LinearOpMode {
+    /**
+     * The distance in inches to drive back and forth.
+     */
     public static double DISTANCE = 72; // in
     // Coefficients from driveConstants are able to be dynamically set in FtcDashboard
+    /**
+     * kV is the velocity feedforward constant.
+     */
     public static double kV;
+    /**
+     * kA is the acceleration feedforward constant.
+     */
     public static double kA;
+    /**
+     * kStatic is the static feedforward constant.
+     */
     public static double kStatic;
     private final FtcDashboard dashboard = FtcDashboard.getInstance();
     protected RoadRunnerDrive drive;
@@ -119,7 +130,7 @@ public abstract class ManualFeedforwardTuner extends LinearOpMode {
                     if (gamepad1.b) {
                         mode = Mode.TUNING_MODE;
                         movingForwards = true;
-                        activeProfile = generateProfile(movingForwards);
+                        activeProfile = generateProfile(true);
                         profileStart = clock.seconds();
                     }
 

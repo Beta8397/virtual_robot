@@ -9,16 +9,37 @@ import com.acmerobotics.roadrunner.control.PIDCoefficients;
  * @author Lucas Bubner, 2023
  */
 public class TankCoefficients {
+    /**
+     * PID coefficients for the axial (forward) control.
+     */
     public PIDCoefficients AXIAL_PID = new PIDCoefficients(0, 0, 0);
+    /**
+     * PID coefficients for the cross-track (strafe) control.
+     */
     public PIDCoefficients CROSS_TRACK_PID = new PIDCoefficients(0, 0, 0);
+    /**
+     * PID coefficients for the heading control.
+     */
     public PIDCoefficients HEADING_PID = new PIDCoefficients(0, 0, 0);
+    /**
+     * Weight for the velocity error in the axial PID.
+     */
     public double VX_WEIGHT = 1;
+    /**
+     * Weight for the velocity error in the heading PID.
+     */
     public double OMEGA_WEIGHT = 1;
 
+    /**
+     * Utility builder for creating new coefficients.
+     */
     public static class Builder {
 
         private final TankCoefficients tankCoefficients;
 
+        /**
+         * Start building.
+         */
         public Builder() {
             tankCoefficients = new TankCoefficients();
         }
@@ -48,6 +69,11 @@ public class TankCoefficients {
             return this;
         }
 
+        /**
+         * Build the coefficients.
+         *
+         * @return The coefficients
+         */
         public TankCoefficients build() {
             return tankCoefficients;
         }

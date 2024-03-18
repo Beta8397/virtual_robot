@@ -35,6 +35,11 @@ public class PIDFController {
 
     /**
      * The base constructor for the PIDF controller
+     *
+     * @param kp The value of kP for the coefficients.
+     * @param ki The value of kI for the coefficients.
+     * @param kd The value of kD for the coefficients.
+     * @param kf The value of kF for the coefficients.
      */
     public PIDFController(double kp, double ki, double kd, double kf) {
         this(kp, ki, kd, kf, 0, 0);
@@ -45,6 +50,10 @@ public class PIDFController {
      * includes a feed-forward value which is useful for fighting friction and gravity.
      * Our errorVal represents the return of e(t) and prevErrorVal is the previous error.
      *
+     * @param kp The value of kP for the coefficients.
+     * @param ki The value of kI for the coefficients.
+     * @param kd The value of kD for the coefficients.
+     * @param kf The value of kF for the coefficients.
      * @param sp The setpoint of the pid control loop.
      * @param pv The measured value of he pid control loop. We want sp = pv, or to the degree
      *           such that sp - pv, or e(t) < tolerance.
@@ -68,6 +77,9 @@ public class PIDFController {
         reset();
     }
 
+    /**
+     * Resets the PIDF controller.
+     */
     public void reset() {
         totalError = 0;
         prevErrorVal = 0;
@@ -215,6 +227,14 @@ public class PIDFController {
         return kP * errorVal_p + kI * totalError + kD * errorVal_v + kF * setPoint;
     }
 
+    /**
+     * Set the current controller PID coefficients to the given coefficients.
+     *
+     * @param kp The value of kP for the coefficients.
+     * @param ki The value of kI for the coefficients.
+     * @param kd The value of kD for the coefficients.
+     * @param kf The value of kF for the coefficients.
+     */
     public void setPIDF(double kp, double ki, double kd, double kf) {
         kP = kp;
         kI = ki;
@@ -246,11 +266,20 @@ public class PIDFController {
         coefficients.f = kF;
     }
 
+    /**
+     * Set the bounds for the integral term.
+     *
+     * @param integralMin The minimum value for the integral term.
+     * @param integralMax The maximum value for the integral term.
+     */
     public void setIntegrationBounds(double integralMin, double integralMax) {
         minIntegral = integralMin;
         maxIntegral = integralMax;
     }
 
+    /**
+     * Clear the integral term.
+     */
     public void clearTotalError() {
         totalError = 0;
     }

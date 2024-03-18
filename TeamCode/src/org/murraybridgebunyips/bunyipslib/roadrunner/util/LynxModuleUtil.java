@@ -13,7 +13,7 @@ import java.util.Map;
 /**
  * Collection of utilites for interacting with Lynx modules.
  */
-public class LynxModuleUtil {
+public final class LynxModuleUtil {
     private static final LynxFirmwareVersion MIN_VERSION = new LynxFirmwareVersion(1, 8, 2);
 
     private LynxModuleUtil() {
@@ -75,12 +75,29 @@ public class LynxModuleUtil {
 
     /**
      * Parsed representation of a Lynx module firmware version.
+     * Alternatively the form for Semantic Versioning 2.0.0.
      */
     public static class LynxFirmwareVersion implements Comparable<LynxFirmwareVersion> {
+        /**
+         * Major version number.
+         */
         public final int major;
+        /**
+         * Minor version number.
+         */
         public final int minor;
+        /**
+         * Engineering version number.
+         */
         public final int eng;
 
+        /**
+         * Create a new firmware version object.
+         *
+         * @param major major version number
+         * @param minor minor version number
+         * @param eng   engineering version number
+         */
         public LynxFirmwareVersion(int major, int minor, int eng) {
             this.major = major;
             this.minor = minor;
@@ -124,6 +141,11 @@ public class LynxModuleUtil {
      * Exception indicating an outdated Lynx firmware version.
      */
     public static class LynxFirmwareVersionException extends RuntimeException {
+        /**
+         * Emergency stop an OpMode on outdated firmware.
+         *
+         * @param detailMessage message to display.
+         */
         public LynxFirmwareVersionException(String detailMessage) {
             super(detailMessage);
         }

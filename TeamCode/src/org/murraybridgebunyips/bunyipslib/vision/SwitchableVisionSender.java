@@ -29,13 +29,23 @@ import java.util.Objects;
 @SuppressWarnings("rawtypes")
 @Config
 public class SwitchableVisionSender implements Runnable {
-    // Can be changed dynamically via FtcDashboard. This is the processor feed
-    // that will be sent to FtcDashboard and to the Driver Station feed.
+    /**
+     * Can be changed dynamically via FtcDashboard. This is the processor feed
+     * that will be sent to FtcDashboard and to the Driver Station feed.
+     */
     public static String CURRENT_PROCESSOR_NAME = "";
+    /**
+     * The maximum FPS to send to FtcDashboard.
+     */
     public static int MAX_FPS;
     private final Vision vision;
     private String lastProcessorName;
 
+    /**
+     * Create a new SwitchableVisionSender with a Vision system.
+     *
+     * @param vision The Vision system to send to FtcDashboard
+     */
     public SwitchableVisionSender(Vision vision) {
         FtcDashboard.getInstance().stopCameraStream();
         // CameraStreamServer will be supplying a raw feed to the DS without this thread

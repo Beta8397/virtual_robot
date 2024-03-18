@@ -9,12 +9,34 @@ import com.qualcomm.robotcore.hardware.DcMotorEx
  * @author Lucas Bubner, 2023
  */
 interface EncoderTracker {
+    /**
+     * Scope of the encoder tracking.
+     */
     enum class Scope {
-        RELATIVE, GLOBAL
+        /**
+         * Relative scope will return the encoder value since the last track() call.
+         */
+        RELATIVE,
+
+        /**
+         * Global scope will return the encoder value since the last reset() call.
+         */
+        GLOBAL
     }
 
+    /**
+     * Diameter of the wheel in millimetres, used in distance calculations.
+     */
     val wheelDiameterMM: Double?
+
+    /**
+     * Number of ticks per revolution of the encoder attached to the motor, used in distance calculations.
+     */
     val ticksPerRevolution: Double?
+
+    /**
+     * The motor to track the encoder of.
+     */
     val motor: DcMotorEx
 
     /**

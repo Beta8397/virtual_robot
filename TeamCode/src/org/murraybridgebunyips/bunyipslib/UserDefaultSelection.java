@@ -6,9 +6,6 @@ import androidx.annotation.NonNull;
  * UserSelection callback representing a default OpMode.
  */
 public final class UserDefaultSelection {
-    public UserDefaultSelection() {
-    }
-
     @NonNull
     @Override
     public String toString() {

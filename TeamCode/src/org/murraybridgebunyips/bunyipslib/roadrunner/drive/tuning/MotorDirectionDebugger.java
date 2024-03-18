@@ -24,6 +24,9 @@ import org.murraybridgebunyips.bunyipslib.roadrunner.drive.MecanumRoadRunnerDriv
  */
 //@Config
 public abstract class MotorDirectionDebugger extends LinearOpMode {
+    /**
+     * The power to run the motors at.
+     */
     public static double MOTOR_POWER = 0.7;
 
     /**

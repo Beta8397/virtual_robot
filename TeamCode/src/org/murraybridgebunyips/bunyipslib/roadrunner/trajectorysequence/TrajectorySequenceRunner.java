@@ -29,16 +29,40 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * RoadRunner trajectory sequence runner.
+ */
 //@Config
 public class TrajectorySequenceRunner {
+    /**
+     * FtcDashboard inactivity color for trajectory segments.
+     */
     public static String COLOR_INACTIVE_TRAJECTORY = "#4caf507a";
+    /**
+     * FtcDashboard inactivity color for turn segments.
+     */
     public static String COLOR_INACTIVE_TURN = "#7c4dff7a";
+    /**
+     * FtcDashboard inactivity color for wait segments.
+     */
     public static String COLOR_INACTIVE_WAIT = "#dd2c007a";
 
+    /**
+     * FtcDashboard activity color for trajectory segments.
+     */
     public static String COLOR_ACTIVE_TRAJECTORY = "#4CAF50";
+    /**
+     * FtcDashboard activity color for turn segments.
+     */
     public static String COLOR_ACTIVE_TURN = "#7c4dff";
+    /**
+     * FtcDashboard activity color for wait segments.
+     */
     public static String COLOR_ACTIVE_WAIT = "#dd2c00";
 
+    /**
+     * The maximum number of poses to store in the history.
+     */
     public static int POSE_HISTORY_LIMIT = 100;
 
     private final TrajectoryFollower follower;
@@ -62,6 +86,19 @@ public class TrajectorySequenceRunner {
     private int lastSegmentIndex;
     private Pose2d lastPoseError = new Pose2d();
 
+    /**
+     * Create a new trajectory sequence runner.
+     *
+     * @param opMode                        The OpMode to use for logging.
+     * @param driveConstantsRunUsingEncoder Whether the drive constants are run using encoders.
+     * @param follower                      The trajectory follower to use.
+     * @param headingPIDCoefficients        The PID coefficients for the heading controller.
+     * @param voltageSensor                 The voltage sensor to use.
+     * @param lastDriveEncPositions         The last drive encoder positions.
+     * @param lastDriveEncVels              The last drive encoder velocities.
+     * @param lastTrackingEncPositions      The last tracking encoder positions.
+     * @param lastTrackingEncVels           The last tracking encoder velocities.
+     */
     public TrajectorySequenceRunner(
             @Nullable BunyipsOpMode opMode, boolean driveConstantsRunUsingEncoder, TrajectoryFollower follower, PIDCoefficients headingPIDCoefficients, VoltageSensor voltageSensor,
             List<Integer> lastDriveEncPositions, List<Integer> lastDriveEncVels, List<Integer> lastTrackingEncPositions, List<Integer> lastTrackingEncVels
@@ -86,6 +123,11 @@ public class TrajectorySequenceRunner {
         dashboard.setTelemetryTransmissionInterval(25);
     }
 
+    /**
+     * Follow a trajectory sequence asynchronously.
+     *
+     * @param trajectorySequence The trajectory sequence to follow.
+     */
     public void followTrajectorySequenceAsync(TrajectorySequence trajectorySequence) {
         currentTrajectorySequence = trajectorySequence;
         currentSegmentStartTime = clock.seconds();
@@ -93,6 +135,13 @@ public class TrajectorySequenceRunner {
         lastSegmentIndex = -1;
     }
 
+    /**
+     * Update the trajectory sequence runner.
+     *
+     * @param poseEstimate The pose estimate.
+     * @param poseVelocity The pose velocity.
+     * @return The drive signal to set the motors to.
+     */
     @Nullable
     public DriveSignal update(Pose2d poseEstimate, Pose2d poseVelocity) {
         Pose2d targetPose = null;
@@ -315,6 +364,9 @@ public class TrajectorySequenceRunner {
         return currentTrajectorySequence != null;
     }
 
+    /**
+     * Abort the current trajectory sequence.
+     */
     public void cancelTrajectory() {
         currentTrajectorySequence = null;
         remainingMarkers.clear();

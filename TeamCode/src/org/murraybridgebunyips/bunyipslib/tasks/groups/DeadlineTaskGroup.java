@@ -13,13 +13,17 @@ public class DeadlineTaskGroup extends TaskGroup {
     @Override
     public final void periodic() {
         for (Task task : tasks) {
-            task.run();
+            executeTask(task);
         }
     }
 
     @Override
     public final boolean isTaskFinished() {
         Task firstTask = tasks.peekFirst();
-        return firstTask == null || firstTask.isFinished();
+        boolean firstTaskFinished = firstTask != null && firstTask.pollFinished();
+        if (firstTaskFinished) {
+            finishAllTasksExcluding(firstTask);
+        }
+        return firstTaskFinished;
     }
 }

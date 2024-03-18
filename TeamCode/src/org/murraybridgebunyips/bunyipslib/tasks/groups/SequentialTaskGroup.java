@@ -13,6 +13,11 @@ public class SequentialTaskGroup extends TaskGroup {
     private final Iterator<Task> taskIterator;
     private Task currentTask;
 
+    /**
+     * Create a new SequentialTaskGroup with tasks.
+     *
+     * @param tasks The tasks to run in sequence
+     */
     public SequentialTaskGroup(Task... tasks) {
         super(tasks);
         taskIterator = super.tasks.iterator();
@@ -28,14 +33,14 @@ public class SequentialTaskGroup extends TaskGroup {
             }
             currentTask = taskIterator.next();
         } else {
-            currentTask.run();
+            executeTask(currentTask);
         }
     }
 
     @Override
     public final boolean isTaskFinished() {
         for (Task task : tasks) {
-            if (!task.isFinished()) return false;
+            if (!task.pollFinished()) return false;
         }
         return true;
     }

@@ -35,8 +35,17 @@ import org.murraybridgebunyips.bunyipslib.roadrunner.drive.localizers.StandardTr
  */
 //@Config
 public abstract class TrackingWheelForwardOffsetTuner extends LinearOpMode {
+    /**
+     * The angle to turn for the forward offset tuning procedure.
+     */
     public static double ANGLE = 180; // deg
+    /**
+     * The number of trials to run for the forward offset tuning procedure.
+     */
     public static int NUM_TRIALS = 5;
+    /**
+     * The delay in milliseconds between each trial.
+     */
     public static int DELAY = 1000; // ms
     protected RoadRunnerDrive drive;
 
