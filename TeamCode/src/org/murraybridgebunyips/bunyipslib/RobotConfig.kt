@@ -33,8 +33,9 @@ abstract class RobotConfig {
      * Uses the HardwareMap to fetch HardwareDevices and assign instances from `onRuntime`.
      * Should be called as the first line in your init cycle.
      * @param opMode the OpMode instance - usually the `this` object when at the root OpMode.
+     * @return the instance of the RobotConfig
      */
-    fun init(opMode: OpMode) {
+    fun init(opMode: OpMode): RobotConfig {
         errors.clear()
         this.hardwareMap = opMode.hardwareMap
         onRuntime()
@@ -51,12 +52,15 @@ abstract class RobotConfig {
         if (errors.isNotEmpty()) {
             for (error in errors) {
                 if (opMode is BunyipsOpMode) {
-                    opMode.addRetainedTelemetry("! DEV_FAULT: $error")
+                    opMode.addRetainedTelemetry("! MISSING_DEVICE: $error")
+                    opMode.log("error: '$error' is not configured in the current saved configuration.")
                 } else {
-                    opMode.telemetry.addData("", "! DEV_FAULT: $error").setRetained(true)
+                    opMode.telemetry.addData("", "! MISSING_DEVICE: $error").setRetained(true)
+                    opMode.telemetry.log().add("error: '$error' is not configured in the current saved configuration.")
                 }
             }
         }
+        return this
     }
 
     /**
@@ -67,8 +71,9 @@ abstract class RobotConfig {
      *
      * @throws UnsupportedOperationException if not called from a BunyipsOpMode.
      * @see init(opMode: OpMode)
+     * @return the instance of the RobotConfig
      */
-    fun init() {
+    fun init(): RobotConfig {
         try {
             // Access the singleton associated with a BunyipsOpMode, if we're not running one Kotlin
             // will throw a UninitializedPropertyAccessException, so we can tell the user off here.
@@ -76,6 +81,7 @@ abstract class RobotConfig {
         } catch (e: UninitializedPropertyAccessException) {
             throw UnsupportedOperationException("Argument-less RobotConfig.init() method is only supported in a BunyipsOpMode. Use RobotConfig.init(opMode) instead.")
         }
+        return this
     }
 
     /**
@@ -89,10 +95,10 @@ abstract class RobotConfig {
      * @param name   name of device saved in the configuration file
      * @param device the class of the item to configure, in final abstraction extending HardwareDevice
      */
-    fun getHardware(name: String, device: Class<*>?): HardwareDevice? {
-        var hardwareDevice: HardwareDevice? = null
+    fun <T : HardwareDevice> getHardware(name: String, device: Class<T>): T? {
+        var hardwareDevice: T? = null
         try {
-            hardwareDevice = hardwareMap.get(device, name) as HardwareDevice
+            hardwareDevice = hardwareMap.get(device, name)
         } catch (e: Throwable) {
             errors.add(name)
             e.localizedMessage?.let { Dbg.warn(it) }

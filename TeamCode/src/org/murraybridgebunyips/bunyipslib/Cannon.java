@@ -2,7 +2,7 @@ package org.murraybridgebunyips.bunyipslib;
 
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.murraybridgebunyips.bunyipslib.tasks.InstantTask;
+import org.murraybridgebunyips.bunyipslib.tasks.CallbackTask;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
 /**
@@ -61,7 +61,7 @@ public class Cannon extends BunyipsSubsystem {
      * @return Fire cannon task
      */
     public Task fireTask() {
-        return new InstantTask(this::fire, this, true).withName("FireCannonTask");
+        return new CallbackTask(this::fire, this, true).withName("FireCannonTask");
     }
 
     /**
@@ -70,7 +70,7 @@ public class Cannon extends BunyipsSubsystem {
      * @return Reset cannon task
      */
     public Task resetTask() {
-        return new InstantTask(this::reset, this, true).withName("ResetCannonTask");
+        return new CallbackTask(this::reset, this, true).withName("ResetCannonTask");
     }
 
     @Override

@@ -2,7 +2,7 @@ package org.murraybridgebunyips.bunyipslib;
 
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.murraybridgebunyips.bunyipslib.tasks.InstantTask;
+import org.murraybridgebunyips.bunyipslib.tasks.CallbackTask;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
 /**
@@ -70,7 +70,7 @@ public class DualServos extends BunyipsSubsystem {
      * @return the task
      */
     public Task toggleServoTask(ServoSide servo) {
-        return new InstantTask(() -> toggleServo(servo), this, true).withName("ToggleServoTask");
+        return new CallbackTask(() -> toggleServo(servo), this, true).withName("ToggleServoTask");
     }
 
     /**
@@ -100,7 +100,7 @@ public class DualServos extends BunyipsSubsystem {
      * @return the task
      */
     public Task openServoTask(ServoSide servo) {
-        return new InstantTask(() -> openServo(servo), this, true).withName("OpenServoTask");
+        return new CallbackTask(() -> openServo(servo), this, true).withName("OpenServoTask");
     }
 
     /**
@@ -130,7 +130,7 @@ public class DualServos extends BunyipsSubsystem {
      * @return the task
      */
     public Task closeServoTask(ServoSide servo) {
-        return new InstantTask(() -> closeServo(servo), this, true).withName("CloseServoTask");
+        return new CallbackTask(() -> closeServo(servo), this, true).withName("CloseServoTask");
     }
 
     /**

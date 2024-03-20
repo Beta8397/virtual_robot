@@ -80,7 +80,7 @@ public class MoveToAprilTagTask<T extends BunyipsSubsystem> extends ForeverTask 
     public MoveToAprilTagTask(Gamepad gamepad, T drive, AprilTag aprilTag, double desiredDistanceM, double speedGain, double strafeGain, double turnGain, double maxAutoSpeed, double maxAutoStrafe, double maxAutoTurn, int targetTag) {
         super(drive, false);
         if (!(drive instanceof RoadRunnerDrive))
-            throw new EmergencyStop("MoveToPixelTask must be used with a drivetrain with X forward Pose/IMU info");
+            throw new EmergencyStop("MoveToContourTask must be used with a drivetrain with X forward Pose/IMU info");
         this.drive = (RoadRunnerDrive) drive;
         this.aprilTag = aprilTag;
         this.gamepad = gamepad;

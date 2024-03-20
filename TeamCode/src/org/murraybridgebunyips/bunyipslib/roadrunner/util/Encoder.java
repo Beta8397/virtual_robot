@@ -55,7 +55,7 @@ public class Encoder {
      * @param clock           the clock to use
      */
     public Encoder(String hardwareMapName, RobotConfig configInstance, NanoClock clock) {
-        DcMotorEx motor = (DcMotorEx) configInstance.getHardware(hardwareMapName, DcMotorEx.class);
+        DcMotorEx motor = configInstance.getHardware(hardwareMapName, DcMotorEx.class);
         if (motor == null) {
             // Instantiation will still continue, NullPointerExceptions are bound to happen beyond this point
             // Will need to check for null with isNull(), or to simply fix the problem (checking the instance itself for null will not work)

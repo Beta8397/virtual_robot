@@ -21,6 +21,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
     private Task currentTask;
     private Task defaultTask = new IdleTask();
     private boolean shouldRun = true;
+    private boolean assertionFailed = false;
 
     /**
      * Utility function to run NullSafety.assertComponentArgs() on the given parameters, usually on
@@ -31,7 +32,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
      * @param parameters constructor parameters for your subsystem that should be checked for null,
      *                   in which case the subsystem should be disabled
      */
-    public void assertParamsNotNull(Object... parameters) {
+    protected void assertParamsNotNull(Object... parameters) {
         // If a previous check has already failed, we don't need to check again otherwise we might
         // erase a previous check that failed
         if (!shouldRun) return;
@@ -39,7 +40,28 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
         // is check if it failed and if so, disable the subsystem
         shouldRun = NullSafety.assertComponentArgs(getClass(), parameters);
         if (!shouldRun) {
+            assertionFailed = true;
             Dbg.error(getClass(), "Subsystem has been disabled as assertParamsNotNull() failed.");
+        }
+    }
+
+    /**
+     * Prevent a subsystem from running.
+     */
+    public void disable() {
+        if (!shouldRun) return;
+        shouldRun = false;
+        Dbg.logd(getClass(), "Subsystem disabled via disable() call.");
+    }
+
+    /**
+     * Re-enable a subsystem if it was previously disabled via a disable() call.
+     * This method will no-op if the assertion from assertParamsNotNull() failed.
+     */
+    public void enable() {
+        if (!shouldRun && !assertionFailed) {
+            shouldRun = true;
+            Dbg.logd("Subsystem enabled via enable() call.");
         }
     }
 
@@ -53,7 +75,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
     public Task getCurrentTask() {
         if (!shouldRun) return null;
         if (currentTask == null || currentTask.isFinished()) {
-            Dbg.logd(getClass(), "Task changed: %<-%", defaultTask.getName(), currentTask != null ? currentTask.getName() : "IdleTask");
+            Dbg.logd(getClass(), "Task changed: %<-%", defaultTask.getName(), currentTask != null ? currentTask.getName() : "[idle]");
             currentTask = defaultTask;
         }
         return currentTask;
@@ -77,7 +99,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
      */
     public final boolean setCurrentTask(Task newTask) {
         if (!shouldRun) {
-            Dbg.warn(getClass(), "Subsystem is disabled from failed assertion, ignoring task change.");
+            Dbg.warn(getClass(), "Subsystem is disabled, ignoring task change.");
             return false;
         }
         if (newTask == null)
@@ -131,7 +153,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
      */
     public final void setHighPriorityCurrentTask(Task currentTask) {
         if (!shouldRun) {
-            Dbg.warn(getClass(), "Subsystem is disabled from failed assertion, ignoring high-priority task change.");
+            Dbg.warn(getClass(), "Subsystem is disabled, ignoring high-priority task change.");
             return;
         }
         if (currentTask == null)
@@ -162,11 +184,13 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
             task.run();
             // Update the state of isFinished() after running the task as it may have changed
             task.pollFinished();
-            Scheduler.addSubsystemTaskReport(
-                    getClass().getSimpleName(),
-                    task.getName(),
-                    round(task.getDeltaTime(), 1)
-            );
+            if (!task.isMuted()) {
+                Scheduler.addSubsystemTaskReport(
+                        getClass().getSimpleName(),
+                        task.getName(),
+                        round(task.getDeltaTime(), 1)
+                );
+            }
         }
         // This should be the only place where periodic() is called for this subsystem
         periodic();

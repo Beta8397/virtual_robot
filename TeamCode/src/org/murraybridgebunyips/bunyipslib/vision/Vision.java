@@ -194,6 +194,7 @@ public class Vision extends BunyipsSubsystem {
                 throw new IllegalStateException("Vision: Tried to start a processor that was not initialised!");
             }
             visionPortal.setProcessorEnabled(processor, true);
+            processor.setRunning(true);
             Dbg.logd(getClass(), "vision processor '%' started.", processor.getName());
         }
         return this;
@@ -232,6 +233,7 @@ public class Vision extends BunyipsSubsystem {
                 throw new IllegalStateException("Vision: Tried to stop a processor that was not initialised!");
             }
             visionPortal.setProcessorEnabled(processor, false);
+            processor.setRunning(false);
             Dbg.logd(getClass(), "vision processor '%' paused.", processor.getName());
         }
         return this;
@@ -290,6 +292,7 @@ public class Vision extends BunyipsSubsystem {
         }
         for (Processor processor : processors) {
             processor.setAttached(false);
+            processor.setRunning(false);
         }
         visionPortal.close();
         visionPortal = null;

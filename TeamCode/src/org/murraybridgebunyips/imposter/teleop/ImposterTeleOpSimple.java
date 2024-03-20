@@ -6,9 +6,7 @@ import org.murraybridgebunyips.bunyipslib.Scheduler;
 import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
 import org.murraybridgebunyips.bunyipslib.drive.CartesianFieldCentricMecanumDrive;
 import org.murraybridgebunyips.bunyipslib.drive.CartesianMecanumDrive;
-import org.murraybridgebunyips.bunyipslib.tasks.ContinuousTask;
 import org.murraybridgebunyips.bunyipslib.tasks.HolonomicDriveTask;
-import org.murraybridgebunyips.bunyipslib.tasks.InstantTask;
 import org.murraybridgebunyips.imposter.components.ImposterConfig;
 
 @TeleOp(name = "TeleOp", group = "VIRTUAL_BUNYIPSFTC")
@@ -26,8 +24,7 @@ public class ImposterTeleOpSimple extends BunyipsOpMode {
         scheduler.addSubsystems(drive);
         drive.setDefaultTask(new HolonomicDriveTask<>(gamepad1, drive, () -> false));
 //        scheduler.when(() -> drive.speedX != 0.0 || drive.speedY != 0.0 || drive.speedR != 0.0)
-//                .runDebounced(new InstantTask(() -> log("Drive has started moving at % seconds.", getRuntime())))
-//                .immediately();
+//                .runDebounced(() -> log("Drive has started moving at % seconds.", getRuntime()));
     }
 
     @Override

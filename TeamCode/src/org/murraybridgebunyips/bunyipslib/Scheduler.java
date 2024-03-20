@@ -4,6 +4,7 @@ import static org.murraybridgebunyips.bunyipslib.MovingAverageTimer.NANOS_IN_SEC
 import static org.murraybridgebunyips.bunyipslib.Text.formatString;
 import static org.murraybridgebunyips.bunyipslib.Text.round;
 
+import org.murraybridgebunyips.bunyipslib.tasks.CallbackTask;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ public class Scheduler extends BunyipsComponent {
      * @param deltaTime The time this task has been running
      */
     public static void addSubsystemTaskReport(String className, String taskName, double deltaTime) {
-        subsystemReports.add(formatString("    % | % -> %s", className, taskName, deltaTime));
+        subsystemReports.add(formatString("    % |\n% -> %s", className, taskName, deltaTime));
     }
 
     /**
@@ -41,11 +42,29 @@ public class Scheduler extends BunyipsComponent {
     }
 
     /**
+     * Disable all subsystems attached to the Scheduler.
+     */
+    public void disable() {
+        for (BunyipsSubsystem subsystem : subsystems) {
+            subsystem.disable();
+        }
+    }
+
+    /**
+     * Enable all subsystems attached to the Scheduler, unless they failed from null assertion.
+     */
+    public void enable() {
+        for (BunyipsSubsystem subsystem : subsystems) {
+            subsystem.enable();
+        }
+    }
+
+    /**
      * Run the scheduler. This will run all subsystems and tasks allocated to the scheduler.
      * This should be called in the activeLoop() method of the BunyipsOpMode.
      */
     public void run() {
-        opMode.addTelemetry("Managing % task% (%sys, %cmd) on % subsystem%",
+        opMode.addTelemetry("Managing % task% (%s, %c) on % subsystem%",
                 // Subsystem count will account for default tasks
                 allocatedTasks.size() + subsystems.size(),
                 allocatedTasks.size() + subsystems.size() == 1 ? "" : "s",
@@ -61,8 +80,8 @@ public class Scheduler extends BunyipsComponent {
         for (ConditionalTask task : allocatedTasks) {
             if (task.taskToRun.shouldOverrideOnConflict() != null)
                 continue;
-            if (task.taskToRun.isRunning() || task.runCondition.getAsBoolean())
-                opMode.addTelemetry("    Scheduler | % -> %s", task.taskToRun.getName(), round(task.taskToRun.getDeltaTime(), 1));
+            if (!task.taskToRun.isMuted() && (task.taskToRun.isRunning() || task.runCondition.getAsBoolean()))
+                opMode.addTelemetry("    Scheduler |\n% -> %s", task.taskToRun.getName(), round(task.taskToRun.getDeltaTime(), 1));
         }
         opMode.addTelemetry("");
         subsystemReports.clear();
@@ -311,6 +330,7 @@ public class Scheduler extends BunyipsComponent {
         protected boolean lastState;
         protected BooleanSupplier stopCondition = () -> false;
         protected long activeSince = -1;
+        private boolean isMuted = false;
 
         /**
          * Create and allocate a new conditional task. This will automatically be added to the scheduler.
@@ -336,11 +356,29 @@ public class Scheduler extends BunyipsComponent {
                 throw new EmergencyStop("A run(Task) method has been called more than once on a scheduler task. If you wish to run multiple tasks see about using a task group as your task.");
             }
             taskToRun = task;
+            if (isMuted)
+                taskToRun.withMutedReports();
             return this;
         }
 
         /**
+         * Implicitly make a new CallbackTask to run once the condition is met.
+         * This method can only be called once per ConditionalTask.
+         * If you do not mention timing control, this task will be run immediately when the condition is met,
+         * ending immediately as it is an CallbackTask.
+         *
+         * @param runnable The code to run
+         * @return Timing control for allocation (none: immediate, inSeconds(), finishingWhen(), inSecondsFinishingWhen()).
+         */
+        public ConditionalTask run(Runnable runnable) {
+            return run(new CallbackTask(runnable));
+        }
+
+        /**
          * Run a task when the condition is met, debouncing the task from running more than once the condition is met.
+         * This method can only be called once per ConditionalTask.
+         * If you do not mention timing control, this task will be run immediately when the condition is met,
+         * ending when the task ends.
          *
          * @param task The task to run.
          * @return Timing control for allocation (none: immediate, inSeconds(), finishingWhen(), inSecondsFinishingWhen()).
@@ -348,6 +386,31 @@ public class Scheduler extends BunyipsComponent {
         public ConditionalTask runDebounced(Task task) {
             debouncing = true;
             return run(task);
+        }
+
+        /**
+         * Implicitly make a new CallbackTask to run once the condition is met, debouncing the task from running more than once the condition is met.
+         * This method can only be called once per ConditionalTask.
+         * If you do not mention timing control, this task will be run immediately when the condition is met,
+         * ending immediately as it is an CallbackTask.
+         *
+         * @param runnable The code to run
+         * @return Timing control for allocation (none: immediate, inSeconds(), finishingWhen(), inSecondsFinishingWhen()).
+         */
+        public ConditionalTask runDebounced(Runnable runnable) {
+            return runDebounced(new CallbackTask(runnable));
+        }
+
+        /**
+         * Mute this task from being a part of the Scheduler report.
+         * @return Timing control for allocation (none: immediate, inSeconds(), finishingWhen(), inSecondsFinishingWhen()).
+         */
+        public ConditionalTask muted() {
+            if (taskToRun != null) {
+                taskToRun.withMutedReports();
+            }
+            isMuted = true;
+            return this;
         }
 
         /**

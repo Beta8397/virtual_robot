@@ -17,13 +17,13 @@ import org.murraybridgebunyips.bunyipslib.vision.processors.MultiColourThreshold
 import java.util.List;
 
 /**
- * Task to align to a pixel using the vision system.
+ * Task to align to a contour using the vision system.
  *
  * @param <T> the drivetrain to use (must implement RoadRunnerDrive for X pose forward info/FCD)
  * @author Lucas Bubner, 2024
  */
 @Config
-public class AlignToPixelTask<T extends BunyipsSubsystem> extends Task {
+public class AlignToContourTask<T extends BunyipsSubsystem> extends Task {
     /**
      * PID coefficients for the alignment controller.
      */
@@ -42,10 +42,10 @@ public class AlignToPixelTask<T extends BunyipsSubsystem> extends Task {
      * @param processors the vision processor to use
      * @param controller the PID controller to use for aligning to a target
      */
-    public AlignToPixelTask(Gamepad gamepad, T drive, MultiColourThreshold processors, PIDController controller) {
+    public AlignToContourTask(Gamepad gamepad, T drive, MultiColourThreshold processors, PIDController controller) {
         super(0, drive, false);
         if (!(drive instanceof RoadRunnerDrive))
-            throw new EmergencyStop("AlignToPixelTask must be used with a drivetrain with X forward Pose/IMU info");
+            throw new EmergencyStop("AlignToContourTask must be used with a drivetrain with X forward Pose/IMU info");
         this.drive = (RoadRunnerDrive) drive;
         this.processors = processors;
         this.gamepad = gamepad;
@@ -61,10 +61,10 @@ public class AlignToPixelTask<T extends BunyipsSubsystem> extends Task {
      * @param processors the vision processor to use
      * @param controller the PID controller to use for aligning to a target
      */
-    public AlignToPixelTask(double timeout, T drive, MultiColourThreshold processors, PIDController controller) {
+    public AlignToContourTask(double timeout, T drive, MultiColourThreshold processors, PIDController controller) {
         super(timeout, drive, false);
         if (!(drive instanceof RoadRunnerDrive))
-            throw new EmergencyStop("AlignToPixelTask must be used with a drivetrain with X forward Pose/IMU info");
+            throw new EmergencyStop("AlignToContourTask must be used with a drivetrain with X forward Pose/IMU info");
         this.drive = (RoadRunnerDrive) drive;
         this.processors = processors;
         this.controller = controller;

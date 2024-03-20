@@ -1,7 +1,7 @@
 package org.murraybridgebunyips.bunyipslib;
 
 
-import org.murraybridgebunyips.bunyipslib.tasks.InstantTask;
+import org.murraybridgebunyips.bunyipslib.tasks.CallbackTask;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
 /**
@@ -61,7 +61,7 @@ public class InputMultiplier extends BunyipsSubsystem {
      * @return the task
      */
     public Task incrementTask() {
-        return new InstantTask(this::increment, this, false).withName("IncrementMultiplier");
+        return new CallbackTask(this::increment, this, false).withName("IncrementMultiplier");
     }
 
     /**
@@ -78,7 +78,7 @@ public class InputMultiplier extends BunyipsSubsystem {
      * @return the task
      */
     public Task decrementTask() {
-        return new InstantTask(this::decrement, this, false).withName("DecrementMultiplier");
+        return new CallbackTask(this::decrement, this, false).withName("DecrementMultiplier");
     }
 
     /**

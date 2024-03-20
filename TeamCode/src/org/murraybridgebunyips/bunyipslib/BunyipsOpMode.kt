@@ -52,20 +52,37 @@ abstract class BunyipsOpMode : LinearOpMode() {
     }
 
     companion object {
+        private var _instance: BunyipsOpMode? = null
+
         /**
-         * The instance of the current BunyipsOpMode. This is set automatically by the OpMode lifecycle.
+         * The instance of the current BunyipsOpMode. This is set automatically by the BunyipsOpMode lifecycle.
          * This can be used instead of dependency injection to access the current OpMode, as it is a singleton.
          *
          * BunyipsComponent and Task internally use this to grant access to the current OpMode through
-         * the `opMode` property. You must ensure all Tasks and BunyipsComponents are instantiated during runtime,
+         * the `opMode` property. As such, you must ensure all Tasks and BunyipsComponents are instantiated during runtime,
          * (such as during onInit()), otherwise this property will be null.
          *
          * If you choose to access the current OpMode through this property, you must ensure that the OpMode
-         * is actively running, otherwise this property will be null and you will raise a whole suite of exceptions.
+         * is actively running, otherwise this property will be null and you will raise an exception.
+         *
+         * @throws UninitializedPropertyAccessException If a BunyipsOpMode is not running, this exception will be raised.
+         * @return The instance of the current BunyipsOpMode.
          */
         @JvmStatic
-        lateinit var instance: BunyipsOpMode
-            private set
+        val instance: BunyipsOpMode
+            // If Kotlin throws an UninitializedPropertyAccessException, it will crash the DS and require a full
+            // restart, so we will handle this exception ourselves and supply a more informative message.
+            get() = _instance
+                ?: throw UninitializedPropertyAccessException("Attempted to access a BunyipsOpMode that is not running, this may be due to a task or subsystem being instantiated in the constructor or member fields. All subsystems and tasks must be instantiated during runtime, such as in onInit().")
+
+        /**
+         * Whether a BunyipsOpMode is currently running. This is useful for checking if the OpMode singleton can be accessed
+         * without raising an exception due to the field being null.
+         * @return Whether a BunyipsOpMode is currently running.
+         */
+        @JvmStatic
+        val isRunning: Boolean
+            get() = _instance != null
     }
 
     /**
@@ -133,7 +150,7 @@ abstract class BunyipsOpMode : LinearOpMode() {
     @Throws(InterruptedException::class)
     final override fun runOpMode() {
         // BunyipsOpMode
-        instance = this
+        _instance = this
         try {
             Dbg.log("=============== BunyipsLib BunyipsOpMode ${BuildConfig.GIT_COMMIT}-${BuildConfig.BUILD_TIME} uid:${BuildConfig.ID} ===============")
             LynxModuleUtil.ensureMinimumFirmwareVersion(hardwareMap)

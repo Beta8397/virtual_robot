@@ -59,7 +59,7 @@ public class ExampleConfig extends RobotConfig {
     public TankCoefficients coefficients;
     // See Wheatley or GLaDOS for mecanum+deadwheel configurations
 
-    // The configureHardware() function is required by RobotConfig to be implemented.
+    // The onRuntime() function is required by RobotConfig to be implemented.
     // In the init function, you will initialise all your hardware with the handy getHardware()
     // function that is available for you to use.
     // This will map your instance variables (above) to the actual hardware you have named in
@@ -69,13 +69,13 @@ public class ExampleConfig extends RobotConfig {
         // Find a Driver Station configuration name called 'left_motor' and assign it to the leftMotor instance variable
         // getHardware will return a type of HardwareDevice, and we can cast it to the type we want.
         // In this case, we want a DcMotor, so we cast it to a DcMotor.
-        leftFrontMotor = (DcMotorEx) getHardware("left_front_motor", DcMotorEx.class);
+        leftFrontMotor = getHardware("left_front_motor", DcMotorEx.class);
         // Repeat for all other hardware
-        leftBackMotor = (DcMotorEx) getHardware("left_back_motor", DcMotorEx.class);
-        rightFrontMotor = (DcMotorEx) getHardware("right_front_motor", DcMotorEx.class);
-        rightBackMotor = (DcMotorEx) getHardware("right_back_motor", DcMotorEx.class);
-        liftMotor = (DcMotorEx) getHardware("lift_motor", DcMotorEx.class);
-        webcam = (WebcamName) getHardware("webcam", WebcamName.class);
+        leftBackMotor = getHardware("left_back_motor", DcMotorEx.class);
+        rightFrontMotor = getHardware("right_front_motor", DcMotorEx.class);
+        rightBackMotor = getHardware("right_back_motor", DcMotorEx.class);
+        liftMotor = getHardware("lift_motor", DcMotorEx.class);
+        webcam = getHardware("webcam", WebcamName.class);
 
         // The reason we do it like this is that any errors will be caught and the program will not crash.
         // Additionally, telemetry will be sent to the Driver Station application to tell you what went wrong.

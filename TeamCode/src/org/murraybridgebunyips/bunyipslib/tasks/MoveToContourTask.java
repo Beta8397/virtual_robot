@@ -18,13 +18,13 @@ import org.murraybridgebunyips.bunyipslib.vision.processors.MultiColourThreshold
 import java.util.List;
 
 /**
- * Task to move to and align to a pixel using the vision system.
+ * Task to move to and align to a contour using the vision system.
  *
  * @param <T> the drivetrain to use (must implement RoadRunnerDrive for X pose forward info/FCD)
  * @author Lucas Bubner, 2024
  */
 @Config
-public class MoveToPixelTask<T extends BunyipsSubsystem> extends Task {
+public class MoveToContourTask<T extends BunyipsSubsystem> extends Task {
     /**
      * The PID coefficients for the translational controller.
      */
@@ -53,10 +53,10 @@ public class MoveToPixelTask<T extends BunyipsSubsystem> extends Task {
      * @param translationController the PID controller for the translational movement
      * @param rotationController    the PID controller for the rotational movement
      */
-    public MoveToPixelTask(Gamepad gamepad, T drive, MultiColourThreshold processors, PIDController translationController, PIDController rotationController) {
+    public MoveToContourTask(Gamepad gamepad, T drive, MultiColourThreshold processors, PIDController translationController, PIDController rotationController) {
         super(0, drive, false);
         if (!(drive instanceof RoadRunnerDrive))
-            throw new EmergencyStop("MoveToPixelTask must be used with a drivetrain with X forward Pose/IMU info");
+            throw new EmergencyStop("MoveToContourTask must be used with a drivetrain with X forward Pose/IMU info");
         this.drive = (RoadRunnerDrive) drive;
         this.processors = processors;
         this.gamepad = gamepad;
@@ -75,10 +75,10 @@ public class MoveToPixelTask<T extends BunyipsSubsystem> extends Task {
      * @param translationController the PID controller for the translational movement
      * @param rotationController    the PID controller for the rotational movement
      */
-    public MoveToPixelTask(double timeout, T drive, MultiColourThreshold processors, PIDController translationController, PIDController rotationController) {
+    public MoveToContourTask(double timeout, T drive, MultiColourThreshold processors, PIDController translationController, PIDController rotationController) {
         super(timeout, drive, false);
         if (!(drive instanceof RoadRunnerDrive))
-            throw new EmergencyStop("MoveToPixelTask must be used with a drivetrain with X forward Pose/IMU info");
+            throw new EmergencyStop("MoveToContourTask must be used with a drivetrain with X forward Pose/IMU info");
         this.drive = (RoadRunnerDrive) drive;
         this.processors = processors;
         this.translationController = translationController;
@@ -93,7 +93,7 @@ public class MoveToPixelTask<T extends BunyipsSubsystem> extends Task {
      * @param pitchTarget the target pitch to move to
      * @return the task
      */
-    public MoveToPixelTask<T> withPitchTarget(double pitchTarget) {
+    public MoveToContourTask<T> withPitchTarget(double pitchTarget) {
         PITCH_TARGET = pitchTarget;
         return this;
     }

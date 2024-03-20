@@ -6,9 +6,9 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.OnceTask;
 /**
  * A task to run a callback before immediately completing.
  * <p>
- * {@code new InstantTask(() -> addTelemetry("Hello world"));}
+ * {@code new CallbackTask(() -> addTelemetry("Hello world"));}
  */
-public class InstantTask extends OnceTask {
+public class CallbackTask extends OnceTask {
     private final Runnable callback;
 
     /**
@@ -16,7 +16,7 @@ public class InstantTask extends OnceTask {
      *
      * @param callback The callback to run
      */
-    public InstantTask(Runnable callback) {
+    public CallbackTask(Runnable callback) {
         this.callback = callback;
     }
 
@@ -27,7 +27,7 @@ public class InstantTask extends OnceTask {
      * @param dependencySubsystem            The subsystem to run this on.
      * @param shouldOverrideConflictingTasks Whether to override conflicting tasks.
      */
-    public InstantTask(Runnable callback, BunyipsSubsystem dependencySubsystem, boolean shouldOverrideConflictingTasks) {
+    public CallbackTask(Runnable callback, BunyipsSubsystem dependencySubsystem, boolean shouldOverrideConflictingTasks) {
         super(dependencySubsystem, shouldOverrideConflictingTasks);
         this.callback = callback;
     }

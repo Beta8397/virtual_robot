@@ -50,6 +50,7 @@ public abstract class Processor<T extends VisionData> implements VisionProcessor
     private boolean isFlipped;
 
     private boolean isAttached;
+    private boolean isRunning;
 
     /**
      * Determine whether the processor is attached to a Vision instance.
@@ -60,9 +61,22 @@ public abstract class Processor<T extends VisionData> implements VisionProcessor
         return isAttached;
     }
 
+    /**
+     * Determine whether the processor is currently started on a Vision instance.
+     * This will not reflect whether the Vision instance is streaming, only if the processor has been started.
+     * Checking this is useful for processors that have been passed into tasks but cannot
+     * be checked by looking directly at the vision system.
+     */
+    public boolean isRunning() {
+        return isAttached && isRunning;
+    }
+
     // Package-private, set internally by Processor
     void setAttached(boolean attached) {
         isAttached = attached;
+    }
+    void setRunning(boolean running) {
+        isRunning = running;
     }
 
     public boolean isFlipped() {
