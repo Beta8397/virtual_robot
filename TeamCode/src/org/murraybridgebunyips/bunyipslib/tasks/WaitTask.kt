@@ -7,14 +7,16 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.Task
 /**
  * Task to wait for a specific amount of time.
  */
-class WaitTask(time: Double) : Task(time), RobotTask {
+class WaitTask(time: Double, private val showTelemetry: Boolean = true) : Task(time), RobotTask {
+    constructor(time: Double) : this(time, true)
+
     override fun init() {
         return
     }
 
     override fun periodic() {
-        opMode.addTelemetry("Waiting %/% seconds...", round(deltaTime, 1), timeout)
-        opMode.idle()
+        if (showTelemetry)
+            opMode.addTelemetry("Waiting %/% seconds...", round(deltaTime, 1), timeout)
     }
 
     override fun isTaskFinished(): Boolean {

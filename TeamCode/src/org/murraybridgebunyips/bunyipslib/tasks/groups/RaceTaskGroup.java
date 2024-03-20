@@ -9,6 +9,15 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
  * @author Lucas Bubner, 2024
  */
 public class RaceTaskGroup extends TaskGroup {
+    /**
+     * Create a new RaceTaskGroup with tasks.
+     *
+     * @param tasks The tasks to run together
+     */
+    public RaceTaskGroup(Task... tasks) {
+        super(tasks);
+    }
+
     @Override
     public final void periodic() {
         for (Task task : tasks) {
@@ -21,6 +30,8 @@ public class RaceTaskGroup extends TaskGroup {
         for (Task task : tasks) {
             if (task.pollFinished()) {
                 finishAllTasksExcluding(task);
+                // Get us out of here
+                finishNow();
                 return true;
             }
         }

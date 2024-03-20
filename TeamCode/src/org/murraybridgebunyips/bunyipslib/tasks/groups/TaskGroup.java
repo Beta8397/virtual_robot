@@ -37,7 +37,7 @@ public abstract class TaskGroup extends Task {
         return this;
     }
 
-    protected void executeTask(Task task) {
+    protected final void executeTask(Task task) {
         // Do not manage a task if it is already attached to a subsystem being managed there
         if (attachedTasks.contains(task)) return;
         for (BunyipsSubsystem subsystem : subsystems) {
@@ -51,10 +51,10 @@ public abstract class TaskGroup extends Task {
         task.run();
     }
 
-    protected void finishAllTasksExcluding(Task excluded) {
+    protected final void finishAllTasksExcluding(Task excluded) {
         for (Task task : tasks) {
             if (task != excluded) {
-                task.forceFinish();
+                task.finishNow();
             }
         }
     }
@@ -67,5 +67,12 @@ public abstract class TaskGroup extends Task {
     @Override
     public final void onFinish() {
         // no-op
+    }
+
+    @Override
+    protected void onReset() {
+        for (Task task : tasks) {
+            task.reset();
+        }
     }
 }

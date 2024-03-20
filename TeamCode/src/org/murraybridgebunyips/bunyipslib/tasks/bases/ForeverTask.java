@@ -14,7 +14,7 @@ public abstract class ForeverTask extends NoTimeoutTask {
     }
 
     @Override
-    public final boolean isTaskFinished() {
+    protected final boolean isTaskFinished() {
         // Will never finish
         return false;
     }

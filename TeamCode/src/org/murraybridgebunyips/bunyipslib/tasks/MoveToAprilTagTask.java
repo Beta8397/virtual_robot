@@ -107,13 +107,13 @@ public class MoveToAprilTagTask<T extends BunyipsSubsystem> extends ForeverTask 
     }
 
     @Override
-    public void init() {
+    protected void init() {
         if (!aprilTag.isAttached())
             throw new RuntimeException("Vision processor was initialised without being attached to the vision system");
     }
 
     @Override
-    public void periodic() {
+    protected void periodic() {
         Pose2d pose = Controller.makeRobotPose(gamepad.left_stick_x, gamepad.left_stick_y, gamepad.right_stick_x);
 
         List<AprilTagData> data = aprilTag.getData();
@@ -138,7 +138,7 @@ public class MoveToAprilTagTask<T extends BunyipsSubsystem> extends ForeverTask 
     }
 
     @Override
-    public void onFinish() {
+    protected void onFinish() {
 //        drive.setSpeedUsingController(0, 0, 0);
     }
 }

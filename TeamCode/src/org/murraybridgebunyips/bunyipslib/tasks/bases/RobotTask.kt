@@ -13,11 +13,6 @@ interface RobotTask {
     }
 
     /**
-     * Runs once when the task is started.
-     */
-    fun init()
-
-    /**
      * Runs every loop of the command system.
      */
     fun run()
@@ -31,9 +26,4 @@ interface RobotTask {
      * Returns true if the task is finished, polling actively for the condition of the task's completion.
      */
     fun pollFinished(): Boolean
-
-    /**
-     * Runs once when the task is finished.
-     */
-    fun onFinish()
 }

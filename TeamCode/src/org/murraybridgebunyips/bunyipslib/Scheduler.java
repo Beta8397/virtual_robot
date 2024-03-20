@@ -20,6 +20,12 @@ public class Scheduler extends BunyipsComponent {
     private static final ArrayList<String> subsystemReports = new ArrayList<>();
     private final ArrayList<BunyipsSubsystem> subsystems = new ArrayList<>();
     private final ArrayList<ConditionalTask> allocatedTasks = new ArrayList<>();
+    private static boolean isMuted;
+
+    public Scheduler() {
+        isMuted = false;
+        subsystemReports.clear();
+    }
 
     /**
      * Used internally by subsystems to report their task-running status.
@@ -29,6 +35,7 @@ public class Scheduler extends BunyipsComponent {
      * @param deltaTime The time this task has been running
      */
     public static void addSubsystemTaskReport(String className, String taskName, double deltaTime) {
+        if (isMuted) return;
         subsystemReports.add(formatString("    % |\n% -> %s", className, taskName, deltaTime));
     }
 
@@ -60,31 +67,54 @@ public class Scheduler extends BunyipsComponent {
     }
 
     /**
+     * Mute Scheduler telemetry.
+     */
+    public void mute() {
+        isMuted = true;
+    }
+
+    /**
+     * Unmute Scheduler telemetry.
+     */
+    public void unmute() {
+        isMuted = false;
+    }
+
+    private boolean timeExceeded(ConditionalTask task) {
+        return task.time * NANOS_IN_SECONDS + task.activeSince < System.nanoTime();
+    }
+
+    /**
      * Run the scheduler. This will run all subsystems and tasks allocated to the scheduler.
      * This should be called in the activeLoop() method of the BunyipsOpMode.
      */
     public void run() {
-        opMode.addTelemetry("Managing % task% (%s, %c) on % subsystem%",
-                // Subsystem count will account for default tasks
-                allocatedTasks.size() + subsystems.size(),
-                allocatedTasks.size() + subsystems.size() == 1 ? "" : "s",
-                allocatedTasks.stream().filter(task -> task.taskToRun.shouldOverrideOnConflict() != null).count() + subsystems.size(),
-                allocatedTasks.stream().filter(task -> task.taskToRun.shouldOverrideOnConflict() == null).count(),
-                subsystems.size(),
-                subsystems.size() == 1 ? "" : "s"
-        );
-        for (String item : subsystemReports) {
-            if (item.contains("IdleTask")) continue;
-            opMode.addTelemetry(item);
+        if (!isMuted) {
+            opMode.addTelemetry("Managing % task% (%s, %c) on % subsystem%",
+                    // Subsystem count will account for default tasks
+                    allocatedTasks.size() + subsystems.size(),
+                    allocatedTasks.size() + subsystems.size() == 1 ? "" : "s",
+                    allocatedTasks.stream().filter(task -> task.taskToRun.shouldOverrideOnConflict() != null).count() + subsystems.size(),
+                    allocatedTasks.stream().filter(task -> task.taskToRun.shouldOverrideOnConflict() == null).count(),
+                    subsystems.size(),
+                    subsystems.size() == 1 ? "" : "s"
+            );
+            for (String item : subsystemReports) {
+                if (item.contains("IdleTask")) continue;
+                opMode.addTelemetry(item);
+            }
+            for (ConditionalTask task : allocatedTasks) {
+                if (task.taskToRun.shouldOverrideOnConflict() != null)
+                    continue;
+                if (!task.taskToRun.isMuted() && (task.taskToRun.isRunning() || task.runCondition.getAsBoolean()) && timeExceeded(task)) {
+                    double deltaTime = round(task.taskToRun.getDeltaTime(), 1);
+                    opMode.addTelemetry("    Scheduler (%) |\n% -> %", opMode.getClass().getSimpleName(), task.taskToRun.getName(), deltaTime == 0.0 ? "active" : deltaTime + "s");
+                }
+            }
+            // Blank line to separate Scheduler information from addTelemetry()
+            opMode.addTelemetry("");
+            subsystemReports.clear();
         }
-        for (ConditionalTask task : allocatedTasks) {
-            if (task.taskToRun.shouldOverrideOnConflict() != null)
-                continue;
-            if (!task.taskToRun.isMuted() && (task.taskToRun.isRunning() || task.runCondition.getAsBoolean()))
-                opMode.addTelemetry("    Scheduler |\n% -> %s", task.taskToRun.getName(), round(task.taskToRun.getDeltaTime(), 1));
-        }
-        opMode.addTelemetry("");
-        subsystemReports.clear();
 
         for (ConditionalTask task : allocatedTasks) {
             boolean condition = task.runCondition.getAsBoolean();
@@ -94,7 +124,7 @@ public class Scheduler extends BunyipsComponent {
                     task.activeSince = System.nanoTime();
                 }
                 // Update controller states for determining whether they need to be continued to be run
-                boolean timeoutExceeded = task.time * NANOS_IN_SECONDS + task.activeSince < System.nanoTime();
+                boolean timeoutExceeded = timeExceeded(task);
                 if (task.runCondition instanceof ControllerStateHandler && task.time != 0.0) {
                     ((ControllerStateHandler) task.runCondition).setTimeoutCondition(timeoutExceeded);
                 }
@@ -103,7 +133,7 @@ public class Scheduler extends BunyipsComponent {
                     if (task.taskToRun.shouldOverrideOnConflict() == null) {
                         if (task.stopCondition.getAsBoolean()) {
                             // Finish handler will be called below
-                            task.taskToRun.finishNow();
+                            task.taskToRun.finish();
                         }
                         // Check for a debouncing situation and skip if it is not met
                         if (task.debouncing && !debouncingCheck(task, condition)) {
@@ -123,7 +153,7 @@ public class Scheduler extends BunyipsComponent {
                     for (BunyipsSubsystem subsystem : subsystems) {
                         if (task.stopCondition.getAsBoolean()) {
                             // Finish handler will be called on the subsystem
-                            task.taskToRun.finishNow();
+                            task.taskToRun.finish();
                         }
                         if (subsystem.getTaskDependencies().contains(task.taskToRun.hashCode())) {
                             subsystem.setCurrentTask(task.taskToRun);

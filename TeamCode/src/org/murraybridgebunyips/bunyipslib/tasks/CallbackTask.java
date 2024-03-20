@@ -33,7 +33,7 @@ public class CallbackTask extends OnceTask {
     }
 
     @Override
-    public void runOnce() {
+    protected void runOnce() {
         callback.run();
     }
 }

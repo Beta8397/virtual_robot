@@ -51,7 +51,7 @@ class GetSignalTask(private val vision: Vision) : Task(0.0),
         RIGHT
     }
 
-    override fun init() {
+    protected override fun init() {
 //        if (cam.mode != CamMode.OPENCV) cam.swapModes()
 
         // Tag size in metres

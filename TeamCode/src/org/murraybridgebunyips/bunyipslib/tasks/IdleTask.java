@@ -8,17 +8,17 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.ForeverTask;
  */
 public class IdleTask extends ForeverTask {
     @Override
-    public void init() {
+    protected void init() {
         // no-op
     }
 
     @Override
-    public void periodic() {
+    protected void periodic() {
         // no-op
     }
 
     @Override
-    public void onFinish() {
+    protected void onFinish() {
         // no-op
     }
 }

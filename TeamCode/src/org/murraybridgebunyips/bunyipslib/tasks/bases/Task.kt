@@ -41,20 +41,11 @@ abstract class Task(timeoutSeconds: Double) : RobotTask {
     }
 
     /**
-     * @return Whether this task should override other tasks in the queue if they conflict with this task.
+     * @return Whether this task should override other tasks in the queue if they conflict with this task. Will return
+     *         null if this task has no dependencies.
      */
     fun shouldOverrideOnConflict(): Boolean? {
         return overrideOnConflict
-    }
-
-    /**
-     * Add a subsystem that this task is dependent on. This will ensure that the task is only run when the subsystem
-     * is available.
-     */
-    fun addDependency(dependencySubsystem: BunyipsSubsystem) {
-        dependencySubsystem.addDependencyFromTask(this.hashCode())
-        if (overrideOnConflict == null)
-            overrideOnConflict = false
     }
 
     constructor(
@@ -62,7 +53,7 @@ abstract class Task(timeoutSeconds: Double) : RobotTask {
         dependencySubsystem: BunyipsSubsystem,
         shouldOverrideConflictingTasks: Boolean
     ) : this(timeoutSeconds) {
-        addDependency(dependencySubsystem)
+        dependencySubsystem.addDependencyFromTask(this.hashCode())
         overrideOnConflict = shouldOverrideConflictingTasks
     }
 
@@ -93,7 +84,8 @@ abstract class Task(timeoutSeconds: Double) : RobotTask {
     }
 
     /**
-     * Whether the task is finished or not.
+     * Whether the task is finished or not via timeout or custom condition. Will be true regardless of the finisher
+     * being fired or not, as some tasks will handle this via finishNow().
      */
     @Volatile
     var taskFinished = false
@@ -105,12 +97,12 @@ abstract class Task(timeoutSeconds: Double) : RobotTask {
     /**
      * Define code to run once, when the task is started.
      */
-    abstract override fun init()
+    protected abstract fun init()
 
     /**
-     * To run as an activeLoop during this task's duration.
+     * To run as an active loop during this task's duration.
      */
-    abstract fun periodic()
+    protected abstract fun periodic()
 
     /**
      * Should be called by your polling loop to run the task and manage all state properly.
@@ -134,25 +126,34 @@ abstract class Task(timeoutSeconds: Double) : RobotTask {
     /**
      * Finalising function to run once the task is finished.
      */
-    abstract override fun onFinish()
+    protected abstract fun onFinish()
 
     /**
      * Return a boolean to this method to add custom criteria if a task should be considered finished.
      * @return bool expression indicating whether the task is finished or not, timeout and OpMode state are handled automatically.
      */
-    abstract fun isTaskFinished(): Boolean
+    protected abstract fun isTaskFinished(): Boolean
 
     /**
-     * Query (but not update) the finished state of the task.
+     * Called when the task is reset. Override this method to add custom reset behaviour, such as resetting any
+     * internal state variables such as iterators or lists.
      */
-    override fun isFinished(): Boolean {
+    protected open fun onReset() {
+    }
+
+    /**
+     * Query (but not update) the finished state of the task. This will return true if the task is finished and the
+     * finisher has been fired.
+     */
+    final override fun isFinished(): Boolean {
         return taskFinished && finisherFired
     }
 
     /**
-     * Update and query the state of the task if it is finished.
+     * Update and query the state of the task if it is finished. This will return true if the task is finished and the
+     * finisher has been fired.
      */
-    override fun pollFinished(): Boolean {
+    final override fun pollFinished(): Boolean {
         // Early return
         if (taskFinished) return finisherFired
 
@@ -172,28 +173,29 @@ abstract class Task(timeoutSeconds: Double) : RobotTask {
         startTime = 0L
         taskFinished = false
         finisherFired = false
+        onReset()
     }
 
     /**
-     * Force a task to finish immediately.
+     * Tell a task to finish on the next iteration.
      */
-    fun finishNow() {
+    fun finish() {
         taskFinished = true
     }
 
     /**
      * Force a task to finish immediately, and fire the onFinish() method without waiting
-     * for the next polling loop. This method is useful when your task is about to die and
+     * for the next polling loop. This method is useful when your task needs to die and
      * needs to finish up immediately.
      */
-    fun forceFinish() {
+    fun finishNow() {
         taskFinished = true
         finisherFired = true
         onFinish()
     }
 
     /**
-     * @return Whether the task is currently running (calls to run() should be made)
+     * @return Whether the task is currently running (i.e. has been started (`init()` called) and not finished).
      */
     val isRunning: Boolean
         get() = startTime != 0L && !isFinished()

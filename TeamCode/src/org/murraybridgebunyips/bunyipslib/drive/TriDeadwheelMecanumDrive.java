@@ -41,6 +41,7 @@ public class TriDeadwheelMecanumDrive extends MecanumDrive {
      */
     public TriDeadwheelMecanumDrive(DriveConstants constants, MecanumCoefficients mecanumCoefficients, HardwareMap.DeviceMapping<VoltageSensor> voltageSensor, IMU imu, DcMotorEx frontLeft, DcMotorEx frontRight, DcMotorEx backLeft, DcMotorEx backRight, StandardTrackingWheelLocalizerCoefficients localizerCoefficients, Encoder enc_left, Encoder enc_right, Encoder enc_x, List<Integer> lastTrackingEncPositions, List<Integer> lastTrackingEncVels) {
         super(constants, mecanumCoefficients, voltageSensor, imu, frontLeft, frontRight, backLeft, backRight);
+        assertParamsNotNull(localizerCoefficients, enc_left, enc_right, enc_x, lastTrackingEncPositions, lastTrackingEncVels);
         setLocalizer(new StandardTrackingWheelLocalizer(localizerCoefficients, enc_left, enc_right, enc_x, lastTrackingEncPositions, lastTrackingEncVels));
     }
 
@@ -62,6 +63,7 @@ public class TriDeadwheelMecanumDrive extends MecanumDrive {
      */
     public TriDeadwheelMecanumDrive(DriveConstants constants, MecanumCoefficients mecanumCoefficients, HardwareMap.DeviceMapping<VoltageSensor> voltageSensor, IMU imu, DcMotorEx frontLeft, DcMotorEx frontRight, DcMotorEx backLeft, DcMotorEx backRight, StandardTrackingWheelLocalizerCoefficients localizerCoefficients, Encoder enc_left, Encoder enc_right, Encoder enc_x) {
         super(constants, mecanumCoefficients, voltageSensor, imu, frontLeft, frontRight, backLeft, backRight);
+        assertParamsNotNull(localizerCoefficients, enc_left, enc_right, enc_x);
         setLocalizer(new StandardTrackingWheelLocalizer(localizerCoefficients, enc_left, enc_right, enc_x, new ArrayList<>(), new ArrayList<>()));
     }
 }

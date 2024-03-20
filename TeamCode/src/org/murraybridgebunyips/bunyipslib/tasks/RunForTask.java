@@ -36,22 +36,22 @@ public class RunForTask extends Task {
     }
 
     @Override
-    public void init() {
+    protected void init() {
         // no-op
     }
 
     @Override
-    public void periodic() {
+    protected void periodic() {
         callback.run();
     }
 
     @Override
-    public void onFinish() {
+    protected void onFinish() {
         // no-op
     }
 
     @Override
-    public boolean isTaskFinished() {
+    protected boolean isTaskFinished() {
         // Timeout will handle this automatically
         return false;
     }

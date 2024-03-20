@@ -10,6 +10,15 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
  * @author Lucas Bubner, 2024
  */
 public class DeadlineTaskGroup extends TaskGroup {
+    /**
+     * Create a new DeadlineTaskGroup with tasks.
+     *
+     * @param tasks The tasks to run together
+     */
+    public DeadlineTaskGroup(Task... tasks) {
+        super(tasks);
+    }
+
     @Override
     public final void periodic() {
         for (Task task : tasks) {
@@ -22,7 +31,9 @@ public class DeadlineTaskGroup extends TaskGroup {
         Task firstTask = tasks.peekFirst();
         boolean firstTaskFinished = firstTask != null && firstTask.pollFinished();
         if (firstTaskFinished) {
+            // Finish everything and evacuate
             finishAllTasksExcluding(firstTask);
+            finishNow();
         }
         return firstTaskFinished;
     }

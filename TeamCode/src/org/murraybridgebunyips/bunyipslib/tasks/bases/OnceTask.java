@@ -15,25 +15,25 @@ public abstract class OnceTask extends Task {
     }
 
     @Override
-    public final void init() {
+    protected final void init() {
         runOnce();
     }
 
     @Override
-    public final void periodic() {
+    protected final void periodic() {
     }
 
     @Override
-    public final boolean isTaskFinished() {
+    protected final boolean isTaskFinished() {
         return getTimeout() == 0.0;
     }
 
     @Override
-    public final void onFinish() {
+    protected final void onFinish() {
     }
 
     /**
      * Code to run once.
      */
-    public abstract void runOnce();
+    protected abstract void runOnce();
 }

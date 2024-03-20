@@ -72,13 +72,13 @@ public class AlignToContourTask<T extends BunyipsSubsystem> extends Task {
     }
 
     @Override
-    public void init() {
+    protected void init() {
         if (!processors.isAttached())
             throw new RuntimeException("Vision processor was initialised without being attached to the vision system");
     }
 
     @Override
-    public void periodic() {
+    protected void periodic() {
         // FtcDashboard live tuning
         controller.setPID(PID);
 
@@ -103,12 +103,12 @@ public class AlignToContourTask<T extends BunyipsSubsystem> extends Task {
     }
 
     @Override
-    public void onFinish() {
+    protected void onFinish() {
 //        drive.setSpeedUsingController(0, 0, 0);
     }
 
     @Override
-    public boolean isTaskFinished() {
+    protected boolean isTaskFinished() {
         return gamepad == null && controller.atSetPoint();
     }
 }

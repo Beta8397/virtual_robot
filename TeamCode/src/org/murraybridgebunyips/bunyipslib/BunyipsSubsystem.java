@@ -25,7 +25,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
 
     /**
      * Utility function to run NullSafety.assertComponentArgs() on the given parameters, usually on
-     * the motors/hardware passed into the constructor. If this check fails, your subsystem
+     * the motors/hardware/critical objects passed into the constructor. If this check fails, your subsystem
      * will automatically disable the update() method from calling to prevent exceptions, no-oping
      * the subsystem. A COM_FAULT will be added to telemetry, and exceptions from this class will be muted.
      *
@@ -121,8 +121,10 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
 
         newTask.reset();
         // Default task technically can't finish, but it can be interrupted, so we will just run the finish callback
-        if (currentTask == defaultTask)
-            defaultTask.onFinish();
+        if (currentTask == defaultTask) {
+            defaultTask.finishNow();
+            defaultTask.reset();
+        }
         Dbg.logd(getClass(), "Task changed: %->%", currentTask.getName(), newTask.getName());
         currentTask = newTask;
         return true;
@@ -161,12 +163,14 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
         // Task will be cancelled abruptly, run the finish callback now
         if (this.currentTask != defaultTask) {
             Dbg.warn(getClass(), "Task changed: %(INT)->%", this.currentTask.getName(), currentTask.getName());
-            this.currentTask.forceFinish();
+            this.currentTask.finishNow();
         }
         currentTask.reset();
         // Default task technically can't finish, but it can be interrupted, so we will just run the finish callback
-        if (this.currentTask == defaultTask)
-            defaultTask.onFinish();
+        if (this.currentTask == defaultTask) {
+            defaultTask.finishNow();
+            defaultTask.reset();
+        }
         this.currentTask = currentTask;
     }
 

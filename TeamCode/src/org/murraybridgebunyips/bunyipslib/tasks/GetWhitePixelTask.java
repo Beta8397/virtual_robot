@@ -56,7 +56,7 @@ public class GetWhitePixelTask extends NoTimeoutTask {
     }
 
     @Override
-    public void init() {
+    protected void init() {
         // We are using the default settings of TFOD for white spike detection
         // We assume that the OpMode has opened a new VisionPortal for us with .init()
         try {
@@ -70,7 +70,7 @@ public class GetWhitePixelTask extends NoTimeoutTask {
     }
 
     @Override
-    public boolean isTaskFinished() {
+    protected boolean isTaskFinished() {
         switch (aggression) {
             case INSTANT:
                 return foundSpike;
@@ -88,7 +88,7 @@ public class GetWhitePixelTask extends NoTimeoutTask {
     }
 
     @Override
-    public void periodic() {
+    protected void periodic() {
         tfod.update();
         List<TfodData> tfodData = tfod.getData();
         if (tfodData.isEmpty()) {
@@ -105,7 +105,7 @@ public class GetWhitePixelTask extends NoTimeoutTask {
     }
 
     @Override
-    public void onFinish() {
+    protected void onFinish() {
         // We will not need TFOD anymore
         vision.stop(tfod);
     }

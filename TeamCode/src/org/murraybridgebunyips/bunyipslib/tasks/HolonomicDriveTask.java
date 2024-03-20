@@ -63,12 +63,12 @@ public class HolonomicDriveTask<T extends BunyipsSubsystem> extends ForeverTask 
     }
 
     @Override
-    public void init() {
+    protected void init() {
         // no-op
     }
 
     @Override
-    public void periodic() {
+    protected void periodic() {
         if (drive instanceof MecanumDrive) {
             if (fieldCentricEnabled.getAsBoolean()) {
                 ((MecanumDrive) drive).setSpeedUsingControllerFieldCentric(
@@ -93,7 +93,7 @@ public class HolonomicDriveTask<T extends BunyipsSubsystem> extends ForeverTask 
     }
 
     @Override
-    public void onFinish() {
+    protected void onFinish() {
         if (drive instanceof MecanumDrive) {
             ((MecanumDrive) drive).stop();
         } else if (drive instanceof CartesianMecanumDrive) {

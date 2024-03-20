@@ -31,19 +31,19 @@ public class DifferentialDriveTask extends ForeverTask {
     }
 
     @Override
-    public void init() {
+    protected void init() {
         // no-op
     }
 
     @Override
-    public void periodic() {
+    protected void periodic() {
         drive.setWeightedDrivePower(
                 Controller.makeRobotPose(gamepad.left_stick_y, 0, gamepad.right_stick_x)
         );
     }
 
     @Override
-    public void onFinish() {
+    protected void onFinish() {
         drive.stop();
     }
 }

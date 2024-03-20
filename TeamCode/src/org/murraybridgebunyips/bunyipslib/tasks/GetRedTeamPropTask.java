@@ -24,14 +24,14 @@ public class GetRedTeamPropTask extends ForeverTask {
     }
 
     @Override
-    public void init() {
+    protected void init() {
         if (!redTeamProp.isAttached()) {
             throw new IllegalStateException("RedTeamProp not attached to an active vision processor");
         }
     }
 
     @Override
-    public void periodic() {
+    protected void periodic() {
         ContourData biggestContour = ContourData.getLargest(redTeamProp.getData());
         if (biggestContour != null) {
             Dbg.log(biggestContour.getYaw());
@@ -40,7 +40,7 @@ public class GetRedTeamPropTask extends ForeverTask {
     }
 
     @Override
-    public void onFinish() {
+    protected void onFinish() {
         // no-op
     }
 }

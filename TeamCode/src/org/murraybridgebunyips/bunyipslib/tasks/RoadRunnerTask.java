@@ -85,7 +85,7 @@ public class RoadRunnerTask<T extends RoadRunnerDrive> extends Task {
     }
 
     @Override
-    public void init() {
+    protected void init() {
         if (trajectory != null) {
             drive.followTrajectoryAsync(trajectory);
         } else if (trajectorySequence != null) {
@@ -97,7 +97,7 @@ public class RoadRunnerTask<T extends RoadRunnerDrive> extends Task {
     }
 
     @Override
-    public void periodic() {
+    protected void periodic() {
         Pose2d endPose;
         double duration;
         if (trajectory != null) {
@@ -123,13 +123,13 @@ public class RoadRunnerTask<T extends RoadRunnerDrive> extends Task {
     }
 
     @Override
-    public void onFinish() {
+    protected void onFinish() {
         drive.stop();
         taskStartedRunning = false;
     }
 
     @Override
-    public boolean isTaskFinished() {
+    protected boolean isTaskFinished() {
         return !drive.isBusy() && taskStartedRunning;
     }
 

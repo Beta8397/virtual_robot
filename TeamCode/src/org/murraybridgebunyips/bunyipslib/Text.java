@@ -1,5 +1,8 @@
 package org.murraybridgebunyips.bunyipslib;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -69,27 +72,53 @@ public final class Text {
     /**
      * Round a number to a certain number of decimal points.
      *
-     * @param num             The number to round
-     * @param toDecimalPlaces The number of decimal places to round to
+     * @param num      The number to round
+     * @param thDigits The number of decimal places to use after the decimal point
      * @return The rounded number
      */
-    public static double round(double num, int toDecimalPlaces) {
-        if (toDecimalPlaces == 0) {
-            return Math.round(num);
-        }
-        // noinspection MalformedFormatString
-        return Double.parseDouble(String.format(Locale.getDefault(), "%." + toDecimalPlaces + "f", num));
+    public static double round(double num, int thDigits) {
+        return round(num, thDigits, -1);
     }
 
     /**
      * Round a number to a certain number of decimal points.
      *
-     * @param num             The number to round
-     * @param toDecimalPlaces The number of decimal places to round to
+     * @param num      The number to round
+     * @param thDigits The number of decimal places to use after the decimal point
      * @return The rounded number
      */
-    public static float round(float num, int toDecimalPlaces) {
-        return (float) round((double) num, toDecimalPlaces);
+    public static float round(float num, int thDigits) {
+        return (float) round((double) num, thDigits, -1);
+    }
+
+    /**
+     * Round a number to a certain number of decimal points.
+     * @param num       The number to round
+     * @param thDigits  The number of decimal places to use after the decimal point
+     * @param sigFigs   The number of significant figures to use
+     * @return The rounded number
+     */
+    public static float round(float num, int thDigits, int sigFigs) {
+        return (float) round((double) num, thDigits, sigFigs);
+    }
+
+    /**
+     * Round a number to a certain number of decimal points.
+     *
+     * @param num      The number to round
+     * @param thDigits The number of decimal places to use after the decimal point
+     * @param sigFigs  The number of significant figures to use
+     * @return The rounded number
+     */
+    public static double round(double num, int thDigits, int sigFigs) {
+        if (thDigits == 0) {
+            return Math.round(num);
+        }
+        BigDecimal bd = new BigDecimal(Double.toString(num));
+        bd = bd.setScale(thDigits, RoundingMode.HALF_UP);
+        if (sigFigs != -1)
+            bd = bd.round(new MathContext(sigFigs, RoundingMode.HALF_UP));
+        return bd.doubleValue();
     }
 
     /**

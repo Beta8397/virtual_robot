@@ -29,13 +29,12 @@ public class CartesianFieldCentricMecanumDrive extends CartesianMecanumDrive {
      */
     public CartesianFieldCentricMecanumDrive(DcMotor frontLeft, DcMotor frontRight, DcMotor backLeft, DcMotor backRight, IMUOp imu, boolean invalidatePreviousHeading, RelativePose2d startingDirection) {
         super(frontLeft, frontRight, backLeft, backRight);
+        assertParamsNotNull(imu);
+
         this.imu = imu;
         if (startingDirection == RelativePose2d.CLOCKWISE || startingDirection == RelativePose2d.ANTICLOCKWISE) {
             throw new IllegalArgumentException("FCMD: Cannot use rotational quantities as a starting direction");
         }
-
-        // Critical component, cannot be ignored if null
-        assert imu != null;
 
         // Invalidate any previous readings
         if (invalidatePreviousHeading)

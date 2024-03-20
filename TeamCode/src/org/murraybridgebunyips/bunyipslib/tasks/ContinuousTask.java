@@ -33,17 +33,17 @@ public class ContinuousTask extends ForeverTask {
     }
 
     @Override
-    public void periodic() {
+    protected void periodic() {
         callback.run();
     }
 
     @Override
-    public void init() {
+    protected void init() {
         // no-op
     }
 
     @Override
-    public void onFinish() {
+    protected void onFinish() {
         // no-op
     }
 }

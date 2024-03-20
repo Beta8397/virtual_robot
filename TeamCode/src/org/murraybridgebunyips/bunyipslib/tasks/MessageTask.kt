@@ -9,7 +9,7 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.Task
 class MessageTask(time: Double, private val message: String) :
     Task(time), RobotTask {
 
-    override fun init() {
+    protected override fun init() {
         return
     }
 

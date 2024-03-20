@@ -30,12 +30,12 @@ public class GetTeamPropTask extends NoTimeoutTask {
     }
 
     @Override
-    public void init() {
+    protected void init() {
         // no-op
     }
 
     @Override
-    public void periodic() {
+    protected void periodic() {
         if (!teamProp.getData().isEmpty()) {
             // TeamProp will never have more than one data instance
             position = teamProp.getData().get(0).getPosition();
@@ -44,12 +44,12 @@ public class GetTeamPropTask extends NoTimeoutTask {
     }
 
     @Override
-    public void onFinish() {
+    protected void onFinish() {
         // no-op
     }
 
     @Override
-    public boolean isTaskFinished() {
+    protected boolean isTaskFinished() {
         // Init-task timing only
         return false;
     }

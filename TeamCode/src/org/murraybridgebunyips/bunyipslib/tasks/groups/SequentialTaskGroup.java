@@ -10,7 +10,7 @@ import java.util.Iterator;
  * @author Lucas Bubner, 2024
  */
 public class SequentialTaskGroup extends TaskGroup {
-    private final Iterator<Task> taskIterator;
+    private Iterator<Task> taskIterator;
     private Task currentTask;
 
     /**
@@ -26,9 +26,8 @@ public class SequentialTaskGroup extends TaskGroup {
 
     @Override
     public final void periodic() {
-        if (currentTask.isFinished()) {
+        if (currentTask.pollFinished()) {
             if (!taskIterator.hasNext()) {
-                finishNow();
                 return;
             }
             currentTask = taskIterator.next();
@@ -39,9 +38,16 @@ public class SequentialTaskGroup extends TaskGroup {
 
     @Override
     public final boolean isTaskFinished() {
-        for (Task task : tasks) {
-            if (!task.pollFinished()) return false;
-        }
-        return true;
+        boolean isFinished = currentTask.isFinished() && !taskIterator.hasNext();
+        // Need to finish as fast as we can, we are wasting loops otherwise
+        if (isFinished) finishNow();
+        return isFinished;
+    }
+
+    @Override
+    protected final void onReset() {
+        super.onReset();
+        taskIterator = tasks.iterator();
+        currentTask = taskIterator.next();
     }
 }
