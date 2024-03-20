@@ -2,6 +2,8 @@ package org.murraybridgebunyips.bunyipslib.vision.processors;
 
 import android.graphics.Canvas;
 
+import androidx.annotation.NonNull;
+
 import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
@@ -57,8 +59,9 @@ public class AprilTag extends Processor<AprilTagData> {
         return instance;
     }
 
+    @NonNull
     @Override
-    public String getName() {
+    public String toString() {
         return "apriltag";
     }
 

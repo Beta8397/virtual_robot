@@ -2,6 +2,8 @@ package org.murraybridgebunyips.bunyipslib.vision.processors.centerstage;
 
 import android.graphics.Canvas;
 
+import androidx.annotation.NonNull;
+
 import com.acmerobotics.dashboard.config.Config;
 
 import org.murraybridgebunyips.bunyipslib.vision.Processor;
@@ -93,8 +95,9 @@ public class TeamProp extends Processor<TeamPropData> {
         // no-op
     }
 
+    @NonNull
     @Override
-    public String getName() {
+    public String toString() {
         return "teamprop";
     }
 

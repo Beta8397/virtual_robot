@@ -2,6 +2,8 @@ package org.murraybridgebunyips.bunyipslib.vision.processors;
 
 import android.graphics.Canvas;
 
+import androidx.annotation.NonNull;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
@@ -41,8 +43,9 @@ public class TFOD extends Processor<TfodData> {
         return instance;
     }
 
+    @NonNull
     @Override
-    public String getName() {
+    public String toString() {
         return "tfod";
     }
 

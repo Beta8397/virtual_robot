@@ -58,14 +58,14 @@ public class SwitchableVisionSender implements Runnable {
         // If there is already a current processor name, we should check to see if it is valid
         if (!Objects.equals(CURRENT_PROCESSOR_NAME, "")) {
             for (Processor processor : processors) {
-                if (processor.getName().equals(CURRENT_PROCESSOR_NAME)) {
+                if (processor.toString().equals(CURRENT_PROCESSOR_NAME)) {
                     // Early return if the processor is valid
                     return;
                 }
             }
         }
 
-        CURRENT_PROCESSOR_NAME = vision.getAttachedProcessors().get(0).getName();
+        CURRENT_PROCESSOR_NAME = vision.getAttachedProcessors().get(0).toString();
     }
 
     /**
@@ -84,7 +84,7 @@ public class SwitchableVisionSender implements Runnable {
                 continue;
 
             Processor currentProcessor = vision.getAttachedProcessors().stream()
-                    .filter(p -> p.getName().equals(CURRENT_PROCESSOR_NAME))
+                    .filter(p -> p.toString().equals(CURRENT_PROCESSOR_NAME))
                     .findFirst()
                     .orElse(null);
 

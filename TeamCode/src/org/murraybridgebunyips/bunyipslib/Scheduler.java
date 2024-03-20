@@ -108,7 +108,7 @@ public class Scheduler extends BunyipsComponent {
                     continue;
                 if (!task.taskToRun.isMuted() && (task.taskToRun.isRunning() || task.runCondition.getAsBoolean()) && timeExceeded(task)) {
                     double deltaTime = round(task.taskToRun.getDeltaTime(), 1);
-                    opMode.addTelemetry("    Scheduler (%) |\n% -> %", opMode.getClass().getSimpleName(), task.taskToRun.getName(), deltaTime == 0.0 ? "active" : deltaTime + "s");
+                    opMode.addTelemetry("    Scheduler (%) |\n% -> %", opMode.getClass().getSimpleName(), task.taskToRun, deltaTime == 0.0 ? "active" : deltaTime + "s");
                 }
             }
             // Blank line to separate Scheduler information from addTelemetry()

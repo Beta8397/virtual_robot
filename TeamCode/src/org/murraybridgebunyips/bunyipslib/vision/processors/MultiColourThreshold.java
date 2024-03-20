@@ -4,6 +4,8 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.Pair;
 
+import androidx.annotation.NonNull;
+
 import com.acmerobotics.dashboard.config.Config;
 
 import org.murraybridgebunyips.bunyipslib.vision.Processor;
@@ -40,8 +42,9 @@ public class MultiColourThreshold extends Processor<ContourData> {
         }
     }
 
+    @NonNull
     @Override
-    public String getName() {
+    public String toString() {
         return "multicolourthreshold";
     }
 
@@ -73,7 +76,7 @@ public class MultiColourThreshold extends Processor<ContourData> {
         }
         // Display mask name on camera feed
         canvas.drawText(
-                MASK >= 1 && MASK <= colourProcessors.size() ? colourProcessors.get(MASK - 1).first.getName() : "",
+                MASK >= 1 && MASK <= colourProcessors.size() ? colourProcessors.get(MASK - 1).first.toString() : "",
                 10,
                 Vision.CAMERA_HEIGHT - 10,
                 new Paint() {{

@@ -75,7 +75,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
     public Task getCurrentTask() {
         if (!shouldRun) return null;
         if (currentTask == null || currentTask.isFinished()) {
-            Dbg.logd(getClass(), "Task changed: %<-%", defaultTask.getName(), currentTask != null ? currentTask.getName() : "[idle]");
+            Dbg.logd(getClass(), "Task changed: %<-%", defaultTask, currentTask != null ? currentTask : "[idle]");
             currentTask = defaultTask;
         }
         return currentTask;
@@ -115,7 +115,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
                 setHighPriorityCurrentTask(newTask);
                 return true;
             }
-            Dbg.log(getClass(), "Ignored task change: %->%", currentTask.getName(), newTask.getName());
+            Dbg.log(getClass(), "Ignored task change: %->%", currentTask, newTask);
             return false;
         }
 
@@ -125,7 +125,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
             defaultTask.finishNow();
             defaultTask.reset();
         }
-        Dbg.logd(getClass(), "Task changed: %->%", currentTask.getName(), newTask.getName());
+        Dbg.logd(getClass(), "Task changed: %->%", currentTask, newTask);
         currentTask = newTask;
         return true;
     }
@@ -162,7 +162,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
             return;
         // Task will be cancelled abruptly, run the finish callback now
         if (this.currentTask != defaultTask) {
-            Dbg.warn(getClass(), "Task changed: %(INT)->%", this.currentTask.getName(), currentTask.getName());
+            Dbg.warn(getClass(), "Task changed: %(INT)->%", this.currentTask, currentTask);
             this.currentTask.finishNow();
         }
         currentTask.reset();
@@ -191,7 +191,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
             if (!task.isMuted()) {
                 Scheduler.addSubsystemTaskReport(
                         getClass().getSimpleName(),
-                        task.getName(),
+                        task.toString(),
                         round(task.getDeltaTime(), 1)
                 );
             }

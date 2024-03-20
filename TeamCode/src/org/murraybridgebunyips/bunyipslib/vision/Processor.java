@@ -3,6 +3,8 @@ package org.murraybridgebunyips.bunyipslib.vision;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 
+import androidx.annotation.NonNull;
+
 import org.firstinspires.ftc.robotcore.external.function.Consumer;
 import org.firstinspires.ftc.robotcore.external.function.Continuation;
 import org.firstinspires.ftc.robotcore.external.stream.CameraStreamSource;
@@ -91,7 +93,9 @@ public abstract class Processor<T extends VisionData> implements VisionProcessor
      * Unique identifier for the processor. This will be used to identify the processor
      * in the Vision system and in the FtcDashboard processor switcher.
      */
-    public abstract String getName();
+    @Override
+    @NonNull
+    public abstract String toString();
 
     /**
      * Get the list of vision data. You should use this method as the primary way to access

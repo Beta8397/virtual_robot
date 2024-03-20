@@ -6,6 +6,8 @@ import static org.murraybridgebunyips.bunyipslib.Text.round;
 import android.graphics.Canvas;
 import android.util.Size;
 
+import androidx.annotation.NonNull;
+
 import com.acmerobotics.dashboard.config.Config;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraName;
@@ -120,23 +122,23 @@ public class Vision extends BunyipsSubsystem {
             if (processor == null) {
                 throw new IllegalStateException("Vision: Processor is not instantiated!");
             }
-            if (processor.getName() == null) {
-                throw new IllegalStateException("Vision: Processor name cannot be null!");
+            if (processor.toString().equals("")) {
+                throw new IllegalStateException("Vision: Processor name cannot be empty!");
             }
             for (Processor otherProcessor : processors) {
-                if (otherProcessor != processor && otherProcessor.getName().equals(processor.getName())) {
+                if (otherProcessor != processor && otherProcessor.toString().equals(processor.toString())) {
                     throw new IllegalStateException("Vision: Processor name must be unique!");
                 }
             }
             builder.addProcessor(processor);
             processor.setAttached(true);
-            Dbg.logd(getClass(), "vision processor '%' initialised.", processor.getName());
+            Dbg.logd(getClass(), "vision processor '%' initialised.", processor.toString());
         }
 
         // Since Vision is usually called from the init-cycle, we can try to fit in some telemetry
         opMode.addTelemetry(
                 "Vision: % processor(s) initialised.",
-                Arrays.stream(newProcessors).map(Processor::getName).collect(Collectors.toList())
+                Arrays.stream(newProcessors).map(Processor::toString).collect(Collectors.toList())
         );
 
         visionPortal = builder
@@ -195,7 +197,7 @@ public class Vision extends BunyipsSubsystem {
             }
             visionPortal.setProcessorEnabled(processor, true);
             processor.setRunning(true);
-            Dbg.logd(getClass(), "vision processor '%' started.", processor.getName());
+            Dbg.logd(getClass(), "vision processor '%' started.", processor.toString());
         }
         return this;
     }
@@ -234,7 +236,7 @@ public class Vision extends BunyipsSubsystem {
             }
             visionPortal.setProcessorEnabled(processor, false);
             processor.setRunning(false);
-            Dbg.logd(getClass(), "vision processor '%' paused.", processor.getName());
+            Dbg.logd(getClass(), "vision processor '%' paused.", processor.toString());
         }
         return this;
     }
@@ -265,8 +267,8 @@ public class Vision extends BunyipsSubsystem {
     public HashMap<String, List<VisionData>> getAllData() {
         HashMap<String, List<VisionData>> data = new HashMap<>();
         for (Processor processor : processors) {
-            if (Objects.equals(processor.getName(), "rawfeed")) continue;
-            data.put(processor.getName(), processor.getData());
+            if (Objects.equals(processor.toString(), "rawfeed")) continue;
+            data.put(processor.toString(), processor.getData());
         }
         return data;
     }
@@ -320,7 +322,7 @@ public class Vision extends BunyipsSubsystem {
                 throw new IllegalStateException("Vision: Tried to flip a processor that was not initialised!");
             }
             processor.setFlipped(!processor.isFlipped());
-            Dbg.logd(getClass(), "vision processor '%' flipped %.", processor.getName(), processor.isFlipped() ? "upside-down" : "right-side up");
+            Dbg.logd(getClass(), "vision processor '%' flipped %.", processor.toString(), processor.isFlipped() ? "upside-down" : "right-side up");
         }
         return this;
     }
@@ -338,7 +340,7 @@ public class Vision extends BunyipsSubsystem {
         }
         for (Processor processor : processors) {
             processor.setFlipped(!processor.isFlipped());
-            Dbg.logd(getClass(), "vision processor '%' flipped %.", processor.getName(), processor.isFlipped() ? "upside-down" : "right-side up");
+            Dbg.logd(getClass(), "vision processor '%' flipped %.", processor.toString(), processor.isFlipped() ? "upside-down" : "right-side up");
         }
         return this;
     }
@@ -425,7 +427,7 @@ public class Vision extends BunyipsSubsystem {
     @SuppressWarnings("rawtypes")
     public Vision setPreview(Processor processor) {
         if (visionSender != null) {
-            visionSender.setStreamingProcessor(processor.getName());
+            visionSender.setStreamingProcessor(processor.toString());
         }
         return this;
     }
@@ -467,8 +469,9 @@ public class Vision extends BunyipsSubsystem {
      * To use this, pass raw as a processor.
      */
     private static class Raw extends Processor<VisionData> {
+        @NonNull
         @Override
-        public String getName() {
+        public String toString() {
             return "raw";
         }
 

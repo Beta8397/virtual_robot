@@ -1,5 +1,7 @@
 package org.murraybridgebunyips.bunyipslib.vision.processors.centerstage;
 
+import androidx.annotation.NonNull;
+
 import com.acmerobotics.dashboard.config.Config;
 
 import org.murraybridgebunyips.bunyipslib.vision.processors.ColourThreshold;
@@ -38,8 +40,9 @@ public class PurplePixel extends ColourThreshold {
         super(ColourSpace.YCrCb);
     }
 
+    @NonNull
     @Override
-    public String getName() {
+    public String toString() {
         return "purplepixel";
     }
 

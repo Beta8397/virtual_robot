@@ -5,14 +5,6 @@ package org.murraybridgebunyips.bunyipslib.tasks.bases
  */
 interface RobotTask {
     /**
-     * Get the name of this task. By default, it will be the class simple name, but you can override this method to
-     * provide a custom name.
-     */
-    fun getName(): String {
-        return this.javaClass.simpleName
-    }
-
-    /**
      * Runs every loop of the command system.
      */
     fun run()
