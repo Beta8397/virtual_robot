@@ -1,6 +1,7 @@
 package org.murraybridgebunyips.bunyipslib.tasks
 
 import com.qualcomm.robotcore.util.ElapsedTime
+import org.murraybridgebunyips.bunyipslib.Direction
 import org.murraybridgebunyips.bunyipslib.tasks.bases.RobotTask
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task
 import org.murraybridgebunyips.bunyipslib.vision.Vision
@@ -28,30 +29,10 @@ class GetSignalTask(private val vision: Vision) : Task(0.0),
      * @return An enum of either LEFT, CENTER, or RIGHT determining where to park
      */
     @Volatile
-    var position: ParkingPosition? = null
+    var position: Direction? = null
         private set
 
-    /**
-     * Represents the three parking positions based on a POWERPLAY Signal detection.
-     */
-    enum class ParkingPosition {
-        /**
-         * Parking position Zone 1
-         */
-        LEFT,
-
-        /**
-         * Parking position Zone 2
-         */
-        CENTER,
-
-        /**
-         * Parking position Zone 3
-         */
-        RIGHT
-    }
-
-    protected override fun init() {
+    override fun init() {
 //        if (cam.mode != CamMode.OPENCV) cam.swapModes()
 
         // Tag size in metres
@@ -82,7 +63,7 @@ class GetSignalTask(private val vision: Vision) : Task(0.0),
     }
 
     override fun onFinish() {
-        return
+        // no-op
     }
 
     override fun periodic() {
@@ -90,7 +71,7 @@ class GetSignalTask(private val vision: Vision) : Task(0.0),
 
         // Caution! ParkingPosition will be null if the camera does not pick up anything in it's task runtime.
         // Be sure to check if ParkingPosition is null before setting up your specific tasks, to handle a fallback value.
-        var newPosition: ParkingPosition? = null
+        var newPosition: Direction? = null
         val detections = at.data
         // Check if there are new frames
         if (detections != null) {
@@ -101,15 +82,15 @@ class GetSignalTask(private val vision: Vision) : Task(0.0),
                 for (detection in detections) {
                     when (detection.id) {
                         17 -> {
-                            newPosition = ParkingPosition.LEFT
+                            newPosition = Direction.LEFT
                         }
 
                         13 -> {
-                            newPosition = ParkingPosition.CENTER
+                            newPosition = Direction.FORWARD
                         }
 
                         7 -> {
-                            newPosition = ParkingPosition.RIGHT
+                            newPosition = Direction.RIGHT
                         }
 
                         else -> {

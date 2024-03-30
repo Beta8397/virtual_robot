@@ -11,10 +11,23 @@ public class StartEndTask extends Task {
     private final Runnable onStart;
     private final Runnable onFinish;
 
+    /**
+     * Create a new StartEndTask with no timeout.
+     *
+     * @param onStart the callback to run when the task starts
+     * @param onEnd   the callback to run when the task finishes
+     */
     public StartEndTask(Runnable onStart, Runnable onEnd) {
         this(0.0, onStart, onEnd);
     }
 
+    /**
+     * Create a new StartEndTask with a timeout.
+     *
+     * @param timeoutSeconds the timeout for the task
+     * @param onStart        the callback to run when the task starts
+     * @param onFinish       the callback to run when the task finishes
+     */
     public StartEndTask(double timeoutSeconds, Runnable onStart, Runnable onFinish) {
         super(timeoutSeconds);
         this.onStart = onStart;

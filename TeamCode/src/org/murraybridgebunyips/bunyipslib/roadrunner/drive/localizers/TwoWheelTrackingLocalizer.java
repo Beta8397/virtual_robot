@@ -6,7 +6,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.localization.TwoTrackingWheelLocalizer;
 
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
-import org.murraybridgebunyips.bunyipslib.roadrunner.util.Encoder;
+import org.murraybridgebunyips.bunyipslib.roadrunner.util.Deadwheel;
 
 import java.util.Arrays;
 import java.util.List;
@@ -40,20 +40,20 @@ public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
     // Parallel/Perpendicular to the forward axis
     // Parallel wheel is parallel to the forward axis
     // Perpendicular is perpendicular to the forward axis
-    private final Encoder parallelEncoder;
-    private final Encoder perpendicularEncoder;
+    private final Deadwheel parallelDeadwheel;
+    private final Deadwheel perpendicularDeadwheel;
 
     private final RoadRunnerDrive drive;
 
     /**
      * Create a new TwoWheelTrackingLocalizer
      *
-     * @param coefficients         The coefficients to use
-     * @param parallelEncoder      The parallel encoder
-     * @param perpendicularEncoder The perpendicular encoder
-     * @param drive                The drivetrain
+     * @param coefficients           The coefficients to use
+     * @param parallelDeadwheel      The parallel encoder
+     * @param perpendicularDeadwheel The perpendicular encoder
+     * @param drive                  The drivetrain
      */
-    public TwoWheelTrackingLocalizer(TwoWheelTrackingLocalizerCoefficients coefficients, Encoder parallelEncoder, Encoder perpendicularEncoder, RoadRunnerDrive drive) {
+    public TwoWheelTrackingLocalizer(TwoWheelTrackingLocalizerCoefficients coefficients, Deadwheel parallelDeadwheel, Deadwheel perpendicularDeadwheel, RoadRunnerDrive drive) {
         super(Arrays.asList(
                 new Pose2d(coefficients.PARALLEL_X, coefficients.PARALLEL_Y, 0),
                 new Pose2d(coefficients.PERPENDICULAR_X, coefficients.PERPENDICULAR_Y, Math.toRadians(90))
@@ -62,8 +62,8 @@ public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
         this.drive = drive;
         this.coefficients = coefficients;
 
-        this.parallelEncoder = parallelEncoder;
-        this.perpendicularEncoder = perpendicularEncoder;
+        this.parallelDeadwheel = parallelDeadwheel;
+        this.perpendicularDeadwheel = perpendicularDeadwheel;
     }
 
     public TwoWheelTrackingLocalizerCoefficients getCoefficients() {
@@ -94,8 +94,8 @@ public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
     @Override
     public List<Double> getWheelPositions() {
         return Arrays.asList(
-                encoderTicksToInches(parallelEncoder.getCurrentPosition()),
-                encoderTicksToInches(perpendicularEncoder.getCurrentPosition())
+                encoderTicksToInches(parallelDeadwheel.getCurrentPosition()),
+                encoderTicksToInches(perpendicularDeadwheel.getCurrentPosition())
         );
     }
 
@@ -107,8 +107,8 @@ public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
         // compensation method
 
         return Arrays.asList(
-                encoderTicksToInches(parallelEncoder.getRawVelocity()),
-                encoderTicksToInches(perpendicularEncoder.getRawVelocity())
+                encoderTicksToInches(parallelDeadwheel.getRawVelocity()),
+                encoderTicksToInches(perpendicularDeadwheel.getRawVelocity())
         );
     }
 }

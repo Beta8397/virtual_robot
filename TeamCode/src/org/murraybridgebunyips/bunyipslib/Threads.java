@@ -18,13 +18,23 @@ public final class Threads {
      * Start a new thread with the given task.
      *
      * @param task the runnable task to run on the new thread
+     * @param name the name of the thread to access it later and to log as
      */
-    public static void start(Runnable task) {
-        Dbg.logd(Threads.class, "starting new thread: % ...", task.getClass().getSimpleName());
+    public static void start(Runnable task, String name) {
+        Dbg.logd(Threads.class, "starting new thread: % ...", name);
         Thread thread = new Thread(task);
-        thread.setName(task.getClass().getSimpleName());
+        thread.setName(name);
         thread.start();
         threads.put(task.hashCode(), thread);
+    }
+
+    /**
+     * Start a new thread with the given task.
+     *
+     * @param task the runnable task to run on the new thread
+     */
+    public static void start(Runnable task) {
+        start(task, task.getClass().getSimpleName());
     }
 
     /**
@@ -53,6 +63,21 @@ public final class Threads {
     }
 
     /**
+     * Check if a task is currently running.
+     *
+     * @param task the name of the task to check, must be managed by Threads
+     * @return true if the task is running, false otherwise
+     */
+    public static boolean isRunning(String task) {
+        for (Thread thread : threads.values()) {
+            if (thread.getName().equals(task)) {
+                return thread.isAlive();
+            }
+        }
+        return false;
+    }
+
+    /**
      * Stop a specific task that is currently running.
      *
      * @param task the task to stop, must be managed by Threads
@@ -69,6 +94,23 @@ public final class Threads {
     }
 
     /**
+     * Stop a specific task that is currently running.
+     *
+     * @param task the name of the task to stop, must be managed by Threads
+     */
+    public static void stop(String task) {
+        for (Thread thread : threads.values()) {
+            if (thread.getName().equals(task)) {
+                Dbg.logd(Threads.class, "stopping thread: % ...", thread.getName());
+                thread.interrupt();
+                threads.remove(thread.hashCode());
+                return;
+            }
+        }
+        Dbg.warn(Threads.class, "tried to stop a task '%' that is not being managed by Threads.", task);
+    }
+
+    /**
      * Restart a specific task by stopping it and then starting it again.
      *
      * @param task the task to restart, must be managed by Threads
@@ -80,12 +122,53 @@ public final class Threads {
     }
 
     /**
+     * Restart a specific task by stopping it and then starting it again.
+     *
+     * @param task the name of the task to restart, must be managed by Threads
+     */
+    public static void restart(String task) {
+        Dbg.logd(Threads.class, "attempting to restart task: % ...", task);
+        for (Thread thread : threads.values()) {
+            if (thread.getName().equals(task)) {
+                stop(thread.getName());
+                start(thread, thread.getName());
+                return;
+            }
+        }
+    }
+
+    /**
      * Wait for a specific task to finish running.
      *
      * @param task the task to wait for, must be managed by Threads
      */
     public static void waitFor(Runnable task) {
         waitFor(task, false);
+    }
+
+    /**
+     * Wait for a specific task to finish running.
+     *
+     * @param task the name of the task to wait for, must be managed by Threads
+     */
+    public static void waitFor(String task) {
+        waitFor(task, false);
+    }
+
+    /**
+     * Wait for a specific task to finish running, with the option to interrupt it.
+     *
+     * @param task      the name of the task to wait for, must be managed by Threads
+     * @param interrupt whether to interrupt the task first then wait
+     */
+    public static void waitFor(String task, boolean interrupt) {
+        for (Thread thread : threads.values()) {
+            if (thread.getName().equals(task)) {
+                waitFor(thread, interrupt);
+                return;
+            }
+        }
+        Dbg.warn(Threads.class, "tried to wait for a task '%' that is not being managed by Threads.", task);
     }
 
     /**

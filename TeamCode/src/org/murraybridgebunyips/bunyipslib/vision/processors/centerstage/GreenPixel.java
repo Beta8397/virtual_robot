@@ -15,11 +15,11 @@ public class GreenPixel extends ColourThreshold {
     /**
      * Lower clamp for YCrCb
      */
-    public static Scalar LOWER_YCBCR = new Scalar(80, 0, 70);
+    public static Scalar LOWER_YCBCR = new Scalar(0, 0, 0);
     /**
      * Upper clamp for YCrCb
      */
-    public static Scalar UPPER_YCBCR = new Scalar(255, 100, 255);
+    public static Scalar UPPER_YCBCR = new Scalar(255, 120, 255);
     /**
      * Default minimum area for the contour
      */

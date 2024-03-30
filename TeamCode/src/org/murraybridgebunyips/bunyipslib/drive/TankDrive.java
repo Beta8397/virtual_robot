@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
-import org.murraybridgebunyips.bunyipslib.Controller;
+import org.murraybridgebunyips.bunyipslib.Controls;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.DriveConstants;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.TankCoefficients;
@@ -238,7 +238,7 @@ public class TankDrive extends BunyipsSubsystem implements RoadRunnerDrive {
      * @return The TankDrive instance
      */
     public TankDrive setSpeedUsingController(double x, double y, double r) {
-        setWeightedDrivePower(Controller.makeRobotPose(x, y, r));
+        setWeightedDrivePower(Controls.makeRobotPose(x, y, r));
         return this;
     }
 
@@ -251,7 +251,7 @@ public class TankDrive extends BunyipsSubsystem implements RoadRunnerDrive {
      * @return The TankDrive instance
      */
     public TankDrive setSpeedUsingControllerFieldCentric(double x, double y, double r) {
-        setWeightedDrivePowerFieldCentric(Controller.makeRobotPose(x, y, r));
+        setWeightedDrivePowerFieldCentric(Controls.makeRobotPose(x, y, r));
         return this;
     }
 

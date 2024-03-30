@@ -31,11 +31,12 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
      *
      * @param parameters constructor parameters for your subsystem that should be checked for null,
      *                   in which case the subsystem should be disabled
+     * @return whether the assertion passed or failed, where you can stop the constructor if this returns false
      */
-    protected void assertParamsNotNull(Object... parameters) {
+    protected boolean assertParamsNotNull(Object... parameters) {
         // If a previous check has already failed, we don't need to check again otherwise we might
         // erase a previous check that failed
-        if (!shouldRun) return;
+        if (!shouldRun) return false;
         // assertComponentArgs will manage telemetry/impl of errors being ignored, all we need to do
         // is check if it failed and if so, disable the subsystem
         shouldRun = NullSafety.assertComponentArgs(getClass(), parameters);
@@ -43,6 +44,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
             assertionFailed = true;
             Dbg.error(getClass(), "Subsystem has been disabled as assertParamsNotNull() failed.");
         }
+        return shouldRun;
     }
 
     /**
@@ -190,7 +192,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
             task.pollFinished();
             if (!task.isMuted()) {
                 Scheduler.addSubsystemTaskReport(
-                        getClass().getSimpleName(),
+                        getClass().getSimpleName() + (task == defaultTask ? " (d.)" : ""),
                         task.toString(),
                         round(task.getDeltaTime(), 1)
                 );

@@ -4,7 +4,6 @@ import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.dashboard.canvas.Canvas
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket
 import com.qualcomm.hardware.lynx.LynxModule
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.HardwareDevice
@@ -17,17 +16,28 @@ import org.murraybridgebunyips.bunyipslib.Text.formatString
 import org.murraybridgebunyips.bunyipslib.Text.round
 import org.murraybridgebunyips.bunyipslib.roadrunner.util.LynxModuleUtil
 import org.murraybridgebunyips.deps.BuildConfig
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import kotlin.math.roundToInt
 
 
 /**
- * Base class for all OpModes that provides a number of useful methods and utilities for development.
- * Includes a lifecycle that is similar to an iterative lifecycle, but includes logging, error catching,
- * and abstraction to provide phased code execution.
+ * [BunyipsOpMode]
  *
- * @author Lucas Bubner, 2023
+ * The gateway to the BunyipsLib framework, BunyipsOpMode is a wrapper around the FTC SDK's LinearOpMode.
+ *
+ * This class provides a structured way to manage the lifecycle of an OpMode, and provides a number of
+ * utility functions to make development easier. This class is designed to be extended by the user to
+ * create their own OpModes, and has native support for linked Driver Station & FtcDashboard telemetry ([addTelemetry]),
+ * native custom gamepads ([Controller]), timing utilities ([movingAverageTimer]), exception handling ([Exceptions]),
+ * and more through the BunyipsLib suite of tools ([BunyipsSubsystem], [Scheduler], etc.)
+ *
+ * @see CommandBasedBunyipsOpMode
+ * @see AutonomousBunyipsOpMode
+ * @see RoadRunnerAutonomousBunyipsOpMode
+ * @author Lucas Bubner, 2024
  */
-abstract class BunyipsOpMode : LinearOpMode() {
+abstract class BunyipsOpMode : BOMInternal() {
     /**
      * The moving average timer for the OpMode, which is used to calculate the average time
      * between hardware cycles. This is useful for debugging and performance monitoring.
@@ -38,6 +48,8 @@ abstract class BunyipsOpMode : LinearOpMode() {
     private var operationsCompleted = false
     private var operationsPaused = false
     private var safeHaltHardwareOnStop = false
+
+    private var gamepadExecutor: ExecutorService? = null
 
     private var opModeStatus = "idle"
     private lateinit var overheadTelemetry: Item
@@ -50,6 +62,16 @@ abstract class BunyipsOpMode : LinearOpMode() {
         RETAINED_TELEMETRY,
         LOG
     }
+
+    /**
+     * BunyipsLib Gamepad 1: Driver
+     */
+    lateinit var gamepad1: Controller
+
+    /**
+     * BunyipsLib Gamepad 2: Operator
+     */
+    lateinit var gamepad2: Controller
 
     companion object {
         private var _instance: BunyipsOpMode? = null
@@ -106,6 +128,7 @@ abstract class BunyipsOpMode : LinearOpMode() {
      * Note: this method is always called even if initialisation is cut short by the Driver Station.
      */
     protected open fun onInitDone() {
+        // no-op
     }
 
     /**
@@ -113,6 +136,7 @@ abstract class BunyipsOpMode : LinearOpMode() {
      * Unlike onInitDone, this will only execute once play is hit and not when initialisation is done.
      */
     protected open fun onStart() {
+        // no-op
     }
 
     /**
@@ -129,6 +153,7 @@ abstract class BunyipsOpMode : LinearOpMode() {
      * @see onStop
      */
     protected open fun onFinish() {
+        // no-op
     }
 
     /**
@@ -137,21 +162,22 @@ abstract class BunyipsOpMode : LinearOpMode() {
      * called before the OpMode is terminated, and is *guaranteed* to be called. This method is useful
      * for releasing resources to prevent memory leaks, as motor controllers will be powered off
      * as the OpMode is ending.
-     * This method is not exception protected!
      * @see onFinish
      */
     protected open fun onStop() {
+        // no-op
     }
 
     /**
-     * Main method overridden from LinearOpMode that handles the OpMode lifecycle.
-     * @throws InterruptedException
+     * This method is the entry point for the BunyipsLib framework, and is called by the FTC SDK.
+     * @throws InterruptedException If the OpMode is interrupted by the FTC SDK, this exception will be raised.
      */
     @Throws(InterruptedException::class)
-    final override fun runOpMode() {
+    final override fun runBunyipsOpMode() {
         // BunyipsOpMode
         _instance = this
         try {
+            resetFields()
             Dbg.log("=============== BunyipsLib BunyipsOpMode ${BuildConfig.GIT_COMMIT}-${BuildConfig.BUILD_TIME} uid:${BuildConfig.ID} ===============")
             LynxModuleUtil.ensureMinimumFirmwareVersion(hardwareMap)
             hardwareMap.getAll(LynxModule::class.java).forEach { module ->
@@ -169,6 +195,21 @@ abstract class BunyipsOpMode : LinearOpMode() {
 
             opModeStatus = "setup"
             Dbg.logd("BunyipsOpMode: setting up...")
+
+            // Controller setup and monitoring threads
+            gamepad1 = Controller(sdkGamepad1)
+            gamepad2 = Controller(sdkGamepad2)
+            // TODO: missing ThreadPool impl
+            gamepadExecutor = Executors.newFixedThreadPool(2)
+            gamepadExecutor?.submit {
+                while (!Thread.currentThread().isInterrupted)
+                    gamepad1.update()
+            }
+            gamepadExecutor?.submit {
+                while (!Thread.currentThread().isInterrupted)
+                    gamepad2.update()
+            }
+
             telemetry.log().displayOrder = Telemetry.Log.DisplayOrder.OLDEST_FIRST
             telemetry.captionValueSeparator = ""
             // Uncap the telemetry log limit to ensure we capture everything
@@ -301,9 +342,16 @@ abstract class BunyipsOpMode : LinearOpMode() {
             throw t
         } finally {
             Dbg.logd("BunyipsOpMode: opmode stop requested. cleaning up...")
-            // Ensure all user threads have been told to stop
+            // Ensure all threads have been told to stop
+            gamepadExecutor?.shutdownNow()
             Threads.stopAll()
-            onStop()
+            try {
+                onStop()
+            } catch (e: Exception) {
+                Exceptions.handle(e, ::log)
+            }
+            _instance = null
+            safeHaltHardware()
             // Telemetry may be not in a nice state, so we will call our stateful functions
             // such as thread stops and cleanup in onStop() first before updating the status
             opModeStatus = "terminating"
@@ -333,7 +381,7 @@ abstract class BunyipsOpMode : LinearOpMode() {
                 } else {
                     "${loopTime}ms"
                 }
-            } | ${Controller.movementString(gamepad1)} ${Controller.movementString(gamepad2)}\n"
+            } | ${Controls.movementString(gamepad1)} ${Controls.movementString(gamepad2)}\n"
 
         overheadTelemetry.setValue("BOM: $overheadStatus")
 
@@ -440,6 +488,20 @@ abstract class BunyipsOpMode : LinearOpMode() {
                 continue
             telemetryItems.remove(item)
         }
+    }
+
+    /**
+     * Reset member fields to their default values as the instance may be reused.
+     */
+    private fun resetFields() {
+        operationsCompleted = false
+        operationsPaused = false
+        safeHaltHardwareOnStop = false
+        opModeStatus = "idle"
+        telemetryQueue = 0
+        telemetryItems.clear()
+        packet = null
+        gamepadExecutor = null
     }
 
     /**

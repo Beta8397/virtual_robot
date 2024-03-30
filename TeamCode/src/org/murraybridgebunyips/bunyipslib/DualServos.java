@@ -2,19 +2,19 @@ package org.murraybridgebunyips.bunyipslib;
 
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.murraybridgebunyips.bunyipslib.tasks.CallbackTask;
+import org.murraybridgebunyips.bunyipslib.tasks.RunTask;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
 /**
  * Control a set of two servos together.
  */
 public class DualServos extends BunyipsSubsystem {
-    private final Servo left;
-    private final Servo right;
-    private final double LEFT_SERVO_CLOSED_POSITION;
-    private final double LEFT_SERVO_OPEN_POSITION;
-    private final double RIGHT_SERVO_CLOSED_POSITION;
-    private final double RIGHT_SERVO_OPEN_POSITION;
+    private Servo left;
+    private Servo right;
+    private double LEFT_SERVO_CLOSED_POSITION;
+    private double LEFT_SERVO_OPEN_POSITION;
+    private double RIGHT_SERVO_CLOSED_POSITION;
+    private double RIGHT_SERVO_OPEN_POSITION;
     private double leftServoPosition;
     private double rightServoPosition;
 
@@ -29,7 +29,7 @@ public class DualServos extends BunyipsSubsystem {
      * @param rightOpen   the right servo open position
      */
     public DualServos(Servo left, Servo right, double leftClosed, double leftOpen, double rightClosed, double rightOpen) {
-        assertParamsNotNull(left, right);
+        if (!assertParamsNotNull(left, right)) return;
         this.left = left;
         this.right = right;
         LEFT_SERVO_CLOSED_POSITION = leftClosed;
@@ -70,7 +70,7 @@ public class DualServos extends BunyipsSubsystem {
      * @return the task
      */
     public Task toggleServoTask(ServoSide servo) {
-        return new CallbackTask(() -> toggleServo(servo), this, true).withName("ToggleServoTask");
+        return new RunTask(() -> toggleServo(servo), this, true).withName("ToggleServoTask");
     }
 
     /**
@@ -100,7 +100,7 @@ public class DualServos extends BunyipsSubsystem {
      * @return the task
      */
     public Task openServoTask(ServoSide servo) {
-        return new CallbackTask(() -> openServo(servo), this, true).withName("OpenServoTask");
+        return new RunTask(() -> openServo(servo), this, true).withName("OpenServoTask");
     }
 
     /**
@@ -130,7 +130,25 @@ public class DualServos extends BunyipsSubsystem {
      * @return the task
      */
     public Task closeServoTask(ServoSide servo) {
-        return new CallbackTask(() -> closeServo(servo), this, true).withName("CloseServoTask");
+        return new RunTask(() -> closeServo(servo), this, true).withName("CloseServoTask");
+    }
+
+    /**
+     * Query if a servo is open.
+     *
+     * @param servo the servo to query
+     * @return whether the servo side is open
+     */
+    public boolean isOpen(ServoSide servo) {
+        switch (servo) {
+            case LEFT:
+                return left.getPosition() == LEFT_SERVO_OPEN_POSITION;
+            case RIGHT:
+                return right.getPosition() == RIGHT_SERVO_OPEN_POSITION;
+            case BOTH:
+                return left.getPosition() == LEFT_SERVO_OPEN_POSITION && right.getPosition() == RIGHT_SERVO_OPEN_POSITION;
+        }
+        return false;
     }
 
     /**

@@ -5,7 +5,7 @@ import androidx.annotation.NonNull;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.localization.ThreeTrackingWheelLocalizer;
 
-import org.murraybridgebunyips.bunyipslib.roadrunner.util.Encoder;
+import org.murraybridgebunyips.bunyipslib.roadrunner.util.Deadwheel;
 
 import java.util.Arrays;
 import java.util.List;
@@ -25,9 +25,9 @@ import java.util.List;
  */
 public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer {
     private final StandardTrackingWheelLocalizerCoefficients coefficients;
-    private final Encoder leftEncoder;
-    private final Encoder rightEncoder;
-    private final Encoder frontEncoder;
+    private final Deadwheel leftDeadwheel;
+    private final Deadwheel rightDeadwheel;
+    private final Deadwheel frontDeadwheel;
     private final List<Integer> lastEncPositions;
     private final List<Integer> lastEncVels;
 
@@ -35,13 +35,13 @@ public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer 
      * Create a new StandardTrackingWheelLocalizer with coefficients, encoders, and last encoder positions and velocities.
      *
      * @param coefficients             The coefficients for the localizer
-     * @param leftEncoder              The left encoder
-     * @param rightEncoder             The right encoder
-     * @param frontEncoder             The front encoder
+     * @param leftDeadwheel            The left encoder
+     * @param rightDeadwheel           The right encoder
+     * @param frontDeadwheel           The front encoder
      * @param lastTrackingEncPositions The last encoder positions
      * @param lastTrackingEncVels      The last encoder velocities
      */
-    public StandardTrackingWheelLocalizer(StandardTrackingWheelLocalizerCoefficients coefficients, Encoder leftEncoder, Encoder rightEncoder, Encoder frontEncoder, List<Integer> lastTrackingEncPositions, List<Integer> lastTrackingEncVels) {
+    public StandardTrackingWheelLocalizer(StandardTrackingWheelLocalizerCoefficients coefficients, Deadwheel leftDeadwheel, Deadwheel rightDeadwheel, Deadwheel frontDeadwheel, List<Integer> lastTrackingEncPositions, List<Integer> lastTrackingEncVels) {
         super(Arrays.asList(
                 new Pose2d(0, coefficients.LATERAL_DISTANCE / 2, 0), // left
                 new Pose2d(0, -coefficients.LATERAL_DISTANCE / 2, 0), // right
@@ -53,11 +53,11 @@ public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer 
         lastEncPositions = lastTrackingEncPositions;
         lastEncVels = lastTrackingEncVels;
 
-        assert leftEncoder != null && rightEncoder != null && frontEncoder != null;
+        assert leftDeadwheel != null && rightDeadwheel != null && frontDeadwheel != null;
 
-        this.leftEncoder = leftEncoder;
-        this.rightEncoder = rightEncoder;
-        this.frontEncoder = frontEncoder;
+        this.leftDeadwheel = leftDeadwheel;
+        this.rightDeadwheel = rightDeadwheel;
+        this.frontDeadwheel = frontDeadwheel;
     }
 
     public StandardTrackingWheelLocalizerCoefficients getCoefficients() {
@@ -77,9 +77,9 @@ public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer 
     @NonNull
     @Override
     public List<Double> getWheelPositions() {
-        int leftPos = leftEncoder.getCurrentPosition();
-        int rightPos = rightEncoder.getCurrentPosition();
-        int frontPos = frontEncoder.getCurrentPosition();
+        int leftPos = leftDeadwheel.getCurrentPosition();
+        int rightPos = rightDeadwheel.getCurrentPosition();
+        int frontPos = frontDeadwheel.getCurrentPosition();
 
         lastEncPositions.clear();
         lastEncPositions.add(leftPos);
@@ -96,9 +96,9 @@ public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer 
     @NonNull
     @Override
     public List<Double> getWheelVelocities() {
-        int leftVel = (int) leftEncoder.getCorrectedVelocity();
-        int rightVel = (int) rightEncoder.getCorrectedVelocity();
-        int frontVel = (int) frontEncoder.getCorrectedVelocity();
+        int leftVel = (int) leftDeadwheel.getCorrectedVelocity();
+        int rightVel = (int) rightDeadwheel.getCorrectedVelocity();
+        int frontVel = (int) frontDeadwheel.getCorrectedVelocity();
 
         lastEncVels.clear();
         lastEncVels.add(leftVel);

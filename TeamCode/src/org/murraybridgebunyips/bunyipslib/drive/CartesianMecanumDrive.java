@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.Range;
 
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
-import org.murraybridgebunyips.bunyipslib.Controller;
+import org.murraybridgebunyips.bunyipslib.Controls;
 
 import java.util.Locale;
 
@@ -18,13 +18,6 @@ import java.util.Locale;
  */
 public class CartesianMecanumDrive extends BunyipsSubsystem {
 
-    private final DcMotor frontLeft;
-    private final DcMotor backLeft;
-    private final DcMotor frontRight;
-    private final DcMotor backRight;
-
-    // Axial translation speeds
-
     /**
      * Horizontal speed of the robot.
      */
@@ -37,7 +30,12 @@ public class CartesianMecanumDrive extends BunyipsSubsystem {
      * Rotational speed of the robot.
      */
     public double speedR;
+    private DcMotor frontLeft;
 
+    // Axial translation speeds
+    private DcMotor backLeft;
+    private DcMotor frontRight;
+    private DcMotor backRight;
     // Store and declare prioritisation when given instruction to calculate motor powers
     private Priority priority = Priority.NORMALISED;
 
@@ -48,7 +46,7 @@ public class CartesianMecanumDrive extends BunyipsSubsystem {
      * @param backRight  the back right motor
      */
     public CartesianMecanumDrive(DcMotor frontLeft, DcMotor frontRight, DcMotor backLeft, DcMotor backRight) {
-        assertParamsNotNull(frontLeft, frontRight, backLeft, backRight);
+        if (!assertParamsNotNull(frontLeft, frontRight, backLeft, backRight)) return;
         this.frontLeft = frontLeft;
         this.backLeft = backLeft;
         this.frontRight = frontRight;
@@ -79,7 +77,7 @@ public class CartesianMecanumDrive extends BunyipsSubsystem {
      * @param left_stick_y  Y value of the controller
      * @param right_stick_x R value of the controller
      * @return this
-     * @see Controller#Companion
+     * @see Controls#Companion
      */
     public CartesianMecanumDrive setSpeedUsingController(double left_stick_x, double left_stick_y, double right_stick_x) {
         speedX = Range.clip(left_stick_x, -1.0, 1.0);

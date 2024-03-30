@@ -1,29 +1,36 @@
 package org.murraybridgebunyips.bunyipslib
 
+import com.acmerobotics.roadrunner.geometry.Vector2d
+
 /**
  * Enum for determining where the robot is starting on the field. This can be used to determine
  * which autonomous path to take.
  */
-enum class StartingPositions {
+enum class StartingPositions(
+    /**
+     * The vector of the starting position.
+     */
+    val vector: Vector2d
+) {
     /**
      * FTC Field starting position Red Alliance, Left side if viewed from the Red Alliance.
      */
-    STARTING_RED_LEFT,
+    STARTING_RED_LEFT(Vector2d(-36.0, -60.0)),
 
     /**
      * FTC Field starting position Red Alliance, Right side if viewed from the Red Alliance.
      */
-    STARTING_RED_RIGHT,
+    STARTING_RED_RIGHT(Vector2d(12.0, -60.0)),
 
     /**
      * FTC Field starting position Blue Alliance, Left side if viewed from the Blue Alliance.
      */
-    STARTING_BLUE_LEFT,
+    STARTING_BLUE_LEFT(Vector2d(12.0, 60.0)),
 
     /**
      * FTC Field starting position Blue Alliance, Right side if viewed from the Blue Alliance.
      */
-    STARTING_BLUE_RIGHT;
+    STARTING_BLUE_RIGHT(Vector2d(-36.0, 60.0));
 
     companion object {
         /**

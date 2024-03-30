@@ -9,7 +9,7 @@ import org.murraybridgebunyips.bunyipslib.roadrunner.drive.DriveConstants;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.MecanumCoefficients;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.localizers.TwoWheelTrackingLocalizer;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.localizers.TwoWheelTrackingLocalizerCoefficients;
-import org.murraybridgebunyips.bunyipslib.roadrunner.util.Encoder;
+import org.murraybridgebunyips.bunyipslib.roadrunner.util.Deadwheel;
 
 /**
  * RoadRunner Mecanum Drive with two tracking dead wheels for localization
@@ -33,9 +33,9 @@ public class DualDeadwheelMecanumDrive extends MecanumDrive {
      * @param parallel              the parallel deadwheel encoder
      * @param perpendicular         the perpendicular deadwheel encoder
      */
-    public DualDeadwheelMecanumDrive(DriveConstants constants, MecanumCoefficients mecanumCoefficients, HardwareMap.DeviceMapping<VoltageSensor> voltageSensor, IMU imu, DcMotorEx frontLeft, DcMotorEx frontRight, DcMotorEx backLeft, DcMotorEx backRight, TwoWheelTrackingLocalizerCoefficients localizerCoefficients, Encoder parallel, Encoder perpendicular) {
+    public DualDeadwheelMecanumDrive(DriveConstants constants, MecanumCoefficients mecanumCoefficients, HardwareMap.DeviceMapping<VoltageSensor> voltageSensor, IMU imu, DcMotorEx frontLeft, DcMotorEx frontRight, DcMotorEx backLeft, DcMotorEx backRight, TwoWheelTrackingLocalizerCoefficients localizerCoefficients, Deadwheel parallel, Deadwheel perpendicular) {
         super(constants, mecanumCoefficients, voltageSensor, imu, frontLeft, frontRight, backLeft, backRight);
-        assertParamsNotNull(localizerCoefficients, parallel, perpendicular);
+        if (!assertParamsNotNull(localizerCoefficients, parallel, perpendicular)) return;
         setLocalizer(new TwoWheelTrackingLocalizer(localizerCoefficients, parallel, perpendicular, getInstance()));
     }
 }

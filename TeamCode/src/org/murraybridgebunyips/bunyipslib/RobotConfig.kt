@@ -1,9 +1,11 @@
 package org.murraybridgebunyips.bunyipslib
 
-import com.acmerobotics.roadrunner.geometry.Pose2d
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
+import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.HardwareDevice
 import com.qualcomm.robotcore.hardware.HardwareMap
+import org.murraybridgebunyips.bunyipslib.roadrunner.util.Deadwheel
+import java.util.function.Consumer
 
 /**
  * Abstract class to use as parent to the class you will define to mirror a "saved configuration"
@@ -36,21 +38,21 @@ abstract class RobotConfig {
      * @return the instance of the RobotConfig
      */
     fun init(opMode: OpMode): RobotConfig {
-        errors.clear()
+        Storage.hardwareErrors.clear()
         this.hardwareMap = opMode.hardwareMap
         onRuntime()
         if (opMode is BunyipsOpMode) {
             opMode.addTelemetry(
-                "${this.javaClass.simpleName}: Configuration completed with ${errors.size} error(s).",
+                "${this.javaClass.simpleName}: Configuration completed with ${Storage.hardwareErrors.size} error(s).",
             )
         } else {
             opMode.telemetry.addData(
                 "",
-                "${this.javaClass.simpleName}: Configuration completed with ${errors.size} error(s).",
+                "${this.javaClass.simpleName}: Configuration completed with ${Storage.hardwareErrors.size} error(s).",
             )
         }
-        if (errors.isNotEmpty()) {
-            for (error in errors) {
+        if (Storage.hardwareErrors.isNotEmpty()) {
+            for (error in Storage.hardwareErrors) {
                 if (opMode is BunyipsOpMode) {
                     opMode.addRetainedTelemetry("! MISSING_DEVICE: $error")
                     opMode.log("error: '$error' is not configured in the current saved configuration.")
@@ -86,9 +88,7 @@ abstract class RobotConfig {
 
     /**
      * Convenience method for reading the device from the hardwareMap without having to check for exceptions.
-     * Uses class initialistion instead of hardwareMap initialistion to widen the range of devices, supporting
-     * custom classes for dead wheels, etc.
-     *
+     * This method is useful for devices that don't require any additional setup.
      * Every hardware error with this method be saved to a static array, which can be accessed during the
      * lifetime of the opMode.
      *
@@ -96,28 +96,42 @@ abstract class RobotConfig {
      * @param device the class of the item to configure, in final abstraction extending HardwareDevice
      */
     fun <T : HardwareDevice> getHardware(name: String, device: Class<T>): T? {
+        return getHardware(name, device) {}
+    }
+
+    /**
+     * Convenience method for reading the device from the hardwareMap without having to check for exceptions.
+     * This method can be passed a Runnable to run if the device is successfully configured, useful for setting up
+     * directions or other configurations that will only run if the device was successfully found.
+     * Every hardware error with this method be saved to a static array, which can be accessed during the
+     * lifetime of the opMode.
+     *
+     * @param name   name of device saved in the configuration file
+     * @param device the class of the item to configure, extending HardwareDevice (DcMotorEx.class, ServoImplEx.class, etc.)
+     * @param onSuccess a Runnable to run if the device is successfully configured, useful for setting up motor configs
+     *                  without having to check for null explicitly.
+     */
+    @Suppress("UNCHECKED_CAST")
+    fun <T : HardwareDevice> getHardware(name: String, device: Class<T>, onSuccess: Consumer<T>): T? {
         var hardwareDevice: T? = null
         try {
-            hardwareDevice = hardwareMap.get(device, name)
-        } catch (e: Throwable) {
-            errors.add(name)
+            if (Storage.hardwareErrors.contains(name)) return null
+            hardwareDevice = if (Deadwheel::class.java.isAssignableFrom(device)) {
+                // Deadwheel configuration needs to use the hardwareMap to fetch a DcMotorEx first
+                val motor = hardwareMap.get(DcMotorEx::class.java, name)
+                // We can safely create a new Deadwheel instance, and we can ignore unchecked cast warnings since
+                // we have already checked the class type.
+                Deadwheel(motor) as T?
+            } else {
+                hardwareMap.get(device, name)
+            }
+            if (hardwareDevice == null)
+                throw NullPointerException()
+            onSuccess.accept(hardwareDevice)
+        } catch (e: Exception) {
+            Storage.hardwareErrors.add(name)
             e.localizedMessage?.let { Dbg.warn(it) }
         }
         return hardwareDevice
-    }
-
-    // Global storage objects
-    companion object {
-        /**
-         * Static array of hardware errors stored via hardware name.
-         */
-        @JvmStatic
-        val errors = ArrayList<String>()
-
-        /**
-         * Static Pose2d to store the robot's last known position after an OpMode has ended.
-         */
-        @JvmStatic
-        var lastKnownPosition: Pose2d? = null
     }
 }

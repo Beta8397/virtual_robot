@@ -149,6 +149,30 @@ public class Gamepad {
         right_trigger = setWithDeadzone(state.rightTrigger);
     }
 
+    public void copy(Gamepad other) {
+        x = other.x;
+        y = other.y;
+        a = other.a;
+        b = other.b;
+        left_stick_x = other.left_stick_x;
+        left_stick_y = other.left_stick_y;
+        right_stick_x = other.right_stick_x;
+        right_stick_y = other.right_stick_y;
+        dpad_up = other.dpad_up;
+        dpad_down = other.dpad_down;
+        dpad_left = other.dpad_left;
+        dpad_right = other.dpad_right;
+        back = other.back;
+        guide = other.guide;
+        start = other.start;
+        left_bumper = other.left_bumper;
+        right_bumper = other.right_bumper;
+        left_stick_button = other.left_stick_button;
+        right_stick_button = other.right_stick_button;
+        left_trigger = other.left_trigger;
+        right_trigger = other.right_trigger;
+    }
+
     public void update(VirtualGamePadController.ControllerState state){
         x = state.x;
         y = state.y;

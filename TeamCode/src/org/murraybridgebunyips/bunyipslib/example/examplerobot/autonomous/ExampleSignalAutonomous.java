@@ -1,6 +1,7 @@
 package org.murraybridgebunyips.bunyipslib.example.examplerobot.autonomous;
 
 import org.murraybridgebunyips.bunyipslib.AutonomousBunyipsOpMode;
+import org.murraybridgebunyips.bunyipslib.Direction;
 import org.murraybridgebunyips.bunyipslib.OpModeSelection;
 import org.murraybridgebunyips.bunyipslib.example.examplerobot.components.ExampleConfig;
 import org.murraybridgebunyips.bunyipslib.tasks.GetSignalTask;
@@ -46,7 +47,7 @@ public class ExampleSignalAutonomous extends AutonomousBunyipsOpMode {
     protected void onInitDone() {
         // Can access initTask.getPosition() here
         // e.g
-        if (initTask.getPosition() == GetSignalTask.ParkingPosition.CENTER) {
+        if (initTask.getPosition() == Direction.FORWARD) {
             // Do something. Note that the first and last variants of the addTask method respect
             // the asynchronous nature of onQueueReady, and will be queued appropriately.
             addTaskFirst(new WaitTask(5.0));

@@ -3,7 +3,7 @@ package org.murraybridgebunyips.bunyipslib.tasks;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.jetbrains.annotations.NotNull;
-import org.murraybridgebunyips.bunyipslib.Controller;
+import org.murraybridgebunyips.bunyipslib.Controls;
 import org.murraybridgebunyips.bunyipslib.drive.TankDrive;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.ForeverTask;
 
@@ -38,7 +38,7 @@ public class DifferentialDriveTask extends ForeverTask {
     @Override
     protected void periodic() {
         drive.setWeightedDrivePower(
-                Controller.makeRobotPose(gamepad.left_stick_y, 0, gamepad.right_stick_x)
+                Controls.makeRobotPose(gamepad.left_stick_y, 0, gamepad.right_stick_x)
         );
     }
 

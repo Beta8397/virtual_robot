@@ -60,15 +60,18 @@ abstract class Task(timeoutSeconds: Double) : RobotTask {
     /**
      * Set the name of this task to be displayed in the OpMode.
      */
-    fun withName(name: String): Task {
+    fun withName(name: String?): Task {
+        if (name == null) {
+            return this
+        }
         this.name = name
         return this
     }
 
-     /**
+    /**
      * Get the name of this task. By default, it will be the class simple name, but you can override this method to
      * provide a custom name.
-      * @return String representing the name of this task.
+     * @return String representing the name of this task.
      */
     override fun toString(): String {
         return name

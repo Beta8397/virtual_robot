@@ -1,6 +1,7 @@
 package org.murraybridgebunyips.bunyipslib.tests;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -24,7 +25,7 @@ import kotlin.Unit;
  * @author Lucas Bubner, 2023
  */
 @TeleOp(name = "Vision Test")
-//@Disabled
+@Disabled
 public class VisionTest extends BunyipsOpMode {
     private Vision vision;
     private Telemetry.Item cameraStreamNotification;
@@ -33,6 +34,9 @@ public class VisionTest extends BunyipsOpMode {
     @SuppressWarnings("rawtypes")
     private Unit callback(Procs selection) {
         if (selection == null) {
+            vision.init(vision.raw);
+            vision.start(vision.raw);
+            vision.startPreview();
             return Unit.INSTANCE;
         }
         Processor chosenProcessor = null;

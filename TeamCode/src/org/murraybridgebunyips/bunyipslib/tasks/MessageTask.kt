@@ -9,8 +9,8 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.Task
 class MessageTask(time: Double, private val message: String) :
     Task(time), RobotTask {
 
-    protected override fun init() {
-        return
+    override fun init() {
+        // no-op
     }
 
     override fun periodic() {
@@ -22,6 +22,6 @@ class MessageTask(time: Double, private val message: String) :
     }
 
     override fun onFinish() {
-        return
+        // no-op
     }
 }

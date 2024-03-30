@@ -7,6 +7,7 @@ import java.util.function.BooleanSupplier;
 
 /**
  * Two tasks that run based on a dynamically evaluated condition.
+ *
  * @author Lucas Bubner, 2024
  */
 public class ConditionalTask extends NoTimeoutTask {
@@ -16,7 +17,8 @@ public class ConditionalTask extends NoTimeoutTask {
 
     /**
      * Create a new conditional task with the given tasks and condition.
-     * @param trueTask the task to run if the condition is true
+     *
+     * @param trueTask  the task to run if the condition is true
      * @param falseTask the task to run if the condition is false
      * @param condition the condition to evaluate
      */

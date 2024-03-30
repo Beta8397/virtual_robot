@@ -11,7 +11,7 @@ class WaitTask(time: Double, private val showTelemetry: Boolean = true) : Task(t
     constructor(time: Double) : this(time, true)
 
     override fun init() {
-        return
+        // no-op
     }
 
     override fun periodic() {
@@ -24,6 +24,6 @@ class WaitTask(time: Double, private val showTelemetry: Boolean = true) : Task(t
     }
 
     override fun onFinish() {
-        return
+        // no-op
     }
 }

@@ -11,7 +11,7 @@ import androidx.annotation.NonNull;
 public class OpModeSelection {
     private final String name;
     private final Object obj;
-    private Controller assignedButton;
+    private Controls assignedButton;
 
     /**
      * Wrap an object with a name for selection.
@@ -27,11 +27,11 @@ public class OpModeSelection {
         this.obj = obj;
     }
 
-    public Controller getAssignedButton() {
+    public Controls getAssignedButton() {
         return assignedButton;
     }
 
-    public void setAssignedButton(Controller assignedButton) {
+    public void setAssignedButton(Controls assignedButton) {
         this.assignedButton = assignedButton;
     }
 

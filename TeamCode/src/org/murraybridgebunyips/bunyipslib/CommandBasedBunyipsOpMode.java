@@ -5,14 +5,16 @@ import java.util.Collections;
 import java.util.HashSet;
 
 /**
- * Command-based structure for a BunyipsOpMode utilising the Scheduler.
+ * Command-based structure for a {@link BunyipsOpMode} utilising the Scheduler.
  * This can be used for seamless/zero-step integration with the Scheduler in TeleOp, for Autonomous it is
- * recommended to use the AutonomousBunyipsOpMode classes as Tasks there are used in a different context.
+ * recommended to use the {@link AutonomousBunyipsOpMode} classes as Tasks there are used in a different context.
  *
  * @author Lucas Bubner, 2024
+ * @see BunyipsOpMode
  */
 public abstract class CommandBasedBunyipsOpMode extends BunyipsOpMode {
     private final HashSet<BunyipsSubsystem> managedSubsystems = new HashSet<>();
+
     // Components can't be final due to runtime instantiation,
     // so we cannot expose the scheduler directly and must use a getter.
     private Scheduler scheduler;
@@ -24,6 +26,26 @@ public abstract class CommandBasedBunyipsOpMode extends BunyipsOpMode {
      */
     public Scheduler scheduler() {
         return scheduler;
+    }
+
+    /**
+     * Call to access the driver() method from the Scheduler.
+     * This is the same as calling scheduler().driver().
+     *
+     * @return a ControllerButtonCreator for the driver controller
+     */
+    public Scheduler.ControllerButtonCreator driver() {
+        return scheduler.driver();
+    }
+
+    /**
+     * Call to access the operator() method from the Scheduler.
+     * This is the same as calling scheduler().operator().
+     *
+     * @return a ControllerButtonCreator for the operator controller
+     */
+    public Scheduler.ControllerButtonCreator operator() {
+        return scheduler.operator();
     }
 
     /**
@@ -41,8 +63,8 @@ public abstract class CommandBasedBunyipsOpMode extends BunyipsOpMode {
 
     @Override
     protected final void onInit() {
-        scheduler = new Scheduler();
         onInitialisation();
+        scheduler = new Scheduler();
         if (managedSubsystems == null || managedSubsystems.isEmpty()) {
             throw new RuntimeException("No BunyipsSubsystems were added in the addSubsystems() method!");
         }

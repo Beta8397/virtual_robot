@@ -1,56 +1,51 @@
 package org.murraybridgebunyips.bunyipslib.tasks;
 
-import org.murraybridgebunyips.bunyipslib.tasks.bases.NoTimeoutTask;
-import org.murraybridgebunyips.bunyipslib.vision.processors.centerstage.TeamProp;
+import org.murraybridgebunyips.bunyipslib.Dbg;
+import org.murraybridgebunyips.bunyipslib.Direction;
+import org.murraybridgebunyips.bunyipslib.tasks.bases.ForeverTask;
+import org.murraybridgebunyips.bunyipslib.vision.data.ContourData;
+import org.murraybridgebunyips.bunyipslib.vision.processors.ColourThreshold;
 
 /**
- * Task for detecting on which spike the Team Prop is placed on.
- * This is measured from the starting position, with the camera facing towards the Spike Marks.
+ * Task to get the position of the team prop.
  *
- * @author Lucas Bubner, 2023
- * @author Lachlan Paul, 2023
+ * @author Lucas Bubner, 2024
  */
-public class GetTeamPropTask extends NoTimeoutTask {
-    private final TeamProp teamProp;
-    private TeamProp.Positions position;
+public class GetTeamPropTask extends ForeverTask {
+    private final ColourThreshold colourThreshold;
+    private volatile Direction position = Direction.LEFT;
 
     /**
-     * Constructor for the GetTeamPropTask.
+     * Create a new GetTeamPropTask.
      *
-     * @param teamProp The TeamProp vision processor to use.
+     * @param colourThreshold the initialised and running colour threshold processor
      */
-    public GetTeamPropTask(TeamProp teamProp) {
-        this.teamProp = teamProp;
-        if (!teamProp.isAttached())
-            throw new RuntimeException("Vision processor is not initialised on a vision system");
+    public GetTeamPropTask(ColourThreshold colourThreshold) {
+        this.colourThreshold = colourThreshold;
     }
 
-    public TeamProp.Positions getPosition() {
+    public Direction getPosition() {
         return position;
     }
 
     @Override
     protected void init() {
-        // no-op
+        if (!colourThreshold.isRunning()) {
+            throw new IllegalStateException("Processor not attached and running on an active vision processor");
+        }
     }
 
     @Override
     protected void periodic() {
-        if (!teamProp.getData().isEmpty()) {
-            // TeamProp will never have more than one data instance
-            position = teamProp.getData().get(0).getPosition();
+        ContourData biggestContour = ContourData.getLargest(colourThreshold.getData());
+        if (biggestContour != null) {
+            Dbg.log(biggestContour.getYaw());
+            position = biggestContour.getYaw() > 0.5 ? Direction.RIGHT : Direction.FORWARD;
         }
-        opMode.addTelemetry("Spike mark reading: %", position);
     }
 
     @Override
     protected void onFinish() {
         // no-op
-    }
-
-    @Override
-    protected boolean isTaskFinished() {
-        // Init-task timing only
-        return false;
     }
 }

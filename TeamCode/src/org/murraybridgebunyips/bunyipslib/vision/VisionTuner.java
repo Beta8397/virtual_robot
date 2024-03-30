@@ -103,11 +103,13 @@ public class VisionTuner extends BunyipsOpMode {
         //  It's hard to expand upon, and could be optimised
 
         if (gamepad1.right_bumper) {
-            scalarDelta = (gamepad1.left_stick_y + gamepad1.left_stick_x) * 2;
+            scalarDelta = (gamepad1.left_stick_y + gamepad1.left_stick_x) / 10;
         } else {
-            // TODO: Test. Hopefully stops the number infinitely adding up if you release the buttons wrong
-            //  If not, set to 0. Might be inconvenient at times but at least it works that way
-            scalarDelta = scalarDelta;
+            scalarDelta = 0;
+        }
+
+        if (gamepad1.left_bumper) {
+            scalars.set(thresholdIndex, 0.0);
         }
 
         if (gamepad1.a) {
@@ -164,12 +166,10 @@ public class VisionTuner extends BunyipsOpMode {
         leftPressed = gamepad1.dpad_left;
         rightPressed = gamepad1.dpad_right;
 
-        // Temporary (maybe)
-        // Preferably, use Range.clip() to clip the value
-        if (scalarDelta < 0) {
-            scalarDelta = 0;
-        } else if (scalarDelta > 255) {
-            scalarDelta = 255;
+        if (scalars.get(thresholdIndex) < 0) {
+            scalars.set(thresholdIndex, 0.0);
+        } else if (scalars.get(thresholdIndex) > 255) {
+            scalars.set(thresholdIndex, 255.0);
         }
 
         // TEST: This is a safety net
@@ -181,6 +181,7 @@ public class VisionTuner extends BunyipsOpMode {
             currentPixel.setUpper(new Scalar(scalars.get(3), scalars.get(4), scalars.get(5)));
         }
 
+        addTelemetry("Press A to save results");
         addTelemetry("Current Threshold: %", scalars.get(thresholdIndex));
         addTelemetry("Current Pixel : %", pixels.get(pixelIndex));
         addTelemetry("Current Value to Change Threshold By: %", scalarDelta);

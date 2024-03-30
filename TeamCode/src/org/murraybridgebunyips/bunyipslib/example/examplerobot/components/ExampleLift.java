@@ -8,19 +8,18 @@ import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
  * Example code for a lift component, see ExampleDrive for more information.
  */
 public class ExampleLift extends BunyipsSubsystem {
-    // Run similar initialisation to ExampleDrive. This will be the same for all components.
-    private final DcMotor liftMotor;
-
     // This example will look at making an index-based lift based on motor encoder position.
     // Array to hold lift position values, and a pointer to the current position.
     private final int[] liftPositions = {0, 100, 200, 300, 400, 500};
+    // Run similar initialisation to ExampleDrive. This will be the same for all components.
+    private DcMotor liftMotor;
     private int liftPositionPointer;
 
     /**
      * @param liftMotor the lift motor to control
      */
     public ExampleLift(DcMotor liftMotor) {
-        assertParamsNotNull(liftMotor);
+        if (!assertParamsNotNull(liftMotor)) return;
         this.liftMotor = liftMotor;
 
         // In the constructor you are also able to set any other variables that you wish to use in

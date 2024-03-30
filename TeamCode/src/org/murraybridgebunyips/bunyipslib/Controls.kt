@@ -11,7 +11,8 @@ import java.util.Objects
  * @author Lucas Bubner, 2024
  */
 @Suppress("KDocMissingDocumentation")
-enum class Controller {
+enum class Controls {
+    // Guide button not included due to volatility as it may be caught by the app
     A, B, X, Y, START, BACK, DPAD_UP, DPAD_DOWN, DPAD_LEFT, DPAD_RIGHT, LEFT_BUMPER, RIGHT_BUMPER, LEFT_STICK_BUTTON, RIGHT_STICK_BUTTON, NONE;
 
     /**
@@ -86,7 +87,7 @@ enum class Controller {
          * upon the first call of this function and pair.
          */
         @JvmStatic
-        fun isSelectedAfterDebounce(gamepad: Gamepad, button: Controller): Boolean {
+        fun isSelectedAfterDebounce(gamepad: Gamepad, button: Controls): Boolean {
             val buttonPressed = isSelected(gamepad, button)
             // Default value will be true as it won't be in the map, to avoid debouncing a value that was never pressed
             val isPressed = debounces.getOrDefault(Objects.hash(gamepad, button), true)
@@ -103,7 +104,7 @@ enum class Controller {
          * Check if a button is currently pressed on a gamepad.
          */
         @JvmStatic
-        fun isSelected(gamepad: Gamepad, button: Controller): Boolean {
+        fun isSelected(gamepad: Gamepad, button: Controls): Boolean {
             var buttonPressed = false
             when (button) {
                 DPAD_UP -> buttonPressed = gamepad.dpad_up
@@ -131,7 +132,7 @@ enum class Controller {
          * Get the character representation of a button.
          */
         @JvmStatic
-        fun getChar(button: Controller): Char {
+        fun getChar(button: Controls): Char {
             when (button) {
                 DPAD_UP -> return 'u'
                 DPAD_DOWN -> return 'd'
@@ -155,12 +156,12 @@ enum class Controller {
          * Map an array of arguments to controller buttons in order of the enum.
          */
         @JvmStatic
-        fun <T> mapArgs(args: Array<out T>): HashMap<T, Controller> {
+        fun <T> mapArgs(args: Array<out T>): HashMap<T, Controls> {
             // Map strings of args to every controller enum in order
             if (args.size >= values().size) {
                 throw IllegalArgumentException("Controller: Number of args exceeds number of possible gamepad buttons (14).")
             }
-            val map = HashMap<T, Controller>()
+            val map = HashMap<T, Controls>()
             for (i in args.indices) {
                 // For every arg, map it to the corresponding enum
                 map[args[i]] = values()[i]

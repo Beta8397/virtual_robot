@@ -2,9 +2,6 @@ package org.murraybridgebunyips.bunyipslib;
 
 import static org.murraybridgebunyips.bunyipslib.Text.getCallingUserCodeFunction;
 
-import org.murraybridgebunyips.bunyipslib.roadrunner.util.Encoder;
-
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -14,10 +11,6 @@ import java.util.List;
  * @see Exceptions
  */
 public final class NullSafety {
-    /**
-     * Components that are unusable and should not have their errors logged.
-     */
-    public static final List<String> unusableComponents = new ArrayList<>();
 
     private NullSafety() {
     }
@@ -52,8 +45,7 @@ public final class NullSafety {
      * Ensure a component is safe to instantiate by checking for null objects.
      * Errors caused by null objects are logged and the component is added to the unusable components list.
      * Components in the unusable components list will not have their errors logged.
-     * <p>
-     * This function may only be called within a BunyipsOpMode, and only during OpMode runtime.
+     * Telemetry will be added to a BunyipsOpMode if it is running.
      *
      * @param T    Class of the component (e.g. Cannon.class)
      * @param objs Objects to check for null
@@ -62,23 +54,16 @@ public final class NullSafety {
     public static boolean assertComponentArgs(Class<?> T, Object... objs) {
         for (Object o : objs) {
             if (o == null) {
-                return reportUnusable(T);
-            } else if (o instanceof Encoder) {
-                if (((Encoder) o).isNull()) {
-                    return reportUnusable(T);
+                if (BunyipsOpMode.isRunning()) {
+                    BunyipsOpMode opMode = BunyipsOpMode.getInstance();
+                    opMode.addRetainedTelemetry("! COM_FAULT: %", T.getSimpleName());
+                    opMode.log("error: % was disabled due to a null assertion fault.", T.getSimpleName());
                 }
+                Dbg.warn(getCallingUserCodeFunction(), "Null object passed to % failed assertion, adding to unusable components...", T.getSimpleName());
+                if (!Storage.unusableComponents.contains(T.getSimpleName()))
+                    Storage.unusableComponents.add(T.getSimpleName());
             }
         }
         return true;
-    }
-
-    private static boolean reportUnusable(Class<?> component) {
-        BunyipsOpMode opMode = BunyipsOpMode.getInstance();
-        opMode.addRetainedTelemetry("! COM_FAULT: %", component.getSimpleName());
-        opMode.log("error: % was disabled due to a null assertion fault.", component.getSimpleName());
-        Dbg.warn(getCallingUserCodeFunction(), "Null object passed to % failed assertion, adding to unusable components...", component.getSimpleName());
-        if (!unusableComponents.contains(component.getSimpleName()))
-            unusableComponents.add(component.getSimpleName());
-        return false;
     }
 }

@@ -1,7 +1,7 @@
 package org.murraybridgebunyips.bunyipslib.example.examplerobot.teleop;
 
 import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
-import org.murraybridgebunyips.bunyipslib.Controller;
+import org.murraybridgebunyips.bunyipslib.Controls;
 import org.murraybridgebunyips.bunyipslib.drive.TankDrive;
 import org.murraybridgebunyips.bunyipslib.example.examplerobot.components.ExampleConfig;
 
@@ -37,7 +37,7 @@ public class ExampleTeleOp extends BunyipsOpMode {
         // You can access gamepad inputs using the built-in gamepad functions, e.g.
         // gamepad1.left_stick_x
 
-        drive.setWeightedDrivePower(Controller.makeRobotPose(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x));
+        drive.setWeightedDrivePower(Controls.makeRobotPose(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x));
         drive.update();
 
         // ActiveLoop will run every hardware cycle, therefore this code will continually set motor

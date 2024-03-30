@@ -4,24 +4,29 @@ import static org.murraybridgebunyips.bunyipslib.MovingAverageTimer.NANOS_IN_SEC
 import static org.murraybridgebunyips.bunyipslib.Text.formatString;
 import static org.murraybridgebunyips.bunyipslib.Text.round;
 
-import org.murraybridgebunyips.bunyipslib.tasks.CallbackTask;
+import org.murraybridgebunyips.bunyipslib.tasks.RunTask;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.function.BooleanSupplier;
+import java.util.function.Predicate;
 
 /**
  * Scheduler and command plexus for use with the BunyipsLib task system.
  *
  * @author Lucas Bubner, 2024
+ * @see CommandBasedBunyipsOpMode
  */
 public class Scheduler extends BunyipsComponent {
     private static final ArrayList<String> subsystemReports = new ArrayList<>();
+    private static boolean isMuted = false;
     private final ArrayList<BunyipsSubsystem> subsystems = new ArrayList<>();
     private final ArrayList<ConditionalTask> allocatedTasks = new ArrayList<>();
-    private static boolean isMuted;
 
+    /**
+     * Create a new scheduler and reset static fields.
+     */
     public Scheduler() {
         isMuted = false;
         subsystemReports.clear();
@@ -36,7 +41,7 @@ public class Scheduler extends BunyipsComponent {
      */
     public static void addSubsystemTaskReport(String className, String taskName, double deltaTime) {
         if (isMuted) return;
-        subsystemReports.add(formatString("    % |\n% -> %s", className, taskName, deltaTime));
+        subsystemReports.add(formatString("% |\n    % -> %s", className, taskName, deltaTime));
     }
 
     /**
@@ -108,7 +113,7 @@ public class Scheduler extends BunyipsComponent {
                     continue;
                 if (!task.taskToRun.isMuted() && (task.taskToRun.isRunning() || task.runCondition.getAsBoolean()) && timeExceeded(task)) {
                     double deltaTime = round(task.taskToRun.getDeltaTime(), 1);
-                    opMode.addTelemetry("    Scheduler (%) |\n% -> %", opMode.getClass().getSimpleName(), task.taskToRun, deltaTime == 0.0 ? "active" : deltaTime + "s");
+                    opMode.addTelemetry("Scheduler (%) |\n    % -> %", opMode.getClass().getSimpleName(), task.taskToRun, deltaTime == 0.0 ? "active" : deltaTime + "s");
                 }
             }
             // Blank line to separate Scheduler information from addTelemetry()
@@ -183,57 +188,31 @@ public class Scheduler extends BunyipsComponent {
     }
 
     /**
-     * Run a task when a controller button is held.
+     * Create a new controller button trigger creator.
      *
-     * @param user   The user of the controller.
-     * @param button The button of the controller.
-     * @return Timing/stop control for allocation.
+     * @param user The driver to use for the controller.
+     * @return The controller button trigger creator.
      */
-    public ConditionalTask whenHeld(Controller.User user, Controller button) {
-        return new ConditionalTask(
-                new ControllerStateHandler(
-                        opMode,
-                        user,
-                        button,
-                        ControllerStateHandler.State.HELD
-                )
-        );
+    public ControllerButtonCreator when(Controller user) {
+        return new ControllerButtonCreator(user);
     }
 
     /**
-     * Run a task when a controller button is pressed (will run once when pressing the desired input).
+     * Create a new controller button trigger creator for the driver.
      *
-     * @param user   The user of the controller.
-     * @param button The button of the controller.
-     * @return Timing/stop control for allocation.
+     * @return The controller button trigger creator.
      */
-    public ConditionalTask whenPressed(Controller.User user, Controller button) {
-        return new ConditionalTask(
-                new ControllerStateHandler(
-                        opMode,
-                        user,
-                        button,
-                        ControllerStateHandler.State.PRESSED
-                )
-        );
+    public ControllerButtonCreator driver() {
+        return new ControllerButtonCreator(opMode.gamepad1);
     }
 
     /**
-     * Run a task when a controller button is released (will run once letting go of the desired input).
+     * Create a new controller button trigger creator for the operator.
      *
-     * @param user   The user of the controller.
-     * @param button The button of the controller.
-     * @return Timing/stop control for allocation.
+     * @return The controller button trigger creator.
      */
-    public ConditionalTask whenReleased(Controller.User user, Controller button) {
-        return new ConditionalTask(
-                new ControllerStateHandler(
-                        opMode,
-                        user,
-                        button,
-                        ControllerStateHandler.State.RELEASED
-                )
-        );
+    public ControllerButtonCreator operator() {
+        return new ControllerButtonCreator(opMode.gamepad2);
     }
 
     /**
@@ -303,21 +282,17 @@ public class Scheduler extends BunyipsComponent {
     }
 
     private static class ControllerStateHandler implements BooleanSupplier {
-        private final BunyipsOpMode opMode;
         private final State state;
-        private final Controller.User user;
-        private final Controller button;
+        private final Controls button;
+        private final Controller controller;
         private final DebounceCondition debounceCondition;
         private boolean timerIsRunning;
 
-        public ControllerStateHandler(BunyipsOpMode opMode, Controller.User user, Controller button, State state) {
-            this.opMode = opMode;
-            this.user = user;
+        public ControllerStateHandler(Controller controller, Controls button, State state) {
             this.button = button;
             this.state = state;
-            debounceCondition = new DebounceCondition(
-                    () -> Controller.isSelected(Controller.getGamepad(user, opMode), button)
-            );
+            this.controller = controller;
+            debounceCondition = new DebounceCondition(() -> controller.get(button));
         }
 
         public void setTimeoutCondition(boolean timerNotFinished) {
@@ -337,7 +312,7 @@ public class Scheduler extends BunyipsComponent {
                 case RELEASED:
                     return debounceCondition.getReversedAsBoolean() || timerIsRunning;
                 case HELD:
-                    return Controller.isSelected(Controller.getGamepad(user, opMode), button);
+                    return controller.get(button);
             }
             return false;
         }
@@ -346,6 +321,79 @@ public class Scheduler extends BunyipsComponent {
             PRESSED,
             RELEASED,
             HELD
+        }
+    }
+
+    /**
+     * Controller button trigger creator.
+     * Used for ControllerStateHandler creation.
+     */
+    public class ControllerButtonCreator {
+        private final Controller user;
+
+        private ControllerButtonCreator(Controller user) {
+            this.user = user;
+        }
+
+        /**
+         * Run a task once this analog axis condition is met.
+         *
+         * @param axis      The axis of the controller.
+         * @param threshold The threshold to meet.
+         * @return Timing/stop control for allocation.
+         */
+        public ConditionalTask when(Controls.Analog axis, Predicate<? super Float> threshold) {
+            return new ConditionalTask(
+                    () -> threshold.test(user.get(axis))
+            );
+        }
+
+        /**
+         * Run a task when a controller button is held.
+         *
+         * @param button The button of the controller.
+         * @return Timing/stop control for allocation.
+         */
+        public ConditionalTask whenHeld(Controls button) {
+            return new ConditionalTask(
+                    new ControllerStateHandler(
+                            user,
+                            button,
+                            ControllerStateHandler.State.HELD
+                    )
+            );
+        }
+
+        /**
+         * Run a task when a controller button is pressed (will run once when pressing the desired input).
+         *
+         * @param button The button of the controller.
+         * @return Timing/stop control for allocation.
+         */
+        public ConditionalTask whenPressed(Controls button) {
+            return new ConditionalTask(
+                    new ControllerStateHandler(
+                            user,
+                            button,
+                            ControllerStateHandler.State.PRESSED
+                    )
+            );
+        }
+
+        /**
+         * Run a task when a controller button is released (will run once letting go of the desired input).
+         *
+         * @param button The button of the controller.
+         * @return Timing/stop control for allocation.
+         */
+        public ConditionalTask whenReleased(Controls button) {
+            return new ConditionalTask(
+                    new ControllerStateHandler(
+                            user,
+                            button,
+                            ControllerStateHandler.State.RELEASED
+                    )
+            );
         }
     }
 
@@ -360,7 +408,7 @@ public class Scheduler extends BunyipsComponent {
         protected boolean lastState;
         protected BooleanSupplier stopCondition = () -> false;
         protected long activeSince = -1;
-        private boolean isMuted = false;
+        private boolean isTaskMuted = false;
 
         /**
          * Create and allocate a new conditional task. This will automatically be added to the scheduler.
@@ -386,22 +434,22 @@ public class Scheduler extends BunyipsComponent {
                 throw new EmergencyStop("A run(Task) method has been called more than once on a scheduler task. If you wish to run multiple tasks see about using a task group as your task.");
             }
             taskToRun = task;
-            if (isMuted)
+            if (isTaskMuted)
                 taskToRun.withMutedReports();
             return this;
         }
 
         /**
-         * Implicitly make a new CallbackTask to run once the condition is met.
+         * Implicitly make a new RunTask to run once the condition is met.
          * This method can only be called once per ConditionalTask.
          * If you do not mention timing control, this task will be run immediately when the condition is met,
-         * ending immediately as it is an CallbackTask.
+         * ending immediately as it is an RunTask.
          *
          * @param runnable The code to run
          * @return Timing control for allocation (none: immediate, inSeconds(), finishingWhen(), inSecondsFinishingWhen()).
          */
         public ConditionalTask run(Runnable runnable) {
-            return run(new CallbackTask(runnable));
+            return run(new RunTask(runnable));
         }
 
         /**
@@ -419,27 +467,28 @@ public class Scheduler extends BunyipsComponent {
         }
 
         /**
-         * Implicitly make a new CallbackTask to run once the condition is met, debouncing the task from running more than once the condition is met.
+         * Implicitly make a new RunTask to run once the condition is met, debouncing the task from running more than once the condition is met.
          * This method can only be called once per ConditionalTask.
          * If you do not mention timing control, this task will be run immediately when the condition is met,
-         * ending immediately as it is an CallbackTask.
+         * ending immediately as it is an RunTask.
          *
          * @param runnable The code to run
          * @return Timing control for allocation (none: immediate, inSeconds(), finishingWhen(), inSecondsFinishingWhen()).
          */
         public ConditionalTask runDebounced(Runnable runnable) {
-            return runDebounced(new CallbackTask(runnable));
+            return runDebounced(new RunTask(runnable));
         }
 
         /**
          * Mute this task from being a part of the Scheduler report.
+         *
          * @return Timing control for allocation (none: immediate, inSeconds(), finishingWhen(), inSecondsFinishingWhen()).
          */
         public ConditionalTask muted() {
             if (taskToRun != null) {
                 taskToRun.withMutedReports();
             }
-            isMuted = true;
+            isTaskMuted = true;
             return this;
         }
 

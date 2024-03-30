@@ -4,67 +4,62 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 
 /**
- * Interface abstraction for encoder motors, for functionality such as enabling/disabling tracking.
- * Includes calculations for distance travelled and revolutions turned.
+ * A generic Encoder, which is used to track the position of a motor in both relative and absolute scopes.
+ * Includes methods for tracking, resetting, and calculating distance travelled.
+ *
  * @author Lucas Bubner, 2023
  */
-interface EncoderTracker {
-    /**
-     * Scope of the encoder tracking.
-     */
-    enum class Scope {
-        /**
-         * Relative scope will return the encoder value since the last track() call.
-         */
-        RELATIVE,
-
-        /**
-         * Global scope will return the encoder value since the last reset() call.
-         */
-        GLOBAL
-    }
-
-    /**
-     * Diameter of the wheel in millimetres, used in distance calculations.
-     */
-    val wheelDiameterMM: Double?
-
-    /**
-     * Number of ticks per revolution of the encoder attached to the motor, used in distance calculations.
-     */
-    val ticksPerRevolution: Double?
-
-    /**
-     * The motor to track the encoder of.
-     */
-    val motor: DcMotorEx
-
-    /**
-     * Reduction factor of the motor, used in gearing calculations.
-     */
-    var reduction: Double
+class Encoder(
+    private val motor: DcMotorEx,
+    private val ticksPerRevolution: Double? = null,
+    private val wheelDiameterMM: Double? = null,
+    private var reduction: Double = 1.0
+) : ScopedEncoder {
+    constructor(motor: DcMotorEx, ticksPerRevolution: Double) : this(motor, ticksPerRevolution, null)
+    constructor(motor: DcMotorEx, ticksPerRevolution: Double, wheelDiameterMM: Double?) : this(
+        motor,
+        ticksPerRevolution,
+        wheelDiameterMM,
+        1.0
+    )
 
     /**
      * Store a snapshot of encoder position when tracking is started.
      */
-    var snapshot: Double
+    var snapshot: Double = 0.0
+        private set
 
     /**
-     * Enable encoder and start tracking, which will also save a snapshot of the encoder position
+     * Enable encoder and start tracking in the selected mode, which will also save a snapshot of the encoder position for relative tracking.
+     * @param mode the mode to track the encoder in
      */
-    fun track() {
+    override fun track(mode: DcMotor.RunMode) {
         // Store the current encoder position
         this.snapshot = motor.currentPosition.toDouble()
-        motor.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
+        motor.mode = mode
+    }
+
+    /**
+     * Hold the current position of the encoder using RUN_TO_POSITION.
+     * @param holdingPower the power to hold the position at
+     */
+    fun holdCurrentPosition(holdingPower: Double) {
+        motor.targetPosition = motor.currentPosition
+        motor.mode = DcMotor.RunMode.RUN_TO_POSITION
+        motor.power = holdingPower
     }
 
     /**
      * Reset encoder positions to zero. Useful when saved state is not needed or can be discarded.
+     * This will also stop the motor.
      */
-    fun reset() {
+    override fun reset() {
         this.snapshot = 0.0
+        motor.power = 0.0
+        val prev = motor.mode
         motor.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
-        motor.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
+        motor.targetPosition = 0
+        motor.mode = prev
     }
 
     /**
@@ -72,8 +67,8 @@ interface EncoderTracker {
      * Can use an optional parameter to use since reset() position instead of track()
      * @return encoder value relative to last track() call, or since the last reset() call
      */
-    fun position(scope: Scope = Scope.RELATIVE): Double {
-        return if (scope == Scope.RELATIVE) {
+    override fun position(scope: ScopedEncoder.Scope): Double {
+        return if (scope == ScopedEncoder.Scope.RELATIVE) {
             (motor.currentPosition.toDouble() - snapshot) * reduction
         } else {
             motor.currentPosition.toDouble() * reduction
@@ -85,13 +80,13 @@ interface EncoderTracker {
      * Can use an optional parameter to use since reset() position instead of track()
      * @return revolutions indicating how far the encoder has travelled
      */
-    fun travelledRevolutions(scope: Scope = Scope.RELATIVE): Double {
+    override fun travelledRevolutions(scope: ScopedEncoder.Scope): Double {
         // Equation: encoder ticks / ticksPerRevolution
         if (ticksPerRevolution == null) {
             throw IllegalStateException("Odometer: ticksPerRevolution must be set to use travelledRevolutions()")
         }
         // Return travelled revolutions depending on selected accuracy
-        return position(scope) / ticksPerRevolution!!
+        return position(scope) / ticksPerRevolution
     }
 
     /**
@@ -99,12 +94,12 @@ interface EncoderTracker {
      * Can use an optional parameter to use since reset() position instead of track()
      * @return millimetres indicating how far the encoder has travelled
      */
-    fun travelledMM(scope: Scope = Scope.RELATIVE): Double {
+    override fun travelledMM(scope: ScopedEncoder.Scope): Double {
         // Equation: circumference (2*pi*r) * (encoder ticks / ticksPerRevolution)
         if (wheelDiameterMM == null || ticksPerRevolution == null) {
             throw IllegalStateException("Odometer: wheelDiameterMM and ticksPerRevolution must be set to use travelledMM()")
         }
         // Return travelled distance in millimetres depending on selected accuracy
-        return Math.PI * wheelDiameterMM!! * (position(scope) / ticksPerRevolution!!)
+        return Math.PI * wheelDiameterMM * (position(scope) / ticksPerRevolution)
     }
 }

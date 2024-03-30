@@ -8,7 +8,7 @@ import org.murraybridgebunyips.bunyipslib.RobotConfig;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.DriveConstants;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.MecanumCoefficients;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.localizers.StandardTrackingWheelLocalizerCoefficients;
-import org.murraybridgebunyips.bunyipslib.roadrunner.util.Encoder;
+import org.murraybridgebunyips.bunyipslib.roadrunner.util.Deadwheel;
 
 /**
  * Running under "Mecanum Bot" config
@@ -20,9 +20,9 @@ public class ImposterConfig extends RobotConfig {
     public DcMotorEx front_left_motor;
     public IMU imu;
 
-    public Encoder enc_x;
-    public Encoder enc_left;
-    public Encoder enc_right;
+    public Deadwheel enc_x;
+    public Deadwheel enc_left;
+    public Deadwheel enc_right;
 
     public DriveConstants driveConstants;
     public MecanumCoefficients mecanumCoefficients;
@@ -30,16 +30,16 @@ public class ImposterConfig extends RobotConfig {
 
     @Override
     protected void onRuntime() {
-        back_right_motor = (DcMotorEx) getHardware("back_right_motor", DcMotorEx.class);
-        back_left_motor = (DcMotorEx) getHardware("back_left_motor", DcMotorEx.class);
-        front_right_motor = (DcMotorEx) getHardware("front_right_motor", DcMotorEx.class);
-        front_left_motor = (DcMotorEx) getHardware("front_left_motor", DcMotorEx.class);
+        back_right_motor = getHardware("back_right_motor", DcMotorEx.class);
+        back_left_motor = getHardware("back_left_motor", DcMotorEx.class);
+        front_right_motor = getHardware("front_right_motor", DcMotorEx.class);
+        front_left_motor = getHardware("front_left_motor", DcMotorEx.class);
 
-        enc_x = new Encoder("enc_x", this);
-        enc_left = new Encoder("enc_left", this);
-        enc_right = new Encoder("enc_right", this);
+        enc_x = getHardware("enc_x", Deadwheel.class);
+        enc_left = getHardware("enc_left", Deadwheel.class);
+        enc_right = getHardware("enc_right", Deadwheel.class);
 
-        enc_left.setDirection(Encoder.Direction.REVERSE);
+        enc_left.setDirection(Deadwheel.Direction.REVERSE);
 
         back_left_motor.setDirection(DcMotorEx.Direction.REVERSE);
         front_left_motor.setDirection(DcMotorEx.Direction.REVERSE);

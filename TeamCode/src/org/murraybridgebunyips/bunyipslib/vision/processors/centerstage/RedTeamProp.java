@@ -7,12 +7,29 @@ import com.acmerobotics.dashboard.config.Config;
 import org.murraybridgebunyips.bunyipslib.vision.processors.ColourThreshold;
 import org.opencv.core.Scalar;
 
+/**
+ * Processor for the red team prop.
+ *
+ * @author Lucas Bubner, 2024
+ */
 @Config
 public class RedTeamProp extends ColourThreshold {
-    public static Scalar lower = new Scalar(0, 190, 0);
-    public static Scalar upper = new Scalar(200, 255, 102);
-    public static double min = 5;
-    public static double max = 100;
+    /**
+     * The lower YCrCb bounds for the red team prop.
+     */
+    public static Scalar LOWER = new Scalar(0, 190, 0);
+    /**
+     * The upper YCrCb bounds for the red team prop.
+     */
+    public static Scalar UPPER = new Scalar(200, 255, 102);
+    /**
+     * The minimum contour area percentages for the red team prop.
+     */
+    public static double MIN = 5;
+    /**
+     * The maximum contour area percentages for the red team prop.
+     */
+    public static double MAX = 100;
 
     /**
      * Defines a new colour thresholding processor for a specific colour space, which your
@@ -30,22 +47,22 @@ public class RedTeamProp extends ColourThreshold {
 
     @Override
     public double getContourAreaMinPercent() {
-        return min;
+        return MIN;
     }
 
     @Override
     public double getContourAreaMaxPercent() {
-        return max;
+        return MAX;
     }
 
     @Override
     public Scalar getLower() {
-        return lower;
+        return LOWER;
     }
 
     @Override
     public Scalar getUpper() {
-        return upper;
+        return UPPER;
     }
 
     @Override

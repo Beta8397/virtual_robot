@@ -5,7 +5,6 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Text and string manipulation utilities.
@@ -93,9 +92,10 @@ public final class Text {
 
     /**
      * Round a number to a certain number of decimal points.
-     * @param num       The number to round
-     * @param thDigits  The number of decimal places to use after the decimal point
-     * @param sigFigs   The number of significant figures to use
+     *
+     * @param num      The number to round
+     * @param thDigits The number of decimal places to use after the decimal point
+     * @param sigFigs  The number of significant figures to use
      * @return The rounded number
      */
     public static float round(float num, int thDigits, int sigFigs) {
@@ -122,21 +122,21 @@ public final class Text {
     }
 
     /**
-     * Get the calling function of the current context.
+     * Get the calling user code function of the current context by looking at the stacktrace until it leaves BunyipsLib.
      */
     public static StackTraceElement getCallingUserCodeFunction() {
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
         // Keep going down the stack trace until we leave the BunyipsLib package
         for (StackTraceElement stackTraceElement : stackTrace) {
-            if (stackTraceElement.getMethodName().equals("getStackTrace")) continue;
+            // dalvik.system.VMStack.getThreadStackTrace(Native Method) is not useful, which shows up in the stacktrace
+            if (stackTraceElement.toString().toLowerCase().contains("stacktrace")) continue;
             // If porting, ensure the string below is set to the package name of BunyipsLib
             if (!stackTraceElement.getClassName().startsWith("org.murraybridgebunyips.bunyipslib")) {
                 return stackTraceElement;
             }
         }
-        // If we can't find the calling function, we'll settle for the first stack trace element
-        // This is likely going to be the getStackTrace() function, and we will warn the user as well
+        // If we can't find the calling function, then we can't return a stack trace element
         Dbg.warn("Could not find calling function in getCallingUserCodeFunction()!");
-        return stackTrace[0];
+        return new StackTraceElement("Unknown", "userMethod", "User Code", -1);
     }
 }

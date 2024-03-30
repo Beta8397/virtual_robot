@@ -9,31 +9,69 @@ import com.qualcomm.robotcore.hardware.DcMotorImpl
  * @author Lucas Bubner, 2023
  */
 class PivotMotor(
-    override val motor: DcMotorEx,
-    override val ticksPerRevolution: Double,
-    override var reduction: Double = 1.0,
-) : DcMotorImpl(motor.controller, motor.portNumber), EncoderTracker {
-    override val wheelDiameterMM = null
-    override var snapshot: Double = 0.0
+    private val motor: DcMotorEx,
+    private val ticksPerRevolution: Double,
+    private val reduction: Double = 1.0,
+) : DcMotorImpl(motor.controller, motor.portNumber), ScopedEncoder {
+    constructor(motor: DcMotorEx, ticksPerRevolution: Double) : this(motor, ticksPerRevolution, 1.0)
 
-    override fun travelledMM(scope: EncoderTracker.Scope): Double {
-        throw IllegalAccessException("PivotMotor: Cannot access travelledMM on a PivotMotor or PivotMotor variant")
+    private val encoder: Encoder = Encoder(motor, ticksPerRevolution, null, reduction)
+
+    /**
+     * Enable encoder and start tracking in the selected mode, which will also save a snapshot of the encoder position for relative tracking.
+     * @param mode the mode to track the encoder in
+     */
+    override fun track(mode: DcMotor.RunMode) {
+        encoder.track(mode)
     }
 
     /**
-     * Setup the motor for tracking the position of a target position.
+     * Reset encoder positions to zero. Useful when saved state is not needed or can be discarded.
+     * This will also stop the motor.
      */
-    fun setup() {
-        motor.targetPosition = motor.currentPosition
-        motor.mode = DcMotor.RunMode.RUN_TO_POSITION
-        motor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
+    override fun reset() {
+        encoder.reset()
+    }
+
+    /**
+     * Get a movement reading in ticks from the encoder since the last track()
+     */
+    override fun position(scope: ScopedEncoder.Scope): Double {
+        return encoder.position(scope)
+    }
+
+    /**
+     * Get the distance travelled in revolutions.
+     * @param scope the scope to calculate the distance in
+     */
+    override fun travelledRevolutions(scope: ScopedEncoder.Scope): Double {
+        return encoder.travelledRevolutions(scope)
+    }
+
+    /**
+     * Get the distance travelled in millimeters.
+     * This method is not used for pivots, and will always return 0.0.
+     * @param scope the scope to calculate the distance in
+     */
+    override fun travelledMM(scope: ScopedEncoder.Scope): Double {
+        // Wheel diameter is not used for pivots
+        Dbg.error(Text.getCallingUserCodeFunction(), "Wheel diameter is not used for pivots")
+        return 0.0
+    }
+
+    /**
+     * Hold the current position of the encoder using RUN_TO_POSITION.
+     * @param holdingPower the power to hold the position at
+     */
+    fun holdCurrentPosition(holdingPower: Double) {
+        encoder.holdCurrentPosition(holdingPower)
     }
 
     /**
      * Get the current degrees of the pivot.
      */
-    fun getDegrees(scope: EncoderTracker.Scope = EncoderTracker.Scope.RELATIVE): Double {
-        return (position(scope) / ticksPerRevolution) * 360
+    fun getDegrees(scope: ScopedEncoder.Scope = ScopedEncoder.Scope.RELATIVE): Double {
+        return (encoder.position(scope) / ticksPerRevolution) * 360
     }
 
     /**
@@ -41,14 +79,14 @@ class PivotMotor(
      */
     // Java interop
     fun getDegrees(): Double {
-        return getDegrees(EncoderTracker.Scope.RELATIVE)
+        return getDegrees(ScopedEncoder.Scope.RELATIVE)
     }
 
     /**
      * Get the current radians of the pivot.
      */
-    fun getRadians(scope: EncoderTracker.Scope = EncoderTracker.Scope.RELATIVE): Double {
-        return (position(scope) / ticksPerRevolution) * (2 * Math.PI)
+    fun getRadians(scope: ScopedEncoder.Scope = ScopedEncoder.Scope.RELATIVE): Double {
+        return Math.toRadians(getDegrees(scope))
     }
 
     /**
@@ -56,7 +94,7 @@ class PivotMotor(
      */
     // Java interop
     fun getRadians(): Double {
-        return getRadians(EncoderTracker.Scope.RELATIVE)
+        return getRadians(ScopedEncoder.Scope.RELATIVE)
     }
 
     /**
@@ -64,14 +102,13 @@ class PivotMotor(
      */
     fun setDegrees(degrees: Double) {
         motor.targetPosition =
-            ((degrees / 360) * ticksPerRevolution / reduction).toInt() - snapshot.toInt()
+            ((degrees / 360) * ticksPerRevolution / reduction).toInt() - encoder.snapshot.toInt()
     }
 
     /**
      * Set the target position of the pivot in radians.
      */
     fun setRadians(radians: Double) {
-        motor.targetPosition =
-            ((radians / (2 * Math.PI)) * ticksPerRevolution / reduction).toInt() - snapshot.toInt()
+        setDegrees(Math.toDegrees(radians))
     }
 }
