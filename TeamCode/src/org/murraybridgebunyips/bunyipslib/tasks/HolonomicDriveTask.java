@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.jetbrains.annotations.NotNull;
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
-import org.murraybridgebunyips.bunyipslib.Controller;
 import org.murraybridgebunyips.bunyipslib.EmergencyStop;
 import org.murraybridgebunyips.bunyipslib.drive.CartesianMecanumDrive;
 import org.murraybridgebunyips.bunyipslib.drive.MecanumDrive;
@@ -41,7 +40,7 @@ public class HolonomicDriveTask<T extends BunyipsSubsystem> extends ForeverTask 
      *                            this will only work on a MecanumDrive that supports dynamic field-centric
      *                            drive switching, such as the RoadRunner-integrated MecanumDrive
      */
-    public HolonomicDriveTask(Controller controller, @NonNull T mecanumDrive, BooleanSupplier fieldCentricEnabled) {
+    public HolonomicDriveTask(Gamepad controller, @NonNull T mecanumDrive, BooleanSupplier fieldCentricEnabled) {
         this(controller, mecanumDrive, () -> 1.0, fieldCentricEnabled);
     }
 

@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.HardwareDevice
 import com.qualcomm.robotcore.hardware.LightSensor
 import com.qualcomm.robotcore.hardware.RobotCoreLynxUsbDevice
 import com.qualcomm.robotcore.hardware.ServoController
+import com.qualcomm.robotcore.util.ThreadPool
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.robotcore.external.Telemetry.Item
 import org.murraybridgebunyips.bunyipslib.Text.formatString
@@ -17,7 +18,6 @@ import org.murraybridgebunyips.bunyipslib.Text.round
 import org.murraybridgebunyips.bunyipslib.roadrunner.util.LynxModuleUtil
 import org.murraybridgebunyips.deps.BuildConfig
 import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 import kotlin.math.roundToInt
 
 
@@ -199,8 +199,7 @@ abstract class BunyipsOpMode : BOMInternal() {
             // Controller setup and monitoring threads
             gamepad1 = Controller(sdkGamepad1)
             gamepad2 = Controller(sdkGamepad2)
-            // TODO: missing ThreadPool impl
-            gamepadExecutor = Executors.newFixedThreadPool(2)
+            gamepadExecutor = ThreadPool.newFixedThreadPool(2, "BunyipsOpMode GamepadMonitor")
             gamepadExecutor?.submit {
                 while (!Thread.currentThread().isInterrupted)
                     gamepad1.update()

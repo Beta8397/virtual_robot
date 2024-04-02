@@ -111,7 +111,7 @@ public class Scheduler extends BunyipsComponent {
             for (ConditionalTask task : allocatedTasks) {
                 if (task.taskToRun.shouldOverrideOnConflict() != null)
                     continue;
-                if (!task.taskToRun.isMuted() && (task.taskToRun.isRunning() || task.runCondition.getAsBoolean()) && timeExceeded(task)) {
+                if (!task.taskToRun.isMuted() && task.activeSince != -1 && timeExceeded(task)) {
                     double deltaTime = round(task.taskToRun.getDeltaTime(), 1);
                     opMode.addTelemetry("Scheduler (%) |\n    % -> %", opMode.getClass().getSimpleName(), task.taskToRun, deltaTime == 0.0 ? "active" : deltaTime + "s");
                 }

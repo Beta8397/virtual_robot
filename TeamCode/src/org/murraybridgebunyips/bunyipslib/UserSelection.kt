@@ -1,6 +1,7 @@
 package org.murraybridgebunyips.bunyipslib
 
 import org.firstinspires.ftc.robotcore.external.Telemetry.Item
+import java.util.function.Consumer
 
 /**
  * Async thread to ask for user input from a controller in order to determine a pre-determined
@@ -38,10 +39,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry.Item
  *      Threads.run(selector);
  *    }
  *
- *    private Unit callback(@Nullable String res) {
+ *    private void callback(@Nullable String res) {
  *      // Do something with res
- *      // Unit.INSTANCE is due to Kotlin not having void, it is required
- *      return Unit.INSTANCE;
  *    }
  * ```
  *
@@ -58,7 +57,7 @@ class UserSelection<T>(
     /**
      * Runs once the user has made a selection or the thread is interrupted. The result will be the selection made by the user.
      */
-    var callback: (res: T?) -> Unit,
+    var callback: Consumer<T?>,
     private vararg val opmodes: T
 ) : Runnable {
 
@@ -77,7 +76,7 @@ class UserSelection<T>(
     override fun run() {
         if (opmodes.isEmpty()) {
             try {
-                callback(null)
+                callback.accept(null)
             } catch (e: Exception) {
                 Exceptions.handle(e, opMode::log)
             }
@@ -164,7 +163,7 @@ class UserSelection<T>(
         opMode.setTelemetryAutoClear(true)
 
         try {
-            callback(selectedOpMode)
+            callback.accept(selectedOpMode)
         } catch (e: Exception) {
             Exceptions.handle(e, opMode::log)
         }

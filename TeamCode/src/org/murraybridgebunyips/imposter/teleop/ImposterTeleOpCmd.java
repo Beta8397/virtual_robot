@@ -2,6 +2,8 @@ package org.murraybridgebunyips.imposter.teleop;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.murraybridgebunyips.bunyipslib.CommandBasedBunyipsOpMode;
+import org.murraybridgebunyips.bunyipslib.Controls;
+import org.murraybridgebunyips.bunyipslib.Dbg;
 import org.murraybridgebunyips.bunyipslib.drive.MecanumDrive;
 import org.murraybridgebunyips.bunyipslib.drive.TriDeadwheelMecanumDrive;
 import org.murraybridgebunyips.bunyipslib.tasks.*;

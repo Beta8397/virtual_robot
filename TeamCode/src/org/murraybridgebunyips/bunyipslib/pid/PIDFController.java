@@ -180,7 +180,7 @@ public class PIDFController {
      *
      * @param pv The given measured value.
      * @param sp The given setpoint.
-     * @return the next output using the given measurd value via
+     * @return the next output using the given measured value via
      * {@link #calculate(double)}.
      */
     public double calculate(double pv, double sp) {

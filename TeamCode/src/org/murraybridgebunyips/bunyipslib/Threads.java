@@ -29,12 +29,41 @@ public final class Threads {
     }
 
     /**
+     * Start a new thread with the given infinite loop task.
+     * This thread will auto end when the task is interrupted.
+     *
+     * @param task the infinite loop task to run on the new thread
+     * @param name the name of the thread to access it later and to log as
+     */
+    public static void startLoop(While task, String name) {
+        Dbg.logd(Threads.class, "starting new loop thread: % ...", name);
+        Thread thread = new Thread(() -> {
+            while (!Thread.interrupted()) {
+                task.run();
+            }
+        });
+        thread.setName(name);
+        thread.start();
+        threads.put(task.hashCode(), thread);
+    }
+
+    /**
      * Start a new thread with the given task.
      *
      * @param task the runnable task to run on the new thread
      */
     public static void start(Runnable task) {
         start(task, task.getClass().getSimpleName());
+    }
+
+    /**
+     * Start a new thread with the given infinite loop task.
+     * This thread will auto end when the task is interrupted.
+     *
+     * @param task the infinite loop task to run on the new thread
+     */
+    public static void startLoop(While task) {
+        startLoop(task, task.getClass().getSimpleName());
     }
 
     /**

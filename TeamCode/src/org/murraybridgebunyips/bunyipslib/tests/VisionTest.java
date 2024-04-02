@@ -16,8 +16,6 @@ import org.murraybridgebunyips.bunyipslib.vision.processors.AprilTag;
 import org.murraybridgebunyips.bunyipslib.vision.processors.TFOD;
 import org.murraybridgebunyips.bunyipslib.vision.processors.centerstage.WhitePixel;
 
-import kotlin.Unit;
-
 /**
  * Test Vision processor detections and data throughput
  * Compatible with all robots with a hardware device webcam "webcam"
@@ -32,12 +30,12 @@ public class VisionTest extends BunyipsOpMode {
     private final UserSelection<Procs> procChooser = new UserSelection<>(this, this::callback, Procs.values());
 
     @SuppressWarnings("rawtypes")
-    private Unit callback(Procs selection) {
+    private void callback(Procs selection) {
         if (selection == null) {
             vision.init(vision.raw);
             vision.start(vision.raw);
             vision.startPreview();
-            return Unit.INSTANCE;
+            return;
         }
         Processor chosenProcessor = null;
         switch (selection) {
@@ -57,7 +55,6 @@ public class VisionTest extends BunyipsOpMode {
         vision.startPreview();
 
         cameraStreamNotification = addRetainedTelemetry("Camera Stream available.");
-        return Unit.INSTANCE;
     }
 
     @Override

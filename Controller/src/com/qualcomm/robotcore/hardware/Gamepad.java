@@ -39,6 +39,7 @@ import com.studiohartman.jamepad.ControllerState;
 
 import org.firstinspires.ftc.robotcore.internal.collections.EvictingBlockingQueue;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -81,6 +82,14 @@ public class Gamepad {
     public volatile boolean right_stick_button = false;
     public volatile float left_trigger = 0;
     public volatile float right_trigger = 0;
+    public volatile long timestamp = 0;
+    public volatile boolean touchpad_finger_1;
+    public volatile boolean touchpad_finger_2;
+    public volatile boolean touchpad;
+    public volatile float touchpad_finger_1_x;
+    public volatile float touchpad_finger_1_y;
+    public volatile float touchpad_finger_2_x;
+    public volatile float touchpad_finger_2_y;
 
     /*
      * NOTE CHANGE IN DEADZONE TO MATCH NEW BEHAVIOR IN FTC SDK v. 7.0
@@ -147,6 +156,10 @@ public class Gamepad {
         right_stick_button = state.rightStickClick;
         left_trigger = setWithDeadzone(state.leftTrigger);
         right_trigger = setWithDeadzone(state.rightTrigger);
+    }
+
+    public byte[] toByteArray() {
+        return new byte[1];
     }
 
     public void copy(Gamepad other) {
@@ -528,6 +541,35 @@ public class Gamepad {
                 left_trigger == 0f && right_trigger == 0f
         );
     }
+    public enum LegacyType {
+        // Do NOT change the order or names of existing entries, or add new entries.
+        // You will break backwards compatibility!!
+        UNKNOWN,
+        LOGITECH_F310,
+        XBOX_360,
+        SONY_PS4;
+    }
+
+    public enum Type {
+        // Do NOT change the order/names of existing entries,
+        // you will break backwards compatibility!!
+        UNKNOWN(LegacyType.UNKNOWN),
+        LOGITECH_F310(LegacyType.LOGITECH_F310),
+        XBOX_360(LegacyType.XBOX_360),
+        SONY_PS4(LegacyType.SONY_PS4), // This indicates a PS4-compatible controller that is being used through our compatibility mode
+        SONY_PS4_SUPPORTED_BY_KERNEL(LegacyType.SONY_PS4); // This indicates a PS4-compatible controller that is being used through the DualShock 4 Linux kernel driver.
+
+        private final LegacyType correspondingLegacyType;
+        Type(LegacyType correspondingLegacyType) {
+            this.correspondingLegacyType = correspondingLegacyType;
+        }
+    }
 
     public int id = 0;
+    public int user;
+    public Type type;
+
+    public ByteBuffer getReadBuffer(Object a) {
+        return ByteBuffer.wrap(new byte[0]);
+    }
 }

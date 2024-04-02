@@ -12,8 +12,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import kotlin.Unit;
-
 /**
  * {@link BunyipsOpMode} variant for Autonomous operation using the {@link Task} system for a queued action OpMode.
  *
@@ -43,14 +41,13 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     private RobotTask initTask;
     private boolean hasGottenCallback;
 
-    private Unit callback(@Nullable OpModeSelection selectedOpMode) {
+    private void callback(@Nullable OpModeSelection selectedOpMode) {
         hasGottenCallback = true;
         if (selectedOpMode != null) {
             log("auto: mode selected. running opmode " + selectedOpMode);
         } else {
             log("auto: mode selected. running default opmode");
         }
-        // Interface Unit to be void
         onQueueReady(selectedOpMode);
         // Add any queued tasks
         for (RobotTask task : postQueue) {
@@ -61,7 +58,6 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
         }
         preQueue.clear();
         postQueue.clear();
-        return Unit.INSTANCE;
     }
 
     @Override

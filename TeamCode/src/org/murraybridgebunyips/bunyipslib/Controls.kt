@@ -1,7 +1,6 @@
 package org.murraybridgebunyips.bunyipslib
 
 import com.acmerobotics.roadrunner.geometry.Pose2d
-import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.hardware.Gamepad
 import java.util.Objects
 
@@ -54,31 +53,7 @@ enum class Controls {
         }
     }
 
-    /**
-     * Represents a user of a gamepad.
-     */
-    enum class User {
-        ONE, TWO
-    }
-
     companion object {
-        /**
-         * Determine the user of a gamepad.
-         * Sometimes, this cannot be determined, and null is returned.
-         */
-        @JvmStatic
-        fun determineUser(gamepad: Gamepad): User? {
-            return if (gamepad.id == 0) User.ONE else if (gamepad.id == 1) User.TWO else null
-        }
-
-        /**
-         * Get the gamepad of a user.
-         */
-        @JvmStatic
-        fun getGamepad(user: User, opMode: OpMode): Gamepad {
-            return if (user == User.ONE) opMode.gamepad1 else opMode.gamepad2
-        }
-
         // Static map of buttons to their debounce state, storing hashcode of gamepad and button
         private val debounces = HashMap<Int, Boolean>()
 
