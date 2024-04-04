@@ -29,7 +29,7 @@ public class RaceTaskGroup extends TaskGroup {
     public final boolean isTaskFinished() {
         for (Task task : tasks) {
             if (task.pollFinished()) {
-                finishAllTasksExcluding(task);
+                finishAllTasks();
                 // Get us out of here
                 finishNow();
                 return true;

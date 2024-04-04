@@ -25,10 +25,10 @@ public class RunTask extends OnceTask {
      *
      * @param callback                       The callback to run.
      * @param dependencySubsystem            The subsystem to run this on.
-     * @param shouldOverrideConflictingTasks Whether to override conflicting tasks.
+     * @param override Whether to override conflicting tasks.
      */
-    public RunTask(Runnable callback, BunyipsSubsystem dependencySubsystem, boolean shouldOverrideConflictingTasks) {
-        super(dependencySubsystem, shouldOverrideConflictingTasks);
+    public RunTask(Runnable callback, BunyipsSubsystem dependencySubsystem, boolean override) {
+        super(dependencySubsystem, override);
         this.callback = callback;
     }
 

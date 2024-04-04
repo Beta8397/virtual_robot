@@ -1,5 +1,7 @@
 package org.murraybridgebunyips.bunyipslib.tasks.groups;
 
+import org.murraybridgebunyips.bunyipslib.Dbg;
+import org.murraybridgebunyips.bunyipslib.tasks.RunTask;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
 import java.util.Iterator;
@@ -10,7 +12,7 @@ import java.util.Iterator;
  * @author Lucas Bubner, 2024
  */
 public class SequentialTaskGroup extends TaskGroup {
-    private Iterator<Task> taskIterator;
+    private int taskIndex;
     private Task currentTask;
 
     /**
@@ -20,34 +22,32 @@ public class SequentialTaskGroup extends TaskGroup {
      */
     public SequentialTaskGroup(Task... tasks) {
         super(tasks);
-        taskIterator = super.tasks.iterator();
-        currentTask = taskIterator.next();
+        currentTask = this.tasks.get(0);
     }
 
     @Override
     public final void periodic() {
         if (currentTask.pollFinished()) {
-            if (!taskIterator.hasNext()) {
+            taskIndex++;
+            if (taskIndex >= tasks.size()) {
+                finish();
                 return;
             }
-            currentTask = taskIterator.next();
+            currentTask = tasks.get(taskIndex);
         } else {
             executeTask(currentTask);
         }
     }
 
     @Override
-    public final boolean isTaskFinished() {
-        boolean isFinished = currentTask.isFinished() && !taskIterator.hasNext();
-        // Need to finish as fast as we can, we are wasting loops otherwise
-        if (isFinished) finishNow();
-        return isFinished;
+    protected final void onReset() {
+        super.onReset();
+        taskIndex = 0;
+        currentTask = tasks.get(0);
     }
 
     @Override
-    protected final void onReset() {
-        super.onReset();
-        taskIterator = tasks.iterator();
-        currentTask = taskIterator.next();
+    protected boolean isTaskFinished() {
+        return taskIndex >= tasks.size() && currentTask.isFinished();
     }
 }

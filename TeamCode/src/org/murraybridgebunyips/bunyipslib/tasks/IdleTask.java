@@ -5,6 +5,7 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.ForeverTask;
 /**
  * Task that runs forever but does nothing.
  * This is used as a default task on subsystems that don't have a default task.
+ * IdleTask is ignored from subsystem report telemetry.
  */
 public class IdleTask extends ForeverTask {
     @Override

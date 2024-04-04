@@ -28,10 +28,10 @@ public class RunForTask extends Task {
      * @param timeout                        The time to run the task for
      * @param callback                       The callback to run every loop
      * @param dependency                     The subsystem to run this task on
-     * @param shouldOverrideConflictingTasks Whether this task should override conflicting tasks
+     * @param override Whether this task should override conflicting tasks
      */
-    public RunForTask(double timeout, Runnable callback, BunyipsSubsystem dependency, boolean shouldOverrideConflictingTasks) {
-        super(timeout, dependency, shouldOverrideConflictingTasks);
+    public RunForTask(double timeout, Runnable callback, BunyipsSubsystem dependency, boolean override) {
+        super(timeout, dependency, override);
         this.callback = callback;
     }
 

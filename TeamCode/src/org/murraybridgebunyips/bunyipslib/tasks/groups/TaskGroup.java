@@ -1,11 +1,13 @@
 package org.murraybridgebunyips.bunyipslib.tasks.groups;
 
-import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
+import org.murraybridgebunyips.bunyipslib.Dbg;
+import org.murraybridgebunyips.bunyipslib.EmergencyStop;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 
 /**
  * A group of tasks.
@@ -17,45 +19,31 @@ import java.util.Arrays;
  * @author Lucas Bubner, 2024
  */
 public abstract class TaskGroup extends Task {
-    protected final ArrayDeque<Task> tasks = new ArrayDeque<>();
-    private final ArrayList<Task> attachedTasks = new ArrayList<>();
-    private final ArrayList<BunyipsSubsystem> subsystems = new ArrayList<>();
+    protected final ArrayList<Task> tasks = new ArrayList<>();
+    private final HashSet<Task> attachedTasks = new HashSet<>();
 
     protected TaskGroup(Task... tasks) {
         super(0.0);
         this.tasks.addAll(Arrays.asList(tasks));
-    }
-
-    /**
-     * Add subsystems to the task group to determine which subsystems each task should be attached.
-     *
-     * @param dependencies the subsystems to add, in order of task addition
-     * @return the task group
-     */
-    public final TaskGroup withSubsystems(BunyipsSubsystem... dependencies) {
-        subsystems.addAll(Arrays.asList(dependencies));
-        return this;
+        if (tasks.length == 0) {
+            throw new EmergencyStop("TaskGroup created with no tasks.");
+        }
     }
 
     protected final void executeTask(Task task) {
         // Do not manage a task if it is already attached to a subsystem being managed there
         if (attachedTasks.contains(task)) return;
-        for (BunyipsSubsystem subsystem : subsystems) {
-            if (subsystem.getTaskDependencies().contains(task.hashCode())) {
-                subsystem.setCurrentTask(task);
-                attachedTasks.add(task);
-                return;
-            }
-        }
+        task.getDependency().ifPresent(dependency -> {
+            dependency.setCurrentTask(task);
+            attachedTasks.add(task);
+        });
         // Otherwise we can just run the task outright
-        task.run();
+        if (!task.hasDependency()) task.run();
     }
 
-    protected final void finishAllTasksExcluding(Task excluded) {
+    protected final void finishAllTasks() {
         for (Task task : tasks) {
-            if (task != excluded) {
-                task.finishNow();
-            }
+            task.finishNow();
         }
     }
 
@@ -74,5 +62,6 @@ public abstract class TaskGroup extends Task {
         for (Task task : tasks) {
             task.reset();
         }
+        attachedTasks.clear();
     }
 }

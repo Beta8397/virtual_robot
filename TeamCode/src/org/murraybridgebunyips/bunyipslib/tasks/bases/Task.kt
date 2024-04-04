@@ -3,6 +3,7 @@ package org.murraybridgebunyips.bunyipslib.tasks.bases
 import org.murraybridgebunyips.bunyipslib.BunyipsOpMode
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem
 import org.murraybridgebunyips.bunyipslib.MovingAverageTimer.NANOS_IN_SECONDS
+import java.util.*
 
 /**
  * A task, or command is an action that can be performed by a robot. This has been designed
@@ -21,9 +22,26 @@ abstract class Task(timeoutSeconds: Double) : RobotTask {
     @JvmField
     protected val opMode: BunyipsOpMode = BunyipsOpMode.instance
 
-    private var overrideOnConflict: Boolean? = null
-    private var name = this.javaClass.simpleName
+    private var overrideDependency: Boolean = false
+    private var dependency: BunyipsSubsystem? = null
     private var mutedReport = false
+
+    private var name = this.javaClass.simpleName
+
+    /**
+     * Return whether this task has a dependency on a subsystem or not.
+     */
+    fun hasDependency(): Boolean {
+        return dependency != null
+    }
+
+    /**
+     * Get the subsystem reference that this task is dependent on.
+     * Will return an Optional where if it is not present, this task is not dependent on any subsystem.
+     */
+    fun getDependency(): Optional<BunyipsSubsystem> {
+        return Optional.ofNullable(dependency)
+    }
 
     /**
      * Mute task reports from the Scheduler.
@@ -34,27 +52,27 @@ abstract class Task(timeoutSeconds: Double) : RobotTask {
     }
 
     /**
-     * @return Whether this task is muted or not.
+     * @return Whether this task is muted from subsystem reports or not.
      */
     fun isMuted(): Boolean {
         return mutedReport
     }
 
     /**
-     * @return Whether this task should override other tasks in the queue if they conflict with this task. Will return
-     *         null if this task has no dependencies.
+     * @return Whether this task should override other tasks in the queue if they conflict with this task. Will only
+     *         apply if this task has a dependency (see hasDependency, getDependency).
      */
-    fun shouldOverrideOnConflict(): Boolean? {
-        return overrideOnConflict
+    fun isOverriding(): Boolean {
+        return overrideDependency
     }
 
     constructor(
         timeoutSeconds: Double,
         dependencySubsystem: BunyipsSubsystem,
-        shouldOverrideConflictingTasks: Boolean
+        override: Boolean
     ) : this(timeoutSeconds) {
-        dependencySubsystem.addDependencyFromTask(this.hashCode())
-        overrideOnConflict = shouldOverrideConflictingTasks
+        dependency = dependencySubsystem
+        overrideDependency = override
     }
 
     /**
@@ -75,6 +93,13 @@ abstract class Task(timeoutSeconds: Double) : RobotTask {
      */
     override fun toString(): String {
         return name
+    }
+
+    /**
+     * Get a verbose string representation of this task, including all of its properties.
+     */
+    fun toVerboseString(): String {
+        return name + "[${if (taskFinished) "FINISHED" else "ACTIVE"}, ${if (isRunning) deltaTime else "NOT RUNNING"}/${if (timeout == 0.0) "INDEFINITE" else "$timeout sec"}, ${if (dependency != null) "DEPENDENT ON <${dependency?.javaClass?.simpleName}>" else "INDEPENDENT"}, ${if (overrideDependency) "OVERRIDING" else "NON-OVERRIDING"}, ${if (mutedReport) "MUTED" else "REPORTING"}]"
     }
 
     /**
@@ -194,12 +219,14 @@ abstract class Task(timeoutSeconds: Double) : RobotTask {
     /**
      * Force a task to finish immediately, and fire the onFinish() method without waiting
      * for the next polling loop. This method is useful when your task needs to die and
-     * needs to finish up immediately.
+     * needs to finish up immediately. If your finisher has already been fired, this method
+     * will do nothing but ensure that the task is marked as finished.
      */
     fun finishNow() {
         taskFinished = true
+        if (!finisherFired)
+            onFinish()
         finisherFired = true
-        onFinish()
     }
 
     /**

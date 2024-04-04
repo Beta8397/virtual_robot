@@ -17,7 +17,6 @@ import java.util.ArrayList;
  * @see Scheduler
  */
 public abstract class BunyipsSubsystem extends BunyipsComponent {
-    private final ArrayList<Integer> dependencies = new ArrayList<>();
     private Task currentTask;
     private Task defaultTask = new IdleTask();
     private boolean shouldRun = true;
@@ -106,14 +105,19 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
         }
         if (newTask == null)
             return false;
+
+        if (currentTask == null) {
+            Dbg.warn(this.getClass(), "Subsystem has not been updated with update() yet and a task was allocated - please ensure your subsystem is being updated via update() or by the Scheduler.");
+            currentTask = defaultTask;
+        }
+
         if (currentTask == newTask)
             return true;
 
         // Lockout if a task is currently running that is not the default task
         if (currentTask != defaultTask) {
             // Override if the task is designed to override
-            // shouldOverrideOnConflict might be null if it is a non-command task
-            if (Boolean.TRUE.equals(newTask.shouldOverrideOnConflict())) {
+            if (newTask.isOverriding()) {
                 setHighPriorityCurrentTask(newTask);
                 return true;
             }
@@ -130,24 +134,6 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
         Dbg.logd(getClass(), "Task changed: %->%", currentTask, newTask);
         currentTask = newTask;
         return true;
-    }
-
-    /**
-     * Add a dependency from another task to this subsystem.
-     *
-     * @param taskHashCode The hash code of the task to add as a dependency
-     */
-    public final void addDependencyFromTask(int taskHashCode) {
-        dependencies.add(taskHashCode);
-    }
-
-    /**
-     * Get the dependencies for this subsystem.
-     *
-     * @return The dependencies for this subsystem
-     */
-    public final ArrayList<Integer> getTaskDependencies() {
-        return dependencies;
     }
 
     /**

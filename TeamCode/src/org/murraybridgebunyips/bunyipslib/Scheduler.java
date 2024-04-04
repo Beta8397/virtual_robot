@@ -99,8 +99,8 @@ public class Scheduler extends BunyipsComponent {
                     // Subsystem count will account for default tasks
                     allocatedTasks.size() + subsystems.size(),
                     allocatedTasks.size() + subsystems.size() == 1 ? "" : "s",
-                    allocatedTasks.stream().filter(task -> task.taskToRun.shouldOverrideOnConflict() != null).count() + subsystems.size(),
-                    allocatedTasks.stream().filter(task -> task.taskToRun.shouldOverrideOnConflict() == null).count(),
+                    allocatedTasks.stream().filter(task -> task.taskToRun.hasDependency()).count() + subsystems.size(),
+                    allocatedTasks.stream().filter(task -> !task.taskToRun.hasDependency()).count(),
                     subsystems.size(),
                     subsystems.size() == 1 ? "" : "s"
             );
@@ -109,7 +109,7 @@ public class Scheduler extends BunyipsComponent {
                 opMode.addTelemetry(item);
             }
             for (ConditionalTask task : allocatedTasks) {
-                if (task.taskToRun.shouldOverrideOnConflict() != null)
+                if (task.taskToRun.hasDependency())
                     continue;
                 if (!task.taskToRun.isMuted() && task.activeSince != -1 && timeExceeded(task)) {
                     double deltaTime = round(task.taskToRun.getDeltaTime(), 1);
@@ -135,7 +135,7 @@ public class Scheduler extends BunyipsComponent {
                 }
                 // Trigger upon timeout goal or if the task does not have one
                 if (task.time == 0.0 || timeoutExceeded) {
-                    if (task.taskToRun.shouldOverrideOnConflict() == null) {
+                    if (!task.taskToRun.hasDependency()) {
                         if (task.stopCondition.getAsBoolean()) {
                             // Finish handler will be called below
                             task.taskToRun.finish();
@@ -152,18 +152,15 @@ public class Scheduler extends BunyipsComponent {
                         }
                         continue;
                     }
-                    // If it has a dependency, set the current task of the subsystems that depend on it
+                    // This task must have a dependency, set the current task of the subsystem that depends on it
                     // Tasks may only have one subsystem dependency, where this dependency represents where the task
                     // will be executed by the scheduler.
-                    for (BunyipsSubsystem subsystem : subsystems) {
-                        if (task.stopCondition.getAsBoolean()) {
-                            // Finish handler will be called on the subsystem
-                            task.taskToRun.finish();
-                        }
-                        if (subsystem.getTaskDependencies().contains(task.taskToRun.hashCode())) {
-                            subsystem.setCurrentTask(task.taskToRun);
-                        }
+                    assert task.taskToRun.getDependency().isPresent();
+                    if (task.stopCondition.getAsBoolean()) {
+                        // Finish handler will be called on the subsystem
+                        task.taskToRun.finish();
                     }
+                    task.taskToRun.getDependency().get().setCurrentTask(task.taskToRun);
                 }
             } else {
                 task.lastState = false;

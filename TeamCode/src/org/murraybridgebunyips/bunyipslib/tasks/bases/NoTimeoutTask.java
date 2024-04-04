@@ -12,7 +12,7 @@ public abstract class NoTimeoutTask extends Task {
         super(0.0);
     }
 
-    protected NoTimeoutTask(@NonNull BunyipsSubsystem dependencySubsystem, boolean shouldOverrideConflictingTasks) {
-        super(0.0, dependencySubsystem, shouldOverrideConflictingTasks);
+    protected NoTimeoutTask(@NonNull BunyipsSubsystem dependencySubsystem, boolean override) {
+        super(0.0, dependencySubsystem, override);
     }
 }

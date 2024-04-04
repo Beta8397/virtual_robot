@@ -10,8 +10,8 @@ public abstract class OnceTask extends Task {
         super(0.0);
     }
 
-    protected OnceTask(BunyipsSubsystem dependencySubsystem, boolean shouldOverrideConflictingTasks) {
-        super(0.0, dependencySubsystem, shouldOverrideConflictingTasks);
+    protected OnceTask(BunyipsSubsystem dependencySubsystem, boolean override) {
+        super(0.0, dependencySubsystem, override);
     }
 
     @Override

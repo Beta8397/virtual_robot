@@ -9,8 +9,8 @@ public abstract class ForeverTask extends NoTimeoutTask {
     protected ForeverTask() {
     }
 
-    protected ForeverTask(BunyipsSubsystem dependencySubsystem, boolean shouldOverrideConflictingTasks) {
-        super(dependencySubsystem, shouldOverrideConflictingTasks);
+    protected ForeverTask(BunyipsSubsystem dependencySubsystem, boolean override) {
+        super(dependencySubsystem, override);
     }
 
     @Override
