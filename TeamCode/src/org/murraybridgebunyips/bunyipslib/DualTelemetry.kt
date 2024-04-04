@@ -3,6 +3,7 @@ package org.murraybridgebunyips.bunyipslib
 import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.dashboard.canvas.Canvas
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket
+import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import org.firstinspires.ftc.robotcore.external.Func
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.robotcore.external.Telemetry.DisplayFormat
@@ -11,14 +12,19 @@ import org.murraybridgebunyips.bunyipslib.Text.formatString
 import kotlin.math.roundToInt
 
 /**
- * Telemetry implementation for BunyipsOpMode, integrating FtcDashboard and Driver Station calls.
- * This is used internally by BOM accessible by the `telemetry` field, but should not be instantiated directly.
+ * Telemetry implementation for BunyipsLib, integrating FtcDashboard and Driver Station calls in one object, while
+ * providing additional features useful for debugging and telemetry management.
+ * This is used internally by BOM accessible by the `telemetry` field, but is compatible with any OpMode.
  *
  * @author Lucas Bubner, 2024
  */
-class BunyipsTelemetry(private val sdkTelemetry: Telemetry, gitCommit: String, buildTime: String) : Telemetry {
-    private val opMode = BunyipsOpMode.instance
-
+class DualTelemetry(
+    private val overheadTag: String,
+    private val opMode: OpMode,
+    private val movingAverageTimer: MovingAverageTimer?,
+    gitCommit: String?,
+    buildTime: String?
+) : Telemetry {
     private lateinit var overheadTelemetry: Item
     private var telemetryQueue = 0
     private val telemetryItems = mutableSetOf<Pair<ItemType, String>>()
@@ -36,19 +42,19 @@ class BunyipsTelemetry(private val sdkTelemetry: Telemetry, gitCommit: String, b
     }
 
     init {
-        sdkTelemetry.log().displayOrder = Telemetry.Log.DisplayOrder.OLDEST_FIRST
-        sdkTelemetry.captionValueSeparator = ""
+        opMode.telemetry.log().displayOrder = Telemetry.Log.DisplayOrder.OLDEST_FIRST
+        opMode.telemetry.captionValueSeparator = ""
         // Uncap the telemetry log limit to ensure we capture everything
-        sdkTelemetry.log().capacity = 999999
+        opMode.telemetry.log().capacity = 999999
         telemetryItems.add(
             Pair(
                 ItemType.LOG,
-                "bunyipslib ${gitCommit}-${buildTime}"
+                "bunyipslib ${gitCommit ?: "N"}-${buildTime ?: "N"}"
             )
         )
         // Separate log from telemetry on the DS with an empty line
-        sdkTelemetry.log().add("")
-        sdkTelemetry.log().add("bunyipslib ${gitCommit}-${buildTime}")
+        opMode.telemetry.log().add("")
+        opMode.telemetry.log().add("bunyipslib ${gitCommit ?: "N"}-${buildTime ?: "N"}")
     }
 
     /**
@@ -59,7 +65,7 @@ class BunyipsTelemetry(private val sdkTelemetry: Telemetry, gitCommit: String, b
      */
     fun add(format: Any, vararg args: Any?): Item? {
         flushTelemetryQueue()
-        if (telemetryQueue >= 255 && !sdkTelemetry.isAutoClear) {
+        if (telemetryQueue >= 255 && !opMode.telemetry.isAutoClear) {
             // Auto flush will fail as clearing is not permitted
             // We will send telemetry to the debugger instead as a fallback
             Dbg.log("Telemetry overflow: $format")
@@ -85,7 +91,7 @@ class BunyipsTelemetry(private val sdkTelemetry: Telemetry, gitCommit: String, b
      * Add any additional telemetry to the Driver Station telemetry object.
      */
     fun addDS(format: Any, vararg args: Any?): Item {
-        return sdkTelemetry.addData("", formatString(format.toString(), *args))
+        return opMode.telemetry.addData("", formatString(format.toString(), *args))
     }
 
     /**
@@ -122,7 +128,7 @@ class BunyipsTelemetry(private val sdkTelemetry: Telemetry, gitCommit: String, b
             // This means all RT objects on the dashboard are permanent, and will respect their
             // last updated value. This is not a problem as retained objects are usually important
             // and can serve as a debugging tool.
-            val res = sdkTelemetry.removeItem(item)
+            val res = opMode.telemetry.removeItem(item)
             if (!res) {
                 Dbg.logd("Could not find telemetry item to remove: $item")
                 ok = false
@@ -146,7 +152,7 @@ class BunyipsTelemetry(private val sdkTelemetry: Telemetry, gitCommit: String, b
      */
     fun log(format: Any, vararg args: Any?) {
         val fstring = formatString(format.toString(), *args)
-        sdkTelemetry.log().add(fstring)
+        opMode.telemetry.log().add(fstring)
         telemetryItems.add(Pair(ItemType.LOG, fstring))
     }
 
@@ -158,7 +164,7 @@ class BunyipsTelemetry(private val sdkTelemetry: Telemetry, gitCommit: String, b
      */
     fun log(obj: Class<*>, format: Any, vararg args: Any?) {
         val msg = "[${obj.simpleName}] ${formatString(format.toString(), *args)}"
-        sdkTelemetry.log().add(msg)
+        opMode.telemetry.log().add(msg)
         telemetryItems.add(Pair(ItemType.LOG, msg))
     }
 
@@ -170,7 +176,7 @@ class BunyipsTelemetry(private val sdkTelemetry: Telemetry, gitCommit: String, b
      */
     fun log(stck: StackTraceElement, format: Any, vararg args: Any?) {
         val msg = "[${stck}] ${formatString(format.toString(), *args)}"
-        sdkTelemetry.log().add(msg)
+        opMode.telemetry.log().add(msg)
         telemetryItems.add(Pair(ItemType.LOG, msg))
     }
 
@@ -179,18 +185,21 @@ class BunyipsTelemetry(private val sdkTelemetry: Telemetry, gitCommit: String, b
      */
     override fun update(): Boolean {
         // Update main DS telemetry
-        val retVal = sdkTelemetry.update()
+        val retVal = opMode.telemetry.update()
 
         // Requeue new overhead status message
-        val loopTime = Text.round(opMode.movingAverageTimer.movingAverage(), 2)
-        val loopsSec = if (!opMode.movingAverageTimer.loopsSec().isNaN())
-            Text.round(opMode.movingAverageTimer.loopsSec(), 1)
+        val loopTime = if (movingAverageTimer != null) Text.round(movingAverageTimer.movingAverage(), 2) else 0.0
+        val loopsSec = if (movingAverageTimer != null)
+            if (!movingAverageTimer.loopsSec().isNaN())
+                Text.round(movingAverageTimer.loopsSec(), 1)
+            else 0.0
         else 0.0
+        val elapsedTime = movingAverageTimer?.elapsedTime()?.div(1000.0)?.roundToInt() ?: "?"
 
         val overheadStatus =
-            "$opModeStatus | T+${(opMode.movingAverageTimer.elapsedTime() / 1000).roundToInt()}s | ${
+            "$opModeStatus | T+${elapsedTime}s | ${
                 if (loopTime <= 0.0) {
-                    if (loopsSec > 0) "$loopsSec l/s" else "0.00ms"
+                    if (loopsSec > 0) "$loopsSec l/s" else "?ms"
                 } else {
                     "${loopTime}ms"
                 }
@@ -231,7 +240,7 @@ class BunyipsTelemetry(private val sdkTelemetry: Telemetry, gitCommit: String, b
             packet = null
         }
 
-        if (sdkTelemetry.isAutoClear) {
+        if (opMode.telemetry.isAutoClear) {
             telemetryQueue = 0
             clearTelemetryObjects()
         }
@@ -245,18 +254,18 @@ class BunyipsTelemetry(private val sdkTelemetry: Telemetry, gitCommit: String, b
     override fun clear() {
         telemetryQueue = 0
         clearTelemetryObjects()
-        sdkTelemetry.clear()
+        opMode.telemetry.clear()
     }
 
     /**
      * Reset telemetry data, including retention and FtcDashboard
      */
     override fun clearAll() {
-        sdkTelemetry.clearAll()
+        opMode.telemetry.clearAll()
         telemetryItems.clear()
         FtcDashboard.getInstance().clearTelemetry()
         telemetryQueue = 0
-        overheadTelemetry = sdkTelemetry.addData("", "BOM: unknown | T+?s | ?ms | (?) (?))\n")
+        overheadTelemetry = opMode.telemetry.addData("", "BOM: unknown | T+?s | ?ms | (?) (?))\n")
             .setRetained(true)
     }
 
@@ -264,28 +273,28 @@ class BunyipsTelemetry(private val sdkTelemetry: Telemetry, gitCommit: String, b
      * Add an action to perform before Driver Station telemetry is updated.
      */
     override fun addAction(action: Runnable): Any {
-        return sdkTelemetry.addAction(action)
+        return opMode.telemetry.addAction(action)
     }
 
     /**
      * Remove an action from the telemetry object.
      */
     override fun removeAction(token: Any): Boolean {
-        return sdkTelemetry.removeAction(token)
+        return opMode.telemetry.removeAction(token)
     }
 
     /**
      * Speak a message to the Driver Station.
      */
     override fun speak(text: String) {
-        sdkTelemetry.speak(text)
+        opMode.telemetry.speak(text)
     }
 
     /**
      * Speak a message to the Driver Station with language and country code.
      */
     override fun speak(text: String, languageCode: String, countryCode: String) {
-        sdkTelemetry.speak(text, languageCode, countryCode)
+        opMode.telemetry.speak(text, languageCode, countryCode)
     }
 
     /**
@@ -293,14 +302,14 @@ class BunyipsTelemetry(private val sdkTelemetry: Telemetry, gitCommit: String, b
      * FtcDashboard will always be false.
      */
     override fun isAutoClear(): Boolean {
-        return sdkTelemetry.isAutoClear
+        return opMode.telemetry.isAutoClear
     }
 
     /**
      * Set the telemetry object to auto-clear after each update for the Driver Station.
      */
     override fun setAutoClear(autoClear: Boolean) {
-        sdkTelemetry.isAutoClear = autoClear
+        opMode.telemetry.isAutoClear = autoClear
     }
 
     /**
@@ -308,14 +317,14 @@ class BunyipsTelemetry(private val sdkTelemetry: Telemetry, gitCommit: String, b
      * FtcDashboard interval can be checked with `FtcDashboard.getInstance().getTelemetryTransmissionInterval()`.
      */
     override fun getMsTransmissionInterval(): Int {
-        return sdkTelemetry.msTransmissionInterval
+        return opMode.telemetry.msTransmissionInterval
     }
 
     /**
      * Set the transmission interval in milliseconds for the Driver Station and FtcDashboard.
      */
     override fun setMsTransmissionInterval(msTransmissionInterval: Int) {
-        sdkTelemetry.msTransmissionInterval = msTransmissionInterval
+        opMode.telemetry.msTransmissionInterval = msTransmissionInterval
         FtcDashboard.getInstance().telemetryTransmissionInterval = msTransmissionInterval
     }
 
@@ -324,14 +333,14 @@ class BunyipsTelemetry(private val sdkTelemetry: Telemetry, gitCommit: String, b
      * BunyipsTelemtry does not use captions.
      */
     override fun getCaptionValueSeparator(): String {
-        return sdkTelemetry.captionValueSeparator
+        return opMode.telemetry.captionValueSeparator
     }
 
     /**
      * Get the current display format for the Driver Station.
      */
     override fun setDisplayFormat(displayFormat: DisplayFormat) {
-        sdkTelemetry.setDisplayFormat(displayFormat)
+        opMode.telemetry.setDisplayFormat(displayFormat)
     }
 
     /**
@@ -353,7 +362,7 @@ class BunyipsTelemetry(private val sdkTelemetry: Telemetry, gitCommit: String, b
         if (telemetryQueue >= 255) {
             // We have to flush out telemetry as the queue is too big
             update()
-            if (sdkTelemetry.isAutoClear) {
+            if (opMode.telemetry.isAutoClear) {
                 // Flush successful
                 Dbg.logd("Telemetry queue exceeded 255 messages, auto-pushing to flush...")
             }
@@ -364,7 +373,7 @@ class BunyipsTelemetry(private val sdkTelemetry: Telemetry, gitCommit: String, b
      * Create a new telemetry object and add it to the management queue.
      */
     private fun createTelemetryItem(value: String, retained: Boolean): Item {
-        val item = sdkTelemetry.addData(value, "")
+        val item = opMode.telemetry.addData(value, "")
             .setRetained(retained)
         if (value.isNotBlank()) {
             telemetryItems.add(
@@ -390,20 +399,20 @@ class BunyipsTelemetry(private val sdkTelemetry: Telemetry, gitCommit: String, b
     }
 
     @Suppress("KDocMissingDocumentation")
-    @Deprecated("Captions are not used with BunyipsTelemetry", replaceWith = ReplaceWith("add(caption + format, args)"))
+    @Deprecated("Captions are not used with DualTelemetry", replaceWith = ReplaceWith("add(caption + format, args)"))
     override fun addData(caption: String, format: String, vararg args: Any): Item? {
         return add(caption + format, args)
     }
 
     @Suppress("KDocMissingDocumentation")
-    @Deprecated("Captions are not used with BunyipsTelemetry", replaceWith = ReplaceWith("add(caption + value)"))
+    @Deprecated("Captions are not used with DualTelemetry", replaceWith = ReplaceWith("add(caption + value)"))
     override fun addData(caption: String, value: Any): Item? {
         return add(caption + value)
     }
 
     @Suppress("KDocMissingDocumentation")
     @Deprecated(
-        "Captions and function providers are not used with BunyipsTelemetry",
+        "Captions and function providers are not used with DualTelemetry",
         replaceWith = ReplaceWith("add(caption) // Use polling loop and fstring for provider")
     )
     override fun <T : Any> addData(caption: String, valueProducer: Func<T>): Item? {
@@ -412,7 +421,7 @@ class BunyipsTelemetry(private val sdkTelemetry: Telemetry, gitCommit: String, b
 
     @Suppress("KDocMissingDocumentation")
     @Deprecated(
-        "Captions and function providers are not used with BunyipsTelemetry",
+        "Captions and function providers are not used with DualTelemetry",
         replaceWith = ReplaceWith("add(caption + format) // Use polling loop and fstring for provider")
     )
     override fun <T : Any> addData(caption: String, format: String, valueProducer: Func<T>): Item? {
@@ -430,7 +439,7 @@ class BunyipsTelemetry(private val sdkTelemetry: Telemetry, gitCommit: String, b
 
     @Suppress("KDocMissingDocumentation")
     @Deprecated(
-        "The telemetry line system is not used with BunyipsTelemetry",
+        "The telemetry line system is not used with DualTelemetry",
         replaceWith = ReplaceWith("add(format, args)")
     )
     override fun addLine(): Telemetry.Line? {
@@ -440,7 +449,7 @@ class BunyipsTelemetry(private val sdkTelemetry: Telemetry, gitCommit: String, b
 
     @Suppress("KDocMissingDocumentation")
     @Deprecated(
-        "The telemetry line system is not used with BunyipsTelemetry",
+        "The telemetry line system is not used with DualTelemetry",
         replaceWith = ReplaceWith("add(format, args)")
     )
     override fun addLine(lineCaption: String): Telemetry.Line? {
@@ -450,7 +459,7 @@ class BunyipsTelemetry(private val sdkTelemetry: Telemetry, gitCommit: String, b
 
     @Suppress("KDocMissingDocumentation")
     @Deprecated(
-        "The telemetry line system is not used with BunyipsTelemetry",
+        "The telemetry line system is not used with DualTelemetry",
         replaceWith = ReplaceWith("add(format, args)")
     )
     override fun removeLine(line: Telemetry.Line): Boolean {
@@ -459,26 +468,26 @@ class BunyipsTelemetry(private val sdkTelemetry: Telemetry, gitCommit: String, b
 
     @Suppress("KDocMissingDocumentation")
     @Deprecated(
-        "The telemetry line system is not used with BunyipsTelemetry",
+        "The telemetry line system is not used with DualTelemetry",
         replaceWith = ReplaceWith("add(format, args)")
     )
     override fun getItemSeparator(): String {
-        return sdkTelemetry.itemSeparator
+        return opMode.telemetry.itemSeparator
     }
 
     @Suppress("KDocMissingDocumentation")
     @Deprecated(
-        "The telemetry line system is not used with BunyipsTelemetry",
+        "The telemetry line system is not used with DualTelemetry",
         replaceWith = ReplaceWith("add(format, args)")
     )
     override fun setItemSeparator(itemSeparator: String) {
-        sdkTelemetry.itemSeparator = itemSeparator
+        opMode.telemetry.itemSeparator = itemSeparator
     }
 
     @Suppress("KDocMissingDocumentation")
-    @Deprecated("Captions are not used with BunyipsTelemetry and should always be left as an empty string")
+    @Deprecated("Captions are not used with DualTelemetry and should always be left as an empty string")
     override fun setCaptionValueSeparator(captionValueSeparator: String) {
-        sdkTelemetry.captionValueSeparator = captionValueSeparator
+        opMode.telemetry.captionValueSeparator = captionValueSeparator
     }
 
     @Suppress("KDocMissingDocumentation")
@@ -487,6 +496,6 @@ class BunyipsTelemetry(private val sdkTelemetry: Telemetry, gitCommit: String, b
         replaceWith = ReplaceWith("log(...)")
     )
     override fun log(): Telemetry.Log {
-        return sdkTelemetry.log()
+        return opMode.telemetry.log()
     }
 }

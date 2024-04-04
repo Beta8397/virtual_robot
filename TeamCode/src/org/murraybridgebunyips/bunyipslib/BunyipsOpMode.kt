@@ -22,7 +22,7 @@ import java.util.concurrent.ExecutorService
  *
  * This class provides a structured way to manage the lifecycle of an OpMode, and provides a number of
  * utility functions to make development easier. This class is designed to be extended by the user to
- * create their own OpModes, and has native support for linked Driver Station & FtcDashboard telemetry ([BunyipsTelemetry]),
+ * create their own OpModes, and has native support for linked Driver Station & FtcDashboard telemetry ([DualTelemetry]),
  * native custom gamepads ([Controller]), timing utilities ([movingAverageTimer]), exception handling ([Exceptions]),
  * and more through the BunyipsLib suite of tools ([BunyipsSubsystem], [Scheduler], etc.)
  *
@@ -58,7 +58,7 @@ abstract class BunyipsOpMode : BOMInternal() {
     /**
      * BunyipsLib Driver Station & FtcDashboard Telemetry
      */
-    lateinit var telemetry: BunyipsTelemetry
+    lateinit var telemetry: DualTelemetry
 
     companion object {
         private var _instance: BunyipsOpMode? = null
@@ -172,11 +172,11 @@ abstract class BunyipsOpMode : BOMInternal() {
             }
 
             Dbg.logd("BunyipsOpMode: setting up...")
-            // Telemetry
-            telemetry = BunyipsTelemetry(sdkTelemetry, BuildConfig.GIT_COMMIT, BuildConfig.BUILD_TIME)
-            telemetry.setup()
             // Ring-buffer timing utility
             movingAverageTimer = MovingAverageTimer()
+            // Telemetry
+            telemetry = DualTelemetry("BOM", this, movingAverageTimer, BuildConfig.GIT_COMMIT, BuildConfig.BUILD_TIME)
+            telemetry.setup()
             // Controller setup and monitoring threads
             gamepad1 = Controller(sdkGamepad1)
             gamepad2 = Controller(sdkGamepad2)
@@ -331,7 +331,7 @@ abstract class BunyipsOpMode : BOMInternal() {
     }
 
     // These telemetry methods exist for continuity as they used to be the primary way to use telemetry in BunyipsLib,
-    // but have since moved to the BunyipsTelemetry class. These methods are now simply aliases to the new methods.
+    // but have since moved to the DualTelemetry class. These methods are now simply aliases to the new methods.
 
     /**
      * Update and push queued telemetry to the Driver Station and FtcDashboard.
