@@ -88,19 +88,6 @@ abstract class RobotConfig {
 
     /**
      * Convenience method for reading the device from the hardwareMap without having to check for exceptions.
-     * This method is useful for devices that don't require any additional setup.
-     * Every hardware error with this method be saved to a static array, which can be accessed during the
-     * lifetime of the opMode.
-     *
-     * @param name   name of device saved in the configuration file
-     * @param device the class of the item to configure, in final abstraction extending HardwareDevice
-     */
-    fun <T : HardwareDevice> getHardware(name: String, device: Class<T>): T? {
-        return getHardware(name, device) {}
-    }
-
-    /**
-     * Convenience method for reading the device from the hardwareMap without having to check for exceptions.
      * This method can be passed a Runnable to run if the device is successfully configured, useful for setting up
      * directions or other configurations that will only run if the device was successfully found.
      * Every hardware error with this method be saved to a static array, which can be accessed during the
@@ -112,7 +99,8 @@ abstract class RobotConfig {
      *                  without having to check for null explicitly.
      */
     @Suppress("UNCHECKED_CAST")
-    fun <T : HardwareDevice> getHardware(name: String, device: Class<T>, onSuccess: Consumer<T>): T? {
+    @JvmOverloads
+    fun <T : HardwareDevice> getHardware(name: String, device: Class<T>, onSuccess: Consumer<T> = Consumer { }): T? {
         var hardwareDevice: T? = null
         try {
             if (Storage.hardwareErrors.contains(name)) return null

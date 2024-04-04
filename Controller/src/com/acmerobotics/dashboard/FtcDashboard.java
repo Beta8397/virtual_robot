@@ -272,6 +272,7 @@ public class FtcDashboard {
     }
 
     public void setTelemetryTransmissionInterval(int telemetryTransmissionInterval){}
+    public int getTelemetryTransmissionInterval(){return 0;}
 
     public void startCameraStream(CameraStreamSource cameraStreamSource, int i) {}
 

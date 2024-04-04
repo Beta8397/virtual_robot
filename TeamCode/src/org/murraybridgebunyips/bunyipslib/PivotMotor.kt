@@ -70,31 +70,17 @@ class PivotMotor(
     /**
      * Get the current degrees of the pivot.
      */
+    @JvmOverloads
     fun getDegrees(scope: ScopedEncoder.Scope = ScopedEncoder.Scope.RELATIVE): Double {
         return (encoder.position(scope) / ticksPerRevolution) * 360
     }
 
     /**
-     * Get the current degrees of the pivot.
-     */
-    // Java interop
-    fun getDegrees(): Double {
-        return getDegrees(ScopedEncoder.Scope.RELATIVE)
-    }
-
-    /**
      * Get the current radians of the pivot.
      */
+    @JvmOverloads
     fun getRadians(scope: ScopedEncoder.Scope = ScopedEncoder.Scope.RELATIVE): Double {
         return Math.toRadians(getDegrees(scope))
-    }
-
-    /**
-     * Get the current radians of the pivot.
-     */
-    // Java interop
-    fun getRadians(): Double {
-        return getRadians(ScopedEncoder.Scope.RELATIVE)
     }
 
     /**

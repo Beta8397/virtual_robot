@@ -1,8 +1,6 @@
 package org.murraybridgebunyips.bunyipslib
 
-import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.dashboard.canvas.Canvas
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket
 import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorSimple
@@ -11,14 +9,10 @@ import com.qualcomm.robotcore.hardware.LightSensor
 import com.qualcomm.robotcore.hardware.RobotCoreLynxUsbDevice
 import com.qualcomm.robotcore.hardware.ServoController
 import com.qualcomm.robotcore.util.ThreadPool
-import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.robotcore.external.Telemetry.Item
-import org.murraybridgebunyips.bunyipslib.Text.formatString
-import org.murraybridgebunyips.bunyipslib.Text.round
 import org.murraybridgebunyips.bunyipslib.roadrunner.util.LynxModuleUtil
 import org.murraybridgebunyips.deps.BuildConfig
 import java.util.concurrent.ExecutorService
-import kotlin.math.roundToInt
 
 
 /**
@@ -28,7 +22,7 @@ import kotlin.math.roundToInt
  *
  * This class provides a structured way to manage the lifecycle of an OpMode, and provides a number of
  * utility functions to make development easier. This class is designed to be extended by the user to
- * create their own OpModes, and has native support for linked Driver Station & FtcDashboard telemetry ([addTelemetry]),
+ * create their own OpModes, and has native support for linked Driver Station & FtcDashboard telemetry ([BunyipsTelemetry]),
  * native custom gamepads ([Controller]), timing utilities ([movingAverageTimer]), exception handling ([Exceptions]),
  * and more through the BunyipsLib suite of tools ([BunyipsSubsystem], [Scheduler], etc.)
  *
@@ -51,18 +45,6 @@ abstract class BunyipsOpMode : BOMInternal() {
 
     private var gamepadExecutor: ExecutorService? = null
 
-    private var opModeStatus = "idle"
-    private lateinit var overheadTelemetry: Item
-    private var telemetryQueue = 0
-    private val telemetryItems = mutableSetOf<Pair<ItemType, String>>()
-    private var packet: TelemetryPacket? = TelemetryPacket()
-
-    private enum class ItemType {
-        TELEMETRY,
-        RETAINED_TELEMETRY,
-        LOG
-    }
-
     /**
      * BunyipsLib Gamepad 1: Driver
      */
@@ -72,6 +54,11 @@ abstract class BunyipsOpMode : BOMInternal() {
      * BunyipsLib Gamepad 2: Operator
      */
     lateinit var gamepad2: Controller
+
+    /**
+     * BunyipsLib Driver Station & FtcDashboard Telemetry
+     */
+    lateinit var telemetry: BunyipsTelemetry
 
     companion object {
         private var _instance: BunyipsOpMode? = null
@@ -183,19 +170,13 @@ abstract class BunyipsOpMode : BOMInternal() {
             hardwareMap.getAll(LynxModule::class.java).forEach { module ->
                 module.bulkCachingMode = LynxModule.BulkCachingMode.AUTO
             }
-            // Separate log from telemetry on the DS with an empty line
-            telemetry.log().add("")
-            telemetry.log().add("bunyipslib ${BuildConfig.GIT_COMMIT}-${BuildConfig.BUILD_TIME}")
-            telemetryItems.add(
-                Pair(
-                    ItemType.LOG,
-                    "bunyipslib ${BuildConfig.GIT_COMMIT}-${BuildConfig.BUILD_TIME}"
-                )
-            )
 
-            opModeStatus = "setup"
             Dbg.logd("BunyipsOpMode: setting up...")
-
+            // Telemetry
+            telemetry = BunyipsTelemetry(sdkTelemetry, BuildConfig.GIT_COMMIT, BuildConfig.BUILD_TIME)
+            telemetry.setup()
+            // Ring-buffer timing utility
+            movingAverageTimer = MovingAverageTimer()
             // Controller setup and monitoring threads
             gamepad1 = Controller(sdkGamepad1)
             gamepad2 = Controller(sdkGamepad2)
@@ -208,23 +189,12 @@ abstract class BunyipsOpMode : BOMInternal() {
                 while (!Thread.currentThread().isInterrupted)
                     gamepad2.update()
             }
-
-            telemetry.log().displayOrder = Telemetry.Log.DisplayOrder.OLDEST_FIRST
-            telemetry.captionValueSeparator = ""
-            // Uncap the telemetry log limit to ensure we capture everything
-            telemetry.log().capacity = 999999
-            // Ring-buffer timing utility
-            movingAverageTimer = MovingAverageTimer()
-            // Assign overhead telemetry as it has been configured now
-            overheadTelemetry =
-                telemetry.addData("", "BOM: idle | T+0s | 0.000ms | (?) (?)\n")
-                    .setRetained(true)
             pushTelemetry()
 
-            opModeStatus = "static_init"
+            telemetry.opModeStatus = "static_init"
             Dbg.logd("BunyipsOpMode: firing onInit()...")
             // Store telemetry objects raised by onInit() by turning off auto-clear
-            setTelemetryAutoClear(false)
+            telemetry.isAutoClear = false
             pushTelemetry()
             if (!gamepad1.atRest() || !gamepad2.atRest()) {
                 log("WARNING: a gamepad was not zeroed during init. please ensure controllers zero out correctly.")
@@ -238,7 +208,7 @@ abstract class BunyipsOpMode : BOMInternal() {
                 Exceptions.handle(e, ::log)
             }
 
-            opModeStatus = "dynamic_init"
+            telemetry.opModeStatus = "dynamic_init"
             pushTelemetry()
             Dbg.logd("BunyipsOpMode: starting onInitLoop()...")
             // Run user-defined dynamic initialisation
@@ -253,7 +223,7 @@ abstract class BunyipsOpMode : BOMInternal() {
                 pushTelemetry()
             } while (opModeInInit())
 
-            opModeStatus = "finish_init"
+            telemetry.opModeStatus = "finish_init"
             pushTelemetry()
             Dbg.logd("BunyipsOpMode: firing onInitDone()...")
             // Run user-defined final initialisation
@@ -264,11 +234,11 @@ abstract class BunyipsOpMode : BOMInternal() {
             }
 
             // Ready to go.
-            opModeStatus = "ready"
+            telemetry.opModeStatus = "ready"
             movingAverageTimer.update()
             Dbg.logd("BunyipsOpMode: init cycle completed in ${movingAverageTimer.elapsedTime() / 1000.0} secs")
             // DS only telemetry
-            telemetry.addData("", "BunyipsOpMode: INIT COMPLETE -- PLAY WHEN READY.")
+            telemetry.addDS("BunyipsOpMode: INIT COMPLETE -- PLAY WHEN READY.")
             Dbg.logd("BunyipsOpMode: ready.")
             movingAverageTimer.reset()
 
@@ -278,8 +248,8 @@ abstract class BunyipsOpMode : BOMInternal() {
             } while (!isStarted)
 
             // Play button has been pressed
-            opModeStatus = "starting"
-            setTelemetryAutoClear(true)
+            telemetry.opModeStatus = "starting"
+            telemetry.isAutoClear = true
             clearTelemetry()
             pushTelemetry()
             movingAverageTimer.reset()
@@ -291,12 +261,12 @@ abstract class BunyipsOpMode : BOMInternal() {
                 Exceptions.handle(e, ::log)
             }
 
-            opModeStatus = "running"
+            telemetry.opModeStatus = "running"
             Dbg.logd("BunyipsOpMode: starting activeLoop()...")
             do {
                 if (operationsPaused) {
                     // If the OpMode is paused, skip the loop and wait for the next hardware cycle
-                    opModeStatus = "halted"
+                    telemetry.opModeStatus = "halted"
                     movingAverageTimer.update()
                     pushTelemetry()
                     continue
@@ -312,7 +282,7 @@ abstract class BunyipsOpMode : BOMInternal() {
                 pushTelemetry()
             } while (opModeIsActive() && !operationsCompleted)
 
-            opModeStatus = "finished"
+            telemetry.opModeStatus = "finished"
             try {
                 onFinish()
             } catch (e: Exception) {
@@ -353,154 +323,35 @@ abstract class BunyipsOpMode : BOMInternal() {
             safeHaltHardware()
             // Telemetry may be not in a nice state, so we will call our stateful functions
             // such as thread stops and cleanup in onStop() first before updating the status
-            opModeStatus = "terminating"
+            telemetry.opModeStatus = "terminating"
             Dbg.logd("BunyipsOpMode: active cycle completed in ${movingAverageTimer.elapsedTime() / 1000.0} secs")
             pushTelemetry()
             Dbg.logd("BunyipsOpMode: exiting...")
         }
     }
 
+    // These telemetry methods exist for continuity as they used to be the primary way to use telemetry in BunyipsLib,
+    // but have since moved to the BunyipsTelemetry class. These methods are now simply aliases to the new methods.
+
     /**
      * Update and push queued telemetry to the Driver Station and FtcDashboard.
      */
     fun pushTelemetry() {
-        // Update main DS telemetry
         telemetry.update()
-
-        // Requeue new overhead status message
-        val loopTime = round(movingAverageTimer.movingAverage(), 2)
-        val loopsSec = if (!movingAverageTimer.loopsSec().isNaN())
-            round(movingAverageTimer.loopsSec(), 1)
-        else 0.0
-
-        val overheadStatus =
-            "$opModeStatus | T+${(movingAverageTimer.elapsedTime() / 1000).roundToInt()}s | ${
-                if (loopTime <= 0.0) {
-                    if (loopsSec > 0) "$loopsSec l/s" else "0.00ms"
-                } else {
-                    "${loopTime}ms"
-                }
-            } | ${Controls.movementString(gamepad1)} ${Controls.movementString(gamepad2)}\n"
-
-        overheadTelemetry.setValue("BOM: $overheadStatus")
-
-        // FtcDashboard
-        if (packet == null) {
-            packet = TelemetryPacket()
-        }
-
-        packet?.let {
-            it.put("BOM", overheadStatus + "\n")
-
-            // Copy with toList() to avoid ConcurrentModificationExceptions
-            telemetryItems.toList().forEachIndexed { index, pair ->
-                val (type, value) = pair
-                when (type) {
-                    ItemType.TELEMETRY -> it.put("DS$index", value)
-                    ItemType.RETAINED_TELEMETRY -> it.put("RT$index", value)
-                    ItemType.LOG -> {
-                        if (index == 0) {
-                            // BunyipsLib info, this is an always log and will always
-                            // be the first log in the list as it is added at the start
-                            // of the init cycle
-                            it.put("INFO", value)
-                            return@forEachIndexed
-                        }
-                        it.put("LOG$index", value)
-                    }
-                }
-            }
-
-            FtcDashboard.getInstance().sendTelemetryPacket(it)
-
-            // Invalidate this packet
-            packet = null
-        }
-
-        if (telemetry.isAutoClear) {
-            telemetryQueue = 0
-            clearTelemetryObjects()
-        }
     }
 
     /**
      * Add any additional telemetry to the FtcDashboard telemetry packet.
      */
     fun addDashboardTelemetry(key: String, value: Any?) {
-        if (packet == null) {
-            packet = TelemetryPacket()
-        }
-        packet!!.put(key, value.toString())
+        telemetry.addDashboard(key, value)
     }
 
     /**
      * Add any field overlay data to the FtcDashboard telemetry packet.
      */
     fun dashboardFieldOverlay(): Canvas {
-        // This will allow us to attach any field overlay data to the packet
-        // as we will only reassign if the packet is null
-        if (packet == null) {
-            packet = TelemetryPacket()
-        }
-        return packet!!.fieldOverlay()
-    }
-
-    /**
-     * Ensure an exception is not thrown due to the telemetry queue being bigger than 255 objects.
-     */
-    private fun flushTelemetryQueue() {
-        telemetryQueue++
-        if (telemetryQueue >= 255) {
-            // We have to flush out telemetry as the queue is too big
-            pushTelemetry()
-            if (telemetry.isAutoClear) {
-                // Flush successful
-                Dbg.logd("Telemetry queue exceeded 255 messages, auto-pushing to flush...")
-            }
-        }
-    }
-
-    /**
-     * Create a new telemetry object and add it to the management queue.
-     */
-    private fun createTelemetryItem(value: String, retained: Boolean): Item {
-        val item = telemetry.addData(value, "")
-            .setRetained(retained)
-        if (value.isNotBlank()) {
-            telemetryItems.add(
-                Pair(
-                    if (retained) ItemType.RETAINED_TELEMETRY else ItemType.TELEMETRY,
-                    value
-                )
-            )
-        }
-        return item
-    }
-
-    /**
-     * Clear all telemetry objects from the management queue just like a telemetry.clear() call.
-     */
-    private fun clearTelemetryObjects() {
-        val tmp = telemetryItems.toTypedArray()
-        for (item in tmp) {
-            if (item.first == ItemType.RETAINED_TELEMETRY)
-                continue
-            telemetryItems.remove(item)
-        }
-    }
-
-    /**
-     * Reset member fields to their default values as the instance may be reused.
-     */
-    private fun resetFields() {
-        operationsCompleted = false
-        operationsPaused = false
-        safeHaltHardwareOnStop = false
-        opModeStatus = "idle"
-        telemetryQueue = 0
-        telemetryItems.clear()
-        packet = null
-        gamepadExecutor = null
+        return telemetry.dashboardFieldOverlay()
     }
 
     /**
@@ -510,16 +361,8 @@ abstract class BunyipsOpMode : BOMInternal() {
      * @return The telemetry item added to the Driver Station, null if the send failed from overflow
      */
     fun addTelemetry(format: Any, vararg args: Any?): Item? {
-        flushTelemetryQueue()
-        if (telemetryQueue >= 255 && !telemetry.isAutoClear) {
-            // Auto flush will fail as clearing is not permitted
-            // We will send telemetry to the debugger instead as a fallback
-            Dbg.log("Telemetry overflow: $format")
-            return null
-        }
-        return createTelemetryItem(formatString(format.toString(), *args), false)
+        return telemetry.add(format, *args)
     }
-
 
     /**
      * Add a data to the telemetry object, with integrated formatting.
@@ -528,10 +371,7 @@ abstract class BunyipsOpMode : BOMInternal() {
      * @return The telemetry item added to the Driver Station
      */
     fun addRetainedTelemetry(format: Any, vararg args: Any?): Item {
-        flushTelemetryQueue()
-        // Retained objects will never be cleared, so we can just add them immediately, as usually
-        // retained messages should be important and not be discarded
-        return createTelemetryItem(formatString(format.toString(), *args), true)
+        return telemetry.addRetained(format, *args)
     }
 
     /**
@@ -539,18 +379,7 @@ abstract class BunyipsOpMode : BOMInternal() {
      * @param items The items to remove from the telemetry object
      */
     fun removeRetainedTelemetry(vararg items: Item) {
-        for (item in items) {
-            // We will be able to remove the item from the DS, but objects on FtcDashboard cannot
-            // be removed as we no longer know the index of the object or the contents of the item.
-            // This means all RT objects on the dashboard are permanent, and will respect their
-            // last updated value. This is not a problem as retained objects are usually important
-            // and can serve as a debugging tool.
-            val res = telemetry.removeItem(item)
-            if (!res) {
-                Dbg.logd("Could not find telemetry item to remove: $item")
-                return
-            }
-        }
+        telemetry.removeRetained(*items)
     }
 
     /**
@@ -567,9 +396,7 @@ abstract class BunyipsOpMode : BOMInternal() {
      * @param args The objects to format into the object format string
      */
     fun log(format: Any, vararg args: Any?) {
-        val fstring = formatString(format.toString(), *args)
-        telemetry.log().add(fstring)
-        telemetryItems.add(Pair(ItemType.LOG, fstring))
+        telemetry.log(format, *args)
     }
 
     /**
@@ -579,9 +406,7 @@ abstract class BunyipsOpMode : BOMInternal() {
      * @param args The objects to format into the object format string
      */
     fun log(obj: Class<*>, format: Any, vararg args: Any?) {
-        val msg = "[${obj.simpleName}] ${formatString(format.toString(), *args)}"
-        telemetry.log().add(msg)
-        telemetryItems.add(Pair(ItemType.LOG, msg))
+        telemetry.log(obj, format, *args)
     }
 
     /**
@@ -591,55 +416,41 @@ abstract class BunyipsOpMode : BOMInternal() {
      * @param args The objects to format into the object format string
      */
     fun log(stck: StackTraceElement, format: Any, vararg args: Any?) {
-        val msg = "[${stck}] ${formatString(format.toString(), *args)}"
-        telemetry.log().add(msg)
-        telemetryItems.add(Pair(ItemType.LOG, msg))
+        telemetry.log(stck, format, *args)
     }
 
     /**
-     * Reset telemetry data, including retention
+     * Reset telemetry data, including retention and FtcDashboard
      */
     fun resetTelemetry() {
-        telemetryQueue = 0
         telemetry.clearAll()
-        telemetryItems.clear()
-        FtcDashboard.getInstance().clearTelemetry()
-        // Must reassign the overhead telemetry item
-        overheadTelemetry =
-            telemetry.addData("", "BOM: unknown | T+?s | ?ms | (?) (?)")
-                .setRetained(true)
     }
 
     /**
-     * Clear telemetry on screen, not including retention
+     * Clear telemetry on the Driver Station, not including retention
      */
     fun clearTelemetry() {
-        telemetryQueue = 0
-        clearTelemetryObjects()
         telemetry.clear()
     }
 
     /**
-     * Set telemetry auto clear status
+     * Reset member fields to their default values as the instance may be reused.
      */
-    fun setTelemetryAutoClear(autoClear: Boolean) {
-        telemetry.isAutoClear = autoClear
-    }
-
-    /**
-     * Get auto-clear status of telemetry
-     */
-    fun getTelemetryAutoClear(): Boolean {
-        return telemetry.isAutoClear
+    private fun resetFields() {
+        operationsCompleted = false
+        operationsPaused = false
+        safeHaltHardwareOnStop = false
+        gamepadExecutor = null
     }
 
     /**
      * Call to manually finish the OpMode.
      * This is a dangerous method, as the OpMode will no longer be able to run any main thread code.
      * This method should be called when the OpMode is finished and no longer needs to run, and will
-     * will put the OpMode in a state where it will not run any more code (including timers & telemetry).
+     * put the OpMode in a state where it will not run any more code (including timers & telemetry).
      * @param safeHaltHardwareOnStop If true (default), all motors/devices will be actively told to stop for the remainder of the OpMode.
      */
+    @JvmOverloads
     fun finish(safeHaltHardwareOnStop: Boolean = true) {
         if (operationsCompleted) {
             return
@@ -647,22 +458,11 @@ abstract class BunyipsOpMode : BOMInternal() {
         this.safeHaltHardwareOnStop = safeHaltHardwareOnStop
         operationsCompleted = true
         Dbg.logd("BunyipsOpMode: activeLoop() terminated by finish().")
-        createTelemetryItem(
+        telemetry.addRetained(
             "BunyipsOpMode: Robot ${if (safeHaltHardwareOnStop) "is stopped" else "tasks finished"}. All operations completed.",
             true
         )
         pushTelemetry()
-    }
-
-    /**
-     * Call to manually finish the OpMode.
-     * This is a dangerous method, as the OpMode will no longer be able to run any main thread code.
-     * This method should be called when the OpMode is finished and no longer needs to run, and will
-     * will put the OpMode in a state where it will not run any more code (including timers & telemetry).
-     * This method will also actively tell all motors/devices to stop for the remainder of the OpMode.
-     */
-    fun finish() {
-        finish(true)
     }
 
     /**
@@ -721,7 +521,7 @@ abstract class BunyipsOpMode : BOMInternal() {
             return
         }
         operationsPaused = false
-        opModeStatus = "running"
+        telemetry.opModeStatus = "running"
         Dbg.logd("BunyipsOpMode: activeLoop() resumed.")
     }
 

@@ -3,6 +3,8 @@ package org.murraybridgebunyips.bunyipslib;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 /**
  * BunyipsOpMode Kotlin and Java interop class to hide the SDK fields from the user, and replace them with the custom
  * BunyipsLib interfaces. This class is not intended to be used by the user, and is only used to provide
@@ -18,18 +20,23 @@ public class BOMInternal extends LinearOpMode {
     // https://youtrack.jetbrains.com/issue/KT-55017/Prioritize-Kotlin-property-from-derived-class-over-Java-field-from-base-class
     private final Gamepad gamepad1 = null;
     private final Gamepad gamepad2 = null;
+    private final Telemetry telemetry = null;
 
     // Prevent users from using this class
     BOMInternal() {
     }
 
-    // For use in BunyipsOpMode to assign the new gamepad objects
+    // For use in BunyipsOpMode to assign custom objects
     final Gamepad getSdkGamepad1() {
         return super.gamepad1;
     }
 
     final Gamepad getSdkGamepad2() {
         return super.gamepad2;
+    }
+
+    final Telemetry getSdkTelemetry() {
+        return super.telemetry;
     }
 
     /**

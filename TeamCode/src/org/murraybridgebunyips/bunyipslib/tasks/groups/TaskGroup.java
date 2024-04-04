@@ -1,10 +1,8 @@
 package org.murraybridgebunyips.bunyipslib.tasks.groups;
 
-import org.murraybridgebunyips.bunyipslib.Dbg;
 import org.murraybridgebunyips.bunyipslib.EmergencyStop;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;

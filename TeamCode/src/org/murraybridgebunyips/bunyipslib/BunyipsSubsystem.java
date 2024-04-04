@@ -7,8 +7,6 @@ import androidx.annotation.Nullable;
 import org.murraybridgebunyips.bunyipslib.tasks.IdleTask;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
-import java.util.ArrayList;
-
 /**
  * Base class for all robot subsystems.
  * Integrates with the Task system to allow for task-based command scheduling.
@@ -107,7 +105,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
             return false;
 
         if (currentTask == null) {
-            Dbg.warn(this.getClass(), "Subsystem has not been updated with update() yet and a task was allocated - please ensure your subsystem is being updated via update() or by the Scheduler.");
+            Dbg.warn(getClass(), "Subsystem has not been updated with update() yet and a task was allocated - please ensure your subsystem is being updated via update() or by the Scheduler.");
             currentTask = defaultTask;
         }
 

@@ -89,13 +89,12 @@ class UserSelection<T>(
         var selectedOpMode: T? = null
 
         // Disable auto clear if it is enabled, we might accidentally clear out static telemetry
-        opMode.setTelemetryAutoClear(false)
+        opMode.telemetry.isAutoClear = false
 
         val retainedObjects = mutableListOf<Item>()
-        retainedObjects.add(opMode.telemetry.addData("", "---------!!!--------"))
+        retainedObjects.add(opMode.telemetry.addDS("---------!!!--------"))
         retainedObjects.add(
-            opMode.telemetry.addData(
-                "",
+            opMode.telemetry.addDS(
                 "ACTION REQUIRED: INIT YOUR OPMODE USING GAMEPAD1"
             )
         )
@@ -108,17 +107,14 @@ class UserSelection<T>(
             )
             packetString += "$selection | "
             retainedObjects.add(
-                opMode.telemetry.addData(
-                    "",
-                    String.format(
-                        "%s: %s",
-                        button.name,
-                        name.toString()
-                    )
+                opMode.telemetry.addDS(
+                    "%: %",
+                    button.name,
+                    name.toString()
                 )
             )
         }
-        retainedObjects.add(opMode.telemetry.addData("", "---------!!!--------"))
+        retainedObjects.add(opMode.telemetry.addDS("---------!!!--------"))
 
         opMode.addDashboardTelemetry("USR", packetString)
 
@@ -140,11 +136,10 @@ class UserSelection<T>(
         val opModeName = selectedOpMode.toString()
 
         if (result == null) {
-            opMode.telemetry.addData("", "No selection made. Result was handled by the OpMode.")
+            opMode.telemetry.addDS("No selection made. Result was handled by the OpMode.")
                 .setRetained(true)
         } else {
-            opMode.telemetry.addData(
-                "",
+            opMode.telemetry.addDS(
                 "'${selectedButton?.name}' registered. Running OpMode: '$opModeName'",
             ).setRetained(true)
         }
@@ -160,7 +155,7 @@ class UserSelection<T>(
         // Clean up telemetry and reset auto clear
         opMode.removeRetainedTelemetry(retainedObjects)
         opMode.pushTelemetry()
-        opMode.setTelemetryAutoClear(true)
+        opMode.telemetry.isAutoClear = true
 
         try {
             callback.accept(selectedOpMode)

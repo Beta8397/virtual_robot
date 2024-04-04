@@ -45,59 +45,59 @@ public class Controller extends Gamepad {
     /**
      * Shorthand for left_stick_x
      */
-    public float lsx;
+    public volatile float lsx;
     /**
      * Shorthand for left_stick_y
      */
-    public float lsy;
+    public volatile float lsy;
     /**
      * Shorthand for right_stick_x
      */
-    public float rsx;
+    public volatile float rsx;
     /**
      * Shorthand for right_stick_y
      */
-    public float rsy;
+    public volatile float rsy;
     /**
      * Shorthand for left_trigger
      */
-    public float lt;
+    public volatile float lt;
     /**
      * Shorthand for right_trigger
      */
-    public float rt;
+    public volatile float rt;
     /**
      * Shorthand for left_bumper
      */
-    public boolean lb;
+    public volatile boolean lb;
     /**
      * Shorthand for right_bumper
      */
-    public boolean rb;
+    public volatile boolean rb;
     /**
      * Shorthand for dpad_up
      */
-    public boolean du;
+    public volatile boolean du;
     /**
      * Shorthand for dpad_down
      */
-    public boolean dd;
+    public volatile boolean dd;
     /**
      * Shorthand for dpad_left
      */
-    public boolean dl;
+    public volatile boolean dl;
     /**
      * Shorthand for dpad_right
      */
-    public boolean dr;
+    public volatile boolean dr;
     /**
      * Shorthand for left_stick_button
      */
-    public boolean lsb;
+    public volatile boolean lsb;
     /**
      * Shorthand for right_stick_button
      */
-    public boolean rsb;
+    public volatile boolean rsb;
 
     /**
      * Create a new Controller to manage.
@@ -109,7 +109,7 @@ public class Controller extends Gamepad {
     }
 
     private void parseUnmanagedControllerBuffer() {
-        ByteBuffer byteBuffer = ByteBuffer.wrap(new byte[0]);
+        ByteBuffer byteBuffer = ByteBuffer.wrap(sdk.toByteArray());
 
         int buttons;
         byte version = byteBuffer.get();
