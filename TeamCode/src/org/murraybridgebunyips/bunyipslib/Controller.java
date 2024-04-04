@@ -108,6 +108,50 @@ public class Controller extends Gamepad {
         sdk = gamepad;
     }
 
+    private void parseUnmanagedControllerBuffer() {
+        ByteBuffer byteBuffer = ByteBuffer.wrap(new byte[0]);
+
+        int buttons;
+        byte version = byteBuffer.get();
+
+        if (version >= 1) {
+            id = byteBuffer.getInt();
+            timestamp = byteBuffer.getLong();
+            // Skip over buffers we don't care about
+            for (int i = 0; i < 6; i++) {
+                byteBuffer.getFloat();
+            }
+
+            buttons = byteBuffer.getInt();
+            touchpad_finger_1 = (buttons & 0x20000) != 0;
+            touchpad_finger_2 = (buttons & 0x10000) != 0;
+            touchpad = (buttons & 0x08000) != 0;
+            guide = (buttons & 0x00010) != 0;
+        }
+
+        if (version >= 2) {
+            user = byteBuffer.get();
+        }
+
+        if (version >= 3) {
+            type = Type.values()[byteBuffer.get()];
+        }
+
+        if (version >= 4) {
+            byte v4TypeValue = byteBuffer.get();
+            if (v4TypeValue < Type.values().length) {
+                type = Type.values()[v4TypeValue];
+            }
+        }
+
+        if (version >= 5) {
+            touchpad_finger_1_x = byteBuffer.getFloat();
+            touchpad_finger_1_y = byteBuffer.getFloat();
+            touchpad_finger_2_x = byteBuffer.getFloat();
+            touchpad_finger_2_y = byteBuffer.getFloat();
+        }
+    }
+
     /**
      * Update the public fields of this Controller with the values from the wrapped Gamepad, performing calculations
      * on the inputs as specified by the user.
@@ -115,47 +159,7 @@ public class Controller extends Gamepad {
      * called in BunyipsOpMode on another thread.
      */
     public void update() {
-//        ByteBuffer byteBuffer = getReadBuffer(sdk.toByteArray());
-//
-//        int buttons;
-//        byte version = byteBuffer.get();
-//
-//        if (version >= 1) {
-//            id = byteBuffer.getInt();
-//            timestamp = byteBuffer.getLong();
-//            // Skip over buffers we don't care about
-//            for (int i = 0; i < 6; i++) {
-//                byteBuffer.getFloat();
-//            }
-//
-//            buttons = byteBuffer.getInt();
-//            touchpad_finger_1 = (buttons & 0x20000) != 0;
-//            touchpad_finger_2 = (buttons & 0x10000) != 0;
-//            touchpad = (buttons & 0x08000) != 0;
-//            guide = (buttons & 0x00010) != 0;
-//        }
-//
-//        if (version >= 2) {
-//            user = byteBuffer.get();
-//        }
-//
-//        if (version >= 3) {
-//            type = Type.values()[byteBuffer.get()];
-//        }
-//
-//        if (version >= 4) {
-//            byte v4TypeValue = byteBuffer.get();
-//            if (v4TypeValue < Type.values().length) {
-//                type = Type.values()[v4TypeValue];
-//            }
-//        }
-//
-//        if (version >= 5) {
-//            touchpad_finger_1_x = byteBuffer.getFloat();
-//            touchpad_finger_1_y = byteBuffer.getFloat();
-//            touchpad_finger_2_x = byteBuffer.getFloat();
-//            touchpad_finger_2_y = byteBuffer.getFloat();
-//        }
+//        parseUnmanagedControllerBuffer();
 
         // Recalculate all custom inputs
         left_stick_x = get(Controls.Analog.LEFT_STICK_X);

@@ -13,5 +13,6 @@ When copying BunyipsLib to org.murraybridgebunyips, you will need to do the foll
 3. Delete `bunyipslib/roadrunner/util/android/`, ignore warnings
 4. Remove deleted import from `bunyipslib/roadrunner/drive/tuning/AutomaticFeedforwardTuner.java` and import `deps/LoggingUtil`
 5. Remove deleted import from `bunyipslib/roadrunner/trajectorysequence/TrajectorySequenceRunner.java` and import `deps/LogFiles`
+6. Comment out the `parseUnmanagedControllerBuffer()` method call in `bunyipslib/Controller.java, ln ~162
 
 BunyipsLib will now compile, although missing some features.
