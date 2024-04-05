@@ -91,6 +91,13 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
     }
 
     /**
+     * Determine if the subsystem is idle, meaning an IdleTask is running.
+     */
+    public final boolean isIdle() {
+        return getCurrentTask().toString().equals("IdleTask");
+    }
+
+    /**
      * Set the current task to the given task.
      *
      * @param newTask The task to set as the current task
@@ -175,10 +182,11 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
             // Update the state of isFinished() after running the task as it may have changed
             task.pollFinished();
             if (!task.isMuted()) {
-                Scheduler.addSubsystemTaskReport(
+                Scheduler.addTaskReport(
                         getClass().getSimpleName() + (task == defaultTask ? " (d.)" : ""),
                         task.toString(),
-                        round(task.getDeltaTime(), 1)
+                        round(task.getDeltaTime(), 1),
+                        task.getTimeout()
                 );
             }
         }

@@ -30,8 +30,6 @@ public class RaceTaskGroup extends TaskGroup {
         for (Task task : tasks) {
             if (task.pollFinished()) {
                 finishAllTasks();
-                // Get us out of here
-                finishNow();
                 return true;
             }
         }

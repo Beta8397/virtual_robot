@@ -31,9 +31,7 @@ public class DeadlineTaskGroup extends TaskGroup {
         Task firstTask = tasks.get(0);
         boolean firstTaskFinished = firstTask != null && firstTask.pollFinished();
         if (firstTaskFinished) {
-            // Finish everything and evacuate
             finishAllTasks();
-            finishNow();
         }
         return firstTaskFinished;
     }

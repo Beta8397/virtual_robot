@@ -1,11 +1,14 @@
 package org.murraybridgebunyips.bunyipslib.tasks.groups;
 
 import org.murraybridgebunyips.bunyipslib.EmergencyStop;
+import org.murraybridgebunyips.bunyipslib.Scheduler;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+
+import static org.murraybridgebunyips.bunyipslib.Text.round;
 
 /**
  * A group of tasks.
@@ -29,6 +32,7 @@ public abstract class TaskGroup extends Task {
     }
 
     protected final void executeTask(Task task) {
+        if (task.isFinished()) return;
         // Do not manage a task if it is already attached to a subsystem being managed there
         if (attachedTasks.contains(task)) return;
         task.getDependency().ifPresent(dependency -> {
@@ -36,7 +40,10 @@ public abstract class TaskGroup extends Task {
             attachedTasks.add(task);
         });
         // Otherwise we can just run the task outright
-        if (!task.hasDependency()) task.run();
+        if (!task.hasDependency()) {
+            Scheduler.addTaskReport(toString(), task.toString(), round(task.getDeltaTime(), 1), task.getTimeout());
+            task.run();
+        }
     }
 
     protected final void finishAllTasks() {

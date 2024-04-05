@@ -1,5 +1,6 @@
 package org.murraybridgebunyips.bunyipslib.tasks.bases
 
+import androidx.annotation.NonNull
 import org.murraybridgebunyips.bunyipslib.BunyipsOpMode
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem
 import org.murraybridgebunyips.bunyipslib.MovingAverageTimer.NANOS_IN_SECONDS
@@ -91,6 +92,7 @@ abstract class Task(timeoutSeconds: Double) : RobotTask {
      * provide a custom name.
      * @return String representing the name of this task.
      */
+    @NonNull
     override fun toString(): String {
         return name
     }

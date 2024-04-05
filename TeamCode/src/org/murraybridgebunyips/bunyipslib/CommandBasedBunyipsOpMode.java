@@ -1,8 +1,10 @@
 package org.murraybridgebunyips.bunyipslib;
 
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.function.BooleanSupplier;
 
 /**
  * Command-based structure for a {@link BunyipsOpMode} utilising the Scheduler.
@@ -20,7 +22,7 @@ public abstract class CommandBasedBunyipsOpMode extends BunyipsOpMode {
     private Scheduler scheduler;
 
     /**
-     * Call to access the Scheduler from within the OpMode.
+     * Call to directly access the Scheduler from within the OpMode.
      *
      * @return The Scheduler instance.
      */
@@ -46,6 +48,39 @@ public abstract class CommandBasedBunyipsOpMode extends BunyipsOpMode {
      */
     public Scheduler.ControllerButtonCreator operator() {
         return scheduler.operator();
+    }
+
+    /**
+     * Call to access the when() scheduler from the Scheduler.
+     * This is the same as calling scheduler().when().
+     * This is used to create a conditional command based on a boolean supplier.
+     *
+     * @return task creation
+     */
+    public Scheduler.ConditionalTask when(BooleanSupplier condition) {
+        return scheduler.when(condition);
+    }
+
+    /**
+     * Call to access the whenDebounced() scheduler from the Scheduler.
+     * This is the same as calling scheduler().whenDebounced().
+     * This is used to create a conditional command based on a boolean supplier that is debounced.
+     *
+     * @return task creation
+     */
+    public Scheduler.ConditionalTask whenDebounced(BooleanSupplier condition) {
+        return scheduler.whenDebounced(condition);
+    }
+
+    /**
+     * Call to access the always() scheduler from the Scheduler.
+     * This is the same as calling scheduler().always().
+     * This is used to create a command that runs every loop.
+     *
+     * @return task creation
+     */
+    public Scheduler.ConditionalTask always() {
+        return scheduler.always();
     }
 
     /**

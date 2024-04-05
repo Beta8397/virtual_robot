@@ -19,7 +19,7 @@ import java.util.function.Predicate;
  * @see CommandBasedBunyipsOpMode
  */
 public class Scheduler extends BunyipsComponent {
-    private static final ArrayList<String> subsystemReports = new ArrayList<>();
+    private static final ArrayList<String> reports = new ArrayList<>();
     private static boolean isMuted = false;
     private final ArrayList<BunyipsSubsystem> subsystems = new ArrayList<>();
     private final ArrayList<ConditionalTask> allocatedTasks = new ArrayList<>();
@@ -29,19 +29,21 @@ public class Scheduler extends BunyipsComponent {
      */
     public Scheduler() {
         isMuted = false;
-        subsystemReports.clear();
+        reports.clear();
     }
 
     /**
-     * Used internally by subsystems to report their task-running status.
+     * Used internally by subsystems and tasks to report their running status statically.
      *
-     * @param className The class name of the subsystem.
+     * @param className The class name of the subsystem or context.
      * @param taskName  The name of the task.
      * @param deltaTime The time this task has been running
+     * @param timeout   The time this task is allowed to run, 0.0 if indefinite
      */
-    public static void addSubsystemTaskReport(String className, String taskName, double deltaTime) {
+    public static void addTaskReport(String className, String taskName, double deltaTime, double timeout) {
         if (isMuted) return;
-        subsystemReports.add(formatString("% |\n    % -> %s", className, taskName, deltaTime));
+        String report = formatString("% |\n    % -> %", className, taskName, deltaTime);
+        reports.add(timeout == 0.0 ? report + "s" : report + "/" + timeout + "s");
     }
 
     /**
@@ -91,20 +93,22 @@ public class Scheduler extends BunyipsComponent {
 
     /**
      * Run the scheduler. This will run all subsystems and tasks allocated to the scheduler.
-     * This should be called in the activeLoop() method of the BunyipsOpMode.
+     * This should be called in the {@code activeLoop()} method of the {@link BunyipsOpMode}, and is automatically called
+     * in {@link CommandBasedBunyipsOpMode}.
      */
     public void run() {
         if (!isMuted) {
+            // Task count will account for tasks on subsystems that are not IdleTasks
+            int taskCount = (int) (allocatedTasks.size() + subsystems.size() - subsystems.stream().filter(BunyipsSubsystem::isIdle).count());
             opMode.addTelemetry("Managing % task% (%s, %c) on % subsystem%",
-                    // Subsystem count will account for default tasks
-                    allocatedTasks.size() + subsystems.size(),
-                    allocatedTasks.size() + subsystems.size() == 1 ? "" : "s",
-                    allocatedTasks.stream().filter(task -> task.taskToRun.hasDependency()).count() + subsystems.size(),
+                    taskCount,
+                    taskCount == 1 ? "" : "s",
+                    allocatedTasks.stream().filter(task -> task.taskToRun.hasDependency()).count() + subsystems.size() - subsystems.stream().filter(BunyipsSubsystem::isIdle).count(),
                     allocatedTasks.stream().filter(task -> !task.taskToRun.hasDependency()).count(),
                     subsystems.size(),
                     subsystems.size() == 1 ? "" : "s"
             );
-            for (String item : subsystemReports) {
+            for (String item : reports) {
                 if (item.contains("IdleTask")) continue;
                 opMode.addTelemetry(item);
             }
@@ -118,7 +122,7 @@ public class Scheduler extends BunyipsComponent {
             }
             // Blank line to separate Scheduler information from addTelemetry()
             opMode.addTelemetry("");
-            subsystemReports.clear();
+            reports.clear();
         }
 
         for (ConditionalTask task : allocatedTasks) {

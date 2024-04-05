@@ -54,27 +54,6 @@ enum class Controls {
     }
 
     companion object {
-        // Static map of buttons to their debounce state, storing hashcode of gamepad and button
-        private val debounces = HashMap<Int, Boolean>()
-
-        /**
-         * Check if a button is currently pressed on a gamepad, with debounce to ignore a press that was already detected
-         * upon the first call of this function and pair.
-         */
-        @JvmStatic
-        fun isSelectedAfterDebounce(gamepad: Gamepad, button: Controls): Boolean {
-            val buttonPressed = isSelected(gamepad, button)
-            // Default value will be true as it won't be in the map, to avoid debouncing a value that was never pressed
-            val isPressed = debounces.getOrDefault(Objects.hash(gamepad, button), true)
-            if (buttonPressed && !isPressed) {
-                debounces[Objects.hash(gamepad, button)] = true
-                return true
-            } else if (!buttonPressed) {
-                debounces[Objects.hash(gamepad, button)] = false
-            }
-            return false
-        }
-
         /**
          * Check if a button is currently pressed on a gamepad.
          */

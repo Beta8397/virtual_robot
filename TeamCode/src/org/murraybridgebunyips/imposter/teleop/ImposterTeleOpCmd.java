@@ -29,7 +29,8 @@ public class ImposterTeleOpCmd extends CommandBasedBunyipsOpMode {
     protected void assignCommands() {
         drive.setDefaultTask(new HolonomicDriveTask<>(gamepad1, drive, () -> false));
         driver().whenPressed(Controls.A)
-                        .run(new Thing(ss1, drive));
+                .run(new ContinuousTask(() -> addTelemetry("toggle is on")))
+                .finishingWhen(() -> gamepad1.getDebounced(Controls.A));
     }
 
     class Thing extends SequentialTaskGroup {

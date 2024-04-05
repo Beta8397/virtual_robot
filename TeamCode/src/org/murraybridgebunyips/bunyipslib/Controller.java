@@ -42,6 +42,7 @@ public class Controller extends Gamepad {
     public final Gamepad sdk;
     private final HashMap<Controls, Predicate<Boolean>> buttons = new HashMap<>();
     private final HashMap<Controls.Analog, Function<Float, Float>> axes = new HashMap<>();
+    private final HashMap<Controls, Boolean> debounces = new HashMap<>();
     /**
      * Shorthand for left_stick_x
      */
@@ -319,6 +320,23 @@ public class Controller extends Gamepad {
         float value = Controls.Analog.get(sdk, axis);
         Function<Float, Float> function = axes.get(axis);
         return function == null ? value : function.apply(value);
+    }
+
+    /**
+     * Check if a button is currently pressed on a gamepad, with debounce to ignore a press that was already detected
+     * upon the first call of this function and button.
+     */
+    public boolean getDebounced(Controls button) {
+        boolean buttonPressed = get(button);
+        // Default value will be true as it won't be in the map, to avoid debouncing a value that was never pressed
+        boolean isPressed = debounces.getOrDefault(button, true);
+        if (buttonPressed && !isPressed) {
+            debounces.put(button, true);
+            return true;
+        } else if (!buttonPressed) {
+            debounces.put(button, false);
+        }
+        return false;
     }
 
     /**

@@ -21,16 +21,15 @@ public class ParallelTaskGroup extends TaskGroup {
     public final void periodic() {
         for (Task task : tasks) {
             executeTask(task);
+            task.pollFinished();
         }
     }
 
     @Override
     public final boolean isTaskFinished() {
         for (Task task : tasks) {
-            if (!task.pollFinished()) return false;
+            if (!task.isFinished()) return false;
         }
-        // No point in waiting for the next loop if we're all done
-        finishNow();
         return true;
     }
 }
