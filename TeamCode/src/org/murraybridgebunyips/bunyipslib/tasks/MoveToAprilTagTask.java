@@ -1,5 +1,8 @@
 package org.murraybridgebunyips.bunyipslib.tasks;
 
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Inches;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Meters;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -8,7 +11,6 @@ import com.qualcomm.robotcore.util.Range;
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 import org.murraybridgebunyips.bunyipslib.Controls;
 import org.murraybridgebunyips.bunyipslib.EmergencyStop;
-import org.murraybridgebunyips.bunyipslib.Inches;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.ForeverTask;
 import org.murraybridgebunyips.bunyipslib.vision.data.AprilTagData;
@@ -28,7 +30,7 @@ public class MoveToAprilTagTask<T extends BunyipsSubsystem> extends ForeverTask 
     /**
      * The desired distance from the tag in meters.
      */
-    public static double DESIRED_DISTANCE = Inches.toM(18.0); // m
+    public static double DESIRED_DISTANCE = Meters.convertFrom(18, Inches); // m
     /**
      * The speed gain for the distance error.
      */
@@ -124,7 +126,7 @@ public class MoveToAprilTagTask<T extends BunyipsSubsystem> extends ForeverTask 
             return;
         }
 
-        double rangeError = (target.get().getRange() - Inches.fromM(DESIRED_DISTANCE)) * SPEED_GAIN;
+        double rangeError = (target.get().getRange() - Inches.convertFrom(DESIRED_DISTANCE, Meters)) * SPEED_GAIN;
         double yawError = -target.get().getYaw() * STRAFE_GAIN;
         double headingError = target.get().getBearing() * TURN_GAIN;
 

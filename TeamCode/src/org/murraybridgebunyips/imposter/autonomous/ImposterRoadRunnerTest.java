@@ -1,9 +1,6 @@
 package org.murraybridgebunyips.imposter.autonomous;
 
-import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import org.murraybridgebunyips.bunyipslib.Inches;
 import org.murraybridgebunyips.bunyipslib.drive.MecanumDrive;
 import org.murraybridgebunyips.bunyipslib.OpModeSelection;
 import org.murraybridgebunyips.bunyipslib.RoadRunnerAutonomousBunyipsOpMode;
@@ -12,6 +9,9 @@ import org.murraybridgebunyips.imposter.components.ImposterConfig;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.FieldTiles;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Inches;
 
 @Autonomous(name = "RoadRunnerTest", group = "VIRTUAL_BUNYIPSFTC")
 public class ImposterRoadRunnerTest extends RoadRunnerAutonomousBunyipsOpMode<MecanumDrive> {
@@ -40,10 +40,12 @@ public class ImposterRoadRunnerTest extends RoadRunnerAutonomousBunyipsOpMode<Me
 //                .splineTo(new Vector2d(63.66, -11.94), Math.toRadians(0.00))
 //                .build();
         addNewTrajectory()
-                .forward(Inches.fromFieldTiles(2.2))
+                .forward(Inches.convertFrom(2, FieldTiles))
+                .withName("Forward 2 Tile")
                 .build();
         addNewTrajectory()
-                .strafeRight(Inches.fromFieldTiles(4.2))
+                .strafeRight(Inches.convertFrom(4, FieldTiles))
+                .withName("Right 4 Tiles")
                 .build();
     }
 

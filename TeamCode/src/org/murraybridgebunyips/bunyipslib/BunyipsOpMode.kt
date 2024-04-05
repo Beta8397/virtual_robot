@@ -175,7 +175,12 @@ abstract class BunyipsOpMode : BOMInternal() {
             // Ring-buffer timing utility
             movingAverageTimer = MovingAverageTimer()
             // Telemetry
-            telemetry = DualTelemetry("BOM", this, movingAverageTimer, BuildConfig.GIT_COMMIT, BuildConfig.BUILD_TIME)
+            telemetry = DualTelemetry(
+                this,
+                movingAverageTimer,
+                "BOM",
+                "bunyipslib ${BuildConfig.GIT_COMMIT}-${BuildConfig.BUILD_TIME}"
+            )
             telemetry.setup()
             // Controller setup and monitoring threads
             gamepad1 = Controller(sdkGamepad1)

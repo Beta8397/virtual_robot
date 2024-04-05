@@ -1,4 +1,4 @@
-package org.murraybridgebunyips.bunyipslib.pid;
+package org.murraybridgebunyips.bunyipslib.external.pid;
 
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 

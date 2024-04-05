@@ -14,16 +14,21 @@ import kotlin.math.roundToInt
 /**
  * Telemetry implementation for BunyipsLib, integrating FtcDashboard and Driver Station calls in one object, while
  * providing additional features useful for debugging and telemetry management.
- * This is used internally by BOM accessible by the `telemetry` field, but is compatible with any OpMode.
+ * This is used internally by [BunyipsOpMode] to be accessible by the overridden `telemetry` field.
  *
  * @author Lucas Bubner, 2024
  */
-class DualTelemetry(
-    private val overheadTag: String,
+class DualTelemetry @JvmOverloads constructor(
     private val opMode: OpMode,
-    private val movingAverageTimer: MovingAverageTimer?,
-    gitCommit: String?,
-    buildTime: String?
+    private val movingAverageTimer: MovingAverageTimer? = null,
+    /**
+     * A tag to prepend to the overhead telemetry status message.
+     */
+    private val overheadTag: String? = null,
+    /**
+     * A string to display as the first log message in the telemetry log.
+     */
+    infoString: String? = null
 ) : Telemetry {
     private lateinit var overheadTelemetry: Item
     private var telemetryQueue = 0
@@ -46,15 +51,17 @@ class DualTelemetry(
         opMode.telemetry.captionValueSeparator = ""
         // Uncap the telemetry log limit to ensure we capture everything
         opMode.telemetry.log().capacity = 999999
-        telemetryItems.add(
-            Pair(
-                ItemType.LOG,
-                "bunyipslib ${gitCommit ?: "N"}-${buildTime ?: "N"}"
-            )
-        )
         // Separate log from telemetry on the DS with an empty line
         opMode.telemetry.log().add("")
-        opMode.telemetry.log().add("bunyipslib ${gitCommit ?: "N"}-${buildTime ?: "N"}")
+        if (infoString != null) {
+            telemetryItems.add(
+                Pair(
+                    ItemType.LOG,
+                    infoString
+                )
+            )
+            opMode.telemetry.log().add(infoString)
+        }
     }
 
     /**
@@ -205,7 +212,7 @@ class DualTelemetry(
                 }
             } | ${Controls.movementString(opMode.gamepad1)} ${Controls.movementString(opMode.gamepad2)}\n"
 
-        overheadTelemetry.setValue("BOM: $overheadStatus")
+        overheadTelemetry.setValue("${if (overheadTag != null) "$overheadTag: " else ""}$overheadStatus")
 
         // FtcDashboard
         if (packet == null) {
@@ -213,7 +220,7 @@ class DualTelemetry(
         }
 
         packet?.let {
-            it.put("BOM", overheadStatus + "\n")
+            it.put(overheadTag ?: "status", overheadStatus + "\n")
 
             // Copy with toList() to avoid ConcurrentModificationExceptions
             telemetryItems.toList().forEachIndexed { index, pair ->
@@ -265,7 +272,10 @@ class DualTelemetry(
         telemetryItems.clear()
         FtcDashboard.getInstance().clearTelemetry()
         telemetryQueue = 0
-        overheadTelemetry = opMode.telemetry.addData("", "BOM: unknown | T+?s | ?ms | (?) (?))\n")
+        overheadTelemetry = opMode.telemetry.addData(
+            "",
+            "${if (overheadTag != null) "$overheadTag: " else ""}unknown | T+?s | ?ms | (?) (?))\n"
+        )
             .setRetained(true)
     }
 

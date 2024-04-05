@@ -1,4 +1,4 @@
-package org.murraybridgebunyips.bunyipslib.pid;
+package org.murraybridgebunyips.bunyipslib.external.pid;
 
 /**
  * A PIDF controller with no feedforward or integral.

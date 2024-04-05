@@ -1,10 +1,12 @@
 package org.murraybridgebunyips.bunyipslib.example.examplerobot.autonomous;
 
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Inches;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Millimeters;
+
 import androidx.annotation.Nullable;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 
-import org.murraybridgebunyips.bunyipslib.Inches;
 import org.murraybridgebunyips.bunyipslib.OpModeSelection;
 import org.murraybridgebunyips.bunyipslib.RoadRunnerAutonomousBunyipsOpMode;
 import org.murraybridgebunyips.bunyipslib.drive.TankDrive;
@@ -57,7 +59,7 @@ public class ExampleRoadRunnerAutonomous extends RoadRunnerAutonomousBunyipsOpMo
 //                .splineTo(...)
 //                .build();
         addNewTrajectory(new Pose2d(0, 0, 0))
-                .forward(Inches.fromMM(1234))
+                .forward(Inches.convertFrom(1234, Millimeters))
                 .buildWithPriority();
         addNewTrajectory()
                 .buildWithLowPriority();

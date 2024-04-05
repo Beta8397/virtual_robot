@@ -1,6 +1,8 @@
 package org.murraybridgebunyips.bunyipslib.drive;
 
 import static org.murraybridgebunyips.bunyipslib.Text.round;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Centimeters;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Inches;
 
 import com.acmerobotics.roadrunner.drive.DriveSignal;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
@@ -16,7 +18,6 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 import org.murraybridgebunyips.bunyipslib.Controls;
-import org.murraybridgebunyips.bunyipslib.Inches;
 import org.murraybridgebunyips.bunyipslib.Storage;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.DriveConstants;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.MecanumCoefficients;
@@ -111,8 +112,8 @@ public class MecanumDrive extends BunyipsSubsystem implements RoadRunnerDrive {
     @Override
     protected void periodic() {
         opMode.addTelemetry("Localizer: X:%cm Y:%cm %deg",
-                round(Inches.toCM(drive.getPoseEstimate().getX()), 1),
-                round(Inches.toCM(drive.getPoseEstimate().getY()), 1),
+                round(Centimeters.convertFrom(drive.getPoseEstimate().getX(), Inches), 1),
+                round(Centimeters.convertFrom(drive.getPoseEstimate().getY(), Inches), 1),
                 round(Math.toDegrees(drive.getPoseEstimate().getHeading()), 1));
 
         drive.update();

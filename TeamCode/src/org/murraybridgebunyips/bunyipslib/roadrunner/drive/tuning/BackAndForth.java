@@ -1,10 +1,12 @@
 package org.murraybridgebunyips.bunyipslib.roadrunner.drive.tuning;
 
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Inches;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Meter;
+
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.murraybridgebunyips.bunyipslib.Inches;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
 
 /**
@@ -28,7 +30,7 @@ public abstract class BackAndForth extends LinearOpMode {
     /**
      * The distance in inches to travel for the feedforward tuning routine.
      */
-    public static double DISTANCE = Inches.fromM(1);
+    public static double DISTANCE = Inches.convertFrom(1, Meter);
     protected RoadRunnerDrive drive;
 
     @Override

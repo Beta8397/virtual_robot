@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.util.Range;
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 import org.murraybridgebunyips.bunyipslib.Controls;
 import org.murraybridgebunyips.bunyipslib.EmergencyStop;
-import org.murraybridgebunyips.bunyipslib.pid.PIDController;
+import org.murraybridgebunyips.bunyipslib.external.pid.PIDController;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 import org.murraybridgebunyips.bunyipslib.vision.data.ContourData;

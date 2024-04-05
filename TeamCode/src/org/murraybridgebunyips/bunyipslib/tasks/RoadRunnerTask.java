@@ -1,12 +1,13 @@
 package org.murraybridgebunyips.bunyipslib.tasks;
 
 import static org.murraybridgebunyips.bunyipslib.Text.round;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Centimeters;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Inches;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
-import org.murraybridgebunyips.bunyipslib.Inches;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.TrajectorySequence;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
@@ -118,7 +119,7 @@ public class RoadRunnerTask<T extends RoadRunnerDrive> extends Task {
         opMode.addTelemetry("Duration: %/% sec", round(getDeltaTime(), 2), round(duration, 2));
         drive.update();
 
-        opMode.addTelemetry("Distance to target: %cm", round(Inches.toCM(distance), 2));
+        opMode.addTelemetry("Distance to target: %cm", round(Centimeters.convertFrom(distance, Inches), 2));
         opMode.addTelemetry("Angle to target: %deg", round(Math.toDegrees(angle), 2));
     }
 
