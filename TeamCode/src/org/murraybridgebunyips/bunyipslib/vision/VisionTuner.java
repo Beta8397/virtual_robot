@@ -51,6 +51,12 @@ import java.util.Arrays;
 @TeleOp(name = "Vision Tuner")
 @Disabled
 public class VisionTuner extends BunyipsOpMode {
+
+    // TODO: Make this more generic and use abstraction to pass in processors, this class only works for pixels
+    //   and isn't a general contour tuner. It should be able to tune any contour ColourThreshold.
+    //   This involves using a ColourThreshold[] instead of the individual pixel variables. and setting scalars
+    //   based off the index of the ColourThreshold in the array. This will also reduce the number of variables used.
+
     int thresholdIndex = 0;
     int pixelIndex = 0;
     double scalarDelta = 0;
@@ -93,10 +99,13 @@ public class VisionTuner extends BunyipsOpMode {
             vision.startPreview();
 
             pixels = new ArrayList<>(Arrays.asList(whitePixel, purplePixel, yellowPixel, greenPixel));
+            // TODO: By having this array, you will override the values of the next processor when you switch to it,
+            //      rather than respecting the current values of the processor you are switching to. Will need to modify
+            //      the processor itself as they already store scalar values in setUpper() setLower() getUpper() getLower().
             scalars = new ArrayList<>(Arrays.asList(lower_y, lower_cb, lower_cr, upper_y, upper_cb, upper_cr));
             currentPixel = whitePixel;  // Set to white pixel by default
         } catch (IllegalArgumentException e) {
-            throw new EmergencyStop("VisionTest is missing a webcam called 'webcam'!");
+            throw new EmergencyStop("VisionTuner is missing a webcam called 'webcam'!");
         }
     }
 

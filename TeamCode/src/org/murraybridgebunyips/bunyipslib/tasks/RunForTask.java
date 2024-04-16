@@ -1,6 +1,8 @@
 package org.murraybridgebunyips.bunyipslib.tasks;
 
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
+import org.murraybridgebunyips.bunyipslib.external.units.Measure;
+import org.murraybridgebunyips.bunyipslib.external.units.Time;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
 /**
@@ -17,7 +19,7 @@ public class RunForTask extends Task {
      * @param timeout  The time to run the task for
      * @param callback The callback to run every loop
      */
-    public RunForTask(double timeout, Runnable callback) {
+    public RunForTask(Measure<Time> timeout, Runnable callback) {
         super(timeout);
         this.callback = callback;
     }
@@ -30,7 +32,7 @@ public class RunForTask extends Task {
      * @param dependency The subsystem to run this task on
      * @param override   Whether this task should override conflicting tasks
      */
-    public RunForTask(double timeout, Runnable callback, BunyipsSubsystem dependency, boolean override) {
+    public RunForTask(Measure<Time> timeout, Runnable callback, BunyipsSubsystem dependency, boolean override) {
         super(timeout, dependency, override);
         this.callback = callback;
     }

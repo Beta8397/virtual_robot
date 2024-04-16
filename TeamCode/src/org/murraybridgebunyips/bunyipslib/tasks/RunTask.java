@@ -21,6 +21,14 @@ public class RunTask extends OnceTask {
     }
 
     /**
+     * Run nothing and complete, this is useful as a placeholder task.
+     */
+    public RunTask() {
+        this(() -> {
+        });
+    }
+
+    /**
      * Run the given callback immediately, with a dependency on the given subsystem.
      *
      * @param callback            The callback to run.

@@ -72,20 +72,26 @@ public final class Units {
     public static final Time Milliseconds = Milli(Seconds);
 
     /** Alias for {@link #Milliseconds} to make combined unit definitions read more smoothly. */
-    public static final Time Millisecond = Milliseconds; // singularized alias
+    public static final Time Millisecond = Milliseconds; // Singularised alias
 
     /** 1/1,000,000 of a {@link #Seconds Second}. */
     public static final Time Microseconds = Micro(Seconds);
 
     /** Alias for {@link #Microseconds} to make combined unit definitions read more smoothly. */
-    public static final Time Microsecond = Microseconds; // singularized alias
+    public static final Time Microsecond = Microseconds; // Singularised alias
+
+    /** 1/1,000,000,000 of a {@link #Seconds Second}. */
+    public static final Time Nanoseconds = Micro(Milliseconds);
+
+    /** Alias for {@link #Nanoseconds} to make combined unit definitions read more smoothly. */
+    public static final Time Nanosecond = Nanoseconds; // Singularised alias
 
     /** 60 {@link #Seconds}. */
     public static final Time Minutes =
             derive(Seconds).aggregate(60).named("Minute").symbol("min").make();
 
     /** Alias for {@link #Minutes} to make combined unit definitions read more smoothly. */
-    public static final Time Minute = Minutes; // singularized alias
+    public static final Time Minute = Minutes; // Singularised alias
 
     // Angle
     /**

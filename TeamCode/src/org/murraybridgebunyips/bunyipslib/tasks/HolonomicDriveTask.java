@@ -1,7 +1,5 @@
 package org.murraybridgebunyips.bunyipslib.tasks;
 
-import androidx.annotation.NonNull;
-
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.jetbrains.annotations.NotNull;
@@ -12,7 +10,6 @@ import org.murraybridgebunyips.bunyipslib.drive.MecanumDrive;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.ForeverTask;
 
 import java.util.function.BooleanSupplier;
-import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 /**
@@ -29,20 +26,6 @@ public class HolonomicDriveTask<T extends BunyipsSubsystem> extends ForeverTask 
     private final Supplier<Float> y;
     private final Supplier<Float> r;
     private final BooleanSupplier fieldCentricEnabled;
-    private final DoubleSupplier multiplierSupplier;
-
-    /**
-     * Constructor for HolonomicDriveTask.
-     *
-     * @param controller          The gamepad to use for driving
-     * @param mecanumDrive        The MecanumDrive to use for driving
-     * @param fieldCentricEnabled A BooleanSupplier that returns whether field centric drive is enabled,
-     *                            this will only work on a MecanumDrive that supports dynamic field-centric
-     *                            drive switching, such as the RoadRunner-integrated MecanumDrive
-     */
-    public HolonomicDriveTask(Gamepad controller, @NonNull T mecanumDrive, BooleanSupplier fieldCentricEnabled) {
-        this(controller, mecanumDrive, () -> 1.0, fieldCentricEnabled);
-    }
 
     /**
      * Constructor for HolonomicDriveTask.
@@ -51,13 +34,11 @@ public class HolonomicDriveTask<T extends BunyipsSubsystem> extends ForeverTask 
      * @param ySupplier           The supplier for the y-axis input
      * @param rSupplier           The supplier for the rotation input
      * @param mecanumDrive        The MecanumDrive to use for driving
-     * @param multiplierSupplier  Supply a multiplier that will be applied to the inputs of each joystick.
-     *                            Useful when in use with the InputMultiplier.
      * @param fieldCentricEnabled A BooleanSupplier that returns whether field centric drive is enabled,
      *                            this will only work on a MecanumDrive that supports dynamic field-centric
      *                            drive switching, such as the RoadRunner-integrated MecanumDrive
      */
-    public HolonomicDriveTask(Supplier<Float> xSupplier, Supplier<Float> ySupplier, Supplier<Float> rSupplier, @NotNull T mecanumDrive, DoubleSupplier multiplierSupplier, BooleanSupplier fieldCentricEnabled) {
+    public HolonomicDriveTask(Supplier<Float> xSupplier, Supplier<Float> ySupplier, Supplier<Float> rSupplier, @NotNull T mecanumDrive, BooleanSupplier fieldCentricEnabled) {
         super(mecanumDrive, false);
         if (!(mecanumDrive instanceof MecanumDrive) && !(mecanumDrive instanceof CartesianMecanumDrive))
             throw new EmergencyStop("HolonomicDriveTask must be used with a holonomic drivetrain");
@@ -65,7 +46,6 @@ public class HolonomicDriveTask<T extends BunyipsSubsystem> extends ForeverTask 
         x = xSupplier;
         y = ySupplier;
         r = rSupplier;
-        this.multiplierSupplier = multiplierSupplier;
         this.fieldCentricEnabled = fieldCentricEnabled;
     }
 
@@ -75,14 +55,12 @@ public class HolonomicDriveTask<T extends BunyipsSubsystem> extends ForeverTask 
      *
      * @param driver              The gamepad to use for driving
      * @param mecanumDrive        The MecanumDrive to use for driving
-     * @param multiplierSupplier  Supply a multiplier that will be applied to the inputs of each joystick.
-     *                            Useful when in use with the InputMultiplier.
      * @param fieldCentricEnabled A BooleanSupplier that returns whether field centric drive is enabled,
      *                            this will only work on a MecanumDrive that supports dynamic field-centric
      *                            drive switching, such as the RoadRunner-integrated MecanumDrive
      */
-    public HolonomicDriveTask(Gamepad driver, @NotNull T mecanumDrive, DoubleSupplier multiplierSupplier, BooleanSupplier fieldCentricEnabled) {
-        this(() -> driver.left_stick_x, () -> driver.left_stick_y, () -> driver.right_stick_x, mecanumDrive, multiplierSupplier, fieldCentricEnabled);
+    public HolonomicDriveTask(Gamepad driver, @NotNull T mecanumDrive, BooleanSupplier fieldCentricEnabled) {
+        this(() -> driver.left_stick_x, () -> driver.left_stick_y, () -> driver.right_stick_x, mecanumDrive, fieldCentricEnabled);
     }
 
     @Override
@@ -94,24 +72,12 @@ public class HolonomicDriveTask<T extends BunyipsSubsystem> extends ForeverTask 
     protected void periodic() {
         if (drive instanceof MecanumDrive) {
             if (fieldCentricEnabled.getAsBoolean()) {
-                ((MecanumDrive) drive).setSpeedUsingControllerFieldCentric(
-                        x.get() * multiplierSupplier.getAsDouble(),
-                        y.get() * multiplierSupplier.getAsDouble(),
-                        r.get() * multiplierSupplier.getAsDouble()
-                );
+                ((MecanumDrive) drive).setSpeedUsingControllerFieldCentric(x.get(), y.get(), r.get());
             } else {
-                ((MecanumDrive) drive).setSpeedUsingController(
-                        x.get() * multiplierSupplier.getAsDouble(),
-                        y.get() * multiplierSupplier.getAsDouble(),
-                        r.get() * multiplierSupplier.getAsDouble()
-                );
+                ((MecanumDrive) drive).setSpeedUsingController(x.get(), y.get(), r.get());
             }
         } else if (drive instanceof CartesianMecanumDrive) {
-            ((CartesianMecanumDrive) drive).setSpeedUsingController(
-                    x.get() * multiplierSupplier.getAsDouble(),
-                    y.get() * multiplierSupplier.getAsDouble(),
-                    r.get() * multiplierSupplier.getAsDouble()
-            );
+            ((CartesianMecanumDrive) drive).setSpeedUsingController(x.get(), y.get(), r.get());
         }
     }
 

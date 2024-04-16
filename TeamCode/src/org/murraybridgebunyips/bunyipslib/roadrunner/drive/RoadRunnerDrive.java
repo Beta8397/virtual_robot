@@ -14,6 +14,8 @@ import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryVelocityCons
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
+import org.murraybridgebunyips.bunyipslib.drive.MecanumDrive;
+import org.murraybridgebunyips.bunyipslib.drive.TankDrive;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.TrajectorySequence;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.TrajectorySequenceBuilder;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.TrajectorySequenceRunner;
@@ -22,7 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Interface for access methods in RoadRunner drive classes.
+ * Interface for access methods in RoadRunner drive classes, such as {@link MecanumDrive} and {@link TankDrive}.
  *
  * @author Lucas Bubner, 2023
  */

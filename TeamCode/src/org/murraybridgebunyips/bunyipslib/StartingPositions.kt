@@ -34,19 +34,19 @@ enum class StartingPositions(
 
     companion object {
         /**
-         * Convert StartingPositions into a list of OpModeSelections. Useful in ABOM setOpModes().
+         * Convert StartingPositions into a list. Useful in ABOM setOpModes().
          *
          * These positions are arranged so they will appear on the controller in the same order
          * as if the controller were rotated 45 degrees anti-clockwise and ABXY represented the four
          * positions from the audience's perspective.
          */
         @JvmStatic
-        fun use(): List<OpModeSelection> {
+        fun use(): List<StartingPositions> {
             return listOf(
-                OpModeSelection(STARTING_RED_LEFT), // A
-                OpModeSelection(STARTING_RED_RIGHT), // B
-                OpModeSelection(STARTING_BLUE_RIGHT), // X
-                OpModeSelection(STARTING_BLUE_LEFT) // Y
+                STARTING_RED_LEFT, // A
+                STARTING_RED_RIGHT, // B
+                STARTING_BLUE_RIGHT, // X
+                STARTING_BLUE_LEFT // Y
             )
         }
     }

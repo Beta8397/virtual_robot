@@ -57,12 +57,12 @@ public class YellowPixel extends ColourThreshold {
     }
 
     @Override
-    public Scalar getLower() {
+    protected Scalar setLower() {
         return LOWER_YCBCR;
     }
 
     @Override
-    public Scalar getUpper() {
+    protected Scalar setUpper() {
         return UPPER_YCBCR;
     }
 

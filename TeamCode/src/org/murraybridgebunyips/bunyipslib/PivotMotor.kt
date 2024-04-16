@@ -3,6 +3,11 @@ package org.murraybridgebunyips.bunyipslib
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorImpl
+import org.murraybridgebunyips.bunyipslib.external.units.Angle
+import org.murraybridgebunyips.bunyipslib.external.units.Distance
+import org.murraybridgebunyips.bunyipslib.external.units.Measure
+import org.murraybridgebunyips.bunyipslib.external.units.Units.Degrees
+import org.murraybridgebunyips.bunyipslib.external.units.Units.Millimeters
 
 /**
  * Extension of DcMotor that implements a pivotal encoder for tracking the position of a pivot.
@@ -15,14 +20,14 @@ class PivotMotor(
 ) : DcMotorImpl(motor.controller, motor.portNumber), ScopedEncoder {
     constructor(motor: DcMotorEx, ticksPerRevolution: Double) : this(motor, ticksPerRevolution, 1.0)
 
-    private val encoder: Encoder = Encoder(motor, ticksPerRevolution, null, reduction)
+    private val encoderMotor: EncoderMotor = EncoderMotor(motor, 1.0, ticksPerRevolution)
 
     /**
      * Enable encoder and start tracking in the selected mode, which will also save a snapshot of the encoder position for relative tracking.
      * @param mode the mode to track the encoder in
      */
     override fun track(mode: DcMotor.RunMode) {
-        encoder.track(mode)
+        encoderMotor.track(mode)
     }
 
     /**
@@ -30,14 +35,14 @@ class PivotMotor(
      * This will also stop the motor.
      */
     override fun reset() {
-        encoder.reset()
+        encoderMotor.reset()
     }
 
     /**
      * Get a movement reading in ticks from the encoder since the last track()
      */
     override fun position(scope: ScopedEncoder.Scope): Double {
-        return encoder.position(scope)
+        return encoderMotor.position(scope)
     }
 
     /**
@@ -45,56 +50,48 @@ class PivotMotor(
      * @param scope the scope to calculate the distance in
      */
     override fun travelledRevolutions(scope: ScopedEncoder.Scope): Double {
-        return encoder.travelledRevolutions(scope)
+        return encoderMotor.travelledRevolutions(scope)
     }
 
     /**
-     * Get the distance travelled in millimeters.
      * This method is not used for pivots, and will always return 0.0.
-     * @param scope the scope to calculate the distance in
+     * @param scope
      */
-    override fun travelledMM(scope: ScopedEncoder.Scope): Double {
+    override fun travelled(scope: ScopedEncoder.Scope): Measure<Distance> {
         // Wheel diameter is not used for pivots
         Dbg.error(Text.getCallingUserCodeFunction(), "Wheel diameter is not used for pivots")
-        return 0.0
+        return Millimeters.zero()
     }
 
     /**
      * Hold the current position of the encoder using RUN_TO_POSITION.
-     * @param holdingPower the power to hold the position at
-     */
-    fun holdCurrentPosition(holdingPower: Double) {
-        encoder.holdCurrentPosition(holdingPower)
-    }
-
-    /**
-     * Get the current degrees of the pivot.
+     * @param holdingPower the power to hold the position at, default is 1.0
      */
     @JvmOverloads
-    fun getDegrees(scope: ScopedEncoder.Scope = ScopedEncoder.Scope.RELATIVE): Double {
-        return (encoder.position(scope) / ticksPerRevolution) * 360
+    fun holdCurrentPosition(holdingPower: Double = 1.0) {
+        encoderMotor.holdCurrentPosition(holdingPower)
     }
 
     /**
-     * Get the current radians of the pivot.
+     * Get the current angle of the pivot.
      */
     @JvmOverloads
-    fun getRadians(scope: ScopedEncoder.Scope = ScopedEncoder.Scope.RELATIVE): Double {
-        return Math.toRadians(getDegrees(scope))
+    fun getCurrent(scope: ScopedEncoder.Scope = ScopedEncoder.Scope.RELATIVE): Measure<Angle> {
+        return Degrees.of((encoderMotor.position(scope) / ticksPerRevolution) * 360)
     }
 
     /**
-     * Set the target position of the pivot in degrees.
+     * Get the current target angle of the pivot.
      */
-    fun setDegrees(degrees: Double) {
+    fun getTarget(): Measure<Angle> {
+        return Degrees.of(((motor.targetPosition + encoderMotor.snapshot.toInt()) / ticksPerRevolution) * 360)
+    }
+
+    /**
+     * Set the target angle of the pivot.
+     */
+    fun set(angle: Measure<Angle>) {
         motor.targetPosition =
-            ((degrees / 360) * ticksPerRevolution / reduction).toInt() - encoder.snapshot.toInt()
-    }
-
-    /**
-     * Set the target position of the pivot in radians.
-     */
-    fun setRadians(radians: Double) {
-        setDegrees(Math.toDegrees(radians))
+            ((angle.inUnit(Degrees) / 360) * ticksPerRevolution / reduction).toInt() - encoderMotor.snapshot.toInt()
     }
 }

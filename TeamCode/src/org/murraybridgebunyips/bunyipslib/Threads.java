@@ -35,10 +35,10 @@ public final class Threads {
      * @param task the infinite loop task to run on the new thread
      * @param name the name of the thread to access it later and to log as
      */
-    public static void startLoop(While task, String name) {
+    public static void startLoop(Runnable task, String name) {
         Dbg.logd(Threads.class, "starting new loop thread: % ...", name);
         Thread thread = new Thread(() -> {
-            while (!Thread.interrupted()) {
+            while (!Thread.currentThread().isInterrupted()) {
                 task.run();
             }
         });
@@ -62,7 +62,7 @@ public final class Threads {
      *
      * @param task the infinite loop task to run on the new thread
      */
-    public static void startLoop(While task) {
+    public static void startLoop(Runnable task) {
         startLoop(task, task.getClass().getSimpleName());
     }
 

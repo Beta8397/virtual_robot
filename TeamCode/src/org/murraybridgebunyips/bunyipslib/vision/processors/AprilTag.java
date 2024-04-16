@@ -66,7 +66,7 @@ public class AprilTag extends Processor<AprilTagData> {
     }
 
     @Override
-    public void update() {
+    protected void update() {
         List<AprilTagDetection> detections = instance.getDetections();
         for (AprilTagDetection detection : detections) {
             data.add(new AprilTagData(
@@ -103,12 +103,12 @@ public class AprilTag extends Processor<AprilTagData> {
     }
 
     @Override
-    public void onProcessFrame(Mat frame, long captureTimeNanos) {
+    protected void onProcessFrame(Mat frame, long captureTimeNanos) {
         atCtx = instance.processFrame(frame, captureTimeNanos);
     }
 
     @Override
-    public void onFrameDraw(Canvas canvas) {
+    protected void onFrameDraw(Canvas canvas) {
         instance.onDrawFrame(canvas, Vision.CAMERA_WIDTH, Vision.CAMERA_HEIGHT, 1.0f, 1.0f, atCtx);
     }
 }

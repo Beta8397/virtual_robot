@@ -57,7 +57,7 @@ class UserSelection<T>(
     /**
      * Runs once the user has made a selection or the thread is interrupted. The result will be the selection made by the user.
      */
-    var callback: Consumer<T?>,
+    private val callback: Consumer<T?>,
     private vararg val opmodes: T
 ) : Runnable {
 

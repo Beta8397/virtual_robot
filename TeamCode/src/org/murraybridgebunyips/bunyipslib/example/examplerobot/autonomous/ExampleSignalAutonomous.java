@@ -1,15 +1,14 @@
 package org.murraybridgebunyips.bunyipslib.example.examplerobot.autonomous;
 
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds;
+
 import org.murraybridgebunyips.bunyipslib.AutonomousBunyipsOpMode;
 import org.murraybridgebunyips.bunyipslib.Direction;
 import org.murraybridgebunyips.bunyipslib.OpModeSelection;
 import org.murraybridgebunyips.bunyipslib.example.examplerobot.components.ExampleConfig;
 import org.murraybridgebunyips.bunyipslib.tasks.GetSignalTask;
 import org.murraybridgebunyips.bunyipslib.tasks.WaitTask;
-import org.murraybridgebunyips.bunyipslib.tasks.bases.RobotTask;
 import org.murraybridgebunyips.bunyipslib.vision.Vision;
-
-import java.util.List;
 
 /**
  * Autonomous example of using POWERPLAY AprilTag detection to determine the parking position.
@@ -25,22 +24,13 @@ public class ExampleSignalAutonomous extends AutonomousBunyipsOpMode {
     private Vision cam;
 
     @Override
-    protected void onInitialisation() {
+    protected void onInitialise() {
         config.init();
         cam = new Vision(config.webcam);
         initTask = new GetSignalTask(cam);
-    }
-
-    @Override
-    protected List<OpModeSelection> setOpModes() {
-        return null;
-    }
-
-    @Override
-    protected RobotTask setInitTask() {
         // Will run this task until it is complete, then move on to onInitDone(), or will terminate
         // once the OpMode is started.
-        return initTask;
+        setInitTask(initTask);
     }
 
     @Override
@@ -49,13 +39,13 @@ public class ExampleSignalAutonomous extends AutonomousBunyipsOpMode {
         // e.g
         if (initTask.getPosition() == Direction.FORWARD) {
             // Do something. Note that the first and last variants of the addTask method respect
-            // the asynchronous nature of onQueueReady, and will be queued appropriately.
-            addTaskFirst(new WaitTask(5.0));
+            // the asynchronous nature of onReady, and will be queued appropriately.
+            addTaskFirst(new WaitTask(Seconds.of(5.0)));
         }
     }
 
     @Override
-    protected void onQueueReady(OpModeSelection selectedOpMode) {
-        addTask(new WaitTask(5.0));
+    protected void onReady(OpModeSelection selectedOpMode) {
+        addTask(new WaitTask(Seconds.of(5.0)));
     }
 }

@@ -1,5 +1,7 @@
 package org.murraybridgebunyips.bunyipslib.example.examplerobot.teleop;
 
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds;
+
 import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
 import org.murraybridgebunyips.bunyipslib.Controls;
 import org.murraybridgebunyips.bunyipslib.Scheduler;
@@ -76,7 +78,7 @@ public class ExampleCommandBasedTeleOp extends BunyipsOpMode {
         // and more. See the Scheduler class and implementations for more information.
         scheduler.driver().whenHeld(Controls.B)
                 .run(new RunTask(() -> log("B started being held 3 seconds ago!")))
-                .inSeconds(3);
+                .in(Seconds.of(3));
 
         scheduler.operator().whenReleased(Controls.X)
                 // This will replace the default DifferentialDriveTask with this task, until X is pressed again

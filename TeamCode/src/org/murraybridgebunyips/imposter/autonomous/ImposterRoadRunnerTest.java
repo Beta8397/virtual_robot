@@ -1,39 +1,30 @@
 package org.murraybridgebunyips.imposter.autonomous;
 
+import androidx.annotation.NonNull;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import org.murraybridgebunyips.bunyipslib.AutonomousBunyipsOpMode;
+import org.murraybridgebunyips.bunyipslib.RoadRunner;
 import org.murraybridgebunyips.bunyipslib.drive.MecanumDrive;
 import org.murraybridgebunyips.bunyipslib.OpModeSelection;
-import org.murraybridgebunyips.bunyipslib.RoadRunnerAutonomousBunyipsOpMode;
-import org.murraybridgebunyips.bunyipslib.tasks.bases.RobotTask;
 import org.murraybridgebunyips.imposter.components.ImposterConfig;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 import static org.murraybridgebunyips.bunyipslib.external.units.Units.FieldTiles;
 import static org.murraybridgebunyips.bunyipslib.external.units.Units.Inches;
 
 @Autonomous(name = "RoadRunnerTest", group = "VIRTUAL_BUNYIPSFTC")
-public class ImposterRoadRunnerTest extends RoadRunnerAutonomousBunyipsOpMode<MecanumDrive> {
+public class ImposterRoadRunnerTest extends AutonomousBunyipsOpMode implements RoadRunner {
     private final ImposterConfig config = new ImposterConfig();
+    private MecanumDrive drive;
 
     @Override
     protected void onInitialise() {
         config.init();
+        drive = new MecanumDrive(config.driveConstants, config.mecanumCoefficients, hardwareMap.voltageSensor, config.imu, config.front_left_motor, config.front_right_motor, config.back_left_motor, config.back_right_motor);
     }
 
     @Override
-    protected List<OpModeSelection> setOpModes() {
-        return null;
-    }
-
-    @Override
-    protected RobotTask setInitTask() {
-        return null;
-    }
-
-    @Override
-    protected void onQueueReady(@Nullable OpModeSelection selectedOpMode) {
+    protected void onReady(@Nullable OpModeSelection selectedOpMode) {
         // Start on RED_LEFT, forward facing Spike Marks, will park left of the backboard
 //        addNewTrajectory(new Pose2d(-36.76, -61.58, Math.toRadians(90.00)))
 //                .splineTo(new Vector2d(-34.29, -15.92), Math.toRadians(13.90))
@@ -49,8 +40,9 @@ public class ImposterRoadRunnerTest extends RoadRunnerAutonomousBunyipsOpMode<Me
                 .build();
     }
 
+    @NonNull
     @Override
-    protected MecanumDrive setDrive() {
-        return new MecanumDrive(config.driveConstants, config.mecanumCoefficients, hardwareMap.voltageSensor, config.imu, config.front_left_motor, config.front_right_motor, config.back_left_motor, config.back_right_motor);
+    public MecanumDrive getDrive() {
+        return drive;
     }
 }

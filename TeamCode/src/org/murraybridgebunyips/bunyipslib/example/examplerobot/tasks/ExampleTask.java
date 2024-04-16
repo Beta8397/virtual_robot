@@ -2,6 +2,8 @@ package org.murraybridgebunyips.bunyipslib.example.examplerobot.tasks;
 
 import org.murraybridgebunyips.bunyipslib.Dbg;
 import org.murraybridgebunyips.bunyipslib.example.examplerobot.components.ExampleLift;
+import org.murraybridgebunyips.bunyipslib.external.units.Measure;
+import org.murraybridgebunyips.bunyipslib.external.units.Time;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
 /**
@@ -22,7 +24,7 @@ public class ExampleTask extends Task {
      * @param time the time to run the task for
      * @param lift the lift to control
      */
-    public ExampleTask(double time, ExampleLift lift) {
+    public ExampleTask(Measure<Time> time, ExampleLift lift) {
         // Here, we allow the superclass to handle time controls. This is required.
         super(time);
         // Inside the constructor you can pass whatever you wish to control, for example, a drive

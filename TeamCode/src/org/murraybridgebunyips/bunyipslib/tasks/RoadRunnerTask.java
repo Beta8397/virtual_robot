@@ -3,18 +3,21 @@ package org.murraybridgebunyips.bunyipslib.tasks;
 import static org.murraybridgebunyips.bunyipslib.Text.round;
 import static org.murraybridgebunyips.bunyipslib.external.units.Units.Centimeters;
 import static org.murraybridgebunyips.bunyipslib.external.units.Units.Inches;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
+import org.murraybridgebunyips.bunyipslib.external.units.Measure;
+import org.murraybridgebunyips.bunyipslib.external.units.Time;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.TrajectorySequence;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
 /**
  * Task for running RoadRunner trajectories using the BunyipsOpMode Task system.
- * This is the task that is used for all RoadRunner tasks in RoadRunnerAutonomousBunyipsOpMode.
+ * This is the task that is used for all RoadRunner tasks in the RoadRunner interface.
  *
  * @param <T> The type of RoadRunnerDrive to be used
  * @author Lucas Bubner, 2023
@@ -36,7 +39,7 @@ public class RoadRunnerTask<T extends RoadRunnerDrive> extends Task {
      * @param drive      The drive to use
      * @param trajectory The trajectory to follow
      */
-    public RoadRunnerTask(double time, T drive, Trajectory trajectory) {
+    public RoadRunnerTask(Measure<Time> time, T drive, Trajectory trajectory) {
         super(time);
         this.drive = drive;
         this.trajectory = trajectory;
@@ -49,7 +52,7 @@ public class RoadRunnerTask<T extends RoadRunnerDrive> extends Task {
      * @param drive              The drive to use
      * @param trajectorySequence The trajectory sequence to follow
      */
-    public RoadRunnerTask(double time, T drive, TrajectorySequence trajectorySequence) {
+    public RoadRunnerTask(Measure<Time> time, T drive, TrajectorySequence trajectorySequence) {
         super(time);
         this.drive = drive;
         this.trajectorySequence = trajectorySequence;
@@ -64,7 +67,7 @@ public class RoadRunnerTask<T extends RoadRunnerDrive> extends Task {
      * @param dependency The subsystem to run this task on
      * @param override   Whether this task should override conflicting tasks
      */
-    public RoadRunnerTask(double time, T drive, Trajectory trajectory, BunyipsSubsystem dependency, boolean override) {
+    public RoadRunnerTask(Measure<Time> time, T drive, Trajectory trajectory, BunyipsSubsystem dependency, boolean override) {
         super(time, dependency, override);
         this.drive = drive;
         this.trajectory = trajectory;
@@ -79,7 +82,7 @@ public class RoadRunnerTask<T extends RoadRunnerDrive> extends Task {
      * @param dependency         The subsystem to run this task on
      * @param override           Whether this task should override conflicting tasks
      */
-    public RoadRunnerTask(double time, T drive, TrajectorySequence trajectorySequence, BunyipsSubsystem dependency, boolean override) {
+    public RoadRunnerTask(Measure<Time> time, T drive, TrajectorySequence trajectorySequence, BunyipsSubsystem dependency, boolean override) {
         super(time, dependency, override);
         this.drive = drive;
         this.trajectorySequence = trajectorySequence;
@@ -116,7 +119,7 @@ public class RoadRunnerTask<T extends RoadRunnerDrive> extends Task {
         double angle = Math.atan2(endPose.getY() - drive.getPoseEstimate().getY(), endPose.getX() - drive.getPoseEstimate().getX());
 
         // Time to completion
-        opMode.addTelemetry("Duration: %/% sec", round(getDeltaTime(), 2), round(duration, 2));
+        opMode.addTelemetry("Duration: %/% sec", round(getDeltaTime().in(Seconds), 2), round(duration, 2));
         drive.update();
 
         opMode.addTelemetry("Distance to target: %cm", round(Centimeters.convertFrom(distance, Inches), 2));

@@ -1,4 +1,4 @@
-package org.murraybridgebunyips.bunyipslib
+package org.murraybridgebunyips.bunyipslib.subsystems
 
 import com.qualcomm.robotcore.hardware.IMU
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
@@ -6,6 +6,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation
+import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem
 
 /**
  * IMUOperation custom common class for internal IMUs

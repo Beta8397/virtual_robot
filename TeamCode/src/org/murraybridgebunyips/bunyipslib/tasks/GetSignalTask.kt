@@ -12,7 +12,7 @@ import org.murraybridgebunyips.bunyipslib.vision.processors.AprilTag
  * Updated 26/12/23 to use the new Vision class.
  * @author Lucas Bubner, 2022
  */
-class GetSignalTask(private val vision: Vision) : Task(0.0),
+class GetSignalTask(private val vision: Vision) : Task(INFINITE_TIMEOUT),
     RobotTask {
     private lateinit var at: AprilTag
     private val lockTimer = ElapsedTime()
@@ -67,8 +67,6 @@ class GetSignalTask(private val vision: Vision) : Task(0.0),
     }
 
     override fun periodic() {
-        at.update()
-
         // Caution! ParkingPosition will be null if the camera does not pick up anything in it's task runtime.
         // Be sure to check if ParkingPosition is null before setting up your specific tasks, to handle a fallback value.
         var newPosition: Direction? = null

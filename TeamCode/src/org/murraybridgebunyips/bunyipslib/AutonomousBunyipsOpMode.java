@@ -9,27 +9,29 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
 /**
- * {@link BunyipsOpMode} variant for Autonomous operation using the {@link Task} system for a queued action OpMode.
+ * {@link BunyipsOpMode} variant for Autonomous operation. Uses the {@link Task} system for a queued action OpMode.
  *
  * @author Lucas Bubner, 2023
  * @author Lachlan Paul, 2023
+ * @see RoadRunner
  * @see BunyipsOpMode
  */
 public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
 
     /**
      * This list defines OpModes that should be selectable by the user. This will then
-     * be used to determine your tasks in {@link #onQueueReady(OpModeSelection)}.
+     * be used to determine your tasks in {@link #onReady(OpModeSelection)}.
      * For example, you may have configurations for RED_LEFT, RED_RIGHT, BLUE_LEFT, BLUE_RIGHT.
      * By default, this will be empty, and the user will not be prompted for a selection.
      *
-     * @see #setOpModes()
+     * @see #setOpModes(Object...)
      */
-    protected final ArrayList<OpModeSelection> opModes = new ArrayList<>();
+    private final ArrayList<OpModeSelection> opModes = new ArrayList<>();
     private final ArrayDeque<RobotTask> tasks = new ArrayDeque<>();
     // Pre and post queues cannot have their tasks removed, so we can rely on their .size() methods
     private final ArrayDeque<RobotTask> postQueue = new ArrayDeque<>();
@@ -48,7 +50,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
         } else {
             log("auto: mode selected. running default opmode");
         }
-        onQueueReady(selectedOpMode);
+        onReady(selectedOpMode);
         // Add any queued tasks
         for (RobotTask task : postQueue) {
             addTask(task);
@@ -62,22 +64,17 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
 
     @Override
     protected final void onInit() {
+        // If the user is using RoadRunner, clear the task list for them as it may be reused
+        RoadRunner.rrTasks.clear();
         // Run user-defined hardware initialisation
-        onInitialisation();
-        // Set user-defined initTask
-        initTask = setInitTask();
+        onInitialise();
         if (initTask == null) {
             log("auto: initTask is null, skipping.");
-        }
-        List<OpModeSelection> userSelections = setOpModes();
-        if (userSelections != null) {
-            // User defined OpModeSelections
-            opModes.addAll(userSelections);
         }
         // Convert user defined OpModeSelections to varargs
         OpModeSelection[] varargs = opModes.toArray(new OpModeSelection[0]);
         if (varargs.length == 0) {
-            log("auto: no OpModeSelections defined, skipping selection phase");
+            log("auto: no setOpModes() defined, skipping selection phase");
             opModes.add(new OpModeSelection(new UserDefaultSelection()));
         }
         if (varargs.length > 1) {
@@ -95,11 +92,11 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
 
     /**
      * Perform one time operations after start is pressed.
-     * Unlike onInitDone, this will only execute once play is hit and not when initialisation is done.
+     * Unlike {@link #onInitDone}, this will only execute once play is hit and not when initialisation is done.
      * <p>
-     * If overriding this method, it is strongly recommended to call `super.onStart()` in your method to
+     * If overriding this method, it is strongly recommended to call {@code super.onStart()} in your method to
      * ensure that the asynchronous task allocation has been notified to stop immediately. This is
-     * not required if setOpModes() returns null.
+     * not required if {@link #setOpModes(Object...)} returns null.
      */
     @Override
     protected void onStart() {
@@ -144,17 +141,17 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     }
 
     /**
-     * Run code in a loop AFTER onBegin() has completed, until
+     * Run code in a loop AFTER {@link #onInitialise()} has completed, until
      * start is pressed on the Driver Station or the {@link #setInitTask initTask} is done.
      * If not implemented, the OpMode will try to run your initTask, and if that is null,
-     * the dynamic_init phase will be skipped.
-     * Overriding this method will fully detach your UserSelection and initTask from runtime,
-     * so override with caution or ensure to use a super call.
+     * the {@code dynamic_init} phase will be skipped.
+     * This method should not be overridden,
+     * if you need to do anything in the init-loop use {@link #setInitTask(RobotTask)}.
      *
      * @see #setInitTask
      */
     @Override
-    protected boolean onInitLoop() {
+    protected final boolean onInitLoop() {
         if (initTask != null) {
             initTask.run();
             return initTask.pollFinished() && (userSelection == null || !Threads.isRunning(userSelection));
@@ -163,12 +160,12 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     }
 
     /**
-     * Can be called to add custom tasks in a robot's autonomous
+     * Can be called to add custom {@link Task}s in a robot's autonomous
      *
      * @param newTask task to add to the run queue
      * @param ack     suppress the warning that a task was added manually before onReady
      */
-    public void addTask(@NotNull RobotTask newTask, boolean ack) {
+    public final void addTask(@NotNull RobotTask newTask, boolean ack) {
         if (!hasGottenCallback && !ack) {
             log("auto: caution! a task was added manually before the onReady callback");
         }
@@ -178,31 +175,31 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     }
 
     /**
-     * Can be called to add custom tasks in a robot's autonomous
+     * Can be called to add custom {@link Task}s in a robot's autonomous
      *
      * @param newTask task to add to the run queue
      */
-    public void addTask(@NotNull RobotTask newTask) {
+    public final void addTask(@NotNull RobotTask newTask) {
         addTask(newTask, false);
     }
 
     /**
-     * Implicitly construct a new RunTask and add it to the run queue
+     * Implicitly construct a new {@link RunTask} and add it to the run queue
      *
      * @param runnable the code to add to the run queue to run once
      */
-    public void addTask(@NotNull Runnable runnable) {
+    public final void addTask(@NotNull Runnable runnable) {
         addTask(new RunTask(runnable));
     }
 
     /**
-     * Add a task to the run queue, but after onReady() has processed tasks. This is useful to call
-     * when working with tasks that should be queued at the very end of the autonomous, while still
-     * being able to add tasks asynchronously with user input in onReady().
+     * Add a task to the run queue, but after {@link #onReady(OpModeSelection)} has processed tasks. This is useful
+     * to call when working with tasks that should be queued at the very end of the autonomous, while still
+     * being able to add tasks asynchronously with user input in {@link #onReady(OpModeSelection)}.
      *
      * @param newTask task to add to the run queue
      */
-    public void addTaskLast(@NotNull RobotTask newTask) {
+    public final void addTaskLast(@NotNull RobotTask newTask) {
         if (!hasGottenCallback) {
             postQueue.add(newTask);
             log("auto: % has been queued as end-init task %/%", newTask, postQueue.size(), postQueue.size());
@@ -216,11 +213,11 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     /**
      * Add a task to the very start of the queue. This is useful to call when working with tasks that
      * should be queued at the very start of the autonomous, while still being able to add tasks
-     * asynchronously with user input in onQueueReady().
+     * asynchronously with user input in {@link #onReady(OpModeSelection)}.
      *
      * @param newTask task to add to the run queue
      */
-    public void addTaskFirst(@NotNull RobotTask newTask) {
+    public final void addTaskFirst(@NotNull RobotTask newTask) {
         if (!hasGottenCallback) {
             preQueue.add(newTask);
             log("auto: % has been queued as end-init task 1/%", newTask, preQueue.size());
@@ -238,7 +235,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
      *
      * @param taskIndex the array index to be removed
      */
-    public void removeTaskIndex(int taskIndex) {
+    public final void removeTaskIndex(int taskIndex) {
         if (taskIndex < 0) {
             throw new IllegalArgumentException("Auto: Cannot remove items starting from last index, this isn't Python");
         }
@@ -277,7 +274,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
      *
      * @param task the task to be removed
      */
-    public void removeTask(@NotNull RobotTask task) {
+    public final void removeTask(@NotNull RobotTask task) {
         if (tasks.contains(task)) {
             tasks.remove(task);
             log("auto: task % was removed", task);
@@ -290,7 +287,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     /**
      * Removes the last task in the task queue
      */
-    public void removeTaskLast() {
+    public final void removeTaskLast() {
         tasks.removeLast();
         taskCount--;
         log("auto: task at index % was removed", taskCount + 1);
@@ -299,7 +296,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     /**
      * Removes the first task in the task queue
      */
-    public void removeTaskFirst() {
+    public final void removeTaskFirst() {
         tasks.removeFirst();
         taskCount--;
         log("auto: task at index 0 was removed");
@@ -309,59 +306,91 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     /**
      * Runs upon the pressing of the INIT button on the Driver Station.
      * This is where your hardware should be initialised. You may also add specific tasks to the queue
-     * here, but it is recommended to use {@link #setInitTask()} or {@link #onQueueReady(OpModeSelection)} instead.
+     * here, but it is recommended to use {@link #setInitTask(RobotTask)} or {@link #onReady(OpModeSelection)} instead.
      */
-    protected abstract void onInitialisation();
+    protected abstract void onInitialise();
 
     /**
-     * Implement to define your OpModeSelections, if you list any, then the user will be prompted to select
+     * Call to define your OpModeSelections, if you list any, then the user will be prompted to select
      * an OpMode before the OpMode begins. If you return null, then the user will not
      * be prompted for a selection, and the OpMode will move to task-ready state immediately.
-     * <pre><code>
-     *     protected List<OpModeSelection> setOpModes() {
-     *         return Arrays.asList(
-     *                 new OpModeSelection("GO_PARK"),
-     *                 new OpModeSelection("GO_SHOOT"),
-     *                 new OpModeSelection("GO_SHOOT_AND_PARK"),
-     *                 new OpModeSelection("SABOTAGE_ALLIANCE")
-     *         );
-     *         // Use `StartingPositions.use();` for using the four Robot starting positions
-     *     }
-     * </code></pre>
+     * <pre>{@code
+     *     setOpModes(
+     *             "GO_PARK",
+     *             "GO_SHOOT",
+     *             "GO_SHOOT_AND_PARK",
+     *             "SABOTAGE_ALLIANCE"
+     *     );
+     *     // Use `StartingPositions.use();` for using the four Robot starting positions
+     * }</pre>
      */
-    @Nullable
-    protected abstract List<OpModeSelection> setOpModes();
+    protected final void setOpModes(@Nullable Object... selectableOpModes) {
+        if (selectableOpModes == null) return;
+        setOpModes(Arrays.asList(selectableOpModes));
+    }
+
 
     /**
-     * Return a task that will run as an init-task. This will run
-     * after your onInitialisation() has completed, allowing you to initialise hardware first.
+     * Call to define your OpModeSelections, if you list any, then the user will be prompted to select
+     * an OpMode before the OpMode begins. If you return null, then the user will not
+     * be prompted for a selection, and the OpMode will move to task-ready state immediately.
+     * <pre>{@code
+     *     setOpModes(
+     *             "GO_PARK",
+     *             "GO_SHOOT",
+     *             "GO_SHOOT_AND_PARK",
+     *             "SABOTAGE_ALLIANCE"
+     *     );
+     *     // Use `StartingPositions.use();` for using the four Robot starting positions
+     * }</pre>
+     */
+    protected final void setOpModes(@Nullable List<Object> selectableOpModes) {
+        if (selectableOpModes != null) {
+            opModes.clear();
+            for (Object selectableOpMode : selectableOpModes) {
+                if (selectableOpMode instanceof OpModeSelection) {
+                    opModes.add((OpModeSelection) selectableOpMode);
+                } else {
+                    opModes.add(new OpModeSelection(selectableOpMode));
+                }
+            }
+        }
+    }
+
+    /**
+     * Set a task that will run as an init-task. This will run
+     * after your {@link #onInitialise()} has completed, allowing you to initialise hardware first.
      * This is an optional method.
      * <p>
      * You should store any running variables inside the task itself, and keep the instance of the task
-     * defined as a field in your OpMode. You can then use this value in your onInitDone() to do
+     * defined as a field in your OpMode. You can then use this value in your {@link #onInitDone()} to do
      * what you need to after the init-task has finished. This method should be paired with {@link #onInitDone()}
      * to do anything after the initTask has finished.
      * </p>
-     * If you do not define an initTask by returning null, then the init-task (dynamic_init) phase will be skipped.
+     * If you do not define an initTask by returning null, then the init-task {@code dynamic_init} phase will be skipped.
      *
      * @see #onInitDone()
      * @see #addTaskFirst(RobotTask)
      * @see #addTaskLast(RobotTask)
      */
-    @Nullable
-    protected abstract RobotTask setInitTask();
+    protected final void setInitTask(@Nullable RobotTask task) {
+        if (initTask != null) {
+            Dbg.warn(getClass(), "Init-task has already been set to %, overriding it with %...", initTask, task);
+        }
+        initTask = task;
+    }
 
     /**
      * Called when the OpMode is ready to process tasks.
-     * This will happen when the user has selected an OpMode, or if setOpModes() returned null,
-     * in which case it will run immediately after onInitialisation() has completed.
+     * This will happen when the user has selected an OpMode, or if {@link #setOpModes(Object...)} returned null,
+     * in which case it will run immediately after {@code static_init} has completed.
      * This is where you should add your tasks to the run queue.
      *
-     * @param selectedOpMode the OpMode selected by the user, if applicable. Will be DefaultOpMode if no OpModeSelections were defined, or
+     * @param selectedOpMode the OpMode selected by the user, if applicable. Will be UserDefaultSelection if no OpModeSelections were defined, or
      *                       NULL if the user did not select an OpMode.
      * @see #addTask(RobotTask)
      */
-    protected abstract void onQueueReady(@Nullable OpModeSelection selectedOpMode);
+    protected abstract void onReady(@Nullable OpModeSelection selectedOpMode);
 
     /**
      * Override to this method to add extra code to the activeLoop, which will be run before

@@ -2,27 +2,23 @@ package org.murraybridgebunyips.bunyipslib
 
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
+import com.qualcomm.robotcore.hardware.DcMotorImpl
+import org.murraybridgebunyips.bunyipslib.external.units.Distance
+import org.murraybridgebunyips.bunyipslib.external.units.Measure
+import org.murraybridgebunyips.bunyipslib.external.units.Units.Millimeters
 
 /**
- * A generic Encoder, which is used to track the position of a motor in both relative and absolute scopes.
+ * A generic encoder based motor, which is used to track the position of a motor in both relative and absolute scopes.
  * Includes methods for tracking, resetting, and calculating distance travelled.
  *
  * @author Lucas Bubner, 2023
  */
-class Encoder(
+class EncoderMotor @JvmOverloads constructor(
     private val motor: DcMotorEx,
+    private var reduction: Double = 1.0,
     private val ticksPerRevolution: Double? = null,
-    private val wheelDiameterMM: Double? = null,
-    private var reduction: Double = 1.0
-) : ScopedEncoder {
-    constructor(motor: DcMotorEx, ticksPerRevolution: Double) : this(motor, ticksPerRevolution, null)
-    constructor(motor: DcMotorEx, ticksPerRevolution: Double, wheelDiameterMM: Double?) : this(
-        motor,
-        ticksPerRevolution,
-        wheelDiameterMM,
-        1.0
-    )
-
+    private val wheelDiameter: Measure<Distance>? = null
+) : DcMotorImpl(motor.controller, motor.portNumber), ScopedEncoder {
     /**
      * Store a snapshot of encoder position when tracking is started.
      */
@@ -41,9 +37,10 @@ class Encoder(
 
     /**
      * Hold the current position of the encoder using RUN_TO_POSITION.
-     * @param holdingPower the power to hold the position at
+     * @param holdingPower the power to hold the position at, default is 1.0
      */
-    fun holdCurrentPosition(holdingPower: Double) {
+    @JvmOverloads
+    fun holdCurrentPosition(holdingPower: Double = 1.0) {
         motor.targetPosition = motor.currentPosition
         motor.mode = DcMotor.RunMode.RUN_TO_POSITION
         motor.power = holdingPower
@@ -92,14 +89,14 @@ class Encoder(
     /**
      * Get the distance travelled by the encoder since the last track()
      * Can use an optional parameter to use since reset() position instead of track()
-     * @return millimetres indicating how far the encoder has travelled
+     * @return distance indicating how far the encoder has travelled
      */
-    override fun travelledMM(scope: ScopedEncoder.Scope): Double {
+    override fun travelled(scope: ScopedEncoder.Scope): Measure<Distance> {
         // Equation: circumference (2*pi*r) * (encoder ticks / ticksPerRevolution)
-        if (wheelDiameterMM == null || ticksPerRevolution == null) {
-            throw IllegalStateException("Odometer: wheelDiameterMM and ticksPerRevolution must be set to use travelledMM()")
+        if (wheelDiameter == null || ticksPerRevolution == null) {
+            throw IllegalStateException("Odometer: wheelDiameter and ticksPerRevolution must be set to use travelledMM()")
         }
         // Return travelled distance in millimetres depending on selected accuracy
-        return Math.PI * wheelDiameterMM * (position(scope) / ticksPerRevolution)
+        return Millimeters.of(Math.PI * wheelDiameter.inUnit(Millimeters) * (position(scope) / ticksPerRevolution))
     }
 }

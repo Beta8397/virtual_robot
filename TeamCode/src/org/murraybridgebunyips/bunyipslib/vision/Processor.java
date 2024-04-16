@@ -132,7 +132,7 @@ public abstract class Processor<T extends VisionData> implements VisionProcessor
      * automatically cleared upon each iteration, so opt to using realtime data in this method.
      * This method will be called automatically once attached to a Vision instance.
      */
-    public abstract void update();
+    protected abstract void update();
 
     /**
      * Called by the vision system to process a frame
@@ -140,7 +140,7 @@ public abstract class Processor<T extends VisionData> implements VisionProcessor
      * @param frame            the frame to process
      * @param captureTimeNanos the time the frame was captured
      */
-    public abstract void onProcessFrame(Mat frame, long captureTimeNanos);
+    protected abstract void onProcessFrame(Mat frame, long captureTimeNanos);
 
     @Override
     public final Object processFrame(Mat f, long captureTimeNanos) {
@@ -173,7 +173,7 @@ public abstract class Processor<T extends VisionData> implements VisionProcessor
      *
      * @param canvas the canvas to draw on
      */
-    public abstract void onFrameDraw(Canvas canvas);
+    protected abstract void onFrameDraw(Canvas canvas);
 
     @Override
     public void getFrameBitmap(Continuation<? extends Consumer<Bitmap>> continuation) {

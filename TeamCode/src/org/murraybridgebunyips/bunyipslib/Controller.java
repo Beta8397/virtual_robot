@@ -1,5 +1,8 @@
 package org.murraybridgebunyips.bunyipslib;
 
+import static org.murraybridgebunyips.bunyipslib.Controls.getAxes;
+import static org.murraybridgebunyips.bunyipslib.Controls.getButtons;
+
 import androidx.annotation.Nullable;
 
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -16,7 +19,6 @@ import java.util.function.Predicate;
  * @author Lucas Bubner, 2024
  * @see BunyipsOpMode
  */
-@SuppressWarnings("EnumValuesSoftDeprecateInJava")
 public class Controller extends Gamepad {
     /**
      * A function that returns the input value as-is.
@@ -207,36 +209,6 @@ public class Controller extends Gamepad {
         rsb = right_stick_button;
     }
 
-    private Controls[] getButtons(ButtonGroup group) {
-        switch (group) {
-            case BUMPERS:
-                return new Controls[]{Controls.LEFT_BUMPER, Controls.RIGHT_BUMPER};
-            case DPAD:
-                return new Controls[]{Controls.DPAD_UP, Controls.DPAD_DOWN, Controls.DPAD_LEFT, Controls.DPAD_RIGHT};
-            case BUTTONS:
-                return new Controls[]{Controls.A, Controls.B, Controls.X, Controls.Y};
-            case SPECIAL:
-                return new Controls[]{Controls.START, Controls.BACK, Controls.LEFT_STICK_BUTTON, Controls.RIGHT_STICK_BUTTON};
-            case ALL:
-                return Controls.values();
-            default:
-                return new Controls[0];
-        }
-    }
-
-    private Controls.Analog[] getAxes(AnalogGroup group) {
-        switch (group) {
-            case ANALOG_STICKS:
-                return new Controls.Analog[]{Controls.Analog.LEFT_STICK_X, Controls.Analog.LEFT_STICK_Y, Controls.Analog.RIGHT_STICK_X, Controls.Analog.RIGHT_STICK_Y};
-            case TRIGGERS:
-                return new Controls.Analog[]{Controls.Analog.LEFT_TRIGGER, Controls.Analog.RIGHT_TRIGGER};
-            case ALL:
-                return Controls.Analog.values();
-            default:
-                return new Controls.Analog[0];
-        }
-    }
-
     /**
      * Customise how a button is read.
      *
@@ -277,7 +249,7 @@ public class Controller extends Gamepad {
      * @param predicate The custom function to use based on the group's value
      * @return this
      */
-    public Controller set(ButtonGroup group, @Nullable Predicate<Boolean> predicate) {
+    public Controller set(Controls.ButtonGroup group, @Nullable Predicate<Boolean> predicate) {
         for (Controls button : getButtons(group)) {
             set(button, predicate);
         }
@@ -291,7 +263,7 @@ public class Controller extends Gamepad {
      * @param function The custom function to use based on the group's value
      * @return this
      */
-    public Controller set(AnalogGroup group, @Nullable Function<Float, Float> function) {
+    public Controller set(Controls.AnalogGroup group, @Nullable Function<Float, Float> function) {
         for (Controls.Analog axis : getAxes(group)) {
             set(axis, function);
         }
@@ -325,11 +297,14 @@ public class Controller extends Gamepad {
     /**
      * Check if a button is currently pressed on a gamepad, with debounce to ignore a press that was already detected
      * upon the first call of this function and button.
+     *
+     * @param button The button to check
+     * @return True if the button is pressed and not debounced
      */
     public boolean getDebounced(Controls button) {
         boolean buttonPressed = get(button);
         // Default value will be true as it won't be in the map, to avoid debouncing a value that was never pressed
-        boolean isPressed = debounces.getOrDefault(button, true);
+        boolean isPressed = Boolean.TRUE.equals(debounces.getOrDefault(button, true));
         if (buttonPressed && !isPressed) {
             debounces.put(button, true);
             return true;
@@ -339,47 +314,4 @@ public class Controller extends Gamepad {
         return false;
     }
 
-    /**
-     * Groups of buttons that can be customised.
-     */
-    public enum ButtonGroup {
-        /**
-         * All bumpers
-         */
-        BUMPERS,
-        /**
-         * All face buttons
-         */
-        DPAD,
-        /**
-         * ABXY buttons
-         */
-        BUTTONS,
-        /**
-         * Start, back, and stick buttons
-         */
-        SPECIAL,
-        /**
-         * All buttons
-         */
-        ALL
-    }
-
-    /**
-     * Groups of axes that can be customised.
-     */
-    public enum AnalogGroup {
-        /**
-         * Both analog sticks
-         */
-        ANALOG_STICKS,
-        /**
-         * Both triggers
-         */
-        TRIGGERS,
-        /**
-         * All analog inputs
-         */
-        ALL
-    }
 }

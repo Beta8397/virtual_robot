@@ -60,21 +60,14 @@ public abstract class ColourThreshold extends Processor<ContourData> {
 
     public abstract double getContourAreaMaxPercent();
 
-    public abstract Scalar getLower();
-
     /**
-     * Forces this upper scalar to be used instead of the scalar supplied by the subclass.
+     * Gets the upper scalar to use for thresholding.
      *
-     * @param lower the lower scalar to use
+     * @return the upper scalar
      */
-    public void setLower(Scalar lower) {
-        if (!lower.equals(lowerOverride)) {
-            Dbg.logd(getClass(), "Overriding lower scalar to " + lower + " from " + getLower().toString());
-            lowerOverride = lower;
-        }
+    public Scalar getUpper() {
+        return upperOverride == null ? setUpper() : upperOverride;
     }
-
-    public abstract Scalar getUpper();
 
     /**
      * Forces this lower scalar to be used instead of the scalar supplied by the subclass.
@@ -83,10 +76,35 @@ public abstract class ColourThreshold extends Processor<ContourData> {
      */
     public void setUpper(Scalar upper) {
         if (!upper.equals(upperOverride)) {
-            Dbg.logd(getClass(), "Overriding upper scalar to " + upper + " from " + getUpper().toString());
+            Dbg.logd(getClass(), "Overriding upper scalar to " + upper + " from " + setUpper().toString());
             upperOverride = upper;
         }
     }
+
+    /**
+     * Gets the lower scalar to use for thresholding.
+     *
+     * @return the lower scalar
+     */
+    public Scalar getLower() {
+        return lowerOverride == null ? setLower() : lowerOverride;
+    }
+
+    /**
+     * Forces this upper scalar to be used instead of the scalar supplied by the subclass.
+     *
+     * @param lower the lower scalar to use
+     */
+    public void setLower(Scalar lower) {
+        if (!lower.equals(lowerOverride)) {
+            Dbg.logd(getClass(), "Overriding lower scalar to " + lower + " from " + setLower().toString());
+            lowerOverride = lower;
+        }
+    }
+
+    protected abstract Scalar setLower();
+
+    protected abstract Scalar setUpper();
 
     public abstract int getBoxColour();
 
@@ -100,7 +118,7 @@ public abstract class ColourThreshold extends Processor<ContourData> {
      */
     public void resetLower() {
         if (lowerOverride != null)
-            Dbg.logd(getClass(), "Resetting scalar to " + getLower().toString());
+            Dbg.logd(getClass(), "Resetting scalar to " + setLower().toString());
         lowerOverride = null;
     }
 
@@ -109,12 +127,12 @@ public abstract class ColourThreshold extends Processor<ContourData> {
      */
     public void resetUpper() {
         if (upperOverride != null)
-            Dbg.logd(getClass(), "Resetting scalar to " + getUpper().toString());
+            Dbg.logd(getClass(), "Resetting scalar to " + setUpper().toString());
         upperOverride = null;
     }
 
     @Override
-    public final void update() {
+    protected final void update() {
         for (MatOfPoint contour : contours) {
             ContourData newData = new ContourData(Imgproc.boundingRect(contour));
             // Min-max bounding
@@ -125,7 +143,7 @@ public abstract class ColourThreshold extends Processor<ContourData> {
     }
 
     @Override
-    public final void onProcessFrame(Mat frame, long captureTimeNanos) {
+    protected final void onProcessFrame(Mat frame, long captureTimeNanos) {
         /*
          * Converts our input mat from RGB to
          * specified color space by the enum.
@@ -153,8 +171,8 @@ public abstract class ColourThreshold extends Processor<ContourData> {
          */
         Core.inRange(
                 processingMat,
-                lowerOverride == null ? getLower() : lowerOverride,
-                upperOverride == null ? getUpper() : upperOverride,
+                getLower(),
+                getUpper(),
                 binaryMat
         );
 
@@ -192,7 +210,7 @@ public abstract class ColourThreshold extends Processor<ContourData> {
     }
 
     @Override
-    public final void onFrameDraw(Canvas canvas) {
+    protected final void onFrameDraw(Canvas canvas) {
         // Draw borders around the contours, with a thicker border for the largest contour
         ContourData biggest = ContourData.getLargest(data);
         for (ContourData contour : data) {

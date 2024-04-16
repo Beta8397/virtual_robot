@@ -9,6 +9,9 @@ import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.robotcore.external.Telemetry.DisplayFormat
 import org.firstinspires.ftc.robotcore.external.Telemetry.Item
 import org.murraybridgebunyips.bunyipslib.Text.formatString
+import org.murraybridgebunyips.bunyipslib.external.units.Units.Milliseconds
+import org.murraybridgebunyips.bunyipslib.external.units.Units.Second
+import org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds
 import kotlin.math.roundToInt
 
 /**
@@ -195,13 +198,14 @@ class DualTelemetry @JvmOverloads constructor(
         val retVal = opMode.telemetry.update()
 
         // Requeue new overhead status message
-        val loopTime = if (movingAverageTimer != null) Text.round(movingAverageTimer.movingAverage(), 2) else 0.0
+        val loopTime =
+            if (movingAverageTimer != null) Text.round(movingAverageTimer.movingAverage(Milliseconds), 2) else 0.0
         val loopsSec = if (movingAverageTimer != null)
-            if (!movingAverageTimer.loopsSec().isNaN())
-                Text.round(movingAverageTimer.loopsSec(), 1)
+            if (!movingAverageTimer.loopsPer(Second).isNaN())
+                Text.round(movingAverageTimer.loopsPer(Second), 1)
             else 0.0
         else 0.0
-        val elapsedTime = movingAverageTimer?.elapsedTime()?.div(1000.0)?.roundToInt() ?: "?"
+        val elapsedTime = movingAverageTimer?.elapsedTime(Seconds)?.roundToInt() ?: "?"
 
         val overheadStatus =
             "$opModeStatus | T+${elapsedTime}s | ${

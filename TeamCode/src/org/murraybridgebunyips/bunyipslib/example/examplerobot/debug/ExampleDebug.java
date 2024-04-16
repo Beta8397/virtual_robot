@@ -1,8 +1,8 @@
 package org.murraybridgebunyips.bunyipslib.example.examplerobot.debug;
 
 import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
-import org.murraybridgebunyips.bunyipslib.IMUOp;
 import org.murraybridgebunyips.bunyipslib.example.examplerobot.components.ExampleConfig;
+import org.murraybridgebunyips.bunyipslib.subsystems.IMUOp;
 
 /**
  * Example debugging code for a robot OpMode under BunyipsOpMode ecosystem.

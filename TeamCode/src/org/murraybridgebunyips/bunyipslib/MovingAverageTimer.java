@@ -1,6 +1,11 @@
 package org.murraybridgebunyips.bunyipslib;
 
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Milliseconds;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Nanoseconds;
+
 import androidx.annotation.NonNull;
+
+import org.murraybridgebunyips.bunyipslib.external.units.Time;
 
 /**
  * Time utilities for robot operation.
@@ -9,26 +14,17 @@ import androidx.annotation.NonNull;
  * @author Shaun, 11/06/2017
  */
 public class MovingAverageTimer {
-    /**
-     * The number of nanoseconds in a second.
-     */
-    public static final double NANOS_IN_SECONDS = 1000000000.0;
-    /**
-     * The number of nanoseconds in a millisecond.
-     */
-    public static final double NANOS_IN_MILLIS = 1000000.0;
-
     // A ring buffer is used to keep track of a moving average
     private final int ringBufferSize;
     private final long[] loopTimeRingBuffer;
-    private final double resolution;
     private final String avgFormatStr;
     private final String toStringFormatStr;
+    private final Time formatResolution;
     private int ringBufferIndex;
     private long loopCount;
     private long movingTotal;
-    private long runningTotal;
     private long previousTime;
+    private long runningTotal;
     private double movingAverage;
     private double minMovingAverage = Double.MAX_VALUE;
     private double maxMovingAverage = Double.MIN_VALUE;
@@ -42,7 +38,7 @@ public class MovingAverageTimer {
      * Create a new MovingAverageTimer with a ring buffer size of 100 and a resolution of milliseconds.
      */
     public MovingAverageTimer() {
-        this(100, Resolution.MILLISECONDS);
+        this(100, Milliseconds);
     }
 
     /**
@@ -51,35 +47,25 @@ public class MovingAverageTimer {
      * @param bufSize the size of the ring buffer
      */
     public MovingAverageTimer(int bufSize) {
-        this(bufSize, Resolution.MILLISECONDS);
+        this(bufSize, Milliseconds);
     }
 
     /**
      * Create a new MovingAverageTimer with the specified buffer size and resolution.
      *
-     * @param bufSize    the size of the ring buffer
-     * @param resolution the resolution of the timer
+     * @param bufSize                the size of the ring buffer
+     * @param formatStringResolution the resolution of the timer for format strings
      */
-    public MovingAverageTimer(int bufSize, Resolution resolution) {
+    public MovingAverageTimer(int bufSize, Time formatStringResolution) {
         reset();
         ringBufferSize = bufSize;
         loopTimeRingBuffer = new long[ringBufferSize];
 
         String hdr = String.format("\n%-12s%-12s%-12s%-12s", "Loops", "TotalTime", "MovAvg", "Avg");
 
-        switch (resolution) {
-            case SECONDS:
-                this.resolution = NANOS_IN_SECONDS;
-                avgFormatStr = "%3.3fs";
-                toStringFormatStr = hdr + " seconds\n%-12d%-12.3f%-12.3f%-12.3f\n min        %-12.3f%-12.3f%-12.3f\n max        %-12.3f%-12.3f%-12.3f";
-                break;
-            case MILLISECONDS:
-            default:
-                this.resolution = NANOS_IN_MILLIS;
-                avgFormatStr = "%3.3fms";
-                toStringFormatStr = hdr + "msecs\n%-12d%-12.3f%-12.3f%-12.3f\n min        %-12.3f%-12.3f%-12.3f\n max        %-12.3f%-12.3f%-12.3f";
-                break;
-        }
+        avgFormatStr = "%3.3f" + formatStringResolution.symbol();
+        toStringFormatStr = hdr + " " + formatStringResolution.name() + "\n%-12d%-12.3f%-12.3f%-12.3f\n min        %-12.3f%-12.3f%-12.3f\n max        %-12.3f%-12.3f%-12.3f";
+        formatResolution = formatStringResolution;
     }
 
     /**
@@ -91,7 +77,7 @@ public class MovingAverageTimer {
         movingTotal = 0;
         runningTotal = 0;
         movingAverage = 0;
-        average = 0.0;
+        average = 0;
     }
 
     /**
@@ -109,28 +95,29 @@ public class MovingAverageTimer {
 
         // Adjust the running total
         movingTotal = movingTotal - loopTimeRingBuffer[ringBufferIndex] + loopTime;
-        runningTotal = runningTotal + loopTime;
+        runningTotal += loopTime;
 
         // Add the new value
         loopTimeRingBuffer[ringBufferIndex] = loopTime;
 
-        // wrap the current index
-        ringBufferIndex = (ringBufferIndex + 1) % ringBufferSize;
+        // Wrap the current index
+        ringBufferIndex++;
+        ringBufferIndex %= ringBufferSize;
 
-        loopCount += 1;
+        loopCount++;
 
         if (loopCount < ringBufferSize) {
             if (loopCount == 0) {
                 movingAverage = 0.0;
             } else {
-                movingAverage = (double) movingTotal / loopCount / resolution;
+                movingAverage = (double) movingTotal / loopCount;
             }
             // Temporarily fill the min/max movingAverage
             minMovingAverage = Math.min(minMovingAverage, movingAverage);
             maxMovingAverage = Math.max(maxMovingAverage, movingAverage);
 
         } else {
-            movingAverage = (double) movingTotal / ringBufferSize / resolution;
+            movingAverage = (double) movingTotal / ringBufferSize;
 
             // Reset the min/max movingAverage values the each time the buffer is filled
             if (ringBufferIndex == 0) {
@@ -142,99 +129,107 @@ public class MovingAverageTimer {
             }
         }
 
-        average = (double) runningTotal / loopCount / resolution;
+        average = (double) runningTotal / loopCount;
         minAverage = Math.min(minAverage, average);
         maxAverage = Math.max(maxAverage, average);
     }
 
     /**
-     * Get the number of loops that have been counted.
-     *
-     * @return the number of loops
+     * @return the number of loops that have been counted
      */
     public long count() {
         return loopCount;
     }
 
     /**
-     * @return the number of loops per second
+     * @param unit the time unit to return the loops per unit in
+     * @return the number of loops per unit
      */
-    public double loopsSec() {
-        return loopCount / (runningTotal / NANOS_IN_SECONDS);
+    public double loopsPer(Time unit) {
+        return loopCount / (Nanoseconds.of(runningTotal).in(unit));
     }
 
     /**
+     * @param unit the time unit to return the loops per unit in
      * @return the moving average loop time
      */
-    public double movingAverage() {
-        return movingAverage;
+    public double movingAverage(Time unit) {
+        return Nanoseconds.of(movingAverage).in(unit);
     }
 
     /**
+     * @param unit the time unit to return the loops per unit in
      * @return the minimum moving average loop time
      */
-    public double minMovingAverage() {
-        return minMovingAverage;
+    public double minMovingAverage(Time unit) {
+        return Nanoseconds.of(minMovingAverage).in(unit);
     }
 
     /**
+     * @param unit the time unit to return the loops per unit in
      * @return the maximum moving average loop time
      */
-    public double maxMovingAverage() {
-        return maxMovingAverage;
+    public double maxMovingAverage(Time unit) {
+        return Nanoseconds.of(maxMovingAverage).in(unit);
     }
 
     /**
-     * @return A string representation of the moving average loop time
+     * @return A string representation of the moving average loop time based on the format resolution
      */
     public String movingAverageString() {
         return String.format(avgFormatStr, movingAverage);
     }
 
     /**
+     * @param unit the time unit to return the loops per unit in
      * @return the average loop time
      */
-    public double average() {
-        return average;
+    public double average(Time unit) {
+        return Nanoseconds.of(average).in(unit);
     }
 
     /**
+     * @param unit the time unit to return the loops per unit in
      * @return the minimum average loop time
      */
-    public double minAverage() {
-        return minAverage;
+    public double minAverage(Time unit) {
+        return Nanoseconds.of(minAverage).in(unit);
     }
 
     /**
+     * @param unit the time unit to return the loops per unit in
      * @return the maximum average loop time
      */
-    public double maxAverage() {
-        return maxAverage;
+    public double maxAverage(Time unit) {
+        return Nanoseconds.of(maxAverage).in(unit);
     }
 
     /**
+     * @param unit the time unit to return the loops per unit in
      * @return the minimum loop time
      */
-    public double minLoopTime() {
-        return minLoopTime / resolution;
+    public double minLoopTime(Time unit) {
+        return Nanoseconds.of(minLoopTime).in(unit);
     }
 
     /**
+     * @param unit the time unit to return the loops per unit in
      * @return the maximum loop time
      */
-    public double maxLoopTime() {
-        return maxLoopTime / resolution;
+    public double maxLoopTime(Time unit) {
+        return Nanoseconds.of(maxLoopTime).in(unit);
     }
 
     /**
+     * @param unit the time unit to return the loops per unit in
      * @return the total time elapsed
      */
-    public double elapsedTime() {
-        return runningTotal / resolution;
+    public double elapsedTime(Time unit) {
+        return Nanoseconds.of(runningTotal).in(unit);
     }
 
     /**
-     * @return A string representation of the average loop time
+     * @return A string representation of the average loop time based on the format resolution
      */
     public String averageString() {
         return String.format(avgFormatStr, average);
@@ -243,20 +238,6 @@ public class MovingAverageTimer {
     @NonNull
     @Override
     public String toString() {
-        return String.format(toStringFormatStr, loopCount, elapsedTime(), movingAverage, average, minLoopTime(), minMovingAverage, minAverage, maxLoopTime(), maxMovingAverage, maxAverage);
-    }
-
-    /**
-     * The resolution of the timer.
-     */
-    public enum Resolution {
-        /**
-         * Report times in seconds.
-         */
-        SECONDS,
-        /**
-         * Report times in milliseconds.
-         */
-        MILLISECONDS
+        return String.format(toStringFormatStr, loopCount, elapsedTime(formatResolution), movingAverage, average, minLoopTime(formatResolution), minMovingAverage, minAverage, maxLoopTime(formatResolution), maxMovingAverage, maxAverage);
     }
 }

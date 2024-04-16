@@ -1,7 +1,8 @@
-package org.murraybridgebunyips.bunyipslib;
+package org.murraybridgebunyips.bunyipslib.subsystems;
 
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 import org.murraybridgebunyips.bunyipslib.tasks.RunTask;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
@@ -15,24 +16,51 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
  * @author Lucas Bubner, 2023
  */
 public class Cannon extends BunyipsSubsystem {
-    // NOTE: Servos go from 1 to 0, 1 being right as set on the servo programmer and vice versa.
-    private static final double FIRED = 1.0;
-    private static final double RESET = 0.0;
+    private final double FIRED;
+    private final double RESET;
+    // Name of the cannon for telemetry
+    private String NAME = "Cannon";
     private Servo prolong;
     private double target;
 
     /**
      * Constructs a new Cannon.
      *
-     * @param prolong the servo to use
+     * @param prolong       the servo to use
+     * @param closePosition the position to set the servo to when not firing
+     * @param openPosition  the position to set the servo to when firing
      */
-    public Cannon(Servo prolong) {
+    public Cannon(Servo prolong, double openPosition, double closePosition) {
+        FIRED = openPosition;
+        RESET = closePosition;
+
         if (!assertParamsNotNull(prolong)) return;
         this.prolong = prolong;
 
         // We assume there will always be something in the reset position for us to hold
         target = RESET;
         update();
+    }
+
+    /**
+     * Constructs a new Cannon.
+     * Implicitly set the close position to 0.0 and the open position to 1.0.
+     *
+     * @param prolong the servo to use
+     */
+    public Cannon(Servo prolong) {
+        this(prolong, 1.0, 0.0);
+    }
+
+    /**
+     * Set the name of the cannon to display in telemetry.
+     *
+     * @param newName the name to set
+     * @return this
+     */
+    public Cannon withName(String newName) {
+        NAME = newName;
+        return this;
     }
 
     /**
@@ -75,7 +103,7 @@ public class Cannon extends BunyipsSubsystem {
 
     @Override
     protected void periodic() {
-        opMode.addTelemetry("Cannon: %", target == FIRED ? "FIRED" : "READY");
+        opMode.addTelemetry("%: %", NAME, target == FIRED ? "FIRED" : "READY");
         prolong.setPosition(target);
     }
 }

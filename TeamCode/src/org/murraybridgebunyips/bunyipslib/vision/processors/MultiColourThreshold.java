@@ -49,7 +49,7 @@ public class MultiColourThreshold extends Processor<ContourData> {
     }
 
     @Override
-    public void update() {
+    protected void update() {
         for (Pair<ColourThreshold, Mat> processor : colourProcessors) {
             processor.first.clearData();
             processor.first.update();
@@ -59,7 +59,7 @@ public class MultiColourThreshold extends Processor<ContourData> {
     }
 
     @Override
-    public void onProcessFrame(Mat frame, long captureTimeNanos) {
+    protected void onProcessFrame(Mat frame, long captureTimeNanos) {
         for (Pair<ColourThreshold, Mat> processor : colourProcessors) {
             frame.copyTo(processor.second);
             processor.first.onProcessFrame(processor.second, captureTimeNanos);
@@ -70,7 +70,7 @@ public class MultiColourThreshold extends Processor<ContourData> {
     }
 
     @Override
-    public void onFrameDraw(Canvas canvas) {
+    protected void onFrameDraw(Canvas canvas) {
         for (Pair<ColourThreshold, Mat> processor : colourProcessors) {
             processor.first.onFrameDraw(canvas);
         }

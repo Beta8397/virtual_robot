@@ -30,7 +30,7 @@ import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.Trajecto
 import java.util.List;
 
 /**
- * This is the standard MecanumDrive class for modern BunyipsFTC robots.
+ * This is the standard MecanumDrive class for modern BunyipsLib robots.
  * This is a component for the RoadRunner Mecanum Drive, integrating RoadRunner and BunyipsLib to be used
  * as a BunyipsSubsystem. As such, this allows for integrated trajectory and pose management,
  * as well as the ability to use Field Centric Drive as a native method.

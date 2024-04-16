@@ -23,7 +23,7 @@ import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.Trajecto
 import java.util.List;
 
 /**
- * This is the standard TankDrive class for modern BunyipsFTC robots.
+ * This is the standard TankDrive class for modern BunyipsLib robots.
  * This is a component for the RoadRunner Tank Drive, integrating RoadRunner and BunyipsLib to be used
  * as a BunyipsSubsystem. As such, this allows for integrated trajectory and pose management.
  *

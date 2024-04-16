@@ -50,7 +50,7 @@ public class TFOD extends Processor<TfodData> {
     }
 
     @Override
-    public void update() {
+    protected void update() {
         List<Recognition> recognitions = instance.getRecognitions();
         for (Recognition recognition : recognitions) {
             data.add(new TfodData(
@@ -78,12 +78,12 @@ public class TFOD extends Processor<TfodData> {
     }
 
     @Override
-    public void onProcessFrame(Mat frame, long captureTimeNanos) {
+    protected void onProcessFrame(Mat frame, long captureTimeNanos) {
         tfodCtx = instance.processFrame(frame, captureTimeNanos);
     }
 
     @Override
-    public void onFrameDraw(Canvas canvas) {
+    protected void onFrameDraw(Canvas canvas) {
         instance.onDrawFrame(canvas, Vision.CAMERA_WIDTH, Vision.CAMERA_HEIGHT, 1.0f, 1.0f, tfodCtx);
     }
 }

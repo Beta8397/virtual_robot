@@ -1,9 +1,13 @@
 package org.murraybridgebunyips.bunyipslib;
 
-import static org.murraybridgebunyips.bunyipslib.MovingAverageTimer.NANOS_IN_SECONDS;
 import static org.murraybridgebunyips.bunyipslib.Text.formatString;
 import static org.murraybridgebunyips.bunyipslib.Text.round;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Nanoseconds;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds;
+import static org.murraybridgebunyips.bunyipslib.tasks.bases.Task.INFINITE_TIMEOUT;
 
+import org.murraybridgebunyips.bunyipslib.external.units.Measure;
+import org.murraybridgebunyips.bunyipslib.external.units.Time;
 import org.murraybridgebunyips.bunyipslib.tasks.RunTask;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
@@ -35,15 +39,15 @@ public class Scheduler extends BunyipsComponent {
     /**
      * Used internally by subsystems and tasks to report their running status statically.
      *
-     * @param className The class name of the subsystem or context.
-     * @param taskName  The name of the task.
-     * @param deltaTime The time this task has been running
-     * @param timeout   The time this task is allowed to run, 0.0 if indefinite
+     * @param className    The class name of the subsystem or context.
+     * @param taskName     The name of the task.
+     * @param deltaTimeSec The time this task has been running in seconds
+     * @param timeoutSec   The time this task is allowed to run in seconds, 0.0 if indefinite
      */
-    public static void addTaskReport(String className, String taskName, double deltaTime, double timeout) {
+    public static void addTaskReport(String className, String taskName, double deltaTimeSec, double timeoutSec) {
         if (isMuted) return;
-        String report = formatString("% |\n    % -> %", className, taskName, deltaTime);
-        reports.add(timeout == 0.0 ? report + "s" : report + "/" + timeout + "s");
+        String report = formatString("% |\n    % -> %", className, taskName, deltaTimeSec);
+        reports.add(timeoutSec == 0.0 ? report + "s" : report + "/" + timeoutSec + "s");
     }
 
     /**
@@ -88,7 +92,7 @@ public class Scheduler extends BunyipsComponent {
     }
 
     private boolean timeExceeded(ConditionalTask task) {
-        return task.time * NANOS_IN_SECONDS + task.activeSince < System.nanoTime();
+        return task.time.in(Nanoseconds) + task.activeSince < System.nanoTime();
     }
 
     /**
@@ -103,7 +107,7 @@ public class Scheduler extends BunyipsComponent {
             opMode.addTelemetry("Managing % task% (%s, %c) on % subsystem%",
                     taskCount,
                     taskCount == 1 ? "" : "s",
-                    allocatedTasks.stream().filter(task -> task.taskToRun.hasDependency()).count() + subsystems.size() - subsystems.stream().filter(BunyipsSubsystem::isIdle).count(),
+                    allocatedTasks.stream().filter(task -> task.taskToRun.hasDependency()).count() + taskCount - allocatedTasks.size(),
                     allocatedTasks.stream().filter(task -> !task.taskToRun.hasDependency()).count(),
                     subsystems.size(),
                     subsystems.size() == 1 ? "" : "s"
@@ -116,7 +120,7 @@ public class Scheduler extends BunyipsComponent {
                 if (task.taskToRun.hasDependency())
                     continue;
                 if (!task.taskToRun.isMuted() && task.activeSince != -1 && timeExceeded(task)) {
-                    double deltaTime = round(task.taskToRun.getDeltaTime(), 1);
+                    double deltaTime = round(task.taskToRun.getDeltaTime().in(Seconds), 1);
                     opMode.addTelemetry("Scheduler (%) |\n    % -> %", opMode.getClass().getSimpleName(), task.taskToRun, deltaTime == 0.0 ? "active" : deltaTime + "s");
                 }
             }
@@ -134,11 +138,11 @@ public class Scheduler extends BunyipsComponent {
                 }
                 // Update controller states for determining whether they need to be continued to be run
                 boolean timeoutExceeded = timeExceeded(task);
-                if (task.runCondition instanceof ControllerStateHandler && task.time != 0.0) {
+                if (task.runCondition instanceof ControllerStateHandler && !task.time.equals(INFINITE_TIMEOUT)) {
                     ((ControllerStateHandler) task.runCondition).setTimeoutCondition(timeoutExceeded);
                 }
                 // Trigger upon timeout goal or if the task does not have one
-                if (task.time == 0.0 || timeoutExceeded) {
+                if (task.time.equals(INFINITE_TIMEOUT) || timeoutExceeded) {
                     if (!task.taskToRun.hasDependency()) {
                         if (task.stopCondition.getAsBoolean()) {
                             // Finish handler will be called below
@@ -404,7 +408,7 @@ public class Scheduler extends BunyipsComponent {
     public class ConditionalTask {
         protected final BooleanSupplier runCondition;
         protected Task taskToRun;
-        protected double time = 0.0;
+        protected Measure<Time> time = INFINITE_TIMEOUT;
         protected boolean debouncing;
         protected boolean lastState;
         protected BooleanSupplier stopCondition = () -> false;
@@ -494,13 +498,24 @@ public class Scheduler extends BunyipsComponent {
         }
 
         /**
-         * Run a task assigned to in run() in a certain amount of seconds of the condition remaining true.
-         * If on a controller, this will delay the activation of the task by the specified amount of seconds.
+         * Run a task assigned to in run() in a certain amount of time of the condition remaining true.
+         * If on a controller, this will delay the activation of the task by the specified amount of time.
          *
-         * @param seconds The amount of seconds to wait before running the task.
+         * @param interval The time interval
          */
-        public void inSeconds(double seconds) {
-            time = Math.abs(seconds);
+        public void in(Measure<Time> interval) {
+            time = interval;
+        }
+
+        /**
+         * Run a task assigned to in run() in a certain amount of time of the condition remaining true.
+         * If on a controller, this will delay the activation of the task by the specified amount of time.
+         *
+         * @param interval The time interval
+         */
+        // Kotlin interop, as in is a reserved keyword
+        public void inTime(Measure<Time> interval) {
+            time = interval;
         }
 
         /**
@@ -514,16 +529,16 @@ public class Scheduler extends BunyipsComponent {
         }
 
         /**
-         * Run the task assigned to in run() in a certain amount of seconds of the condition remaining true.
-         * If on a controller, this will delay the activation of the task by the specified amount of seconds.
+         * Run the task assigned to in run() in a certain amount of time of the condition remaining true.
+         * If on a controller, this will delay the activation of the task by the specified amount of time.
          * Once this condition is met, the task will be forcefully stopped and the scheduler will move on.
          * This is useful for continuous tasks.
          *
-         * @param seconds   The amount of seconds to wait before running the task.
+         * @param interval  The time interval
          * @param condition The condition to stop the task.
          */
-        public void inSecondsFinishingWhen(double seconds, BooleanSupplier condition) {
-            time = Math.abs(seconds);
+        public void inTimeFinishingWhen(Measure<Time> interval, BooleanSupplier condition) {
+            time = interval;
             stopCondition = condition;
         }
     }

@@ -1,14 +1,16 @@
 package org.murraybridgebunyips.bunyipslib.tasks.groups;
 
+import static org.murraybridgebunyips.bunyipslib.Text.round;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds;
+
 import org.murraybridgebunyips.bunyipslib.EmergencyStop;
 import org.murraybridgebunyips.bunyipslib.Scheduler;
+import org.murraybridgebunyips.bunyipslib.tasks.bases.NoTimeoutTask;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-
-import static org.murraybridgebunyips.bunyipslib.Text.round;
 
 /**
  * A group of tasks.
@@ -19,12 +21,11 @@ import static org.murraybridgebunyips.bunyipslib.Text.round;
  *
  * @author Lucas Bubner, 2024
  */
-public abstract class TaskGroup extends Task {
+public abstract class TaskGroup extends NoTimeoutTask {
     protected final ArrayList<Task> tasks = new ArrayList<>();
     private final HashSet<Task> attachedTasks = new HashSet<>();
 
     protected TaskGroup(Task... tasks) {
-        super(0.0);
         this.tasks.addAll(Arrays.asList(tasks));
         if (tasks.length == 0) {
             throw new EmergencyStop("TaskGroup created with no tasks.");
@@ -41,7 +42,7 @@ public abstract class TaskGroup extends Task {
         });
         // Otherwise we can just run the task outright
         if (!task.hasDependency()) {
-            Scheduler.addTaskReport(toString(), task.toString(), round(task.getDeltaTime(), 1), task.getTimeout());
+            Scheduler.addTaskReport(toString(), task.toString(), round(task.getDeltaTime().in(Seconds), 1), task.getTimeout().in(Seconds));
             task.run();
         }
     }

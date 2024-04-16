@@ -4,6 +4,9 @@ import androidx.annotation.NonNull;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+import org.murraybridgebunyips.bunyipslib.external.units.Distance;
+import org.murraybridgebunyips.bunyipslib.external.units.Measure;
+
 /**
  * Marker interface for encoders that are scoped to relative or absolute positions.
  *
@@ -59,21 +62,21 @@ public interface ScopedEncoder {
     }
 
     /**
-     * Get the number of millimeters the encoder has travelled as per the scope.
+     * Get a human distance of what the encoder has travelled as per the scope.
      *
      * @param scope the scope to read the encoder in
      * @return millimeters indicating how far the encoder has travelled
      */
-    double travelledMM(@NonNull Scope scope);
+    Measure<Distance> travelled(@NonNull Scope scope);
 
     /**
-     * Get the number of millimeters the encoder has travelled since the last track()
+     * Get a human distance of what the encoder has travelled since the last track()
      * Can use an optional parameter to use since reset() position instead of track()
      *
      * @return millimeters indicating how far the encoder has travelled
      */
-    default double travelledMM() {
-        return travelledMM(Scope.RELATIVE);
+    default Measure<Distance> travelled() {
+        return travelled(Scope.RELATIVE);
     }
 
     /**

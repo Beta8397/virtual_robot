@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.RobotCoreLynxUsbDevice
 import com.qualcomm.robotcore.hardware.ServoController
 import com.qualcomm.robotcore.util.ThreadPool
 import org.firstinspires.ftc.robotcore.external.Telemetry.Item
+import org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds
 import org.murraybridgebunyips.bunyipslib.roadrunner.util.LynxModuleUtil
 import org.murraybridgebunyips.deps.BuildConfig
 import java.util.concurrent.ExecutorService
@@ -28,7 +29,6 @@ import java.util.concurrent.ExecutorService
  *
  * @see CommandBasedBunyipsOpMode
  * @see AutonomousBunyipsOpMode
- * @see RoadRunnerAutonomousBunyipsOpMode
  * @author Lucas Bubner, 2024
  */
 abstract class BunyipsOpMode : BOMInternal() {
@@ -64,18 +64,18 @@ abstract class BunyipsOpMode : BOMInternal() {
         private var _instance: BunyipsOpMode? = null
 
         /**
-         * The instance of the current BunyipsOpMode. This is set automatically by the BunyipsOpMode lifecycle.
+         * The instance of the current [BunyipsOpMode]. This is set automatically by the [BunyipsOpMode] lifecycle.
          * This can be used instead of dependency injection to access the current OpMode, as it is a singleton.
          *
-         * BunyipsComponent and Task internally use this to grant access to the current OpMode through
-         * the `opMode` property. As such, you must ensure all Tasks and BunyipsComponents are instantiated during runtime,
-         * (such as during onInit()), otherwise this property will be null.
+         * `BunyipsComponent` and `Task` internally use this to grant access to the current OpMode through
+         * the `opMode` property. As such, you must ensure all `Task`s and `BunyipsComponent`s are instantiated during runtime,
+         * (such as during [onInit]), otherwise this property will be null.
          *
          * If you choose to access the current OpMode through this property, you must ensure that the OpMode
          * is actively running, otherwise this property will be null and you will raise an exception.
          *
-         * @throws UninitializedPropertyAccessException If a BunyipsOpMode is not running, this exception will be raised.
-         * @return The instance of the current BunyipsOpMode.
+         * @throws UninitializedPropertyAccessException If a [BunyipsOpMode] is not running, this exception will be raised.
+         * @return The instance of the current [BunyipsOpMode].
          */
         @JvmStatic
         val instance: BunyipsOpMode
@@ -85,9 +85,9 @@ abstract class BunyipsOpMode : BOMInternal() {
                 ?: throw UninitializedPropertyAccessException("Attempted to access a BunyipsOpMode that is not running, this may be due to a task or subsystem being instantiated in the constructor or member fields. All subsystems and tasks must be instantiated during runtime, such as in onInit().")
 
         /**
-         * Whether a BunyipsOpMode is currently running. This is useful for checking if the OpMode singleton can be accessed
+         * Whether a [BunyipsOpMode] is currently running. This is useful for checking if the OpMode singleton can be accessed
          * without raising an exception due to the field being null.
-         * @return Whether a BunyipsOpMode is currently running.
+         * @return Whether a [BunyipsOpMode] is currently running.
          */
         @JvmStatic
         val isRunning: Boolean
@@ -95,13 +95,13 @@ abstract class BunyipsOpMode : BOMInternal() {
     }
 
     /**
-     * Runs upon the pressing of the INIT button on the Driver Station.
+     * Runs upon the pressing of the `INIT` button on the Driver Station.
      * This is where you should initialise your hardware and other components.
      */
     protected abstract fun onInit()
 
     /**
-     * Run code in a loop AFTER onInit() has completed, until
+     * Run code in a loop AFTER [onInit] has completed, until
      * start is pressed on the Driver Station or true is returned to this method.
      * This method is called at least once.
      * If not implemented, the OpMode will continue on as normal and wait for start.
@@ -120,23 +120,24 @@ abstract class BunyipsOpMode : BOMInternal() {
 
     /**
      * Perform one time operations after start is pressed.
-     * Unlike onInitDone, this will only execute once play is hit and not when initialisation is done.
+     * Unlike [onInitDone], this will only execute once play is hit and not when initialisation is done.
      */
     protected open fun onStart() {
         // no-op
     }
 
     /**
-     * Code to run continuously after the START button is pressed on the Driver Station.
+     * Code to run continuously after the `START` button is pressed on the Driver Station.
      * This method will be called on each hardware cycle, and is guaranteed to be called at least once.
      */
     protected abstract fun activeLoop()
 
     /**
-     * Perform one time clean-up operations after the activeLoop() finishes from an uninterrupted
-     * OpMode lifecycle. This method is called after a finish() or exit() call, but may not
-     * be called if the OpMode is terminated by an unhandled exception. This method is useful for
-     * ensuring the robot is in a safe state after the OpMode has finished.
+     * Perform one time clean-up operations after the [activeLoop] finishes all intentions gracefully.
+     * This method is called after a [finish] or [exit] call, but may not
+     * be called if the OpMode is terminated by an *unhandled fatal* exception. This method is useful for
+     * ensuring the robot is in a safe state after the OpMode has finished. In an exception-less OpMode,
+     * this method will be called before [onStop].
      * @see onStop
      */
     protected open fun onFinish() {
@@ -144,7 +145,7 @@ abstract class BunyipsOpMode : BOMInternal() {
     }
 
     /**
-     * Perform one time clean-up operations after the OpMode finishes.
+     * Perform one time clean-up operations as the OpMode is stopping.
      * This method is called after the OpMode has been requested to stop, and will be the last method
      * called before the OpMode is terminated, and is *guaranteed* to be called. This method is useful
      * for releasing resources to prevent memory leaks, as motor controllers will be powered off
@@ -241,7 +242,7 @@ abstract class BunyipsOpMode : BOMInternal() {
             // Ready to go.
             telemetry.opModeStatus = "ready"
             movingAverageTimer.update()
-            Dbg.logd("BunyipsOpMode: init cycle completed in ${movingAverageTimer.elapsedTime() / 1000.0} secs")
+            Dbg.logd("BunyipsOpMode: init cycle completed in ${movingAverageTimer.elapsedTime(Seconds)} secs")
             // DS only telemetry
             telemetry.addDS("BunyipsOpMode: INIT COMPLETE -- PLAY WHEN READY.")
             Dbg.logd("BunyipsOpMode: ready.")
@@ -329,7 +330,7 @@ abstract class BunyipsOpMode : BOMInternal() {
             // Telemetry may be not in a nice state, so we will call our stateful functions
             // such as thread stops and cleanup in onStop() first before updating the status
             telemetry.opModeStatus = "terminating"
-            Dbg.logd("BunyipsOpMode: active cycle completed in ${movingAverageTimer.elapsedTime() / 1000.0} secs")
+            Dbg.logd("BunyipsOpMode: active cycle completed in ${movingAverageTimer.elapsedTime(Seconds)} secs")
             pushTelemetry()
             Dbg.logd("BunyipsOpMode: exiting...")
         }
@@ -339,48 +340,48 @@ abstract class BunyipsOpMode : BOMInternal() {
     // but have since moved to the DualTelemetry class. These methods are now simply aliases to the new methods.
 
     /**
-     * Update and push queued telemetry to the Driver Station and FtcDashboard.
+     * Update and push queued [telemetry] to the Driver Station and FtcDashboard.
      */
     fun pushTelemetry() {
         telemetry.update()
     }
 
     /**
-     * Add any additional telemetry to the FtcDashboard telemetry packet.
+     * Add any additional telemetry to the FtcDashboard [telemetry] packet.
      */
     fun addDashboardTelemetry(key: String, value: Any?) {
         telemetry.addDashboard(key, value)
     }
 
     /**
-     * Add any field overlay data to the FtcDashboard telemetry packet.
+     * Add any field overlay data to the FtcDashboard [telemetry] packet.
      */
     fun dashboardFieldOverlay(): Canvas {
         return telemetry.dashboardFieldOverlay()
     }
 
     /**
-     * Add data to the telemetry object, with integrated formatting.
+     * Add data to the [telemetry] object, with integrated formatting.
      * @param format An object string to add to telemetry
      * @param args The objects to format into the object format string
-     * @return The telemetry item added to the Driver Station, null if the send failed from overflow
+     * @return The telemetry [Item] added to the Driver Station, null if the send failed from overflow
      */
     fun addTelemetry(format: Any, vararg args: Any?): Item? {
         return telemetry.add(format, *args)
     }
 
     /**
-     * Add a data to the telemetry object, with integrated formatting.
+     * Add a data to the [telemetry] object, with integrated formatting.
      * @param format An object string to add to telemetry
      * @param args The objects to format into the object format string
-     * @return The telemetry item added to the Driver Station
+     * @return The telemetry [Item] added to the Driver Station
      */
     fun addRetainedTelemetry(format: Any, vararg args: Any?): Item {
         return telemetry.addRetained(format, *args)
     }
 
     /**
-     * Remove retained entries from the telemetry object.
+     * Remove retained entries from the [telemetry] object.
      * @param items The items to remove from the telemetry object
      */
     fun removeRetainedTelemetry(vararg items: Item) {
@@ -388,7 +389,7 @@ abstract class BunyipsOpMode : BOMInternal() {
     }
 
     /**
-     * Remove retained entries from the telemetry object.
+     * Remove retained entries from the [telemetry] object.
      * @param items The items to remove from the telemetry object
      */
     fun removeRetainedTelemetry(items: List<Item>) {
@@ -396,7 +397,7 @@ abstract class BunyipsOpMode : BOMInternal() {
     }
 
     /**
-     * Log a message to the telemetry log, with integrated formatting.
+     * Log a message to the [telemetry] log, with integrated formatting.
      * @param format An object string to add to telemetry
      * @param args The objects to format into the object format string
      */
@@ -405,7 +406,7 @@ abstract class BunyipsOpMode : BOMInternal() {
     }
 
     /**
-     * Log a message to the telemetry log, with integrated formatting.
+     * Log a message to the [telemetry] log, with integrated formatting.
      * @param obj Class where this log was called (name will be prepended to message)
      * @param format An object string to add to telemetry
      * @param args The objects to format into the object format string
@@ -415,7 +416,7 @@ abstract class BunyipsOpMode : BOMInternal() {
     }
 
     /**
-     * Log a message into the telemetry log
+     * Log a message into the [telemetry] log
      * @param stck StackTraceElement with information about where this log was called (see Text.getCallingUserCodeFunction())
      * @param format An object string to add to telemetry
      * @param args The objects to format into the object format string
@@ -425,14 +426,14 @@ abstract class BunyipsOpMode : BOMInternal() {
     }
 
     /**
-     * Reset telemetry data, including retention and FtcDashboard
+     * Reset [telemetry] data, including retention and FtcDashboard
      */
     fun resetTelemetry() {
         telemetry.clearAll()
     }
 
     /**
-     * Clear telemetry on the Driver Station, not including retention
+     * Clear [telemetry] on the Driver Station, not including retention
      */
     fun clearTelemetry() {
         telemetry.clear()
@@ -473,7 +474,7 @@ abstract class BunyipsOpMode : BOMInternal() {
     /**
      * Call to command all motors and sensors on the robot to stop.
      * This method is continuously called when no OpMode is running, and allows you to do the same while still
-     * in an OpMode (called internally after `finish(true)`).
+     * in an OpMode (called internally after [finish]).
      * This method will also power down all LynxModules and disable all servos.
      */
     fun safeHaltHardware() {
@@ -506,9 +507,9 @@ abstract class BunyipsOpMode : BOMInternal() {
     }
 
     /**
-     * Call to temporarily halt all activeLoop-related updates from running.
-     * Note this will pause the entire activeLoop, but continue to update timers and telemetry. These events
-     * must be handled manually if needed, which include any conditional calls to resume().
+     * Call to temporarily halt all [activeLoop]-related updates from running.
+     * Note this will pause the entire [activeLoop], but continue to update timers and telemetry. These events
+     * must be handled manually if needed, which include any conditional calls to [resume].
      */
     fun halt() {
         if (operationsPaused) {
@@ -519,7 +520,7 @@ abstract class BunyipsOpMode : BOMInternal() {
     }
 
     /**
-     * Call to resume the activeLoop after a halt() call.
+     * Call to resume the [activeLoop] after a [halt] call.
      */
     fun resume() {
         if (!operationsPaused) {
@@ -532,7 +533,7 @@ abstract class BunyipsOpMode : BOMInternal() {
 
     /**
      * Dangerous method: call to shut down the OpMode as soon as possible.
-     * This will run any BunyipsOpMode cleanup code.
+     * This will run any [BunyipsOpMode] cleanup code, much as if the user pressed the `STOP` button.
      */
     fun exit() {
         Dbg.logd("BunyipsOpMode: exiting opmode...")
@@ -542,7 +543,7 @@ abstract class BunyipsOpMode : BOMInternal() {
 
     /**
      * Dangerous method: call to IMMEDIATELY terminate the OpMode.
-     * This will not run any cleanup code, and should only be used in emergencies.
+     * **No further code will run**, and this should only be used in emergencies.
      */
     fun emergencyStop() {
         Dbg.logd("BunyipsOpMode: emergency stop requested.")

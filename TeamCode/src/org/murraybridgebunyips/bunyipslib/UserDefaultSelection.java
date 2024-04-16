@@ -9,6 +9,6 @@ public final class UserDefaultSelection {
     @NonNull
     @Override
     public String toString() {
-        return "DEFAULT";
+        return "Default";
     }
 }

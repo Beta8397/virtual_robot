@@ -1,6 +1,7 @@
 package org.murraybridgebunyips.bunyipslib;
 
 import static org.murraybridgebunyips.bunyipslib.Text.round;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds;
 
 import androidx.annotation.Nullable;
 
@@ -94,7 +95,8 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
      * Determine if the subsystem is idle, meaning an IdleTask is running.
      */
     public final boolean isIdle() {
-        return getCurrentTask().toString().equals("IdleTask");
+        Task current = getCurrentTask();
+        return current == null || current.toString().equals("IdleTask");
     }
 
     /**
@@ -185,8 +187,8 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
                 Scheduler.addTaskReport(
                         getClass().getSimpleName() + (task == defaultTask ? " (d.)" : ""),
                         task.toString(),
-                        round(task.getDeltaTime(), 1),
-                        task.getTimeout()
+                        round(task.getDeltaTime().in(Seconds), 1),
+                        task.getTimeout().in(Seconds)
                 );
             }
         }
