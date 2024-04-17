@@ -12,6 +12,7 @@ import org.murraybridgebunyips.bunyipslib.Text.formatString
 import org.murraybridgebunyips.bunyipslib.external.units.Units.Milliseconds
 import org.murraybridgebunyips.bunyipslib.external.units.Units.Second
 import org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds
+import java.util.Collections
 import kotlin.math.roundToInt
 
 /**
@@ -34,8 +35,12 @@ class DualTelemetry @JvmOverloads constructor(
     infoString: String? = null
 ) : Telemetry {
     private lateinit var overheadTelemetry: Item
+    private val telemetryItems = Collections.synchronizedSet(mutableSetOf<Pair<ItemType, String>>())
+
+    @Volatile
     private var telemetryQueue = 0
-    private val telemetryItems = mutableSetOf<Pair<ItemType, String>>()
+
+    @Volatile
     private var packet: TelemetryPacket? = TelemetryPacket()
 
     /**
@@ -57,12 +62,14 @@ class DualTelemetry @JvmOverloads constructor(
         // Separate log from telemetry on the DS with an empty line
         opMode.telemetry.log().add("")
         if (infoString != null) {
-            telemetryItems.add(
-                Pair(
-                    ItemType.LOG,
-                    infoString
+            synchronized(telemetryItems) {
+                telemetryItems.add(
+                    Pair(
+                        ItemType.LOG,
+                        infoString
+                    )
                 )
-            )
+            }
             opMode.telemetry.log().add(infoString)
         }
     }
@@ -163,7 +170,9 @@ class DualTelemetry @JvmOverloads constructor(
     fun log(format: Any, vararg args: Any?) {
         val fstring = formatString(format.toString(), *args)
         opMode.telemetry.log().add(fstring)
-        telemetryItems.add(Pair(ItemType.LOG, fstring))
+        synchronized(telemetryItems) {
+            telemetryItems.add(Pair(ItemType.LOG, fstring))
+        }
     }
 
     /**
@@ -175,7 +184,9 @@ class DualTelemetry @JvmOverloads constructor(
     fun log(obj: Class<*>, format: Any, vararg args: Any?) {
         val msg = "[${obj.simpleName}] ${formatString(format.toString(), *args)}"
         opMode.telemetry.log().add(msg)
-        telemetryItems.add(Pair(ItemType.LOG, msg))
+        synchronized(telemetryItems) {
+            telemetryItems.add(Pair(ItemType.LOG, msg))
+        }
     }
 
     /**
@@ -187,7 +198,9 @@ class DualTelemetry @JvmOverloads constructor(
     fun log(stck: StackTraceElement, format: Any, vararg args: Any?) {
         val msg = "[${stck}] ${formatString(format.toString(), *args)}"
         opMode.telemetry.log().add(msg)
-        telemetryItems.add(Pair(ItemType.LOG, msg))
+        synchronized(telemetryItems) {
+            telemetryItems.add(Pair(ItemType.LOG, msg))
+        }
     }
 
     /**
@@ -224,31 +237,32 @@ class DualTelemetry @JvmOverloads constructor(
         }
 
         packet?.let {
-            it.put(overheadTag ?: "status", overheadStatus + "\n")
+            synchronized(it) {
+                it.put(overheadTag ?: "status", overheadStatus + "\n")
 
-            // Copy with toList() to avoid ConcurrentModificationExceptions
-            telemetryItems.toList().forEachIndexed { index, pair ->
-                val (type, value) = pair
-                when (type) {
-                    ItemType.TELEMETRY -> it.put("DS$index", value)
-                    ItemType.RETAINED_TELEMETRY -> it.put("RT$index", value)
-                    ItemType.LOG -> {
-                        if (index == 0) {
-                            // BunyipsLib info, this is an always log and will always
-                            // be the first log in the list as it is added at the start
-                            // of the init cycle
-                            it.put("INFO", value)
-                            return@forEachIndexed
+                telemetryItems.forEachIndexed { index, pair ->
+                    val (type, value) = pair
+                    when (type) {
+                        ItemType.TELEMETRY -> it.put("DS$index", value)
+                        ItemType.RETAINED_TELEMETRY -> it.put("RT$index", value)
+                        ItemType.LOG -> {
+                            if (index == 0) {
+                                // BunyipsLib info, this is an always log and will always
+                                // be the first log in the list as it is added at the start
+                                // of the init cycle
+                                it.put("INFO", value)
+                                return@forEachIndexed
+                            }
+                            it.put("LOG$index", value)
                         }
-                        it.put("LOG$index", value)
                     }
                 }
+
+                FtcDashboard.getInstance().sendTelemetryPacket(it)
+
+                // Invalidate this packet
+                packet = null
             }
-
-            FtcDashboard.getInstance().sendTelemetryPacket(it)
-
-            // Invalidate this packet
-            packet = null
         }
 
         if (opMode.telemetry.isAutoClear) {
@@ -273,7 +287,9 @@ class DualTelemetry @JvmOverloads constructor(
      */
     override fun clearAll() {
         opMode.telemetry.clearAll()
-        telemetryItems.clear()
+        synchronized(telemetryItems) {
+            telemetryItems.clear()
+        }
         FtcDashboard.getInstance().clearTelemetry()
         telemetryQueue = 0
         overheadTelemetry = opMode.telemetry.addData(
@@ -364,7 +380,9 @@ class DualTelemetry @JvmOverloads constructor(
         clearAll()
         opModeStatus = "setup"
         telemetryQueue = 0
-        telemetryItems.clear()
+        synchronized(telemetryItems) {
+            telemetryItems.clear()
+        }
         packet = null
     }
 
@@ -390,12 +408,14 @@ class DualTelemetry @JvmOverloads constructor(
         val item = opMode.telemetry.addData(value, "")
             .setRetained(retained)
         if (value.isNotBlank()) {
-            telemetryItems.add(
-                Pair(
-                    if (retained) ItemType.RETAINED_TELEMETRY else ItemType.TELEMETRY,
-                    value
+            synchronized(telemetryItems) {
+                telemetryItems.add(
+                    Pair(
+                        if (retained) ItemType.RETAINED_TELEMETRY else ItemType.TELEMETRY,
+                        value
+                    )
                 )
-            )
+            }
         }
         return item
     }
@@ -404,11 +424,13 @@ class DualTelemetry @JvmOverloads constructor(
      * Clear all telemetry objects from the management queue just like a telemetry.clear() call.
      */
     private fun clearTelemetryObjects() {
-        val tmp = telemetryItems.toTypedArray()
-        for (item in tmp) {
-            if (item.first == ItemType.RETAINED_TELEMETRY)
-                continue
-            telemetryItems.remove(item)
+        synchronized(telemetryItems) {
+            val tmp = telemetryItems.toTypedArray()
+            for (item in tmp) {
+                if (item.first == ItemType.RETAINED_TELEMETRY)
+                    continue
+                telemetryItems.remove(item)
+            }
         }
     }
 
