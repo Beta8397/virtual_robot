@@ -9,13 +9,16 @@ import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 import org.murraybridgebunyips.bunyipslib.Controls;
 import org.murraybridgebunyips.bunyipslib.EmergencyStop;
 import org.murraybridgebunyips.bunyipslib.external.pid.PIDController;
+import org.murraybridgebunyips.bunyipslib.external.units.Measure;
+import org.murraybridgebunyips.bunyipslib.external.units.Time;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
-import org.murraybridgebunyips.bunyipslib.tasks.bases.ForeverTask;
+import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 import org.murraybridgebunyips.bunyipslib.vision.data.AprilTagData;
 import org.murraybridgebunyips.bunyipslib.vision.processors.AprilTag;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.DoubleSupplier;
 
 /**
  * Task to align to an AprilTag.
@@ -24,7 +27,7 @@ import java.util.Optional;
  * @author Lucas Bubner, 2024
  */
 @Config
-public class AlignToAprilTagTask<T extends BunyipsSubsystem> extends ForeverTask {
+public class AlignToAprilTagTask<T extends BunyipsSubsystem> extends Task {
     /**
      * PID coefficients for the alignment controller.
      */
@@ -32,24 +35,62 @@ public class AlignToAprilTagTask<T extends BunyipsSubsystem> extends ForeverTask
 
     private final RoadRunnerDrive drive;
     private final AprilTag at;
-    private final Gamepad gamepad;
     private final PIDController controller;
+    private DoubleSupplier x;
+    private DoubleSupplier y;
+    private DoubleSupplier r;
 
     /**
-     * @param gamepad    the gamepad to use for input
+     * Autonomous constructor.
+     *
+     * @param timeout    the timeout for the task
      * @param drive      the drivetrain to use
      * @param at         the AprilTag processor to use
      * @param controller the PID controller to use for aligning to a target
      */
-    public AlignToAprilTagTask(Gamepad gamepad, T drive, AprilTag at, PIDController controller) {
-        super(drive, false);
+    public AlignToAprilTagTask(Measure<Time> timeout, T drive, AprilTag at, PIDController controller) {
+        super(timeout, drive, false);
         if (!(drive instanceof RoadRunnerDrive))
             throw new EmergencyStop("AlignToAprilTagTask must be used with a drivetrain with X forward Pose/IMU info");
         this.drive = (RoadRunnerDrive) drive;
         this.at = at;
-        this.gamepad = gamepad;
         this.controller = controller;
         controller.updatePID(PID);
+    }
+
+    /**
+     * TeleOp constructor.
+     *
+     * @param xSupplier  x (strafe) value
+     * @param ySupplier  y (forward) value
+     * @param rSupplier  r (rotate) value
+     * @param drive      the drivetrain to use
+     * @param at         the AprilTag processor to use
+     * @param controller the PID controller to use for aligning to a target
+     */
+    public AlignToAprilTagTask(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier rSupplier, T drive, AprilTag at, PIDController controller) {
+        super(INFINITE_TIMEOUT, drive, false);
+        if (!(drive instanceof RoadRunnerDrive))
+            throw new EmergencyStop("AlignToAprilTagTask must be used with a drivetrain with X forward Pose/IMU info");
+        this.drive = (RoadRunnerDrive) drive;
+        this.at = at;
+        x = xSupplier;
+        y = ySupplier;
+        r = rSupplier;
+        this.controller = controller;
+        controller.updatePID(PID);
+    }
+
+    /**
+     * Constructor for AlignToAprilTagTask using a default Mecanum binding.
+     *
+     * @param driver     The gamepad to use for driving
+     * @param drive      The MecanumDrive to use for driving
+     * @param at         The AprilTag processor to use
+     * @param controller The PID controller to use for aligning to a target
+     */
+    public AlignToAprilTagTask(Gamepad driver, T drive, AprilTag at, PIDController controller) {
+        this(() -> driver.left_stick_x, () -> driver.left_stick_y, () -> driver.right_stick_x, drive, at, controller);
     }
 
     @Override
@@ -63,7 +104,9 @@ public class AlignToAprilTagTask<T extends BunyipsSubsystem> extends ForeverTask
         // FtcDashboard live tuning
         controller.setPID(PID);
 
-        Pose2d pose = Controls.makeRobotPose(gamepad.left_stick_x, gamepad.left_stick_y, gamepad.right_stick_x);
+        Pose2d pose = new Pose2d();
+        if (x != null)
+            pose = Controls.makeRobotPose(x.getAsDouble(), y.getAsDouble(), r.getAsDouble());
 
         List<AprilTagData> data = at.getData();
 
@@ -85,5 +128,10 @@ public class AlignToAprilTagTask<T extends BunyipsSubsystem> extends ForeverTask
     @Override
     protected void onFinish() {
 //        drive.setSpeedUsingController(0, 0, 0);
+    }
+
+    @Override
+    protected boolean isTaskFinished() {
+        return x == null && controller.atSetPoint();
     }
 }

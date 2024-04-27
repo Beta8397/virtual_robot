@@ -11,13 +11,17 @@ import com.qualcomm.robotcore.util.Range;
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 import org.murraybridgebunyips.bunyipslib.Controls;
 import org.murraybridgebunyips.bunyipslib.EmergencyStop;
+import org.murraybridgebunyips.bunyipslib.external.units.Distance;
+import org.murraybridgebunyips.bunyipslib.external.units.Measure;
+import org.murraybridgebunyips.bunyipslib.external.units.Time;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
-import org.murraybridgebunyips.bunyipslib.tasks.bases.ForeverTask;
+import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 import org.murraybridgebunyips.bunyipslib.vision.data.AprilTagData;
 import org.murraybridgebunyips.bunyipslib.vision.processors.AprilTag;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.DoubleSupplier;
 
 /**
  * Task to move to and align to an AprilTag.
@@ -26,11 +30,11 @@ import java.util.Optional;
  * @author Lucas Bubner, 2024
  */
 @Config
-public class MoveToAprilTagTask<T extends BunyipsSubsystem> extends ForeverTask {
+public class MoveToAprilTagTask<T extends BunyipsSubsystem> extends Task {
     /**
-     * The desired distance from the tag in meters.
+     * The desired distance from the tag.
      */
-    public static double DESIRED_DISTANCE = Meters.convertFrom(18, Inches); // m
+    public static Measure<Distance> DESIRED_DISTANCE = Meters.of(1);
     /**
      * The speed gain for the distance error.
      */
@@ -56,56 +60,159 @@ public class MoveToAprilTagTask<T extends BunyipsSubsystem> extends ForeverTask 
      */
     public static double MAX_AUTO_TURN = 0.3;
     /**
+     * Tolerance of the error for the robot to stop the task in an Autonomous context.
+     */
+    public static double AUTO_FINISH_ERROR_TOLERANCE = 0.1;
+    /**
      * The tag to target. -1 for any tag.
      */
     public static int TARGET_TAG = -1;
 
     private final RoadRunnerDrive drive;
     private final AprilTag aprilTag;
-    private final Gamepad gamepad;
+    private DoubleSupplier x;
+    private DoubleSupplier y;
+    private DoubleSupplier r;
+
+    private double rangeError;
+    private double yawError;
+    private double headingError;
 
     /**
-     * TeleOp constructor.
+     * Autonomous constructor.
      *
-     * @param gamepad          the gamepad to use for manual control
-     * @param drive            the drivetrain to use
-     * @param aprilTag         the AprilTag processor to use
-     * @param desiredDistanceM the desired distance from the tag in meters
-     * @param speedGain        the speed gain for the distance error
-     * @param strafeGain       the strafe gain for the yaw error
-     * @param turnGain         the turn gain for the heading error
-     * @param maxAutoSpeed     the maximum speed the robot can move at
-     * @param maxAutoStrafe    the maximum strafe the robot can move at
-     * @param maxAutoTurn      the maximum turn the robot can move at
-     * @param targetTag        the tag to target. -1 for any tag
+     * @param timeout   the timeout for the task
+     * @param drive     the drivetrain to use
+     * @param aprilTag  the AprilTag processor to use
+     * @param targetTag the tag to target. -1 for any tag
      */
-    public MoveToAprilTagTask(Gamepad gamepad, T drive, AprilTag aprilTag, double desiredDistanceM, double speedGain, double strafeGain, double turnGain, double maxAutoSpeed, double maxAutoStrafe, double maxAutoTurn, int targetTag) {
-        super(drive, false);
+    public MoveToAprilTagTask(Measure<Time> timeout, T drive, AprilTag aprilTag, int targetTag) {
+        super(timeout, drive, false);
         if (!(drive instanceof RoadRunnerDrive))
-            throw new EmergencyStop("MoveToContourTask must be used with a drivetrain with X forward Pose/IMU info");
+            throw new EmergencyStop("MoveToAprilTagTask must be used with a drivetrain with X forward Pose/IMU info");
         this.drive = (RoadRunnerDrive) drive;
         this.aprilTag = aprilTag;
-        this.gamepad = gamepad;
-        DESIRED_DISTANCE = desiredDistanceM;
-        SPEED_GAIN = speedGain;
-        STRAFE_GAIN = strafeGain;
-        TURN_GAIN = turnGain;
-        MAX_AUTO_SPEED = maxAutoSpeed;
-        MAX_AUTO_STRAFE = maxAutoStrafe;
-        MAX_AUTO_TURN = maxAutoTurn;
-        TARGET_TAG = targetTag;
     }
 
     /**
      * TeleOp constructor with default values.
      *
-     * @param gamepad   the gamepad to use for manual control
+     * @param xSupplier x (strafe) value
+     * @param ySupplier y (forward) value
+     * @param rSupplier r (rotate) value
+     * @param drive     the drivetrain to use
+     * @param aprilTag  the AprilTag processor to use
+     * @param targetTag the tag to target. -1 for any tag
+     */
+    public MoveToAprilTagTask(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier rSupplier, T drive, AprilTag aprilTag, int targetTag) {
+        super(INFINITE_TIMEOUT, drive, false);
+        if (!(drive instanceof RoadRunnerDrive))
+            throw new EmergencyStop("MoveToAprilTagTask must be used with a drivetrain with X forward Pose/IMU info");
+        this.drive = (RoadRunnerDrive) drive;
+        this.aprilTag = aprilTag;
+        x = xSupplier;
+        y = ySupplier;
+        r = rSupplier;
+    }
+
+    /**
+     * TeleOp constructor using a default Mecanum binding.
+     *
+     * @param gamepad   the gamepad to use for driving
      * @param drive     the drivetrain to use
      * @param aprilTag  the AprilTag processor to use
      * @param targetTag the tag to target. -1 for any tag
      */
     public MoveToAprilTagTask(Gamepad gamepad, T drive, AprilTag aprilTag, int targetTag) {
-        this(gamepad, drive, aprilTag, DESIRED_DISTANCE, SPEED_GAIN, STRAFE_GAIN, TURN_GAIN, MAX_AUTO_SPEED, MAX_AUTO_STRAFE, MAX_AUTO_TURN, targetTag);
+        this(() -> gamepad.left_stick_x, () -> gamepad.left_stick_y, () -> gamepad.right_stick_x, drive, aprilTag, targetTag);
+    }
+
+    /**
+     * Set the desired distance from the tag.
+     *
+     * @param desiredDistance the desired distance from the tag
+     * @return this
+     */
+    public MoveToAprilTagTask<T> withDesiredDistance(Measure<Distance> desiredDistance) {
+        DESIRED_DISTANCE = desiredDistance;
+        return this;
+    }
+
+    /**
+     * Set the forward speed gain for the distance error.
+     *
+     * @param speedGain the speed gain for the distance error
+     * @return this
+     */
+    public MoveToAprilTagTask<T> withSpeedGain(double speedGain) {
+        SPEED_GAIN = speedGain;
+        return this;
+    }
+
+    /**
+     * Set the strafe gain for the yaw error.
+     *
+     * @param strafeGain the strafe gain for the yaw error
+     * @return this
+     */
+    public MoveToAprilTagTask<T> withStrafeGain(double strafeGain) {
+        STRAFE_GAIN = strafeGain;
+        return this;
+    }
+
+    /**
+     * Set the turn gain for the heading error.
+     *
+     * @param turnGain the turn gain for the heading error
+     * @return this
+     */
+    public MoveToAprilTagTask<T> withTurnGain(double turnGain) {
+        TURN_GAIN = turnGain;
+        return this;
+    }
+
+    /**
+     * Set the maximum speed the robot can move at.
+     *
+     * @param maxAutoSpeed the maximum speed the robot can move at
+     * @return this
+     */
+    public MoveToAprilTagTask<T> withMaxAutoSpeed(double maxAutoSpeed) {
+        MAX_AUTO_SPEED = maxAutoSpeed;
+        return this;
+    }
+
+    /**
+     * Set the maximum strafe the robot can move at.
+     *
+     * @param maxAutoStrafe the maximum strafe the robot can move at
+     * @return this
+     */
+    public MoveToAprilTagTask<T> withMaxAutoStrafe(double maxAutoStrafe) {
+        MAX_AUTO_STRAFE = maxAutoStrafe;
+        return this;
+    }
+
+    /**
+     * Set the maximum turn the robot can move at.
+     *
+     * @param maxAutoTurn the maximum turn the robot can move at
+     * @return this
+     */
+    public MoveToAprilTagTask<T> withMaxAutoTurn(double maxAutoTurn) {
+        MAX_AUTO_TURN = maxAutoTurn;
+        return this;
+    }
+
+    /**
+     * Set the tag ID to target. -1 for any tag.
+     *
+     * @param targetTag the tag ID to target
+     * @return this
+     */
+    public MoveToAprilTagTask<T> withTargetTag(int targetTag) {
+        TARGET_TAG = targetTag;
+        return this;
     }
 
     @Override
@@ -116,7 +223,7 @@ public class MoveToAprilTagTask<T extends BunyipsSubsystem> extends ForeverTask 
 
     @Override
     protected void periodic() {
-        Pose2d pose = Controls.makeRobotPose(gamepad.left_stick_x, gamepad.left_stick_y, gamepad.right_stick_x);
+        Pose2d pose = Controls.makeRobotPose(x.getAsDouble(), y.getAsDouble(), r.getAsDouble());
 
         List<AprilTagData> data = aprilTag.getData();
 
@@ -126,9 +233,9 @@ public class MoveToAprilTagTask<T extends BunyipsSubsystem> extends ForeverTask 
             return;
         }
 
-        double rangeError = (target.get().getRange() - Inches.convertFrom(DESIRED_DISTANCE, Meters)) * SPEED_GAIN;
-        double yawError = -target.get().getYaw() * STRAFE_GAIN;
-        double headingError = target.get().getBearing() * TURN_GAIN;
+        rangeError = (target.get().getRange() - DESIRED_DISTANCE.in(Inches)) * SPEED_GAIN;
+        yawError = -target.get().getYaw() * STRAFE_GAIN;
+        headingError = target.get().getBearing() * TURN_GAIN;
 
         drive.setWeightedDrivePower(
                 new Pose2d(
@@ -142,5 +249,10 @@ public class MoveToAprilTagTask<T extends BunyipsSubsystem> extends ForeverTask 
     @Override
     protected void onFinish() {
 //        drive.setSpeedUsingController(0, 0, 0);
+    }
+
+    @Override
+    protected boolean isTaskFinished() {
+        return x == null && Math.abs(rangeError) < AUTO_FINISH_ERROR_TOLERANCE && Math.abs(yawError) < AUTO_FINISH_ERROR_TOLERANCE && Math.abs(headingError) < AUTO_FINISH_ERROR_TOLERANCE;
     }
 }

@@ -1,6 +1,5 @@
 package org.murraybridgebunyips.bunyipslib.example.examplerobot.autonomous;
 
-import static org.murraybridgebunyips.bunyipslib.external.units.Units.Inches;
 import static org.murraybridgebunyips.bunyipslib.external.units.Units.Millimeters;
 
 import androidx.annotation.NonNull;
@@ -43,7 +42,7 @@ public class ExampleRoadRunnerAutonomous extends AutonomousBunyipsOpMode impleme
 //                .splineTo(...)
 //                .build();
         addNewTrajectory(new Pose2d(0, 0, 0))
-                .forward(Inches.convertFrom(1234, Millimeters))
+                .forward(1234, Millimeters)
                 .withPriority(PriorityLevel.FIRST)
                 .build();
         addNewTrajectory()

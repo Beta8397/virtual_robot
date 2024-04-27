@@ -162,7 +162,7 @@ public class Controller extends Gamepad {
      * called in BunyipsOpMode on another thread.
      */
     public void update() {
-//        parseUnmanagedControllerBuffer();
+        parseUnmanagedControllerBuffer();
 
         // Recalculate all custom inputs
         left_stick_x = get(Controls.Analog.LEFT_STICK_X);

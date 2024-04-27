@@ -1,5 +1,10 @@
 package org.murraybridgebunyips.bunyipslib.example.examplerobot.components;
 
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Inches;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.InchesPerSecond;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.RadiansPerSecond;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Second;
+
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -97,14 +102,14 @@ public class ExampleConfig extends RobotConfig {
                 .setTicksPerRev(0)
                 .setMaxRPM(0)
                 .setRunUsingEncoder(false)
-                .setWheelRadius(0)
+                .setWheelRadius(Inches.zero())
                 .setGearRatio(0)
-                .setTrackWidth(0)
+                .setTrackWidth(Inches.zero())
                 // ((MAX_RPM / 60) * GEAR_RATIO * WHEEL_RADIUS * 2 * Math.PI) * 0.85
-                .setMaxVel(0)
-                .setMaxAccel(0)
-                .setMaxAngVel(0)
-                .setMaxAngAccel(0)
+                .setMaxVel(InchesPerSecond.zero())
+                .setMaxAccel(InchesPerSecond.per(Second).zero())
+                .setMaxAngVel(RadiansPerSecond.zero())
+                .setMaxAngAccel(RadiansPerSecond.per(Second).zero())
                 .setKV(0)
                 .setKStatic(0)
                 .setKA(0)

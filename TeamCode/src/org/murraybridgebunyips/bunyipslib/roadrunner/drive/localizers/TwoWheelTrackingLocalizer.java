@@ -42,8 +42,8 @@ public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
     // Perpendicular is perpendicular to the forward axis
     private final Deadwheel parallelDeadwheel;
     private final Deadwheel perpendicularDeadwheel;
-
     private final RoadRunnerDrive drive;
+    private boolean usingOverflowCompensation;
 
     /**
      * Create a new TwoWheelTrackingLocalizer
@@ -64,6 +64,16 @@ public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
 
         this.parallelDeadwheel = parallelDeadwheel;
         this.perpendicularDeadwheel = perpendicularDeadwheel;
+    }
+
+    /**
+     * Enable overflow compensation if your encoders exceed 32767 counts / second.
+     *
+     * @return this
+     */
+    public TwoWheelTrackingLocalizer enableOverflowCompensation() {
+        usingOverflowCompensation = true;
+        return this;
     }
 
     public TwoWheelTrackingLocalizerCoefficients getCoefficients() {
@@ -103,12 +113,10 @@ public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
     @Override
     public List<Double> getWheelVelocities() {
         // If your encoder velocity can exceed 32767 counts / second (such as the REV Through Bore and other
-        // competing magnetic encoders), change Encoder.getRawVelocity() to Encoder.getCorrectedVelocity() to enable a
-        // compensation method
-
+        // high resolution encoders), enable overflow compensation with enableOverflowCompensation.
         return Arrays.asList(
-                encoderTicksToInches(parallelDeadwheel.getRawVelocity()),
-                encoderTicksToInches(perpendicularDeadwheel.getRawVelocity())
+                encoderTicksToInches(usingOverflowCompensation ? parallelDeadwheel.getCorrectedVelocity() : parallelDeadwheel.getRawVelocity()),
+                encoderTicksToInches(usingOverflowCompensation ? perpendicularDeadwheel.getCorrectedVelocity() : perpendicularDeadwheel.getRawVelocity())
         );
     }
 }

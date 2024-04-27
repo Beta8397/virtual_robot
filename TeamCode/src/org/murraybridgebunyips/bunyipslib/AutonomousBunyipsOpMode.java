@@ -10,6 +10,8 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -36,6 +38,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     // Pre and post queues cannot have their tasks removed, so we can rely on their .size() methods
     private final ArrayDeque<RobotTask> postQueue = new ArrayDeque<>();
     private final ArrayDeque<RobotTask> preQueue = new ArrayDeque<>();
+    private final HashSet<BunyipsSubsystem> updatedSubsystems = new HashSet<>();
     private int taskCount;
     private UserSelection<OpModeSelection> userSelection;
     // Init-task does not count as a queued task, so we start at 1
@@ -121,7 +124,6 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
 
         // Run the queue of tasks
         RobotTask currentTask = tasks.peekFirst();
-
         if (currentTask == null) {
             log("auto: all tasks done, finishing...");
             finish();
@@ -138,6 +140,11 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
         }
 
         currentTask.run();
+
+        // Update all subsystems
+        for (BunyipsSubsystem subsystem : updatedSubsystems) {
+            subsystem.update();
+        }
     }
 
     /**
@@ -160,12 +167,26 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     }
 
     /**
+     * Call to add subsystems that should be updated by AutonomousBunyipsOpMode. This is required to be called
+     * as some subsystems rely on their {@code update()} method to dispatch tasks.
+     *
+     * @param subsystems the subsystems to be periodically called for their {@code update()} method.
+     */
+    public final void addSubsystems(BunyipsSubsystem... subsystems) {
+        if (!NullSafety.assertNotNull(Arrays.stream(subsystems).toArray())) {
+            throw new RuntimeException("Null subsystems were added in the addSubsystems() method!");
+        }
+        Collections.addAll(updatedSubsystems, subsystems);
+    }
+
+    /**
      * Can be called to add custom {@link Task}s in a robot's autonomous
      *
      * @param newTask task to add to the run queue
      * @param ack     suppress the warning that a task was added manually before onReady
      */
     public final void addTask(@NotNull RobotTask newTask, boolean ack) {
+        checkTaskForDependency(newTask);
         if (!hasGottenCallback && !ack) {
             log("auto: caution! a task was added manually before the onReady callback");
         }
@@ -200,6 +221,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
      * @param newTask task to add to the run queue
      */
     public final void addTaskLast(@NotNull RobotTask newTask) {
+        checkTaskForDependency(newTask);
         if (!hasGottenCallback) {
             postQueue.add(newTask);
             log("auto: % has been queued as end-init task %/%", newTask, postQueue.size(), postQueue.size());
@@ -218,6 +240,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
      * @param newTask task to add to the run queue
      */
     public final void addTaskFirst(@NotNull RobotTask newTask) {
+        checkTaskForDependency(newTask);
         if (!hasGottenCallback) {
             preQueue.add(newTask);
             log("auto: % has been queued as end-init task 1/%", newTask, preQueue.size());
@@ -302,6 +325,14 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
         log("auto: task at index 0 was removed");
     }
 
+    private void checkTaskForDependency(RobotTask task) {
+        if (task instanceof Task) {
+            ((Task) task).getDependency().ifPresent((s) -> {
+                if (!updatedSubsystems.contains(s))
+                    Dbg.warn(getClass(), "Task % has a dependency on %, but it is not being updated by the AutonomousBunyipsOpMode. Please ensure it is being updated properly through addSubsystems().", task, s);
+            });
+        }
+    }
 
     /**
      * Runs upon the pressing of the INIT button on the Driver Station.
@@ -324,9 +355,9 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
      *     // Use `StartingPositions.use();` for using the four Robot starting positions
      * }</pre>
      */
-    protected final void setOpModes(@Nullable Object... selectableOpModes) {
+    protected final void setOpModes(@Nullable List<Object> selectableOpModes) {
         if (selectableOpModes == null) return;
-        setOpModes(Arrays.asList(selectableOpModes));
+        setOpModes(selectableOpModes.toArray(new Object[0]));
     }
 
 
@@ -344,15 +375,14 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
      *     // Use `StartingPositions.use();` for using the four Robot starting positions
      * }</pre>
      */
-    protected final void setOpModes(@Nullable List<Object> selectableOpModes) {
-        if (selectableOpModes != null) {
-            opModes.clear();
-            for (Object selectableOpMode : selectableOpModes) {
-                if (selectableOpMode instanceof OpModeSelection) {
-                    opModes.add((OpModeSelection) selectableOpMode);
-                } else {
-                    opModes.add(new OpModeSelection(selectableOpMode));
-                }
+    protected final void setOpModes(@Nullable Object... selectableOpModes) {
+        if (selectableOpModes == null) return;
+        opModes.clear();
+        for (Object selectableOpMode : selectableOpModes) {
+            if (selectableOpMode instanceof OpModeSelection) {
+                opModes.add((OpModeSelection) selectableOpMode);
+            } else {
+                opModes.add(new OpModeSelection(selectableOpMode));
             }
         }
     }

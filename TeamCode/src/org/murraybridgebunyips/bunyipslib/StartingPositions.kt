@@ -40,11 +40,11 @@ enum class StartingPositions(
          * as if the controller were rotated 45 degrees anti-clockwise and ABXY represented the four
          * positions from the audience's perspective.
          */
-        @JvmStatic
-        fun use(): List<StartingPositions> {
+        @JvmStatic /* giulio was here fun use(): list<any> { */
+        fun use(): List<Any> {
             return listOf(
                 STARTING_RED_LEFT, // A
-                STARTING_RED_RIGHT, // B
+                STARTING_RED_RIGHT, // B /*giulio is is still here*/
                 STARTING_BLUE_RIGHT, // X
                 STARTING_BLUE_LEFT // Y
             )

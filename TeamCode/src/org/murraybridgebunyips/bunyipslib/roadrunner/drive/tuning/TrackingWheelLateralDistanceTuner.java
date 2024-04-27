@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.RobotLog;
 
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
-import org.murraybridgebunyips.bunyipslib.roadrunner.drive.localizers.StandardTrackingWheelLocalizer;
+import org.murraybridgebunyips.bunyipslib.roadrunner.drive.localizers.ThreeWheelTrackingLocalizer;
 
 /**
  * Opmode designed to assist the user in tuning the `StandardTrackingWheelLocalizer`'s
@@ -75,12 +75,12 @@ public abstract class TrackingWheelLateralDistanceTuner extends LinearOpMode {
         // Must set localizer to a StandardTrackingWheelLocalizer, at the moment this will not run
         Localizer localizer = drive.getLocalizer();
 
-        if (!(localizer instanceof StandardTrackingWheelLocalizer)) {
+        if (!(localizer instanceof ThreeWheelTrackingLocalizer)) {
             RobotLog.setGlobalErrorMsg("StandardTrackingWheelLocalizer is not being set in the "
                     + "drive class. Ensure that \"setLocalizer(new StandardTrackingWheelLocalizer"
                     + "(hardwareMap));\" is called in SampleMecanumDrive.java");
         }
-        assert localizer instanceof StandardTrackingWheelLocalizer;
+        assert localizer instanceof ThreeWheelTrackingLocalizer;
 
         telemetry.addLine("Prior to beginning the routine, please read the directions "
                 + "located in the comments of the opmode file.");
@@ -127,7 +127,7 @@ public abstract class TrackingWheelLateralDistanceTuner extends LinearOpMode {
         telemetry.clearAll();
         telemetry.addLine("Localizer's total heading: " + Math.toDegrees(headingAccumulator) + "°");
         telemetry.addLine("Effective LATERAL_DISTANCE: " +
-                (headingAccumulator / (NUM_TURNS * Math.PI * 2)) * ((StandardTrackingWheelLocalizer) localizer).getCoefficients().LATERAL_DISTANCE);
+                (headingAccumulator / (NUM_TURNS * Math.PI * 2)) * ((ThreeWheelTrackingLocalizer) localizer).getCoefficients().LATERAL_DISTANCE);
 
         telemetry.update();
 

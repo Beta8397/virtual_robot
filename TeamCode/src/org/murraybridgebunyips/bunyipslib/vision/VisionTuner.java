@@ -167,8 +167,6 @@ public class VisionTuner extends BunyipsOpMode {
             }
         }
 
-        // NOTE: If this doesn't work, I have a backup of the original match case string with fixed
-        // index numbers.
         currentPixel = pixels.get(pixelIndex);
         scalars.set(thresholdIndex, scalars.get(thresholdIndex) + scalarDelta);
 

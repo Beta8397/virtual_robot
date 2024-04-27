@@ -1,5 +1,7 @@
 package org.murraybridgebunyips.bunyipslib;
 
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Inches;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Radians;
 import static org.murraybridgebunyips.bunyipslib.tasks.bases.Task.INFINITE_TIMEOUT;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
@@ -8,6 +10,8 @@ import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
 import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryAccelerationConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryVelocityConstraint;
 
+import org.murraybridgebunyips.bunyipslib.external.units.Angle;
+import org.murraybridgebunyips.bunyipslib.external.units.Distance;
 import org.murraybridgebunyips.bunyipslib.external.units.Measure;
 import org.murraybridgebunyips.bunyipslib.external.units.Time;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
@@ -44,7 +48,7 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
     /**
      * Get the last known pose of the drive system, or the last pose from the last trajectory.
      *
-     * @return Last known pose of the scheduled tasks or current pose of the drive
+     * @return Last known pose of the scheduled tasks or current pose of the drive, in inches
      */
     default Pose2d getPreviousPose() {
         // Needed to splice the last pose from the last trajectory
@@ -59,14 +63,35 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
      * This method is the combination of {@link #newTrajectorySequence()} and {@link #addTrajectory(TrajectorySequence)},
      * using a custom builder that supports {@code setTimeout()} and priority building.
      *
-     * @param startPose Starting pose of the trajectory, ** WILL SET DRIVE POSE ESTIMATE TO THIS POSE **, (in, in, rad)
+     * @param startPoseInchRad Starting pose of the trajectory, ** WILL SET DRIVE POSE ESTIMATE TO THIS POSE **, (in, in, radians)
      * @return Builder for the trajectory
      */
-    default RoadRunnerTrajectoryTaskBuilder addNewTrajectory(Pose2d startPose) {
+    default RoadRunnerTrajectoryTaskBuilder addNewTrajectory(Pose2d startPoseInchRad) {
         // noinspection rawtypes
-        TrajectorySequenceBuilder builder = getDrive().trajectorySequenceBuilder(startPose);
-        getDrive().setPoseEstimate(startPose);
-        return new RoadRunnerTrajectoryTaskBuilder(getDrive(), startPose, builder.getBaseVelConstraint(), builder.getBaseAccelConstraint(), builder.getBaseTurnConstraintMaxAngVel(), builder.getBaseTurnConstraintMaxAngAccel());
+        TrajectorySequenceBuilder builder = getDrive().trajectorySequenceBuilder(startPoseInchRad);
+        getDrive().setPoseEstimate(startPoseInchRad);
+        return new RoadRunnerTrajectoryTaskBuilder(getDrive(), startPoseInchRad, builder.getBaseVelConstraint(), builder.getBaseAccelConstraint(), builder.getBaseTurnConstraintMaxAngVel(), builder.getBaseTurnConstraintMaxAngAccel());
+    }
+
+
+    /**
+     * Use this method to build a new RoadRunner trajectory to the queue.
+     * Creates a new builder for a RoadRunner trajectory, which will automatically add a
+     * task to the queue when build() is called, optionally with a timeout control ({@link RoadRunnerTrajectoryTaskBuilder#withTimeout(Measure)}).
+     * <p>
+     * This method is the combination of {@link #newTrajectorySequence()} and {@link #addTrajectory(TrajectorySequence)},
+     * using a custom builder that supports {@code setTimeout()} and priority building.
+     *
+     * @param startPose Starting pose of the trajectory, ** WILL SET DRIVE POSE ESTIMATE TO THIS POSE **
+     * @param inUnit    The unit of the end pose vector (will be converted to inches)
+     * @param angleUnit The unit of the end pose heading (will be converted to radians)
+     * @return Builder for the trajectory
+     */
+    default RoadRunnerTrajectoryTaskBuilder addNewTrajectory(Pose2d startPose, Distance inUnit, Angle angleUnit) {
+        double x = Inches.convertFrom(startPose.getX(), inUnit);
+        double y = Inches.convertFrom(startPose.getY(), inUnit);
+        double r = Radians.convertFrom(startPose.getHeading(), angleUnit);
+        return addNewTrajectory(new Pose2d(x, y, r));
     }
 
     /**
@@ -105,12 +130,30 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
      * integrated task building, or if you prefer you can use {@link #addTrajectory(Trajectory)}
      * to add your sequence to the queue manually.
      *
-     * @param startPose Starting pose of the trajectory, ** WILL SET DRIVE POSE ESTIMATE TO THIS POSE **, (in, in, rad)
+     * @param startPose Starting pose of the trajectory, ** WILL SET DRIVE POSE ESTIMATE TO THIS POSE **, (in, in, radians)
      * @return Builder for the trajectory
      */
     default TrajectoryBuilder newTrajectory(Pose2d startPose) {
         getDrive().setPoseEstimate(startPose);
         return getDrive().trajectoryBuilder(startPose);
+    }
+
+    /**
+     * Create a new builder for a standard RoadRunner trajectory using the drive system.
+     * This will use the builder directly from RoadRunner, see {@link #addNewTrajectory(Pose2d)} for
+     * integrated task building, or if you prefer you can use {@link #addTrajectory(Trajectory)}
+     * to add your sequence to the queue manually.
+     *
+     * @param startPose Starting pose of the trajectory, ** WILL SET DRIVE POSE ESTIMATE TO THIS POSE **
+     * @param inUnit    The unit of the end pose vector (will be converted to inches)
+     * @param angleUnit The unit of the end pose heading (will be converted to radians)
+     * @return Builder for the trajectory
+     */
+    default TrajectoryBuilder newTrajectory(Pose2d startPose, Distance inUnit, Angle angleUnit) {
+        double x = Inches.convertFrom(startPose.getX(), inUnit);
+        double y = Inches.convertFrom(startPose.getY(), inUnit);
+        double r = Radians.convertFrom(startPose.getHeading(), angleUnit);
+        return newTrajectory(new Pose2d(x, y, r));
     }
 
     /**
@@ -133,13 +176,32 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
      * integrated task building, or if you prefer you can use {@link #addTrajectory(TrajectorySequence)}
      * to add your sequence to the queue manually.
      *
-     * @param startPose Starting pose of the trajectory, ** WILL SET DRIVE POSE ESTIMATE TO THIS POSE **, (in, in, rad)
+     * @param startPose Starting pose of the trajectory, ** WILL SET DRIVE POSE ESTIMATE TO THIS POSE **, (in, in, radians)
      * @return Builder for the trajectory
      */
     @SuppressWarnings("rawtypes")
     default TrajectorySequenceBuilder newTrajectorySequence(Pose2d startPose) {
         getDrive().setPoseEstimate(startPose);
         return getDrive().trajectorySequenceBuilder(startPose);
+    }
+
+    /**
+     * Create a new builder for a standard RoadRunner trajectory sequence using the drive system.
+     * This will use the builder directly from RoadRunner, see {@link #addNewTrajectory(Pose2d)} for
+     * integrated task building, or if you prefer you can use {@link #addTrajectory(TrajectorySequence)}
+     * to add your sequence to the queue manually.
+     *
+     * @param startPose Starting pose of the trajectory, ** WILL SET DRIVE POSE ESTIMATE TO THIS POSE **
+     * @param inUnit    The unit of the end pose vector (will be converted to inches)
+     * @param angleUnit The unit of the end pose heading (will be converted to radians)
+     * @return Builder for the trajectory
+     */
+    @SuppressWarnings("rawtypes")
+    default TrajectorySequenceBuilder newTrajectorySequence(Pose2d startPose, Distance inUnit, Angle angleUnit) {
+        double x = Inches.convertFrom(startPose.getX(), inUnit);
+        double y = Inches.convertFrom(startPose.getY(), inUnit);
+        double r = Radians.convertFrom(startPose.getHeading(), angleUnit);
+        return newTrajectorySequence(new Pose2d(x, y, r));
     }
 
     /**
@@ -289,8 +351,8 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
          * Create a new builder for a RoadRunner trajectory task.
          *
          * @param drive                         Drive system to use
-         * @param startPose                     Starting pose of the trajectory (in, in, rad)
-         * @param startTangent                  Starting tangent of the trajectory (rad)
+         * @param startPose                     Starting pose of the trajectory (in, in, radians)
+         * @param startTangent                  Starting tangent of the trajectory (radians)
          * @param baseVelConstraint             Base velocity constraint (in/s)
          * @param baseAccelConstraint           Base acceleration constraint (in/s^2)
          * @param baseTurnConstraintMaxAngVel   Base turn constraint max angular velocity (rad/s)
@@ -305,7 +367,7 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
          * Create a new builder for a RoadRunner trajectory task.
          *
          * @param drive                         Drive system to use
-         * @param startPose                     Starting pose of the trajectory (in, in, rad)
+         * @param startPose                     Starting pose of the trajectory (in, in, radians)
          * @param baseVelConstraint             Base velocity constraint
          * @param baseAccelConstraint           Base acceleration constraint
          * @param baseTurnConstraintMaxAngVel   Base turn constraint max angular velocity
@@ -357,6 +419,7 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
         /**
          * Build the trajectory sequence without adding it to the task queue.
          * This method is useful if you are not running an {@link AutonomousBunyipsOpMode}.
+         *
          * @return The built trajectory sequence from the builder
          */
         public TrajectorySequence buildOnlyTrajectory() {
@@ -367,6 +430,7 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
          * Build the trajectory sequence and task, without adding it to a task queue.
          * This method is useful if you are not running an {@link AutonomousBunyipsOpMode}, but still want to
          * use the task system to run the trajectory with your own implementation.
+         *
          * @return The built task.
          */
         public RoadRunnerTask<RoadRunnerDrive> buildOnlyTask() {

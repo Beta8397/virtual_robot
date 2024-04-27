@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.util.RobotLog;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.internal.system.Misc;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
-import org.murraybridgebunyips.bunyipslib.roadrunner.drive.localizers.StandardTrackingWheelLocalizer;
+import org.murraybridgebunyips.bunyipslib.roadrunner.drive.localizers.ThreeWheelTrackingLocalizer;
 
 /**
  * This routine determines the effective forward offset for the lateral tracking wheel.
@@ -57,12 +57,12 @@ public abstract class TrackingWheelForwardOffsetTuner extends LinearOpMode {
         // Must set localizer to a StandardTrackingWheelLocalizer, at the moment this will not run
         Localizer localizer = drive.getLocalizer();
 
-        if (!(localizer instanceof StandardTrackingWheelLocalizer)) {
+        if (!(localizer instanceof ThreeWheelTrackingLocalizer)) {
             RobotLog.setGlobalErrorMsg("StandardTrackingWheelLocalizer is not being set in the "
                     + "drive class. Ensure that \"setLocalizer(new StandardTrackingWheelLocalizer"
                     + "(...));\" is called somewhere else.");
         }
-        assert localizer instanceof StandardTrackingWheelLocalizer;
+        assert localizer instanceof ThreeWheelTrackingLocalizer;
 
         telemetry.addLine("Press play to begin the forward offset tuner");
         telemetry.addLine("Make sure your robot has enough clearance to turn smoothly");
@@ -94,7 +94,7 @@ public abstract class TrackingWheelForwardOffsetTuner extends LinearOpMode {
                 drive.update();
             }
 
-            double forwardOffset = ((StandardTrackingWheelLocalizer) localizer).getCoefficients().FORWARD_OFFSET +
+            double forwardOffset = ((ThreeWheelTrackingLocalizer) localizer).getCoefficients().FORWARD_OFFSET +
                     drive.getPoseEstimate().getY() / headingAccumulator;
             forwardOffsetStats.add(forwardOffset);
 

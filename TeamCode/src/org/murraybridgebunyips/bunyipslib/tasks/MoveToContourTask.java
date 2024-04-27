@@ -18,6 +18,7 @@ import org.murraybridgebunyips.bunyipslib.vision.data.ContourData;
 import org.murraybridgebunyips.bunyipslib.vision.processors.MultiColourThreshold;
 
 import java.util.List;
+import java.util.function.DoubleSupplier;
 
 /**
  * Task to move to and align to a contour using the vision system.
@@ -44,28 +45,47 @@ public class MoveToContourTask<T extends BunyipsSubsystem> extends Task {
     private final MultiColourThreshold processors;
     private final PIDController translationController;
     private final PIDController rotationController;
-    private Gamepad gamepad;
+    private DoubleSupplier x;
+    private DoubleSupplier y;
+    private DoubleSupplier r;
 
     /**
      * TeleOp constructor.
      *
-     * @param gamepad               the gamepad to use for manual control
+     * @param xSupplier             x (strafe) value
+     * @param ySupplier             y (forward) value
+     * @param rSupplier             r (rotate) value
      * @param drive                 the drivetrain to use
      * @param processors            the vision processors to use
      * @param translationController the PID controller for the translational movement
      * @param rotationController    the PID controller for the rotational movement
      */
-    public MoveToContourTask(Gamepad gamepad, T drive, MultiColourThreshold processors, PIDController translationController, PIDController rotationController) {
+    public MoveToContourTask(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier rSupplier, T drive, MultiColourThreshold processors, PIDController translationController, PIDController rotationController) {
         super(INFINITE_TIMEOUT, drive, false);
         if (!(drive instanceof RoadRunnerDrive))
             throw new EmergencyStop("MoveToContourTask must be used with a drivetrain with X forward Pose/IMU info");
         this.drive = (RoadRunnerDrive) drive;
         this.processors = processors;
-        this.gamepad = gamepad;
+        x = xSupplier;
+        y = ySupplier;
+        r = rSupplier;
         this.translationController = translationController;
         this.rotationController = rotationController;
         translationController.updatePID(TRANSLATIONAL_PID);
         rotationController.updatePID(ROTATIONAL_PID);
+    }
+
+    /**
+     * TeleOp constructor using a default Mecanum binding.
+     *
+     * @param driver                the gamepad to use for driving
+     * @param drive                 the drivetrain to use
+     * @param processors            the vision processor to use
+     * @param translationController the PID controller for the translational movement
+     * @param rotationController    the PID controller for the rotational movement
+     */
+    public MoveToContourTask(Gamepad driver, T drive, MultiColourThreshold processors, PIDController translationController, PIDController rotationController) {
+        this(() -> driver.left_stick_x, () -> driver.left_stick_y, () -> driver.right_stick_x, drive, processors, translationController, rotationController);
     }
 
     /**
@@ -113,8 +133,8 @@ public class MoveToContourTask<T extends BunyipsSubsystem> extends Task {
         rotationController.setPID(ROTATIONAL_PID);
 
         Pose2d pose = new Pose2d(0, 0, 0);
-        if (gamepad != null)
-            pose = Controls.makeRobotPose(gamepad.left_stick_x, gamepad.left_stick_y, gamepad.right_stick_x);
+        if (x != null)
+            pose = Controls.makeRobotPose(x.getAsDouble(), y.getAsDouble(), r.getAsDouble());
 
         List<ContourData> data = processors.getData();
         ContourData biggestContour = ContourData.getLargest(data);
@@ -139,6 +159,6 @@ public class MoveToContourTask<T extends BunyipsSubsystem> extends Task {
 
     @Override
     protected boolean isTaskFinished() {
-        return gamepad == null && translationController.atSetPoint() && rotationController.atSetPoint();
+        return x == null && translationController.atSetPoint() && rotationController.atSetPoint();
     }
 }

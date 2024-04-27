@@ -15,7 +15,7 @@ public class GreenPixel extends ColourThreshold {
     /**
      * Lower clamp for YCrCb
      */
-    public static Scalar LOWER_YCBCR = new Scalar(0, 0, 0);
+    public static Scalar LOWER_YCBCR = new Scalar(145, 0, 0);
     /**
      * Upper clamp for YCrCb
      */

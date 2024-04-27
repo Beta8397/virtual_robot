@@ -1,5 +1,10 @@
 package org.murraybridgebunyips.bunyipslib.roadrunner.drive.localizers;
 
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Inches;
+
+import org.murraybridgebunyips.bunyipslib.external.units.Distance;
+import org.murraybridgebunyips.bunyipslib.external.units.Measure;
+
 /**
  * Coefficients for RoadRunner two wheel tracking localizer.
  * Reworked to use a builder for multiple robot configurations.
@@ -52,38 +57,80 @@ public class TwoWheelTrackingLocalizerCoefficients {
             twoWheelTrackingCoefficients = new TwoWheelTrackingLocalizerCoefficients();
         }
 
+        /**
+         * Set the ticks per revolution of the tracking wheel encoder.
+         *
+         * @param ticksPerRev The ticks per revolution
+         * @return The builder
+         */
         public Builder setTicksPerRev(double ticksPerRev) {
             twoWheelTrackingCoefficients.TICKS_PER_REV = ticksPerRev;
             return this;
         }
 
-        public Builder setWheelRadius(double wheelRadius) {
-            twoWheelTrackingCoefficients.WHEEL_RADIUS = wheelRadius;
+        /**
+         * Set the radius of the tracking wheel.
+         *
+         * @param wheelRadius The radius of the tracking wheel
+         * @return The builder
+         */
+        public Builder setWheelRadius(Measure<Distance> wheelRadius) {
+            twoWheelTrackingCoefficients.WHEEL_RADIUS = wheelRadius.in(Inches);
             return this;
         }
 
+        /**
+         * Set the gear ratio of the tracking wheel.
+         *
+         * @param gearRatio The gear ratio of the tracking wheel (output wheel speed / input encoder speed)
+         * @return The builder
+         */
         public Builder setGearRatio(double gearRatio) {
             twoWheelTrackingCoefficients.GEAR_RATIO = gearRatio;
             return this;
         }
 
-        public Builder setParallelX(double parallelX) {
-            twoWheelTrackingCoefficients.PARALLEL_X = parallelX;
+        /**
+         * Set the position of the parallel wheel in the forward direction.
+         *
+         * @param parallelX The position of the parallel wheel in the forward direction from the center of rotation
+         * @return The builder
+         */
+        public Builder setParallelX(Measure<Distance> parallelX) {
+            twoWheelTrackingCoefficients.PARALLEL_X = parallelX.in(Inches);
             return this;
         }
 
-        public Builder setParallelY(double parallelY) {
-            twoWheelTrackingCoefficients.PARALLEL_Y = parallelY;
+        /**
+         * Set the position of the parallel wheel in the strafe direction.
+         *
+         * @param parallelY The position of the parallel wheel in the strafe direction from the center of rotation
+         * @return The builder
+         */
+        public Builder setParallelY(Measure<Distance> parallelY) {
+            twoWheelTrackingCoefficients.PARALLEL_Y = parallelY.in(Inches);
             return this;
         }
 
-        public Builder setPerpendicularX(double perpendicularX) {
-            twoWheelTrackingCoefficients.PERPENDICULAR_X = perpendicularX;
+        /**
+         * Set the position of the perpendicular wheel in the forward direction.
+         *
+         * @param perpendicularX The position of the perpendicular wheel in the forward direction from the center of rotation
+         * @return The builder
+         */
+        public Builder setPerpendicularX(Measure<Distance> perpendicularX) {
+            twoWheelTrackingCoefficients.PERPENDICULAR_X = perpendicularX.in(Inches);
             return this;
         }
 
-        public Builder setPerpendicularY(double perpendicularY) {
-            twoWheelTrackingCoefficients.PERPENDICULAR_Y = perpendicularY;
+        /**
+         * Set the position of the perpendicular wheel in the strafe direction.
+         *
+         * @param perpendicularY The position of the perpendicular wheel in the strafe direction from the center of rotation
+         * @return The builder
+         */
+        public Builder setPerpendicularY(Measure<Distance> perpendicularY) {
+            twoWheelTrackingCoefficients.PERPENDICULAR_Y = perpendicularY.in(Inches);
             return this;
         }
 

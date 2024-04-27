@@ -7,8 +7,10 @@ import com.qualcomm.robotcore.hardware.IMU;
 import org.murraybridgebunyips.bunyipslib.RobotConfig;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.DriveConstants;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.MecanumCoefficients;
-import org.murraybridgebunyips.bunyipslib.roadrunner.drive.localizers.StandardTrackingWheelLocalizerCoefficients;
+import org.murraybridgebunyips.bunyipslib.roadrunner.drive.localizers.ThreeWheelTrackingLocalizerCoefficients;
 import org.murraybridgebunyips.bunyipslib.roadrunner.util.Deadwheel;
+
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.*;
 
 /**
  * Running under "Mecanum Bot" config
@@ -26,7 +28,7 @@ public class ImposterConfig extends RobotConfig {
 
     public DriveConstants driveConstants;
     public MecanumCoefficients mecanumCoefficients;
-    public StandardTrackingWheelLocalizerCoefficients localizerCoefficients;
+    public ThreeWheelTrackingLocalizerCoefficients localizerCoefficients;
 
     @Override
     protected void onRuntime() {
@@ -49,11 +51,11 @@ public class ImposterConfig extends RobotConfig {
                 .setTicksPerRev(1120)
                 .setMaxRPM(160)
                 .setRunUsingEncoder(true)
-                .setTrackWidth(17.91)
-                .setMaxVel(21)
-                .setMaxAccel(21)
-                .setMaxAngVel(Math.toRadians(170))
-                .setMaxAngAccel(Math.toRadians(170))
+                .setTrackWidth(Inches.of(17.91))
+                .setMaxVel(InchesPerSecond.of(21))
+                .setMaxAccel(InchesPerSecond.per(Second).of(21))
+                .setMaxAngVel(DegreesPerSecond.of(170))
+                .setMaxAngAccel(DegreesPerSecond.per(Second).of(170))
                 .setKV(1.1)
                 .setKA(0.002)
                 .build();
@@ -63,15 +65,15 @@ public class ImposterConfig extends RobotConfig {
                 .setHeadingPID(new PIDCoefficients(1, 0, 0))
                 .build();
 
-        localizerCoefficients = new StandardTrackingWheelLocalizerCoefficients.Builder()
+        localizerCoefficients = new ThreeWheelTrackingLocalizerCoefficients.Builder()
                 .setTicksPerRev(2000)
-                .setWheelRadius(2.0)
+                .setWheelRadius(Inches.of(2.0))
                 .setGearRatio(1)
-                .setLateralDistance(12)
-                .setForwardOffset(0)
+                .setLateralDistance(Inches.of(12))
+                .setForwardOffset(Inches.zero())
                 .build();
 
-        imu = (IMU) getHardware("imu", IMU.class);
+        imu = getHardware("imu", IMU.class);
 
         // i swear to god if my virtual hardware becomes null
         assert imu != null;

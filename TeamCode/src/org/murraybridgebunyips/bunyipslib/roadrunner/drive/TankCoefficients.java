@@ -44,26 +44,56 @@ public class TankCoefficients {
             tankCoefficients = new TankCoefficients();
         }
 
+        /**
+         * Set the axial (forward) PID coefficients.
+         *
+         * @param axialPID The axial PID coefficients
+         * @return The builder
+         */
         public Builder setAxialPID(PIDCoefficients axialPID) {
             tankCoefficients.AXIAL_PID = axialPID;
             return this;
         }
 
+        /**
+         * Set the cross-track (strafe) PID coefficients.
+         *
+         * @param crossTrackPID The cross-track PID coefficients
+         * @return The builder
+         */
         public Builder setCrossTrackPID(PIDCoefficients crossTrackPID) {
             tankCoefficients.CROSS_TRACK_PID = crossTrackPID;
             return this;
         }
 
+        /**
+         * Set the heading PID coefficients.
+         *
+         * @param headingPID The heading PID coefficients
+         * @return The builder
+         */
         public Builder setHeadingPID(PIDCoefficients headingPID) {
             tankCoefficients.HEADING_PID = headingPID;
             return this;
         }
 
+        /**
+         * Set the weight for the velocity error in the axial PID.
+         *
+         * @param vxWeight The weight for the velocity error in the axial PID
+         * @return The builder
+         */
         public Builder setVXWeight(double vxWeight) {
             tankCoefficients.VX_WEIGHT = vxWeight;
             return this;
         }
 
+        /**
+         * Set the weight for the velocity error in the heading PID.
+         *
+         * @param omegaWeight The weight for the velocity error in the heading PID
+         * @return The builder
+         */
         public Builder setOmegaWeight(double omegaWeight) {
             tankCoefficients.OMEGA_WEIGHT = omegaWeight;
             return this;

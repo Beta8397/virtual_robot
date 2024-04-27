@@ -1,5 +1,12 @@
 package org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence;
 
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Inches;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.InchesPerSecond;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Radians;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.RadiansPerSecond;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Second;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds;
+
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.path.PathContinuityViolationException;
@@ -17,8 +24,13 @@ import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
 import com.acmerobotics.roadrunner.trajectory.TrajectoryMarker;
 import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryAccelerationConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryVelocityConstraint;
-import com.acmerobotics.roadrunner.util.Angle;
 
+import org.murraybridgebunyips.bunyipslib.external.Mathf;
+import org.murraybridgebunyips.bunyipslib.external.units.Angle;
+import org.murraybridgebunyips.bunyipslib.external.units.Distance;
+import org.murraybridgebunyips.bunyipslib.external.units.Measure;
+import org.murraybridgebunyips.bunyipslib.external.units.Time;
+import org.murraybridgebunyips.bunyipslib.external.units.Velocity;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.sequencesegment.SequenceSegment;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.sequencesegment.TrajectorySegment;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.sequencesegment.TurnSegment;
@@ -68,8 +80,8 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
     /**
      * Create a new TrajectorySequenceBuilder
      *
-     * @param startPose                     The starting pose (in, in, rad)
-     * @param startTangent                  The starting tangent (rad)
+     * @param startPose                     The starting pose (in, in, radians)
+     * @param startTangent                  The starting tangent (radians)
      * @param baseVelConstraint             The base velocity constraint (inches/sec)
      * @param baseAccelConstraint           The base acceleration constraint (inches/sec^2)
      * @param baseTurnConstraintMaxAngVel   The base turn constraint maximum angular velocity (radians/sec)
@@ -120,7 +132,7 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
     /**
      * Create a new TrajectorySequenceBuilder
      *
-     * @param startPose                     The starting pose (in, in, rad)
+     * @param startPose                     The starting pose (in, in, radians)
      * @param baseVelConstraint             The base velocity constraint (inches/sec)
      * @param baseAccelConstraint           The base acceleration constraint (inches/sec^2)
      * @param baseTurnConstraintMaxAngVel   The base turn constraint maximum angular velocity (radians/sec)
@@ -138,6 +150,28 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
                 baseVelConstraint, baseAccelConstraint,
                 baseTurnConstraintMaxAngVel, baseTurnConstraintMaxAngAccel
         );
+    }
+
+    /**
+     * Convert a constraint to a new unit.
+     *
+     * @param inUnit     The unit of the constraint (will be converted to inches)
+     * @param constraint The constraint
+     * @return The constraint in the new unit for use in the builder
+     */
+    public TrajectoryVelocityConstraint constraintIn(Velocity<Distance> inUnit, TrajectoryVelocityConstraint constraint) {
+        return (s, pose, deriv, base) -> InchesPerSecond.convertFrom(constraint.get(s, pose, deriv, base), inUnit);
+    }
+
+    /**
+     * Convert a constraint to a new unit.
+     *
+     * @param inUnit     The unit of the constraint (will be converted to inches)
+     * @param constraint The constraint
+     * @return The constraint in the new unit for use in the builder
+     */
+    public TrajectoryAccelerationConstraint constraintIn(Velocity<Velocity<Distance>> inUnit, TrajectoryAccelerationConstraint constraint) {
+        return (s, pose, deriv, base) -> InchesPerSecond.per(Second).convertFrom(constraint.get(s, pose, deriv, base), inUnit);
     }
 
     public double getBaseTurnConstraintMaxAngVel() {
@@ -159,351 +193,824 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
     /**
      * Move in a straight line to a given position.
      *
-     * @param endPosition The end position (inches)
+     * @param endPositionInches The end position (inches)
      * @return The builder
      */
-    public T lineTo(Vector2d endPosition) {
-        return addPath(() -> currentTrajectoryBuilder.lineTo(endPosition, currentVelConstraint, currentAccelConstraint));
+    public T lineTo(Vector2d endPositionInches) {
+        return addPath(() -> currentTrajectoryBuilder.lineTo(endPositionInches, currentVelConstraint, currentAccelConstraint));
+    }
+
+    /**
+     * Move in a straight line to a given position.
+     *
+     * @param endPosition The end position
+     * @param inUnit      The unit of the end position vector (will be converted to inches)
+     * @return The builder
+     */
+    public T lineTo(Vector2d endPosition, Distance inUnit) {
+        double x = Inches.convertFrom(endPosition.getX(), inUnit);
+        double y = Inches.convertFrom(endPosition.getY(), inUnit);
+        return lineTo(new Vector2d(x, y));
     }
 
     /**
      * Move in a straight line to a given position with custom velocity and acceleration constraints.
      *
-     * @param endPosition     The end position (inches)
-     * @param velConstraint   The velocity constraint (inches/sec)
-     * @param accelConstraint The acceleration constraint (inches/sec^2)
+     * @param endPositionInches The end position (inches)
+     * @param velConstraint     The velocity constraint (inches/sec)
+     * @param accelConstraint   The acceleration constraint (inches/sec^2)
      * @return The builder
      */
     public T lineTo(
-            Vector2d endPosition,
+            Vector2d endPositionInches,
             TrajectoryVelocityConstraint velConstraint,
             TrajectoryAccelerationConstraint accelConstraint
     ) {
-        return addPath(() -> currentTrajectoryBuilder.lineTo(endPosition, velConstraint, accelConstraint));
+        return addPath(() -> currentTrajectoryBuilder.lineTo(endPositionInches, velConstraint, accelConstraint));
+    }
+
+    /**
+     * Move in a straight line to a given position with custom velocity and acceleration constraints.
+     *
+     * @param endPositionInches The end position (inches)
+     * @param inUnit            The unit of the end position vector (will be converted to inches)
+     * @param velConstraint     The velocity constraint (inches/sec)
+     * @param accelConstraint   The acceleration constraint (inches/sec^2)
+     * @return The builder
+     */
+    public T lineTo(
+            Vector2d endPositionInches,
+            Distance inUnit,
+            TrajectoryVelocityConstraint velConstraint,
+            TrajectoryAccelerationConstraint accelConstraint
+    ) {
+        double x = Inches.convertFrom(endPositionInches.getX(), inUnit);
+        double y = Inches.convertFrom(endPositionInches.getY(), inUnit);
+        return lineTo(new Vector2d(x, y), velConstraint, accelConstraint);
     }
 
     /**
      * Move in a straight line to a given position with a constant heading.
      *
-     * @param endPosition The end position (inches)
+     * @param endPositionInches The end position (inches)
      * @return The builder
      */
-    public T lineToConstantHeading(Vector2d endPosition) {
-        return addPath(() -> currentTrajectoryBuilder.lineToConstantHeading(endPosition, currentVelConstraint, currentAccelConstraint));
+    public T lineToConstantHeading(Vector2d endPositionInches) {
+        return addPath(() -> currentTrajectoryBuilder.lineToConstantHeading(endPositionInches, currentVelConstraint, currentAccelConstraint));
+    }
+
+    /**
+     * Move in a straight line to a given position with a constant heading.
+     *
+     * @param endPosition The end position
+     * @param inUnit      The unit of the end position vector (will be converted to inches)
+     * @return The builder
+     */
+    public T lineToConstantHeading(Vector2d endPosition, Distance inUnit) {
+        double x = Inches.convertFrom(endPosition.getX(), inUnit);
+        double y = Inches.convertFrom(endPosition.getY(), inUnit);
+        return lineToConstantHeading(new Vector2d(x, y));
     }
 
     /**
      * Move in a straight line to a given position with a constant heading and custom velocity and acceleration constraints.
      *
-     * @param endPosition     The end position (inches)
+     * @param endPositionInches The end position (inches)
+     * @param velConstraint     The velocity constraint (inches/sec)
+     * @param accelConstraint   The acceleration constraint (inches/sec^2)
+     * @return The builder
+     */
+    public T lineToConstantHeading(
+            Vector2d endPositionInches,
+            TrajectoryVelocityConstraint velConstraint,
+            TrajectoryAccelerationConstraint accelConstraint
+    ) {
+        return addPath(() -> currentTrajectoryBuilder.lineToConstantHeading(endPositionInches, velConstraint, accelConstraint));
+    }
+
+    /**
+     * Move in a straight line to a given position with a constant heading and custom velocity and acceleration constraints.
+     *
+     * @param endPosition     The end position
+     * @param inUnit          The unit of the end position vector (will be converted to inches)
      * @param velConstraint   The velocity constraint (inches/sec)
      * @param accelConstraint The acceleration constraint (inches/sec^2)
      * @return The builder
      */
     public T lineToConstantHeading(
             Vector2d endPosition,
+            Distance inUnit,
             TrajectoryVelocityConstraint velConstraint,
             TrajectoryAccelerationConstraint accelConstraint
     ) {
-        return addPath(() -> currentTrajectoryBuilder.lineToConstantHeading(endPosition, velConstraint, accelConstraint));
+        double x = Inches.convertFrom(endPosition.getX(), inUnit);
+        double y = Inches.convertFrom(endPosition.getY(), inUnit);
+        return lineToConstantHeading(new Vector2d(x, y), velConstraint, accelConstraint);
     }
 
     /**
      * Move in a straight line to a given position with a linear heading.
      *
-     * @param endPose The end pose (in, in, rad)
+     * @param endPoseInchRad The end pose (in, in, radians)
      * @return The builder
      */
-    public T lineToLinearHeading(Pose2d endPose) {
-        return addPath(() -> currentTrajectoryBuilder.lineToLinearHeading(endPose, currentVelConstraint, currentAccelConstraint));
+    public T lineToLinearHeading(Pose2d endPoseInchRad) {
+        return addPath(() -> currentTrajectoryBuilder.lineToLinearHeading(endPoseInchRad, currentVelConstraint, currentAccelConstraint));
+    }
+
+    /**
+     * Move in a straight line to a given position with a linear heading.
+     *
+     * @param endPose      The end pose
+     * @param distanceUnit The unit of the end pose vector (will be converted to inches)
+     * @param angleUnit    The unit of the end pose heading (will be converted to radians)
+     * @return The builder
+     */
+    public T lineToLinearHeading(Pose2d endPose, Distance distanceUnit, Angle angleUnit) {
+        double x = Inches.convertFrom(endPose.getX(), distanceUnit);
+        double y = Inches.convertFrom(endPose.getY(), distanceUnit);
+        double r = Radians.convertFrom(endPose.getHeading(), angleUnit);
+        return lineToLinearHeading(new Pose2d(x, y, r));
     }
 
     /**
      * Move in a straight line to a given position with a linear heading and custom velocity and acceleration constraints.
      *
-     * @param endPose         The end pose (in, in, rad)
+     * @param endPoseInchRad  The end pose (in, in, radians)
+     * @param velConstraint   The velocity constraint (inches/sec)
+     * @param accelConstraint The acceleration constraint (inches/sec^2)
+     * @return The builder
+     */
+    public T lineToLinearHeading(
+            Pose2d endPoseInchRad,
+            TrajectoryVelocityConstraint velConstraint,
+            TrajectoryAccelerationConstraint accelConstraint
+    ) {
+        return addPath(() -> currentTrajectoryBuilder.lineToLinearHeading(endPoseInchRad, velConstraint, accelConstraint));
+    }
+
+    /**
+     * Move in a straight line to a given position with a linear heading and custom velocity and acceleration constraints.
+     *
+     * @param endPose         The end pose
+     * @param distanceUnit    The unit of the end pose vector (will be converted to inches)
+     * @param angleUnit       The unit of the end pose heading (will be converted to radians)
      * @param velConstraint   The velocity constraint (inches/sec)
      * @param accelConstraint The acceleration constraint (inches/sec^2)
      * @return The builder
      */
     public T lineToLinearHeading(
             Pose2d endPose,
+            Distance distanceUnit,
+            Angle angleUnit,
             TrajectoryVelocityConstraint velConstraint,
             TrajectoryAccelerationConstraint accelConstraint
     ) {
-        return addPath(() -> currentTrajectoryBuilder.lineToLinearHeading(endPose, velConstraint, accelConstraint));
+        double x = Inches.convertFrom(endPose.getX(), distanceUnit);
+        double y = Inches.convertFrom(endPose.getY(), distanceUnit);
+        double r = Radians.convertFrom(endPose.getHeading(), angleUnit);
+        return lineToLinearHeading(new Pose2d(x, y, r), velConstraint, accelConstraint);
     }
 
     /**
      * Move in a straight line to a given position with a spline heading.
      *
-     * @param endPose The end pose (in, in, rad)
+     * @param endPoseInchRad The end pose (in, in, radians)
      * @return The builder
      */
-    public T lineToSplineHeading(Pose2d endPose) {
-        return addPath(() -> currentTrajectoryBuilder.lineToSplineHeading(endPose, currentVelConstraint, currentAccelConstraint));
+    public T lineToSplineHeading(Pose2d endPoseInchRad) {
+        return addPath(() -> currentTrajectoryBuilder.lineToSplineHeading(endPoseInchRad, currentVelConstraint, currentAccelConstraint));
+    }
+
+    /**
+     * Move in a straight line to a given position with a spline heading.
+     *
+     * @param endPose      The end pose
+     * @param distanceUnit The unit of the end pose vector (will be converted to inches)
+     * @param angleUnit    The unit of the end pose heading (will be converted to radians)
+     * @return The builder
+     */
+    public T lineToSplineHeading(Pose2d endPose, Distance distanceUnit, Angle angleUnit) {
+        double x = Inches.convertFrom(endPose.getX(), distanceUnit);
+        double y = Inches.convertFrom(endPose.getY(), distanceUnit);
+        double r = Radians.convertFrom(endPose.getHeading(), angleUnit);
+        return lineToSplineHeading(new Pose2d(x, y, r));
     }
 
     /**
      * Move in a straight line to a given position with a spline heading and custom velocity and acceleration constraints.
      *
-     * @param endPose         The end pose (in, in, rad)
+     * @param endPoseInchRad  The end pose (in, in, radians)
+     * @param velConstraint   The velocity constraint (inches/sec)
+     * @param accelConstraint The acceleration constraint (inches/sec^2)
+     * @return The builder
+     */
+    public T lineToSplineHeading(
+            Pose2d endPoseInchRad,
+            TrajectoryVelocityConstraint velConstraint,
+            TrajectoryAccelerationConstraint accelConstraint
+    ) {
+        return addPath(() -> currentTrajectoryBuilder.lineToSplineHeading(endPoseInchRad, velConstraint, accelConstraint));
+    }
+
+    /**
+     * Move in a straight line to a given position with a spline heading and custom velocity and acceleration constraints.
+     *
+     * @param endPose         The end pose
+     * @param distanceUnit    The unit of the end pose vector (will be converted to inches)
+     * @param angleUnit       The unit of the end pose heading (will be converted to radians)
      * @param velConstraint   The velocity constraint (inches/sec)
      * @param accelConstraint The acceleration constraint (inches/sec^2)
      * @return The builder
      */
     public T lineToSplineHeading(
             Pose2d endPose,
+            Distance distanceUnit,
+            Angle angleUnit,
             TrajectoryVelocityConstraint velConstraint,
             TrajectoryAccelerationConstraint accelConstraint
     ) {
-        return addPath(() -> currentTrajectoryBuilder.lineToSplineHeading(endPose, velConstraint, accelConstraint));
+        double x = Inches.convertFrom(endPose.getX(), distanceUnit);
+        double y = Inches.convertFrom(endPose.getY(), distanceUnit);
+        double r = Radians.convertFrom(endPose.getHeading(), angleUnit);
+        return lineToSplineHeading(new Pose2d(x, y, r), velConstraint, accelConstraint);
     }
 
     /**
      * Move in a strafe straight line to a given position.
      *
-     * @param endPosition The end position (inches)
+     * @param endPositionInches The end position (inches)
      * @return The builder
      */
-    public T strafeTo(Vector2d endPosition) {
-        return addPath(() -> currentTrajectoryBuilder.strafeTo(endPosition, currentVelConstraint, currentAccelConstraint));
+    public T strafeTo(Vector2d endPositionInches) {
+        return addPath(() -> currentTrajectoryBuilder.strafeTo(endPositionInches, currentVelConstraint, currentAccelConstraint));
+    }
+
+    /**
+     * Move in a strafe straight line to a given position.
+     *
+     * @param endPosition The end position
+     * @param inUnit      The unit of the end position vector (will be converted to inches)
+     * @return The builder
+     */
+    public T strafeTo(Vector2d endPosition, Distance inUnit) {
+        double x = Inches.convertFrom(endPosition.getX(), inUnit);
+        double y = Inches.convertFrom(endPosition.getY(), inUnit);
+        return strafeTo(new Vector2d(x, y));
     }
 
     /**
      * Move in a strafe straight line to a given position with custom velocity and acceleration constraints.
      *
-     * @param endPosition     The end position (inches)
+     * @param endPositionInches The end position (inches)
+     * @param velConstraint     The velocity constraint (inches/sec)
+     * @param accelConstraint   The acceleration constraint (inches/sec^2)
+     * @return The builder
+     */
+    public T strafeTo(
+            Vector2d endPositionInches,
+            TrajectoryVelocityConstraint velConstraint,
+            TrajectoryAccelerationConstraint accelConstraint
+    ) {
+        return addPath(() -> currentTrajectoryBuilder.strafeTo(endPositionInches, velConstraint, accelConstraint));
+    }
+
+    /**
+     * Move in a strafe straight line to a given position with custom velocity and acceleration constraints.
+     *
+     * @param endPosition     The end position
+     * @param inUnit          The unit of the end position vector (will be converted to inches)
      * @param velConstraint   The velocity constraint (inches/sec)
      * @param accelConstraint The acceleration constraint (inches/sec^2)
      * @return The builder
      */
     public T strafeTo(
             Vector2d endPosition,
+            Distance inUnit,
             TrajectoryVelocityConstraint velConstraint,
             TrajectoryAccelerationConstraint accelConstraint
     ) {
-        return addPath(() -> currentTrajectoryBuilder.strafeTo(endPosition, velConstraint, accelConstraint));
+        double x = Inches.convertFrom(endPosition.getX(), inUnit);
+        double y = Inches.convertFrom(endPosition.getY(), inUnit);
+        return strafeTo(new Vector2d(x, y), velConstraint, accelConstraint);
     }
 
     /**
      * Move forward a given distance.
      *
-     * @param distance The distance to move (inches)
+     * @param inches The distance to move (inches)
      * @return The builder
      */
-    public T forward(double distance) {
-        return addPath(() -> currentTrajectoryBuilder.forward(distance, currentVelConstraint, currentAccelConstraint));
+    public T forward(double inches) {
+        return addPath(() -> currentTrajectoryBuilder.forward(inches, currentVelConstraint, currentAccelConstraint));
+    }
+
+    /**
+     * Move forward a given distance.
+     *
+     * @param distance The distance to move
+     * @param inUnit   The unit of the distance (will be converted to inches)
+     * @return The builder
+     */
+    public T forward(double distance, Distance inUnit) {
+        double d = Inches.convertFrom(distance, inUnit);
+        return forward(d);
     }
 
     /**
      * Move forward a given distance with custom velocity and acceleration constraints.
      *
-     * @param distance        The distance to move (inches)
+     * @param inches          The distance to move (inches)
+     * @param velConstraint   The velocity constraint (inches/sec)
+     * @param accelConstraint The acceleration constraint (inches/sec^2)
+     * @return The builder
+     */
+    public T forward(
+            double inches,
+            TrajectoryVelocityConstraint velConstraint,
+            TrajectoryAccelerationConstraint accelConstraint
+    ) {
+        return addPath(() -> currentTrajectoryBuilder.forward(inches, velConstraint, accelConstraint));
+    }
+
+    /**
+     * Move forward a given distance with custom velocity and acceleration constraints.
+     *
+     * @param distance        The distance to move
+     * @param inUnit          The unit of the distance (will be converted to inches)
      * @param velConstraint   The velocity constraint (inches/sec)
      * @param accelConstraint The acceleration constraint (inches/sec^2)
      * @return The builder
      */
     public T forward(
             double distance,
+            Distance inUnit,
             TrajectoryVelocityConstraint velConstraint,
             TrajectoryAccelerationConstraint accelConstraint
     ) {
-        return addPath(() -> currentTrajectoryBuilder.forward(distance, velConstraint, accelConstraint));
+        double d = Inches.convertFrom(distance, inUnit);
+        return forward(d, velConstraint, accelConstraint);
     }
 
     /**
      * Move backward a given distance.
      *
-     * @param distance The distance to move (inches)
+     * @param inches The distance to move (inches)
      * @return The builder
      */
-    public T back(double distance) {
-        return addPath(() -> currentTrajectoryBuilder.back(distance, currentVelConstraint, currentAccelConstraint));
+    public T back(double inches) {
+        return addPath(() -> currentTrajectoryBuilder.back(inches, currentVelConstraint, currentAccelConstraint));
+    }
+
+    /**
+     * Move backward a given distance.
+     *
+     * @param distance The distance to move
+     * @param inUnit   The unit of the distance (will be converted to inches)
+     * @return The builder
+     */
+    public T back(double distance, Distance inUnit) {
+        double d = Inches.convertFrom(distance, inUnit);
+        return back(d);
     }
 
     /**
      * Move backward a given distance with custom velocity and acceleration constraints.
      *
-     * @param distance        The distance to move (inches)
+     * @param inches          The distance to move (inches)
+     * @param velConstraint   The velocity constraint (inches/sec)
+     * @param accelConstraint The acceleration constraint (inches/sec^2)
+     * @return The builder
+     */
+    public T back(
+            double inches,
+            TrajectoryVelocityConstraint velConstraint,
+            TrajectoryAccelerationConstraint accelConstraint
+    ) {
+        return addPath(() -> currentTrajectoryBuilder.back(inches, velConstraint, accelConstraint));
+    }
+
+    /**
+     * Move backward a given distance with custom velocity and acceleration constraints.
+     *
+     * @param distance        The distance to move
+     * @param inUnit          The unit of the distance (will be converted to inches)
      * @param velConstraint   The velocity constraint (inches/sec)
      * @param accelConstraint The acceleration constraint (inches/sec^2)
      * @return The builder
      */
     public T back(
             double distance,
+            Distance inUnit,
             TrajectoryVelocityConstraint velConstraint,
             TrajectoryAccelerationConstraint accelConstraint
     ) {
-        return addPath(() -> currentTrajectoryBuilder.back(distance, velConstraint, accelConstraint));
+        double d = Inches.convertFrom(distance, inUnit);
+        return back(d, velConstraint, accelConstraint);
     }
 
     /**
      * Strafe left a given distance.
      *
-     * @param distance The distance to strafe (inches)
+     * @param inches The distance to strafe (inches)
      * @return The builder
      */
-    public T strafeLeft(double distance) {
-        return addPath(() -> currentTrajectoryBuilder.strafeLeft(distance, currentVelConstraint, currentAccelConstraint));
+    public T strafeLeft(double inches) {
+        return addPath(() -> currentTrajectoryBuilder.strafeLeft(inches, currentVelConstraint, currentAccelConstraint));
+    }
+
+    /**
+     * Strafe left a given distance.
+     *
+     * @param distance The distance to strafe
+     * @param inUnit   The unit of the distance (will be converted to inches)
+     * @return The builder
+     */
+    public T strafeLeft(double distance, Distance inUnit) {
+        double d = Inches.convertFrom(distance, inUnit);
+        return strafeLeft(d);
     }
 
     /**
      * Strafe left a given distance with custom velocity and acceleration constraints.
      *
-     * @param distance        The distance to strafe (inches)
+     * @param inches          The distance to strafe (inches)
+     * @param velConstraint   The velocity constraint (inches/sec)
+     * @param accelConstraint The acceleration constraint (inches/sec^2)
+     * @return The builder
+     */
+    public T strafeLeft(
+            double inches,
+            TrajectoryVelocityConstraint velConstraint,
+            TrajectoryAccelerationConstraint accelConstraint
+    ) {
+        return addPath(() -> currentTrajectoryBuilder.strafeLeft(inches, velConstraint, accelConstraint));
+    }
+
+    /**
+     * Strafe left a given distance with custom velocity and acceleration constraints.
+     *
+     * @param distance        The distance to strafe
+     * @param inUnit          The unit of the distance (will be converted to inches)
      * @param velConstraint   The velocity constraint (inches/sec)
      * @param accelConstraint The acceleration constraint (inches/sec^2)
      * @return The builder
      */
     public T strafeLeft(
             double distance,
+            Distance inUnit,
             TrajectoryVelocityConstraint velConstraint,
             TrajectoryAccelerationConstraint accelConstraint
     ) {
-        return addPath(() -> currentTrajectoryBuilder.strafeLeft(distance, velConstraint, accelConstraint));
+        double d = Inches.convertFrom(distance, inUnit);
+        return strafeLeft(d, velConstraint, accelConstraint);
     }
 
     /**
      * Strafe right a given distance.
      *
-     * @param distance The distance to strafe (inches)
+     * @param inches The distance to strafe (inches)
      * @return The builder
      */
-    public T strafeRight(double distance) {
-        return addPath(() -> currentTrajectoryBuilder.strafeRight(distance, currentVelConstraint, currentAccelConstraint));
+    public T strafeRight(double inches) {
+        return addPath(() -> currentTrajectoryBuilder.strafeRight(inches, currentVelConstraint, currentAccelConstraint));
+    }
+
+    /**
+     * Strafe right a given distance.
+     *
+     * @param distance The distance to strafe
+     * @param inUnit   The unit of the distance (will be converted to inches)
+     * @return The builder
+     */
+    public T strafeRight(double distance, Distance inUnit) {
+        double d = Inches.convertFrom(distance, inUnit);
+        return strafeRight(d);
     }
 
     /**
      * Strafe right a given distance with custom velocity and acceleration constraints.
      *
-     * @param distance        The distance to strafe (inches)
+     * @param inches          The distance to strafe (inches)
+     * @param velConstraint   The velocity constraint (inches/sec)
+     * @param accelConstraint The acceleration constraint (inches/sec^2)
+     * @return The builder
+     */
+    public T strafeRight(
+            double inches,
+            TrajectoryVelocityConstraint velConstraint,
+            TrajectoryAccelerationConstraint accelConstraint
+    ) {
+        return addPath(() -> currentTrajectoryBuilder.strafeRight(inches, velConstraint, accelConstraint));
+    }
+
+    /**
+     * Strafe right a given distance with custom velocity and acceleration constraints.
+     *
+     * @param distance        The distance to strafe
+     * @param inUnit          The unit of the distance (will be converted to inches)
      * @param velConstraint   The velocity constraint (inches/sec)
      * @param accelConstraint The acceleration constraint (inches/sec^2)
      * @return The builder
      */
     public T strafeRight(
             double distance,
+            Distance inUnit,
             TrajectoryVelocityConstraint velConstraint,
             TrajectoryAccelerationConstraint accelConstraint
     ) {
-        return addPath(() -> currentTrajectoryBuilder.strafeRight(distance, velConstraint, accelConstraint));
+        double d = Inches.convertFrom(distance, inUnit);
+        return strafeRight(d, velConstraint, accelConstraint);
     }
 
     /**
      * Spline to a given position with a given heading.
      *
-     * @param endPosition The end position (inches)
-     * @param endHeading  The end heading (rad)
+     * @param endPositionInches The end position (inches)
+     * @param endHeadingRad     The end heading (radians)
      * @return The builder
      */
-    public T splineTo(Vector2d endPosition, double endHeading) {
-        return addPath(() -> currentTrajectoryBuilder.splineTo(endPosition, endHeading, currentVelConstraint, currentAccelConstraint));
+    public T splineTo(Vector2d endPositionInches, double endHeadingRad) {
+        return addPath(() -> currentTrajectoryBuilder.splineTo(endPositionInches, endHeadingRad, currentVelConstraint, currentAccelConstraint));
+    }
+
+    /**
+     * Spline to a given position with a given heading.
+     *
+     * @param endPosition The end position
+     * @param inUnit      The unit of the end position vector (will be converted to inches)
+     * @param endHeading  The end heading
+     * @param angleUnit   The unit of the end heading (will be converted to radians)
+     * @return The builder
+     */
+    public T splineTo(Vector2d endPosition, Distance inUnit, double endHeading, Angle angleUnit) {
+        double x = Inches.convertFrom(endPosition.getX(), inUnit);
+        double y = Inches.convertFrom(endPosition.getY(), inUnit);
+        double r = Radians.convertFrom(endHeading, angleUnit);
+        return splineTo(new Vector2d(x, y), r);
     }
 
     /**
      * Spline to a given position with a given heading and custom velocity and acceleration constraints.
      *
-     * @param endPosition     The end position (inches)
-     * @param endHeading      The end heading (rad)
+     * @param endPositionInches The end position (inches)
+     * @param endHeadingRad     The end heading (radians)
+     * @param velConstraint     The velocity constraint (inches/sec)
+     * @param accelConstraint   The acceleration constraint (inches/sec^2)
+     * @return The builder
+     */
+    public T splineTo(
+            Vector2d endPositionInches,
+            double endHeadingRad,
+            TrajectoryVelocityConstraint velConstraint,
+            TrajectoryAccelerationConstraint accelConstraint
+    ) {
+        return addPath(() -> currentTrajectoryBuilder.splineTo(endPositionInches, endHeadingRad, velConstraint, accelConstraint));
+    }
+
+    /**
+     * Spline to a given position with a given heading and custom velocity and acceleration constraints.
+     *
+     * @param endPosition     The end position
+     * @param inUnit          The unit of the end position vector (will be converted to inches)
+     * @param endHeading      The end heading
+     * @param angleUnit       The unit of the end heading (will be converted to radians)
      * @param velConstraint   The velocity constraint (inches/sec)
      * @param accelConstraint The acceleration constraint (inches/sec^2)
      * @return The builder
      */
     public T splineTo(
             Vector2d endPosition,
+            Distance inUnit,
             double endHeading,
+            Angle angleUnit,
             TrajectoryVelocityConstraint velConstraint,
             TrajectoryAccelerationConstraint accelConstraint
     ) {
-        return addPath(() -> currentTrajectoryBuilder.splineTo(endPosition, endHeading, velConstraint, accelConstraint));
+        double x = Inches.convertFrom(endPosition.getX(), inUnit);
+        double y = Inches.convertFrom(endPosition.getY(), inUnit);
+        double r = Radians.convertFrom(endHeading, angleUnit);
+        return splineTo(new Vector2d(x, y), r, velConstraint, accelConstraint);
     }
 
     /**
      * Spline to a given position with a constant heading.
      *
-     * @param endPosition The end position (inches)
-     * @param endHeading  The end heading (rad)
+     * @param endPositionInches The end position (inches)
+     * @param endHeadingRad     The end heading (radians)
      * @return The builder
      */
-    public T splineToConstantHeading(Vector2d endPosition, double endHeading) {
-        return addPath(() -> currentTrajectoryBuilder.splineToConstantHeading(endPosition, endHeading, currentVelConstraint, currentAccelConstraint));
+    public T splineToConstantHeading(Vector2d endPositionInches, double endHeadingRad) {
+        return addPath(() -> currentTrajectoryBuilder.splineToConstantHeading(endPositionInches, endHeadingRad, currentVelConstraint, currentAccelConstraint));
+    }
+
+    /**
+     * Spline to a given position with a constant heading.
+     *
+     * @param endPosition The end position
+     * @param inUnit      The unit of the end position vector (will be converted to inches)
+     * @param endHeading  The end heading
+     * @param angleUnit   The unit of the end heading (will be converted to radians)
+     * @return The builder
+     */
+    public T splineToConstantHeading(Vector2d endPosition, Distance inUnit, double endHeading, Angle angleUnit) {
+        double x = Inches.convertFrom(endPosition.getX(), inUnit);
+        double y = Inches.convertFrom(endPosition.getY(), inUnit);
+        double r = Radians.convertFrom(endHeading, angleUnit);
+        return splineToConstantHeading(new Vector2d(x, y), r);
     }
 
     /**
      * Spline to a given position with a constant heading and custom velocity and acceleration constraints.
      *
-     * @param endPosition     The end position (inches)
-     * @param endHeading      The end heading (rad)
+     * @param endPositionInches The end position (inches)
+     * @param endHeadingRad     The end heading (radians)
+     * @param velConstraint     The velocity constraint (inches/sec)
+     * @param accelConstraint   The acceleration constraint (inches/sec^2)
+     * @return The builder
+     */
+    public T splineToConstantHeading(
+            Vector2d endPositionInches,
+            double endHeadingRad,
+            TrajectoryVelocityConstraint velConstraint,
+            TrajectoryAccelerationConstraint accelConstraint
+    ) {
+        return addPath(() -> currentTrajectoryBuilder.splineToConstantHeading(endPositionInches, endHeadingRad, velConstraint, accelConstraint));
+    }
+
+    /**
+     * Spline to a given position with a constant heading and custom velocity and acceleration constraints.
+     *
+     * @param endPosition     The end position
+     * @param inUnit          The unit of the end position vector (will be converted to inches)
+     * @param endHeading      The end heading
+     * @param angleUnit       The unit of the end heading (will be converted to radians)
      * @param velConstraint   The velocity constraint (inches/sec)
      * @param accelConstraint The acceleration constraint (inches/sec^2)
      * @return The builder
      */
     public T splineToConstantHeading(
             Vector2d endPosition,
+            Distance inUnit,
             double endHeading,
+            Angle angleUnit,
             TrajectoryVelocityConstraint velConstraint,
             TrajectoryAccelerationConstraint accelConstraint
     ) {
-        return addPath(() -> currentTrajectoryBuilder.splineToConstantHeading(endPosition, endHeading, velConstraint, accelConstraint));
+        double x = Inches.convertFrom(endPosition.getX(), inUnit);
+        double y = Inches.convertFrom(endPosition.getY(), inUnit);
+        double r = Radians.convertFrom(endHeading, angleUnit);
+        return splineToConstantHeading(new Vector2d(x, y), r, velConstraint, accelConstraint);
     }
 
     /**
      * Spline to a given position with a linear heading.
      *
-     * @param endPose    The end pose (in, in, rad)
-     * @param endHeading The end heading (rad)
+     * @param endPoseInchRad The end pose (in, in, radians)
+     * @param endHeadingRad  The end heading (radians)
      * @return The builder
      */
-    public T splineToLinearHeading(Pose2d endPose, double endHeading) {
-        return addPath(() -> currentTrajectoryBuilder.splineToLinearHeading(endPose, endHeading, currentVelConstraint, currentAccelConstraint));
+    public T splineToLinearHeading(Pose2d endPoseInchRad, double endHeadingRad) {
+        return addPath(() -> currentTrajectoryBuilder.splineToLinearHeading(endPoseInchRad, endHeadingRad, currentVelConstraint, currentAccelConstraint));
+    }
+
+    /**
+     * Spline to a given position with a linear heading.
+     *
+     * @param endPose      The end pose
+     * @param distanceUnit The unit of the end pose vector (will be converted to inches)
+     * @param angleUnit    The unit of the end pose heading (will be converted to radians)
+     * @param endHeading   The end heading
+     * @param endAngleUnit The unit of the end heading (will be converted to radians)
+     * @return The builder
+     */
+    public T splineToLinearHeading(Pose2d endPose, Distance distanceUnit, Angle angleUnit, double endHeading, Angle endAngleUnit) {
+        double x = Inches.convertFrom(endPose.getX(), distanceUnit);
+        double y = Inches.convertFrom(endPose.getY(), distanceUnit);
+        double r = Radians.convertFrom(endHeading, angleUnit);
+        double r2 = Radians.convertFrom(endPose.getHeading(), endAngleUnit);
+        return splineToLinearHeading(new Pose2d(x, y, r), r2);
     }
 
     /**
      * Spline to a given position with a linear heading and custom velocity and acceleration constraints.
      *
-     * @param endPose         The end pose (in, in, rad)
-     * @param endHeading      The end heading (rad)
+     * @param endPoseInchRad  The end pose (in, in, radians)
+     * @param endHeadingRad   The end heading (radians)
+     * @param velConstraint   The velocity constraint (inches/sec)
+     * @param accelConstraint The acceleration constraint (inches/sec^2)
+     * @return The builder
+     */
+    public T splineToLinearHeading(
+            Pose2d endPoseInchRad,
+            double endHeadingRad,
+            TrajectoryVelocityConstraint velConstraint,
+            TrajectoryAccelerationConstraint accelConstraint
+    ) {
+        return addPath(() -> currentTrajectoryBuilder.splineToLinearHeading(endPoseInchRad, endHeadingRad, velConstraint, accelConstraint));
+    }
+
+    /**
+     * Spline to a given position with a linear heading and custom velocity and acceleration constraints.
+     *
+     * @param endPose         The end pose
+     * @param distanceUnit    The unit of the end pose vector (will be converted to inches)
+     * @param angleUnit       The unit of the end pose heading (will be converted to radians)
+     * @param endHeading      The end heading
+     * @param endAngleUnit    The unit of the end heading (will be converted to radians)
      * @param velConstraint   The velocity constraint (inches/sec)
      * @param accelConstraint The acceleration constraint (inches/sec^2)
      * @return The builder
      */
     public T splineToLinearHeading(
             Pose2d endPose,
+            Distance distanceUnit,
+            Angle angleUnit,
             double endHeading,
+            Angle endAngleUnit,
             TrajectoryVelocityConstraint velConstraint,
             TrajectoryAccelerationConstraint accelConstraint
     ) {
-        return addPath(() -> currentTrajectoryBuilder.splineToLinearHeading(endPose, endHeading, velConstraint, accelConstraint));
+        double x = Inches.convertFrom(endPose.getX(), distanceUnit);
+        double y = Inches.convertFrom(endPose.getY(), distanceUnit);
+        double r = Radians.convertFrom(endHeading, angleUnit);
+        double r2 = Radians.convertFrom(endPose.getHeading(), endAngleUnit);
+        return splineToLinearHeading(new Pose2d(x, y, r), r2, velConstraint, accelConstraint);
     }
 
     /**
      * Spline to a given position with a spline heading.
      *
-     * @param endPose    The end pose (in, in, rad)
-     * @param endHeading The end heading (rad)
+     * @param endPoseInchRad The end pose (in, in, radians)
+     * @param endHeadingRad  The end heading (radians)
      * @return The builder
      */
-    public T splineToSplineHeading(Pose2d endPose, double endHeading) {
-        return addPath(() -> currentTrajectoryBuilder.splineToSplineHeading(endPose, endHeading, currentVelConstraint, currentAccelConstraint));
+    public T splineToSplineHeading(Pose2d endPoseInchRad, double endHeadingRad) {
+        return addPath(() -> currentTrajectoryBuilder.splineToSplineHeading(endPoseInchRad, endHeadingRad, currentVelConstraint, currentAccelConstraint));
+    }
+
+    /**
+     * Spline to a given position with a spline heading.
+     *
+     * @param endPose      The end pose
+     * @param distanceUnit The unit of the end pose vector (will be converted to inches)
+     * @param angleUnit    The unit of the end pose heading (will be converted to radians)
+     * @param endHeading   The end heading
+     * @param endAngleUnit The unit of the end heading (will be converted to radians)
+     * @return The builder
+     */
+    public T splineToSplineHeading(Pose2d endPose, Distance distanceUnit, Angle angleUnit, double endHeading, Angle endAngleUnit) {
+        double x = Inches.convertFrom(endPose.getX(), distanceUnit);
+        double y = Inches.convertFrom(endPose.getY(), distanceUnit);
+        double r = Radians.convertFrom(endHeading, angleUnit);
+        double r2 = Radians.convertFrom(endPose.getHeading(), endAngleUnit);
+        return splineToSplineHeading(new Pose2d(x, y, r), r2);
     }
 
     /**
      * Spline to a given position with a spline heading and custom velocity and acceleration constraints.
      *
-     * @param endPose         The end pose (in, in, rad)
-     * @param endHeading      The end heading (rad)
+     * @param endPoseInchRad  The end pose (in, in, radians)
+     * @param endHeadingRad   The end heading (radians)
+     * @param velConstraint   The velocity constraint (inches/sec)
+     * @param accelConstraint The acceleration constraint (inches/sec^2)
+     * @return The builder
+     */
+    public T splineToSplineHeading(
+            Pose2d endPoseInchRad,
+            double endHeadingRad,
+            TrajectoryVelocityConstraint velConstraint,
+            TrajectoryAccelerationConstraint accelConstraint
+    ) {
+        return addPath(() -> currentTrajectoryBuilder.splineToSplineHeading(endPoseInchRad, endHeadingRad, velConstraint, accelConstraint));
+    }
+
+    /**
+     * Spline to a given position with a spline heading and custom velocity and acceleration constraints.
+     *
+     * @param endPose         The end pose
+     * @param distanceUnit    The unit of the end pose vector (will be converted to inches)
+     * @param angleUnit       The unit of the end pose heading (will be converted to radians)
+     * @param endHeading      The end heading
+     * @param endAngleUnit    The unit of the end heading (will be converted to radians)
      * @param velConstraint   The velocity constraint (inches/sec)
      * @param accelConstraint The acceleration constraint (inches/sec^2)
      * @return The builder
      */
     public T splineToSplineHeading(
             Pose2d endPose,
+            Distance distanceUnit,
+            Angle angleUnit,
             double endHeading,
+            Angle endAngleUnit,
             TrajectoryVelocityConstraint velConstraint,
             TrajectoryAccelerationConstraint accelConstraint
     ) {
-        return addPath(() -> currentTrajectoryBuilder.splineToSplineHeading(endPose, endHeading, velConstraint, accelConstraint));
+        double x = Inches.convertFrom(endPose.getX(), distanceUnit);
+        double y = Inches.convertFrom(endPose.getY(), distanceUnit);
+        double r = Radians.convertFrom(endHeading, angleUnit);
+        double r2 = Radians.convertFrom(endPose.getHeading(), endAngleUnit);
+        return splineToSplineHeading(new Pose2d(x, y, r), r2, velConstraint, accelConstraint);
     }
 
     private T addPath(Runnable callback) {
@@ -531,6 +1038,12 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
         return (T) this;
     }
 
+    /**
+     * Set the tangent of the next path.
+     *
+     * @param tangent The tangent (radians)
+     * @return The builder
+     */
     public T setTangent(double tangent) {
         setAbsoluteTangent = true;
         absoluteTangent = tangent;
@@ -538,6 +1051,18 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
         pushPath();
 
         return (T) this;
+    }
+
+    /**
+     * Set the tangent of the next path.
+     *
+     * @param tangent   The tangent
+     * @param angleUnit The unit of the tangent (will be converted to radians)
+     * @return The builder
+     */
+    public T setTangent(double tangent, Angle angleUnit) {
+        double t = Radians.convertFrom(tangent, angleUnit);
+        return setTangent(t);
     }
 
     private T setTangentOffset(double offset) {
@@ -649,6 +1174,21 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
     }
 
     /**
+     * Set the turn constraints for the next builder instructions.
+     *
+     * @param maxAngVel   The maximum angular velocity
+     * @param velUnit     The unit of the maximum angular velocity (will be converted to radians/sec)
+     * @param maxAngAccel The maximum angular acceleration
+     * @param accelUnit   The unit of the maximum angular acceleration (will be converted to radians/sec^2)
+     * @return The builder
+     */
+    public T setTurnConstraint(double maxAngVel, Velocity<Angle> velUnit, double maxAngAccel, Velocity<Velocity<Angle>> accelUnit) {
+        double v = RadiansPerSecond.convertFrom(maxAngVel, velUnit);
+        double a = RadiansPerSecond.per(Second).convertFrom(maxAngAccel, accelUnit);
+        return setTurnConstraint(v, a);
+    }
+
+    /**
      * Reset the turn constraints to the base turn constraints.
      *
      * @return The builder
@@ -682,6 +1222,17 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
     }
 
     /**
+     * Add a temporal marker at the current duration plus an offset to run a callback at that time.
+     *
+     * @param offset   The offset to add to the current duration
+     * @param callback The callback to run
+     * @return The builder
+     */
+    public T UNSTABLE_addTemporalMarkerOffset(Measure<Time> offset, MarkerCallback callback) {
+        return addTemporalMarker(currentDuration + offset.in(Seconds), callback);
+    }
+
+    /**
      * Add a temporal marker at a given time to run a callback at that time.
      *
      * @param time     The time to run the callback (seconds)
@@ -690,6 +1241,17 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
      */
     public T addTemporalMarker(double time, MarkerCallback callback) {
         return addTemporalMarker(0.0, time, callback);
+    }
+
+    /**
+     * Add a temporal marker at a given time to run a callback at that time.
+     *
+     * @param time     The time to run the callback
+     * @param callback The callback to run
+     * @return The builder
+     */
+    public T addTemporalMarker(Measure<Time> time, MarkerCallback callback) {
+        return addTemporalMarker(time.in(Seconds), callback);
     }
 
     /**
@@ -707,6 +1269,18 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
     /**
      * Add a temporal marker at a given time to run a callback at that time.
      *
+     * @param scale    A multiplicative scale to apply to the time
+     * @param offset   The offset to add to the time
+     * @param callback The callback to run
+     * @return The builder
+     */
+    public T addTemporalMarker(double scale, Measure<Time> offset, MarkerCallback callback) {
+        return addTemporalMarker(scale, offset.in(Seconds), callback);
+    }
+
+    /**
+     * Add a temporal marker at a given time to run a callback at that time.
+     *
      * @param time     The time to run the callback (seconds)
      * @param callback The callback to run
      * @return The builder
@@ -717,15 +1291,42 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
     }
 
     /**
-     * Add a spatial marker at the current position to run a callback at that position.
+     * Add a temporal marker at a given time to run a callback at that time.
      *
-     * @param point    The point to run the callback (inches)
+     * @param time     The time to run the callback
+     * @param timeUnit The unit of the time supplied (will be converted to seconds)
      * @param callback The callback to run
      * @return The builder
      */
-    public T addSpatialMarker(Vector2d point, MarkerCallback callback) {
-        spatialMarkers.add(new SpatialMarker(point, callback));
+    public T addTemporalMarker(TimeProducer time, Time timeUnit, MarkerCallback callback) {
+        TimeProducer conv = v -> Seconds.convertFrom(time.produce(v), timeUnit);
+        return addTemporalMarker(conv, callback);
+    }
+
+    /**
+     * Add a spatial marker at the current position to run a callback at that position.
+     *
+     * @param pointInches The point to run the callback (inches)
+     * @param callback    The callback to run
+     * @return The builder
+     */
+    public T addSpatialMarker(Vector2d pointInches, MarkerCallback callback) {
+        spatialMarkers.add(new SpatialMarker(pointInches, callback));
         return (T) this;
+    }
+
+    /**
+     * Add a spatial marker at the current position to run a callback at that position.
+     *
+     * @param point    The point to run the callback
+     * @param inUnit   The unit of the point (will be converted to inches)
+     * @param callback The callback to run
+     * @return The builder
+     */
+    public T addSpatialMarker(Vector2d point, Distance inUnit, MarkerCallback callback) {
+        double x = Inches.convertFrom(point.getX(), inUnit);
+        double y = Inches.convertFrom(point.getY(), inUnit);
+        return addSpatialMarker(new Vector2d(x, y), callback);
     }
 
     /**
@@ -741,58 +1342,123 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
     /**
      * Add a displacement marker at the current displacement plus an offset to run a callback at that displacement.
      *
-     * @param offset   The offset to add to the current displacement (inches)
+     * @param offsetInches The offset to add to the current displacement (inches)
+     * @param callback     The callback to run
+     * @return The builder
+     */
+    public T UNSTABLE_addDisplacementMarkerOffset(double offsetInches, MarkerCallback callback) {
+        return addDisplacementMarker(currentDisplacement + offsetInches, callback);
+    }
+
+    /**
+     * Add a displacement marker at the current displacement plus an offset to run a callback at that displacement.
+     *
+     * @param offset   The offset to add to the current displacement
+     * @param inUnit   The unit of the offset (will be converted to inches)
      * @param callback The callback to run
      * @return The builder
      */
-    public T UNSTABLE_addDisplacementMarkerOffset(double offset, MarkerCallback callback) {
-        return addDisplacementMarker(currentDisplacement + offset, callback);
+    public T UNSTABLE_addDisplacementMarkerOffset(double offset, Distance inUnit, MarkerCallback callback) {
+        double o = Inches.convertFrom(offset, inUnit);
+        return UNSTABLE_addDisplacementMarkerOffset(o, callback);
     }
 
     /**
      * Add a displacement marker at a given displacement to run a callback at that displacement.
      *
-     * @param displacement The displacement to run the callback (inches)
+     * @param displacementInches The displacement to run the callback (inches)
+     * @param callback           The callback to run
+     * @return The builder
+     */
+    public T addDisplacementMarker(double displacementInches, MarkerCallback callback) {
+        return addDisplacementMarker(0.0, displacementInches, callback);
+    }
+
+    /**
+     * Add a displacement marker at a given displacement to run a callback at that displacement.
+     *
+     * @param displacement The displacement to run the callback
+     * @param inUnit       The unit of the displacement (will be converted to inches)
      * @param callback     The callback to run
      * @return The builder
      */
-    public T addDisplacementMarker(double displacement, MarkerCallback callback) {
-        return addDisplacementMarker(0.0, displacement, callback);
+    public T addDisplacementMarker(double displacement, Distance inUnit, MarkerCallback callback) {
+        double d = Inches.convertFrom(displacement, inUnit);
+        return addDisplacementMarker(d, callback);
+    }
+
+    /**
+     * Add a displacement marker at a given displacement to run a callback at that displacement.
+     *
+     * @param scale        A multiplicative scale to apply to the displacement
+     * @param offsetInches The offset to add to the displacement (inches)
+     * @param callback     The callback to run
+     * @return The builder
+     */
+    public T addDisplacementMarker(double scale, double offsetInches, MarkerCallback callback) {
+        return addDisplacementMarker((displacement -> scale * displacement + offsetInches), callback);
     }
 
     /**
      * Add a displacement marker at a given displacement to run a callback at that displacement.
      *
      * @param scale    A multiplicative scale to apply to the displacement
-     * @param offset   The offset to add to the displacement (inches)
+     * @param offset   The offset to add to the displacement
+     * @param inUnit   The unit of the offset (will be converted to inches)
      * @param callback The callback to run
      * @return The builder
      */
-    public T addDisplacementMarker(double scale, double offset, MarkerCallback callback) {
-        return addDisplacementMarker((displacement -> scale * displacement + offset), callback);
+    public T addDisplacementMarker(double scale, double offset, Distance inUnit, MarkerCallback callback) {
+        double o = Inches.convertFrom(offset, inUnit);
+        return addDisplacementMarker(scale, o, callback);
     }
 
     /**
      * Add a displacement marker at a given displacement to run a callback at that displacement.
      *
-     * @param displacement The displacement to run the callback (inches)
-     * @param callback     The callback to run
+     * @param displacementInches The displacement to run the callback (inches)
+     * @param callback           The callback to run
      * @return The builder
      */
-    public T addDisplacementMarker(DisplacementProducer displacement, MarkerCallback callback) {
-        displacementMarkers.add(new DisplacementMarker(displacement, callback));
+    public T addDisplacementMarker(DisplacementProducer displacementInches, MarkerCallback callback) {
+        displacementMarkers.add(new DisplacementMarker(displacementInches, callback));
 
         return (T) this;
     }
 
     /**
-     * Turn to a given angle.
+     * Add a displacement marker at a given displacement to run a callback at that displacement.
      *
-     * @param angle The angle to turn (radians)
+     * @param displacement The displacement to run the callback
+     * @param inUnit       The unit of the displacement (will be converted to inches)
+     * @param callback     The callback to run
      * @return The builder
      */
-    public T turn(double angle) {
-        return turn(angle, currentTurnConstraintMaxAngVel, currentTurnConstraintMaxAngAccel);
+    public T addDisplacementMarker(DisplacementProducer displacement, Distance inUnit, MarkerCallback callback) {
+        DisplacementProducer conv = d -> Inches.convertFrom(displacement.produce(d), inUnit);
+        return addDisplacementMarker(conv, callback);
+    }
+
+    /**
+     * Turn to a given angle.
+     *
+     * @param radians The angle to turn (radians)
+     * @return The builder
+     */
+    public T turn(double radians) {
+        return turn(radians, currentTurnConstraintMaxAngVel, currentTurnConstraintMaxAngAccel);
+    }
+
+    /**
+     * Turn to a given angle.
+     *
+     * @param angle     The angle to turn
+     * @param angleUnit The unit of the angle (will be converted to radians)
+     * @return The builder
+     */
+    public T turn(double angle, Angle angleUnit) {
+        double a = Radians.convertFrom(angle, angleUnit);
+        return turn(a);
     }
 
     /**
@@ -817,12 +1483,30 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
 
         lastPose = new Pose2d(
                 lastPose.getX(), lastPose.getY(),
-                Angle.norm(lastPose.getHeading() + angle)
+                Mathf.normaliseAngle(Radians.of(lastPose.getHeading() + angle)).in(Radians)
         );
 
         currentDuration += turnProfile.duration();
 
         return (T) this;
+    }
+
+    /**
+     * Turn to a given angle with custom maximum angular velocity and acceleration.
+     *
+     * @param angle       The angle to turn
+     * @param angleUnit   The unit of the angle (will be converted to radians)
+     * @param maxAngVel   The maximum angular velocity
+     * @param velUnit     The unit of the maximum angular velocity (will be converted to radians/sec)
+     * @param maxAngAccel The maximum angular acceleration
+     * @param accelUnit   The unit of the maximum angular acceleration (will be converted to radians/sec^2)
+     * @return The builder
+     */
+    public T turn(double angle, Angle angleUnit, double maxAngVel, Velocity<Angle> velUnit, double maxAngAccel, Velocity<Velocity<Angle>> accelUnit) {
+        double a = Radians.convertFrom(angle, angleUnit);
+        double v = RadiansPerSecond.convertFrom(maxAngVel, velUnit);
+        double a2 = RadiansPerSecond.per(Second).convertFrom(maxAngAccel, accelUnit);
+        return turn(a, v, a2);
     }
 
     /**
@@ -837,6 +1521,16 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
 
         currentDuration += seconds;
         return (T) this;
+    }
+
+    /**
+     * Wait for a given amount of time.
+     *
+     * @param time The amount of time to wait.
+     * @return The builder
+     */
+    public T waitFor(Measure<Time> time) {
+        return waitSeconds(time.in(Seconds));
     }
 
     /**
@@ -868,7 +1562,7 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
         lastDurationTraj = 0.0;
         lastDisplacementTraj = 0.0;
 
-        double tangent = setAbsoluteTangent ? absoluteTangent : Angle.norm(lastPose.getHeading() + tangentOffset);
+        double tangent = setAbsoluteTangent ? absoluteTangent : Mathf.normaliseAngle(Radians.of(lastPose.getHeading() + tangentOffset)).in(Radians);
 
         currentTrajectoryBuilder = new TrajectoryBuilder(lastPose, tangent, currentVelConstraint, currentAccelConstraint, resolution);
     }

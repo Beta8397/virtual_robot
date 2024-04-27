@@ -1,6 +1,16 @@
 package org.murraybridgebunyips.bunyipslib.roadrunner.drive;
 
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Inches;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.InchesPerSecond;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.RadiansPerSecond;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Second;
+
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+
+import org.murraybridgebunyips.bunyipslib.external.units.Angle;
+import org.murraybridgebunyips.bunyipslib.external.units.Distance;
+import org.murraybridgebunyips.bunyipslib.external.units.Measure;
+import org.murraybridgebunyips.bunyipslib.external.units.Velocity;
 
 /**
  * Constants shared between multiple drive types.
@@ -139,73 +149,163 @@ public class DriveConstants {
             driveConstants = new DriveConstants();
         }
 
+        /**
+         * Set the number of ticks per revolution of the motor's output shaft.
+         *
+         * @param ticksPerRev the number of ticks per revolution
+         * @return this
+         */
         public Builder setTicksPerRev(double ticksPerRev) {
             driveConstants.TICKS_PER_REV = ticksPerRev;
             return this;
         }
 
+        /**
+         * Set the maximum RPM of the motor.
+         *
+         * @param maxRPM the maximum RPM
+         * @return this
+         */
         public Builder setMaxRPM(double maxRPM) {
             driveConstants.MAX_RPM = maxRPM;
             return this;
         }
 
+        /**
+         * Set whether to run using the encoder.
+         * Set RUN_USING_ENCODER to true to enable built-in hub velocity control using drive encoders.
+         * Set this flag to false if drive encoders are not present and an alternative localization
+         * method is in use (e.g., tracking wheels).
+         * If using the built-in motor velocity PID, update MOTOR_VELO_PID with the tuned coefficients
+         * from DriveVelocityPIDTuner.
+         *
+         * @param runUsingEncoder whether to run using the encoder
+         * @return this
+         */
         public Builder setRunUsingEncoder(boolean runUsingEncoder) {
             driveConstants.RUN_USING_ENCODER = runUsingEncoder;
             return this;
         }
 
+        /**
+         * Set the motor velocity PID coefficients.
+         *
+         * @param motorVeloPID the motor velocity PID coefficients
+         * @return this
+         */
         public Builder setMotorVeloPID(PIDFCoefficients motorVeloPID) {
             driveConstants.MOTOR_VELO_PID = motorVeloPID;
             return this;
         }
 
-        public Builder setWheelRadius(double wheelRadius) {
-            driveConstants.WHEEL_RADIUS = wheelRadius;
+        /**
+         * Set the wheel radius of the drive motors.
+         *
+         * @param wheelRadius the wheel radius
+         * @return this
+         */
+        public Builder setWheelRadius(Measure<Distance> wheelRadius) {
+            driveConstants.WHEEL_RADIUS = wheelRadius.in(Inches);
             return this;
         }
 
+        /**
+         * Set the gear ratio of the drive motors
+         *
+         * @param gearRatio output (wheel) speed / input (motor) speed.
+         * @return this
+         */
         public Builder setGearRatio(double gearRatio) {
             driveConstants.GEAR_RATIO = gearRatio;
             return this;
         }
 
-        public Builder setTrackWidth(double trackWidth) {
-            driveConstants.TRACK_WIDTH = trackWidth;
+        /**
+         * Set the track width of the robot.
+         * The track width is the distance between the left and right wheels on the robot.
+         *
+         * @param trackWidth the track width
+         * @return this
+         */
+        public Builder setTrackWidth(Measure<Distance> trackWidth) {
+            driveConstants.TRACK_WIDTH = trackWidth.in(Inches);
             return this;
         }
 
+        /**
+         * Set the kV feedforward gain for the velocity PID.
+         *
+         * @param kV the kV feedforward gain
+         * @return this
+         */
         public Builder setKV(double kV) {
             driveConstants.kV = kV;
             return this;
         }
 
+        /**
+         * Set the kA feedforward gain for the velocity PID.
+         *
+         * @param kA the kA feedforward gain
+         * @return this
+         */
         public Builder setKA(double kA) {
             driveConstants.kA = kA;
             return this;
         }
 
+        /**
+         * Set the kStatic feedforward gain for the velocity PID.
+         *
+         * @param kStatic the kStatic feedforward gain
+         * @return this
+         */
         public Builder setKStatic(double kStatic) {
             driveConstants.kStatic = kStatic;
             return this;
         }
 
-        public Builder setMaxVel(double maxVel) {
-            driveConstants.MAX_VEL = maxVel;
+        /**
+         * Set the maximum velocity of the robot.
+         *
+         * @param maxVel the maximum velocity
+         * @return this
+         */
+        public Builder setMaxVel(Measure<Velocity<Distance>> maxVel) {
+            driveConstants.MAX_VEL = maxVel.in(InchesPerSecond);
             return this;
         }
 
-        public Builder setMaxAccel(double maxAccel) {
-            driveConstants.MAX_ACCEL = maxAccel;
+        /**
+         * Set the maximum acceleration of the robot.
+         *
+         * @param maxAccel the maximum acceleration
+         * @return this
+         */
+        public Builder setMaxAccel(Measure<Velocity<Velocity<Distance>>> maxAccel) {
+            driveConstants.MAX_ACCEL = maxAccel.in(InchesPerSecond.per(Second));
             return this;
         }
 
-        public Builder setMaxAngVel(double maxAngVel) {
-            driveConstants.MAX_ANG_VEL = maxAngVel;
+        /**
+         * Set the maximum angular velocity of the robot.
+         *
+         * @param maxAngVel the maximum angular velocity
+         * @return this
+         */
+        public Builder setMaxAngVel(Measure<Velocity<Angle>> maxAngVel) {
+            driveConstants.MAX_ANG_VEL = maxAngVel.in(RadiansPerSecond);
             return this;
         }
 
-        public Builder setMaxAngAccel(double maxAngAccel) {
-            driveConstants.MAX_ANG_ACCEL = maxAngAccel;
+        /**
+         * Set the maximum angular acceleration of the robot.
+         *
+         * @param maxAngAccel the maximum angular acceleration
+         * @return this
+         */
+        public Builder setMaxAngAccel(Measure<Velocity<Velocity<Angle>>> maxAngAccel) {
+            driveConstants.MAX_ANG_ACCEL = maxAngAccel.in(RadiansPerSecond.per(Second));
             return this;
         }
 

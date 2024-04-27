@@ -15,7 +15,7 @@ public class WhitePixel extends ColourThreshold {
     /**
      * Lower bounds for YCrCb
      */
-    public static Scalar LOWER_YCBCR = new Scalar(192.7, 120.0, 106.3);
+    public static Scalar LOWER_YCBCR = new Scalar(250, 120.0, 106.3);
     /**
      * Upper bounds for YCrCb
      */

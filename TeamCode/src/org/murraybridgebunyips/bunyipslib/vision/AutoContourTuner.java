@@ -72,7 +72,8 @@ public abstract class AutoContourTuner extends BunyipsOpMode {
         vision.update();
 
         ContourData biggestContour = ContourData.getLargest(processor.getData());
-        if (biggestContour == null) return;
+        if (biggestContour == null) {
+        }
 
         // TODO: fitting bounding boxes positions and size
     }

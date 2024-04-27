@@ -7,8 +7,8 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.DriveConstants;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.MecanumCoefficients;
-import org.murraybridgebunyips.bunyipslib.roadrunner.drive.localizers.StandardTrackingWheelLocalizer;
-import org.murraybridgebunyips.bunyipslib.roadrunner.drive.localizers.StandardTrackingWheelLocalizerCoefficients;
+import org.murraybridgebunyips.bunyipslib.roadrunner.drive.localizers.ThreeWheelTrackingLocalizer;
+import org.murraybridgebunyips.bunyipslib.roadrunner.drive.localizers.ThreeWheelTrackingLocalizerCoefficients;
 import org.murraybridgebunyips.bunyipslib.roadrunner.util.Deadwheel;
 
 import java.util.ArrayList;
@@ -39,11 +39,11 @@ public class TriDeadwheelMecanumDrive extends MecanumDrive {
      * @param lastTrackingEncPositions The last tracking encoder positions
      * @param lastTrackingEncVels      The last tracking encoder velocities
      */
-    public TriDeadwheelMecanumDrive(DriveConstants constants, MecanumCoefficients mecanumCoefficients, HardwareMap.DeviceMapping<VoltageSensor> voltageSensor, IMU imu, DcMotorEx frontLeft, DcMotorEx frontRight, DcMotorEx backLeft, DcMotorEx backRight, StandardTrackingWheelLocalizerCoefficients localizerCoefficients, Deadwheel enc_left, Deadwheel enc_right, Deadwheel enc_x, List<Integer> lastTrackingEncPositions, List<Integer> lastTrackingEncVels) {
+    public TriDeadwheelMecanumDrive(DriveConstants constants, MecanumCoefficients mecanumCoefficients, HardwareMap.DeviceMapping<VoltageSensor> voltageSensor, IMU imu, DcMotorEx frontLeft, DcMotorEx frontRight, DcMotorEx backLeft, DcMotorEx backRight, ThreeWheelTrackingLocalizerCoefficients localizerCoefficients, Deadwheel enc_left, Deadwheel enc_right, Deadwheel enc_x, List<Integer> lastTrackingEncPositions, List<Integer> lastTrackingEncVels) {
         super(constants, mecanumCoefficients, voltageSensor, imu, frontLeft, frontRight, backLeft, backRight);
         if (!assertParamsNotNull(localizerCoefficients, enc_left, enc_right, enc_x, lastTrackingEncPositions, lastTrackingEncVels))
             return;
-        setLocalizer(new StandardTrackingWheelLocalizer(localizerCoefficients, enc_left, enc_right, enc_x, lastTrackingEncPositions, lastTrackingEncVels));
+        setLocalizer(new ThreeWheelTrackingLocalizer(localizerCoefficients, enc_left, enc_right, enc_x, lastTrackingEncPositions, lastTrackingEncVels));
     }
 
     /**
@@ -62,9 +62,21 @@ public class TriDeadwheelMecanumDrive extends MecanumDrive {
      * @param enc_right             The right y encoder
      * @param enc_x                 The x encoder
      */
-    public TriDeadwheelMecanumDrive(DriveConstants constants, MecanumCoefficients mecanumCoefficients, HardwareMap.DeviceMapping<VoltageSensor> voltageSensor, IMU imu, DcMotorEx frontLeft, DcMotorEx frontRight, DcMotorEx backLeft, DcMotorEx backRight, StandardTrackingWheelLocalizerCoefficients localizerCoefficients, Deadwheel enc_left, Deadwheel enc_right, Deadwheel enc_x) {
+    public TriDeadwheelMecanumDrive(DriveConstants constants, MecanumCoefficients mecanumCoefficients, HardwareMap.DeviceMapping<VoltageSensor> voltageSensor, IMU imu, DcMotorEx frontLeft, DcMotorEx frontRight, DcMotorEx backLeft, DcMotorEx backRight, ThreeWheelTrackingLocalizerCoefficients localizerCoefficients, Deadwheel enc_left, Deadwheel enc_right, Deadwheel enc_x) {
         super(constants, mecanumCoefficients, voltageSensor, imu, frontLeft, frontRight, backLeft, backRight);
         if (!assertParamsNotNull(localizerCoefficients, enc_left, enc_right, enc_x)) return;
-        setLocalizer(new StandardTrackingWheelLocalizer(localizerCoefficients, enc_left, enc_right, enc_x, new ArrayList<>(), new ArrayList<>()));
+        setLocalizer(new ThreeWheelTrackingLocalizer(localizerCoefficients, enc_left, enc_right, enc_x, new ArrayList<>(), new ArrayList<>()));
+    }
+
+    /**
+     * Enable overflow compensation if your encoders exceed 32767 counts / second.
+     *
+     * @return this
+     */
+    public TriDeadwheelMecanumDrive enableOverflowCompensation() {
+        ThreeWheelTrackingLocalizer localizer = (ThreeWheelTrackingLocalizer) getLocalizer();
+        if (localizer != null)
+            localizer.enableOverflowCompensation();
+        return this;
     }
 }

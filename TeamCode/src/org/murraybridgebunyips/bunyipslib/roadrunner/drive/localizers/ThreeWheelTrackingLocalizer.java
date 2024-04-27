@@ -23,13 +23,14 @@ import java.util.List;
  *    |              |
  *    \--------------/
  */
-public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer {
-    private final StandardTrackingWheelLocalizerCoefficients coefficients;
+public class ThreeWheelTrackingLocalizer extends ThreeTrackingWheelLocalizer {
+    private final ThreeWheelTrackingLocalizerCoefficients coefficients;
     private final Deadwheel leftDeadwheel;
     private final Deadwheel rightDeadwheel;
     private final Deadwheel frontDeadwheel;
     private final List<Integer> lastEncPositions;
     private final List<Integer> lastEncVels;
+    private boolean usingOverflowCompensation;
 
     /**
      * Create a new StandardTrackingWheelLocalizer with coefficients, encoders, and last encoder positions and velocities.
@@ -41,7 +42,7 @@ public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer 
      * @param lastTrackingEncPositions The last encoder positions
      * @param lastTrackingEncVels      The last encoder velocities
      */
-    public StandardTrackingWheelLocalizer(StandardTrackingWheelLocalizerCoefficients coefficients, Deadwheel leftDeadwheel, Deadwheel rightDeadwheel, Deadwheel frontDeadwheel, List<Integer> lastTrackingEncPositions, List<Integer> lastTrackingEncVels) {
+    public ThreeWheelTrackingLocalizer(ThreeWheelTrackingLocalizerCoefficients coefficients, Deadwheel leftDeadwheel, Deadwheel rightDeadwheel, Deadwheel frontDeadwheel, List<Integer> lastTrackingEncPositions, List<Integer> lastTrackingEncVels) {
         super(Arrays.asList(
                 new Pose2d(0, coefficients.LATERAL_DISTANCE / 2, 0), // left
                 new Pose2d(0, -coefficients.LATERAL_DISTANCE / 2, 0), // right
@@ -60,7 +61,17 @@ public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer 
         this.frontDeadwheel = frontDeadwheel;
     }
 
-    public StandardTrackingWheelLocalizerCoefficients getCoefficients() {
+    /**
+     * Enable overflow compensation if your encoders exceed 32767 counts / second.
+     *
+     * @return this
+     */
+    public ThreeWheelTrackingLocalizer enableOverflowCompensation() {
+        usingOverflowCompensation = true;
+        return this;
+    }
+
+    public ThreeWheelTrackingLocalizerCoefficients getCoefficients() {
         return coefficients;
     }
 
@@ -96,9 +107,9 @@ public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer 
     @NonNull
     @Override
     public List<Double> getWheelVelocities() {
-        int leftVel = (int) leftDeadwheel.getCorrectedVelocity();
-        int rightVel = (int) rightDeadwheel.getCorrectedVelocity();
-        int frontVel = (int) frontDeadwheel.getCorrectedVelocity();
+        int leftVel = usingOverflowCompensation ? (int) leftDeadwheel.getCorrectedVelocity() : (int) leftDeadwheel.getRawVelocity();
+        int rightVel = usingOverflowCompensation ? (int) rightDeadwheel.getCorrectedVelocity() : (int) rightDeadwheel.getRawVelocity();
+        int frontVel = usingOverflowCompensation ? (int) frontDeadwheel.getCorrectedVelocity() : (int) frontDeadwheel.getRawVelocity();
 
         lastEncVels.clear();
         lastEncVels.add(leftVel);

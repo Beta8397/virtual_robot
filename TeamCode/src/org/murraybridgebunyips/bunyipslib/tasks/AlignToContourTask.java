@@ -17,6 +17,7 @@ import org.murraybridgebunyips.bunyipslib.vision.data.ContourData;
 import org.murraybridgebunyips.bunyipslib.vision.processors.MultiColourThreshold;
 
 import java.util.List;
+import java.util.function.DoubleSupplier;
 
 /**
  * Task to align to a contour using the vision system.
@@ -34,25 +35,43 @@ public class AlignToContourTask<T extends BunyipsSubsystem> extends Task {
     private final RoadRunnerDrive drive;
     private final MultiColourThreshold processors;
     private final PIDController controller;
-    private Gamepad gamepad;
+    private DoubleSupplier x;
+    private DoubleSupplier y;
+    private DoubleSupplier r;
 
     /**
      * TeleOp constructor
      *
-     * @param gamepad    the gamepad to use for input
+     * @param xSupplier  x (strafe) value
+     * @param ySupplier  y (forward) value
+     * @param rSupplier  r (rotate) value
      * @param drive      the drivetrain to use
      * @param processors the vision processor to use
      * @param controller the PID controller to use for aligning to a target
      */
-    public AlignToContourTask(Gamepad gamepad, T drive, MultiColourThreshold processors, PIDController controller) {
+    public AlignToContourTask(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier rSupplier, T drive, MultiColourThreshold processors, PIDController controller) {
         super(INFINITE_TIMEOUT, drive, false);
         if (!(drive instanceof RoadRunnerDrive))
             throw new EmergencyStop("AlignToContourTask must be used with a drivetrain with X forward Pose/IMU info");
         this.drive = (RoadRunnerDrive) drive;
         this.processors = processors;
-        this.gamepad = gamepad;
+        x = xSupplier;
+        y = ySupplier;
+        r = rSupplier;
         this.controller = controller;
         controller.updatePID(PID);
+    }
+
+    /**
+     * TeleOp constructor using a default Mecanum binding.
+     *
+     * @param driver     the gamepad to use for driving
+     * @param drive      the drivetrain to use
+     * @param processors the vision processor to use
+     * @param controller the PID controller to use for aligning to a target
+     */
+    public AlignToContourTask(Gamepad driver, T drive, MultiColourThreshold processors, PIDController controller) {
+        this(() -> driver.left_stick_x, () -> driver.left_stick_y, () -> driver.right_stick_x, drive, processors, controller);
     }
 
     /**
@@ -85,8 +104,8 @@ public class AlignToContourTask<T extends BunyipsSubsystem> extends Task {
         controller.setPID(PID);
 
         Pose2d pose = new Pose2d(0, 0, 0);
-        if (gamepad != null)
-            pose = Controls.makeRobotPose(gamepad.left_stick_x, gamepad.left_stick_y, gamepad.right_stick_x);
+        if (x != null)
+            pose = Controls.makeRobotPose(x.getAsDouble(), y.getAsDouble(), r.getAsDouble());
 
         List<ContourData> data = processors.getData();
         ContourData biggestContour = ContourData.getLargest(data);
@@ -111,6 +130,6 @@ public class AlignToContourTask<T extends BunyipsSubsystem> extends Task {
 
     @Override
     protected boolean isTaskFinished() {
-        return gamepad == null && controller.atSetPoint();
+        return x == null && controller.atSetPoint();
     }
 }

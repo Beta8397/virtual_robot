@@ -15,7 +15,7 @@ public class PurplePixel extends ColourThreshold {
     /**
      * Lower bounds for the YCrCb colour space.
      */
-    public static Scalar LOWER_YCBCR = new Scalar(89.3, 0.0, 145.8);
+    public static Scalar LOWER_YCBCR = new Scalar(150, 0.0, 145.8);
     /**
      * Upper bounds for the YCrCb colour space.
      */
