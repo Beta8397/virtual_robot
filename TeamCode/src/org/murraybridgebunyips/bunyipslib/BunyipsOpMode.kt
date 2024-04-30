@@ -166,7 +166,7 @@ abstract class BunyipsOpMode : BOMInternal() {
         _instance = this
         try {
             resetFields()
-            Dbg.log("=============== BunyipsLib BunyipsOpMode ${BuildConfig.GIT_COMMIT}-${BuildConfig.BUILD_TIME} uid:${BuildConfig.ID} ===============")
+            Dbg.log("=============== BunyipsLib v${BuildConfig.SEMVER} BunyipsOpMode ${BuildConfig.GIT_COMMIT}-${BuildConfig.BUILD_TIME} uid:${BuildConfig.ID} ===============")
             LynxModuleUtil.ensureMinimumFirmwareVersion(hardwareMap)
             hardwareMap.getAll(LynxModule::class.java).forEach { module ->
                 module.bulkCachingMode = LynxModule.BulkCachingMode.AUTO
@@ -180,7 +180,7 @@ abstract class BunyipsOpMode : BOMInternal() {
                 this,
                 movingAverageTimer,
                 "BOM",
-                "bunyipslib ${BuildConfig.GIT_COMMIT}-${BuildConfig.BUILD_TIME}"
+                "bunyipslib v${BuildConfig.SEMVER}-${BuildConfig.GIT_COMMIT}-${BuildConfig.BUILD_TIME}"
             )
             telemetry.setup()
             // Controller setup and monitoring threads

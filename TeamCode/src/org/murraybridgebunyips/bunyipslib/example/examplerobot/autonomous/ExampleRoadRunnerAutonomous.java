@@ -34,20 +34,20 @@ public class ExampleRoadRunnerAutonomous extends AutonomousBunyipsOpMode impleme
 
     @Override
     protected void onReady(@Nullable OpModeSelection selectedOpMode) {
-        // You have access to a range of RoadRunner methods here, primary one being addNewTrajectory
-//        addNewTrajectory()
+        // You have access to a range of RoadRunner methods here, primary one being makeTrajectory
+//        makeTrajectory()
 //                .lineToLinearHeading(...)
 //                .splineTo(...)
 //                .splineTo(...)
 //                .splineTo(...)
-//                .build();
-        addNewTrajectory(new Pose2d(0, 0, 0))
+//                .addTask();
+        makeTrajectory(new Pose2d(0, 0, 0))
                 .forward(1234, Millimeters)
                 .withPriority(PriorityLevel.FIRST)
-                .build();
-        addNewTrajectory()
+                .addTask();
+        makeTrajectory()
                 .withPriority(PriorityLevel.LAST)
-                .build();
+                .addTask();
         // These methods are syntactic sugar for the following:
 //        addTask(new RoadRunnerTask<>(INFINITE_TIMEOUT, drive, drive.trajectoryBuilder().lineToLinearHeading(...).splineTo(...).splineTo(...).splineTo(...).build()));
         // where using FIRST priority will add the task to the front of the queue (addTaskFirst()), and

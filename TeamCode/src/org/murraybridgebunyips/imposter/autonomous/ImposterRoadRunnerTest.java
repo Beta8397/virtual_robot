@@ -30,14 +30,14 @@ public class ImposterRoadRunnerTest extends AutonomousBunyipsOpMode implements R
 //                .splineTo(new Vector2d(-34.29, -15.92), Math.toRadians(13.90))
 //                .splineTo(new Vector2d(63.66, -11.94), Math.toRadians(0.00))
 //                .build();
-        addNewTrajectory()
+        makeTrajectory()
                 .forward(Inches.convertFrom(2, FieldTiles))
                 .withName("Forward 2 Tile")
-                .build();
-        addNewTrajectory()
+                .addTask();
+        makeTrajectory()
                 .strafeRight(Inches.convertFrom(4, FieldTiles))
                 .withName("Right 4 Tiles")
-                .build();
+                .addTask();
     }
 
     @NonNull

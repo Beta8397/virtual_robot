@@ -20,7 +20,7 @@ public class ExampleAutonomous extends AutonomousBunyipsOpMode {
     // This class extends BunyipsOpMode, which is the base class for all OpModes in BunyipsLib
     // If you need to use RoadRunner, it is recommended to implement the RoadRunner interface as well,
     // which is an interface that allows for RoadRunner methods to be used with special
-    // methods such as addNewTrajectory()
+    // methods such as makeTrajectory()
 
     // The primary difference between AutonomousBunyipsOpMode and BunyipsOpMode is that looping
     // is handled differently. In BunyipsOpMode, the activeLoop() method is called repeatedly, and you

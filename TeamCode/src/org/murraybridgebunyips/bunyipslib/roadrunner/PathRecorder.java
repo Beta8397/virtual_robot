@@ -171,7 +171,7 @@ public abstract class PathRecorder extends BunyipsOpMode {
     private void processData() {
         Dbg.log("Processing data of % poses...", path.size());
         StringBuilder sb = new StringBuilder();
-        sb.append("addNewTrajectory(new Pose2d(")
+        sb.append("makeTrajectory(new Pose2d(")
                 .append(startPose.getX())
                 .append(", ")
                 .append(startPose.getY())

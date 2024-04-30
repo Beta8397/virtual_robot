@@ -16,8 +16,7 @@ import java.util.HashSet;
  * A group of tasks.
  * Users must be careful to ensure they do not allocate tasks that use the same subsystems when
  * running in parallel (all task groups except SequentialTaskGroup), otherwise hardware will
- * try to take commands from multiple tasks at once. In WPILib, this is handled by mentioning
- * requirements, but the nature of the Task system doesn't demand the need to integrate this.
+ * try to take commands from multiple tasks at once, overriding each other and causing unpredictable behaviour.
  *
  * @author Lucas Bubner, 2024
  */
