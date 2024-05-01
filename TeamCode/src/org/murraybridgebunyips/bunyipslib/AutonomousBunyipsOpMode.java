@@ -67,8 +67,6 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
 
     @Override
     protected final void onInit() {
-        // If the user is using RoadRunner, clear the task list for them as it may be reused
-        RoadRunner.rrTasks.clear();
         // Run user-defined hardware initialisation
         onInitialise();
         if (initTask == null) {

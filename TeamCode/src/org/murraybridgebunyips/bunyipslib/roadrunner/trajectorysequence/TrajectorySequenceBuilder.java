@@ -197,7 +197,7 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
      * @return The builder
      */
     public T lineTo(Vector2d endPositionInches) {
-        return addPath(() -> currentTrajectoryBuilder.lineTo(endPositionInches, currentVelConstraint, currentAccelConstraint));
+        return lineTo(endPositionInches, currentVelConstraint, currentAccelConstraint);
     }
 
     /**
@@ -256,7 +256,7 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
      * @return The builder
      */
     public T lineToConstantHeading(Vector2d endPositionInches) {
-        return addPath(() -> currentTrajectoryBuilder.lineToConstantHeading(endPositionInches, currentVelConstraint, currentAccelConstraint));
+        return lineToConstantHeading(endPositionInches, currentVelConstraint, currentAccelConstraint);
     }
 
     /**
@@ -315,7 +315,7 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
      * @return The builder
      */
     public T lineToLinearHeading(Pose2d endPoseInchRad) {
-        return addPath(() -> currentTrajectoryBuilder.lineToLinearHeading(endPoseInchRad, currentVelConstraint, currentAccelConstraint));
+        return lineToLinearHeading(endPoseInchRad, currentVelConstraint, currentAccelConstraint);
     }
 
     /**
@@ -379,7 +379,7 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
      * @return The builder
      */
     public T lineToSplineHeading(Pose2d endPoseInchRad) {
-        return addPath(() -> currentTrajectoryBuilder.lineToSplineHeading(endPoseInchRad, currentVelConstraint, currentAccelConstraint));
+        return lineToSplineHeading(endPoseInchRad, currentVelConstraint, currentAccelConstraint);
     }
 
     /**
@@ -443,7 +443,7 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
      * @return The builder
      */
     public T strafeTo(Vector2d endPositionInches) {
-        return addPath(() -> currentTrajectoryBuilder.strafeTo(endPositionInches, currentVelConstraint, currentAccelConstraint));
+        return strafeTo(endPositionInches, currentVelConstraint, currentAccelConstraint);
     }
 
     /**
@@ -502,7 +502,7 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
      * @return The builder
      */
     public T forward(double inches) {
-        return addPath(() -> currentTrajectoryBuilder.forward(inches, currentVelConstraint, currentAccelConstraint));
+        return forward(inches, currentVelConstraint, currentAccelConstraint);
     }
 
     /**
@@ -559,7 +559,7 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
      * @return The builder
      */
     public T back(double inches) {
-        return addPath(() -> currentTrajectoryBuilder.back(inches, currentVelConstraint, currentAccelConstraint));
+        return back(inches, currentVelConstraint, currentAccelConstraint);
     }
 
     /**
@@ -616,7 +616,7 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
      * @return The builder
      */
     public T strafeLeft(double inches) {
-        return addPath(() -> currentTrajectoryBuilder.strafeLeft(inches, currentVelConstraint, currentAccelConstraint));
+        return strafeLeft(inches, currentVelConstraint, currentAccelConstraint);
     }
 
     /**
@@ -673,7 +673,7 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
      * @return The builder
      */
     public T strafeRight(double inches) {
-        return addPath(() -> currentTrajectoryBuilder.strafeRight(inches, currentVelConstraint, currentAccelConstraint));
+        return strafeRight(inches, currentVelConstraint, currentAccelConstraint);
     }
 
     /**
@@ -731,7 +731,7 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
      * @return The builder
      */
     public T splineTo(Vector2d endPositionInches, double endHeadingRad) {
-        return addPath(() -> currentTrajectoryBuilder.splineTo(endPositionInches, endHeadingRad, currentVelConstraint, currentAccelConstraint));
+        return splineTo(endPositionInches, endHeadingRad, currentVelConstraint, currentAccelConstraint);
     }
 
     /**
@@ -801,7 +801,7 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
      * @return The builder
      */
     public T splineToConstantHeading(Vector2d endPositionInches, double endHeadingRad) {
-        return addPath(() -> currentTrajectoryBuilder.splineToConstantHeading(endPositionInches, endHeadingRad, currentVelConstraint, currentAccelConstraint));
+        return splineToConstantHeading(endPositionInches, endHeadingRad, currentVelConstraint, currentAccelConstraint);
     }
 
     /**
@@ -871,7 +871,7 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
      * @return The builder
      */
     public T splineToLinearHeading(Pose2d endPoseInchRad, double endHeadingRad) {
-        return addPath(() -> currentTrajectoryBuilder.splineToLinearHeading(endPoseInchRad, endHeadingRad, currentVelConstraint, currentAccelConstraint));
+        return splineToLinearHeading(endPoseInchRad, endHeadingRad, currentVelConstraint, currentAccelConstraint);
     }
 
     /**
@@ -946,7 +946,7 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
      * @return The builder
      */
     public T splineToSplineHeading(Pose2d endPoseInchRad, double endHeadingRad) {
-        return addPath(() -> currentTrajectoryBuilder.splineToSplineHeading(endPoseInchRad, endHeadingRad, currentVelConstraint, currentAccelConstraint));
+        return splineToSplineHeading(endPoseInchRad, endHeadingRad, currentVelConstraint, currentAccelConstraint);
     }
 
     /**

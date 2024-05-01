@@ -2,6 +2,7 @@ package org.murraybridgebunyips.bunyipslib;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import org.firstinspires.ftc.robotcore.external.function.Consumer;
 
 /**
  * Represents an object reference that may be reassigned.
@@ -85,6 +86,17 @@ public class Reference<V> {
      */
     public boolean isNotNull() {
         return value != null;
+    }
+
+    /**
+     * Runs the consumer on the value of the reference if it is not null.
+     *
+     * @param consumer the consumer to run
+     */
+    public void ifPresent(Consumer<V> consumer) {
+        if (value != null) {
+            consumer.accept(value);
+        }
     }
 
     /**
