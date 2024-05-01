@@ -137,11 +137,11 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
          * @param baseVelConstraint             Base velocity constraint (in/s)
          * @param baseAccelConstraint           Base acceleration constraint (in/s^2)
          * @param baseTurnConstraintMaxAngVel   Base turn constraint max angular velocity (rad/s)
-         * @param baseTurnConstraintMaxAngAccel Base turn constraint max angular acceleration (rad/s^2)
+     * @param baseTurnConstraintMaxAngAccel Base turn constraint max angular acceleration (rad/s^2)
          */
         public RoadRunnerTrajectoryTaskBuilder(RoadRunnerDrive drive, Pose2d startPose, Double startTangent, TrajectoryVelocityConstraint baseVelConstraint, TrajectoryAccelerationConstraint baseAccelConstraint, double baseTurnConstraintMaxAngVel, double baseTurnConstraintMaxAngAccel) {
             super(startPose, startTangent, baseVelConstraint, baseAccelConstraint, baseTurnConstraintMaxAngVel, baseTurnConstraintMaxAngAccel);
-            mirroredBuilder = new TrajectorySequenceBuilder<>(splicedPose.isNotNull() ? splicedPose.get() : startPose, mirror(startTangent), baseVelConstraint, baseAccelConstraint, baseTurnConstraintMaxAngVel, baseTurnConstraintMaxAngAccel);
+            mirroredBuilder = new TrajectorySequenceBuilder<>(splicedPose.isNotNull() ? splicedPose.get() : startPose, -startTangent, baseVelConstraint, baseAccelConstraint, baseTurnConstraintMaxAngVel, baseTurnConstraintMaxAngAccel);
             this.drive = drive;
         }
 
@@ -160,43 +160,13 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
             mirroredBuilder = new TrajectorySequenceBuilder<>(splicedPose.isNotNull() ? splicedPose.get() : startPose, baseVelConstraint, baseAccelConstraint, baseTurnConstraintMaxAngVel, baseTurnConstraintMaxAngAccel);
             this.drive = drive;
         }
-        // TODO: unfixed mirror methods
-
-        private double mirrorDist(double d) {
-            return -d;
-        }
 
         private Pose2d mirror(Pose2d pose) {
-            return new Pose2d(pose.getX(), -pose.getY(), mirror(pose.getHeading()));
-        }
-
-        private Pose2d mirror(Pose2d pose, Distance inUnit, Angle angleUnit) {
-            double x = Inches.convertFrom(pose.getX(), inUnit);
-            double y = Inches.convertFrom(pose.getY(), inUnit);
-            return new Pose2d(x, -y, mirror(pose.getHeading(), angleUnit));
+            return new Pose2d(pose.getX(), -pose.getY(), -pose.getHeading());
         }
 
         private Vector2d mirror(Vector2d vector) {
             return new Vector2d(vector.getX(), -vector.getY());
-        }
-
-        private Vector2d mirror(Vector2d vector, Distance inUnit) {
-            double x = Inches.convertFrom(vector.getX(), inUnit);
-            double y = Inches.convertFrom(vector.getY(), inUnit);
-            return new Vector2d(x, -y);
-        }
-
-        private double mirror(double radians) {
-            return mirror(radians, Radians);
-        }
-
-        private double mirror(double unit, Angle angleUnit) {
-//            double g = Mathf.angleModulus(Radians.of(Math.PI).minus(angleUnit.of(unit))).in(angleUnit);
-//            Dbg.log(g);
-//            return g;
-            Dbg.log(unit);
-            Dbg.log(angleUnit.toString());
-            return -unit;
         }
 
         /**
@@ -331,7 +301,7 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
                 TrajectoryVelocityConstraint velConstraint,
                 TrajectoryAccelerationConstraint accelConstraint
         ) {
-            mirroredBuilder.strafeLeft(mirrorDist(inches), velConstraint, accelConstraint);
+            mirroredBuilder.strafeLeft(-inches, velConstraint, accelConstraint);
             return super.strafeLeft(inches, velConstraint, accelConstraint);
         }
 
@@ -348,7 +318,7 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
                 TrajectoryVelocityConstraint velConstraint,
                 TrajectoryAccelerationConstraint accelConstraint
         ) {
-            mirroredBuilder.strafeRight(mirrorDist(inches), velConstraint, accelConstraint);
+            mirroredBuilder.strafeRight(-inches, velConstraint, accelConstraint);
             return super.strafeRight(inches, velConstraint, accelConstraint);
         }
 
@@ -367,7 +337,7 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
                 TrajectoryVelocityConstraint velConstraint,
                 TrajectoryAccelerationConstraint accelConstraint
         ) {
-            mirroredBuilder.splineTo(mirror(endPositionInches), mirror(endHeadingRad), velConstraint, accelConstraint);
+            mirroredBuilder.splineTo(mirror(endPositionInches), -endHeadingRad, velConstraint, accelConstraint);
             return super.splineTo(endPositionInches, endHeadingRad, velConstraint, accelConstraint);
         }
 
@@ -386,7 +356,7 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
                 TrajectoryVelocityConstraint velConstraint,
                 TrajectoryAccelerationConstraint accelConstraint
         ) {
-            mirroredBuilder.splineToConstantHeading(mirror(endPositionInches), mirror(endHeadingRad), velConstraint, accelConstraint);
+            mirroredBuilder.splineToConstantHeading(mirror(endPositionInches), -endHeadingRad, velConstraint, accelConstraint);
             return super.splineToConstantHeading(endPositionInches, endHeadingRad, velConstraint, accelConstraint);
         }
 
@@ -405,7 +375,7 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
                 TrajectoryVelocityConstraint velConstraint,
                 TrajectoryAccelerationConstraint accelConstraint
         ) {
-            mirroredBuilder.splineToLinearHeading(mirror(endPoseInchRad), mirror(endHeadingRad), velConstraint, accelConstraint);
+            mirroredBuilder.splineToLinearHeading(mirror(endPoseInchRad), -endHeadingRad, velConstraint, accelConstraint);
             return super.splineToLinearHeading(endPoseInchRad, endHeadingRad, velConstraint, accelConstraint);
         }
 
@@ -424,7 +394,7 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
                 TrajectoryVelocityConstraint velConstraint,
                 TrajectoryAccelerationConstraint accelConstraint
         ) {
-            mirroredBuilder.splineToSplineHeading(mirror(endPoseInchRad), mirror(endPoseInchRad.getHeading()), velConstraint, accelConstraint);
+            mirroredBuilder.splineToSplineHeading(mirror(endPoseInchRad), -endPoseInchRad.getHeading(), velConstraint, accelConstraint);
             return super.splineToSplineHeading(endPoseInchRad, endHeadingRad, velConstraint, accelConstraint);
         }
 
@@ -717,7 +687,7 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
          * @return The builder
          */
         public RoadRunnerTrajectoryTaskBuilder turn(double radians, double maxAngVel, double maxAngAccel) {
-            mirroredBuilder.turn(mirror(radians), maxAngVel, maxAngAccel);
+            mirroredBuilder.turn(-radians, maxAngVel, maxAngAccel);
             return super.turn(radians, maxAngVel, maxAngAccel);
         }
 
