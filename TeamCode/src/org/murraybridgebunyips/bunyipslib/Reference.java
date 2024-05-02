@@ -2,7 +2,8 @@ package org.murraybridgebunyips.bunyipslib;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import org.firstinspires.ftc.robotcore.external.function.Consumer;
+
+import java.util.function.Consumer;
 
 /**
  * Represents an object reference that may be reassigned.
