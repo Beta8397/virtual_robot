@@ -1,10 +1,12 @@
 package org.murraybridgebunyips.bunyipslib.subsystems;
 
 import static org.murraybridgebunyips.bunyipslib.external.units.Units.Amps;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.TouchSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
@@ -38,6 +40,8 @@ public class HoldableActuator extends BunyipsSubsystem {
     private int ZERO_HIT_THRESHOLD = 30;
     // Overcurrent for Home Task
     private Measure<Current> OVERCURRENT = Amps.of(4);
+    // Time of which the Home Task Overcurrent needs to be exceeded
+    private Measure<Time> OVERCURRENT_TIME = Seconds.of(1.0);
     // Name of the actuator for telemetry
     private String NAME = "Actuator";
     private DcMotorEx motor;
@@ -89,11 +93,11 @@ public class HoldableActuator extends BunyipsSubsystem {
 
     /**
      * Set the zero hit threshold to how many greater than or equal to zero velocity hits are required for the Home Task.
-     * Set to 0 or less to have the Home Task rely solely on a limit switch provided by
-     * {@link #withBottomSwitch(TouchSensor) withBottomSwitch}.
+     * If the actuator has a continuous negative velocity of zero for this many hits, the Home Task will complete.
      *
-     * @param threshold the new threshold of continuous hits of zero velocity to complete homing. Set to 0 or less to disable threshold.
+     * @param threshold the new threshold of continuous hits of zero velocity to complete homing. Default is 30.
      * @return this
+     * @see #disableHomingZeroHits()
      */
     public HoldableActuator withHomingZeroHits(int threshold) {
         ZERO_HIT_THRESHOLD = threshold;
@@ -101,16 +105,36 @@ public class HoldableActuator extends BunyipsSubsystem {
     }
 
     /**
-     * Set the overcurrent threshold for the Home Task.
-     * If this current is reached during a Home Task, the home task will end, set to zero or less to disable this
-     * functionality.
+     * Disable the zero hit threshold for the Home Task.
      *
-     * @param current the current which if exceeded in a Home Task will finish the reset. Set to 0 or less to disable.
      * @return this
      */
-    public HoldableActuator withHomingOvercurrent(Measure<Current> current) {
+    public HoldableActuator disableHomingZeroHits() {
+        return withHomingZeroHits(0);
+    }
+
+    /**
+     * Set the overcurrent threshold for the Home Task.
+     * If this current is reached during a Home Task, for the set duration set here, the home task will end.
+     *
+     * @param current the current which if exceeded in a Home Task will finish the reset. Default is 4A.
+     * @param forTime the time the current must be exceeded for to finish the reset. Useful for filtering out momentary spikes. Default is 1s.
+     * @return this
+     * @see #disableHomingOvercurrent()
+     */
+    public HoldableActuator withHomingOvercurrent(Measure<Current> current, Measure<Time> forTime) {
         OVERCURRENT = current;
+        OVERCURRENT_TIME = forTime;
         return this;
+    }
+
+    /**
+     * Disable the overcurrent threshold for the Home Task.
+     *
+     * @return this
+     */
+    public HoldableActuator disableHomingOvercurrent() {
+        return withHomingOvercurrent(Amps.of(0), Seconds.of(0));
     }
 
     /**
@@ -118,6 +142,8 @@ public class HoldableActuator extends BunyipsSubsystem {
      *
      * @param bottomLimitSwitch the limit switch to set as the bottom switch where the arm would be "homed"
      * @return this
+     * @see #disableHomingZeroHits()
+     * @see #disableHomingOvercurrent()
      */
     public HoldableActuator withBottomSwitch(TouchSensor bottomLimitSwitch) {
         bottomSwitch = bottomLimitSwitch;
@@ -204,13 +230,13 @@ public class HoldableActuator extends BunyipsSubsystem {
     }
 
     /**
-     * Home the actuator based on encoder tick velocity against a hard stop or limit switch.
+     * Home the actuator based on encoders against a hard stop or limit switch.
      *
      * @return a task to home the actuator
      */
-    // TODO: Test
     public Task homeTask() {
         return new NoTimeoutTask() {
+            private ElapsedTime overcurrentTimer;
             private double previousAmpAlert;
             private double zeroHits;
 
@@ -244,7 +270,13 @@ public class HoldableActuator extends BunyipsSubsystem {
                 boolean bottomedOut = bottomSwitch != null && bottomSwitch.isPressed();
                 boolean velocityZeroed = ZERO_HIT_THRESHOLD > 0 && zeroHits >= ZERO_HIT_THRESHOLD;
                 boolean overCurrent = OVERCURRENT.magnitude() > 0 && motor.isOverCurrent();
-                return bottomedOut || velocityZeroed || overCurrent;
+                if (OVERCURRENT_TIME.magnitude() > 0 && overCurrent && overcurrentTimer == null) {
+                    overcurrentTimer = new ElapsedTime();
+                } else if (!overCurrent) {
+                    overcurrentTimer = null;
+                }
+                boolean sustainedOvercurrent = overcurrentTimer != null && overcurrentTimer.seconds() >= OVERCURRENT_TIME.in(Seconds);
+                return bottomedOut || velocityZeroed || sustainedOvercurrent;
             }
         }.withName("HomeTask");
     }

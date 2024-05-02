@@ -58,6 +58,15 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
     }
 
     /**
+     * Reset pose info back to default.
+     */
+    default void resetPoseInfo() {
+        resetForOpMode();
+        Storage.lastKnownPosition = null;
+        getDrive().setPoseEstimate(new Pose2d());
+    }
+
+    /**
      * Make a translation velocity constraint.
      *
      * @param translation The translation velocity
@@ -157,13 +166,22 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
 
     /**
      * Use this method to build a new RoadRunner trajectory or to add a RoadRunner trajectory to the task queue.
-     * Without arguments, will use the current pose estimate of the drive or the last spliced pose.
+     * Without arguments, will use the current pose estimate of the drive or the last spliced pose as the starting
+     * pose of the trajectory. If there is no buffered spliced pose, the current pose estimate will be used.
      *
      * @return Builder for the trajectory
      * @see #makeTrajectory(Pose2d)
      */
     default RoadRunnerTrajectoryTaskBuilder makeTrajectory() {
-        return makeTrajectory(splicedPose.isNotNull() ? splicedPose.get() : getDrive().getPoseEstimate());
+        // If we're using an implicit start pose in the presence of a lastKnownPosition, it is likely the case that
+        // we don't want to use the lastKnownPosition as the implicit pose, so we'll reset the pose info here
+        if (Storage.lastKnownPosition != null && splicedPose.isNull()) {
+            resetPoseInfo();
+        }
+        Pose2d implicitPose = splicedPose.isNotNull() ? splicedPose.get() : getDrive().getPoseEstimate();
+        // noinspection rawtypes
+        TrajectorySequenceBuilder builder = getDrive().trajectorySequenceBuilder(implicitPose);
+        return new RoadRunnerTrajectoryTaskBuilder(getDrive(), implicitPose, builder.getBaseVelConstraint(), builder.getBaseAccelConstraint(), builder.getBaseTurnConstraintMaxAngVel(), builder.getBaseTurnConstraintMaxAngAccel());
     }
 
     /**
@@ -837,9 +855,9 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
 
         /**
          * Run a sequence of trajectories, useful if you do not need to build a trajectory but
-         * run one directly. This method will override any previous trajectories added to the builder,
-         * but will still mirror the sequence and accept task settings. This will set the drive pose
-         * estimate to the start of the sequence.
+         * run one directly. This method will override and void any previous trajectory added to this builder,
+         * but will still accept task settings and construction. This will also set the drive pose
+         * estimate to the start of this sequence.
          * <p>
          * Example usage:
          * {@code
@@ -860,6 +878,7 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
          * This method is useful if you are not running an {@link AutonomousBunyipsOpMode}.
          *
          * @return The built trajectory sequence from the builder, with no task being created or added.
+         * If there is an {@link #runSequence(TrajectorySequence) override sequence}, that will be returned instead.
          */
         public TrajectorySequence build() {
             if (overrideSequence != null)
@@ -875,7 +894,7 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
          * not running an {@link AutonomousBunyipsOpMode} and cannot use the queue system.
          * <p>
          * This task will be added to the global poses list, so the next implicitly created trajectory will
-         * start from the end of this one. Set {@code useAsImplicitPose} to false if you do not want this behavior,
+         * start from the end of this one. Set {@code useEndAsNextImplicitPose} to false if you do not want this behavior,
          * such as if there are side effects of construction using multiple implicit trajectories.
          *
          * @return The built task, not added to the task queue automatically.
@@ -890,18 +909,18 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
          * This method is useful is you are running this task as part of a {@link TaskGroup}, or if you are
          * not running an {@link AutonomousBunyipsOpMode} and cannot use the queue system.
          *
-         * @param useAsImplicitPose Whether to use this trajectory end point as a global splice, therefore making the
-         *                          next implicit trajectory start from the end of this one. This should be used if you are using
-         *                          makeTrajectory() and building a task, and there are no side effects of construction using
-         *                          multiple implicit trajectories.
+         * @param useEndAsNextImplicitPose Whether to use this trajectory end point as a global splice, therefore making the
+         *                                 next implicit trajectory start from the end of this one. This should be used if you are using
+         *                                 makeTrajectory() and building a task, and there are no side effects of construction using
+         *                                 multiple implicit trajectories.
          * @return The built task, not added to the task queue automatically.
          */
-        public RoadRunnerTask<RoadRunnerDrive> buildTask(boolean useAsImplicitPose) {
-            TrajectorySequence sequence = overrideSequence != null ? overrideSequence : build();
+        public RoadRunnerTask<RoadRunnerDrive> buildTask(boolean useEndAsNextImplicitPose) {
+            TrajectorySequence sequence = build();
             RoadRunnerTask<RoadRunnerDrive> task = new RoadRunnerTask<>(timeout, drive, sequence);
             task.withTimeout(timeout);
             task.withName(name);
-            if (useAsImplicitPose)
+            if (useEndAsNextImplicitPose)
                 splicedPose.set(sequence.end());
             return task;
         }

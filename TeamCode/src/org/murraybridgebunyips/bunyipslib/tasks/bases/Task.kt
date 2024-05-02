@@ -156,6 +156,8 @@ abstract class Task(
             onFinish()
             finisherFired = true
         }
+        // Don't run the task if it is finished as a safety guard
+        if (isFinished()) return
         periodic()
     }
 

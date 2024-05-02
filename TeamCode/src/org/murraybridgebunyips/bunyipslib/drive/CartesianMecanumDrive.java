@@ -243,8 +243,18 @@ public class CartesianMecanumDrive extends BunyipsSubsystem {
         return this;
     }
 
-    enum Priority {
-        NORMALISED, ROTATIONAL
+    /**
+     * Mecanum control prioritisation.
+     */
+    public enum Priority {
+        /**
+         * Calculate translational speeds first.
+         */
+        NORMALISED,
+        /**
+         * Calculate rotational speeds first, and use the rest for translation.
+         */
+        ROTATIONAL
     }
 }
 

@@ -8,6 +8,7 @@ import static org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 
+import com.acmerobotics.roadrunner.util.Angle;
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 import org.murraybridgebunyips.bunyipslib.external.units.Measure;
 import org.murraybridgebunyips.bunyipslib.external.units.Time;
@@ -112,11 +113,11 @@ public class RoadRunnerTask<T extends RoadRunnerDrive> extends Task {
             duration = trajectorySequence.duration();
         }
 
-        // Calculate distance from current pose to end pose using the distance formula
+        // Angle formula: tan^-1(y/x), using right angle trigonometry and offsetting by the robot rotation to get
+        // at what angle we are "facing" the target
+        double angle = -Angle.normDelta(Math.atan2(endPose.getY() - drive.getPoseEstimate().getY(), endPose.getX() - drive.getPoseEstimate().getX()) - drive.getPoseEstimate().getHeading());
+        // Distance formula: sqrt((x2 - x1)^2 + (y2 - y1)^2)
         double distance = Math.sqrt(Math.pow(endPose.getX() - drive.getPoseEstimate().getX(), 2) + Math.pow(endPose.getY() - drive.getPoseEstimate().getY(), 2));
-
-        // Calculate angle from current pose to end pose using the arctangent function
-        double angle = Math.atan2(endPose.getY() - drive.getPoseEstimate().getY(), endPose.getX() - drive.getPoseEstimate().getX());
 
         // Time to completion
         opMode.addTelemetry("Duration: %/% sec", round(getDeltaTime().in(Seconds), 2), round(duration, 2));

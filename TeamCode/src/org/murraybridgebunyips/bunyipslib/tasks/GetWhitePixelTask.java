@@ -109,12 +109,21 @@ public class GetWhitePixelTask extends NoTimeoutTask {
         vision.stop(tfod);
     }
 
-    enum Aggression {
-        // Immediately report as finished if a spike is detected for one frame
+    /**
+     * Detection aggression levels for the task
+     */
+    public enum Aggression {
+        /**
+         * Immediately report as finished if a spike is detected for one frame
+         */
         INSTANT,
-        // Report as finished if a spike is detected under a set of criteria (confidence, frames)
+        /**
+         * Report as finished if a spike is detected under a set of criteria (confidence, frames)
+         */
         CAPTURE,
-        // Never report as finished until the timeout, result will be determined at the end of the timeout
+        /**
+         * Never report as finished until the timeout, result will be determined at the end of the timeout
+         */
         TIMEOUT
     }
 }

@@ -1,5 +1,7 @@
 package org.murraybridgebunyips.imposter.teleop;
 
+import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.util.Angle;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.murraybridgebunyips.bunyipslib.*;
 import org.murraybridgebunyips.bunyipslib.Scheduler;
