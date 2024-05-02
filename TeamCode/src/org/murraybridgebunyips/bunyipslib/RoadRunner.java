@@ -17,6 +17,8 @@ import org.murraybridgebunyips.bunyipslib.external.units.Angle;
 import org.murraybridgebunyips.bunyipslib.external.units.Distance;
 import org.murraybridgebunyips.bunyipslib.external.units.Measure;
 import org.murraybridgebunyips.bunyipslib.external.units.Time;
+import org.murraybridgebunyips.bunyipslib.external.units.Velocity;
+import org.murraybridgebunyips.bunyipslib.roadrunner.Limit;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.TrajectorySequence;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.TrajectorySequenceBuilder;
@@ -53,6 +55,76 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
      */
     static void resetForOpMode() {
         splicedPose.clear();
+    }
+
+    /**
+     * Make a translation velocity constraint.
+     *
+     * @param translation The translation velocity
+     * @param unit        The unit of the translation velocity
+     * @return The velocity constraint
+     */
+    default TrajectoryVelocityConstraint atVelocity(double translation, Velocity<Distance> unit) {
+        return Limit.ofVelocity(unit.of(translation), getDrive().getConstants());
+    }
+
+    /**
+     * Make an angular velocity constraint.
+     *
+     * @param rotation The angular velocity
+     * @param unit     The unit of the angular velocity
+     * @return The velocity constraint
+     */
+    default TrajectoryVelocityConstraint atAngularVelocity(double rotation, Velocity<Angle> unit) {
+        return Limit.ofAngularVelocity(unit.of(rotation), getDrive().getConstants());
+    }
+
+    /**
+     * Make a translation and angular velocity constraint.
+     *
+     * @param translation     The translation velocity
+     * @param translationUnit The unit of the translation velocity
+     * @param rotation        The angular velocity
+     * @param rotationUnit    The unit of the angular velocity
+     * @return The velocity constraint
+     */
+    default TrajectoryVelocityConstraint atVelocities(double translation, Velocity<Distance> translationUnit, double rotation, Velocity<Angle> rotationUnit) {
+        return Limit.ofVelocities(translationUnit.of(translation), rotationUnit.of(rotation), getDrive().getConstants());
+    }
+
+    /**
+     * Make a translation acceleration constraint.
+     *
+     * @param acceleration The translation acceleration
+     * @param unit         The unit of the translation acceleration
+     * @return The acceleration constraint
+     */
+    default TrajectoryAccelerationConstraint atAcceleration(double acceleration, Velocity<Velocity<Distance>> unit) {
+        return Limit.ofAcceleration(unit.of(acceleration), getDrive().getConstants());
+    }
+
+    /**
+     * Make an angular acceleration constraint.
+     *
+     * @param acceleration The angular acceleration
+     * @param unit         The unit of the angular acceleration
+     * @return The acceleration constraint
+     */
+    default TrajectoryAccelerationConstraint atAngularAcceleration(double acceleration, Velocity<Velocity<Angle>> unit) {
+        return Limit.ofAngularAcceleration(unit.of(acceleration), getDrive().getConstants());
+    }
+
+    /**
+     * Make a translation and angular acceleration constraint.
+     *
+     * @param translation     The translation acceleration
+     * @param translationUnit The unit of the translation acceleration
+     * @param rotation        The angular acceleration
+     * @param rotationUnit    The unit of the angular acceleration
+     * @return The acceleration constraint
+     */
+    default TrajectoryAccelerationConstraint atAccelerations(double translation, Velocity<Velocity<Distance>> translationUnit, double rotation, Velocity<Velocity<Angle>> rotationUnit) {
+        return Limit.ofAccelerations(translationUnit.of(translation), rotationUnit.of(rotation), getDrive().getConstants());
     }
 
     /**
@@ -135,7 +207,7 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
          * @param baseVelConstraint             Base velocity constraint (in/s)
          * @param baseAccelConstraint           Base acceleration constraint (in/s^2)
          * @param baseTurnConstraintMaxAngVel   Base turn constraint max angular velocity (rad/s)
-     * @param baseTurnConstraintMaxAngAccel Base turn constraint max angular acceleration (rad/s^2)
+         * @param baseTurnConstraintMaxAngAccel Base turn constraint max angular acceleration (rad/s^2)
          */
         public RoadRunnerTrajectoryTaskBuilder(RoadRunnerDrive drive, Pose2d startPose, Double startTangent, TrajectoryVelocityConstraint baseVelConstraint, TrajectoryAccelerationConstraint baseAccelConstraint, double baseTurnConstraintMaxAngVel, double baseTurnConstraintMaxAngAccel) {
             super(startPose, startTangent, baseVelConstraint, baseAccelConstraint, baseTurnConstraintMaxAngVel, baseTurnConstraintMaxAngAccel);
@@ -771,7 +843,7 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
          * <p>
          * Example usage:
          * {@code
-         *     makeTrajectory().runSequence(sequence).withName("pre-built sequence").addTask();
+         * makeTrajectory().runSequence(sequence).withName("pre-built sequence").addTask();
          * }
          *
          * @param sequence The sequence to run

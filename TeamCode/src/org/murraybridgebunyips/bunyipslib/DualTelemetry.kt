@@ -39,6 +39,7 @@ class DualTelemetry @JvmOverloads constructor(
 
     @Volatile
     private var telemetryQueue = 0
+
     @Volatile
     private var packet: TelemetryPacket = TelemetryPacket()
 

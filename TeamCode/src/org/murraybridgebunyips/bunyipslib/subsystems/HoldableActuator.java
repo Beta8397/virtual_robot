@@ -1,11 +1,16 @@
 package org.murraybridgebunyips.bunyipslib.subsystems;
 
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Amps;
+
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
+import org.murraybridgebunyips.bunyipslib.external.Mathf;
+import org.murraybridgebunyips.bunyipslib.external.units.Current;
 import org.murraybridgebunyips.bunyipslib.external.units.Measure;
 import org.murraybridgebunyips.bunyipslib.external.units.Time;
 import org.murraybridgebunyips.bunyipslib.tasks.ContinuousTask;
@@ -29,8 +34,10 @@ public class HoldableActuator extends BunyipsSubsystem {
     private double MOVING_POWER = 0.7;
     // targetPosition tolerance in encoder ticks, default of 10
     private int TOLERANCE = 10;
-    // Number of zero hits required for Home Task
+    // Number of greater than zero velocity hits required for Home Task
     private int ZERO_HIT_THRESHOLD = 30;
+    // Overcurrent for Home Task
+    private Measure<Current> OVERCURRENT = Amps.of(4);
     // Name of the actuator for telemetry
     private String NAME = "Actuator";
     private DcMotorEx motor;
@@ -81,15 +88,28 @@ public class HoldableActuator extends BunyipsSubsystem {
     }
 
     /**
-     * Set the zero hit threshold to how many zero velocity hits are required for the Home Task.
+     * Set the zero hit threshold to how many greater than or equal to zero velocity hits are required for the Home Task.
      * Set to 0 or less to have the Home Task rely solely on a limit switch provided by
      * {@link #withBottomSwitch(TouchSensor) withBottomSwitch}.
      *
      * @param threshold the new threshold of continuous hits of zero velocity to complete homing. Set to 0 or less to disable threshold.
      * @return this
      */
-    public HoldableActuator withZeroHitThreshold(int threshold) {
+    public HoldableActuator withHomingZeroHits(int threshold) {
         ZERO_HIT_THRESHOLD = threshold;
+        return this;
+    }
+
+    /**
+     * Set the overcurrent threshold for the Home Task.
+     * If this current is reached during a Home Task, the home task will end, set to zero or less to disable this
+     * functionality.
+     *
+     * @param current the current which if exceeded in a Home Task will finish the reset. Set to 0 or less to disable.
+     * @return this
+     */
+    public HoldableActuator withHomingOvercurrent(Measure<Current> current) {
+        OVERCURRENT = current;
         return this;
     }
 
@@ -191,12 +211,15 @@ public class HoldableActuator extends BunyipsSubsystem {
     // TODO: Test
     public Task homeTask() {
         return new NoTimeoutTask() {
-            double zeroHits;
+            private double previousAmpAlert;
+            private double zeroHits;
 
             @Override
             protected void init() {
                 zeroHits = 0;
                 inputMode = Mode.HOMING;
+                previousAmpAlert = motor.getCurrentAlert(CurrentUnit.AMPS);
+                motor.setCurrentAlert(OVERCURRENT.in(Amps), CurrentUnit.AMPS);
             }
 
             @Override
@@ -212,6 +235,7 @@ public class HoldableActuator extends BunyipsSubsystem {
             @Override
             protected void onFinish() {
                 motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                motor.setCurrentAlert(previousAmpAlert, CurrentUnit.AMPS);
                 inputMode = Mode.USER;
             }
 
@@ -219,7 +243,8 @@ public class HoldableActuator extends BunyipsSubsystem {
             protected boolean isTaskFinished() {
                 boolean bottomedOut = bottomSwitch != null && bottomSwitch.isPressed();
                 boolean velocityZeroed = ZERO_HIT_THRESHOLD > 0 && zeroHits >= ZERO_HIT_THRESHOLD;
-                return bottomedOut || velocityZeroed;
+                boolean overCurrent = OVERCURRENT.magnitude() > 0 && motor.isOverCurrent();
+                return bottomedOut || velocityZeroed || overCurrent;
             }
         }.withName("HomeTask");
     }
@@ -252,7 +277,7 @@ public class HoldableActuator extends BunyipsSubsystem {
 
             @Override
             public boolean isTaskFinished() {
-                return !motor.isBusy() && Math.abs(targetPosition - motor.getCurrentPosition()) < TOLERANCE;
+                return !motor.isBusy() && Mathf.isNear(targetPosition, motor.getCurrentPosition(), TOLERANCE);
             }
         }.withName("RunToPositionTask");
     }
@@ -286,7 +311,7 @@ public class HoldableActuator extends BunyipsSubsystem {
 
             @Override
             public boolean isTaskFinished() {
-                return !motor.isBusy() && Math.abs(target - motor.getCurrentPosition()) < TOLERANCE;
+                return !motor.isBusy() && Mathf.isNear(target, motor.getCurrentPosition(), TOLERANCE);
             }
         }.withName("DeltaPositionTask");
     }
@@ -327,6 +352,11 @@ public class HoldableActuator extends BunyipsSubsystem {
         }
 
         if (bottomSwitch != null) {
+            if (bottomSwitch.isPressed() && motorPower < 0) {
+                // Stop going down if the limit switch is pressed
+                motorPower = 0;
+            }
+
             if (bottomSwitch.isPressed() && !zeroed) {
                 DcMotor.RunMode prev = motor.getMode();
                 motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);

@@ -15,6 +15,9 @@ import org.murraybridgebunyips.bunyipslib.tasks.RoadRunnerTask;
 import org.murraybridgebunyips.imposter.components.ImposterConfig;
 import org.jetbrains.annotations.Nullable;
 
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.InchesPerSecond;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Second;
+
 @Autonomous(name = "RoadRunnerTest", group = "VIRTUAL_BUNYIPSFTC")
 public class ImposterRoadRunnerTest extends AutonomousBunyipsOpMode implements RoadRunner {
     private final ImposterConfig config = new ImposterConfig();
