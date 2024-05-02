@@ -13,12 +13,10 @@ import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryAccelerationConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryVelocityConstraint;
 
-import org.murraybridgebunyips.bunyipslib.external.Mathf;
 import org.murraybridgebunyips.bunyipslib.external.units.Angle;
 import org.murraybridgebunyips.bunyipslib.external.units.Distance;
 import org.murraybridgebunyips.bunyipslib.external.units.Measure;
 import org.murraybridgebunyips.bunyipslib.external.units.Time;
-import org.murraybridgebunyips.bunyipslib.external.units.Velocity;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.TrajectorySequence;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.TrajectorySequenceBuilder;
@@ -141,7 +139,7 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
          */
         public RoadRunnerTrajectoryTaskBuilder(RoadRunnerDrive drive, Pose2d startPose, Double startTangent, TrajectoryVelocityConstraint baseVelConstraint, TrajectoryAccelerationConstraint baseAccelConstraint, double baseTurnConstraintMaxAngVel, double baseTurnConstraintMaxAngAccel) {
             super(startPose, startTangent, baseVelConstraint, baseAccelConstraint, baseTurnConstraintMaxAngVel, baseTurnConstraintMaxAngAccel);
-            mirroredBuilder = new TrajectorySequenceBuilder<>(splicedPose.isNotNull() ? splicedPose.get() : startPose, -startTangent, baseVelConstraint, baseAccelConstraint, baseTurnConstraintMaxAngVel, baseTurnConstraintMaxAngAccel);
+            mirroredBuilder = new TrajectorySequenceBuilder<>(splicedPose.isNotNull() ? mirror(Objects.requireNonNull(splicedPose.get())) : mirror(startPose), -startTangent, baseVelConstraint, baseAccelConstraint, baseTurnConstraintMaxAngVel, baseTurnConstraintMaxAngAccel);
             this.drive = drive;
         }
 
@@ -157,7 +155,7 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
          */
         public RoadRunnerTrajectoryTaskBuilder(RoadRunnerDrive drive, Pose2d startPose, TrajectoryVelocityConstraint baseVelConstraint, TrajectoryAccelerationConstraint baseAccelConstraint, double baseTurnConstraintMaxAngVel, double baseTurnConstraintMaxAngAccel) {
             super(startPose, baseVelConstraint, baseAccelConstraint, baseTurnConstraintMaxAngVel, baseTurnConstraintMaxAngAccel);
-            mirroredBuilder = new TrajectorySequenceBuilder<>(splicedPose.isNotNull() ? splicedPose.get() : startPose, baseVelConstraint, baseAccelConstraint, baseTurnConstraintMaxAngVel, baseTurnConstraintMaxAngAccel);
+            mirroredBuilder = new TrajectorySequenceBuilder<>(splicedPose.isNotNull() ? mirror(Objects.requireNonNull(splicedPose.get())) : mirror(startPose), baseVelConstraint, baseAccelConstraint, baseTurnConstraintMaxAngVel, baseTurnConstraintMaxAngAccel);
             this.drive = drive;
         }
 
@@ -768,7 +766,8 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
         /**
          * Run a sequence of trajectories, useful if you do not need to build a trajectory but
          * run one directly. This method will override any previous trajectories added to the builder,
-         * but will still mirror the sequence and accept task settings.
+         * but will still mirror the sequence and accept task settings. This will set the drive pose
+         * estimate to the start of the sequence.
          * <p>
          * Example usage:
          * {@code
@@ -780,6 +779,7 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
          */
         public RoadRunnerTrajectoryTaskBuilder runSequence(TrajectorySequence sequence) {
             overrideSequence = sequence;
+            drive.setPoseEstimate(sequence.start());
             return this;
         }
 

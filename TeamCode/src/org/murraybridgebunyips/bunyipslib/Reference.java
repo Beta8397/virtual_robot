@@ -62,6 +62,20 @@ public class Reference<V> {
     }
 
     /**
+     * Gets the value of the reference.
+     * If it is null, a NullPointerException is thrown.
+     *
+     * @return the value of the reference, never null
+     */
+    @NonNull
+    public V require() {
+        if (value == null) {
+            throw new NullPointerException("Reference value is null");
+        }
+        return value;
+    }
+
+    /**
      * Sets the value of the reference.
      *
      * @param value the new value of the reference
@@ -97,6 +111,42 @@ public class Reference<V> {
         if (value != null) {
             consumer.accept(value);
         }
+    }
+
+    /**
+     * Runs the runnable on the value of the reference if it is null.
+     *
+     * @param runnable the runnable to run if the reference is null
+     */
+    public void ifNotPresent(Runnable runnable) {
+        if (value == null) {
+            runnable.run();
+        }
+    }
+
+    /**
+     * Runs the consumer on the value of the reference if it is not null.
+     * If the reference is null, the given runnable is run.
+     *
+     * @param consumer the consumer to run
+     * @param runnable the runnable to run if the reference is null
+     */
+    public void ifPresentOrElse(Consumer<V> consumer, Runnable runnable) {
+        if (value != null) {
+            consumer.accept(value);
+        } else {
+            runnable.run();
+        }
+    }
+
+    /**
+     * Returns the value of the reference if it is not null, otherwise returns the given value.
+     *
+     * @param other the value to return if the reference is null
+     * @return the value of the reference if it is not null, otherwise the given value
+     */
+    public V getOrElse(V other) {
+        return value == null ? other : value;
     }
 
     /**

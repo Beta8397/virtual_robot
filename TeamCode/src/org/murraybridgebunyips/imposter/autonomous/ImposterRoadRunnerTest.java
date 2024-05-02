@@ -1,6 +1,8 @@
 package org.murraybridgebunyips.imposter.autonomous;
 
 import androidx.annotation.NonNull;
+import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.murraybridgebunyips.bunyipslib.AutonomousBunyipsOpMode;
 import org.murraybridgebunyips.bunyipslib.Reference;
@@ -12,8 +14,6 @@ import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.Trajecto
 import org.murraybridgebunyips.bunyipslib.tasks.RoadRunnerTask;
 import org.murraybridgebunyips.imposter.components.ImposterConfig;
 import org.jetbrains.annotations.Nullable;
-
-import static org.murraybridgebunyips.bunyipslib.external.units.Units.*;
 
 @Autonomous(name = "RoadRunnerTest", group = "VIRTUAL_BUNYIPSFTC")
 public class ImposterRoadRunnerTest extends AutonomousBunyipsOpMode implements RoadRunner {
@@ -31,10 +31,10 @@ public class ImposterRoadRunnerTest extends AutonomousBunyipsOpMode implements R
     @Override
     protected void onReady(@Nullable OpModeSelection selectedOpMode) {
         if (selectedOpMode == null) return;
-        RoadRunnerTask<RoadRunnerDrive> task = makeTrajectory()
-                .turn(-90, Degrees)
-                .strafeLeft(24)
-                .forward(24)
+        RoadRunnerTask<RoadRunnerDrive> task = makeTrajectory(new Pose2d(-36.78, -60.52, Math.toRadians(0.00)))
+                .splineTo(new Vector2d(17.69, -58.50), Math.toRadians(6.38))
+                .splineTo(new Vector2d(34.60, -20.95), Math.toRadians(61.02))
+                .splineTo(new Vector2d(60.83, -6.05), Math.toRadians(57.59))
                 .withName("Main")
                 .mirrorToRef(ref)
                 .buildTask(false);
@@ -43,7 +43,7 @@ public class ImposterRoadRunnerTest extends AutonomousBunyipsOpMode implements R
             addTask(task);
         } else {
             makeTrajectory()
-                    .runSequence(ref.get())
+                    .runSequence(ref.require())
                     .withName("Mirror Main")
                     .addTask();
         }
