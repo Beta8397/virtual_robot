@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.util.ThreadPool
 import org.firstinspires.ftc.robotcore.external.Telemetry.Item
 import org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds
 import org.murraybridgebunyips.bunyipslib.roadrunner.util.LynxModuleUtil
+import org.murraybridgebunyips.bunyipslib.tasks.bases.RobotTask
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task
 import org.murraybridgebunyips.deps.BuildConfig
 import java.util.concurrent.ExecutorService
@@ -45,7 +46,7 @@ abstract class BunyipsOpMode : BOMInternal() {
     private var safeHaltHardwareOnStop = false
 
     private var gamepadExecutor: ExecutorService? = null
-    private var initTask: Task? = null
+    private var initTask: RobotTask? = null
 
     /**
      * BunyipsLib Gamepad 1: Driver
@@ -220,7 +221,8 @@ abstract class BunyipsOpMode : BOMInternal() {
             pushTelemetry()
             Dbg.logd("BunyipsOpMode: starting onInitLoop()...")
             if (initTask != null) {
-                log("running init task: %", initTask)
+                Dbg.logd("BunyipsOpMode: running initTask -> % ...")
+                log("running init-task: %", initTask)
             }
             // Run user-defined dynamic initialisation
             do {
@@ -237,9 +239,17 @@ abstract class BunyipsOpMode : BOMInternal() {
             } while (opModeInInit())
 
             telemetry.opModeStatus = "finish_init"
-            if (initTask?.isFinished() == false)
-                log("init task interrupted: %", initTask)
-            initTask?.finishNow()
+            // We can only finish Task objects, as the RobotTask interface does not have a finish method
+            // Most tasks will inherit from Task, so this should be safe, but this is to ensure maximum compatibility
+            if (initTask is Task && initTask?.isFinished() == false) {
+                Dbg.log("BunyipsOpMode: initTask did not finish in time, early finishing -> % ...", initTask)
+                log("interrupted init-task: %", initTask)
+                (initTask as Task).finishNow()
+            } else if (initTask?.isFinished() == false) {
+                // If we can't finish the task, log a warning and continue
+                Dbg.warn("BunyipsOpMode: initTask did not finish during the init-phase!", initTask)
+                log("WARNING: unfinished init-task -> %", initTask)
+            }
             pushTelemetry()
             Dbg.logd("BunyipsOpMode: firing onInitDone()...")
             // Run user-defined final initialisation

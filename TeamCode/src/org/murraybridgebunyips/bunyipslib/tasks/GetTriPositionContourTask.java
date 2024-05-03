@@ -1,26 +1,30 @@
 package org.murraybridgebunyips.bunyipslib.tasks;
 
-import org.murraybridgebunyips.bunyipslib.Dbg;
 import org.murraybridgebunyips.bunyipslib.Direction;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.ForeverTask;
 import org.murraybridgebunyips.bunyipslib.vision.data.ContourData;
 import org.murraybridgebunyips.bunyipslib.vision.processors.ColourThreshold;
 
 /**
- * Task to get the position of the team prop.
+ * A generic task to get the position of a contour based on three positions, where the contour in question
+ * may be viewed in the two halves of the camera frame on the FORWARD and RIGHT sides.
+ * <p>
+ * An example of this task is use with CENTERSTAGE's Team Prop detection, where the camera will face the Center and Right
+ * Spike Marks, where if the prop is on the left of the camera, it is in the center. If no contour is detected, the
+ * prop is assumed to be on the left as it cannot be seen.
  *
  * @author Lucas Bubner, 2024
  */
-public class GetTeamPropTask extends ForeverTask {
+public class GetTriPositionContourTask extends ForeverTask {
     private final ColourThreshold colourThreshold;
     private volatile Direction position = Direction.LEFT;
 
     /**
-     * Create a new GetTeamPropTask.
+     * Create a new GetTriPositionContourTask.
      *
      * @param colourThreshold the initialised and running colour threshold processor
      */
-    public GetTeamPropTask(ColourThreshold colourThreshold) {
+    public GetTriPositionContourTask(ColourThreshold colourThreshold) {
         this.colourThreshold = colourThreshold;
     }
 
@@ -39,7 +43,6 @@ public class GetTeamPropTask extends ForeverTask {
     protected void periodic() {
         ContourData biggestContour = ContourData.getLargest(colourThreshold.getData());
         if (biggestContour != null) {
-            Dbg.log(biggestContour.getYaw());
             position = biggestContour.getYaw() > 0.5 ? Direction.RIGHT : Direction.FORWARD;
         }
     }

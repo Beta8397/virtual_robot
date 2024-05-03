@@ -8,7 +8,8 @@ import androidx.annotation.Nullable;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 
 import org.murraybridgebunyips.bunyipslib.AutonomousBunyipsOpMode;
-import org.murraybridgebunyips.bunyipslib.OpModeSelection;
+import org.murraybridgebunyips.bunyipslib.Controls;
+import org.murraybridgebunyips.bunyipslib.Reference;
 import org.murraybridgebunyips.bunyipslib.RoadRunner;
 import org.murraybridgebunyips.bunyipslib.drive.TankDrive;
 import org.murraybridgebunyips.bunyipslib.example.examplerobot.components.ExampleConfig;
@@ -33,7 +34,7 @@ public class ExampleRoadRunnerAutonomous extends AutonomousBunyipsOpMode impleme
     }
 
     @Override
-    protected void onReady(@Nullable OpModeSelection selectedOpMode) {
+    protected void onReady(@Nullable Reference<?> selectedOpMode, Controls selectedButton) {
         // You have access to a range of RoadRunner methods here, primary one being makeTrajectory
 //        makeTrajectory()
 //                .lineToLinearHeading(...)
@@ -49,7 +50,7 @@ public class ExampleRoadRunnerAutonomous extends AutonomousBunyipsOpMode impleme
                 .withPriority(PriorityLevel.LAST)
                 .addTask();
         // These methods are syntactic sugar for the following:
-//        addTask(new RoadRunnerTask<>(INFINITE_TIMEOUT, drive, drive.trajectoryBuilder().lineToLinearHeading(...).splineTo(...).splineTo(...).splineTo(...).build()));
+//        addTask(new RoadRunnerTask(INFINITE_TIMEOUT, drive, drive.trajectoryBuilder().lineToLinearHeading(...).splineTo(...).splineTo(...).splineTo(...).build()));
         // where using FIRST priority will add the task to the front of the queue (addTaskFirst()), and
         // LAST priority will add the task to the back of the queue (addTaskLast())
 

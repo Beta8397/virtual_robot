@@ -7,8 +7,8 @@ import static org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
-
 import com.acmerobotics.roadrunner.util.Angle;
+
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 import org.murraybridgebunyips.bunyipslib.external.units.Measure;
 import org.murraybridgebunyips.bunyipslib.external.units.Time;
@@ -20,11 +20,10 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
  * Task for running RoadRunner trajectories using the BunyipsOpMode Task system.
  * This is the task that is used for all RoadRunner tasks in the RoadRunner interface.
  *
- * @param <T> The type of RoadRunnerDrive to be used
  * @author Lucas Bubner, 2023
  */
-public class RoadRunnerTask<T extends RoadRunnerDrive> extends Task {
-    private final T drive;
+public class RoadRunnerTask extends Task {
+    private final RoadRunnerDrive drive;
 
     private Trajectory trajectory;
     private TrajectorySequence trajectorySequence;
@@ -40,7 +39,7 @@ public class RoadRunnerTask<T extends RoadRunnerDrive> extends Task {
      * @param drive      The drive to use
      * @param trajectory The trajectory to follow
      */
-    public RoadRunnerTask(Measure<Time> time, T drive, Trajectory trajectory) {
+    public RoadRunnerTask(Measure<Time> time, RoadRunnerDrive drive, Trajectory trajectory) {
         super(time);
         this.drive = drive;
         this.trajectory = trajectory;
@@ -53,7 +52,7 @@ public class RoadRunnerTask<T extends RoadRunnerDrive> extends Task {
      * @param drive              The drive to use
      * @param trajectorySequence The trajectory sequence to follow
      */
-    public RoadRunnerTask(Measure<Time> time, T drive, TrajectorySequence trajectorySequence) {
+    public RoadRunnerTask(Measure<Time> time, RoadRunnerDrive drive, TrajectorySequence trajectorySequence) {
         super(time);
         this.drive = drive;
         this.trajectorySequence = trajectorySequence;
@@ -68,7 +67,7 @@ public class RoadRunnerTask<T extends RoadRunnerDrive> extends Task {
      * @param dependency The subsystem to run this task on
      * @param override   Whether this task should override conflicting tasks
      */
-    public RoadRunnerTask(Measure<Time> time, T drive, Trajectory trajectory, BunyipsSubsystem dependency, boolean override) {
+    public RoadRunnerTask(Measure<Time> time, RoadRunnerDrive drive, Trajectory trajectory, BunyipsSubsystem dependency, boolean override) {
         super(time, dependency, override);
         this.drive = drive;
         this.trajectory = trajectory;
@@ -83,7 +82,7 @@ public class RoadRunnerTask<T extends RoadRunnerDrive> extends Task {
      * @param dependency         The subsystem to run this task on
      * @param override           Whether this task should override conflicting tasks
      */
-    public RoadRunnerTask(Measure<Time> time, T drive, TrajectorySequence trajectorySequence, BunyipsSubsystem dependency, boolean override) {
+    public RoadRunnerTask(Measure<Time> time, RoadRunnerDrive drive, TrajectorySequence trajectorySequence, BunyipsSubsystem dependency, boolean override) {
         super(time, dependency, override);
         this.drive = drive;
         this.trajectorySequence = trajectorySequence;
@@ -114,7 +113,7 @@ public class RoadRunnerTask<T extends RoadRunnerDrive> extends Task {
         }
 
         // Angle formula: tan^-1(y/x), using right angle trigonometry and offsetting by the robot rotation to get
-        // at what angle we are "facing" the target
+        // at what angle we are "facing" the target, negating as pose angles are opposite and similar to the unit circle
         double angle = -Angle.normDelta(Math.atan2(endPose.getY() - drive.getPoseEstimate().getY(), endPose.getX() - drive.getPoseEstimate().getX()) - drive.getPoseEstimate().getHeading());
         // Distance formula: sqrt((x2 - x1)^2 + (y2 - y1)^2)
         double distance = Math.sqrt(Math.pow(endPose.getX() - drive.getPoseEstimate().getX(), 2) + Math.pow(endPose.getY() - drive.getPoseEstimate().getY(), 2));

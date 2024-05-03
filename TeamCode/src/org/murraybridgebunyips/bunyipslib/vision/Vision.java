@@ -57,6 +57,7 @@ public class Vision extends BunyipsSubsystem {
     /**
      * A built-in raw feed Processor that will do nothing but provide the raw camera feed.
      * Useful for debugging and testing, pass this raw field (vision.raw) to init() and start() to use it.
+     *
      * @noinspection ClassEscapesDefinedScope (should never be used outside of this class)
      */
     public Raw raw = new Raw();

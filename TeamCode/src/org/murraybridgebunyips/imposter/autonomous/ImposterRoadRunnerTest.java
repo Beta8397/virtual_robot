@@ -27,8 +27,9 @@ public class ImposterRoadRunnerTest extends AutonomousBunyipsOpMode implements R
     }
 
     @Override
-    protected void onReady(@Nullable OpModeSelection selectedOpMode) {
+    protected void onReady(@Nullable Reference<?> selectedOpMode, Controls selectedButton) {
         if (selectedOpMode == null) return;
+        Dbg.log(selectedButton);
         Reference<TrajectorySequence> blueLeft = Reference.empty();
         Reference<TrajectorySequence> blueRight = Reference.empty();
 
@@ -46,7 +47,7 @@ public class ImposterRoadRunnerTest extends AutonomousBunyipsOpMode implements R
                 .mirrorToRef(blueLeft)
                 .build();
 
-        StartingPositions startingPosition = (StartingPositions) selectedOpMode.getObj();
+        StartingPositions startingPosition = (StartingPositions) selectedOpMode.require();
         TrajectorySequence targetTrajectory = null;
         switch (startingPosition) {
             case STARTING_RED_LEFT:

@@ -27,32 +27,32 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
 
     /**
      * This list defines OpModes that should be selectable by the user. This will then
-     * be used to determine your tasks in {@link #onReady(OpModeSelection)}.
+     * be used to determine your tasks in {@link #onReady(Reference, Controls)}.
      * For example, you may have configurations for RED_LEFT, RED_RIGHT, BLUE_LEFT, BLUE_RIGHT.
      * By default, this will be empty, and the user will not be prompted for a selection.
      *
      * @see #setOpModes(Object...)
      */
-    private final ArrayList<OpModeSelection> opModes = new ArrayList<>();
+    private final ArrayList<Reference<?>> opModes = new ArrayList<>();
     private final ArrayDeque<RobotTask> tasks = new ArrayDeque<>();
     // Pre and post queues cannot have their tasks removed, so we can rely on their .size() methods
     private final ArrayDeque<RobotTask> postQueue = new ArrayDeque<>();
     private final ArrayDeque<RobotTask> preQueue = new ArrayDeque<>();
     private final HashSet<BunyipsSubsystem> updatedSubsystems = new HashSet<>();
     private int taskCount;
-    private UserSelection<OpModeSelection> userSelection;
+    private UserSelection<Reference<?>> userSelection;
     // Init-task does not count as a queued task, so we start at 1
     private int currentTask = 1;
-    private boolean hasGottenCallback;
+    private boolean callbackReceived;
 
-    private void callback(@Nullable OpModeSelection selectedOpMode) {
-        hasGottenCallback = true;
+    private void callback(@Nullable Reference<?> selectedOpMode) {
+        callbackReceived = true;
         if (selectedOpMode != null) {
             log("auto: mode selected. running opmode " + selectedOpMode);
         } else {
             log("auto: mode selected. running default opmode");
         }
-        onReady(selectedOpMode);
+        onReady(selectedOpMode, userSelection.getSelectedButton());
         // Add any queued tasks
         for (RobotTask task : postQueue) {
             addTask(task);
@@ -69,10 +69,10 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
         // Run user-defined hardware initialisation
         onInitialise();
         // Convert user defined OpModeSelections to varargs
-        OpModeSelection[] varargs = opModes.toArray(new OpModeSelection[0]);
+        Reference<?>[] varargs = opModes.toArray(new Reference[0]);
         if (varargs.length == 0) {
             log("auto: no setOpModes() defined, skipping selection phase");
-            opModes.add(new OpModeSelection(new UserDefaultSelection()));
+            opModes.add(Reference.empty());
         }
         if (varargs.length > 1) {
             // Run task allocation if OpModeSelections are defined
@@ -106,7 +106,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
 
     @Override
     protected final void activeLoop() {
-        if (!hasGottenCallback) {
+        if (!callbackReceived) {
             // Not ready to run tasks yet, we can't do much. This shouldn't really happen,
             // but just in case, we'll log it and wait for the callback to be run
             Dbg.logd("AutonomousBunyipsOpMode is busy-waiting for a late UserSelection callback...");
@@ -172,7 +172,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
      */
     public final void addTask(@NotNull RobotTask newTask, boolean ack) {
         checkTaskForDependency(newTask);
-        if (!hasGottenCallback && !ack) {
+        if (!callbackReceived && !ack) {
             log("auto: caution! a task was added manually before the onReady callback");
         }
         tasks.add(newTask);
@@ -199,15 +199,15 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     }
 
     /**
-     * Add a task to the run queue, but after {@link #onReady(OpModeSelection)} has processed tasks. This is useful
+     * Add a task to the run queue, but after {@link #onReady(Reference, Controls)} has processed tasks. This is useful
      * to call when working with tasks that should be queued at the very end of the autonomous, while still
-     * being able to add tasks asynchronously with user input in {@link #onReady(OpModeSelection)}.
+     * being able to add tasks asynchronously with user input in {@link #onReady(Reference, Controls)}.
      *
      * @param newTask task to add to the run queue
      */
     public final void addTaskLast(@NotNull RobotTask newTask) {
         checkTaskForDependency(newTask);
-        if (!hasGottenCallback) {
+        if (!callbackReceived) {
             postQueue.add(newTask);
             log("auto: % has been queued as end-init task %/%", newTask, postQueue.size(), postQueue.size());
             return;
@@ -220,13 +220,13 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     /**
      * Add a task to the very start of the queue. This is useful to call when working with tasks that
      * should be queued at the very start of the autonomous, while still being able to add tasks
-     * asynchronously with user input in {@link #onReady(OpModeSelection)}.
+     * asynchronously with user input in {@link #onReady(Reference, Controls)}.
      *
      * @param newTask task to add to the run queue
      */
     public final void addTaskFirst(@NotNull RobotTask newTask) {
         checkTaskForDependency(newTask);
-        if (!hasGottenCallback) {
+        if (!callbackReceived) {
             preQueue.add(newTask);
             log("auto: % has been queued as end-init task 1/%", newTask, preQueue.size());
             return;
@@ -322,7 +322,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     /**
      * Runs upon the pressing of the INIT button on the Driver Station.
      * This is where your hardware should be initialised. You may also add specific tasks to the queue
-     * here, but it is recommended to use {@link #setInitTask(Task)} or {@link #onReady(OpModeSelection)} instead.
+     * here, but it is recommended to use {@link #setInitTask(Task)} or {@link #onReady(Reference, Controls)} instead.
      */
     protected abstract void onInitialise();
 
@@ -364,10 +364,10 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
         if (selectableOpModes == null) return;
         opModes.clear();
         for (Object selectableOpMode : selectableOpModes) {
-            if (selectableOpMode instanceof OpModeSelection) {
-                opModes.add((OpModeSelection) selectableOpMode);
+            if (selectableOpMode instanceof Reference<?>) {
+                opModes.add((Reference<?>) selectableOpMode);
             } else {
-                opModes.add(new OpModeSelection(selectableOpMode));
+                opModes.add(new Reference<>(selectableOpMode));
             }
         }
     }
@@ -378,11 +378,12 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
      * in which case it will run immediately after {@code static_init} has completed.
      * This is where you should add your tasks to the run queue.
      *
-     * @param selectedOpMode the OpMode selected by the user, if applicable. Will be UserDefaultSelection if no OpModeSelections were defined, or
-     *                       NULL if the user did not select an OpMode.
+     * @param selectedOpMode the OpMode selected by the user, if applicable. Will be NULL if the user does not select an OpMode (and OpModes were available).
+     *                       Will be an empty reference if {@link #setOpModes(Object...)} returned null (no OpModes to select).
+     * @param selectedButton the button selected by the user. Will be Controls.NONE if no selection is made or given.
      * @see #addTask(RobotTask)
      */
-    protected abstract void onReady(@Nullable OpModeSelection selectedOpMode);
+    protected abstract void onReady(@Nullable Reference<?> selectedOpMode, Controls selectedButton);
 
     /**
      * Override to this method to add extra code to the activeLoop, which will be run before

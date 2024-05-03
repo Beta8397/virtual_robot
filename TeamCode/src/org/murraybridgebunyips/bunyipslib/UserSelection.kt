@@ -70,6 +70,12 @@ class UserSelection<T>(
         private set
 
     /**
+     * The button that was selected by the user.
+     */
+    var selectedButton: Controls = Controls.NONE
+        private set
+
+    /**
      * Maps a set of operation modes to a set of buttons.
      * @return A HashMap of operation modes to buttons.
      */
@@ -85,7 +91,6 @@ class UserSelection<T>(
         val buttons: HashMap<T, Controls> = Controls.mapArgs(opmodes)
 
         // Default options for button selection and operation mode
-        var selectedButton: Controls? = null
         var selectedOpMode: T? = null
 
         // Disable auto clear if it is enabled, we might accidentally clear out static telemetry
@@ -140,13 +145,13 @@ class UserSelection<T>(
                 .setRetained(true)
         } else {
             opMode.telemetry.addDS(
-                "'${selectedButton?.name}' registered. Running OpMode: '$opModeName'",
+                "'${selectedButton.name}' registered. Running OpMode: '$opModeName'",
             ).setRetained(true)
         }
 
         opMode.addDashboardTelemetry(
             "USR",
-            if (result == null) "No selection" else "${selectedButton?.name} -> $opModeName"
+            if (result == null) "No selection" else "${selectedButton.name} -> $opModeName"
         )
 
         //This is code from lucas bubner. He is sad cause hes not important and dosent recieve capital letters. He is lonely except for LACHLAN PAUL  his coding buddy. Now i need to go but always keep this message in mind!!!

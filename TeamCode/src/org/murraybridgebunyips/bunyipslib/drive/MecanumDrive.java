@@ -79,6 +79,7 @@ public class MecanumDrive extends BunyipsSubsystem implements RoadRunnerDrive {
     /**
      * Cleanup and store the last pose estimate in global storage, while stopping the motors.
      */
+    @Override
     public void stop() {
         // Store the last pose estimate in global storage
         Storage.lastKnownPosition = drive.getPoseEstimate();
@@ -117,6 +118,7 @@ public class MecanumDrive extends BunyipsSubsystem implements RoadRunnerDrive {
                 round(Math.toDegrees(drive.getPoseEstimate().getHeading()), 1));
 
         drive.update();
+        Storage.lastKnownPosition = drive.getPoseEstimate();
     }
 
     public MecanumRoadRunnerDrive getInstance() {

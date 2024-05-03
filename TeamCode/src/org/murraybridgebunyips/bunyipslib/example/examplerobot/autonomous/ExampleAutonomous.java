@@ -5,7 +5,8 @@ import static org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds;
 import androidx.annotation.Nullable;
 
 import org.murraybridgebunyips.bunyipslib.AutonomousBunyipsOpMode;
-import org.murraybridgebunyips.bunyipslib.OpModeSelection;
+import org.murraybridgebunyips.bunyipslib.Controls;
+import org.murraybridgebunyips.bunyipslib.Reference;
 import org.murraybridgebunyips.bunyipslib.StartingPositions;
 import org.murraybridgebunyips.bunyipslib.drive.CartesianMecanumDrive;
 import org.murraybridgebunyips.bunyipslib.example.examplerobot.components.ExampleConfig;
@@ -58,7 +59,7 @@ public class ExampleAutonomous extends AutonomousBunyipsOpMode {
     }
 
     @Override
-    protected void onReady(@Nullable OpModeSelection selectedOpMode) {
+    protected void onReady(@Nullable Reference<?> selectedOpMode, Controls selectedButton) {
         // onReady will return the OpModeSelection that was selected in setOpModes()
         // or will return null if the user did not select an OpMode,
         // or an instance of UserDefaultSelection if setOpModes() method is null

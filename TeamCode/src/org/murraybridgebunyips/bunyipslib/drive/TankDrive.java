@@ -1,5 +1,9 @@
 package org.murraybridgebunyips.bunyipslib.drive;
 
+import static org.murraybridgebunyips.bunyipslib.Text.round;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Centimeters;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Inches;
+
 import com.acmerobotics.roadrunner.drive.DriveSignal;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.localization.Localizer;
@@ -12,6 +16,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 import org.murraybridgebunyips.bunyipslib.Controls;
+import org.murraybridgebunyips.bunyipslib.Storage;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.DriveConstants;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.TankCoefficients;
@@ -126,7 +131,13 @@ public class TankDrive extends BunyipsSubsystem implements RoadRunnerDrive {
 
     @Override
     protected void periodic() {
+        opMode.addTelemetry("Localizer: X:%cm Y:%cm %deg",
+                round(Centimeters.convertFrom(instance.getPoseEstimate().getX(), Inches), 1),
+                round(Centimeters.convertFrom(instance.getPoseEstimate().getY(), Inches), 1),
+                round(Math.toDegrees(instance.getPoseEstimate().getHeading()), 1));
+
         instance.update();
+        Storage.lastKnownPosition = instance.getPoseEstimate();
     }
 
     @Override

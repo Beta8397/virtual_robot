@@ -900,7 +900,7 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
          * @return The built task, not added to the task queue automatically.
          * @see #buildTask(boolean)
          */
-        public RoadRunnerTask<RoadRunnerDrive> buildTask() {
+        public RoadRunnerTask buildTask() {
             return buildTask(true);
         }
 
@@ -915,9 +915,9 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
          *                                 multiple implicit trajectories.
          * @return The built task, not added to the task queue automatically.
          */
-        public RoadRunnerTask<RoadRunnerDrive> buildTask(boolean useEndAsNextImplicitPose) {
+        public RoadRunnerTask buildTask(boolean useEndAsNextImplicitPose) {
             TrajectorySequence sequence = build();
-            RoadRunnerTask<RoadRunnerDrive> task = new RoadRunnerTask<>(timeout, drive, sequence);
+            RoadRunnerTask task = new RoadRunnerTask(timeout, drive, sequence);
             task.withTimeout(timeout);
             task.withName(name);
             if (useEndAsNextImplicitPose)
@@ -932,7 +932,7 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
          * poses list, so the next implicitly created trajectory will start from the end of this one.
          */
         public void addTask() {
-            RoadRunnerTask<RoadRunnerDrive> task = buildTask();
+            RoadRunnerTask task = buildTask();
             switch (priority) {
                 case LAST:
                     ((AutonomousBunyipsOpMode) BunyipsOpMode.getInstance()).addTaskLast(task);

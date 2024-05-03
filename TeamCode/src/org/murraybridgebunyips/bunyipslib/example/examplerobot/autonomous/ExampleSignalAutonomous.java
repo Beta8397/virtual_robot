@@ -2,9 +2,12 @@ package org.murraybridgebunyips.bunyipslib.example.examplerobot.autonomous;
 
 import static org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds;
 
+import androidx.annotation.Nullable;
+
 import org.murraybridgebunyips.bunyipslib.AutonomousBunyipsOpMode;
+import org.murraybridgebunyips.bunyipslib.Controls;
 import org.murraybridgebunyips.bunyipslib.Direction;
-import org.murraybridgebunyips.bunyipslib.OpModeSelection;
+import org.murraybridgebunyips.bunyipslib.Reference;
 import org.murraybridgebunyips.bunyipslib.example.examplerobot.components.ExampleConfig;
 import org.murraybridgebunyips.bunyipslib.tasks.GetSignalTask;
 import org.murraybridgebunyips.bunyipslib.tasks.WaitTask;
@@ -45,7 +48,7 @@ public class ExampleSignalAutonomous extends AutonomousBunyipsOpMode {
     }
 
     @Override
-    protected void onReady(OpModeSelection selectedOpMode) {
+    protected void onReady(@Nullable Reference<?> selectedOpMode, Controls selectedButton) {
         addTask(new WaitTask(Seconds.of(5.0)));
     }
 }
