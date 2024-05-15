@@ -31,13 +31,14 @@ import java.util.List;
 public interface RoadRunnerDrive {
     /**
      * Get a velocity constraint for the drive.
+     * Override this method to use a custom velocity constraint.
      *
      * @param maxVel        The maximum velocity of the drive.
      * @param maxAngularVel The maximum angular velocity of the drive.
      * @param trackWidth    The track width of the drive.
      * @return A velocity constraint for the drive.
      */
-    static TrajectoryVelocityConstraint getVelocityConstraint(double maxVel, double maxAngularVel, double trackWidth) {
+    default TrajectoryVelocityConstraint getVelocityConstraint(double maxVel, double maxAngularVel, double trackWidth) {
         return new MinVelocityConstraint(Arrays.asList(
                 new AngularVelocityConstraint(maxAngularVel),
                 new MecanumVelocityConstraint(maxVel, trackWidth)
@@ -46,11 +47,12 @@ public interface RoadRunnerDrive {
 
     /**
      * Get an acceleration constraint for the drive.
+     * Override this method to use a custom acceleration constraint.
      *
      * @param maxAccel The maximum acceleration of the drive.
      * @return An acceleration constraint for the drive.
      */
-    static TrajectoryAccelerationConstraint getAccelerationConstraint(double maxAccel) {
+    default TrajectoryAccelerationConstraint getAccelerationConstraint(double maxAccel) {
         return new ProfileAccelerationConstraint(maxAccel);
     }
 

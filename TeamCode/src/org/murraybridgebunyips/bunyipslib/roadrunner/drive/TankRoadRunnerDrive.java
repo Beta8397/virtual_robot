@@ -122,7 +122,8 @@ public class TankRoadRunnerDrive extends com.acmerobotics.roadrunner.drive.TankD
      * @param trackWidth    The track width in inches
      * @return The velocity constraint
      */
-    public static TrajectoryVelocityConstraint getVelocityConstraint(double maxVel, double maxAngularVel, double trackWidth) {
+    @Override
+    public TrajectoryVelocityConstraint getVelocityConstraint(double maxVel, double maxAngularVel, double trackWidth) {
         return new MinVelocityConstraint(Arrays.asList(
                 new AngularVelocityConstraint(maxAngularVel),
                 new TankVelocityConstraint(maxVel, trackWidth)
@@ -135,7 +136,8 @@ public class TankRoadRunnerDrive extends com.acmerobotics.roadrunner.drive.TankD
      * @param maxAccel The maximum acceleration in inches per second squared
      * @return The acceleration constraint
      */
-    public static TrajectoryAccelerationConstraint getAccelerationConstraint(double maxAccel) {
+    @Override
+    public TrajectoryAccelerationConstraint getAccelerationConstraint(double maxAccel) {
         return new ProfileAccelerationConstraint(maxAccel);
     }
 

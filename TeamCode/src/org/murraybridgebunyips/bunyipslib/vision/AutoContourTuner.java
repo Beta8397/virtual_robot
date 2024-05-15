@@ -19,6 +19,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 
 /**
+ * <b>** WIP **</b>
  * An automatic tuning OpMode for calibrating the vision system's colour thresholding for one processor.
  *
  * @author Lucas Bubner, 2024
@@ -72,8 +73,8 @@ public abstract class AutoContourTuner extends BunyipsOpMode {
         vision.update();
 
         ContourData biggestContour = ContourData.getLargest(processor.getData());
-        if (biggestContour == null) {
-        }
+//        if (biggestContour == null) {
+//        }
 
         // TODO: fitting bounding boxes positions and size
     }

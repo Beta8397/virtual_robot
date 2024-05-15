@@ -26,11 +26,10 @@ import java.util.function.DoubleSupplier;
 /**
  * Task to move to and align to an AprilTag.
  *
- * @param <T> the drivetrain to use (must implement RoadRunnerDrive for X pose forward info/FCD)
  * @author Lucas Bubner, 2024
  */
 @Config
-public class MoveToAprilTagTask<T extends BunyipsSubsystem> extends Task {
+public class MoveToAprilTagTask extends Task {
     /**
      * The desired distance from the tag.
      */
@@ -82,11 +81,11 @@ public class MoveToAprilTagTask<T extends BunyipsSubsystem> extends Task {
      * Autonomous constructor.
      *
      * @param timeout   the timeout for the task
-     * @param drive     the drivetrain to use
+     * @param drive     the drivetrain to use, must be a RoadRunnerDrive
      * @param aprilTag  the AprilTag processor to use
      * @param targetTag the tag to target. -1 for any tag
      */
-    public MoveToAprilTagTask(Measure<Time> timeout, T drive, AprilTag aprilTag, int targetTag) {
+    public MoveToAprilTagTask(Measure<Time> timeout, BunyipsSubsystem drive, AprilTag aprilTag, int targetTag) {
         super(timeout, drive, false);
         if (!(drive instanceof RoadRunnerDrive))
             throw new EmergencyStop("MoveToAprilTagTask must be used with a drivetrain with X forward Pose/IMU info");
@@ -100,11 +99,11 @@ public class MoveToAprilTagTask<T extends BunyipsSubsystem> extends Task {
      * @param xSupplier x (strafe) value
      * @param ySupplier y (forward) value
      * @param rSupplier r (rotate) value
-     * @param drive     the drivetrain to use
+     * @param drive     the drivetrain to use, must be a RoadRunnerDrive
      * @param aprilTag  the AprilTag processor to use
      * @param targetTag the tag to target. -1 for any tag
      */
-    public MoveToAprilTagTask(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier rSupplier, T drive, AprilTag aprilTag, int targetTag) {
+    public MoveToAprilTagTask(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier rSupplier, BunyipsSubsystem drive, AprilTag aprilTag, int targetTag) {
         super(INFINITE_TIMEOUT, drive, false);
         if (!(drive instanceof RoadRunnerDrive))
             throw new EmergencyStop("MoveToAprilTagTask must be used with a drivetrain with X forward Pose/IMU info");
@@ -119,11 +118,11 @@ public class MoveToAprilTagTask<T extends BunyipsSubsystem> extends Task {
      * TeleOp constructor using a default Mecanum binding.
      *
      * @param gamepad   the gamepad to use for driving
-     * @param drive     the drivetrain to use
+     * @param drive     the drivetrain to use, must be a RoadRunnerDrive
      * @param aprilTag  the AprilTag processor to use
      * @param targetTag the tag to target. -1 for any tag
      */
-    public MoveToAprilTagTask(Gamepad gamepad, T drive, AprilTag aprilTag, int targetTag) {
+    public MoveToAprilTagTask(Gamepad gamepad, BunyipsSubsystem drive, AprilTag aprilTag, int targetTag) {
         this(() -> gamepad.left_stick_x, () -> gamepad.left_stick_y, () -> gamepad.right_stick_x, drive, aprilTag, targetTag);
     }
 
@@ -133,7 +132,7 @@ public class MoveToAprilTagTask<T extends BunyipsSubsystem> extends Task {
      * @param desiredDistance the desired distance from the tag
      * @return this
      */
-    public MoveToAprilTagTask<T> withDesiredDistance(Measure<Distance> desiredDistance) {
+    public MoveToAprilTagTask withDesiredDistance(Measure<Distance> desiredDistance) {
         DESIRED_DISTANCE = desiredDistance;
         return this;
     }
@@ -144,7 +143,7 @@ public class MoveToAprilTagTask<T extends BunyipsSubsystem> extends Task {
      * @param speedGain the speed gain for the distance error
      * @return this
      */
-    public MoveToAprilTagTask<T> withSpeedGain(double speedGain) {
+    public MoveToAprilTagTask withSpeedGain(double speedGain) {
         SPEED_GAIN = speedGain;
         return this;
     }
@@ -155,7 +154,7 @@ public class MoveToAprilTagTask<T extends BunyipsSubsystem> extends Task {
      * @param strafeGain the strafe gain for the yaw error
      * @return this
      */
-    public MoveToAprilTagTask<T> withStrafeGain(double strafeGain) {
+    public MoveToAprilTagTask withStrafeGain(double strafeGain) {
         STRAFE_GAIN = strafeGain;
         return this;
     }
@@ -166,7 +165,7 @@ public class MoveToAprilTagTask<T extends BunyipsSubsystem> extends Task {
      * @param turnGain the turn gain for the heading error
      * @return this
      */
-    public MoveToAprilTagTask<T> withTurnGain(double turnGain) {
+    public MoveToAprilTagTask withTurnGain(double turnGain) {
         TURN_GAIN = turnGain;
         return this;
     }
@@ -177,7 +176,7 @@ public class MoveToAprilTagTask<T extends BunyipsSubsystem> extends Task {
      * @param maxAutoSpeed the maximum speed the robot can move at
      * @return this
      */
-    public MoveToAprilTagTask<T> withMaxAutoSpeed(double maxAutoSpeed) {
+    public MoveToAprilTagTask withMaxAutoSpeed(double maxAutoSpeed) {
         MAX_AUTO_SPEED = maxAutoSpeed;
         return this;
     }
@@ -188,7 +187,7 @@ public class MoveToAprilTagTask<T extends BunyipsSubsystem> extends Task {
      * @param maxAutoStrafe the maximum strafe the robot can move at
      * @return this
      */
-    public MoveToAprilTagTask<T> withMaxAutoStrafe(double maxAutoStrafe) {
+    public MoveToAprilTagTask withMaxAutoStrafe(double maxAutoStrafe) {
         MAX_AUTO_STRAFE = maxAutoStrafe;
         return this;
     }
@@ -199,7 +198,7 @@ public class MoveToAprilTagTask<T extends BunyipsSubsystem> extends Task {
      * @param maxAutoTurn the maximum turn the robot can move at
      * @return this
      */
-    public MoveToAprilTagTask<T> withMaxAutoTurn(double maxAutoTurn) {
+    public MoveToAprilTagTask withMaxAutoTurn(double maxAutoTurn) {
         MAX_AUTO_TURN = maxAutoTurn;
         return this;
     }
@@ -210,7 +209,7 @@ public class MoveToAprilTagTask<T extends BunyipsSubsystem> extends Task {
      * @param targetTag the tag ID to target
      * @return this
      */
-    public MoveToAprilTagTask<T> withTargetTag(int targetTag) {
+    public MoveToAprilTagTask withTargetTag(int targetTag) {
         TARGET_TAG = targetTag;
         return this;
     }

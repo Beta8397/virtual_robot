@@ -26,7 +26,7 @@ import java.util.concurrent.ExecutorService
  * This class provides a structured way to manage the lifecycle of an OpMode, and provides a number of
  * utility functions to make development easier. This class is designed to be extended by the user to
  * create their own OpModes, and has native support for linked Driver Station & FtcDashboard telemetry ([DualTelemetry]),
- * native custom gamepads ([Controller]), timing utilities ([movingAverageTimer]), exception handling ([Exceptions]),
+ * native custom gamepads ([Controller]), timing utilities ([timer]), exception handling ([Exceptions]),
  * and more through the BunyipsLib suite of tools ([BunyipsSubsystem], [Scheduler], etc.)
  *
  * @see CommandBasedBunyipsOpMode
@@ -35,11 +35,33 @@ import java.util.concurrent.ExecutorService
  */
 abstract class BunyipsOpMode : BOMInternal() {
     /**
-     * The moving average timer for the OpMode, which is used to calculate the average time
-     * between hardware cycles. This is useful for debugging and performance monitoring.
+     * The moving average timer for the OpMode, which is used to calculate time
+     * between hardware cycles. This is useful for debugging, performance monitoring, and calculating various
+     * time-based values (deltaTime, loopCount, elapsedTime, etc.)
+     *
+     * This timer is automatically active during the `dynamic_init` and `running` phases of the OpMode, and is reset in between.
+     * If you wish to get the *total* time since this OpMode was started, you can call the built-in [getRuntime] method.
+     * @see MovingAverageTimer
      */
-    lateinit var movingAverageTimer: MovingAverageTimer
-        private set
+    lateinit var timer: MovingAverageTimer
+
+    /**
+     * BunyipsLib Gamepad 1: Driver
+     * @see Controller
+     */
+    lateinit var gamepad1: Controller
+
+    /**
+     * BunyipsLib Gamepad 2: Operator
+     * @see Controller
+     */
+    lateinit var gamepad2: Controller
+
+    /**
+     * BunyipsLib Driver Station & FtcDashboard Telemetry
+     * @see DualTelemetry
+     */
+    lateinit var telemetry: DualTelemetry
 
     private var operationsCompleted = false
     private var operationsPaused = false
@@ -47,21 +69,6 @@ abstract class BunyipsOpMode : BOMInternal() {
 
     private var gamepadExecutor: ExecutorService? = null
     private var initTask: RobotTask? = null
-
-    /**
-     * BunyipsLib Gamepad 1: Driver
-     */
-    lateinit var gamepad1: Controller
-
-    /**
-     * BunyipsLib Gamepad 2: Operator
-     */
-    lateinit var gamepad2: Controller
-
-    /**
-     * BunyipsLib Driver Station & FtcDashboard Telemetry
-     */
-    lateinit var telemetry: DualTelemetry
 
     companion object {
         private var _instance: BunyipsOpMode? = null
@@ -177,11 +184,11 @@ abstract class BunyipsOpMode : BOMInternal() {
 
             Dbg.logd("BunyipsOpMode: setting up...")
             // Ring-buffer timing utility
-            movingAverageTimer = MovingAverageTimer()
+            timer = MovingAverageTimer()
             // Telemetry
             telemetry = DualTelemetry(
                 this,
-                movingAverageTimer,
+                timer,
                 "BOM",
                 "bunyipslib v${BuildConfig.SEMVER}-${BuildConfig.GIT_COMMIT}-${BuildConfig.BUILD_TIME}"
             )
@@ -213,7 +220,7 @@ abstract class BunyipsOpMode : BOMInternal() {
                 onInit()
             } catch (e: Exception) {
                 // Catch all exceptions, log them, and continue running the OpMode
-                // All InterruptedExceptions are handled by the FTC SDK and are raised in ErrorUtil
+                // All InterruptedExceptions are handled by the FTC SDK and are raised in the Exceptions handler
                 Exceptions.handle(e, ::log)
             }
 
@@ -221,7 +228,7 @@ abstract class BunyipsOpMode : BOMInternal() {
             pushTelemetry()
             Dbg.logd("BunyipsOpMode: starting onInitLoop()...")
             if (initTask != null) {
-                Dbg.logd("BunyipsOpMode: running initTask -> % ...")
+                Dbg.logd("BunyipsOpMode: running initTask -> % ...", initTask)
                 log("running init-task: %", initTask)
             }
             // Run user-defined dynamic initialisation
@@ -234,7 +241,7 @@ abstract class BunyipsOpMode : BOMInternal() {
                 } catch (e: Exception) {
                     Exceptions.handle(e, ::log)
                 }
-                movingAverageTimer.update()
+                timer.update()
                 pushTelemetry()
             } while (opModeInInit())
 
@@ -261,12 +268,12 @@ abstract class BunyipsOpMode : BOMInternal() {
 
             // Ready to go.
             telemetry.opModeStatus = "ready"
-            movingAverageTimer.update()
-            Dbg.logd("BunyipsOpMode: init cycle completed in ${movingAverageTimer.elapsedTime(Seconds)} secs")
+            timer.update()
+            Dbg.logd("BunyipsOpMode: init cycle completed in ${timer.elapsedTime().inUnit(Seconds)} secs")
             // DS only telemetry
             telemetry.addDS("BunyipsOpMode: INIT COMPLETE -- PLAY WHEN READY.")
             Dbg.logd("BunyipsOpMode: ready.")
-            movingAverageTimer.reset()
+            timer.reset()
 
             // Wait for start
             do {
@@ -278,7 +285,7 @@ abstract class BunyipsOpMode : BOMInternal() {
             telemetry.isAutoClear = true
             clearTelemetry()
             pushTelemetry()
-            movingAverageTimer.reset()
+            timer.reset()
             Dbg.logd("BunyipsOpMode: firing onStart()...")
             try {
                 // Run user-defined start operations
@@ -293,7 +300,7 @@ abstract class BunyipsOpMode : BOMInternal() {
                 if (operationsPaused) {
                     // If the OpMode is paused, skip the loop and wait for the next hardware cycle
                     telemetry.opModeStatus = "halted"
-                    movingAverageTimer.update()
+                    timer.update()
                     pushTelemetry()
                     continue
                 }
@@ -304,7 +311,7 @@ abstract class BunyipsOpMode : BOMInternal() {
                     Exceptions.handle(e, ::log)
                 }
                 // Update telemetry and timers
-                movingAverageTimer.update()
+                timer.update()
                 pushTelemetry()
             } while (opModeIsActive() && !operationsCompleted)
 
@@ -315,7 +322,7 @@ abstract class BunyipsOpMode : BOMInternal() {
                 Exceptions.handle(e, ::log)
             }
             // overheadTelemetry will no longer update, will remain frozen on last value
-            movingAverageTimer.update()
+            timer.update()
             pushTelemetry()
             Dbg.logd("BunyipsOpMode: all tasks finished.")
             // Wait for user to hit stop or for the OpMode to be terminated
@@ -350,7 +357,7 @@ abstract class BunyipsOpMode : BOMInternal() {
             // Telemetry may be not in a nice state, so we will call our stateful functions
             // such as thread stops and cleanup in onStop() first before updating the status
             telemetry.opModeStatus = "terminating"
-            Dbg.logd("BunyipsOpMode: active cycle completed in ${movingAverageTimer.elapsedTime(Seconds)} secs")
+            Dbg.logd("BunyipsOpMode: active cycle completed in ${timer.elapsedTime().inUnit(Seconds)} secs")
             pushTelemetry()
             Dbg.logd("BunyipsOpMode: exiting...")
         }

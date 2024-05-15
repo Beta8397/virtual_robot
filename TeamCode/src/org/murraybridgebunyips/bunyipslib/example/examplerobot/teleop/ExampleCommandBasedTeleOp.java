@@ -83,7 +83,7 @@ public class ExampleCommandBasedTeleOp extends BunyipsOpMode {
         scheduler.operator().whenReleased(Controls.X)
                 // This will replace the default DifferentialDriveTask with this task, until X is pressed again
                 .run(new ContinuousTask(() -> addTelemetry("X was released on gamepad2 and the drive system has been stopped."), drive, false))
-                .finishingWhen(() -> Controls.isSelected(gamepad2, Controls.X));
+                .finishingIf(() -> Controls.isSelected(gamepad2, Controls.X));
 
         scheduler.when(() -> drive.isBusy())
                 .run(new RunTask(() -> addTelemetry("Drive system is busy!")));

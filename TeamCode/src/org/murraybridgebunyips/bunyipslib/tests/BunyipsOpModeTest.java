@@ -18,6 +18,6 @@ public class BunyipsOpModeTest extends BunyipsOpMode {
 
     @Override
     protected void activeLoop() {
-        addTelemetry(getMovingAverageTimer().toString());
+        addTelemetry(getTimer().toString());
     }
 }

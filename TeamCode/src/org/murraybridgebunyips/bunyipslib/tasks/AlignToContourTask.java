@@ -22,11 +22,10 @@ import java.util.function.DoubleSupplier;
 /**
  * Task to align to a contour using the vision system.
  *
- * @param <T> the drivetrain to use (must implement RoadRunnerDrive for X pose forward info/FCD)
  * @author Lucas Bubner, 2024
  */
 @Config
-public class AlignToContourTask<T extends BunyipsSubsystem> extends Task {
+public class AlignToContourTask extends Task {
     /**
      * PID coefficients for the alignment controller.
      */
@@ -45,11 +44,11 @@ public class AlignToContourTask<T extends BunyipsSubsystem> extends Task {
      * @param xSupplier  x (strafe) value
      * @param ySupplier  y (forward) value
      * @param rSupplier  r (rotate) value
-     * @param drive      the drivetrain to use
+     * @param drive      the drivetrain to use, must be a RoadRunnerDrive
      * @param processors the vision processor to use
      * @param controller the PID controller to use for aligning to a target
      */
-    public AlignToContourTask(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier rSupplier, T drive, MultiColourThreshold processors, PIDController controller) {
+    public AlignToContourTask(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier rSupplier, BunyipsSubsystem drive, MultiColourThreshold processors, PIDController controller) {
         super(INFINITE_TIMEOUT, drive, false);
         if (!(drive instanceof RoadRunnerDrive))
             throw new EmergencyStop("AlignToContourTask must be used with a drivetrain with X forward Pose/IMU info");
@@ -66,11 +65,11 @@ public class AlignToContourTask<T extends BunyipsSubsystem> extends Task {
      * TeleOp constructor using a default Mecanum binding.
      *
      * @param driver     the gamepad to use for driving
-     * @param drive      the drivetrain to use
+     * @param drive      the drivetrain to use, must be a RoadRunnerDrive
      * @param processors the vision processor to use
      * @param controller the PID controller to use for aligning to a target
      */
-    public AlignToContourTask(Gamepad driver, T drive, MultiColourThreshold processors, PIDController controller) {
+    public AlignToContourTask(Gamepad driver, BunyipsSubsystem drive, MultiColourThreshold processors, PIDController controller) {
         this(() -> driver.left_stick_x, () -> driver.left_stick_y, () -> driver.right_stick_x, drive, processors, controller);
     }
 
@@ -78,11 +77,11 @@ public class AlignToContourTask<T extends BunyipsSubsystem> extends Task {
      * Autonomous constructor
      *
      * @param timeout    the maximum time in seconds to run the task for
-     * @param drive      the drivetrain to use
+     * @param drive      the drivetrain to use, must be a RoadRunnerDrive
      * @param processors the vision processor to use
      * @param controller the PID controller to use for aligning to a target
      */
-    public AlignToContourTask(Measure<Time> timeout, T drive, MultiColourThreshold processors, PIDController controller) {
+    public AlignToContourTask(Measure<Time> timeout, BunyipsSubsystem drive, MultiColourThreshold processors, PIDController controller) {
         super(timeout, drive, false);
         if (!(drive instanceof RoadRunnerDrive))
             throw new EmergencyStop("AlignToContourTask must be used with a drivetrain with X forward Pose/IMU info");

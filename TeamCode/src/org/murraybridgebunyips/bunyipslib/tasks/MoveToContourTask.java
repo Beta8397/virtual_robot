@@ -23,11 +23,10 @@ import java.util.function.DoubleSupplier;
 /**
  * Task to move to and align to a contour using the vision system.
  *
- * @param <T> the drivetrain to use (must implement RoadRunnerDrive for X pose forward info/FCD)
  * @author Lucas Bubner, 2024
  */
 @Config
-public class MoveToContourTask<T extends BunyipsSubsystem> extends Task {
+public class MoveToContourTask extends Task {
     /**
      * The PID coefficients for the translational controller.
      */
@@ -55,12 +54,12 @@ public class MoveToContourTask<T extends BunyipsSubsystem> extends Task {
      * @param xSupplier             x (strafe) value
      * @param ySupplier             y (forward) value
      * @param rSupplier             r (rotate) value
-     * @param drive                 the drivetrain to use
+     * @param drive                 the drivetrain to use, must be a RoadRunnerDrive
      * @param processors            the vision processors to use
      * @param translationController the PID controller for the translational movement
      * @param rotationController    the PID controller for the rotational movement
      */
-    public MoveToContourTask(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier rSupplier, T drive, MultiColourThreshold processors, PIDController translationController, PIDController rotationController) {
+    public MoveToContourTask(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier rSupplier, BunyipsSubsystem drive, MultiColourThreshold processors, PIDController translationController, PIDController rotationController) {
         super(INFINITE_TIMEOUT, drive, false);
         if (!(drive instanceof RoadRunnerDrive))
             throw new EmergencyStop("MoveToContourTask must be used with a drivetrain with X forward Pose/IMU info");
@@ -79,12 +78,12 @@ public class MoveToContourTask<T extends BunyipsSubsystem> extends Task {
      * TeleOp constructor using a default Mecanum binding.
      *
      * @param driver                the gamepad to use for driving
-     * @param drive                 the drivetrain to use
+     * @param drive                 the drivetrain to use, must be a RoadRunnerDrive
      * @param processors            the vision processor to use
      * @param translationController the PID controller for the translational movement
      * @param rotationController    the PID controller for the rotational movement
      */
-    public MoveToContourTask(Gamepad driver, T drive, MultiColourThreshold processors, PIDController translationController, PIDController rotationController) {
+    public MoveToContourTask(Gamepad driver, BunyipsSubsystem drive, MultiColourThreshold processors, PIDController translationController, PIDController rotationController) {
         this(() -> driver.left_stick_x, () -> driver.left_stick_y, () -> driver.right_stick_x, drive, processors, translationController, rotationController);
     }
 
@@ -92,12 +91,12 @@ public class MoveToContourTask<T extends BunyipsSubsystem> extends Task {
      * Autonomous constructor.
      *
      * @param timeout               the maximum timeout for the task
-     * @param drive                 the drivetrain to use
+     * @param drive                 the drivetrain to use, must be a RoadRunnerDrive
      * @param processors            the vision processors to use
      * @param translationController the PID controller for the translational movement
      * @param rotationController    the PID controller for the rotational movement
      */
-    public MoveToContourTask(Measure<Time> timeout, T drive, MultiColourThreshold processors, PIDController translationController, PIDController rotationController) {
+    public MoveToContourTask(Measure<Time> timeout, BunyipsSubsystem drive, MultiColourThreshold processors, PIDController translationController, PIDController rotationController) {
         super(timeout, drive, false);
         if (!(drive instanceof RoadRunnerDrive))
             throw new EmergencyStop("MoveToContourTask must be used with a drivetrain with X forward Pose/IMU info");
@@ -115,7 +114,7 @@ public class MoveToContourTask<T extends BunyipsSubsystem> extends Task {
      * @param pitchTarget the target pitch to move to
      * @return the task
      */
-    public MoveToContourTask<T> withPitchTarget(double pitchTarget) {
+    public MoveToContourTask withPitchTarget(double pitchTarget) {
         PITCH_TARGET = pitchTarget;
         return this;
     }

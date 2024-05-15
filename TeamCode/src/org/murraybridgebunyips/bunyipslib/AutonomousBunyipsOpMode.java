@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**
  * {@link BunyipsOpMode} variant for Autonomous operation. Uses the {@link Task} system for a queued action OpMode.
@@ -34,7 +35,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
      * @see #setOpModes(Object...)
      */
     private final ArrayList<Reference<?>> opModes = new ArrayList<>();
-    private final ArrayDeque<RobotTask> tasks = new ArrayDeque<>();
+    private final ConcurrentLinkedDeque<RobotTask> tasks = new ConcurrentLinkedDeque<>();
     // Pre and post queues cannot have their tasks removed, so we can rely on their .size() methods
     private final ArrayDeque<RobotTask> postQueue = new ArrayDeque<>();
     private final ArrayDeque<RobotTask> preQueue = new ArrayDeque<>();
@@ -47,11 +48,6 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
 
     private void callback(@Nullable Reference<?> selectedOpMode) {
         callbackReceived = true;
-        if (selectedOpMode != null) {
-            log("auto: mode selected. running opmode " + selectedOpMode);
-        } else {
-            log("auto: mode selected. running default opmode");
-        }
         onReady(selectedOpMode, userSelection.getSelectedButton());
         // Add any queued tasks
         for (RobotTask task : postQueue) {
@@ -71,14 +67,12 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
         // Convert user defined OpModeSelections to varargs
         Reference<?>[] varargs = opModes.toArray(new Reference[0]);
         if (varargs.length == 0) {
-            log("auto: no setOpModes() defined, skipping selection phase");
             opModes.add(Reference.empty());
         }
         if (varargs.length > 1) {
             // Run task allocation if OpModeSelections are defined
             // This will run asynchronously, and the callback will be called
             // when the user has selected an OpMode
-            log("auto: waiting for user input...");
             userSelection = new UserSelection<>(this, this::callback, varargs);
             Threads.start(userSelection);
         } else {
@@ -117,23 +111,25 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
         periodic();
 
         // Run the queue of tasks
-        RobotTask currentTask = tasks.peekFirst();
-        if (currentTask == null) {
-            log("auto: all tasks done, finishing...");
-            finish();
-            return;
+        synchronized (tasks) {
+            RobotTask currentTask = tasks.peekFirst();
+            if (currentTask == null) {
+                log("auto: all tasks done, finishing...");
+                finish();
+                return;
+            }
+
+            addTelemetry("Running task (%/%): %", this.currentTask, taskCount, currentTask);
+
+            // AutonomousBunyipsOpMode is handling all task completion checks, manual checks not required
+            if (currentTask.pollFinished()) {
+                tasks.removeFirst();
+                log("auto: task %/% (%) finished", this.currentTask, taskCount, currentTask);
+                this.currentTask++;
+            }
+
+            currentTask.run();
         }
-
-        addTelemetry("Running task (%/%): %", this.currentTask, taskCount, currentTask);
-
-        // AutonomousBunyipsOpMode is handling all task completion checks, manual checks not required
-        if (currentTask.pollFinished()) {
-            tasks.removeFirst();
-            log("auto: task %/% (%) finished", this.currentTask, taskCount, currentTask);
-            this.currentTask++;
-        }
-
-        currentTask.run();
 
         // Update all subsystems
         for (BunyipsSubsystem subsystem : updatedSubsystems) {
@@ -175,7 +171,9 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
         if (!callbackReceived && !ack) {
             log("auto: caution! a task was added manually before the onReady callback");
         }
-        tasks.add(newTask);
+        synchronized (tasks) {
+            tasks.add(newTask);
+        }
         taskCount++;
         log("auto: % has been added as task %/%", newTask, taskCount, taskCount);
     }
@@ -199,6 +197,47 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     }
 
     /**
+     * Insert a task at a specific index in the queue. This is useful for adding tasks that should be run
+     * at a specific point in the autonomous sequence. Note that this function immediately produces side effects,
+     * and subsequent calls will not be able to insert tasks at the same index due to the shifting of tasks.
+     *
+     * @param index   the index to insert the task at, starting from 0
+     * @param newTask the task to add to the run queue
+     */
+    public final void addTaskAtIndex(int index, @NotNull RobotTask newTask) {
+        checkTaskForDependency(newTask);
+        ArrayDeque<RobotTask> tmp = new ArrayDeque<>();
+        synchronized (tasks) {
+            if (index < 0 || index > tasks.size())
+                throw new IllegalArgumentException("Cannot insert task at index " + index + ", out of bounds");
+            // Deconstruct the queue to insert the new task
+            while (tasks.size() > index) {
+                tmp.add(tasks.removeLast());
+            }
+            // Insert the new task
+            tasks.add(newTask);
+            // Refill the queue
+            while (!tmp.isEmpty()) {
+                tasks.add(tmp.removeLast());
+            }
+        }
+        taskCount++;
+        log("auto: % has been inserted as task %/%", newTask, index, taskCount);
+    }
+
+    /**
+     * Insert a task at a specific index in the queue. This is useful for adding tasks that should be run
+     * at a specific point in the autonomous sequence. Note that this function immediately produces side effects,
+     * and subsequent calls will not be able to insert tasks at the same index due to the shifting of tasks.
+     *
+     * @param index    the index to insert the task at, starting from 0
+     * @param runnable the code to add to the run queue to run once
+     */
+    public final void addTaskAtIndex(int index, @NotNull Runnable runnable) {
+        addTaskAtIndex(index, new RunTask(runnable));
+    }
+
+    /**
      * Add a task to the run queue, but after {@link #onReady(Reference, Controls)} has processed tasks. This is useful
      * to call when working with tasks that should be queued at the very end of the autonomous, while still
      * being able to add tasks asynchronously with user input in {@link #onReady(Reference, Controls)}.
@@ -212,7 +251,9 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
             log("auto: % has been queued as end-init task %/%", newTask, postQueue.size(), postQueue.size());
             return;
         }
-        tasks.addLast(newTask);
+        synchronized (tasks) {
+            tasks.addLast(newTask);
+        }
         taskCount++;
         log("auto: % has been added as task %/%", newTask, taskCount, taskCount);
     }
@@ -231,7 +272,9 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
             log("auto: % has been queued as end-init task 1/%", newTask, preQueue.size());
             return;
         }
-        tasks.addFirst(newTask);
+        synchronized (tasks) {
+            tasks.addFirst(newTask);
+        }
         taskCount++;
         log("auto: % has been added as task 1/%", newTask, taskCount);
     }
@@ -239,39 +282,36 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     /**
      * Removes whatever task is at the given queue position
      * Note: this will remove the index and shift all other tasks down, meaning that
-     * tasks being added/removed may affect the index of the task you want to remove
+     * tasks being added/removed will affect the index of the task you want to remove
      *
-     * @param taskIndex the array index to be removed
+     * @param taskIndex the array index to be removed, starting from 0
      */
-    public final void removeTaskIndex(int taskIndex) {
-        if (taskIndex < 0) {
-            throw new IllegalArgumentException("Auto: Cannot remove items starting from last index, this isn't Python");
-        }
+    public final void removeTaskAtIndex(int taskIndex) {
+        synchronized (tasks) {
+            if (taskIndex < 0 || taskIndex >= tasks.size())
+                throw new IllegalArgumentException("Cannot remove task at index " + taskIndex + ", out of bounds");
 
-        if (taskIndex > tasks.size()) {
-            throw new IllegalArgumentException("Auto: Given index exceeds array size");
-        }
+            /*
+             * In the words of the great Lucas Bubner:
+             *      You've made an iterator for all those tasks
+             *      which is the goofinator car that can drive around your array
+             *      calling .next() on your car will move it one down the array
+             *      then if you call .remove() on your car it will remove the element wherever it is
+             */
+            Iterator<RobotTask> iterator = tasks.iterator();
 
-        /*
-         * In the words of the great Lucas Bubner:
-         *      You've made an iterator for all those tasks
-         *      which is the goofinator car that can drive around your array
-         *      calling .next() on your car will move it one down the array
-         *      then if you call .remove() on your car it will remove the element wherever it is
-         */
-        Iterator<RobotTask> iterator = tasks.iterator();
+            int counter = 0;
+            while (iterator.hasNext()) {
+                iterator.next();
 
-        int counter = 0;
-        while (iterator.hasNext()) {
-            if (counter == taskIndex) {
-                iterator.remove();
-                log("auto: task at index % was removed", taskIndex);
-                taskCount--;
-                break;
+                if (counter == taskIndex) {
+                    iterator.remove();
+                    log("auto: task at index % was removed", taskIndex);
+                    taskCount--;
+                    break;
+                }
+                counter++;
             }
-
-            iterator.next();
-            counter++;
         }
     }
 
@@ -283,12 +323,14 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
      * @param task the task to be removed
      */
     public final void removeTask(@NotNull RobotTask task) {
-        if (tasks.contains(task)) {
-            tasks.remove(task);
-            log("auto: task % was removed", task);
-            taskCount--;
-        } else {
-            log("auto: task % was not found in the queue", task);
+        synchronized (tasks) {
+            if (tasks.contains(task)) {
+                tasks.remove(task);
+                log("auto: task % was removed", task);
+                taskCount--;
+            } else {
+                log("auto: task % was not found in the queue", task);
+            }
         }
     }
 
@@ -296,7 +338,9 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
      * Removes the last task in the task queue
      */
     public final void removeTaskLast() {
-        tasks.removeLast();
+        synchronized (tasks) {
+            tasks.removeLast();
+        }
         taskCount--;
         log("auto: task at index % was removed", taskCount + 1);
     }
@@ -305,7 +349,9 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
      * Removes the first task in the task queue
      */
     public final void removeTaskFirst() {
-        tasks.removeFirst();
+        synchronized (tasks) {
+            tasks.removeFirst();
+        }
         taskCount--;
         log("auto: task at index 0 was removed");
     }

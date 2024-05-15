@@ -176,4 +176,14 @@ public class Reference<V> {
         }
         return false;
     }
+
+    /**
+     * Returns the hash code of the reference.
+     *
+     * @return the hash code of the reference, 0 if the reference is null
+     */
+    @Override
+    public int hashCode() {
+        return value == null ? 0 : value.hashCode();
+    }
 }

@@ -4,6 +4,8 @@ import static org.murraybridgebunyips.bunyipslib.external.units.Units.Inches;
 import static org.murraybridgebunyips.bunyipslib.external.units.Units.Radians;
 import static org.murraybridgebunyips.bunyipslib.tasks.bases.Task.INFINITE_TIMEOUT;
 
+import androidx.annotation.NonNull;
+
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.DisplacementProducer;
@@ -40,7 +42,7 @@ import java.util.Objects;
  * @noinspection InterfaceMayBeAnnotatedFunctional
  * @see AutonomousBunyipsOpMode
  */
-public interface RoadRunner extends RoadRunnerDriveInstance {
+public interface RoadRunner {
     /**
      * Default timeout for all RoadRunner tasks, if not explicitly mentioned.
      */
@@ -56,6 +58,16 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
     static void resetForOpMode() {
         splicedPose.clear();
     }
+
+    /**
+     * Get the drive instance reference to be used for RoadRunner trajectories.
+     * <b>Do NOT instantiate a new drive instance here, use the reference from your subsystems in your OpMode.</b>
+     * (e.g. {@code return drive;}) instead of ({@code return new MecanumDrive(...);})
+     *
+     * @return Drive instance reference
+     */
+    @NonNull
+    RoadRunnerDrive getDrive();
 
     /**
      * Reset pose info back to default.
@@ -74,7 +86,7 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
      * @return The velocity constraint
      */
     default TrajectoryVelocityConstraint atVelocity(double translation, Velocity<Distance> unit) {
-        return Limit.ofVelocity(unit.of(translation), getDrive().getConstants());
+        return Limit.ofVelocity(unit.of(translation), getDrive());
     }
 
     /**
@@ -85,7 +97,7 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
      * @return The velocity constraint
      */
     default TrajectoryVelocityConstraint atAngularVelocity(double rotation, Velocity<Angle> unit) {
-        return Limit.ofAngularVelocity(unit.of(rotation), getDrive().getConstants());
+        return Limit.ofAngularVelocity(unit.of(rotation), getDrive());
     }
 
     /**
@@ -98,7 +110,7 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
      * @return The velocity constraint
      */
     default TrajectoryVelocityConstraint atVelocities(double translation, Velocity<Distance> translationUnit, double rotation, Velocity<Angle> rotationUnit) {
-        return Limit.ofVelocities(translationUnit.of(translation), rotationUnit.of(rotation), getDrive().getConstants());
+        return Limit.ofVelocities(translationUnit.of(translation), rotationUnit.of(rotation), getDrive());
     }
 
     /**
@@ -109,31 +121,7 @@ public interface RoadRunner extends RoadRunnerDriveInstance {
      * @return The acceleration constraint
      */
     default TrajectoryAccelerationConstraint atAcceleration(double acceleration, Velocity<Velocity<Distance>> unit) {
-        return Limit.ofAcceleration(unit.of(acceleration), getDrive().getConstants());
-    }
-
-    /**
-     * Make an angular acceleration constraint.
-     *
-     * @param acceleration The angular acceleration
-     * @param unit         The unit of the angular acceleration
-     * @return The acceleration constraint
-     */
-    default TrajectoryAccelerationConstraint atAngularAcceleration(double acceleration, Velocity<Velocity<Angle>> unit) {
-        return Limit.ofAngularAcceleration(unit.of(acceleration), getDrive().getConstants());
-    }
-
-    /**
-     * Make a translation and angular acceleration constraint.
-     *
-     * @param translation     The translation acceleration
-     * @param translationUnit The unit of the translation acceleration
-     * @param rotation        The angular acceleration
-     * @param rotationUnit    The unit of the angular acceleration
-     * @return The acceleration constraint
-     */
-    default TrajectoryAccelerationConstraint atAccelerations(double translation, Velocity<Velocity<Distance>> translationUnit, double rotation, Velocity<Velocity<Angle>> rotationUnit) {
-        return Limit.ofAccelerations(translationUnit.of(translation), rotationUnit.of(rotation), getDrive().getConstants());
+        return Limit.ofAcceleration(unit.of(acceleration), getDrive());
     }
 
     /**

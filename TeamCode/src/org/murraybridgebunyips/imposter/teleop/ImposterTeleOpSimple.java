@@ -25,7 +25,7 @@ public class ImposterTeleOpSimple extends BunyipsOpMode {
 //        drive = new TriDeadwheelMecanumDrive(this, config.driveConstants, config.mecanumCoefficients, hardwareMap.voltageSensor, config.imu, config.front_left_motor, config.front_right_motor, config.back_left_motor, config.back_right_motor, config.localizerCoefficients, config.enc_left, config.enc_right, config.enc_x);
         drive = new CartesianFieldCentricMecanumDrive(config.front_left_motor, config.front_right_motor, config.back_left_motor, config.back_right_motor, new IMUOp(config.imu), false, Direction.FORWARD);
         scheduler.addSubsystems(drive);
-        drive.setDefaultTask(new HolonomicDriveTask<>(gamepad1, drive, () -> false));
+        drive.setDefaultTask(new HolonomicDriveTask(gamepad1, drive, () -> false));
 //        scheduler.when(() -> drive.speedX != 0.0 || drive.speedY != 0.0 || drive.speedR != 0.0)
 //                .runDebounced(() -> log("Drive has started moving at % seconds.", getRuntime()));
     }

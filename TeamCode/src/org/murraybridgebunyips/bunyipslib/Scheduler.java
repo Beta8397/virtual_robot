@@ -432,7 +432,7 @@ public class Scheduler extends BunyipsComponent {
          * ending when the task ends.
          *
          * @param task The task to run.
-         * @return Timing control for allocation (none: immediate, inSeconds(), finishingWhen(), inSecondsFinishingWhen()).
+         * @return Timing control for allocation (none: immediate, in(), finishingIf(), inTimeFinishingIf()).
          */
         public ConditionalTask run(Task task) {
             if (taskToRun != null) {
@@ -451,7 +451,7 @@ public class Scheduler extends BunyipsComponent {
          * ending immediately as it is an RunTask.
          *
          * @param runnable The code to run
-         * @return Timing control for allocation (none: immediate, inSeconds(), finishingWhen(), inSecondsFinishingWhen()).
+         * @return Timing control for allocation (none: immediate, in(), finishingIf(), inTimeFinishingIf()).
          */
         public ConditionalTask run(Runnable runnable) {
             return run(new RunTask(runnable));
@@ -464,7 +464,7 @@ public class Scheduler extends BunyipsComponent {
          * ending when the task ends.
          *
          * @param task The task to run.
-         * @return Timing control for allocation (none: immediate, inSeconds(), finishingWhen(), inSecondsFinishingWhen()).
+         * @return Timing control for allocation (none: immediate, in(), finishingIf(), inTimeFinishingIf()).
          */
         public ConditionalTask runDebounced(Task task) {
             debouncing = true;
@@ -478,7 +478,7 @@ public class Scheduler extends BunyipsComponent {
          * ending immediately as it is an RunTask.
          *
          * @param runnable The code to run
-         * @return Timing control for allocation (none: immediate, inSeconds(), finishingWhen(), inSecondsFinishingWhen()).
+         * @return Timing control for allocation (none: immediate, in(), finishingIf(), inTimeFinishingIf()).
          */
         public ConditionalTask runDebounced(Runnable runnable) {
             return runDebounced(new RunTask(runnable));
@@ -487,7 +487,7 @@ public class Scheduler extends BunyipsComponent {
         /**
          * Mute this task from being a part of the Scheduler report.
          *
-         * @return Timing control for allocation (none: immediate, inSeconds(), finishingWhen(), inSecondsFinishingWhen()).
+         * @return Timing control for allocation (none: immediate, in(), finishingIf(), inTimeFinishingIf()).
          */
         public ConditionalTask muted() {
             if (taskToRun != null) {
@@ -522,9 +522,10 @@ public class Scheduler extends BunyipsComponent {
          * Run the task assigned to in run() until this condition is met. Once this condition is met, the task will
          * be forcefully stopped and the scheduler will move on. This is useful for continuous tasks.
          *
-         * @param condition The condition to stop the task.
+         * @param condition The condition to stop the task. Note the task will be auto-stopped if it finishes by itself,
+         *                  this condition simply allows for an early finish if this condition is met.
          */
-        public void finishingWhen(BooleanSupplier condition) {
+        public void finishingIf(BooleanSupplier condition) {
             stopCondition = condition;
         }
 
@@ -535,9 +536,10 @@ public class Scheduler extends BunyipsComponent {
          * This is useful for continuous tasks.
          *
          * @param interval  The time interval
-         * @param condition The condition to stop the task.
+         * @param condition The condition to stop the task. Note the task will be auto-stopped if it finishes by itself,
+         *                  this condition simply allows for an early finish if this condition is met.
          */
-        public void inTimeFinishingWhen(Measure<Time> interval, BooleanSupplier condition) {
+        public void inTimeFinishingIf(Measure<Time> interval, BooleanSupplier condition) {
             time = interval;
             stopCondition = condition;
         }

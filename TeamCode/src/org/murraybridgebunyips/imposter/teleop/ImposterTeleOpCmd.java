@@ -16,6 +16,7 @@ import org.murraybridgebunyips.imposter.components.ImposterConfig;
 
 import static org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds;
 
+/** bunyipslib virtual testing ground */
 @TeleOp(name = "TeleOp w/ Cmd", group = "VIRTUAL_BUNYIPSFTC")
 public class ImposterTeleOpCmd extends CommandBasedBunyipsOpMode {
     private ImposterConfig config = new ImposterConfig();
@@ -32,10 +33,15 @@ public class ImposterTeleOpCmd extends CommandBasedBunyipsOpMode {
 
     @Override
     protected void assignCommands() {
-        drive.setDefaultTask(new HolonomicDriveTask<>(gamepad1, drive, () -> false));
+        drive.setDefaultTask(new HolonomicDriveTask(gamepad1, drive, () -> false));
         driver().whenPressed(Controls.A)
                 .run(new ContinuousTask(() -> addTelemetry("toggle is on")))
-                .finishingWhen(() -> gamepad1.getDebounced(Controls.A));
+                .finishingIf(() -> gamepad1.getDebounced(Controls.A));
+    }
+
+    @Override
+    protected void periodic() {
+        ss1.update();
     }
 
     class Thing extends SequentialTaskGroup {

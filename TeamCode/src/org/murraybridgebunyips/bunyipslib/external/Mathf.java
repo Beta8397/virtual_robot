@@ -2,12 +2,17 @@ package org.murraybridgebunyips.bunyipslib.external;
 
 import static org.murraybridgebunyips.bunyipslib.external.units.Units.Degrees;
 import static org.murraybridgebunyips.bunyipslib.external.units.Units.Radians;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds;
+
+import androidx.annotation.NonNull;
 
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.util.MathUtil;
 
+import org.murraybridgebunyips.bunyipslib.Reference;
 import org.murraybridgebunyips.bunyipslib.external.units.Angle;
 import org.murraybridgebunyips.bunyipslib.external.units.Measure;
+import org.murraybridgebunyips.bunyipslib.external.units.Time;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -431,37 +436,42 @@ public final class Mathf {
      *
      * @param current         The current position.
      * @param target          The position we want to be at.
-     * @param currentVelocity The current velocity.
+     * @param currentVelocity The current velocity of the current position moving towards the target.
+     *                        This ref is modified by this function and should be passed back into it on subsequent calls.
      * @param smoothTime      Approximately the time it will take to reach the target.
      * @param maxSpeed        The maximum speed.
      * @param deltaTime       The time since the last call to this method.
-     * @return An array containing the new position and the new velocity.
+     * @return The new position following the smooth damp. The new velocity is stored in the currentVelocity reference,
+     * for when this method is called again. Any clamping of this value to minimum limits is left to your discretion.
      */
-    public static double[] smoothDamp(double current, double target, double currentVelocity, double smoothTime, double maxSpeed, double deltaTime) {
-        // Based on Game Programming Gems 4 Chapter 1.10
-        double max = Math.max(0.0001F, smoothTime);
-        double omega = 2.0 / max;
+    public static double smoothDamp(double current, double target, @NonNull Reference<Double> currentVelocity, Measure<Time> smoothTime, double maxSpeed, Measure<Time> deltaTime) {
+        double t = smoothTime.in(Seconds);
+        double dt = deltaTime.in(Seconds);
+        double omega = 2.0 / t;
 
-        double x = omega * deltaTime;
+        // Exponential decay function
+        double x = omega * dt;
         double exp = 1.0 / (1.0 + x + 0.48 * x * x + 0.235 * x * x * x);
         double change = current - target;
 
         // Clamp maximum speed
-        double maxChange = maxSpeed * max;
+        double maxChange = maxSpeed * t;
         change = clamp(change, -maxChange, maxChange);
         double v = current - change;
 
-        double temp = (currentVelocity + omega * change) * deltaTime;
-        double v1 = (currentVelocity - omega * temp) * exp;
+        currentVelocity.ifNotPresent(() -> currentVelocity.set(0.0));
+
+        double temp = (currentVelocity.require() + omega * change) * dt;
+        currentVelocity.set((currentVelocity.require() - omega * temp) * exp);
         double output = v + (change + temp) * exp;
 
         // Prevent overshooting
         if (target - current > 0.0 == output > target) {
             output = target;
-            v1 = (output - target) / deltaTime;
+            currentVelocity.set((output - target) / dt);
         }
 
-        return new double[]{output, v1};
+        return output;
     }
 
     /**
@@ -469,15 +479,18 @@ public final class Mathf {
      *
      * @param current         The current position.
      * @param target          The position we want to be at.
-     * @param currentVelocity The current velocity.
+     * @param currentVelocity The current velocity of the current position moving towards the target.
+     *                        This ref is modified by this function and should be passed back into it on subsequent calls.
      * @param smoothTime      Approximately the time it will take to reach the target.
      * @param maxSpeed        The maximum speed.
      * @param deltaTime       The time since the last call to this method.
-     * @return An array containing the new position and the new velocity.
+     * @return The new position following the smooth damp. The new velocity is stored in the currentVelocity reference,
+     * for when this method is called again. Any clamping of this value to minimum limits is left to your discretion.
      */
-    public static float[] smoothDamp(float current, float target, float currentVelocity, float smoothTime, float maxSpeed, float deltaTime) {
-        double[] res = smoothDamp((double) current, target, currentVelocity, smoothTime, maxSpeed, deltaTime);
-        return new float[]{(float) res[0], (float) res[1]};
+
+    public static float smoothDamp(float current, float target, Reference<Double> currentVelocity, Measure<Time> smoothTime, float maxSpeed, Measure<Time> deltaTime) {
+        double res = smoothDamp((double) current, target, currentVelocity, smoothTime, maxSpeed, deltaTime);
+        return (float) res;
     }
 
     /**
@@ -485,16 +498,18 @@ public final class Mathf {
      *
      * @param current         The current angle.
      * @param target          The angle we want to be at.
-     * @param currentVelocity The current angular velocity.
+     * @param currentVelocity The current angular velocity of the current position moving towards the target.
+     *                        This ref is modified by this function and should be passed back into it on subsequent calls.
      * @param smoothTime      Approximately the time it will take to reach the target.
-     * @param maxSpeed        The maximum angular speed.
+     * @param maxSpeed        The maximum speed.
      * @param deltaTime       The time since the last call to this method.
-     * @return An array containing the new angle and the new angular velocity.
+     * @return The new angle following the smooth damp. The new ang. velocity is stored in the currentVelocity reference,
+     * for when this method is called again. Any clamping of this value to minimum limits is left to your discretion.
      */
-    @SuppressWarnings("unchecked")
-    public static Measure<Angle>[] smoothDampAngle(Measure<Angle> current, Measure<Angle> target, double currentVelocity, double smoothTime, double maxSpeed, double deltaTime) {
-        double[] res = smoothDamp(current.in(Degrees), current.plus(deltaAngle(current, target)).in(Degrees), currentVelocity, smoothTime, maxSpeed, deltaTime);
-        return new Measure[]{Degrees.of(res[0]), Degrees.of(res[1])};
+
+    public static Measure<Angle> smoothDampAngle(Measure<Angle> current, Measure<Angle> target, Reference<Double> currentVelocity, Measure<Time> smoothTime, double maxSpeed, Measure<Time> deltaTime) {
+        double res = smoothDamp(current.in(Degrees), current.plus(deltaAngle(current, target)).in(Degrees), currentVelocity, smoothTime, maxSpeed, deltaTime);
+        return Degrees.of(res);
     }
 
     /**

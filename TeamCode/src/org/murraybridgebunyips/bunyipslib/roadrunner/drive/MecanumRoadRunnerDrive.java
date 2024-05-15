@@ -69,8 +69,8 @@ public class MecanumRoadRunnerDrive extends com.acmerobotics.roadrunner.drive.Me
         follower = new HolonomicPIDVAFollower(coefficients.TRANSLATIONAL_PID, coefficients.TRANSLATIONAL_PID, coefficients.HEADING_PID,
                 new Pose2d(0.5, 0.5, Math.toRadians(5.0)), 0.5);
 
-        VEL_CONSTRAINT = RoadRunnerDrive.getVelocityConstraint(constants.MAX_VEL, constants.MAX_ANG_VEL, constants.TRACK_WIDTH);
-        ACCEL_CONSTRAINT = RoadRunnerDrive.getAccelerationConstraint(constants.MAX_ACCEL);
+        VEL_CONSTRAINT = getVelocityConstraint(constants.MAX_VEL, constants.MAX_ANG_VEL, constants.TRACK_WIDTH);
+        ACCEL_CONSTRAINT = getAccelerationConstraint(constants.MAX_ACCEL);
 
         batteryVoltageSensor = voltageSensor.iterator().next();
 

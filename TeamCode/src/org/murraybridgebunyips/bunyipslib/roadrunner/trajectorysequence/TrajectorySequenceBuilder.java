@@ -1201,6 +1201,72 @@ public class TrajectorySequenceBuilder<T extends TrajectorySequenceBuilder<T>> {
     }
 
     /**
+     * Set the maximum angular velocity for the next builder instructions.
+     *
+     * @param maxAngVel The maximum angular velocity (radians/sec)
+     * @return The builder
+     */
+    public T setAngVel(double maxAngVel) {
+        currentTurnConstraintMaxAngVel = maxAngVel;
+        return (T) this;
+    }
+
+    /**
+     * Set the maximum angular velocity for the next builder instructions.
+     *
+     * @param maxAngVel The maximum angular velocity
+     * @param velUnit   The unit of the maximum angular velocity (will be converted to radians/sec)
+     * @return The builder
+     */
+    public T setAngVel(double maxAngVel, Velocity<Angle> velUnit) {
+        double v = RadiansPerSecond.convertFrom(maxAngVel, velUnit);
+        return setAngVel(v);
+    }
+
+    /**
+     * Set the maximum angular acceleration for the next builder instructions.
+     *
+     * @param maxAngAccel The maximum angular acceleration (radians/sec^2)
+     * @return The builder
+     */
+    public T setAngAccel(double maxAngAccel) {
+        currentTurnConstraintMaxAngAccel = maxAngAccel;
+        return (T) this;
+    }
+
+    /**
+     * Set the maximum angular acceleration for the next builder instructions.
+     *
+     * @param maxAngAccel The maximum angular acceleration
+     * @param accelUnit   The unit of the maximum angular acceleration (will be converted to radians/sec^2)
+     * @return The builder
+     */
+    public T setAngAccel(double maxAngAccel, Velocity<Velocity<Angle>> accelUnit) {
+        double a = RadiansPerSecond.per(Second).convertFrom(maxAngAccel, accelUnit);
+        return setAngAccel(a);
+    }
+
+    /**
+     * Reset the angular velocity to the base angular velocity.
+     *
+     * @return The builder
+     */
+    public T resetAngVel() {
+        currentTurnConstraintMaxAngVel = baseTurnConstraintMaxAngVel;
+        return (T) this;
+    }
+
+    /**
+     * Reset the angular acceleration to the base angular acceleration.
+     *
+     * @return The builder
+     */
+    public T resetAngAccel() {
+        currentTurnConstraintMaxAngAccel = baseTurnConstraintMaxAngAccel;
+        return (T) this;
+    }
+
+    /**
      * Add a temporal marker at the current duration to run a callback at that time.
      *
      * @param callback The callback to run

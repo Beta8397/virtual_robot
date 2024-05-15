@@ -5,6 +5,7 @@ import static org.murraybridgebunyips.bunyipslib.external.units.Units.Nanosecond
 
 import androidx.annotation.NonNull;
 
+import org.murraybridgebunyips.bunyipslib.external.units.Measure;
 import org.murraybridgebunyips.bunyipslib.external.units.Time;
 
 /**
@@ -17,12 +18,12 @@ public class MovingAverageTimer {
     // A ring buffer is used to keep track of a moving average
     private final int ringBufferSize;
     private final long[] loopTimeRingBuffer;
-    private final String avgFormatStr;
     private final String toStringFormatStr;
     private final Time formatResolution;
     private int ringBufferIndex;
     private long loopCount;
     private long movingTotal;
+    private long loopTime;
     private long previousTime;
     private long runningTotal;
     private double movingAverage;
@@ -62,8 +63,6 @@ public class MovingAverageTimer {
         loopTimeRingBuffer = new long[ringBufferSize];
 
         String hdr = String.format("\n%-12s%-12s%-12s%-12s", "Loops", "TotalTime", "MovAvg", "Avg");
-
-        avgFormatStr = "%3.3f" + formatStringResolution.symbol();
         toStringFormatStr = hdr + " " + formatStringResolution.name() + "\n%-12d%-12.3f%-12.3f%-12.3f\n min        %-12.3f%-12.3f%-12.3f\n max        %-12.3f%-12.3f%-12.3f";
         formatResolution = formatStringResolution;
     }
@@ -85,7 +84,7 @@ public class MovingAverageTimer {
      */
     public void update() {
         long now = System.nanoTime();
-        long loopTime = now - previousTime;
+        loopTime = now - previousTime;
         previousTime = now;
 
         if (loopCount > 0) {
@@ -137,7 +136,7 @@ public class MovingAverageTimer {
     /**
      * @return the number of loops that have been counted
      */
-    public long count() {
+    public long loopCount() {
         return loopCount;
     }
 
@@ -150,94 +149,78 @@ public class MovingAverageTimer {
     }
 
     /**
-     * @param unit the time unit to return the loops per unit in
      * @return the moving average loop time
      */
-    public double movingAverage(Time unit) {
-        return Nanoseconds.of(movingAverage).in(unit);
+    public Measure<Time> movingAverageLoopTime() {
+        return Nanoseconds.of(movingAverage);
     }
 
     /**
-     * @param unit the time unit to return the loops per unit in
      * @return the minimum moving average loop time
      */
-    public double minMovingAverage(Time unit) {
-        return Nanoseconds.of(minMovingAverage).in(unit);
+    public Measure<Time> minMovingAverageLoopTime() {
+        return Nanoseconds.of(minMovingAverage);
     }
 
     /**
-     * @param unit the time unit to return the loops per unit in
      * @return the maximum moving average loop time
      */
-    public double maxMovingAverage(Time unit) {
-        return Nanoseconds.of(maxMovingAverage).in(unit);
+    public Measure<Time> maxMovingAverageLoopTime() {
+        return Nanoseconds.of(maxMovingAverage);
     }
 
     /**
-     * @return A string representation of the moving average loop time based on the format resolution
-     */
-    public String movingAverageString() {
-        return String.format(avgFormatStr, movingAverage);
-    }
-
-    /**
-     * @param unit the time unit to return the loops per unit in
      * @return the average loop time
      */
-    public double average(Time unit) {
-        return Nanoseconds.of(average).in(unit);
+    public Measure<Time> averageLoopTime() {
+        return Nanoseconds.of(average);
     }
 
     /**
-     * @param unit the time unit to return the loops per unit in
      * @return the minimum average loop time
      */
-    public double minAverage(Time unit) {
-        return Nanoseconds.of(minAverage).in(unit);
+    public Measure<Time> minAverageLoopTime() {
+        return Nanoseconds.of(minAverage);
     }
 
     /**
-     * @param unit the time unit to return the loops per unit in
      * @return the maximum average loop time
      */
-    public double maxAverage(Time unit) {
-        return Nanoseconds.of(maxAverage).in(unit);
+    public Measure<Time> maxAverageLoopTime() {
+        return Nanoseconds.of(maxAverage);
     }
 
     /**
-     * @param unit the time unit to return the loops per unit in
      * @return the minimum loop time
      */
-    public double minLoopTime(Time unit) {
-        return Nanoseconds.of(minLoopTime).in(unit);
+    public Measure<Time> minLoopTime() {
+        return Nanoseconds.of(minLoopTime);
     }
 
     /**
-     * @param unit the time unit to return the loops per unit in
      * @return the maximum loop time
      */
-    public double maxLoopTime(Time unit) {
-        return Nanoseconds.of(maxLoopTime).in(unit);
+    public Measure<Time> maxLoopTime() {
+        return Nanoseconds.of(maxLoopTime);
     }
 
     /**
-     * @param unit the time unit to return the loops per unit in
      * @return the total time elapsed
      */
-    public double elapsedTime(Time unit) {
-        return Nanoseconds.of(runningTotal).in(unit);
+    public Measure<Time> elapsedTime() {
+        return Nanoseconds.of(runningTotal);
     }
 
     /**
-     * @return A string representation of the average loop time based on the format resolution
+     * @return the current loop time (time since the last update of this timer)
      */
-    public String averageString() {
-        return String.format(avgFormatStr, average);
+    public Measure<Time> deltaTime() {
+        return Nanoseconds.of(loopTime);
     }
 
     @NonNull
     @Override
     public String toString() {
-        return String.format(toStringFormatStr, loopCount, elapsedTime(formatResolution), movingAverage, average, minLoopTime(formatResolution), minMovingAverage, minAverage, maxLoopTime(formatResolution), maxMovingAverage, maxAverage);
+        return String.format(toStringFormatStr, loopCount, elapsedTime().in(formatResolution), movingAverage, average, minLoopTime().in(formatResolution), minMovingAverage, minAverage, maxLoopTime().in(formatResolution), maxMovingAverage, maxAverage);
     }
 }

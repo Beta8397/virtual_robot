@@ -17,11 +17,10 @@ import java.util.function.Supplier;
  * Left stick controls translation, right stick controls rotation.
  * This task is designed to be used as a default task, other tasks will override it.
  *
- * @param <T> The type of the MecanumDrive to use
  * @author Lucas Bubner, 2024
  */
-public class HolonomicDriveTask<T extends BunyipsSubsystem> extends ForeverTask {
-    private final T drive;
+public class HolonomicDriveTask extends ForeverTask {
+    private final BunyipsSubsystem drive;
     private final Supplier<Float> x;
     private final Supplier<Float> y;
     private final Supplier<Float> r;
@@ -33,12 +32,12 @@ public class HolonomicDriveTask<T extends BunyipsSubsystem> extends ForeverTask 
      * @param xSupplier           The supplier for the x-axis input
      * @param ySupplier           The supplier for the y-axis input
      * @param rSupplier           The supplier for the rotation input
-     * @param mecanumDrive        The MecanumDrive to use for driving
+     * @param mecanumDrive        The MecanumDrive to use for driving, must be a MecanumDrive or CartesianMecanumDrive
      * @param fieldCentricEnabled A BooleanSupplier that returns whether field centric drive is enabled,
      *                            this will only work on a MecanumDrive that supports dynamic field-centric
      *                            drive switching, such as the RoadRunner-integrated MecanumDrive
      */
-    public HolonomicDriveTask(Supplier<Float> xSupplier, Supplier<Float> ySupplier, Supplier<Float> rSupplier, @NotNull T mecanumDrive, BooleanSupplier fieldCentricEnabled) {
+    public HolonomicDriveTask(Supplier<Float> xSupplier, Supplier<Float> ySupplier, Supplier<Float> rSupplier, @NotNull BunyipsSubsystem mecanumDrive, BooleanSupplier fieldCentricEnabled) {
         super(mecanumDrive, false);
         if (!(mecanumDrive instanceof MecanumDrive) && !(mecanumDrive instanceof CartesianMecanumDrive))
             throw new EmergencyStop("HolonomicDriveTask must be used with a holonomic drivetrain");
@@ -54,12 +53,12 @@ public class HolonomicDriveTask<T extends BunyipsSubsystem> extends ForeverTask 
      * Constructor for HolonomicDriveTask using a default Mecanum binding.
      *
      * @param driver              The gamepad to use for driving
-     * @param mecanumDrive        The MecanumDrive to use for driving
+     * @param mecanumDrive        The MecanumDrive to use for driving, must be a MecanumDrive or CartesianMecanumDrive
      * @param fieldCentricEnabled A BooleanSupplier that returns whether field centric drive is enabled,
      *                            this will only work on a MecanumDrive that supports dynamic field-centric
      *                            drive switching, such as the RoadRunner-integrated MecanumDrive
      */
-    public HolonomicDriveTask(Gamepad driver, @NotNull T mecanumDrive, BooleanSupplier fieldCentricEnabled) {
+    public HolonomicDriveTask(Gamepad driver, @NotNull BunyipsSubsystem mecanumDrive, BooleanSupplier fieldCentricEnabled) {
         this(() -> driver.left_stick_x, () -> driver.left_stick_y, () -> driver.right_stick_x, mecanumDrive, fieldCentricEnabled);
     }
 
