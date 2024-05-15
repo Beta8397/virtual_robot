@@ -1,6 +1,6 @@
 package virtual_robot.robots.classes;
 
-import com.qualcomm.robotcore.hardware.DcMotorExImpl;
+import com.qualcomm.robotcore.hardware.DcMotorImplEx;
 import com.qualcomm.robotcore.hardware.DeadWheelEncoder;
 import com.qualcomm.robotcore.hardware.DigitalChannelImpl;
 import com.qualcomm.robotcore.hardware.ServoImpl;
@@ -66,8 +66,8 @@ public class QQ_Bot extends MecanumPhysicsBase {
         hardwareMap.put("claw", new ServoImpl());
         hardwareMap.put("horizontal", new ServoImpl());
 
-        hardwareMap.put("right_lift_motor", new DcMotorExImpl(MotorType.Gobilda137));
-        hardwareMap.put("left_lift_motor", new DcMotorExImpl(MotorType.Gobilda137));
+        hardwareMap.put("right_lift_motor", new DcMotorImplEx(MotorType.Gobilda137));
+        hardwareMap.put("left_lift_motor", new DcMotorImplEx(MotorType.Gobilda137));
         hardwareMap.put("cone_detector", controller.new ColorSensorImpl());
         hardwareMap.put("lift_switch", new DigitalChannelImpl());
         String[] encoderNames = new String[]{"enc_right", "enc_left", "enc_x"};

@@ -1,5 +1,8 @@
 package org.murraybridgebunyips.bunyipslib;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
@@ -25,8 +28,8 @@ public final class Text {
      * @param objs    The objects to insert into the string
      * @return The formatted string
      */
-    public static String formatString(String fstring, List<Object> objs) {
-        if (objs.isEmpty())
+    public static String formatString(@NonNull String fstring, @Nullable List<Object> objs) {
+        if (objs == null || objs.isEmpty())
             return fstring;
         // Replace all % with the strings in order
         int occurrences = 0;
@@ -64,7 +67,7 @@ public final class Text {
      * @param objs    The objects to insert into the string
      * @return The formatted string
      */
-    public static String formatString(String fstring, Object... objs) {
+    public static String formatString(@NonNull String fstring, @Nullable Object... objs) {
         return formatString(fstring, Arrays.asList(objs));
     }
 
@@ -73,9 +76,9 @@ public final class Text {
      *
      * @param num      The number to round
      * @param thDigits The number of decimal places to use after the decimal point
-     * @return The rounded number
+     * @return The rounded number, or 0 if the number is null
      */
-    public static double round(double num, int thDigits) {
+    public static double round(@Nullable Double num, int thDigits) {
         return round(num, thDigits, -1);
     }
 
@@ -84,10 +87,12 @@ public final class Text {
      *
      * @param num      The number to round
      * @param thDigits The number of decimal places to use after the decimal point
-     * @return The rounded number
+     * @return The rounded number, or 0 if the number is null
      */
-    public static float round(float num, int thDigits) {
-        return (float) round((double) num, thDigits, -1);
+    public static float round(@Nullable Float num, int thDigits) {
+        if (num == null)
+            return 0;
+        return (float) round(Double.valueOf(num), thDigits, -1);
     }
 
     /**
@@ -96,10 +101,12 @@ public final class Text {
      * @param num      The number to round
      * @param thDigits The number of decimal places to use after the decimal point
      * @param sigFigs  The number of significant figures to use
-     * @return The rounded number
+     * @return The rounded number, or 0 if the number is null
      */
-    public static float round(float num, int thDigits, int sigFigs) {
-        return (float) round((double) num, thDigits, sigFigs);
+    public static float round(@Nullable Float num, int thDigits, int sigFigs) {
+        if (num == null)
+            return 0;
+        return (float) round(Double.valueOf(num), thDigits, sigFigs);
     }
 
     /**
@@ -108,12 +115,13 @@ public final class Text {
      * @param num      The number to round
      * @param thDigits The number of decimal places to use after the decimal point
      * @param sigFigs  The number of significant figures to use
-     * @return The rounded number
+     * @return The rounded number, or 0 if the number is null, or 0 if the number is null
      */
-    public static double round(double num, int thDigits, int sigFigs) {
-        if (thDigits == 0) {
+    public static double round(@Nullable Double num, int thDigits, int sigFigs) {
+        if (num == null)
+            return 0;
+        if (thDigits == 0)
             return Math.round(num);
-        }
         BigDecimal bd = new BigDecimal(Double.toString(num));
         bd = bd.setScale(thDigits, RoundingMode.HALF_UP);
         if (sigFigs != -1)

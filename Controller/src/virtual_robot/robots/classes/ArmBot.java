@@ -1,7 +1,7 @@
 package virtual_robot.robots.classes;
 
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorExImpl;
+import com.qualcomm.robotcore.hardware.DcMotorImplEx;
 import com.qualcomm.robotcore.hardware.ServoImpl;
 import com.qualcomm.robotcore.hardware.configuration.MotorType;
 import javafx.fxml.FXML;
@@ -9,7 +9,6 @@ import javafx.scene.Group;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
-import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import org.dyn4j.collision.CategoryFilter;
 import org.dyn4j.dynamics.Body;
@@ -21,7 +20,6 @@ import virtual_robot.controller.VirtualField;
 import virtual_robot.dyn4j.Dyn4jUtil;
 import virtual_robot.dyn4j.FixtureData;
 import virtual_robot.dyn4j.Slide;
-import virtual_robot.game_elements.classes.Freight;
 import virtual_robot.game_elements.classes.WobbleGoal;
 
 import java.util.HashMap;
@@ -48,7 +46,7 @@ public class ArmBot extends MecanumPhysicsBase {
     DcMotorImpl methods (such as update()) that are intended for internal use, and are not part of the
     DcMotor interface. The drive motors are stored in an array of DcMotorImpl.
      */
-    private DcMotorExImpl armMotor = null;
+    private DcMotorImplEx armMotor = null;
 
     //Servo to control the hand at the end of the arm. Note use of ServoImpl class rather than Servo interface.
     private ServoImpl handServo = null;
@@ -117,7 +115,7 @@ public class ArmBot extends MecanumPhysicsBase {
         //Temporarily activate the hardware map to allow calls to "get"
         hardwareMap.setActive(true);
 
-        armMotor = (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "arm_motor");
+        armMotor = (DcMotorImplEx)hardwareMap.get(DcMotorEx.class, "arm_motor");
         armMotor.setActualPositionLimits(0, 2240);
         armMotor.setPositionLimitsEnabled(true);
 
@@ -191,7 +189,7 @@ public class ArmBot extends MecanumPhysicsBase {
         super.createHardwareMap();
 
         //Add the arm motor using HardwareMap.put(...) method
-        hardwareMap.put("arm_motor", new DcMotorExImpl(MotorType.Neverest40));
+        hardwareMap.put("arm_motor", new DcMotorImplEx(MotorType.Neverest40));
 
         //Add the ServoImpl object
         hardwareMap.put("hand_servo", new ServoImpl());

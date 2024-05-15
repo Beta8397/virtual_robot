@@ -3,7 +3,7 @@ package virtual_robot.robots.classes;
 import com.qualcomm.hardware.bosch.BNO055IMUImpl;
 import com.qualcomm.hardware.bosch.BNO055IMUNew;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorExImpl;
+import com.qualcomm.robotcore.hardware.DcMotorImplEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.configuration.MotorType;
@@ -28,7 +28,7 @@ import virtual_robot.util.AngleUtils;
 public abstract class SquareOmniPhysicsBase extends VirtualBot {
 
     public final MotorType MOTOR_TYPE;
-    private DcMotorExImpl[] motors = null;
+    private DcMotorImplEx[] motors = null;
     private BNO055IMUImpl imu = null;
     BNO055IMUNew imuNew = null;
     private VirtualRobotController.ColorSensorImpl colorSensor = null;
@@ -74,11 +74,11 @@ public abstract class SquareOmniPhysicsBase extends VirtualBot {
     public void initialize(){
         super.initialize();
         hardwareMap.setActive(true);
-        motors = new DcMotorExImpl[]{
-                (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "left_motor"),
-                (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "right_motor"),
-                (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "front_motor"),
-                (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "back_motor")
+        motors = new DcMotorImplEx[]{
+                (DcMotorImplEx) hardwareMap.get(DcMotorEx.class, "left_motor"),
+                (DcMotorImplEx) hardwareMap.get(DcMotorEx.class, "right_motor"),
+                (DcMotorImplEx) hardwareMap.get(DcMotorEx.class, "front_motor"),
+                (DcMotorImplEx) hardwareMap.get(DcMotorEx.class, "back_motor")
         };
         distanceSensors = new VirtualRobotController.DistanceSensorImpl[]{
                 hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "front_distance"),
@@ -135,7 +135,7 @@ public abstract class SquareOmniPhysicsBase extends VirtualBot {
     protected void createHardwareMap() {
         hardwareMap = new HardwareMap();
         String[] motorNames = new String[]{"left_motor", "right_motor", "front_motor", "back_motor"};
-        for (String name : motorNames) hardwareMap.put(name, new DcMotorExImpl(MOTOR_TYPE));
+        for (String name : motorNames) hardwareMap.put(name, new DcMotorImplEx(MOTOR_TYPE));
         String[] distNames = new String[]{"front_distance", "left_distance", "back_distance", "right_distance"};
         for (String name : distNames) hardwareMap.put(name, controller.new DistanceSensorImpl());
         hardwareMap.put("imu", new BNO055IMUImpl(this, 10));

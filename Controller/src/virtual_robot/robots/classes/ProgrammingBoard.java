@@ -36,7 +36,7 @@ import virtual_robot.util.AngleUtils;
 public class ProgrammingBoard extends VirtualBot {
 
     private MotorType MOTOR_TYPE = MotorType.Neverest40;
-    private DcMotorExImpl motor = null;
+    private DcMotorImplEx motor = null;
     private BNO055IMUImpl imu = null;
     private BNO055IMUNew imuNew = null;
     private PassiveColorSensorImpl colorSensor = null;
@@ -100,7 +100,7 @@ public class ProgrammingBoard extends VirtualBot {
         super.initialize();
 
         hardwareMap.setActive(true);
-        motor = (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "motor");
+        motor = (DcMotorImplEx)hardwareMap.get(DcMotorEx.class, "motor");
         imu = (BNO055IMUImpl) hardwareMap.get(BNO055IMU.class, "imu");
         imuNew = hardwareMap.get(BNO055IMUNew.class, "imu");
         colorSensor = (PassiveColorSensorImpl)hardwareMap.colorSensor.get("sensor_color_distance");
@@ -125,7 +125,7 @@ public class ProgrammingBoard extends VirtualBot {
 
     protected void createHardwareMap(){
         hardwareMap = new HardwareMap();
-        hardwareMap.put("motor", new DcMotorExImpl(MOTOR_TYPE));
+        hardwareMap.put("motor", new DcMotorImplEx(MOTOR_TYPE));
         hardwareMap.put("imu", new BNO055IMUImpl(this, 10));
         hardwareMap.put("imu", new BNO055IMUNew(this, 10));
         hardwareMap.put("sensor_color_distance", new PassiveColorSensorImpl());

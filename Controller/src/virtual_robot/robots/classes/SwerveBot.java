@@ -14,7 +14,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import virtual_robot.config.Config;
 import virtual_robot.controller.*;
 import virtual_robot.util.AngleUtils;
-import virtual_robot.util.Vector2D;
 
 /**
  * For internal use only. Represents a robot with four swerve drives, color sensor, four distance sensors,
@@ -27,7 +26,7 @@ import virtual_robot.util.Vector2D;
 public class SwerveBot extends VirtualBot {
 
     private final MotorType MOTOR_TYPE = MotorType.Neverest40;
-    private DcMotorExImpl[] motors = null;
+    private DcMotorImplEx[] motors = null;
     private CRServoImpl[] crServos = null;
     private DeadWheelEncoder[] steerEncoders = null;
     private BNO055IMUImpl imu = null;
@@ -64,11 +63,11 @@ public class SwerveBot extends VirtualBot {
         super.initialize();
 
         hardwareMap.setActive(true);
-        motors = new DcMotorExImpl[]{
-                (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "back_left_motor"),
-                (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "front_left_motor"),
-                (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "front_right_motor"),
-                (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "back_right_motor")
+        motors = new DcMotorImplEx[]{
+                (DcMotorImplEx)hardwareMap.get(DcMotorEx.class, "back_left_motor"),
+                (DcMotorImplEx)hardwareMap.get(DcMotorEx.class, "front_left_motor"),
+                (DcMotorImplEx)hardwareMap.get(DcMotorEx.class, "front_right_motor"),
+                (DcMotorImplEx)hardwareMap.get(DcMotorEx.class, "back_right_motor")
         };
         crServos = new CRServoImpl[] {
                 (CRServoImpl)hardwareMap.get(CRServoImpl.class, "back_left_crservo"),
@@ -116,7 +115,7 @@ public class SwerveBot extends VirtualBot {
         String[] motorNames = new String[] {"back_left_motor", "front_left_motor", "front_right_motor", "back_right_motor"};
         String[] encoderNames = new String[] {"back_left_encoder", "front_left_encoder", "front_right_encoder", "back_right_encoder"};
         String[] crservoNames = new String[] {"back_left_crservo", "front_left_crservo", "front_right_crservo", "back_right_crservo"};
-        for (String name: motorNames) hardwareMap.put(name, new DcMotorExImpl(MOTOR_TYPE));
+        for (String name: motorNames) hardwareMap.put(name, new DcMotorImplEx(MOTOR_TYPE));
         for (String name: crservoNames) hardwareMap.put(name, new CRServoImpl(360));
         for (String name: encoderNames) hardwareMap.put(name, new DeadWheelEncoder(MOTOR_TYPE));
         String[] distNames = new String[]{"front_distance", "left_distance", "back_distance", "right_distance"};

@@ -10,14 +10,18 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
  * This is included to support existing Team Code that uses Bulk Cache Reads.
  */
 
-public class DcMotorExImpl extends DcMotorImpl implements DcMotorEx{
+public class DcMotorImplEx extends DcMotorImpl implements DcMotorEx{
 
     /**
      * For internal use only.
      * @param motorType
      */
-    public DcMotorExImpl(MotorType motorType){
+    public DcMotorImplEx(MotorType motorType){
         super(motorType);
+    }
+
+    public DcMotorImplEx(DcMotorController controller, int port) {
+        super(MotorType.RevUltraPlanetaryOneToOne);
     }
 
     @Override

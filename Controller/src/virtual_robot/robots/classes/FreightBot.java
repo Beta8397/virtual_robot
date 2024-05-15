@@ -4,7 +4,6 @@ import com.qualcomm.robotcore.hardware.*;
 import com.qualcomm.robotcore.hardware.configuration.MotorType;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
-import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
@@ -21,7 +20,6 @@ import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.NarrowphaseCollisionData;
 import org.dyn4j.world.listener.CollisionListenerAdapter;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import virtual_robot.controller.BotConfig;
 import virtual_robot.controller.Filters;
 import virtual_robot.controller.Game;
 import virtual_robot.controller.VirtualField;
@@ -56,8 +54,8 @@ public class FreightBot extends MecanumPhysicsBase implements ControlsElements {
     DcMotorImpl methods (such as update()) that are intended for internal use, and are not part of the
     DcMotor interface. The drive motors are stored in an array of DcMotorImpl.
      */
-    private DcMotorExImpl armMotor = null;
-    private DcMotorExImpl rotorMotor = null;
+    private DcMotorImplEx armMotor = null;
+    private DcMotorImplEx rotorMotor = null;
 
     //Servo to control the hand at the end of the arm. Note use of ServoImpl class rather than Servo interface.
     private ServoImpl handServo = null;
@@ -146,11 +144,11 @@ public class FreightBot extends MecanumPhysicsBase implements ControlsElements {
         //Temporarily activate the hardware map to allow calls to "get"
         hardwareMap.setActive(true);
 
-        armMotor = (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "arm_motor");
+        armMotor = (DcMotorImplEx)hardwareMap.get(DcMotorEx.class, "arm_motor");
         armMotor.setActualPositionLimits(0, 2240);
         armMotor.setPositionLimitsEnabled(true);
 
-        rotorMotor = hardwareMap.get(DcMotorExImpl.class, "rotor_motor");
+        rotorMotor = hardwareMap.get(DcMotorImplEx.class, "rotor_motor");
 
         //Instantiate the hand servo. Note the cast to ServoImpl.
         handServo = (ServoImpl)hardwareMap.servo.get("hand_servo");
@@ -244,13 +242,13 @@ public class FreightBot extends MecanumPhysicsBase implements ControlsElements {
         super.createHardwareMap();
 
         //Add the arm motor using HardwareMap.put(...) method
-        hardwareMap.put("arm_motor", new DcMotorExImpl(MotorType.Neverest40));
+        hardwareMap.put("arm_motor", new DcMotorImplEx(MotorType.Neverest40));
 
         //Add the ServoImpl object
         hardwareMap.put("hand_servo", new ServoImpl());
 
         //Add the Rotor motor
-        hardwareMap.put("rotor_motor", new DcMotorExImpl(MotorType.Neverest40));
+        hardwareMap.put("rotor_motor", new DcMotorImplEx(MotorType.Neverest40));
     }
 
     /**

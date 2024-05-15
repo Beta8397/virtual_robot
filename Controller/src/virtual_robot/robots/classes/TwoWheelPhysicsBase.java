@@ -4,11 +4,9 @@ import com.qualcomm.hardware.bosch.BNO055IMUImpl;
 import com.qualcomm.hardware.bosch.BNO055IMUNew;
 import com.qualcomm.robotcore.hardware.*;
 import com.qualcomm.robotcore.hardware.configuration.MotorType;
-import javafx.scene.transform.Rotate;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Vector2;
-import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import virtual_robot.config.Config;
 import virtual_robot.controller.Filters;
@@ -23,8 +21,8 @@ import virtual_robot.util.AngleUtils;
 public class TwoWheelPhysicsBase extends VirtualBot {
 
     private final MotorType MOTOR_TYPE = MotorType.Neverest40;
-    private DcMotorExImpl leftMotor = null;
-    private DcMotorExImpl rightMotor = null;
+    private DcMotorImplEx leftMotor = null;
+    private DcMotorImplEx rightMotor = null;
     private BNO055IMUImpl imu = null;
     private BNO055IMUNew imuNew = null;
     private VirtualRobotController.ColorSensorImpl colorSensor = null;
@@ -43,8 +41,8 @@ public class TwoWheelPhysicsBase extends VirtualBot {
         super.initialize();
 
         hardwareMap.setActive(true);
-        leftMotor = (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "left_motor");
-        rightMotor = (DcMotorExImpl)hardwareMap.get(DcMotorEx.class, "right_motor");
+        leftMotor = (DcMotorImplEx)hardwareMap.get(DcMotorEx.class, "left_motor");
+        rightMotor = (DcMotorImplEx)hardwareMap.get(DcMotorEx.class, "right_motor");
         distanceSensors = new VirtualRobotController.DistanceSensorImpl[]{
                 hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "front_distance"),
                 hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "left_distance"),
@@ -65,8 +63,8 @@ public class TwoWheelPhysicsBase extends VirtualBot {
 
     protected void createHardwareMap(){
         hardwareMap = new HardwareMap();
-        hardwareMap.put("left_motor", new DcMotorExImpl(MOTOR_TYPE));
-        hardwareMap.put("right_motor", new DcMotorExImpl(MOTOR_TYPE));
+        hardwareMap.put("left_motor", new DcMotorImplEx(MOTOR_TYPE));
+        hardwareMap.put("right_motor", new DcMotorImplEx(MOTOR_TYPE));
         String[] distNames = new String[]{"front_distance", "left_distance", "back_distance", "right_distance"};
         for (String name: distNames) hardwareMap.put(name, controller.new DistanceSensorImpl());
         hardwareMap.put("imu", new BNO055IMUImpl(this, 10));

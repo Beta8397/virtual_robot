@@ -111,6 +111,10 @@ abstract class RobotConfig {
                 // We can safely create a new Deadwheel instance, and we can ignore unchecked cast warnings since
                 // we have already checked the class type.
                 Deadwheel(motor) as T?
+            } else if (DcMotorRamping::class.java.isAssignableFrom(device)) {
+                // Same applies to a DcMotorRamping instance
+                val motor = hardwareMap.get(DcMotorEx::class.java, name)
+                DcMotorRamping(motor) as T
             } else {
                 hardwareMap.get(device, name)
             }

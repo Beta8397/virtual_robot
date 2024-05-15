@@ -25,9 +25,9 @@ public class ImposterSlipperyDrive extends BunyipsOpMode {
 
     @Override
     protected void activeLoop() {
-        d.speedX = Mathf.smoothDamp(d.speedX, gamepad1.lsx, x, Seconds.of(1), 1, timer.deltaTime());
-        d.speedY = Mathf.smoothDamp(d.speedY, -gamepad1.lsy, y, Seconds.of(1), 1, timer.deltaTime());
-        d.speedR = Mathf.smoothDamp(d.speedR, gamepad1.rsx, r, Seconds.of(1), 1, timer.deltaTime());
+        d.speedX = Mathf.smoothDamp(d.speedX, gamepad1.lsx, x, Seconds.of(1), 0.1, timer.deltaTime());
+        d.speedY = Mathf.smoothDamp(d.speedY, -gamepad1.lsy, y, Seconds.of(1), 0.1, timer.deltaTime());
+        d.speedR = Mathf.smoothDamp(d.speedR, gamepad1.rsx, r, Seconds.of(1), 0.1, timer.deltaTime());
         telemetry.add("velocities -> x:% y:% r:% %", round(x.get(), 3), round(y.get(), 3), round(r.get(), 3));
         d.update();
     }

@@ -3,10 +3,9 @@ package virtual_robot.robots.classes;
 import com.qualcomm.hardware.bosch.BNO055IMUImpl;
 import com.qualcomm.hardware.bosch.BNO055IMUNew;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorExImpl;
+import com.qualcomm.robotcore.hardware.DcMotorImplEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.ServoImpl;
 import com.qualcomm.robotcore.hardware.configuration.MotorType;
 
 import org.dyn4j.dynamics.Body;
@@ -27,10 +26,10 @@ import virtual_robot.util.AngleUtils;
 public class SixWheelPhysicsBase extends VirtualBot {
 
     private final MotorType MOTOR_TYPE = MotorType.Gobilda137;
-    private DcMotorExImpl leftMotorFront = null;
-    private DcMotorExImpl leftMotorBack = null;
-    private DcMotorExImpl rightMotorFront = null;
-    private DcMotorExImpl rightMotorBack = null;
+    private DcMotorImplEx leftMotorFront = null;
+    private DcMotorImplEx leftMotorBack = null;
+    private DcMotorImplEx rightMotorFront = null;
+    private DcMotorImplEx rightMotorBack = null;
     private BNO055IMUImpl imu = null;
     private BNO055IMUNew imuNew = null;
     private VirtualRobotController.ColorSensorImpl colorSensor = null;
@@ -49,10 +48,10 @@ public class SixWheelPhysicsBase extends VirtualBot {
         super.initialize();
 
         hardwareMap.setActive(true);
-        leftMotorFront = (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "left_motor_front");
-        leftMotorBack = (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "left_motor_back");
-        rightMotorFront = (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "right_motor_front");
-        rightMotorBack = (DcMotorExImpl) hardwareMap.get(DcMotorEx.class, "right_motor_back");
+        leftMotorFront = (DcMotorImplEx) hardwareMap.get(DcMotorEx.class, "left_motor_front");
+        leftMotorBack = (DcMotorImplEx) hardwareMap.get(DcMotorEx.class, "left_motor_back");
+        rightMotorFront = (DcMotorImplEx) hardwareMap.get(DcMotorEx.class, "right_motor_front");
+        rightMotorBack = (DcMotorImplEx) hardwareMap.get(DcMotorEx.class, "right_motor_back");
         distanceSensors = new VirtualRobotController.DistanceSensorImpl[]{
                 hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "front_distance"),
                 hardwareMap.get(VirtualRobotController.DistanceSensorImpl.class, "left_distance"),
@@ -73,10 +72,10 @@ public class SixWheelPhysicsBase extends VirtualBot {
 
     protected void createHardwareMap() {
         hardwareMap = new HardwareMap();
-        hardwareMap.put("left_motor_front", new DcMotorExImpl(MOTOR_TYPE));
-        hardwareMap.put("right_motor_front", new DcMotorExImpl(MOTOR_TYPE));
-        hardwareMap.put("left_motor_back", new DcMotorExImpl(MOTOR_TYPE));
-        hardwareMap.put("right_motor_back", new DcMotorExImpl(MOTOR_TYPE));
+        hardwareMap.put("left_motor_front", new DcMotorImplEx(MOTOR_TYPE));
+        hardwareMap.put("right_motor_front", new DcMotorImplEx(MOTOR_TYPE));
+        hardwareMap.put("left_motor_back", new DcMotorImplEx(MOTOR_TYPE));
+        hardwareMap.put("right_motor_back", new DcMotorImplEx(MOTOR_TYPE));
         String[] distNames = new String[]{"front_distance", "left_distance", "back_distance", "right_distance"};
         for (String name : distNames) hardwareMap.put(name, controller.new DistanceSensorImpl());
         hardwareMap.put("imu", new BNO055IMUImpl(this, 10));
