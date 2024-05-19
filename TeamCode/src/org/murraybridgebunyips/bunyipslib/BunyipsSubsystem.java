@@ -69,7 +69,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
     public void enable() {
         if (!shouldRun && !assertionFailed) {
             shouldRun = true;
-            Dbg.logd("Subsystem enabled via enable() call.");
+            Dbg.logd(getClass(), "Subsystem enabled via enable() call.");
         }
     }
 
@@ -190,14 +190,15 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
         Task task = getCurrentTask();
         if (task != null) {
             if (task == defaultTask && defaultTask.pollFinished()) {
-                throw new EmergencyStop("Default task should never finish!");
+                throw new EmergencyStop("Default task (of " + getClass().getSimpleName() + ") should never finish!");
             }
             task.run();
             // Update the state of isFinished() after running the task as it may have changed
             task.pollFinished();
             if (!task.isMuted()) {
                 Scheduler.addTaskReport(
-                        getClass().getSimpleName() + (task == defaultTask ? " (d.)" : ""),
+                        getClass().getSimpleName(),
+                        task == defaultTask,
                         task.toString(),
                         round(task.getDeltaTime().in(Seconds), 1),
                         task.getTimeout().in(Seconds)

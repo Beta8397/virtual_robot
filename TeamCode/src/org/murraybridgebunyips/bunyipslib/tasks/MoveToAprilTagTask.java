@@ -91,6 +91,7 @@ public class MoveToAprilTagTask extends Task {
             throw new EmergencyStop("MoveToAprilTagTask must be used with a drivetrain with X forward Pose/IMU info");
         this.drive = (RoadRunnerDrive) drive;
         this.aprilTag = aprilTag;
+        TARGET_TAG = targetTag;
     }
 
     /**
@@ -112,6 +113,7 @@ public class MoveToAprilTagTask extends Task {
         x = xSupplier;
         y = ySupplier;
         r = rSupplier;
+        TARGET_TAG = targetTag;
     }
 
     /**

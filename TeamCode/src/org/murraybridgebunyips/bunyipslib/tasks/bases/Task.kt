@@ -108,7 +108,7 @@ abstract class Task(
      * Get a verbose string representation of this task, including all of its properties.
      */
     fun toVerboseString(): String {
-        return name + "[${if (taskFinished) "FINISHED" else "ACTIVE"}, ${if (isRunning) deltaTime else "NOT RUNNING"}/${if (timeout.magnitude() == 0.0) "INDEFINITE" else "$timeout sec"}, ${if (dependency != null) "DEPENDENT ON <${dependency?.javaClass?.simpleName}>" else "INDEPENDENT"}, ${if (overrideDependency) "OVERRIDING" else "NON-OVERRIDING"}, ${if (mutedReport) "MUTED" else "REPORTING"}]"
+        return name + "[${if (taskFinished) "FINISHED" else "READY"}, ${if (isRunning) deltaTime else "NOT RUNNING"}/${if (timeout.magnitude() == 0.0) "INDEFINITE" else "$timeout"}, ${if (dependency != null) "DEPENDENT ON <${dependency?.javaClass?.simpleName}>" else "INDEPENDENT"}, ${if (overrideDependency) "OVERRIDING" else "NON-OVERRIDING"}, ${if (mutedReport) "MUTED" else "REPORTING"}]"
     }
 
     /**

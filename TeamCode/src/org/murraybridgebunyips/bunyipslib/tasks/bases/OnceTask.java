@@ -2,16 +2,18 @@ package org.murraybridgebunyips.bunyipslib.tasks.bases;
 
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Milliseconds;
+
 /**
  * A task that runs once and then immediately completes.
  */
 public abstract class OnceTask extends Task {
     protected OnceTask() {
-        super(INFINITE_TIMEOUT);
+        super(Milliseconds.of(1));
     }
 
     protected OnceTask(BunyipsSubsystem dependencySubsystem, boolean override) {
-        super(INFINITE_TIMEOUT, dependencySubsystem, override);
+        super(Milliseconds.of(1), dependencySubsystem, override);
     }
 
     @Override
@@ -26,7 +28,7 @@ public abstract class OnceTask extends Task {
     @Override
     protected final boolean isTaskFinished() {
         // OnceTasks may sometimes have their timeouts adjusted at runtime
-        return getTimeout().magnitude() == 0.0;
+        return getTimeout().lte(Milliseconds.of(1));
     }
 
     @Override

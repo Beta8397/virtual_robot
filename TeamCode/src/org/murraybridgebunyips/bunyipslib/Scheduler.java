@@ -38,16 +38,25 @@ public class Scheduler extends BunyipsComponent {
 
     /**
      * Used internally by subsystems and tasks to report their running status statically.
+     * This method is not intended for use by the user.
      *
-     * @param className    The class name of the subsystem or context.
-     * @param taskName     The name of the task.
-     * @param deltaTimeSec The time this task has been running in seconds
-     * @param timeoutSec   The time this task is allowed to run in seconds, 0.0 if indefinite
+     * @param className     The class name of the subsystem or context.
+     * @param isDefaultTask Whether this task is a default task.
+     * @param taskName      The name of the task.
+     * @param deltaTimeSec  The time this task has been running in seconds
+     * @param timeoutSec    The time this task is allowed to run in seconds, 0.0 if indefinite
      */
-    public static void addTaskReport(String className, String taskName, double deltaTimeSec, double timeoutSec) {
+    public static void addTaskReport(String className, boolean isDefaultTask, String taskName, double deltaTimeSec, double timeoutSec) {
         if (isMuted) return;
-        String report = formatString("% |\n    % -> %", className, taskName, deltaTimeSec);
-        reports.add(timeoutSec == 0.0 ? report + "s" : report + "/" + timeoutSec + "s");
+        String report = formatString(
+                "<small><b>%</b>% <font color='gray'>|</font> <b>%</b> -> %",
+                className,
+                isDefaultTask ? " (d.)" : "",
+                taskName,
+                deltaTimeSec
+        );
+        report += timeoutSec == 0.0 ? "s" : "/" + timeoutSec + "s";
+        reports.add(report + "</small>");
     }
 
     /**
@@ -121,7 +130,11 @@ public class Scheduler extends BunyipsComponent {
                     continue;
                 if (!task.taskToRun.isMuted() && task.activeSince != -1 && timeExceeded(task)) {
                     double deltaTime = round(task.taskToRun.getDeltaTime().in(Seconds), 1);
-                    opMode.addTelemetry("Scheduler (%) |\n    % -> %", opMode.getClass().getSimpleName(), task.taskToRun, deltaTime == 0.0 ? "active" : deltaTime + "s");
+                    opMode.addTelemetry(
+                            "<small><b>Scheduler</b> (c.) <font color='gray'>|</font> <b>%</b> -> %</small>",
+                            task.taskToRun,
+                            deltaTime == 0.0 ? "active" : deltaTime + "s"
+                    );
                 }
             }
             // Blank line to separate Scheduler information from addTelemetry()

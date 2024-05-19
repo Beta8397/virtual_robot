@@ -5,7 +5,6 @@ import static org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds;
 
 import org.murraybridgebunyips.bunyipslib.EmergencyStop;
 import org.murraybridgebunyips.bunyipslib.Scheduler;
-import org.murraybridgebunyips.bunyipslib.tasks.bases.NoTimeoutTask;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
 import java.util.ArrayList;
@@ -20,14 +19,30 @@ import java.util.HashSet;
  *
  * @author Lucas Bubner, 2024
  */
-public abstract class TaskGroup extends NoTimeoutTask {
+public abstract class TaskGroup extends Task {
     protected final ArrayList<Task> tasks = new ArrayList<>();
     private final HashSet<Task> attachedTasks = new HashSet<>();
 
     protected TaskGroup(Task... tasks) {
+        // Try to extract the highest timeout to be the timeout of this task group, however if one is infinite
+        // then the group is infinite
+        super(Arrays.stream(tasks).anyMatch(t -> t.getTimeout().magnitude() == 0.0) ? INFINITE_TIMEOUT :
+                Seconds.of(Arrays.stream(tasks).mapToDouble(t -> t.getTimeout().in(Seconds)).max().orElse(0.0)));
         this.tasks.addAll(Arrays.asList(tasks));
         if (tasks.length == 0) {
-            throw new EmergencyStop("TaskGroup created with no tasks.");
+            throw new EmergencyStop(getClass().getSimpleName() + " created with no tasks.");
+        }
+        String groupName = toString();
+        String taskGroup = getClass().getSimpleName();
+        // Avoid printing the group name if it is the same as the task group name
+        if (!groupName.equals(taskGroup)) {
+            opMode.log("<font color='gray'>%:</font> % created with % tasks.", groupName, taskGroup, this.tasks.size());
+        } else {
+            opMode.log("<font color='gray'>%:</font> Created with % tasks.", taskGroup, this.tasks.size());
+        }
+        // List subtasks
+        for (Task task : this.tasks) {
+            opMode.log("&nbsp;&nbsp;-> <font color='gray'>%<i>(t=%)</i></font>", task.toString(), task.getTimeout().magnitude() != 0.0 ? round(task.getTimeout().in(Seconds), 1) + "s" : "∞");
         }
     }
 
@@ -41,7 +56,7 @@ public abstract class TaskGroup extends NoTimeoutTask {
         });
         // Otherwise we can just run the task outright
         if (!task.hasDependency()) {
-            Scheduler.addTaskReport(toString(), task.toString(), round(task.getDeltaTime().in(Seconds), 1), task.getTimeout().in(Seconds));
+            Scheduler.addTaskReport(toString(), false, task.toString(), round(task.getDeltaTime().in(Seconds), 1), task.getTimeout().in(Seconds));
             task.run();
         }
     }

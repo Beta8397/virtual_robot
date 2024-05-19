@@ -1,6 +1,7 @@
 package org.murraybridgebunyips.bunyipslib
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
+import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.HardwareDevice
 import com.qualcomm.robotcore.hardware.HardwareMap
@@ -43,22 +44,22 @@ abstract class RobotConfig {
         onRuntime()
         if (opMode is BunyipsOpMode) {
             opMode.addTelemetry(
-                "${this.javaClass.simpleName}: Configuration completed with ${Storage.hardwareErrors.size} error(s).",
+                "<b>${this.javaClass.simpleName}</b>: Completed with ${if (Storage.hardwareErrors.size > 0) "<font color='red'>${Storage.hardwareErrors.size} error(s)</font>" else "<font color='green'>0 errors</font>"}.",
             )
         } else {
             opMode.telemetry.addData(
                 "",
-                "${this.javaClass.simpleName}: Configuration completed with ${Storage.hardwareErrors.size} error(s).",
+                "${this.javaClass.simpleName}: Completed with ${Storage.hardwareErrors.size} error(s).",
             )
         }
         if (Storage.hardwareErrors.isNotEmpty()) {
             for (error in Storage.hardwareErrors) {
                 if (opMode is BunyipsOpMode) {
-                    opMode.addRetainedTelemetry("! MISSING_DEVICE: $error")
-                    opMode.log("error: '$error' is not configured in the current saved configuration.")
+                    opMode.addRetainedTelemetry("<font color='red'><b>! MISSING_DEVICE</b></font>: $error")
+                    opMode.log("<font color='red'>error:</font> <i>$error</i> was not found in the current saved configuration.")
                 } else {
                     opMode.telemetry.addData("", "! MISSING_DEVICE: $error").setRetained(true)
-                    opMode.telemetry.log().add("error: '$error' is not configured in the current saved configuration.")
+                    opMode.telemetry.log().add("error: '$error' was not found in the current saved configuration.")
                 }
             }
         }
@@ -110,10 +111,10 @@ abstract class RobotConfig {
                 val motor = hardwareMap.get(DcMotorEx::class.java, name)
                 // We can safely create a new Deadwheel instance, and we can ignore unchecked cast warnings since
                 // we have already checked the class type.
-                Deadwheel(motor) as T?
+                Deadwheel(motor) as T
             } else if (DcMotorRamping::class.java.isAssignableFrom(device)) {
                 // Same applies to a DcMotorRamping instance
-                val motor = hardwareMap.get(DcMotorEx::class.java, name)
+                val motor = hardwareMap.get(DcMotor::class.java, name)
                 DcMotorRamping(motor) as T
             } else {
                 hardwareMap.get(device, name)

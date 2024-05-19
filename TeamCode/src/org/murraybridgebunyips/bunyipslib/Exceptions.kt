@@ -23,7 +23,7 @@ object Exceptions {
     /**
      * Handle an exception, logging it to the Driver Station and Logcat.
      * @param e The exception to handle.
-     * @param stderr The function to print logging to the Driver Station or other stderr outputs.
+     * @param stderr The function to print logging to the Driver Station or other stderr outputs that support HTML parsing.
      */
     @Throws(InterruptedException::class)
     fun handle(e: Exception, stderr: (msg: String) -> Unit) {
@@ -37,7 +37,7 @@ object Exceptions {
                 }
             }
         }
-        stderr("encountered exception! <${e.localizedMessage}>")
+        stderr("<font color='red'><b>exception caught! &lt;${e.localizedMessage}&gt;</b></font>")
         if (e.cause != null) {
             stderr("caused by: ${e.cause}")
         }
@@ -48,7 +48,7 @@ object Exceptions {
             stack = stack.substring(0, MAX_DS_STACKTRACE_CHARS - 4)
             stack += " ..."
         }
-        stderr("stacktrace (max->$MAX_DS_STACKTRACE_CHARS): $stack")
+        stderr("<small>$stack</small>")
         Dbg.error("Exception caught! Stacktrace:")
         Dbg.sendStacktrace(e)
         if (e is InterruptedException) {

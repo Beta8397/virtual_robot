@@ -1,5 +1,7 @@
 package org.murraybridgebunyips.bunyipslib.tasks
 
+import org.firstinspires.ftc.robotcore.external.Telemetry.Item
+import org.murraybridgebunyips.bunyipslib.Text.formatString
 import org.murraybridgebunyips.bunyipslib.Text.round
 import org.murraybridgebunyips.bunyipslib.external.units.Measure
 import org.murraybridgebunyips.bunyipslib.external.units.Time
@@ -12,13 +14,18 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.Task
  */
 class MessageTask(time: Measure<Time>, private val message: String) :
     Task(time), RobotTask {
+    private lateinit var item: Item
+
+    private fun buildString(): String {
+        return formatString("%/%s: %", round(deltaTime.inUnit(Seconds), 1), timeout.inUnit(Seconds), message)
+    }
 
     override fun init() {
-        // no-op
+        item = opMode.addRetainedTelemetry(buildString())
     }
 
     override fun periodic() {
-        opMode.addTelemetry("%/%s: %", round(deltaTime.inUnit(Seconds), 1), timeout.inUnit(Seconds), message)
+        item.setValue(buildString())
     }
 
     override fun isTaskFinished(): Boolean {
@@ -26,6 +33,6 @@ class MessageTask(time: Measure<Time>, private val message: String) :
     }
 
     override fun onFinish() {
-        // no-op
+        opMode.telemetry.removeRetained(item)
     }
 }

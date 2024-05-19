@@ -86,6 +86,28 @@ public class Reference<V> {
     }
 
     /**
+     * Sets the value of the reference if it is not already set.
+     *
+     * @param value the new value of the reference
+     */
+    public void setIfNotPresent(@Nullable V value) {
+        if (this.value == null) {
+            this.value = value;
+        }
+    }
+
+    /**
+     * Sets the value of the reference if it is already set.
+     *
+     * @param value the new value of the reference
+     */
+    public void setIfPresent(@Nullable V value) {
+        if (this.value != null) {
+            this.value = value;
+        }
+    }
+
+    /**
      * Checks if the reference is null.
      *
      * @return true if the reference is null, false otherwise

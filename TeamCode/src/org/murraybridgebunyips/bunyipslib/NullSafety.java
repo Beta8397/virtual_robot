@@ -56,8 +56,8 @@ public final class NullSafety {
             if (o == null) {
                 if (BunyipsOpMode.isRunning()) {
                     BunyipsOpMode opMode = BunyipsOpMode.getInstance();
-                    opMode.addRetainedTelemetry("! COM_FAULT: %", T.getSimpleName());
-                    opMode.log("error: % was disabled due to a null assertion fault.", T.getSimpleName());
+                    opMode.addRetainedTelemetry("<font color='red'><b>! COM_FAULT</b></font>: %", T.getSimpleName());
+                    opMode.log("<font color='yellow'><b>warning!</b> % was disabled due to a null assertion fault.</font>", T.getSimpleName());
                 }
                 Dbg.warn(getCallingUserCodeFunction(), "Null object passed to % failed assertion, adding to unusable components...", T.getSimpleName());
                 if (!Storage.unusableComponents.contains(T.getSimpleName()))

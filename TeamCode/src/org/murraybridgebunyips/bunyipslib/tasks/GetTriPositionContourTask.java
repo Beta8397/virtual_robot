@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.murraybridgebunyips.bunyipslib.Direction;
 import org.murraybridgebunyips.bunyipslib.external.units.Measure;
 import org.murraybridgebunyips.bunyipslib.external.units.Time;
@@ -28,6 +29,7 @@ public class GetTriPositionContourTask extends ForeverTask {
     private final ElapsedTime lockoutTimer = new ElapsedTime();
     private Measure<Time> leftSidePersistenceTime = Seconds.of(3);
     private volatile Direction position = Direction.LEFT;
+    private Telemetry.Item item;
 
     /**
      * Create a new GetTriPositionContourTask.
@@ -55,11 +57,16 @@ public class GetTriPositionContourTask extends ForeverTask {
         return position;
     }
 
+    private String buildString() {
+        return "Currently detecting position: " + position;
+    }
+
     @Override
     protected void init() {
         if (!colourThreshold.isRunning()) {
             throw new IllegalStateException("Processor not attached and running on an active vision processor");
         }
+        item = opMode.telemetry.addRetained(buildString());
     }
 
     @Override
@@ -71,11 +78,11 @@ public class GetTriPositionContourTask extends ForeverTask {
         } else if (lockoutTimer.seconds() >= leftSidePersistenceTime.in(Seconds)) {
             position = Direction.LEFT;
         }
-        opMode.addTelemetry("Currently detecting position: %", position);
+        item.setValue(buildString());
     }
 
     @Override
     protected void onFinish() {
-        // no-op
+        opMode.telemetry.removeRetained(item);
     }
 }

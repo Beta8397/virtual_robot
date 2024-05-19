@@ -17,8 +17,10 @@ import java.util.function.BooleanSupplier;
 public abstract class CommandBasedBunyipsOpMode extends BunyipsOpMode {
     private final HashSet<BunyipsSubsystem> managedSubsystems = new HashSet<>();
 
-    // Components can't be final due to runtime instantiation,
-    // so we cannot expose the scheduler directly and must use a getter.
+    // Components can't be final due to runtime instantiation, so we cannot expose the scheduler directly and must use a getter.
+    // This is for consistency with the driver() and operator() methods, which are also accessed through a getter.
+    // We technically could assign this similar to the telemetry, gamepads, and timer in BunyipsOpMode, but this is more explicit
+    // and reduces the risk of accidental overwriting of this field especially as this is a derived class.
     private Scheduler scheduler;
 
     /**
@@ -102,11 +104,13 @@ public abstract class CommandBasedBunyipsOpMode extends BunyipsOpMode {
     protected final void onInit() {
         onInitialise();
         scheduler = new Scheduler();
-        if (managedSubsystems == null || managedSubsystems.isEmpty()) {
-            throw new RuntimeException("No BunyipsSubsystems were added in the addSubsystems() method!");
-        }
-        scheduler.addSubsystems(managedSubsystems.toArray(new BunyipsSubsystem[0]));
+        boolean error = managedSubsystems == null || managedSubsystems.isEmpty();
+        if (!error)
+            scheduler.addSubsystems(managedSubsystems.toArray(new BunyipsSubsystem[0]));
         assignCommands();
+        // Ensure to always run assignCommands() even if no subsystems are added, since it may be used for other purposes
+        if (error)
+            throw new RuntimeException("No BunyipsSubsystems were added in the addSubsystems() method!");
     }
 
     @Override
@@ -126,7 +130,7 @@ public abstract class CommandBasedBunyipsOpMode extends BunyipsOpMode {
     protected abstract void onInitialise();
 
     /**
-     * Assign your scheduler commands here by accessing the {@link #scheduler()}.
+     * Assign your scheduler commands here by accessing the {@link #scheduler()} and controllers {@link #driver()} and {@link #operator()}.
      */
     protected abstract void assignCommands();
 

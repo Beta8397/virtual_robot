@@ -773,7 +773,9 @@ public class TelemetryImpl implements Telemetry, TelemetryInternal
         Platform.runLater(new Runnable() {
                               @Override
                               public void run() {
-                                  virtualRobotController.updateTelemetryDisplay(sb.toString());
+                                  virtualRobotController.updateTelemetryDisplay(
+                                          // remove all html
+                                          sb.toString().replaceAll("<.*?>","").replaceAll("&nbsp;"," "));
                               }
                           }
         );

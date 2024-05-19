@@ -138,7 +138,7 @@ abstract class BunyipsOpMode : BOMInternal() {
 
     /**
      * Code to run continuously after the `START` button is pressed on the Driver Station.
-     * This method will be called on each hardware cycle, and is guaranteed to be called at least once.
+     * This method will be called on each hardware cycle, but may not be called if the OpMode is stopped before starting.
      */
     protected abstract fun activeLoop()
 
@@ -189,14 +189,13 @@ abstract class BunyipsOpMode : BOMInternal() {
             telemetry = DualTelemetry(
                 this,
                 timer,
-                "BOM",
-                "bunyipslib v${BuildConfig.SEMVER}-${BuildConfig.GIT_COMMIT}-${BuildConfig.BUILD_TIME}"
+                "<b>${javaClass.simpleName}</b>",
+                "<small><font color='#e5ffde'>bunyipslib</font> <font color='gray'>v${BuildConfig.SEMVER}-${BuildConfig.GIT_COMMIT}-${BuildConfig.BUILD_TIME}</font></small>"
             )
-            telemetry.setup()
             // Controller setup and monitoring threads
             gamepad1 = Controller(sdkGamepad1)
             gamepad2 = Controller(sdkGamepad2)
-            gamepadExecutor = ThreadPool.newFixedThreadPool(2, "BunyipsOpMode GamepadMonitor")
+            gamepadExecutor = ThreadPool.newFixedThreadPool(2, "BunyipsLib BunyipsOpMode Gamepad1+2")
             gamepadExecutor?.submit {
                 while (!Thread.currentThread().isInterrupted)
                     gamepad1.update()
@@ -207,13 +206,13 @@ abstract class BunyipsOpMode : BOMInternal() {
             }
             pushTelemetry()
 
-            telemetry.opModeStatus = "static_init"
+            telemetry.opModeStatus = "<b><font color='yellow'></b>static_init</font>"
             Dbg.logd("BunyipsOpMode: firing onInit()...")
             // Store telemetry objects raised by onInit() by turning off auto-clear
             telemetry.isAutoClear = false
             pushTelemetry()
             if (!gamepad1.atRest() || !gamepad2.atRest()) {
-                log("WARNING: a gamepad was not zeroed during init. please ensure controllers zero out correctly.")
+                log("<b><font color='yellow'>WARNING!</font></b> a gamepad was not zeroed during init. please ensure controllers zero out correctly.")
             }
             // Run user-defined setup
             try {
@@ -221,15 +220,16 @@ abstract class BunyipsOpMode : BOMInternal() {
             } catch (e: Exception) {
                 // Catch all exceptions, log them, and continue running the OpMode
                 // All InterruptedExceptions are handled by the FTC SDK and are raised in the Exceptions handler
+                telemetry.overrideStatus = "<font color='red'><b>error</b></font>"
                 Exceptions.handle(e, ::log)
             }
 
-            telemetry.opModeStatus = "dynamic_init"
+            telemetry.opModeStatus = "<font color='aqua'>dynamic_init</font>"
             pushTelemetry()
             Dbg.logd("BunyipsOpMode: starting onInitLoop()...")
             if (initTask != null) {
-                Dbg.logd("BunyipsOpMode: running initTask -> % ...", initTask)
-                log("running init-task: %", initTask)
+                Dbg.logd("BunyipsOpMode: running initTask -> % ...", if (initTask is Task) (initTask as Task).toVerboseString() else initTask)
+                log("<font color='gray'>running init-task:</font> %", initTask)
             }
             // Run user-defined dynamic initialisation
             do {
@@ -239,23 +239,27 @@ abstract class BunyipsOpMode : BOMInternal() {
                     // Run until onInitLoop returns true, and the initTask is done, or the OpMode is continued
                     if (onInitLoop() && (initTask == null || initTask?.pollFinished() == true)) break
                 } catch (e: Exception) {
+                    telemetry.overrideStatus = "<font color='red'><b>error</b></font>"
                     Exceptions.handle(e, ::log)
                 }
                 timer.update()
                 pushTelemetry()
-            } while (opModeInInit())
+            } while (opModeInInit() && !operationsCompleted)
 
-            telemetry.opModeStatus = "finish_init"
+            telemetry.opModeStatus = "<font color='yellow'>finish_init</font>"
             // We can only finish Task objects, as the RobotTask interface does not have a finish method
             // Most tasks will inherit from Task, so this should be safe, but this is to ensure maximum compatibility
             if (initTask is Task && initTask?.isFinished() == false) {
                 Dbg.log("BunyipsOpMode: initTask did not finish in time, early finishing -> % ...", initTask)
-                log("interrupted init-task: %", initTask)
+                log("<font color='gray'>init-task interrupted by start request.</font>")
                 (initTask as Task).finishNow()
             } else if (initTask?.isFinished() == false) {
                 // If we can't finish the task, log a warning and continue
                 Dbg.warn("BunyipsOpMode: initTask did not finish during the init-phase!", initTask)
-                log("WARNING: unfinished init-task -> %", initTask)
+                log("<b><font color='yellow'>WARNING!</font></b> <font color='gray'>init-task did not finish.</font>")
+            } else if (initTask != null) {
+                Dbg.logd("BunyipsOpMode: initTask finished -> % ...", initTask)
+                log("<font color='gray'>init-task finished.</font>")
             }
             pushTelemetry()
             Dbg.logd("BunyipsOpMode: firing onInitDone()...")
@@ -263,25 +267,28 @@ abstract class BunyipsOpMode : BOMInternal() {
             try {
                 onInitDone()
             } catch (e: Exception) {
+                telemetry.overrideStatus = "<font color='red'><b>error</b></font>"
                 Exceptions.handle(e, ::log)
             }
 
             // Ready to go.
-            telemetry.opModeStatus = "ready"
+            telemetry.opModeStatus = "<font color='green'>ready</font>"
             timer.update()
             Dbg.logd("BunyipsOpMode: init cycle completed in ${timer.elapsedTime().inUnit(Seconds)} secs")
             // DS only telemetry
-            telemetry.addDS("BunyipsOpMode: INIT COMPLETE -- PLAY WHEN READY.")
+            telemetry.addDS("<b>Init <font color='green'>complete</font>. Press play to start.</b>")
             Dbg.logd("BunyipsOpMode: ready.")
             timer.reset()
 
             // Wait for start
             do {
                 pushTelemetry()
+                // Save some CPU cycles
+                sleep(200)
             } while (!isStarted)
 
             // Play button has been pressed
-            telemetry.opModeStatus = "starting"
+            telemetry.opModeStatus = "<font color='yellow'>starting</font>"
             telemetry.isAutoClear = true
             clearTelemetry()
             pushTelemetry()
@@ -290,35 +297,40 @@ abstract class BunyipsOpMode : BOMInternal() {
             try {
                 // Run user-defined start operations
                 onStart()
+                telemetry.overrideStatus = null
             } catch (e: Exception) {
+                telemetry.overrideStatus = "<font color='red'><b>error</b></font>"
                 Exceptions.handle(e, ::log)
             }
 
-            telemetry.opModeStatus = "running"
+            telemetry.opModeStatus = "<font color='green'><b>running</b></font>"
             Dbg.logd("BunyipsOpMode: starting activeLoop()...")
-            do {
+            while (opModeIsActive() && !operationsCompleted) {
                 if (operationsPaused) {
                     // If the OpMode is paused, skip the loop and wait for the next hardware cycle
-                    telemetry.opModeStatus = "halted"
                     timer.update()
                     pushTelemetry()
+                    // Slow down the OpMode as this is all we're doing
+                    sleep(100)
                     continue
                 }
                 try {
                     // Run user-defined active loop
                     activeLoop()
                 } catch (e: Exception) {
+                    telemetry.overrideStatus = "<font color='red'><b>error</b></font>"
                     Exceptions.handle(e, ::log)
                 }
                 // Update telemetry and timers
                 timer.update()
                 pushTelemetry()
-            } while (opModeIsActive() && !operationsCompleted)
+            }
 
-            telemetry.opModeStatus = "finished"
+            telemetry.opModeStatus = "<font color='gray'>finished</font>"
             try {
                 onFinish()
             } catch (e: Exception) {
+                telemetry.overrideStatus = "<font color='red'><b>error</b></font>"
                 Exceptions.handle(e, ::log)
             }
             // overheadTelemetry will no longer update, will remain frozen on last value
@@ -334,6 +346,8 @@ abstract class BunyipsOpMode : BOMInternal() {
             while (opModeIsActive()) {
                 if (safeHaltHardwareOnStop)
                     safeHaltHardware()
+                // Save some CPU cycles
+                sleep(500)
             }
         } catch (t: Throwable) {
             Dbg.error("BunyipsOpMode: unhandled throwable! <${t.message}>")
@@ -350,13 +364,14 @@ abstract class BunyipsOpMode : BOMInternal() {
             try {
                 onStop()
             } catch (e: Exception) {
+                telemetry.overrideStatus = "<font color='red'><b>error</b></font>"
                 Exceptions.handle(e, ::log)
             }
             _instance = null
             safeHaltHardware()
             // Telemetry may be not in a nice state, so we will call our stateful functions
             // such as thread stops and cleanup in onStop() first before updating the status
-            telemetry.opModeStatus = "terminating"
+            telemetry.opModeStatus = "<font color='red'>terminating</font>"
             Dbg.logd("BunyipsOpMode: active cycle completed in ${timer.elapsedTime().inUnit(Seconds)} secs")
             pushTelemetry()
             Dbg.logd("BunyipsOpMode: exiting...")
@@ -414,7 +429,7 @@ abstract class BunyipsOpMode : BOMInternal() {
      * @param args The objects to format into the object format string
      * @return The telemetry [Item] added to the Driver Station, null if the send failed from overflow
      */
-    fun addTelemetry(format: Any, vararg args: Any?): Item? {
+    fun addTelemetry(format: Any, vararg args: Any?): DualTelemetry.HtmlItem {
         return telemetry.add(format, *args)
     }
 
@@ -424,7 +439,7 @@ abstract class BunyipsOpMode : BOMInternal() {
      * @param args The objects to format into the object format string
      * @return The telemetry [Item] added to the Driver Station
      */
-    fun addRetainedTelemetry(format: Any, vararg args: Any?): Item {
+    fun addRetainedTelemetry(format: Any, vararg args: Any?): DualTelemetry.HtmlItem {
         return telemetry.addRetained(format, *args)
     }
 
@@ -514,7 +529,7 @@ abstract class BunyipsOpMode : BOMInternal() {
         operationsCompleted = true
         Dbg.logd("BunyipsOpMode: activeLoop() terminated by finish().")
         telemetry.addRetained(
-            "BunyipsOpMode: Robot ${if (safeHaltHardwareOnStop) "is stopped" else "tasks finished"}. All operations completed.",
+            "<b>Robot ${if (safeHaltHardwareOnStop) "<font color='green'>is stopped</font>" else "tasks finished"}. All operations completed.</b>",
             true
         )
         pushTelemetry()
@@ -565,6 +580,7 @@ abstract class BunyipsOpMode : BOMInternal() {
             return
         }
         operationsPaused = true
+        telemetry.overrideStatus = "<font color='yellow'>halted</font>"
         Dbg.logd("BunyipsOpMode: activeLoop() halted.")
     }
 
@@ -576,7 +592,7 @@ abstract class BunyipsOpMode : BOMInternal() {
             return
         }
         operationsPaused = false
-        telemetry.opModeStatus = "running"
+        telemetry.overrideStatus = null
         Dbg.logd("BunyipsOpMode: activeLoop() resumed.")
     }
 

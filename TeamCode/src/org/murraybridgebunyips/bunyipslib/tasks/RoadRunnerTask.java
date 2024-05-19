@@ -40,7 +40,7 @@ public class RoadRunnerTask extends Task {
      * @param trajectory The trajectory to follow
      */
     public RoadRunnerTask(Measure<Time> time, RoadRunnerDrive drive, Trajectory trajectory) {
-        super(time);
+        super(time.magnitude() != 0.0 ? time : Seconds.of(trajectory.duration()));
         this.drive = drive;
         this.trajectory = trajectory;
     }
@@ -53,7 +53,7 @@ public class RoadRunnerTask extends Task {
      * @param trajectorySequence The trajectory sequence to follow
      */
     public RoadRunnerTask(Measure<Time> time, RoadRunnerDrive drive, TrajectorySequence trajectorySequence) {
-        super(time);
+        super(time.magnitude() != 0.0 ? time : Seconds.of(trajectorySequence.duration()));
         this.drive = drive;
         this.trajectorySequence = trajectorySequence;
     }
@@ -68,7 +68,7 @@ public class RoadRunnerTask extends Task {
      * @param override   Whether this task should override conflicting tasks
      */
     public RoadRunnerTask(Measure<Time> time, RoadRunnerDrive drive, Trajectory trajectory, BunyipsSubsystem dependency, boolean override) {
-        super(time, dependency, override);
+        super(time.magnitude() != 0.0 ? time : Seconds.of(trajectory.duration()));
         this.drive = drive;
         this.trajectory = trajectory;
     }

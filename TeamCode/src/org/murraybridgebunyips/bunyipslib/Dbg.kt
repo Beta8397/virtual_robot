@@ -213,4 +213,54 @@ object Dbg {
     fun log(format: Any, vararg args: Any?) {
         RobotLog.ii(TAG, formatString(format.toString(), *args))
     }
+
+    /**
+     * Log a user message temporarily.
+     * This method is marked as 'deprecated' to remind you to remove it before committing your code and for it
+     * to be picked up as part of static code analysis. It serves the same as a regular log() call.
+     * @param stck StackTraceElement with information about where this log was called (see Text.getCallingUserCodeFunction())
+     * @param format An object string to add to telemetry
+     * @param args The objects to format into the object format string
+     */
+    @JvmStatic
+    @Deprecated(
+        "This method is for temporary debugging only.",
+        replaceWith = ReplaceWith("remove debug statement before committing")
+    )
+    fun logTmp(stck: StackTraceElement, format: Any, vararg args: Any?) {
+        log(stck, format, *args)
+    }
+
+    /**
+     * Log a user message temporarily.
+     * This method is marked as 'deprecated' to remind you to remove it before committing your code and for it
+     * to be picked up as part of static code analysis. It serves the same as a regular log() call.
+     * @param obj Class where this log was called (name will be prepended to message)
+     * @param format An object string to add to telemetry
+     * @param args The objects to format into the object format string
+     */
+    @JvmStatic
+    @Deprecated(
+        "This method is for temporary debugging only.",
+        replaceWith = ReplaceWith("remove debug statement before committing")
+    )
+    fun logTmp(obj: Class<*>, format: Any, vararg args: Any?) {
+        log(obj, format, *args)
+    }
+
+    /**
+     * Log a user message temporarily.
+     * This method is marked as 'deprecated' to remind you to remove it before committing your code and for it
+     * to be picked up as part of static code analysis. It serves the same as a regular log() call.
+     * @param format An object string to add to telemetry
+     * @param args The objects to format into the object format string
+     */
+    @JvmStatic
+    @Deprecated(
+        "This method is for temporary debugging only.",
+        replaceWith = ReplaceWith("remove debug statement before committing")
+    )
+    fun logTmp(format: Any, vararg args: Any?) {
+        log(format, *args)
+    }
 }

@@ -457,7 +457,8 @@ public class Vision extends BunyipsSubsystem {
     protected void periodic() {
         if (visionPortal != null) {
             opMode.addTelemetry(
-                    "Vision: % | % fps | %/% processors",
+                    "Vision: <font color='%'>%</font> | % fps | %/% processors",
+                    visionPortal.getCameraState() == VisionPortal.CameraState.STREAMING ? "green" : "yellow",
                     visionPortal.getCameraState(),
                     (int) round(visionPortal.getFps(), 0),
                     processors.stream().filter((p) -> visionPortal.getProcessorEnabled(p)).count(),

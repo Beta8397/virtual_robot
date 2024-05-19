@@ -6,6 +6,7 @@ import androidx.annotation.Nullable;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -146,5 +147,211 @@ public final class Text {
         // If we can't find the calling function, then we can't return a stack trace element
         Dbg.warn("Could not find calling function in getCallingUserCodeFunction()!");
         return new StackTraceElement("Unknown", "userMethod", "User Code", -1);
+    }
+
+    /**
+     * Begin building an HTML string.
+     *
+     * @return A HtmlBuilder instance
+     */
+    public static HtmlBuilder html() {
+        return new HtmlBuilder();
+    }
+
+    /**
+     * Allows for the building of HTML strings, similar to the DualTelemetry HtmlItem for Driver Station telemetry.
+     * This serves as a good alternative when not working with the Driver Station telemetry messages, such as in the case
+     * of Driver Station logs, FtcDashboard, or other HTML output.
+     */
+    public static class HtmlBuilder {
+        private final StringBuilder html = new StringBuilder();
+        private final ArrayList<String> tags = new ArrayList<>();
+
+        /**
+         * Insert normal text into the HTML string.
+         *
+         * @param text The text to insert
+         * @return The HtmlBuilder instance
+         */
+        public HtmlBuilder text(String text) {
+            html.append(text);
+            return this;
+        }
+
+        /**
+         * Insert a new line into the HTML string.
+         *
+         * @return The HtmlBuilder instance
+         */
+        public HtmlBuilder endl() {
+            html.append("\n");
+            return this;
+        }
+
+        /**
+         * Insert bold text into the HTML string.
+         *
+         * @param text The text to insert
+         * @return The HtmlBuilder instance
+         */
+        public HtmlBuilder bold(String text) {
+            html.append("<b>").append(text).append("</b>");
+            return this;
+        }
+
+        /**
+         * Insert italic text into the HTML string.
+         *
+         * @param text The text to insert
+         * @return The HtmlBuilder instance
+         */
+        public HtmlBuilder italic(String text) {
+            html.append("<i>").append(text).append("</i>");
+            return this;
+        }
+
+        /**
+         * Insert big text into the HTML string.
+         *
+         * @param text The text to insert
+         * @return The HtmlBuilder instance
+         */
+        public HtmlBuilder big(String text) {
+            html.append("<big>").append(text).append("</big>");
+            return this;
+        }
+
+        /**
+         * Insert small text into the HTML string.
+         *
+         * @param text The text to insert
+         * @return The HtmlBuilder instance
+         */
+        public HtmlBuilder small(String text) {
+            html.append("<small>").append(text).append("</small>");
+            return this;
+        }
+
+        /**
+         * Insert underline text into the HTML string.
+         *
+         * @param text The text to insert
+         * @return The HtmlBuilder instance
+         */
+        public HtmlBuilder underline(String text) {
+            html.append("<u>").append(text).append("</u>");
+            return this;
+        }
+
+        /**
+         * Insert strikethrough text into the HTML string.
+         *
+         * @param text The text to insert
+         * @return The HtmlBuilder instance
+         */
+        public HtmlBuilder strikethrough(String text) {
+            html.append("<s>").append(text).append("</s>");
+            return this;
+        }
+
+        /**
+         * Insert superscript text into the HTML string.
+         *
+         * @param text The text to insert
+         * @return The HtmlBuilder instance
+         */
+        public HtmlBuilder superscript(String text) {
+            html.append("<sup>").append(text).append("</sup>");
+            return this;
+        }
+
+        /**
+         * Insert subscript text into the HTML string.
+         *
+         * @param text The text to insert
+         * @return The HtmlBuilder instance
+         */
+        public HtmlBuilder subscript(String text) {
+            html.append("<sub>").append(text).append("</sub>");
+            return this;
+        }
+
+        /**
+         * Insert a header into the HTML string.
+         *
+         * @param text  The text to insert
+         * @param level The header level
+         * @return The HtmlBuilder instance
+         */
+        public HtmlBuilder header(int level, String text) {
+            if (level < 1 || level > 6) {
+                Dbg.warn("Invalid header level " + level + " in HtmlBuilder.header()");
+                return this;
+            }
+            html.append("<h").append(level).append(">").append(text).append("</h").append(level).append(">");
+            return this;
+        }
+
+        /**
+         * Insert a custom tag supplied by the user into the HTML string. Note that these tags are limited to the
+         * HTML tags that are available as part of `Html.fromHtml()`.
+         *
+         * @param tag  The tag to insert, e.g. "div", "span", "p"
+         * @param text The text to insert
+         * @return The HtmlBuilder instance
+         */
+        public HtmlBuilder tag(String tag, String text) {
+            html.append("<").append(tag).append(">").append(text).append("</").append(tag).append(">");
+            return this;
+        }
+
+        /**
+         * Insert a foreground color to display the text in.
+         *
+         * @param color The color to use (any valid CSS color)
+         * @param text  The text to insert
+         * @return The HtmlBuilder instance
+         */
+        public HtmlBuilder color(String color, String text) {
+            html.append("<font color=\"").append(color).append("\">").append(text).append("</font>");
+            return this;
+        }
+
+        /**
+         * Insert a background color to display the text in.
+         *
+         * @param color The color to use (any valid CSS color)
+         * @param text  The text to insert
+         * @return The HtmlBuilder instance
+         */
+        public HtmlBuilder bgColor(String color, String text) {
+            html.append("<span style=\"background-color:").append(color).append("\">").append(text).append("</span>");
+            return this;
+        }
+
+        /**
+         * Build the HTML string.
+         *
+         * @return The HTML string built by the HtmlBuilder
+         */
+        @NonNull
+        @Override
+        public String toString() {
+            return html.toString();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj.toString().equals(html.toString())) return true;
+            if (!(obj instanceof HtmlBuilder)) return false;
+            HtmlBuilder other = (HtmlBuilder) obj;
+            return html.toString().equals(other.html.toString());
+        }
+
+        @Override
+        public int hashCode() {
+            return html.toString().hashCode();
+        }
     }
 }

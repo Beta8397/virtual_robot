@@ -906,7 +906,8 @@ public interface RoadRunner {
         public RoadRunnerTask buildTask(boolean useEndAsNextImplicitPose) {
             TrajectorySequence sequence = build();
             RoadRunnerTask task = new RoadRunnerTask(timeout, drive, sequence);
-            task.withTimeout(timeout);
+            if (timeout.magnitude() != 0.0)
+                task.withTimeout(timeout);
             task.withName(name);
             if (useEndAsNextImplicitPose)
                 splicedPose.set(sequence.end());

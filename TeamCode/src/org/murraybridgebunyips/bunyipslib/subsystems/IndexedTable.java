@@ -111,7 +111,7 @@ public class IndexedTable extends BunyipsSubsystem {
     @Override
     protected void periodic() {
         opMode.addTelemetry(
-                "%: % (%/%)",
+                "%: % <font color='gray'>(%/%)</font>",
                 NAME != null ? "Idx-" + NAME : "Index Table",
                 tableValues[index],
                 index + 1,

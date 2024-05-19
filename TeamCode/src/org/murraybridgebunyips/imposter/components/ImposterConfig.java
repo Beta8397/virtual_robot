@@ -4,7 +4,6 @@ import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
-import org.murraybridgebunyips.bunyipslib.DcMotorRamping;
 import org.murraybridgebunyips.bunyipslib.RobotConfig;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.DriveConstants;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.MecanumCoefficients;
@@ -33,10 +32,10 @@ public class ImposterConfig extends RobotConfig {
 
     @Override
     protected void onRuntime() {
-        back_right_motor = getHardware("back_right_motor", DcMotorRamping.class);
-        back_left_motor = getHardware("back_left_motor", DcMotorRamping.class);
-        front_right_motor = getHardware("front_right_motor", DcMotorRamping.class);
-        front_left_motor = getHardware("front_left_motor", DcMotorRamping.class);
+        back_right_motor = getHardware("back_right_motor", DcMotorEx.class);
+        back_left_motor = getHardware("back_left_motor", DcMotorEx.class);
+        front_right_motor = getHardware("front_right_motor", DcMotorEx.class);
+        front_left_motor = getHardware("front_left_motor", DcMotorEx.class);
 
         enc_x = getHardware("enc_x", Deadwheel.class);
         enc_left = getHardware("enc_left", Deadwheel.class);
@@ -74,18 +73,13 @@ public class ImposterConfig extends RobotConfig {
                 .setForwardOffset(Inches.zero())
                 .build();
 
-        imu = getHardware("imu", IMU.class);
-
-        // i swear to god if my virtual hardware becomes null
-        assert imu != null;
-
-        imu.initialize(
+        imu = getHardware("imu", IMU.class, (d) -> d.initialize(
                 new IMU.Parameters(
                         new RevHubOrientationOnRobot(
                                 RevHubOrientationOnRobot.LogoFacingDirection.UP,
                                 RevHubOrientationOnRobot.UsbFacingDirection.LEFT
                         )
                 )
-        );
+        ));
     }
 }
