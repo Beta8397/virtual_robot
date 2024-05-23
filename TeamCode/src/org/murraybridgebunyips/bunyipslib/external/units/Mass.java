@@ -13,16 +13,20 @@ package org.murraybridgebunyips.bunyipslib.external.units;
  * <p>Actual units (such as {@link Units#Grams} and {@link Units#Pounds}) can be found in the {@link
  * Units} class.
  */
-@SuppressWarnings("SameParameterValue")
 public class Mass extends Unit<Mass> {
     /**
-     * Creates a new unit with the given name and multiplier to the base unit.
+     * @noinspection SameParameterValue
      */
-    Mass(double baseUnitEquivalent, String name, String symbol) {
-        super(Mass.class, baseUnitEquivalent, name, symbol);
+    Mass(Mass baseUnit, double baseUnitEquivalent, String name, String symbol) {
+        super(baseUnit, baseUnitEquivalent, name, symbol);
     }
 
-    Mass(UnaryFunction toBaseConverter, UnaryFunction fromBaseConverter, String name, String symbol) {
-        super(Mass.class, toBaseConverter, fromBaseConverter, name, symbol);
+    Mass(
+            Mass baseUnit,
+            UnaryFunction toBaseConverter,
+            UnaryFunction fromBaseConverter,
+            String name,
+            String symbol) {
+        super(baseUnit, toBaseConverter, fromBaseConverter, name, symbol);
     }
 }

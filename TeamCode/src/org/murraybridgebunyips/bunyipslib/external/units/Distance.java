@@ -13,17 +13,20 @@ package org.murraybridgebunyips.bunyipslib.external.units;
  * <p>Actual units (such as {@link Units#Meters} and {@link Units#Inches}) can be found in the
  * {@link Units} class.
  */
-@SuppressWarnings("SameParameterValue")
 public class Distance extends Unit<Distance> {
     /**
-     * Creates a new unit with the given name and multiplier to the base unit.
+     * @noinspection SameParameterValue
      */
-    Distance(double baseUnitEquivalent, String name, String symbol) {
-        super(Distance.class, baseUnitEquivalent, name, symbol);
+    Distance(Distance baseUnit, double baseUnitEquivalent, String name, String symbol) {
+        super(baseUnit, baseUnitEquivalent, name, symbol);
     }
 
     Distance(
-            UnaryFunction toBaseConverter, UnaryFunction fromBaseConverter, String name, String symbol) {
-        super(Distance.class, toBaseConverter, fromBaseConverter, name, symbol);
+            Distance baseUnit,
+            UnaryFunction toBaseConverter,
+            UnaryFunction fromBaseConverter,
+            String name,
+            String symbol) {
+        super(baseUnit, toBaseConverter, fromBaseConverter, name, symbol);
     }
 }

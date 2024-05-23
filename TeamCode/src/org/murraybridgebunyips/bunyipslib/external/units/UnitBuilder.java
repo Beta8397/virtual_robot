@@ -9,14 +9,19 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 
 /**
- * Builder used for easily deriving new units from existing ones.
+ * Builder used for easily deriving new units from existing ones. When deriving a new unit, the base
+ * unit class <strong>must</strong> redeclare the constructor {@link Unit#Unit(Unit, UnaryFunction,
+ * UnaryFunction, String, String) (U, UnaryFunction, UnaryFunction, String, String)}. The unit
+ * builder class will invoke this constructor automatically and build the new unit. Alternatively,
+ * new units can be derived by passing an explicit constructor function to {@link
+ * #make(UnitConstructorFunction)}.
  *
  * @param <U> the type of the unit
  */
 public final class UnitBuilder<U extends Unit<U>> {
     private final U base;
-    private UnaryFunction fromBaseVal;
-    private UnaryFunction toBaseVal;
+    private UnaryFunction fromBaseVal = UnaryFunction.IDENTITY;
+    private UnaryFunction toBaseVal = UnaryFunction.IDENTITY;
     private String nameVal;
     private String symbolVal;
 
@@ -43,11 +48,31 @@ public final class UnitBuilder<U extends Unit<U>> {
      * @param outMax the maximum output value (does not have to be absolute)
      * @return the mapped output
      */
-    // This method lives here instead of in MappingBuilder because inner classes can't
+    // NOTE: This method lives here instead of in MappingBuilder because inner classes can't
     // define static methods prior to Java 16.
     private static double mapValue(
             double value, double inMin, double inMax, double outMin, double outMax) {
         return (value - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static <U extends Unit<U>> Constructor<? extends Unit<U>> getConstructor(U baseUnit)
+            throws NoSuchMethodException {
+        Class<? extends Unit> baseClass = baseUnit.getClass();
+
+        Constructor<? extends Unit<U>> ctor =
+                (Constructor<? extends Unit<U>>) baseClass.getDeclaredConstructor(
+                        baseClass, // baseUnit
+                        UnaryFunction.class, // toBaseUnits
+                        UnaryFunction.class, // fromBaseUnits
+                        String.class, // name
+                        String.class); // symbol
+
+        // Need to flag the constructor as accessible so we can use private, package-private,
+        // and protected constructors
+        ctor.setAccessible(true);
+
+        return ctor;
     }
 
     /**
@@ -157,6 +182,28 @@ public final class UnitBuilder<U extends Unit<U>> {
     }
 
     /**
+     * Creates the new unit based off of the builder methods called prior, passing them to a provided
+     * constructor function.
+     *
+     * @param constructor the function to use to create the new derived unit
+     * @return the new derived unit
+     * @throws NullPointerException if the unit conversions, unit name, or unit symbol were not set
+     */
+    public U make(UnitConstructorFunction<U> constructor) {
+        Objects.requireNonNull(fromBaseVal, "fromBase function was not set");
+        Objects.requireNonNull(toBaseVal, "toBase function was not set");
+        Objects.requireNonNull(nameVal, "new unit name was not set");
+        Objects.requireNonNull(symbolVal, "new unit symbol was not set");
+
+        return constructor.create(
+                base.getBaseUnit(),
+                toBaseVal.pipeTo(base.getConverterToBase()),
+                base.getConverterFromBase().pipeTo(fromBaseVal),
+                nameVal,
+                symbolVal);
+    }
+
+    /**
      * Creates the new unit based off of the builder methods called prior.
      *
      * @return the new derived unit
@@ -164,36 +211,59 @@ public final class UnitBuilder<U extends Unit<U>> {
      * @throws RuntimeException     if the base unit does not define a constructor accepting the
      *                              conversion functions, unit name, and unit symbol - in that order
      */
+    @SuppressWarnings("unchecked")
     public U make() {
-        Objects.requireNonNull(fromBaseVal, "fromBase function was not set");
-        Objects.requireNonNull(toBaseVal, "toBase function was not set");
-        Objects.requireNonNull(nameVal, "new unit name was not set");
-        Objects.requireNonNull(symbolVal, "new unit symbol was not set");
-        Class<? extends U> baseType = base.baseType;
-        try {
-            Constructor<? extends U> ctor =
-                    baseType.getDeclaredConstructor(
-                            UnaryFunction.class, // toBaseUnits
-                            UnaryFunction.class, // fromBaseUnits
-                            String.class, // name
-                            String.class); // symbol
-            // Need to flag the constructor as accessible so we can use private, package-private, and
-            // protected constructors
-            ctor.setAccessible(true);
-            return ctor.newInstance(
-                    toBaseVal.pipeTo(base.getConverterToBase()),
-                    base.getConverterFromBase().pipeTo(fromBaseVal),
-                    nameVal,
-                    symbolVal);
-        } catch (InstantiationException e) {
-            throw new RuntimeException("Could not instantiate class " + baseType.getName(), e);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException("Could not access constructor", e);
-        } catch (InvocationTargetException e) {
-            throw new RuntimeException("Constructing " + baseType.getName() + " raised an exception", e);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException("No compatible constructor", e);
-        }
+        return make(
+                (baseUnit, toBaseUnits, fromBaseUnits, name, symbol) -> {
+                    Class<?> baseClass = baseUnit.getClass();
+
+                    try {
+                        Constructor<? extends Unit<U>> ctor = getConstructor(baseUnit);
+                        return (U) ctor.newInstance(baseUnit, toBaseUnits, fromBaseUnits, name, symbol);
+                    } catch (InstantiationException e) {
+                        throw new RuntimeException("Could not instantiate class " + baseClass.getName(), e);
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException("Could not access constructor", e);
+                    } catch (InvocationTargetException e) {
+                        throw new RuntimeException(
+                                "Constructing " + baseClass.getName() + " raised an exception", e);
+                    } catch (NoSuchMethodException e) {
+                        throw new RuntimeException(
+                                "No compatible constructor "
+                                        + baseClass.getSimpleName()
+                                        + "("
+                                        + baseClass.getSimpleName()
+                                        + ", UnaryFunction, UnaryFunction, String, String)",
+                                e);
+                    }
+                });
+    }
+
+    /**
+     * A functional interface for constructing new units without relying on reflection.
+     *
+     * @param <U> the type of the unit
+     */
+    @FunctionalInterface
+    public interface UnitConstructorFunction<U extends Unit<U>> {
+        /**
+         * Creates a new unit instance based on its relation to the base unit of measure.
+         *
+         * @param baseUnit      the base unit of the unit system
+         * @param toBaseUnits   a function that converts values of the new unit to equivalent values in
+         *                      terms of the base unit
+         * @param fromBaseUnits a function that converts values in the base unit to equivalent values in
+         *                      terms of the new unit
+         * @param name          the name of the new unit
+         * @param symbol        the shorthand symbol of the new unit
+         * @return a new unit
+         */
+        U create(
+                U baseUnit,
+                UnaryFunction toBaseUnits,
+                UnaryFunction fromBaseUnits,
+                String name,
+                String symbol);
     }
 
     /**

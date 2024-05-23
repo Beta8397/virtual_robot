@@ -13,16 +13,20 @@ package org.murraybridgebunyips.bunyipslib.external.units;
  * <p>Actual units (such as {@link Units#Seconds} and {@link Units#Milliseconds}) can be found in
  * the {@link Units} class.
  */
-@SuppressWarnings("SameParameterValue")
 public class Time extends Unit<Time> {
     /**
-     * Creates a new unit with the given name and multiplier to the base unit.
+     * @noinspection SameParameterValue
      */
-    Time(double baseUnitEquivalent, String name, String symbol) {
-        super(Time.class, baseUnitEquivalent, name, symbol);
+    Time(Time baseUnit, double baseUnitEquivalent, String name, String symbol) {
+        super(baseUnit, baseUnitEquivalent, name, symbol);
     }
 
-    Time(UnaryFunction toBaseConverter, UnaryFunction fromBaseConverter, String name, String symbol) {
-        super(Time.class, toBaseConverter, fromBaseConverter, name, symbol);
+    Time(
+            Time baseUnit,
+            UnaryFunction toBaseConverter,
+            UnaryFunction fromBaseConverter,
+            String name,
+            String symbol) {
+        super(baseUnit, toBaseConverter, fromBaseConverter, name, symbol);
     }
 }

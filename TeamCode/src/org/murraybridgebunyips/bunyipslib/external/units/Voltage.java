@@ -4,6 +4,8 @@
 
 package org.murraybridgebunyips.bunyipslib.external.units;
 
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Watts;
+
 /**
  * Unit of electric voltage dimension.
  *
@@ -13,15 +15,21 @@ package org.murraybridgebunyips.bunyipslib.external.units;
  * <p>Actual units (such as {@link Units#Volts} and {@link Units#Millivolts}) can be found in the
  * {@link Units} class.
  */
-@SuppressWarnings("SameParameterValue")
 public class Voltage extends Unit<Voltage> {
-    Voltage(double baseUnitEquivalent, String name, String symbol) {
-        super(Voltage.class, baseUnitEquivalent, name, symbol);
+    /**
+     * @noinspection SameParameterValue
+     */
+    Voltage(Voltage baseUnit, double baseUnitEquivalent, String name, String symbol) {
+        super(baseUnit, baseUnitEquivalent, name, symbol);
     }
 
     Voltage(
-            UnaryFunction toBaseConverter, UnaryFunction fromBaseConverter, String name, String symbol) {
-        super(Voltage.class, toBaseConverter, fromBaseConverter, name, symbol);
+            Voltage baseUnit,
+            UnaryFunction toBaseConverter,
+            UnaryFunction fromBaseConverter,
+            String name,
+            String symbol) {
+        super(baseUnit, toBaseConverter, fromBaseConverter, name, symbol);
     }
 
     /**
@@ -36,6 +44,6 @@ public class Voltage extends Unit<Voltage> {
      * @return the power unit
      */
     public Power times(Unit<Current> current, String name, String symbol) {
-        return new Power(toBaseUnits(1) * current.toBaseUnits(1), name, symbol);
+        return new Power(Watts, toBaseUnits(1) * current.toBaseUnits(1), name, symbol);
     }
 }

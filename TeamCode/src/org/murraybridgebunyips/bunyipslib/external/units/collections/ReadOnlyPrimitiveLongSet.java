@@ -23,6 +23,7 @@ public class ReadOnlyPrimitiveLongSet implements Iterable<Long> {
      *
      * @param values the values that belong to the set.
      */
+    @SuppressWarnings("ForLoopReplaceableByForEach")
     public ReadOnlyPrimitiveLongSet(long... values) {
         // Initial size is the upper limit
         long[] uniqueValues = new long[values.length];
@@ -31,12 +32,14 @@ public class ReadOnlyPrimitiveLongSet implements Iterable<Long> {
 
         // Copy the set of unique values to our array using indexed for-loops to avoid allocations
         copyLoop:
-        for (long value : values) {
+        for (int i = 0; i < values.length; i++) {
+            long value = values[i];
             if (value == 0 && !seenZero) {
                 // Special case to support zero
                 seenZero = true;
             } else {
-                for (long uniqueValue : uniqueValues) {
+                for (int j = 0; j < uniqueValues.length; j++) {
+                    long uniqueValue = uniqueValues[j];
                     if (uniqueValue == value) {
                         continue copyLoop;
                     }

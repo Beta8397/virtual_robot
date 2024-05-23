@@ -179,8 +179,12 @@ public class LongToObjectHashMap<V> {
         return size;
     }
 
-    // Package-private for tests
-    int capacity() {
+    /**
+     * Gets the current capacity of the map. This is the maximum number of key-value pairs that can be.
+     *
+     * @return the current capacity of the map
+     */
+    public int capacity() {
         return capacity;
     }
 

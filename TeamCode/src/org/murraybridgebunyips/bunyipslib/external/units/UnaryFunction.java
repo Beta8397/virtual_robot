@@ -16,6 +16,11 @@ import java.util.Objects;
 @FunctionalInterface
 public interface UnaryFunction {
     /**
+     * The identity function that simply returns the input value.
+     */
+    UnaryFunction IDENTITY = x -> x;
+
+    /**
      * Applies this function to the input value and returns the result.
      *
      * @param input the input value to the function
@@ -77,14 +82,14 @@ public interface UnaryFunction {
         return x -> {
             double numerator = apply(x);
 
-            // Fast-track to avoid another function call
-            // Avoids returning NaN if divisor is also zero
+            // fast-track to avoid another function call
+            // avoids returning NaN if divisor is also zero
             if (numerator == 0) {
                 return 0;
             }
 
             double div = divisor.apply(x);
-            return numerator / div; // NOTE: Returns +Infinity or -Infinity if div is zero
+            return numerator / div; // NOTE: returns +Infinity or -Infinity if div is zero
         };
     }
 

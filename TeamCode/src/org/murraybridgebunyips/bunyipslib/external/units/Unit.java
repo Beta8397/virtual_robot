@@ -17,9 +17,10 @@ import java.util.Objects;
  * @param <U> the self type, e.g. {@code class SomeUnit extends Unit<SomeUnit>}
  */
 public class Unit<U extends Unit<U>> {
-    final Class<? extends U> baseType; // Package-private for the builder
     private final UnaryFunction toBaseConverter;
     private final UnaryFunction fromBaseConverter;
+
+    private final U baseUnit;
     private final String name;
     private final String symbol;
     private Measure<U> zero;
@@ -28,19 +29,21 @@ public class Unit<U extends Unit<U>> {
     /**
      * Creates a new unit defined by its relationship to some base unit.
      *
-     * @param baseType          the base type of the unit, e.g. Distance.class for the distance unit
+     * @param baseUnit          the base unit, e.g. Meters for distances. Set this to {@code null} if the unit
+     *                          being constructed is its own base unit
      * @param toBaseConverter   a function for converting units of this type to the base unit
      * @param fromBaseConverter a function for converting units of the base unit to this one
      * @param name              the name of the unit. This should be a singular noun (so "Meter", not "Meters")
      * @param symbol            the short symbol for the unit, such as "m" for meters or "lb." for pounds
      */
+    @SuppressWarnings("unchecked")
     protected Unit(
-            Class<? extends U> baseType,
+            U baseUnit,
             UnaryFunction toBaseConverter,
             UnaryFunction fromBaseConverter,
             String name,
             String symbol) {
-        this.baseType = Objects.requireNonNull(baseType);
+        this.baseUnit = baseUnit == null ? (U) this : baseUnit;
         this.toBaseConverter = Objects.requireNonNull(toBaseConverter);
         this.fromBaseConverter = Objects.requireNonNull(fromBaseConverter);
         this.name = Objects.requireNonNull(name);
@@ -50,16 +53,42 @@ public class Unit<U extends Unit<U>> {
     /**
      * Creates a new unit with the given name and multiplier to the base unit.
      *
-     * @param baseType           the base type of the unit, e.g. Distance.class for the distance unit
+     * @param baseUnit           the base unit, e.g. Meters for distances
      * @param baseUnitEquivalent the multiplier to convert this unit to the base unit of this type.
      *                           For example, meters has a multiplier of 1, mm has a multiplier of 1e3, and km has
      *                           multiplier of 1e-3.
      * @param name               the name of the unit. This should be a singular noun (so "Meter", not "Meters")
      * @param symbol             the short symbol for the unit, such as "m" for meters or "lb." for pounds
      */
-    protected Unit(
-            Class<? extends U> baseType, double baseUnitEquivalent, String name, String symbol) {
-        this(baseType, x -> x * baseUnitEquivalent, x -> x / baseUnitEquivalent, name, symbol);
+    protected Unit(U baseUnit, double baseUnitEquivalent, String name, String symbol) {
+        this(baseUnit, x -> x * baseUnitEquivalent, x -> x / baseUnitEquivalent, name, symbol);
+    }
+
+    /**
+     * Gets the base unit of measurement that this unit is derived from. If the unit is the base unit,
+     * the unit will be returned.
+     *
+     * <pre>{@code
+     *   Unit baseUnit = new Unit(null, ...);
+     *   baseUnit.getBaseUnit(); // returns baseUnit
+     *
+     *   Unit derivedUnit = new Unit(baseUnit, ...);
+     *   derivedUnit.getBaseUnit(); // returns baseUnit
+     * }</pre>
+     *
+     * @return the base unit
+     */
+    public U getBaseUnit() {
+        return baseUnit;
+    }
+
+    /**
+     * Checks if this unit is the base unit for its own system of measurement.
+     *
+     * @return true if this is the base unit, false if not
+     */
+    public boolean isBaseUnit() {
+        return equals(baseUnit);
     }
 
     /**
@@ -97,7 +126,7 @@ public class Unit<U extends Unit<U>> {
      */
     public double convertFrom(double magnitude, Unit<U> otherUnit) {
         if (equivalent(otherUnit)) {
-            // Same unit, don't bother converting
+            // same unit, don't bother converting
             return magnitude;
         }
         return fromBaseUnits(otherUnit.toBaseUnits(magnitude));
@@ -132,11 +161,11 @@ public class Unit<U extends Unit<U>> {
      */
     public Measure<U> of(double magnitude) {
         if (magnitude == 0) {
-            // Reuse static object
+            // reuse static object
             return zero();
         }
         if (magnitude == 1) {
-            // Reuse static object
+            // reuse static object
             return one();
         }
         return ImmutableMeasure.ofRelativeUnits(magnitude, this);
@@ -159,7 +188,7 @@ public class Unit<U extends Unit<U>> {
      * @return the zero-valued measure
      */
     public Measure<U> zero() {
-        // Lazy init because 'this' is null in object initialization
+        // lazy init because 'this' is null in object initialization
         if (zero == null) {
             zero = ImmutableMeasure.ofRelativeUnits(0, this);
         }
@@ -172,7 +201,7 @@ public class Unit<U extends Unit<U>> {
      * @return the 1-valued measure
      */
     public Measure<U> one() {
-        // Lazy init because 'this' is null in object initialization
+        // lazy init because 'this' is null in object initialization
         if (one == null) {
             one = ImmutableMeasure.ofRelativeUnits(1, this);
         }
@@ -239,8 +268,8 @@ public class Unit<U extends Unit<U>> {
      * @return true if both units are equivalent, false if not
      */
     public boolean equivalent(Unit<?> other) {
-        if (baseType != other.baseType) {
-            // Different unit types, not compatible
+        if (!getClass().equals(other.getClass())) {
+            // different unit types, not compatible
             return false;
         }
 
@@ -264,15 +293,12 @@ public class Unit<U extends Unit<U>> {
             return false;
         }
         Unit<?> that = (Unit<?>) o;
-        return baseType.equals(that.baseType)
-                && name.equals(that.name)
-                && symbol.equals(that.symbol)
-                && equivalent(that);
+        return name.equals(that.name) && symbol.equals(that.symbol) && equivalent(that);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(toBaseConverter, fromBaseConverter, baseType, name, symbol);
+        return Objects.hash(toBaseConverter, fromBaseConverter, name, symbol);
     }
 
     /**

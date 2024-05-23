@@ -13,10 +13,16 @@ package org.murraybridgebunyips.bunyipslib.external.units;
  * <p>Actual units (such as {@link Units#Celsius} and {@link Units#Fahrenheit}) can be found in the
  * {@link Units} class.
  */
-@SuppressWarnings("SameParameterValue")
 public class Temperature extends Unit<Temperature> {
+    /**
+     * @noinspection SameParameterValue, SameParameterValue, SameParameterValue
+     */
     Temperature(
-            UnaryFunction toBaseConverter, UnaryFunction fromBaseConverter, String name, String symbol) {
-        super(Temperature.class, toBaseConverter, fromBaseConverter, name, symbol);
+            Temperature baseUnit,
+            UnaryFunction toBaseConverter,
+            UnaryFunction fromBaseConverter,
+            String name,
+            String symbol) {
+        super(baseUnit, toBaseConverter, fromBaseConverter, name, symbol);
     }
 }

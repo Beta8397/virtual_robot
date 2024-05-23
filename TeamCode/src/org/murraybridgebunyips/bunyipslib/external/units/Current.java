@@ -4,8 +4,10 @@
 
 package org.murraybridgebunyips.bunyipslib.external.units;
 
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Watts;
+
 /**
- * Unit of electic current dimension.
+ * Unit of electric current dimension.
  *
  * <p>This is the base type for units of current dimension. It is also used to specify the dimension
  * for {@link Measure}: {@code Measure<Current>}.
@@ -13,15 +15,21 @@ package org.murraybridgebunyips.bunyipslib.external.units;
  * <p>Actual units (such as {@link Units#Amps} and {@link Units#Milliamps}) can be found in the
  * {@link Units} class.
  */
-@SuppressWarnings("SameParameterValue")
 public class Current extends Unit<Current> {
-    Current(double baseUnitEquivalent, String name, String symbol) {
-        super(Current.class, baseUnitEquivalent, name, symbol);
+    /**
+     * @noinspection SameParameterValue
+     */
+    Current(Current baseUnit, double baseUnitEquivalent, String name, String symbol) {
+        super(baseUnit, baseUnitEquivalent, name, symbol);
     }
 
     Current(
-            UnaryFunction toBaseConverter, UnaryFunction fromBaseConverter, String name, String symbol) {
-        super(Current.class, toBaseConverter, fromBaseConverter, name, symbol);
+            Current baseUnit,
+            UnaryFunction toBaseConverter,
+            UnaryFunction fromBaseConverter,
+            String name,
+            String symbol) {
+        super(baseUnit, toBaseConverter, fromBaseConverter, name, symbol);
     }
 
     /**
@@ -36,6 +44,6 @@ public class Current extends Unit<Current> {
      * @return the power unit
      */
     public Power times(Unit<Voltage> voltage, String name, String symbol) {
-        return new Power(toBaseUnits(1) * voltage.toBaseUnits(1), name, symbol);
+        return new Power(Watts, toBaseUnits(1) * voltage.toBaseUnits(1), name, symbol);
     }
 }

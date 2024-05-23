@@ -4,13 +4,14 @@
 
 package org.murraybridgebunyips.bunyipslib.external.units;
 
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds;
+
 /**
  * A measure holds the magnitude and unit of some dimension, such as distance, time, or speed. Two
  * measures with the same <i>unit</i> and <i>magnitude</i> are effectively equivalent objects.
  *
  * @param <U> the unit type of the measure
  */
-@SuppressWarnings("BoundedWildcard")
 public interface Measure<U extends Unit<U>> extends Comparable<Measure<U>> {
     /**
      * The threshold for two measures to be considered equivalent if converted to the same unit. This
@@ -28,7 +29,7 @@ public interface Measure<U extends Unit<U>> extends Comparable<Measure<U>> {
     @SafeVarargs
     static <U extends Unit<U>> Measure<U> max(Measure<U>... measures) {
         if (measures.length == 0) {
-            return null; // Nothing to compare
+            return null; // nothing to compare
         }
 
         Measure<U> max = null;
@@ -51,7 +52,7 @@ public interface Measure<U extends Unit<U>> extends Comparable<Measure<U>> {
     @SafeVarargs
     static <U extends Unit<U>> Measure<U> min(Measure<U>... measures) {
         if (measures.length == 0) {
-            return null; // Nothing to compare
+            return null; // nothing to compare
         }
 
         Measure<U> max = null;
@@ -106,6 +107,7 @@ public interface Measure<U extends Unit<U>> extends Comparable<Measure<U>> {
         }
     }
 
+    // BunyipsLib change
     // Kotlin compatibility, the `in` token is a reserved keyword
 
     /**
@@ -151,35 +153,35 @@ public interface Measure<U extends Unit<U>> extends Comparable<Measure<U>> {
     @SuppressWarnings("unchecked")
     default <U2 extends Unit<U2>> Measure<?> times(Measure<U2> other) {
         if (other.unit() instanceof Dimensionless) {
-            // Scalar multiplication
+            // scalar multiplication
             return times(other.baseUnitMagnitude());
         }
 
         if (unit() instanceof Per
-                && other.unit().baseType.equals(((Per<?, ?>) unit()).denominator().baseType)) {
-            // Denominator of the Per cancels out, return with just the units of the numerator
+                && other.unit().getBaseUnit().equals(((Per<?, ?>) unit()).denominator().getBaseUnit())) {
+            // denominator of the Per cancels out, return with just the units of the numerator
             Unit<?> numerator = ((Per<?, ?>) unit()).numerator();
             return numerator.ofBaseUnits(baseUnitMagnitude() * other.baseUnitMagnitude());
-        } else if (unit() instanceof Velocity && other.unit().baseType.equals(Time.class)) {
+        } else if (unit() instanceof Velocity && other.unit().getBaseUnit().equals(Seconds)) {
             // Multiplying a velocity by a time, return the scalar unit (eg Distance)
             Unit<?> numerator = ((Velocity<?>) unit()).getUnit();
             return numerator.ofBaseUnits(baseUnitMagnitude() * other.baseUnitMagnitude());
         } else if (other.unit() instanceof Per
-                && unit().baseType.equals(((Per<?, ?>) other.unit()).denominator().baseType)) {
+                && unit().getBaseUnit().equals(((Per<?, ?>) other.unit()).denominator().getBaseUnit())) {
             Unit<?> numerator = ((Per<?, ?>) other.unit()).numerator();
             return numerator.ofBaseUnits(baseUnitMagnitude() * other.baseUnitMagnitude());
         } else if (unit() instanceof Per
                 && other.unit() instanceof Per
                 && ((Per<?, ?>) unit())
                 .denominator()
-                .baseType
-                .equals(((Per<?, U>) other.unit()).numerator().baseType)
+                .getBaseUnit()
+                .equals(((Per<?, U>) other.unit()).numerator().getBaseUnit())
                 && ((Per<?, ?>) unit())
                 .numerator()
-                .baseType
-                .equals(((Per<?, ?>) other.unit()).denominator().baseType)) {
-            // Multiplying eg meters per second * milliseconds per foot
-            // Return a scalar
+                .getBaseUnit()
+                .equals(((Per<?, ?>) other.unit()).denominator().getBaseUnit())) {
+            // multiplying eg meters per second * milliseconds per foot
+            // return a scalar
             return Units.Value.of(baseUnitMagnitude() * other.baseUnitMagnitude());
         }
 
@@ -200,16 +202,33 @@ public interface Measure<U extends Unit<U>> extends Comparable<Measure<U>> {
     }
 
     /**
-     * Divides this measurement by some constant divisor and returns the result. This is equivalent to
-     * {@code divide(divisor.baseUnitMagnitude())}
+     * Divides this measurement by another measure and performs some dimensional analysis to reduce
+     * the units.
      *
-     * @param divisor the dimensionless measure to divide by
+     * @param <U2>  the type of the other measure to multiply by
+     * @param other the unit to multiply by
      * @return the resulting measure
-     * @see #divide(double)
-     * @see #times(double)
      */
-    default Measure<U> divide(Measure<Dimensionless> divisor) {
-        return divide(divisor.baseUnitMagnitude());
+    default <U2 extends Unit<U2>> Measure<?> divide(Measure<U2> other) {
+        if (unit().getBaseUnit().equals(other.unit().getBaseUnit())) {
+            return Units.Value.ofBaseUnits(baseUnitMagnitude() / other.baseUnitMagnitude());
+        }
+        if (other.unit() instanceof Dimensionless) {
+            return divide(other.baseUnitMagnitude());
+        }
+        if (other.unit() instanceof Velocity) {
+            Velocity<?> velocity = (Velocity<?>) other.unit();
+            if (velocity.getUnit().getBaseUnit().equals(unit().getBaseUnit())) {
+                return times(velocity.reciprocal().ofBaseUnits(1 / other.baseUnitMagnitude()));
+            }
+        }
+        if (other.unit() instanceof Per) {
+            Per<?, ?> per = (Per<?, ?>) other.unit();
+            if (per.numerator().getBaseUnit().equals(unit().getBaseUnit())) {
+                return times(per.reciprocal().ofBaseUnits(1 / other.baseUnitMagnitude()));
+            }
+        }
+        return unit().per(other.unit()).ofBaseUnits(baseUnitMagnitude() / other.baseUnitMagnitude());
     }
 
     /**
@@ -320,7 +339,7 @@ public interface Measure<U extends Unit<U>> extends Comparable<Measure<U>> {
      * @return true if this unit is near the other measure, otherwise false
      */
     default boolean isNear(Measure<?> other, double varianceThreshold) {
-        if (unit().baseType != other.unit().baseType) {
+        if (!unit().getBaseUnit().equivalent(other.unit().getBaseUnit())) {
             return false; // Disjoint units, not compatible
         }
 
@@ -331,13 +350,32 @@ public interface Measure<U extends Unit<U>> extends Comparable<Measure<U>> {
     }
 
     /**
+     * Checks if this measure is near another measure of the same unit, with a specified tolerance of
+     * the same unit.
+     *
+     * <pre>
+     *     Meters.of(1).isNear(Meters.of(1.2), Millimeters.of(300)) // true
+     *     Degrees.of(90).isNear(Rotations.of(0.5), Degrees.of(45)) // false
+     * </pre>
+     *
+     * @param other     the other measure to compare against.
+     * @param tolerance the tolerance allowed in which the two measures are defined as near each
+     *                  other.
+     * @return true if this unit is near the other measure, otherwise false.
+     */
+    default boolean isNear(Measure<U> other, Measure<U> tolerance) {
+        return Math.abs(baseUnitMagnitude() - other.baseUnitMagnitude())
+                <= Math.abs(tolerance.baseUnitMagnitude());
+    }
+
+    /**
      * Checks if this measure is equivalent to another measure of the same unit.
      *
      * @param other the measure to compare to
      * @return true if this measure is equivalent, false otherwise
      */
     default boolean isEquivalent(Measure<?> other) {
-        if (unit().baseType != other.unit().baseType) {
+        if (!unit().getBaseUnit().equals(other.unit().getBaseUnit())) {
             return false; // Disjoint units, not compatible
         }
 
@@ -397,7 +435,7 @@ public interface Measure<U extends Unit<U>> extends Comparable<Measure<U>> {
      * @return the short form representation of this measurement
      */
     default String toShortString() {
-        // Eg. 1.234e+04 V/m (1234 Volt per Meter in long form)
+        // eg 1.234e+04 V/m (1234 Volt per Meter in long form)
         return String.format("%.3e %s", magnitude(), unit().symbol());
     }
 
@@ -409,7 +447,7 @@ public interface Measure<U extends Unit<U>> extends Comparable<Measure<U>> {
      * @return the long form representation of this measurement
      */
     default String toLongString() {
-        // Eg. 1234 Volt per Meter (1.234e+04 V/m in short form)
+        // eg 1234 Volt per Meter (1.234e+04 V/m in short form)
         return String.format("%s %s", magnitude(), unit().name());
     }
 }

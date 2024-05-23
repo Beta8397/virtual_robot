@@ -2,8 +2,8 @@ package org.murraybridgebunyips.deps;
 
 // Dummy BuildConfig as Gradle is not here
 public class BuildConfig {
-    public static final String BUILD_TIME = "xxxx-xx-xx@xx:xx:xx";
-    public static final String GIT_COMMIT = "a1b2c3";
-    public static final String ID = "abcdefgh-1234-5678-ABCD-VIRTUAL__BOT";
-    public static final String SEMVER = "x.x.x";
+    public static final String BUILD_TIME = "robot";
+    public static final String GIT_COMMIT = "virtual";
+    public static final String ID = "VIRTUAL_BUNYIPSFTC";
+    public static final String SEMVER = "3.1.2";
 }

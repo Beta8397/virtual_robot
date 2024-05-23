@@ -31,19 +31,27 @@ public class Velocity<D extends Unit<D>> extends Unit<Velocity<D>> {
     private final D unit;
     private final Time period;
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     Velocity(D unit, Time period, String name, String symbol) {
-        super((Class) Velocity.class, unit.toBaseUnits(1) / period.toBaseUnits(1), name, symbol);
+        super(
+                unit.isBaseUnit() && period.isBaseUnit()
+                        ? null
+                        : combine(unit.getBaseUnit(), period.getBaseUnit()),
+                unit.toBaseUnits(1) / period.toBaseUnits(1),
+                name,
+                symbol);
         this.unit = unit;
         this.period = period;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     Velocity(
-            UnaryFunction toBaseConverter, UnaryFunction fromBaseConverter, String name, String symbol) {
-        super((Class) Velocity.class, toBaseConverter, fromBaseConverter, name, symbol);
-        unit = Units.anonymous();
-        period = Units.Seconds;
+            Velocity<D> baseUnit,
+            UnaryFunction toBaseConverter,
+            UnaryFunction fromBaseConverter,
+            String name,
+            String symbol) {
+        super(baseUnit, toBaseConverter, fromBaseConverter, name, symbol);
+        unit = baseUnit.unit;
+        period = baseUnit.period;
     }
 
     /**
@@ -147,6 +155,15 @@ public class Velocity<D extends Unit<D>> extends Unit<Velocity<D>> {
      */
     public Time getPeriod() {
         return period;
+    }
+
+    /**
+     * Returns the reciprocal of this velocity.
+     *
+     * @return the reciprocal
+     */
+    public Per<Time, D> reciprocal() {
+        return period.per(unit);
     }
 
     @Override

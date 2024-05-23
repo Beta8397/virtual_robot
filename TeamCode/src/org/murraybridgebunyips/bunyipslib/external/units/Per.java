@@ -32,18 +32,30 @@ public class Per<N extends Unit<N>, D extends Unit<D>> extends Unit<Per<N, D>> {
      * Creates a new proportional unit derived from the ratio of one unit to another. Consider using
      * {@link #combine} instead of manually calling this constructor.
      *
-     * @param baseType    the base type representing the unit ratio
      * @param numerator   the numerator unit
      * @param denominator the denominator unit
      */
-    protected Per(Class<? extends Per<N, D>> baseType, N numerator, D denominator) {
+    protected Per(N numerator, D denominator) {
         super(
-                baseType,
+                numerator.isBaseUnit() && denominator.isBaseUnit()
+                        ? null
+                        : combine(numerator.getBaseUnit(), denominator.getBaseUnit()),
                 numerator.toBaseUnits(1) / denominator.toBaseUnits(1),
                 numerator.name() + " per " + denominator.name(),
                 numerator.symbol() + "/" + denominator.symbol());
         this.numerator = numerator;
         this.denominator = denominator;
+    }
+
+    Per(
+            Per<N, D> baseUnit,
+            UnaryFunction toBaseConverter,
+            UnaryFunction fromBaseConverter,
+            String name,
+            String symbol) {
+        super(baseUnit, toBaseConverter, fromBaseConverter, name, symbol);
+        numerator = baseUnit.numerator();
+        denominator = baseUnit.denominator();
     }
 
     /**
@@ -74,7 +86,7 @@ public class Per<N extends Unit<N>, D extends Unit<D>> extends Unit<Per<N, D>> {
             return existing;
         }
 
-        Per newUnit = new Per<N, D>((Class) Per.class, numerator, denominator);
+        Per newUnit = new Per<>(numerator, denominator);
         cache.put(key, newUnit);
         return newUnit;
     }
@@ -95,6 +107,15 @@ public class Per<N extends Unit<N>, D extends Unit<D>> extends Unit<Per<N, D>> {
      */
     public D denominator() {
         return denominator;
+    }
+
+    /**
+     * Returns the reciprocal of this Per.
+     *
+     * @return the reciprocal
+     */
+    public Per<D, N> reciprocal() {
+        return denominator.per(numerator);
     }
 
     @Override

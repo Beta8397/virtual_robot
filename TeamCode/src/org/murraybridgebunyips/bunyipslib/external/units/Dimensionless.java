@@ -7,21 +7,20 @@ package org.murraybridgebunyips.bunyipslib.external.units;
 /**
  * A type of unit that corresponds to raw values and not any physical dimension, such as percentage.
  */
-@SuppressWarnings("SameParameterValue")
 public class Dimensionless extends Unit<Dimensionless> {
     /**
-     * Creates a new unit with the given name and multiplier to the base unit.
-     *
-     * @param baseUnitEquivalent the multiplier to convert this unit to the base unit of this type.
-     * @param name               the name of the unit
-     * @param symbol             the symbol of the unit
+     * @noinspection SameParameterValue
      */
-    Dimensionless(double baseUnitEquivalent, String name, String symbol) {
-        super(Dimensionless.class, baseUnitEquivalent, name, symbol);
+    Dimensionless(Dimensionless baseUnit, double baseUnitEquivalent, String name, String symbol) {
+        super(baseUnit, baseUnitEquivalent, name, symbol);
     }
 
     Dimensionless(
-            UnaryFunction toBaseConverter, UnaryFunction fromBaseConverter, String name, String symbol) {
-        super(Dimensionless.class, toBaseConverter, fromBaseConverter, name, symbol);
+            Dimensionless baseUnit,
+            UnaryFunction toBaseConverter,
+            UnaryFunction fromBaseConverter,
+            String name,
+            String symbol) {
+        super(baseUnit, toBaseConverter, fromBaseConverter, name, symbol);
     }
 }

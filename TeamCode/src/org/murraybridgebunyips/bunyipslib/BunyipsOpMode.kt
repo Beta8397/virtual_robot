@@ -228,7 +228,10 @@ abstract class BunyipsOpMode : BOMInternal() {
             pushTelemetry()
             Dbg.logd("BunyipsOpMode: starting onInitLoop()...")
             if (initTask != null) {
-                Dbg.logd("BunyipsOpMode: running initTask -> % ...", if (initTask is Task) (initTask as Task).toVerboseString() else initTask)
+                Dbg.logd(
+                    "BunyipsOpMode: running initTask -> % ...",
+                    if (initTask is Task) (initTask as Task).toVerboseString() else initTask
+                )
                 log("<font color='gray'>running init-task:</font> %", initTask)
             }
             // Run user-defined dynamic initialisation

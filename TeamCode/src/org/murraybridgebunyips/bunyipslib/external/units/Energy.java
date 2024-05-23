@@ -13,14 +13,20 @@ package org.murraybridgebunyips.bunyipslib.external.units;
  * <p>Actual units (such as {@link Units#Joules} and {@link Units#Kilojoules}) can be found in the
  * {@link Units} class.
  */
-@SuppressWarnings("SameParameterValue")
 public class Energy extends Unit<Energy> {
     Energy(
-            UnaryFunction toBaseConverter, UnaryFunction fromBaseConverter, String name, String symbol) {
-        super(Energy.class, toBaseConverter, fromBaseConverter, name, symbol);
+            Energy baseUnit,
+            UnaryFunction toBaseConverter,
+            UnaryFunction fromBaseConverter,
+            String name,
+            String symbol) {
+        super(baseUnit, toBaseConverter, fromBaseConverter, name, symbol);
     }
 
-    Energy(double baseUnitEquivalent, String name, String symbol) {
-        super(Energy.class, baseUnitEquivalent, name, symbol);
+    /**
+     * @noinspection SameParameterValue
+     */
+    Energy(Energy baseUnit, double baseUnitEquivalent, String name, String symbol) {
+        super(baseUnit, baseUnitEquivalent, name, symbol);
     }
 }
