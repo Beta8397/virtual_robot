@@ -48,6 +48,24 @@ public class Switch extends Cannon {
     }
 
     /**
+     * Query whether the switch is open.
+     *
+     * @return whether the switch is open
+     */
+    public boolean isOpen() {
+        return isFired();
+    }
+
+    /**
+     * Query whether the switch is closed.
+     *
+     * @return whether the switch is closed
+     */
+    public boolean isClosed() {
+        return isReset();
+    }
+
+    /**
      * Open the switch.
      *
      * @return a task that opens the switch

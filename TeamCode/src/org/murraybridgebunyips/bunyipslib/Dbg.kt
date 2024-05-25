@@ -32,6 +32,8 @@ package org.murraybridgebunyips.bunyipslib
 
 import com.qualcomm.robotcore.util.RobotLog
 import org.murraybridgebunyips.bunyipslib.Text.formatString
+import org.murraybridgebunyips.bunyipslib.Text.getCallingUserCodeFunction
+import org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds
 
 /**
  * Provide utility methods for debug logging
@@ -262,5 +264,23 @@ object Dbg {
     )
     fun logTmp(format: Any, vararg args: Any?) {
         log(format, *args)
+    }
+
+    /**
+     * Log a timestamp from inside a BunyipsOpMode.
+     * This will call a log() with the current time since the last timer reset, prefixed with the last user-related
+     * function that was called.
+     * If not called from a BunyipsOpMode, time information will be unknown.
+     */
+    @JvmStatic
+    fun stamp() {
+        log(
+            getCallingUserCodeFunction(),
+            "Stamped at: T+%s",
+            if (BunyipsOpMode.isRunning)
+                BunyipsOpMode.instance.timer.elapsedTime().inUnit(Seconds)
+            else
+                "?"
+        )
     }
 }

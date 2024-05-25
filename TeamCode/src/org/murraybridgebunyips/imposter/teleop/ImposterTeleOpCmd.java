@@ -10,6 +10,7 @@ import org.murraybridgebunyips.bunyipslib.Dbg;
 import org.murraybridgebunyips.bunyipslib.drive.MecanumDrive;
 import org.murraybridgebunyips.bunyipslib.drive.TriDeadwheelMecanumDrive;
 import org.murraybridgebunyips.bunyipslib.external.Mathf;
+import org.murraybridgebunyips.bunyipslib.subsystems.Switch;
 import org.murraybridgebunyips.bunyipslib.tasks.*;
 import org.murraybridgebunyips.bunyipslib.tasks.groups.SequentialTaskGroup;
 import org.murraybridgebunyips.imposter.components.ImposterConfig;
@@ -19,46 +20,23 @@ import static org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds;
 /** bunyipslib virtual testing ground */
 @TeleOp(name = "TeleOp w/ Cmd", group = "VIRTUAL_BUNYIPSFTC")
 public class ImposterTeleOpCmd extends CommandBasedBunyipsOpMode {
-    private ImposterConfig config = new ImposterConfig();
+    private final ImposterConfig config = new ImposterConfig();
+    private Switch backServo;
     private MecanumDrive drive;
-    private Subsystem1 ss1;
 
     @Override
     protected void onInitialise() {
         config.init();
         drive = new TriDeadwheelMecanumDrive(config.driveConstants, config.mecanumCoefficients, hardwareMap.voltageSensor, config.imu, config.front_left_motor, config.front_right_motor, config.back_left_motor, config.back_right_motor, config.localizerCoefficients, config.enc_left, config.enc_right, config.enc_x);
-        ss1 = new Subsystem1();
-        addSubsystems(drive);
+        backServo = new Switch(config.back_servo);
+        addSubsystems(drive, backServo);
+        drive.disable();
     }
 
     @Override
     protected void assignCommands() {
+        scheduler().when(backServo::isOpen).runDebounced(drive::enable);
+        driver().whenPressed(Controls.A).run(backServo.openTask());
         drive.setDefaultTask(new HolonomicDriveTask(gamepad1, drive, () -> false));
-        driver().whenPressed(Controls.A)
-                .run(new ContinuousTask(() -> addTelemetry("toggle is on")))
-                .finishingIf(() -> gamepad1.getDebounced(Controls.A));
-    }
-
-    @Override
-    protected void periodic() {
-        ss1.update();
-    }
-
-    class Thing extends SequentialTaskGroup {
-        public Thing(Subsystem1 a, MecanumDrive b) {
-            super(
-                    new RunForTask(Seconds.of(1), () -> getInstance().addTelemetry("1 second"), a, false),
-                    new RunForTask(Seconds.of(3), () -> {}, b, false),
-                    new RunForTask(Seconds.of(1), () -> {}, a, false)
-            );
-        }
-    }
-
-    class Subsystem1 extends BunyipsSubsystem {
-
-        @Override
-        protected void periodic() {
-
-        }
     }
 }

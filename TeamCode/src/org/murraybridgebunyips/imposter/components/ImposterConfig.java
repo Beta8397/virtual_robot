@@ -4,6 +4,7 @@ import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.Servo;
 import org.murraybridgebunyips.bunyipslib.RobotConfig;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.DriveConstants;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.MecanumCoefficients;
@@ -22,6 +23,8 @@ public class ImposterConfig extends RobotConfig {
     public DcMotorEx front_left_motor;
     public IMU imu;
 
+    public Servo back_servo;
+
     public Deadwheel enc_x;
     public Deadwheel enc_left;
     public Deadwheel enc_right;
@@ -36,6 +39,8 @@ public class ImposterConfig extends RobotConfig {
         back_left_motor = getHardware("back_left_motor", DcMotorEx.class);
         front_right_motor = getHardware("front_right_motor", DcMotorEx.class);
         front_left_motor = getHardware("front_left_motor", DcMotorEx.class);
+
+        back_servo = getHardware("back_servo", Servo.class);
 
         enc_x = getHardware("enc_x", Deadwheel.class);
         enc_left = getHardware("enc_left", Deadwheel.class);

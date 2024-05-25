@@ -98,7 +98,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
      * @param defaultTask The task to set as the default task
      */
     public final void setDefaultTask(Task defaultTask) {
-        if (!shouldRun || defaultTask == null) return;
+        if (defaultTask == null) return;
         this.defaultTask = defaultTask;
     }
 
