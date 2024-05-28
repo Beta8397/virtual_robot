@@ -59,6 +59,7 @@ public class AlignToContourTask extends Task {
         r = rSupplier;
         this.controller = controller;
         controller.updatePID(PID);
+        withName("Align To Contour");
     }
 
     /**
@@ -89,6 +90,7 @@ public class AlignToContourTask extends Task {
         this.processors = processors;
         this.controller = controller;
         controller.updatePID(PID);
+        withName("Align To Contour");
     }
 
     @Override

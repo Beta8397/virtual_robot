@@ -16,6 +16,10 @@ class MessageTask(time: Measure<Time>, private val message: String) :
     Task(time), RobotTask {
     private lateinit var item: Item
 
+    init {
+        withName("Message")
+    }
+
     private fun buildString(): String {
         return formatString("%/%s: %", round(deltaTime.inUnit(Seconds), 1), timeout.inUnit(Seconds), message)
     }

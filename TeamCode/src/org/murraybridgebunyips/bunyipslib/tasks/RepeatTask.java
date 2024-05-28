@@ -18,6 +18,7 @@ public class RepeatTask extends ForeverTask {
      */
     public RepeatTask(Task task) {
         this.task = task;
+        withName(task + " (Repeat)");
     }
 
     @Override

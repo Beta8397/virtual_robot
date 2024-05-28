@@ -22,6 +22,7 @@ public class RunForTask extends Task {
     public RunForTask(Measure<Time> timeout, Runnable callback) {
         super(timeout);
         this.callback = callback;
+        withName("Run For");
     }
 
     /**
@@ -35,6 +36,7 @@ public class RunForTask extends Task {
     public RunForTask(Measure<Time> timeout, Runnable callback, BunyipsSubsystem dependency, boolean override) {
         super(timeout, dependency, override);
         this.callback = callback;
+        withName("Run For");
     }
 
     @Override

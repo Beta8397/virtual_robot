@@ -43,6 +43,7 @@ public class RoadRunnerTask extends Task {
         super(time.magnitude() != 0.0 ? time : Seconds.of(trajectory.duration()));
         this.drive = drive;
         this.trajectory = trajectory;
+        withName("RoadRunner Trajectory");
     }
 
     /**
@@ -56,6 +57,7 @@ public class RoadRunnerTask extends Task {
         super(time.magnitude() != 0.0 ? time : Seconds.of(trajectorySequence.duration()));
         this.drive = drive;
         this.trajectorySequence = trajectorySequence;
+        withName("RoadRunner Trajectory");
     }
 
     /**

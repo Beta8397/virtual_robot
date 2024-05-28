@@ -61,6 +61,7 @@ public class AlignToAprilTagTask extends Task {
         TARGET_TAG = targetTag;
         this.controller = controller;
         controller.updatePID(PID);
+        withName("Align To AprilTag");
     }
 
     /**
@@ -86,6 +87,7 @@ public class AlignToAprilTagTask extends Task {
         r = rSupplier;
         this.controller = controller;
         controller.updatePID(PID);
+        withName("Align To AprilTag");
     }
 
     /**

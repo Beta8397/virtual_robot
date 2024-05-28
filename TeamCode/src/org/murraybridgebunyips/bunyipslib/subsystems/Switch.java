@@ -71,7 +71,7 @@ public class Switch extends Cannon {
      * @return a task that opens the switch
      */
     public Task openTask() {
-        return fireTask();
+        return fireTask().withName("Open");
     }
 
     /**
@@ -80,6 +80,6 @@ public class Switch extends Cannon {
      * @return a task that closes the switch
      */
     public Task closeTask() {
-        return resetTask();
+        return resetTask().withName("Close");
     }
 }

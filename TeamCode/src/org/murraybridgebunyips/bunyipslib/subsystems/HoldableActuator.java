@@ -259,7 +259,7 @@ public class HoldableActuator extends BunyipsSubsystem {
      * @return a task to move the actuator
      */
     public Task controlTask(DoubleSupplier powerSupplier) {
-        return new ContinuousTask(() -> setPower(powerSupplier.getAsDouble()), this, false).withName("JoystickControlTask");
+        return new ContinuousTask(() -> setPower(powerSupplier.getAsDouble()), this, false).withName("Joystick Control");
     }
 
     public HoldableActuator setPower(double p) {
@@ -274,7 +274,7 @@ public class HoldableActuator extends BunyipsSubsystem {
      * @return a task to set the power
      */
     public Task setPowerTask(double p) {
-        return new RunTask(() -> setPower(p), this, false).withName("SetPowerTask");
+        return new RunTask(() -> setPower(p), this, false).withName("Set Power");
     }
 
     /**
@@ -306,7 +306,7 @@ public class HoldableActuator extends BunyipsSubsystem {
             public boolean isTaskFinished() {
                 return false;
             }
-        }.withName("RunForTask");
+        }.withName("Run For Time");
     }
 
     /**
@@ -358,7 +358,7 @@ public class HoldableActuator extends BunyipsSubsystem {
                 boolean sustainedOvercurrent = overcurrentTimer != null && overcurrentTimer.seconds() >= OVERCURRENT_TIME.in(Seconds);
                 return inputMode != Mode.HOMING || (bottomedOut || velocityZeroed || sustainedOvercurrent);
             }
-        }.withName("HomeTask");
+        }.withName("Return To Home");
     }
 
     /**
@@ -391,7 +391,7 @@ public class HoldableActuator extends BunyipsSubsystem {
             public boolean isTaskFinished() {
                 return inputMode != Mode.AUTO || (!motor.isBusy() && Mathf.isNear(targetPosition, motor.getCurrentPosition(), TOLERANCE));
             }
-        }.withName("RunToPositionTask");
+        }.withName("Run To Position");
     }
 
     /**
@@ -425,7 +425,7 @@ public class HoldableActuator extends BunyipsSubsystem {
             public boolean isTaskFinished() {
                 return inputMode != Mode.AUTO || (!motor.isBusy() && Mathf.isNear(target, motor.getCurrentPosition(), TOLERANCE));
             }
-        }.withName("DeltaPositionTask");
+        }.withName("Run To Delta");
     }
 
     @Override

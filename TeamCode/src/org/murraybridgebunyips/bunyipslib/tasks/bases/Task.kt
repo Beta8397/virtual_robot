@@ -1,7 +1,6 @@
 package org.murraybridgebunyips.bunyipslib.tasks.bases
 
 import org.murraybridgebunyips.bunyipslib.BunyipsComponent
-import org.murraybridgebunyips.bunyipslib.BunyipsOpMode
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem
 import org.murraybridgebunyips.bunyipslib.external.units.Measure
 import org.murraybridgebunyips.bunyipslib.external.units.Time

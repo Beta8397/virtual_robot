@@ -18,6 +18,7 @@ public class RunTask extends OnceTask {
      */
     public RunTask(Runnable callback) {
         this.callback = callback;
+        withName("Run");
     }
 
     /**
@@ -26,6 +27,7 @@ public class RunTask extends OnceTask {
     public RunTask() {
         this(() -> {
         });
+        withName("Run Nothing");
     }
 
     /**
@@ -38,6 +40,7 @@ public class RunTask extends OnceTask {
     public RunTask(Runnable callback, BunyipsSubsystem dependencySubsystem, boolean override) {
         super(dependencySubsystem, override);
         this.callback = callback;
+        withName("Run");
     }
 
     @Override

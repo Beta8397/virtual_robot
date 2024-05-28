@@ -46,6 +46,7 @@ public class GetWhitePixelTask extends NoTimeoutTask {
         this.vision = vision;
         this.tfod = tfod;
         this.aggression = aggression;
+        withName("Get White Pixel");
     }
 
     /**

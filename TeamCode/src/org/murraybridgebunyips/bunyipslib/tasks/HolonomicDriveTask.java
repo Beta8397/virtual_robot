@@ -46,6 +46,7 @@ public class HolonomicDriveTask extends ForeverTask {
         y = ySupplier;
         r = rSupplier;
         this.fieldCentricEnabled = fieldCentricEnabled;
+        withName("Holonomic Drive Control");
     }
 
 

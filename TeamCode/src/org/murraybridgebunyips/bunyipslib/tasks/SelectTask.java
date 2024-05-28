@@ -22,6 +22,7 @@ public class SelectTask<T> extends NoTimeoutTask {
      */
     public SelectTask(Supplier<T> stateSupplier) {
         this.stateSupplier = stateSupplier;
+        withName("Select");
     }
 
     /**

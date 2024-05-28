@@ -92,6 +92,7 @@ public class MoveToAprilTagTask extends Task {
         this.drive = (RoadRunnerDrive) drive;
         this.aprilTag = aprilTag;
         TARGET_TAG = targetTag;
+        withName("Move to AprilTag");
     }
 
     /**
@@ -114,6 +115,7 @@ public class MoveToAprilTagTask extends Task {
         y = ySupplier;
         r = rSupplier;
         TARGET_TAG = targetTag;
+        withName("Move to AprilTag");
     }
 
     /**

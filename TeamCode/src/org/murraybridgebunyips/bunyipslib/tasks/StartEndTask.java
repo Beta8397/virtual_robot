@@ -34,6 +34,7 @@ public class StartEndTask extends Task {
         super(timeoutSeconds);
         this.onStart = onStart;
         this.onFinish = onFinish;
+        withName("Start End");
     }
 
     @Override

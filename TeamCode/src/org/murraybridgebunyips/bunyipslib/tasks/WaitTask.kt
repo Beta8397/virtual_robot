@@ -13,6 +13,10 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.Task
 class WaitTask(time: Measure<Time>, private val showTelemetry: Boolean = true) : Task(time), RobotTask {
     constructor(time: Measure<Time>) : this(time, true)
 
+    init {
+        withName("Wait")
+    }
+
     override fun init() {
         // no-op
     }

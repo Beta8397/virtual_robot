@@ -44,6 +44,14 @@ public abstract class TaskGroup extends Task {
         for (Task task : this.tasks) {
             opMode.log("&nbsp;&nbsp;-> <font color='gray'>%<i>(t=%)</i></font>", task.toString(), task.getTimeout().magnitude() != 0.0 ? round(task.getTimeout().in(Seconds), 1) + "s" : "∞");
         }
+        StringBuilder taskNames = new StringBuilder();
+        taskNames.append(getClass().getSimpleName().replace("TaskGroup", ""));
+        taskNames.append(": ");
+        for (int i = 0; i < tasks.length - 1; i++) {
+            taskNames.append(tasks[i]).append(", ");
+        }
+        taskNames.append(tasks[tasks.length - 1]);
+        withName(taskNames.toString());
     }
 
     protected final void executeTask(Task task) {

@@ -72,6 +72,7 @@ public class MoveToContourTask extends Task {
         this.rotationController = rotationController;
         translationController.updatePID(TRANSLATIONAL_PID);
         rotationController.updatePID(ROTATIONAL_PID);
+        withName("Move to Contour");
     }
 
     /**
@@ -106,6 +107,7 @@ public class MoveToContourTask extends Task {
         this.rotationController = rotationController;
         translationController.updatePID(TRANSLATIONAL_PID);
         rotationController.updatePID(ROTATIONAL_PID);
+        withName("Move to Contour");
     }
 
     /**

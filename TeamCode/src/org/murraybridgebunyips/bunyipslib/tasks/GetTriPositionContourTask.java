@@ -38,6 +38,7 @@ public class GetTriPositionContourTask extends ForeverTask {
      */
     public GetTriPositionContourTask(ColourThreshold colourThreshold) {
         this.colourThreshold = colourThreshold;
+        withName("Get Tri Position Contour");
     }
 
     /**

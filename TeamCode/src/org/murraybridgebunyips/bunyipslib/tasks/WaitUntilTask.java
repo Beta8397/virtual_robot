@@ -19,6 +19,7 @@ public class WaitUntilTask extends NoTimeoutTask {
      */
     public WaitUntilTask(BooleanSupplier condition) {
         this.condition = condition;
+        withName("Wait Until");
     }
 
     @Override

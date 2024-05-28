@@ -26,6 +26,18 @@ public class ConditionalTask extends NoTimeoutTask {
         this.trueTask = trueTask;
         this.falseTask = falseTask;
         this.condition = condition;
+        withName("Conditional " + trueTask + " / " + falseTask);
+    }
+
+    /**
+     * Create a new conditional task with the given callbacks and condition.
+     *
+     * @param onTrue    the callback to run if the condition is true
+     * @param onFalse   the callback to run if the condition is false
+     * @param condition the condition to evaluate
+     */
+    public ConditionalTask(Runnable onTrue, Runnable onFalse, BooleanSupplier condition) {
+        this(new RunTask(onTrue), new RunTask(onFalse), condition);
     }
 
     @Override

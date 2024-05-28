@@ -49,6 +49,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
         if (!shouldRun) {
             assertionFailed = true;
             Dbg.error(getClass(), "Subsystem has been disabled as assertParamsNotNull() failed.");
+            onDisable();
         }
         return shouldRun;
     }
@@ -60,6 +61,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
         if (!shouldRun) return;
         shouldRun = false;
         Dbg.logd(getClass(), "Subsystem disabled via disable() call.");
+        onDisable();
     }
 
     /**
@@ -67,10 +69,10 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
      * This method will no-op if the assertion from assertParamsNotNull() failed.
      */
     public void enable() {
-        if (!shouldRun && !assertionFailed) {
-            shouldRun = true;
-            Dbg.logd(getClass(), "Subsystem enabled via enable() call.");
-        }
+        if (shouldRun || assertionFailed) return;
+        shouldRun = true;
+        Dbg.logd(getClass(), "Subsystem enabled via enable() call.");
+        onEnable();
     }
 
     /**
@@ -83,10 +85,12 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
     public Task getCurrentTask() {
         if (!shouldRun) return null;
         if (currentTask == null || currentTask.isFinished()) {
-            if (currentTask == null)
+            if (currentTask == null) {
                 Dbg.logd(getClass(), "Subsystem awake.");
-            else
+                onEnable();
+            } else {
                 Dbg.logd(getClass(), "Task changed: %<-%", defaultTask, currentTask);
+            }
             currentTask = defaultTask;
         }
         return currentTask;
@@ -217,4 +221,22 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
      * @see #update()
      */
     protected abstract void periodic();
+
+    /**
+     * User callback that runs once when this subsystem is enabled by a call to {@link #enable()}
+     * or the first active call to {@link #periodic()}.
+     */
+    protected void onEnable() {
+        // no-op
+    }
+
+    /**
+     * User callback that runs once when this subsystem is disabled by a call to {@link #disable()}
+     * or by an assertion failure.
+     * Note that this method may run where asserted parameters are null, so be sure to check for
+     * null safety in this method if necessary.
+     */
+    protected void onDisable() {
+        // no-op
+    }
 }

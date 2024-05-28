@@ -18,6 +18,7 @@ public class ContinuousTask extends ForeverTask {
      */
     public ContinuousTask(Runnable callback) {
         this.callback = callback;
+        withName("Continuous");
     }
 
     /**
@@ -30,6 +31,7 @@ public class ContinuousTask extends ForeverTask {
     public ContinuousTask(Runnable callback, BunyipsSubsystem dependency, boolean override) {
         super(dependency, override);
         this.callback = callback;
+        withName("Continuous");
     }
 
     @Override
