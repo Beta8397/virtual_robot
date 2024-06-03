@@ -122,8 +122,6 @@ public class RoadRunnerTask extends Task {
 
         // Time to completion
         opMode.addTelemetry("Duration: %/% sec", round(getDeltaTime().in(Seconds), 2), round(duration, 2));
-        drive.update();
-
         opMode.addTelemetry("Distance to target: %cm", round(Centimeters.convertFrom(distance, Inches), 2));
         opMode.addTelemetry("Angle to target: %deg", round(Math.toDegrees(angle), 2));
     }

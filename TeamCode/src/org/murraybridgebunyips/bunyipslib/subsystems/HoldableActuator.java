@@ -55,6 +55,7 @@ public class HoldableActuator extends BunyipsSubsystem {
     // Tolerance for the actuator in ticks, default 2
     private int TOLERANCE = 2;
     private DcMotorEx motor;
+    private TouchSensor topSwitch;
     private TouchSensor bottomSwitch;
     private boolean zeroed;
     private boolean userLatch;
@@ -146,6 +147,17 @@ public class HoldableActuator extends BunyipsSubsystem {
      */
     public HoldableActuator disableHomingOvercurrent() {
         return withHomingOvercurrent(Amps.of(0), Seconds.of(0));
+    }
+
+    /**
+     * Set the top limit switch of the actuator to use in encoder awareness.
+     *
+     * @param topLimitSwitch the limit switch to set as the top switch where the arm would be at the max position
+     * @return this
+     */
+    public HoldableActuator withTopSwitch(TouchSensor topLimitSwitch) {
+        topSwitch = topLimitSwitch;
+        return this;
     }
 
     /**
@@ -486,6 +498,11 @@ public class HoldableActuator extends BunyipsSubsystem {
 
             if (!bottomSwitch.isPressed())
                 zeroed = false;
+        }
+
+        if (topSwitch != null && topSwitch.isPressed() && motorPower > 0) {
+            inputMode = Mode.USER;
+            motorPower = 0;
         }
 
         if ((motor.getCurrentPosition() < MIN_LIMIT && motorPower < 0.0) || (motor.getCurrentPosition() > MAX_LIMIT && motorPower > 0.0)) {

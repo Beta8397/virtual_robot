@@ -3,6 +3,7 @@ package org.murraybridgebunyips.bunyipslib.tasks.groups;
 import static org.murraybridgebunyips.bunyipslib.Text.round;
 import static org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds;
 
+import org.murraybridgebunyips.bunyipslib.AutonomousBunyipsOpMode;
 import org.murraybridgebunyips.bunyipslib.EmergencyStop;
 import org.murraybridgebunyips.bunyipslib.Scheduler;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
@@ -32,18 +33,6 @@ public abstract class TaskGroup extends Task {
         if (tasks.length == 0) {
             throw new EmergencyStop(getClass().getSimpleName() + " created with no tasks.");
         }
-        String groupName = toString();
-        String taskGroup = getClass().getSimpleName();
-        // Avoid printing the group name if it is the same as the task group name
-        if (!groupName.equals(taskGroup)) {
-            opMode.log("<font color='gray'>%:</font> % created with % tasks.", groupName, taskGroup, this.tasks.size());
-        } else {
-            opMode.log("<font color='gray'>%:</font> Created with % tasks.", taskGroup, this.tasks.size());
-        }
-        // List subtasks
-        for (Task task : this.tasks) {
-            opMode.log("&nbsp;&nbsp;-> <font color='gray'>%<i>(t=%)</i></font>", task.toString(), task.getTimeout().magnitude() != 0.0 ? round(task.getTimeout().in(Seconds), 1) + "s" : "∞");
-        }
         StringBuilder taskNames = new StringBuilder();
         taskNames.append(getClass().getSimpleName().replace("TaskGroup", ""));
         taskNames.append(": ");
@@ -52,6 +41,25 @@ public abstract class TaskGroup extends Task {
         }
         taskNames.append(tasks[tasks.length - 1]);
         withName(taskNames.toString());
+    }
+
+    /**
+     * Log the creation of this task group in the OpMode telemetry.
+     * Called internally by {@link AutonomousBunyipsOpMode}.
+     */
+    public void logCreation() {
+        String groupName = toString();
+        String taskGroup = getClass().getSimpleName();
+        // Avoid printing the group name if it is the same as the task group name
+        if (!groupName.equals(taskGroup)) {
+            opMode.log("<font color='gray'>%:</font> % created with % tasks.", groupName, taskGroup, tasks.size());
+        } else {
+            opMode.log("<font color='gray'>%:</font> Created with % tasks.", taskGroup, tasks.size());
+        }
+        // List subtasks
+        for (Task task : tasks) {
+            opMode.log("&nbsp;&nbsp;-> <font color='gray'>%<i>(t=%)</i></font>", task.toString(), task.getTimeout().magnitude() != 0.0 ? round(task.getTimeout().in(Seconds), 1) + "s" : "∞");
+        }
     }
 
     protected final void executeTask(Task task) {

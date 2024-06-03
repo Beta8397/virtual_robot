@@ -1,9 +1,9 @@
 package org.murraybridgebunyips.bunyipslib;
 
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
 /**
@@ -108,6 +108,30 @@ public abstract class CommandBasedBunyipsOpMode extends BunyipsOpMode {
         if (!error)
             scheduler.addSubsystems(managedSubsystems.toArray(new BunyipsSubsystem[0]));
         assignCommands();
+        Scheduler.ConditionalTask[] tasks = scheduler.getAllocatedTasks();
+        BunyipsSubsystem[] subsystems = scheduler.getManagedSubsystems();
+        Text.Builder out = Text.builder();
+        // Task count will account for tasks on subsystems that are not IdleTasks
+        int taskCount = (int) (tasks.length + subsystems.length - Arrays.stream(subsystems).filter(BunyipsSubsystem::isIdle).count());
+        out.append("[CommandBasedBunyipsOpMode] assignCommands() called | Managing % subsystem(s) | % task(s) scheduled (% subsystem, % command)\n",
+                subsystems.length,
+                taskCount,
+                Arrays.stream(tasks).filter(task -> task.taskToRun.hasDependency()).count() + taskCount - tasks.length,
+                Arrays.stream(tasks).filter(task -> !task.taskToRun.hasDependency()).count()
+        );
+        for (BunyipsSubsystem subsystem : subsystems) {
+            out.append("  | %\n", subsystem);
+            for (Scheduler.ConditionalTask task : tasks) {
+                Optional<BunyipsSubsystem> dep = task.taskToRun.getDependency();
+                if (!dep.isPresent() || !dep.get().equals(subsystem)) continue;
+                out.append("    -> %\n", task);
+            }
+        }
+        for (Scheduler.ConditionalTask task : tasks) {
+            if (task.taskToRun.getDependency().isPresent()) continue;
+            out.append("  | %\n", task);
+        }
+        Dbg.logd(out.toString());
         // Ensure to always run assignCommands() even if no subsystems are added, since it may be used for other purposes
         if (error)
             throw new RuntimeException("No BunyipsSubsystems were added in the addSubsystems() method!");

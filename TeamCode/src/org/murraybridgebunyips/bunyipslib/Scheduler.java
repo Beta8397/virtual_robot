@@ -6,6 +6,8 @@ import static org.murraybridgebunyips.bunyipslib.external.units.Units.Nanosecond
 import static org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds;
 import static org.murraybridgebunyips.bunyipslib.tasks.bases.Task.INFINITE_TIMEOUT;
 
+import androidx.annotation.NonNull;
+
 import org.murraybridgebunyips.bunyipslib.external.units.Measure;
 import org.murraybridgebunyips.bunyipslib.external.units.Time;
 import org.murraybridgebunyips.bunyipslib.tasks.RunTask;
@@ -57,6 +59,20 @@ public class Scheduler extends BunyipsComponent {
         );
         report += timeoutSec == 0.0 ? "s" : "/" + timeoutSec + "s";
         reports.add(report + "</small>");
+    }
+
+    /**
+     * Get all allocated tasks.
+     */
+    public ConditionalTask[] getAllocatedTasks() {
+        return allocatedTasks.toArray(new ConditionalTask[0]);
+    }
+
+    /**
+     * Get all subsystems attached to the scheduler.
+     */
+    public BunyipsSubsystem[] getManagedSubsystems() {
+        return subsystems.toArray(new BunyipsSubsystem[0]);
     }
 
     /**
@@ -588,6 +604,14 @@ public class Scheduler extends BunyipsComponent {
         public void inTimeFinishingIf(Measure<Time> interval, BooleanSupplier condition) {
             time = interval;
             stopCondition = condition;
+        }
+
+        @NonNull
+        @Override
+        public String toString() {
+            // TODO: Implement this method to be more verbose as it will be displayed in Logcat,
+            //  should display everything applicable to the task with its extra Conditional conditions
+            return taskToRun.toString();
         }
     }
 }
