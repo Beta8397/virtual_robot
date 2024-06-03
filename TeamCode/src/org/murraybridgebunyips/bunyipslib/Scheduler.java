@@ -465,6 +465,8 @@ public class Scheduler extends BunyipsComponent {
 
         /**
          * Run a task when the condition is met.
+         * This task will run (and self-reset if finished) while the condition is met.
+         * <p>
          * This method can only be called once per ConditionalTask.
          * If you do not mention timing control, this task will be run immediately when the condition is met,
          * ending when the task ends.
@@ -484,6 +486,8 @@ public class Scheduler extends BunyipsComponent {
 
         /**
          * Implicitly make a new RunTask to run once the condition is met.
+         * This callback will run repeatedly while the condition is met.
+         * <p>
          * This method can only be called once per ConditionalTask.
          * If you do not mention timing control, this task will be run immediately when the condition is met,
          * ending immediately as it is an RunTask.
@@ -501,12 +505,13 @@ public class Scheduler extends BunyipsComponent {
          * If you do not mention timing control, this task will be run immediately when the condition is met,
          * ending when the task ends.
          *
+         * @deprecated Renamed to {@link #runOnce}
          * @param task The task to run.
          * @return Current builder for additional task parameters
          */
+        @Deprecated
         public ConditionalTask runDebounced(Task task) {
-            debouncing = true;
-            return run(task);
+            return runOnce(task);
         }
 
         /**
@@ -515,11 +520,42 @@ public class Scheduler extends BunyipsComponent {
          * If you do not mention timing control, this task will be run immediately when the condition is met,
          * ending immediately as it is an RunTask.
          *
+         * @deprecated Renamed to {@link #runOnce}
          * @param runnable The code to run
          * @return Current builder for additional task parameters
          */
+        @Deprecated
         public ConditionalTask runDebounced(Runnable runnable) {
-            return runDebounced(new RunTask(runnable));
+            return runOnce(runnable);
+        }
+
+        /**
+         * Run a task when the condition is met, debouncing the task from running more than once the condition is met.
+         * <p>
+         * This method can only be called once per ConditionalTask.
+         * If you do not mention timing control, this task will be run immediately when the condition is met,
+         * ending when the task ends.
+         *
+         * @param task The task to run.
+         * @return Current builder for additional task parameters
+         */
+        public ConditionalTask runOnce(Task task) {
+            debouncing = true;
+            return run(task);
+        }
+
+        /**
+         * Implicitly make a new RunTask to run once the condition is met, debouncing the task from running more than once the condition is met.
+         * <p>
+         * This method can only be called once per ConditionalTask.
+         * If you do not mention timing control, this task will be run immediately when the condition is met,
+         * ending immediately as it is an RunTask.
+         *
+         * @param runnable The code to run
+         * @return Current builder for additional task parameters
+         */
+        public ConditionalTask runOnce(Runnable runnable) {
+            return runOnce(new RunTask(runnable));
         }
 
         /**

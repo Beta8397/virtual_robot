@@ -905,7 +905,11 @@ public interface RoadRunner {
          */
         public RoadRunnerTask buildTask(boolean useEndAsNextImplicitPose) {
             TrajectorySequence sequence = build();
-            RoadRunnerTask task = new RoadRunnerTask(timeout, drive, sequence);
+            RoadRunnerTask task;
+            if (drive instanceof BunyipsSubsystem)
+                task = new RoadRunnerTask(timeout, drive, sequence, (BunyipsSubsystem) drive, true);
+            else
+                task = new RoadRunnerTask(timeout, drive, sequence);
             if (timeout.magnitude() != 0.0)
                 task.withTimeout(timeout);
             task.withName(name);
