@@ -125,14 +125,14 @@ public class VisionTuner extends BunyipsOpMode {
         }
 
         if (gamepad1.a) {
-            addTelemetry("Pixel: %", pixels.get(pixelIndex));
+            telemetry.add("Pixel: %", pixels.get(pixelIndex));
 
-            addTelemetry("lower_y: %", scalars.get(0));
-            addTelemetry("lower_cb: %", scalars.get(1));
-            addTelemetry("lower_cr: %", scalars.get(2));
-            addTelemetry("upper_y: %", scalars.get(3));
-            addTelemetry("upper_cb: %", scalars.get(4));
-            addTelemetry("upper_cr: %", scalars.get(5));
+            telemetry.add("lower_y: %", scalars.get(0));
+            telemetry.add("lower_cb: %", scalars.get(1));
+            telemetry.add("lower_cr: %", scalars.get(2));
+            telemetry.add("upper_y: %", scalars.get(3));
+            telemetry.add("upper_cb: %", scalars.get(4));
+            telemetry.add("upper_cr: %", scalars.get(5));
         }
 
         if (gamepad1.dpad_up && !upPressed && !downPressed) {
@@ -191,9 +191,9 @@ public class VisionTuner extends BunyipsOpMode {
             currentPixel.setUpper(new Scalar(scalars.get(3), scalars.get(4), scalars.get(5)));
         }
 
-        addTelemetry("Press A to save results");
-        addTelemetry("Current Threshold: %", scalars.get(thresholdIndex));
-        addTelemetry("Current Pixel : %", pixels.get(pixelIndex));
-        addTelemetry("Current Value to Change Threshold By: %", scalarDelta);
+        telemetry.add("Press A to save results");
+        telemetry.add("Current Threshold: %", scalars.get(thresholdIndex));
+        telemetry.add("Current Pixel : %", pixels.get(pixelIndex));
+        telemetry.add("Current Value to Change Threshold By: %", scalarDelta);
     }
 }

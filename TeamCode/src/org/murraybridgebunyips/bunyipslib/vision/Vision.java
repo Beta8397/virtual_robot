@@ -138,7 +138,7 @@ public class Vision extends BunyipsSubsystem {
         }
 
         // Since Vision is usually called from the init-cycle, we can try to fit in some telemetry
-        opMode.addTelemetry(
+        opMode.telemetry.add(
                 "Vision: % processor(s) initialised.",
                 Arrays.stream(newProcessors).map(Processor::toString).collect(Collectors.toList())
         );
@@ -456,7 +456,7 @@ public class Vision extends BunyipsSubsystem {
     @Override
     protected void periodic() {
         if (visionPortal != null) {
-            opMode.addTelemetry(
+            opMode.telemetry.add(
                     "Vision: <font color='%'>%</font> | % fps | %/% processors",
                     visionPortal.getCameraState() == VisionPortal.CameraState.STREAMING ? "green" : "yellow",
                     visionPortal.getCameraState(),

@@ -71,22 +71,22 @@ public class ExampleCommandBasedTeleOp extends BunyipsOpMode {
         // or based on controller input. These tasks will replace the default tasks when the subsystem is mentioned as a task parameter,
         // or if no subsystem is attached it will run directly on the scheduler.
         scheduler.driver().whenPressed(Controls.A)
-                .run(new RunTask(() -> log("A was pressed!")));
+                .run(new RunTask(() -> telemetry.log("A was pressed!")));
 
 
         // There are plenty of configuration options, including setting a queue delay, stop condition for continuous tasks,
         // and more. See the Scheduler class and implementations for more information.
         scheduler.driver().whenHeld(Controls.B)
-                .run(new RunTask(() -> log("B started being held 3 seconds ago!")))
+                .run(new RunTask(() -> telemetry.log("B started being held 3 seconds ago!")))
                 .in(Seconds.of(3));
 
         scheduler.operator().whenReleased(Controls.X)
                 // This will replace the default DifferentialDriveTask with this task, until X is pressed again
-                .run(new ContinuousTask(() -> addTelemetry("X was released on gamepad2 and the drive system has been stopped."), drive, false))
+                .run(new ContinuousTask(() -> telemetry.add("X was released on gamepad2 and the drive system has been stopped."), drive, false))
                 .finishingIf(() -> Controls.isSelected(gamepad2, Controls.X));
 
         scheduler.when(() -> drive.isBusy())
-                .run(new RunTask(() -> addTelemetry("Drive system is busy!")));
+                .run(new RunTask(() -> telemetry.add("Drive system is busy!")));
     }
 
     @Override

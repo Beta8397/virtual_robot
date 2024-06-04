@@ -64,7 +64,7 @@ public class GetWhitePixelTask extends NoTimeoutTask {
             vision.start(tfod);
         } catch (IllegalStateException e) {
             // OpMode did not start the VisionPortal for us, we better do it ourselves
-            opMode.log("WARNING: TFOD processor not initialised by Vision.init()! Initialising now...");
+            opMode.telemetry.log("WARNING: TFOD processor not initialised by Vision.init()! Initialising now...");
             vision.init(tfod);
             vision.start(tfod);
         }

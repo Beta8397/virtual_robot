@@ -52,14 +52,14 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     private final HashSet<BunyipsSubsystem> updatedSubsystems = new HashSet<>();
     private int taskCount;
     private UserSelection<Reference<?>> userSelection;
-    // Init-task does not count as a queued task, so we start at 1
     private int currentTask = 1;
-    private boolean callbackReceived;
+    private volatile boolean callbackReceived;
+    private boolean safeToAddTasks;
 
     private void callback(@Nullable Reference<?> selectedOpMode) {
         if (isStopRequested())
             return;
-        callbackReceived = true;
+        safeToAddTasks = true;
         onReady(selectedOpMode, userSelection != null ? userSelection.getSelectedButton() : null);
         // Add any queued tasks
         for (RobotTask task : postQueue) {
@@ -82,6 +82,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
             out.append("   -> %\n", ((Task) task).toVerboseString());
         }
         Dbg.logd(out.toString());
+        callbackReceived = true;
     }
 
     @Override
@@ -120,17 +121,15 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
             // but we should wait here until it has actually terminated
             Threads.waitFor(userSelection, true);
         }
+        // Busy wait here until onReady() has processed and the callback is fully joined
+        // This is safe to do as there are no main thread operations left to run
+        while (!callbackReceived) {
+            sleep(1);
+        }
     }
 
     @Override
     protected final void activeLoop() {
-        if (!callbackReceived) {
-            // Not ready to run tasks yet, we can't do much. This shouldn't really happen,
-            // but just in case, we'll log it and wait for the callback to be run
-            Dbg.logd("AutonomousBunyipsOpMode is busy-waiting for a late UserSelection callback...");
-            return;
-        }
-
         // Run any code defined by the user
         periodic();
 
@@ -138,7 +137,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
         synchronized (tasks) {
             RobotTask currentTask = tasks.peekFirst();
             if (currentTask == null) {
-                log("<font color='gray'>auto:</font> tasks done -> finishing");
+                telemetry.log("<font color='gray'>auto:</font> tasks done -> finishing");
                 finish();
                 return;
             }
@@ -199,8 +198,8 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
      */
     public final void addTask(@NotNull RobotTask newTask, boolean ack) {
         checkTaskForDependency(newTask);
-        if (!callbackReceived && !ack) {
-            log("<font color='gray'>auto:</font> caution! a task was added manually before the onReady callback");
+        if (!safeToAddTasks && !ack) {
+            telemetry.log("<font color='gray'>auto:</font> <font color='yellow'>caution!</font> a task was added manually before the onReady callback");
         }
         synchronized (tasks) {
             tasks.add(newTask);
@@ -208,7 +207,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
         if (newTask instanceof TaskGroup)
             ((TaskGroup) newTask).logCreation();
         taskCount++;
-        log("<font color='gray'>auto:</font> %<i>(t=%)</i> -> added %/%", newTask, getTaskTimeout(newTask), taskCount, taskCount);
+        telemetry.log("<font color='gray'>auto:</font> %<i>(t=%)</i> -> added %/%", newTask, getTaskTimeout(newTask), taskCount, taskCount);
     }
 
     /**
@@ -257,7 +256,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
         if (newTask instanceof TaskGroup)
             ((TaskGroup) newTask).logCreation();
         taskCount++;
-        log("<font color='gray'>auto:</font> %<i>(t=%)</i> -> inserted %/%", newTask, getTaskTimeout(newTask), index, taskCount);
+        telemetry.log("<font color='gray'>auto:</font> %<i>(t=%)</i> -> inserted %/%", newTask, getTaskTimeout(newTask), index, taskCount);
     }
 
     /**
@@ -283,7 +282,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
         checkTaskForDependency(newTask);
         if (!callbackReceived) {
             postQueue.add(newTask);
-            log("<font color='gray'>auto:</font> %<i>(t=%)</i> -> queued end-init %/%", newTask, getTaskTimeout(newTask), postQueue.size(), postQueue.size());
+            telemetry.log("<font color='gray'>auto:</font> %<i>(t=%)</i> -> queued end-init %/%", newTask, getTaskTimeout(newTask), postQueue.size(), postQueue.size());
             return;
         }
         synchronized (tasks) {
@@ -292,7 +291,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
         if (newTask instanceof TaskGroup)
             ((TaskGroup) newTask).logCreation();
         taskCount++;
-        log("<font color='gray'>auto:</font> %<i>(t=%)</i> -> added %/%", newTask, getTaskTimeout(newTask), taskCount, taskCount);
+        telemetry.log("<font color='gray'>auto:</font> %<i>(t=%)</i> -> added %/%", newTask, getTaskTimeout(newTask), taskCount, taskCount);
     }
 
     /**
@@ -306,7 +305,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
         checkTaskForDependency(newTask);
         if (!callbackReceived) {
             preQueue.add(newTask);
-            log("<font color='gray'>auto:</font> %<i>(t=%)</i> -> queued end-init 1/%", newTask, getTaskTimeout(newTask), preQueue.size());
+            telemetry.log("<font color='gray'>auto:</font> %<i>(t=%)</i> -> queued end-init 1/%", newTask, getTaskTimeout(newTask), preQueue.size());
             return;
         }
         synchronized (tasks) {
@@ -315,7 +314,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
         if (newTask instanceof TaskGroup)
             ((TaskGroup) newTask).logCreation();
         taskCount++;
-        log("<font color='gray'>auto:</font> %<i>(t=%)</i> -> added 1/%", newTask, getTaskTimeout(newTask), taskCount);
+        telemetry.log("<font color='gray'>auto:</font> %<i>(t=%)</i> -> added 1/%", newTask, getTaskTimeout(newTask), taskCount);
     }
 
     private String getTaskTimeout(RobotTask task) {
@@ -334,11 +333,11 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
         // Must use an atomic boolean due to lambda restrictions
         AtomicBoolean approx = new AtomicBoolean(false);
         // Attempt to get the time left for all tasks by summing their timeouts
-        double timeLeft = tasks.stream().mapToDouble(t -> {
+        double timeLeft = tasks.stream().mapToDouble(task -> {
             // We cannot extract the duration of a task that is not a Task, we will return zero instead of the assumption
             // as they are completely out of our control and we don't even know how they function
-            if (!(t instanceof Task)) return 0;
-            Measure<Time> timeout = ((Task) t).getTimeout();
+            if (!(task instanceof Task)) return 0;
+            Measure<Time> timeout = ((Task) task).getTimeout();
             // We have to approximate and guess as we cannot determine the duration of a task that is infinite
             if (timeout.magnitude() == 0.0) {
                 // We also adjust the approx flag so we can notify the user that the time is an estimate with a tilde
@@ -389,7 +388,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
 
                 if (counter == taskIndex) {
                     iterator.remove();
-                    log("<font color='gray'>auto:</font> task at index % -> removed", taskIndex);
+                    telemetry.log("<font color='gray'>auto:</font> task at index % -> removed", taskIndex);
                     taskCount--;
                     break;
                 }
@@ -409,10 +408,10 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
         synchronized (tasks) {
             if (tasks.contains(task)) {
                 tasks.remove(task);
-                log("<font color='gray'>auto:</font> task %<i>(t=%)</i> -> removed", task, getTaskTimeout(task));
+                telemetry.log("<font color='gray'>auto:</font> task %<i>(t=%)</i> -> removed", task, getTaskTimeout(task));
                 taskCount--;
             } else {
-                log("<font color='gray'>auto:</font> task %<i>(t=%)</i> -> <font color='yellow'>not found</font>", task, getTaskTimeout(task));
+                telemetry.log("<font color='gray'>auto:</font> task %<i>(t=%)</i> -> <font color='yellow'>not found</font>", task, getTaskTimeout(task));
             }
         }
     }
@@ -425,7 +424,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
             tasks.removeLast();
         }
         taskCount--;
-        log("<font color='gray'>auto:</font> task at index % -> removed", taskCount + 1);
+        telemetry.log("<font color='gray'>auto:</font> task at index % -> removed", taskCount + 1);
     }
 
     /**
@@ -436,7 +435,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
             tasks.removeFirst();
         }
         taskCount--;
-        log("<font color='gray'>auto:</font> task at index 0 -> removed");
+        telemetry.log("<font color='gray'>auto:</font> task at index 0 -> removed");
     }
 
     private void checkTaskForDependency(RobotTask task) {

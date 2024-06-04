@@ -131,7 +131,7 @@ public class CartesianMecanumDrive extends BunyipsSubsystem {
     protected void periodic() {
         if (priority == Priority.ROTATIONAL) {
             rotationalUpdate();
-            opMode.addTelemetry(String.format(Locale.getDefault(), "Rotation-priority Mecanum Drive: Forward: %.2f, Strafe: %.2f, Rotate: %.2f", speedX, speedY, speedR));
+            opMode.telemetry.add(String.format(Locale.getDefault(), "Rotation-priority Mecanum Drive: Forward: %.2f, Strafe: %.2f, Rotate: %.2f", speedX, speedY, speedR));
             return;
         }
 
@@ -155,7 +155,7 @@ public class CartesianMecanumDrive extends BunyipsSubsystem {
         backLeft.setPower(backLeftPower);
         backRight.setPower(backRightPower);
 
-        opMode.addTelemetry(String.format(Locale.getDefault(), "Mecanum Drive: X: %.2f, Y: %.2f, R: %.2f", speedX, speedY, speedR));
+        opMode.telemetry.add(String.format(Locale.getDefault(), "Mecanum Drive: X: %.2f, Y: %.2f, R: %.2f", speedX, speedY, speedR));
     }
 
     /**

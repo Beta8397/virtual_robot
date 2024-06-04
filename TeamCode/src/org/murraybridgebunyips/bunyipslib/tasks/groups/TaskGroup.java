@@ -52,13 +52,13 @@ public abstract class TaskGroup extends Task {
         String taskGroup = getClass().getSimpleName();
         // Avoid printing the group name if it is the same as the task group name
         if (!groupName.equals(taskGroup)) {
-            opMode.log("<font color='gray'>%:</font> % created with % tasks.", groupName, taskGroup, tasks.size());
+            opMode.telemetry.log("<font color='gray'>%:</font> % created with % tasks.", groupName, taskGroup, tasks.size());
         } else {
-            opMode.log("<font color='gray'>%:</font> Created with % tasks.", taskGroup, tasks.size());
+            opMode.telemetry.log("<font color='gray'>%:</font> Created with % tasks.", taskGroup, tasks.size());
         }
         // List subtasks
         for (Task task : tasks) {
-            opMode.log("&nbsp;&nbsp;-> <font color='gray'>%<i>(t=%)</i></font>", task.toString(), task.getTimeout().magnitude() != 0.0 ? round(task.getTimeout().in(Seconds), 1) + "s" : "∞");
+            opMode.telemetry.log("&nbsp;&nbsp;-> <font color='gray'>%<i>(t=%)</i></font>", task.toString(), task.getTimeout().magnitude() != 0.0 ? round(task.getTimeout().in(Seconds), 1) + "s" : "∞");
         }
     }
 

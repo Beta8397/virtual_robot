@@ -65,7 +65,7 @@ public class ExampleAutonomous extends AutonomousBunyipsOpMode {
         // or an instance of UserDefaultSelection if setOpModes() method is null
         // See the definition of this method for more information.
         if (selectedOpMode == null) {
-            addRetainedTelemetry("where opmode?");
+            telemetry.addRetained("where opmode?");
             return;
         }
         switch (selectedOpMode.toString()) {

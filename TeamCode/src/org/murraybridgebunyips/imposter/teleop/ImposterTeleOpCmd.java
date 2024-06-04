@@ -1,22 +1,15 @@
 package org.murraybridgebunyips.imposter.teleop;
 
-import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.util.Angle;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 import org.murraybridgebunyips.bunyipslib.CommandBasedBunyipsOpMode;
 import org.murraybridgebunyips.bunyipslib.Controls;
-import org.murraybridgebunyips.bunyipslib.Dbg;
 import org.murraybridgebunyips.bunyipslib.drive.MecanumDrive;
 import org.murraybridgebunyips.bunyipslib.drive.TriDeadwheelMecanumDrive;
-import org.murraybridgebunyips.bunyipslib.external.Mathf;
 import org.murraybridgebunyips.bunyipslib.subsystems.Switch;
 import org.murraybridgebunyips.bunyipslib.tasks.*;
-import org.murraybridgebunyips.bunyipslib.tasks.groups.ParallelTaskGroup;
-import org.murraybridgebunyips.bunyipslib.tasks.groups.SequentialTaskGroup;
 import org.murraybridgebunyips.imposter.components.ImposterConfig;
 
-import static org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Milliseconds;
 
 /** bunyipslib virtual testing ground */
 @TeleOp(name = "TeleOp w/ Cmd", group = "VIRTUAL_BUNYIPSFTC")
@@ -32,6 +25,7 @@ public class ImposterTeleOpCmd extends CommandBasedBunyipsOpMode {
         backServo = new Switch(config.back_servo);
         addSubsystems(drive, backServo);
         drive.disable();
+        setLoopSpeed(Milliseconds.of(100));
     }
 
     @Override

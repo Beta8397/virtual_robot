@@ -10,12 +10,15 @@ import com.qualcomm.robotcore.hardware.RobotCoreLynxUsbDevice
 import com.qualcomm.robotcore.hardware.ServoController
 import com.qualcomm.robotcore.util.ThreadPool
 import org.firstinspires.ftc.robotcore.external.Telemetry.Item
-import org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds
+import org.murraybridgebunyips.bunyipslib.external.units.Measure
+import org.murraybridgebunyips.bunyipslib.external.units.Time
+import org.murraybridgebunyips.bunyipslib.external.units.Units.*
 import org.murraybridgebunyips.bunyipslib.roadrunner.util.LynxModuleUtil
 import org.murraybridgebunyips.bunyipslib.tasks.bases.RobotTask
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task
 import org.murraybridgebunyips.deps.BuildConfig
 import java.util.concurrent.ExecutorService
+import kotlin.math.abs
 
 
 /**
@@ -62,6 +65,21 @@ abstract class BunyipsOpMode : BOMInternal() {
      * @see DualTelemetry
      */
     lateinit var telemetry: DualTelemetry
+
+    /**
+     * Shorthand field alias for the [telemetry] ([DualTelemetry]) field.
+     * Sometimes, this field is required to be used as the Kotlin compiler might have trouble distinguishing between
+     * the overridden field and the base field. This method is a direct alias to the DualTelemetry field.
+     * @see telemetry
+     */
+    lateinit var t: DualTelemetry
+
+    /**
+     * Set how fast the OpMode is able to loop in the [activeLoop] or [onInitLoop] methods in Loops per Time Unit.
+     * This will dynamically adjust to be the target speed of how fast loops should be executed.
+     * Measures of less than or equal to zero will be ignored, and the OpMode will run as fast as possible.
+     */
+    var loopSpeed: Measure<Time> = Seconds.zero()
 
     private var operationsCompleted = false
     private var operationsPaused = false
@@ -192,6 +210,9 @@ abstract class BunyipsOpMode : BOMInternal() {
                 "<b>${javaClass.simpleName}</b>",
                 "<small><font color='#e5ffde'>bunyipslib</font> <font color='gray'>v${BuildConfig.SEMVER}-${BuildConfig.GIT_COMMIT}-${BuildConfig.BUILD_TIME}</font></small>"
             )
+            // Configure alias
+            t = telemetry
+            telemetry.logBracketColor = "gray"
             // Controller setup and monitoring threads
             gamepad1 = Controller(sdkGamepad1)
             gamepad2 = Controller(sdkGamepad2)
@@ -204,15 +225,15 @@ abstract class BunyipsOpMode : BOMInternal() {
                 while (!Thread.currentThread().isInterrupted)
                     gamepad2.update()
             }
-            pushTelemetry()
+            telemetry.update()
 
             telemetry.opModeStatus = "<b><font color='yellow'></b>static_init</font>"
             Dbg.logd("BunyipsOpMode: firing onInit()...")
             // Store telemetry objects raised by onInit() by turning off auto-clear
             telemetry.isAutoClear = false
-            pushTelemetry()
+            telemetry.update()
             if (!gamepad1.atRest() || !gamepad2.atRest()) {
-                log("<b><font color='yellow'>WARNING!</font></b> a gamepad was not zeroed during init. please ensure controllers zero out correctly.")
+                telemetry.log("<b><font color='yellow'>WARNING!</font></b> a gamepad was not zeroed during init. please ensure controllers zero out correctly.")
             }
             // Run user-defined setup
             try {
@@ -221,21 +242,22 @@ abstract class BunyipsOpMode : BOMInternal() {
                 // Catch all exceptions, log them, and continue running the OpMode
                 // All InterruptedExceptions are handled by the FTC SDK and are raised in the Exceptions handler
                 telemetry.overrideStatus = "<font color='red'><b>error</b></font>"
-                Exceptions.handle(e, ::log)
+                Exceptions.handle(e, telemetry::log)
             }
 
             telemetry.opModeStatus = "<font color='aqua'>dynamic_init</font>"
-            pushTelemetry()
+            telemetry.update()
             Dbg.logd("BunyipsOpMode: starting onInitLoop()...")
             if (initTask != null) {
                 Dbg.logd(
                     "BunyipsOpMode: running initTask -> % ...",
                     if (initTask is Task) (initTask as Task).toVerboseString() else initTask
                 )
-                log("<font color='gray'>running init-task:</font> %", initTask)
+                telemetry.log("<font color='gray'>running init-task:</font> %", initTask)
             }
             // Run user-defined dynamic initialisation
             do {
+                val curr = System.nanoTime()
                 try {
                     // Run the user's init task, if it isn't null
                     initTask?.run()
@@ -243,10 +265,12 @@ abstract class BunyipsOpMode : BOMInternal() {
                     if (onInitLoop() && (initTask == null || initTask?.pollFinished() == true)) break
                 } catch (e: Exception) {
                     telemetry.overrideStatus = "<font color='red'><b>error</b></font>"
-                    Exceptions.handle(e, ::log)
+                    Exceptions.handle(e, telemetry::log)
                 }
                 timer.update()
-                pushTelemetry()
+                telemetry.update()
+                if (loopSpeed.magnitude() > 0)
+                    sleep(abs((loopSpeed.inUnit(Nanoseconds).toLong() - (System.nanoTime() - curr))) / 1_000_000)
             } while (opModeInInit() && !operationsCompleted)
 
             telemetry.opModeStatus = "<font color='yellow'>finish_init</font>"
@@ -254,24 +278,24 @@ abstract class BunyipsOpMode : BOMInternal() {
             // Most tasks will inherit from Task, so this should be safe, but this is to ensure maximum compatibility
             if (initTask is Task && initTask?.isFinished() == false) {
                 Dbg.log("BunyipsOpMode: initTask did not finish in time, early finishing -> % ...", initTask)
-                log("<font color='gray'>init-task interrupted by start request.</font>")
+                telemetry.log("<font color='gray'>init-task interrupted by start request.</font>")
                 (initTask as Task).finishNow()
             } else if (initTask?.isFinished() == false) {
                 // If we can't finish the task, log a warning and continue
                 Dbg.warn("BunyipsOpMode: initTask did not finish during the init-phase!", initTask)
-                log("<b><font color='yellow'>WARNING!</font></b> <font color='gray'>init-task did not finish.</font>")
+                telemetry.log("<b><font color='yellow'>WARNING!</font></b> <font color='gray'>init-task did not finish.</font>")
             } else if (initTask != null) {
                 Dbg.logd("BunyipsOpMode: initTask finished -> % ...", initTask)
-                log("<font color='gray'>init-task finished.</font>")
+                telemetry.log("<font color='gray'>init-task finished.</font>")
             }
-            pushTelemetry()
+            telemetry.update()
             Dbg.logd("BunyipsOpMode: firing onInitDone()...")
             // Run user-defined final initialisation
             try {
                 onInitDone()
             } catch (e: Exception) {
                 telemetry.overrideStatus = "<font color='red'><b>error</b></font>"
-                Exceptions.handle(e, ::log)
+                Exceptions.handle(e, telemetry::log)
             }
 
             // Ready to go.
@@ -281,11 +305,10 @@ abstract class BunyipsOpMode : BOMInternal() {
             // DS only telemetry
             telemetry.addDS("<b>Init <font color='green'>complete</font>. Press play to start.</b>")
             Dbg.logd("BunyipsOpMode: ready.")
-            timer.reset()
 
             // Wait for start
             do {
-                pushTelemetry()
+                telemetry.update()
                 // Save some CPU cycles
                 sleep(200)
             } while (!isStarted)
@@ -293,9 +316,7 @@ abstract class BunyipsOpMode : BOMInternal() {
             // Play button has been pressed
             telemetry.opModeStatus = "<font color='yellow'>starting</font>"
             telemetry.isAutoClear = true
-            clearTelemetry()
-            pushTelemetry()
-            timer.reset()
+            telemetry.clear()
             Dbg.logd("BunyipsOpMode: firing onStart()...")
             try {
                 // Run user-defined start operations
@@ -303,8 +324,11 @@ abstract class BunyipsOpMode : BOMInternal() {
                 telemetry.overrideStatus = null
             } catch (e: Exception) {
                 telemetry.overrideStatus = "<font color='red'><b>error</b></font>"
-                Exceptions.handle(e, ::log)
+                Exceptions.handle(e, telemetry::log)
             }
+            telemetry.update()
+            timer.reset()
+            telemetry.logBracketColor = "green"
 
             telemetry.opModeStatus = "<font color='green'><b>running</b></font>"
             Dbg.logd("BunyipsOpMode: starting activeLoop()...")
@@ -312,21 +336,24 @@ abstract class BunyipsOpMode : BOMInternal() {
                 if (operationsPaused) {
                     // If the OpMode is paused, skip the loop and wait for the next hardware cycle
                     timer.update()
-                    pushTelemetry()
+                    telemetry.update()
                     // Slow down the OpMode as this is all we're doing
                     sleep(100)
                     continue
                 }
+                val curr = System.nanoTime()
                 try {
                     // Run user-defined active loop
                     activeLoop()
                 } catch (e: Exception) {
                     telemetry.overrideStatus = "<font color='red'><b>error</b></font>"
-                    Exceptions.handle(e, ::log)
+                    Exceptions.handle(e, telemetry::log)
                 }
                 // Update telemetry and timers
                 timer.update()
-                pushTelemetry()
+                telemetry.update()
+                if (loopSpeed.magnitude() > 0)
+                    sleep(abs((loopSpeed.inUnit(Nanoseconds).toLong() - (System.nanoTime() - curr))) / 1_000_000)
             }
 
             telemetry.opModeStatus = "<font color='gray'>finished</font>"
@@ -334,11 +361,11 @@ abstract class BunyipsOpMode : BOMInternal() {
                 onFinish()
             } catch (e: Exception) {
                 telemetry.overrideStatus = "<font color='red'><b>error</b></font>"
-                Exceptions.handle(e, ::log)
+                Exceptions.handle(e, telemetry::log)
             }
             // overheadTelemetry will no longer update, will remain frozen on last value
             timer.update()
-            pushTelemetry()
+            telemetry.update()
             Dbg.logd("BunyipsOpMode: all tasks finished.")
             // Wait for user to hit stop or for the OpMode to be terminated
             // We will continue running the OpMode as there might be some other user threads
@@ -368,7 +395,7 @@ abstract class BunyipsOpMode : BOMInternal() {
                 onStop()
             } catch (e: Exception) {
                 telemetry.overrideStatus = "<font color='red'><b>error</b></font>"
-                Exceptions.handle(e, ::log)
+                Exceptions.handle(e, telemetry::log)
             }
             _instance = null
             safeHaltHardware()
@@ -376,7 +403,7 @@ abstract class BunyipsOpMode : BOMInternal() {
             // such as thread stops and cleanup in onStop() first before updating the status
             telemetry.opModeStatus = "<font color='red'>terminating</font>"
             Dbg.logd("BunyipsOpMode: active cycle completed in ${timer.elapsedTime().inUnit(Seconds)} secs")
-            pushTelemetry()
+            telemetry.update()
             Dbg.logd("BunyipsOpMode: exiting...")
         }
     }
@@ -404,10 +431,12 @@ abstract class BunyipsOpMode : BOMInternal() {
 
     // These telemetry methods exist for continuity as they used to be the primary way to use telemetry in BunyipsLib,
     // but have since moved to the DualTelemetry class. These methods are now simply aliases to the new methods.
+    // These methods will be removed in a future release.
 
     /**
      * Update and push queued [telemetry] to the Driver Station and FtcDashboard.
      */
+    @Deprecated("This is an alias method scheduled for deletion", ReplaceWith("telemetry.update()"))
     fun pushTelemetry() {
         telemetry.update()
     }
@@ -415,6 +444,7 @@ abstract class BunyipsOpMode : BOMInternal() {
     /**
      * Add any additional telemetry to the FtcDashboard [telemetry] packet.
      */
+    @Deprecated("This is an alias method scheduled for deletion", ReplaceWith("telemetry.addDashboard(...)"))
     fun addDashboardTelemetry(key: String, value: Any?) {
         telemetry.addDashboard(key, value)
     }
@@ -422,6 +452,7 @@ abstract class BunyipsOpMode : BOMInternal() {
     /**
      * Add any field overlay data to the FtcDashboard [telemetry] packet.
      */
+    @Deprecated("This is an alias method scheduled for deletion", ReplaceWith("telemetry.dashboardFieldOverlay()"))
     fun dashboardFieldOverlay(): Canvas {
         return telemetry.dashboardFieldOverlay()
     }
@@ -432,6 +463,7 @@ abstract class BunyipsOpMode : BOMInternal() {
      * @param args The objects to format into the object format string
      * @return The telemetry [Item] added to the Driver Station, null if the send failed from overflow
      */
+    @Deprecated("This is an alias method scheduled for deletion", ReplaceWith("telemetry.add(...)"))
     fun addTelemetry(format: Any, vararg args: Any?): DualTelemetry.HtmlItem {
         return telemetry.add(format, *args)
     }
@@ -442,6 +474,7 @@ abstract class BunyipsOpMode : BOMInternal() {
      * @param args The objects to format into the object format string
      * @return The telemetry [Item] added to the Driver Station
      */
+    @Deprecated("This is an alias method scheduled for deletion", ReplaceWith("telemetry.addRetained(...)"))
     fun addRetainedTelemetry(format: Any, vararg args: Any?): DualTelemetry.HtmlItem {
         return telemetry.addRetained(format, *args)
     }
@@ -450,16 +483,18 @@ abstract class BunyipsOpMode : BOMInternal() {
      * Remove retained entries from the [telemetry] object.
      * @param items The items to remove from the telemetry object
      */
-    fun removeRetainedTelemetry(vararg items: Item) {
-        telemetry.removeRetained(*items)
+    @Deprecated("This is an alias method scheduled for deletion", ReplaceWith("telemetry.remove(...)"))
+    fun removeRetainedTelemetry(vararg items: Item): Boolean {
+        return telemetry.remove(*items)
     }
 
     /**
      * Remove retained entries from the [telemetry] object.
      * @param items The items to remove from the telemetry object
      */
-    fun removeRetainedTelemetry(items: List<Item>) {
-        removeRetainedTelemetry(*items.toTypedArray())
+    @Deprecated("This is an alias method scheduled for deletion", ReplaceWith("telemetry.remove(...)"))
+    fun removeRetainedTelemetry(items: List<Item>): Boolean {
+        return telemetry.remove(*items.toTypedArray())
     }
 
     /**
@@ -467,6 +502,7 @@ abstract class BunyipsOpMode : BOMInternal() {
      * @param format An object string to add to telemetry
      * @param args The objects to format into the object format string
      */
+    @Deprecated("This is an alias method scheduled for deletion", ReplaceWith("telemetry.log(...)"))
     fun log(format: Any, vararg args: Any?) {
         telemetry.log(format, *args)
     }
@@ -477,6 +513,7 @@ abstract class BunyipsOpMode : BOMInternal() {
      * @param format An object string to add to telemetry
      * @param args The objects to format into the object format string
      */
+    @Deprecated("This is an alias method scheduled for deletion", ReplaceWith("telemetry.log(...)"))
     fun log(obj: Class<*>, format: Any, vararg args: Any?) {
         telemetry.log(obj, format, *args)
     }
@@ -487,6 +524,7 @@ abstract class BunyipsOpMode : BOMInternal() {
      * @param format An object string to add to telemetry
      * @param args The objects to format into the object format string
      */
+    @Deprecated("This is an alias method scheduled for deletion", ReplaceWith("telemetry.log(...)"))
     fun log(stck: StackTraceElement, format: Any, vararg args: Any?) {
         telemetry.log(stck, format, *args)
     }
@@ -494,13 +532,16 @@ abstract class BunyipsOpMode : BOMInternal() {
     /**
      * Reset [telemetry] data, including retention and FtcDashboard
      */
+    @Deprecated("This is an alias method scheduled for deletion", ReplaceWith("telemetry.clearAll()"))
     fun resetTelemetry() {
         telemetry.clearAll()
     }
 
     /**
-     * Clear [telemetry] on the Driver Station, not including retention
+     * Clear [telemetry] on the Driver Station, not including retention.
+     * This method is automatically called every hardware cycle.
      */
+    @Deprecated("This is an alias method scheduled for deletion", ReplaceWith("telemetry.clear()"))
     fun clearTelemetry() {
         telemetry.clear()
     }
@@ -535,7 +576,7 @@ abstract class BunyipsOpMode : BOMInternal() {
             "<b>Robot ${if (safeHaltHardwareOnStop) "<font color='green'>is stopped</font>" else "tasks finished"}. All operations completed.</b>",
             true
         )
-        pushTelemetry()
+        telemetry.update()
     }
 
     /**

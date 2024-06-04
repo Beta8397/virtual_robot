@@ -116,10 +116,10 @@ public abstract class PathRecorder extends BunyipsOpMode {
 
     @Override
     protected final void activeLoop() {
-        addTelemetry("PoseRecorder is recording at %ms intervals...", snapshotDuration);
-        addTelemetry("Current pose: %", currentPose.toString());
-        addTelemetry("Snapshot count: %", path.size());
-        addTelemetry("Press B to stop recording.\n");
+        telemetry.add("PoseRecorder is recording at %ms intervals...", snapshotDuration);
+        telemetry.add("Current pose: %", currentPose.toString());
+        telemetry.add("Snapshot count: %", path.size());
+        telemetry.add("Press B to stop recording.\n");
         if (gamepad1.b) {
             drive.stop();
             captureSnapshot();
@@ -191,9 +191,9 @@ public abstract class PathRecorder extends BunyipsOpMode {
         sb.append("    .build();");
 
         // DS + FtcDashboard
-        resetTelemetry();
-        addRetainedTelemetry("Generated path:\n" + sb);
-        pushTelemetry();
+        telemetry.clearAll();
+        telemetry.addRetained("Generated path:\n" + sb);
+        telemetry.update();
 
         // Logcat
         Dbg.log("Generated path:\n" + sb);

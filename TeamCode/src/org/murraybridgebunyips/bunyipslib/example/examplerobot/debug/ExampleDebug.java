@@ -25,7 +25,7 @@ public class ExampleDebug extends BunyipsOpMode {
 
     @Override
     protected void activeLoop() {
-        addTelemetry("Heading: " + imu.getHeading());
-        // Alternatively the custom format string method, where type can be omitted: addTelemetry("Heading: %", imu.getHeading());
+        telemetry.add("Heading: " + imu.getHeading());
+        // Alternatively the custom format string method, where type can be omitted: telemetry.add("Heading: %", imu.getHeading());
     }
 }

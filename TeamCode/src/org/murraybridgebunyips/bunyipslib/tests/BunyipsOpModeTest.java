@@ -13,11 +13,11 @@ import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
 public class BunyipsOpModeTest extends BunyipsOpMode {
     @Override
     protected void onInit() {
-        addRetainedTelemetry("======= BunyipsOpMode =======");
+        telemetry.addRetained("======= BunyipsOpMode =======");
     }
 
     @Override
     protected void activeLoop() {
-        addTelemetry(getTimer().toString());
+        telemetry.add(getTimer().toString());
     }
 }

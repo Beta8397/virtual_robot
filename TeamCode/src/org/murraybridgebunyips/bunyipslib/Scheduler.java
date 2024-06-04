@@ -129,7 +129,7 @@ public class Scheduler extends BunyipsComponent {
         if (!isMuted) {
             // Task count will account for tasks on subsystems that are not IdleTasks
             int taskCount = (int) (allocatedTasks.size() + subsystems.size() - subsystems.stream().filter(BunyipsSubsystem::isIdle).count());
-            opMode.addTelemetry("Managing % task% (%s, %c) on % subsystem%",
+            opMode.telemetry.add("Managing % task% (%s, %c) on % subsystem%",
                     taskCount,
                     taskCount == 1 ? "" : "s",
                     allocatedTasks.stream().filter(task -> task.taskToRun.hasDependency()).count() + taskCount - allocatedTasks.size(),
@@ -139,7 +139,7 @@ public class Scheduler extends BunyipsComponent {
             );
             for (String item : reports) {
                 if (item.contains("IdleTask")) continue;
-                opMode.addTelemetry(item);
+                opMode.telemetry.add(item);
             }
             for (ConditionalTask task : allocatedTasks) {
                 if (task.taskToRun.hasDependency() // Whether the task is never run from the Scheduler (and task reports will come from the reports array)
@@ -150,14 +150,14 @@ public class Scheduler extends BunyipsComponent {
                     continue;
                 }
                 double deltaTime = round(task.taskToRun.getDeltaTime().in(Seconds), 1);
-                opMode.addTelemetry(
+                opMode.telemetry.add(
                         "<small><b>Scheduler</b> (c.) <font color='gray'>|</font> <b>%</b> -> %</small>",
                         task.taskToRun,
                         deltaTime == 0.0 ? "active" : deltaTime + "s"
                 );
             }
             // Blank line to separate Scheduler information from addTelemetry()
-            opMode.addTelemetry("");
+            opMode.telemetry.add("");
             reports.clear();
         }
 
@@ -505,9 +505,9 @@ public class Scheduler extends BunyipsComponent {
          * If you do not mention timing control, this task will be run immediately when the condition is met,
          * ending when the task ends.
          *
-         * @deprecated Renamed to {@link #runOnce}
          * @param task The task to run.
          * @return Current builder for additional task parameters
+         * @deprecated Renamed to {@link #runOnce}
          */
         @Deprecated
         public ConditionalTask runDebounced(Task task) {
@@ -520,9 +520,9 @@ public class Scheduler extends BunyipsComponent {
          * If you do not mention timing control, this task will be run immediately when the condition is met,
          * ending immediately as it is an RunTask.
          *
-         * @deprecated Renamed to {@link #runOnce}
          * @param runnable The code to run
          * @return Current builder for additional task parameters
+         * @deprecated Renamed to {@link #runOnce}
          */
         @Deprecated
         public ConditionalTask runDebounced(Runnable runnable) {

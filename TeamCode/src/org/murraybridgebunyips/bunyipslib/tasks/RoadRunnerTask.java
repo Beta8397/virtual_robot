@@ -121,9 +121,9 @@ public class RoadRunnerTask extends Task {
         double distance = Math.sqrt(Math.pow(endPose.getX() - drive.getPoseEstimate().getX(), 2) + Math.pow(endPose.getY() - drive.getPoseEstimate().getY(), 2));
 
         // Time to completion
-        opMode.addTelemetry("Duration: %/% sec", round(getDeltaTime().in(Seconds), 2), round(duration, 2));
-        opMode.addTelemetry("Distance to target: %cm", round(Centimeters.convertFrom(distance, Inches), 2));
-        opMode.addTelemetry("Angle to target: %deg", round(Math.toDegrees(angle), 2));
+        opMode.telemetry.add("Duration: %/% sec", round(getDeltaTime().in(Seconds), 2), round(duration, 2));
+        opMode.telemetry.add("Distance to target: %cm", round(Centimeters.convertFrom(distance, Inches), 2));
+        opMode.telemetry.add("Angle to target: %deg", round(Math.toDegrees(angle), 2));
     }
 
     @Override

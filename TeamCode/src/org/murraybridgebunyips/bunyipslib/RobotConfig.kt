@@ -43,7 +43,7 @@ abstract class RobotConfig {
         this.hardwareMap = opMode.hardwareMap
         onRuntime()
         if (opMode is BunyipsOpMode) {
-            opMode.addTelemetry(
+            opMode.t.add(
                 "<b>${this.javaClass.simpleName}</b>: Completed with ${if (Storage.hardwareErrors.size > 0) "<font color='red'>${Storage.hardwareErrors.size} error(s)</font>" else "<font color='green'>0 errors</font>"}.",
             )
         } else {
@@ -55,8 +55,8 @@ abstract class RobotConfig {
         if (Storage.hardwareErrors.isNotEmpty()) {
             for (error in Storage.hardwareErrors) {
                 if (opMode is BunyipsOpMode) {
-                    opMode.addRetainedTelemetry("<font color='red'><b>! MISSING_DEVICE</b></font>: $error")
-                    opMode.log("<font color='red'>error:</font> <i>$error</i> was not found in the current saved configuration.")
+                    opMode.t.addRetained("<font color='red'><b>! MISSING_DEVICE</b></font>: $error")
+                    opMode.t.addRetained("<font color='red'>error:</font> <i>$error</i> was not found in the current saved configuration.")
                 } else {
                     opMode.telemetry.addData("", "! MISSING_DEVICE: $error").setRetained(true)
                     opMode.telemetry.log().add("error: '$error' was not found in the current saved configuration.")

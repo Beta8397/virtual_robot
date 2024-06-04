@@ -88,7 +88,7 @@ class UserSelection<T : Any>(
             try {
                 callback.accept(null)
             } catch (e: Exception) {
-                Exceptions.handle(e, opMode::log)
+                Exceptions.handle(e, opMode.telemetry::log)
             }
         }
 
@@ -125,11 +125,11 @@ class UserSelection<T : Any>(
         }
         retainedObjects.add(opMode.telemetry.addDS("<b>---------<font color='red'>!!!</font>--------</b>"))
 
-        opMode.addDashboardTelemetry("<small>USR</small>", packetString)
+        opMode.telemetry.addDashboard("<small>USR</small>", packetString)
 
         // Must manually call telemetry push as the BOM may not be handling them
         // This will not clear out any other telemetry as auto clear is disabled
-        opMode.pushTelemetry()
+        opMode.telemetry.update()
 
         var flash = false
         while (selectedOpMode == null && opMode.opModeInInit() && !Thread.currentThread().isInterrupted) {
@@ -164,7 +164,7 @@ class UserSelection<T : Any>(
             )
         }
 
-        opMode.addDashboardTelemetry(
+        opMode.telemetry.addDashboard(
             "<small>USR</small>",
             if (result == null) "No selection" else "${selectedButton.name} -> $opModeName@T+${
                 round(
@@ -177,13 +177,13 @@ class UserSelection<T : Any>(
         // - Sorayya, hijacker of laptops
 
         // Clean up telemetry and reset auto clear
-        opMode.removeRetainedTelemetry(retainedObjects)
+        opMode.telemetry.remove(retainedObjects)
         opMode.telemetry.isAutoClear = true
 
         try {
             callback.accept(selectedOpMode)
         } catch (e: Exception) {
-            Exceptions.handle(e, opMode::log)
+            Exceptions.handle(e, opMode.telemetry::log)
         }
     }
 }

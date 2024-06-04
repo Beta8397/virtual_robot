@@ -112,7 +112,7 @@ public class MecanumDrive extends BunyipsSubsystem implements RoadRunnerDrive {
 
     @Override
     protected void periodic() {
-        opMode.addTelemetry("Localizer: X:%cm Y:%cm %deg",
+        opMode.telemetry.add("Localizer: X:%cm Y:%cm %deg",
                 round(Centimeters.convertFrom(drive.getPoseEstimate().getX(), Inches), 1),
                 round(Centimeters.convertFrom(drive.getPoseEstimate().getY(), Inches), 1),
                 round(Math.toDegrees(drive.getPoseEstimate().getHeading()), 1)).color("gray");

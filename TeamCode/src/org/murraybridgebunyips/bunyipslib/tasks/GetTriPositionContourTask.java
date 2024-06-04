@@ -84,6 +84,6 @@ public class GetTriPositionContourTask extends ForeverTask {
 
     @Override
     protected void onFinish() {
-        opMode.telemetry.removeRetained(item);
+        opMode.telemetry.remove(item);
     }
 }

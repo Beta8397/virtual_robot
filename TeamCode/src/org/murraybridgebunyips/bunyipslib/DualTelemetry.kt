@@ -10,6 +10,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.robotcore.external.Telemetry.DisplayFormat
 import org.firstinspires.ftc.robotcore.external.Telemetry.Item
 import org.murraybridgebunyips.bunyipslib.Text.formatString
+import org.murraybridgebunyips.bunyipslib.external.units.Measure
+import org.murraybridgebunyips.bunyipslib.external.units.Time
 import org.murraybridgebunyips.bunyipslib.external.units.Units.Milliseconds
 import org.murraybridgebunyips.bunyipslib.external.units.Units.Second
 import org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds
@@ -70,6 +72,17 @@ class DualTelemetry @JvmOverloads constructor(
      * By default, this is an empty string.
      */
     var overheadSubtitle = ""
+
+    /**
+     * The color of the brackets in log messages, useful for distinguishing between different timer phases.
+     */
+    var logBracketColor = "white"
+
+    /**
+     * The low speed at which the loop timer will go yellow in the overhead telemetry to alert the user of slow
+     * looping times.
+     */
+    var loopSpeedSlowAlert: Measure<Time> = Milliseconds.of(60.0)
 
     private enum class ItemType {
         TELEMETRY,
@@ -160,10 +173,10 @@ class DualTelemetry @JvmOverloads constructor(
     }
 
     /**
-     * Remove retained entries from the telemetry object.
-     * @param items The items to remove from the telemetry object
+     * Remove entries from the Driver Station telemetry object.
+     * @param items The items to remove from the DS telemetry object
      */
-    fun removeRetained(vararg items: Item): Boolean {
+    fun remove(vararg items: Item): Boolean {
         var ok = true
         for (item in items) {
             // We will be able to remove the item from the DS, but objects on FtcDashboard cannot
@@ -181,21 +194,53 @@ class DualTelemetry @JvmOverloads constructor(
     }
 
     /**
-     * Remove retained entries from the telemetry object.
-     * @param items The items to remove from the telemetry object
+     * Remove entries from the Driver Station telemetry object.
+     * @param items The items to remove from the DS telemetry object
      */
-    fun removeRetained(items: List<Item>) {
-        removeRetained(*items.toTypedArray())
+    fun remove(items: List<Item>): Boolean {
+        return remove(*items.toTypedArray())
+    }
+
+    /**
+     * Remove entries from the Driver Station telemetry object.
+     * @param items The items to remove from the DS telemetry object
+     */
+    @Deprecated("This method has been renamed", ReplaceWith("remove(items)"))
+    fun removeRetained(vararg items: Item): Boolean {
+        return remove(*items)
+    }
+
+    /**
+     * Remove entries from the Driver Station telemetry object.
+     * @param items The items to remove from the DS telemetry object
+     */
+    @Deprecated("This method has been renamed", ReplaceWith("remove(items)"))
+    fun removeRetained(items: List<Item>): Boolean {
+        return remove(items)
     }
 
     /**
      * Remove a data item from the telemetry object, which will remove only from the Driver Station.
-     * This is an alias for [removeRetained].
+     * This is an alias for [remove].
      * @param item The item to remove from the telemetry object
-     * @see removeRetained
+     * @see remove
      */
     override fun removeItem(item: Item): Boolean {
-        return removeRetained(item)
+        return remove(item)
+    }
+
+    private fun logMessage(msg: String) {
+        var prepend = ""
+        if (movingAverageTimer != null)
+            prepend = "<small><font color='$logBracketColor'>[</font>T+${
+                Math.round(
+                    movingAverageTimer.elapsedTime().inUnit(Seconds)
+                )
+            }s<font color='$logBracketColor'>]</font></small> "
+        opMode.telemetry.log().add(prepend + msg)
+        synchronized(dashboardItems) {
+            dashboardItems.add(Pair(ItemType.LOG, Reference.of(msg)))
+        }
     }
 
     /**
@@ -204,11 +249,7 @@ class DualTelemetry @JvmOverloads constructor(
      * @param args The objects to format into the object format string
      */
     fun log(format: Any, vararg args: Any?) {
-        val fstring = formatString(format.toString(), *args)
-        opMode.telemetry.log().add(fstring)
-        synchronized(dashboardItems) {
-            dashboardItems.add(Pair(ItemType.LOG, Reference.of(fstring)))
-        }
+        logMessage(formatString(format.toString(), *args))
     }
 
     /**
@@ -218,11 +259,7 @@ class DualTelemetry @JvmOverloads constructor(
      * @param args The objects to format into the object format string
      */
     fun log(obj: Class<*>, format: Any, vararg args: Any?) {
-        val msg = "<font color='gray'>[${obj.simpleName}]</font> ${formatString(format.toString(), *args)}"
-        opMode.telemetry.log().add(msg)
-        synchronized(dashboardItems) {
-            dashboardItems.add(Pair(ItemType.LOG, Reference.of(msg)))
-        }
+        logMessage("<font color='gray'>[${obj.simpleName}]</font> ${formatString(format.toString(), *args)}")
     }
 
     /**
@@ -232,11 +269,7 @@ class DualTelemetry @JvmOverloads constructor(
      * @param args The objects to format into the object format string
      */
     fun log(stck: StackTraceElement, format: Any, vararg args: Any?) {
-        val msg = "<font color='gray'>[${stck}]</font> ${formatString(format.toString(), *args)}"
-        opMode.telemetry.log().add(msg)
-        synchronized(dashboardItems) {
-            dashboardItems.add(Pair(ItemType.LOG, Reference.of(msg)))
-        }
+        logMessage("<font color='gray'>[${stck}]</font> ${formatString(format.toString(), *args)}")
     }
 
     /**
@@ -258,28 +291,41 @@ class DualTelemetry @JvmOverloads constructor(
         val retVal = opMode.telemetry.update()
 
         // Requeue new overhead status message
-        val loopTime =
-            if (movingAverageTimer != null) Text.round(
-                movingAverageTimer.movingAverageLoopTime().inUnit(Milliseconds),
-                2
-            ) else 0.0
-        val loopsSec = if (movingAverageTimer != null)
-            if (!movingAverageTimer.loopsPer(Second).isNaN())
-                Text.round(movingAverageTimer.loopsPer(Second), 1)
-            else 0.0
-        else 0.0
-        val elapsedTime = movingAverageTimer?.elapsedTime()?.inUnit(Seconds)?.roundToInt() ?: "?"
-
-        val overheadStatus =
-            "${if (overrideStatus == null) opModeStatus else overrideStatus}\n${if (overheadSubtitle.isNotEmpty()) overheadSubtitle + "\n" else ""}<small>T+${elapsedTime}s | ${
-                if (loopTime <= 0.0) {
-                    if (loopsSec > 0) "$loopsSec l/s" else "?ms"
-                } else {
-                    "${loopTime}ms"
-                }
-            } | ${Controls.movementString(opMode.gamepad1)} ${Controls.movementString(opMode.gamepad2)}</small>\n"
-
-        overheadTelemetry.setValue("${if (overheadTag != null) "$overheadTag | " else ""}$overheadStatus")
+        val loopTime = movingAverageTimer?.let {
+            Text.round(it.movingAverageLoopTime().inUnit(Milliseconds), 2)
+        } ?: 0.0
+        val loopsSec = movingAverageTimer?.let {
+            val loopsPerSec = it.loopsPer(Second)
+            if (!loopsPerSec.isNaN()) Text.round(loopsPerSec, 1) else 0.0
+        } ?: 0.0
+        val elapsedTime = movingAverageTimer?.elapsedTime()?.inUnit(Seconds)?.roundToInt()?.toString() ?: "?"
+        val overheadStatus = StringBuilder()
+        overheadStatus.append(if (overrideStatus != null) overrideStatus else opModeStatus)
+        overheadStatus.append("\n")
+        if (overheadSubtitle.isNotEmpty())
+            overheadStatus.append(overheadSubtitle).append("\n")
+        overheadStatus.append("<small>T+").append(elapsedTime).append("s | ")
+        if (loopTime <= 0.0) {
+            if (loopsSec > 0) {
+                overheadStatus.append("$loopsSec l/s")
+            } else {
+                overheadStatus.append("?ms")
+            }
+        } else {
+            if (loopTime >= loopSpeedSlowAlert.inUnit(Milliseconds)) {
+                overheadStatus.append("<font color='yellow'>").append(loopTime).append("ms</font>")
+            } else {
+                overheadStatus.append(loopTime).append("ms")
+            }
+        }
+        overheadStatus.append(" | ")
+            .append(Controls.movementString(opMode.gamepad1))
+            .append(" ")
+            .append(Controls.movementString(opMode.gamepad2))
+            .append("</small>\n")
+        if (overheadTag != null)
+            overheadStatus.insert(0, "$overheadTag | ")
+        overheadTelemetry.setValue(overheadStatus.toString())
 
         // FtcDashboard
         val packet = TelemetryPacket()
@@ -747,7 +793,10 @@ class DualTelemetry @JvmOverloads constructor(
          * Adds a new data item in the associated [Telemetry] immediately following the receiver.
          * @see addData
          */
-        @Deprecated("This method is not used with DualTelemetry. Split data into separate items or use a single item value with a newline.")
+        @Deprecated(
+            "This method is not used with DualTelemetry. Split data into separate items or use a single item value with a newline.",
+            level = DeprecationLevel.ERROR
+        )
         override fun addData(caption: String, value: Any): Item? {
             return item?.addData(caption, value)
         }
@@ -756,7 +805,10 @@ class DualTelemetry @JvmOverloads constructor(
          * Adds a new data item in the associated [Telemetry] immediately following the receiver.
          * @see addData
          */
-        @Deprecated("This method is not used with DualTelemetry. Split data into separate items or use a single item value with a newline.")
+        @Deprecated(
+            "This method is not used with DualTelemetry. Split data into separate items or use a single item value with a newline.",
+            level = DeprecationLevel.ERROR
+        )
         override fun <T : Any> addData(caption: String, valueProducer: Func<T>): Item? {
             return item?.addData(caption, valueProducer)
         }
@@ -765,7 +817,10 @@ class DualTelemetry @JvmOverloads constructor(
          * Adds a new data item in the associated [Telemetry] immediately following the receiver.
          * @see addData
          */
-        @Deprecated("This method is not used with DualTelemetry. Split data into separate items or use a single item value with a newline.")
+        @Deprecated(
+            "This method is not used with DualTelemetry. Split data into separate items or use a single item value with a newline.",
+            level = DeprecationLevel.ERROR
+        )
         override fun <T : Any> addData(caption: String, format: String, valueProducer: Func<T>): Item? {
             return item?.addData(caption, format, valueProducer)
         }
@@ -849,7 +904,8 @@ class DualTelemetry @JvmOverloads constructor(
     @Suppress("KDocMissingDocumentation")
     @Deprecated(
         "The telemetry line system is not used with DualTelemetry",
-        replaceWith = ReplaceWith("add(format, args)")
+        replaceWith = ReplaceWith("add(format, args)"),
+        level = DeprecationLevel.ERROR
     )
     override fun addLine(): Telemetry.Line? {
         add("")
@@ -859,7 +915,8 @@ class DualTelemetry @JvmOverloads constructor(
     @Suppress("KDocMissingDocumentation")
     @Deprecated(
         "The telemetry line system is not used with DualTelemetry",
-        replaceWith = ReplaceWith("add(format, args)")
+        replaceWith = ReplaceWith("add(format, args)"),
+        level = DeprecationLevel.ERROR
     )
     override fun addLine(lineCaption: String): Telemetry.Line? {
         add(lineCaption)
@@ -869,7 +926,8 @@ class DualTelemetry @JvmOverloads constructor(
     @Suppress("KDocMissingDocumentation")
     @Deprecated(
         "The telemetry line system is not used with DualTelemetry",
-        replaceWith = ReplaceWith("add(format, args)")
+        replaceWith = ReplaceWith("add(format, args)"),
+        level = DeprecationLevel.ERROR
     )
     override fun removeLine(line: Telemetry.Line): Boolean {
         return false
@@ -887,7 +945,8 @@ class DualTelemetry @JvmOverloads constructor(
     @Suppress("KDocMissingDocumentation")
     @Deprecated(
         "The telemetry line system is not used with DualTelemetry",
-        replaceWith = ReplaceWith("add(format, args)")
+        replaceWith = ReplaceWith("add(format, args)"),
+        level = DeprecationLevel.ERROR
     )
     override fun setItemSeparator(itemSeparator: String) {
         opMode.telemetry.itemSeparator = itemSeparator
@@ -902,7 +961,8 @@ class DualTelemetry @JvmOverloads constructor(
     @Suppress("KDocMissingDocumentation")
     @Deprecated(
         "The telemetry log should not be accessed with this method, use log(msg) methods directly as FtcDashboard logging will not work with this method.",
-        replaceWith = ReplaceWith("log(...)")
+        replaceWith = ReplaceWith("log(...)"),
+        level = DeprecationLevel.ERROR
     )
     override fun log(): Telemetry.Log {
         return opMode.telemetry.log()

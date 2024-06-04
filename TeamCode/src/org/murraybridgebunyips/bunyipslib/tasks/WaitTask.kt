@@ -23,7 +23,7 @@ class WaitTask(time: Measure<Time>, private val showTelemetry: Boolean = true) :
 
     override fun periodic() {
         if (showTelemetry)
-            opMode.addTelemetry("Waiting %/% seconds...", round(deltaTime.inUnit(Seconds), 1), timeout.inUnit(Seconds))
+            opMode.telemetry.add("Waiting %/% seconds...", round(deltaTime.inUnit(Seconds), 1), timeout.inUnit(Seconds))
     }
 
     override fun isTaskFinished(): Boolean {

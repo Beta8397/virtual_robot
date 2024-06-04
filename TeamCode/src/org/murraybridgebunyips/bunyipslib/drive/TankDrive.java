@@ -131,7 +131,7 @@ public class TankDrive extends BunyipsSubsystem implements RoadRunnerDrive {
 
     @Override
     protected void periodic() {
-        opMode.addTelemetry("Localizer: X:%cm Y:%cm %deg",
+        opMode.telemetry.add("Localizer: X:%cm Y:%cm %deg",
                 round(Centimeters.convertFrom(instance.getPoseEstimate().getX(), Inches), 1),
                 round(Centimeters.convertFrom(instance.getPoseEstimate().getY(), Inches), 1),
                 round(Math.toDegrees(instance.getPoseEstimate().getHeading()), 1)).color("gray");

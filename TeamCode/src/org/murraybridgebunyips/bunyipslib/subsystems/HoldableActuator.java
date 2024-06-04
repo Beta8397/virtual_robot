@@ -454,12 +454,12 @@ public class HoldableActuator extends BunyipsSubsystem {
                     break;
                 }
                 motorPower = MOVING_POWER;
-                opMode.addTelemetry("%: <font color='#FF5F1F'>MOVING -> %/% ticks</font> [%rps]", NAME, motor.getTargetPosition(), motor.getCurrentPosition(), round(DegreesPerSecond.of(motor.getVelocity(AngleUnit.DEGREES)).in(RevolutionsPerSecond), 1));
+                opMode.telemetry.add("%: <font color='#FF5F1F'>MOVING -> %/% ticks</font> [%rps]", NAME, motor.getTargetPosition(), motor.getCurrentPosition(), round(DegreesPerSecond.of(motor.getVelocity(AngleUnit.DEGREES)).in(RevolutionsPerSecond), 1));
                 break;
             case HOMING:
                 motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 motorPower = -MOVING_POWER;
-                opMode.addTelemetry("%: <font color='yellow'><b>HOMING</b></font> [%rps]", NAME, round(DegreesPerSecond.of(motor.getVelocity(AngleUnit.DEGREES)).in(RevolutionsPerSecond), 1));
+                opMode.telemetry.add("%: <font color='yellow'><b>HOMING</b></font> [%rps]", NAME, round(DegreesPerSecond.of(motor.getVelocity(AngleUnit.DEGREES)).in(RevolutionsPerSecond), 1));
                 break;
             case USER:
                 if (userPower == 0.0) {
@@ -476,7 +476,7 @@ public class HoldableActuator extends BunyipsSubsystem {
                     motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     motorPower = userPower;
                 }
-                opMode.addTelemetry("%: % at % ticks [%tps]", NAME, userPower == 0.0 ? "<font color='green'>HOLDING</font>" : "<font color='#FF5F1F'><b>MOVING</b></font>", motor.getCurrentPosition(), Math.round(motor.getVelocity()));
+                opMode.telemetry.add("%: % at % ticks [%tps]", NAME, userPower == 0.0 ? "<font color='green'>HOLDING</font>" : "<font color='#FF5F1F'><b>MOVING</b></font>", motor.getCurrentPosition(), Math.round(motor.getVelocity()));
                 break;
         }
 
