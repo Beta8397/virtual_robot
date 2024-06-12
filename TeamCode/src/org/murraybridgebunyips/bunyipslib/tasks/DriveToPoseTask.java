@@ -5,11 +5,17 @@ import androidx.annotation.NonNull;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
+import org.murraybridgebunyips.bunyipslib.Dbg;
+import org.murraybridgebunyips.bunyipslib.external.Mathf;
 import org.murraybridgebunyips.bunyipslib.external.pid.PIDController;
+import org.murraybridgebunyips.bunyipslib.external.units.Angle;
+import org.murraybridgebunyips.bunyipslib.external.units.Distance;
 import org.murraybridgebunyips.bunyipslib.external.units.Measure;
 import org.murraybridgebunyips.bunyipslib.external.units.Time;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
+
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.*;
 
 /**
  * Drive to a pose using RoadRunner.
@@ -24,6 +30,9 @@ public class DriveToPoseTask extends Task {
     private final PIDController forwardController;
     private final PIDController strafeController;
     private final PIDController headingController;
+
+    private Measure<Angle> headingTolerance = Degrees.of(2);
+    private Measure<Distance> vectorTolerance = Centimeters.of(5);
 
     /**
      * Run the Drive To Pose Task on a drive subsystem.
@@ -48,19 +57,51 @@ public class DriveToPoseTask extends Task {
         withName("Drive To Pose: " + targetPose.toString());
     }
 
+    /**
+     * Set the tolerances for the task.
+     *
+     * @param headingTolerance The tolerance for heading.
+     * @param vectorTolerance The tolerance for the translation vector.
+     * @return this
+     */
+    public DriveToPoseTask withTolerances(Measure<Angle> headingTolerance, Measure<Distance> vectorTolerance) {
+        this.headingTolerance = headingTolerance;
+        this.vectorTolerance = vectorTolerance;
+        return this;
+    }
+
     @Override
     protected void init() {
         drive.cancelTrajectory();
         drive.stop();
     }
 
+    private boolean vectorNear() {
+        return Math.abs(drive.getPoseEstimate().vec().distTo(targetPose.vec())) < vectorTolerance.in(Inches);
+    }
+
+    private boolean headingNear() {
+        return Math.abs(drive.getPoseEstimate().getHeading() - targetPose.getHeading()) < headingTolerance.in(Radians);
+    }
+
     @Override
     protected void periodic() {
-        Pose2d error = targetPose.minus(drive.getPoseEstimate());
+        Pose2d estimatedPose = drive.getPoseEstimate();
+        Pose2d error = targetPose.minus(estimatedPose);
+        // Twist the error vector to be relative to the robot's heading, as rotations of the robot are not
+        // accounted for in the RoadRunner pose estimate
+        double cos = Math.cos(estimatedPose.getHeading());
+        double sin = Math.sin(estimatedPose.getHeading());
+        // Wrap angle between -pi and pi for optimal turns
+        double angle = Mathf.inputModulus(error.getHeading(), -Math.PI, Math.PI);
+        // When the angle is near the modulus boundary, lock towards a definitive full rotation to avoid oscillations
+        if (Mathf.isNear(Math.abs(angle), Math.PI, 0.1))
+            angle = -Math.PI * Math.signum(error.getHeading());
+        // Apply PID
         drive.setWeightedDrivePower(new Pose2d(
-                forwardController.calculate(error.getX()),
-                strafeController.calculate(error.getY()),
-                headingController.calculate(error.getHeading())
+                -forwardController.calculate(error.getX()) * cos - forwardController.calculate(error.getY()) * sin,
+                -strafeController.calculate(error.getY()) * cos + strafeController.calculate(error.getX()) * sin,
+                -headingController.calculate(angle)
         ));
     }
 
@@ -71,6 +112,6 @@ public class DriveToPoseTask extends Task {
 
     @Override
     protected boolean isTaskFinished() {
-        return forwardController.atSetPoint() && strafeController.atSetPoint() && headingController.atSetPoint();
+        return vectorNear() && headingNear();
     }
 }
