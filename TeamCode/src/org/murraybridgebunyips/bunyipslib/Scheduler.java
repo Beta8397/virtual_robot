@@ -373,6 +373,36 @@ public class Scheduler extends BunyipsComponent {
         }
 
         /**
+         * Represents an axis threshold for the controller.
+         */
+        public class AxisThreshold implements BooleanSupplier {
+            private final BooleanSupplier cond;
+            private final Controls.Analog axis;
+
+            /**
+             * Wrap a condition for an axis threshold.
+             *
+             * @param axis The axis of the controller.
+             * @param threshold The threshold to meet.
+             */
+            public AxisThreshold(Controls.Analog axis, Predicate<? super Float> threshold) {
+                this.axis = axis;
+                cond = () -> threshold.test(user.get(axis));
+            }
+
+            @Override
+            public boolean getAsBoolean() {
+                return cond.getAsBoolean();
+            }
+
+            @NonNull
+            @Override
+            public String toString() {
+                return "AxisThreshold:" + axis.toString();
+            }
+        }
+
+        /**
          * Run a task once this analog axis condition is met.
          *
          * @param axis      The axis of the controller.
@@ -381,7 +411,7 @@ public class Scheduler extends BunyipsComponent {
          */
         public ConditionalTask when(Controls.Analog axis, Predicate<? super Float> threshold) {
             return new ConditionalTask(
-                    () -> threshold.test(user.get(axis))
+                    new AxisThreshold(axis, threshold)
             );
         }
 
@@ -439,6 +469,7 @@ public class Scheduler extends BunyipsComponent {
      */
     public class ConditionalTask {
         protected final BooleanSupplier runCondition;
+        private final BooleanSupplier originalRunCondition;
         private final ArrayList<BooleanSupplier> and = new ArrayList<>();
         private final ArrayList<BooleanSupplier> or = new ArrayList<>();
         protected Task taskToRun;
@@ -452,14 +483,15 @@ public class Scheduler extends BunyipsComponent {
         /**
          * Create and allocate a new conditional task. This will automatically be added to the scheduler.
          *
-         * @param runCondition The condition to start running the task.
+         * @param originalRunCondition The condition to start running the task.
          */
-        public ConditionalTask(BooleanSupplier runCondition) {
+        public ConditionalTask(BooleanSupplier originalRunCondition) {
             // Run the task if the original expression is met,
             // and all AND conditions are met, or any OR conditions are met
-            this.runCondition = () -> runCondition.getAsBoolean()
+            runCondition = () -> originalRunCondition.getAsBoolean()
                     && and.stream().allMatch(BooleanSupplier::getAsBoolean)
                     || or.stream().anyMatch(BooleanSupplier::getAsBoolean);
+            this.originalRunCondition = originalRunCondition;
             allocatedTasks.add(this);
         }
 
@@ -645,9 +677,36 @@ public class Scheduler extends BunyipsComponent {
         @NonNull
         @Override
         public String toString() {
-            // TODO: Implement this method to be more verbose as it will be displayed in Logcat,
-            //  should display everything applicable to the task with its extra Conditional conditions
-            return taskToRun.toString();
+            Text.Builder out = Text.builder();
+            out.append(taskToRun.hasDependency() ? "Scheduling " : "Running ")
+                    .append("'")
+                    .append(taskToRun.toString())
+                    .append("'");
+            double timeout = taskToRun.getTimeout().in(Seconds);
+            if (timeout > 0.001) {
+                out.append(" (t=").append(timeout).append("s)");
+            }
+            if (taskToRun.isOverriding())
+                out.append(" (overriding)");
+            if (originalRunCondition instanceof ControllerStateHandler) {
+                ControllerStateHandler handler = (ControllerStateHandler) originalRunCondition;
+                out.append(" when c")
+                        .append(handler.controller.id)
+                        .append("->")
+                        .append(handler.button)
+                        .append(" is ")
+                        .append(handler.state);
+            } else {
+                out.append(" when ")
+                        .append(originalRunCondition.toString().replace("org.murraybridgebunyips.bunyipslib.Scheduler", ""))
+                        .append(" is true");
+            }
+            out.append(time.magnitude() > 0 ? " for " + time.in(Seconds) + "s" : "")
+                    .append(!and.isEmpty() ? ", " + and.size() + " extra AND condition(s)" : "")
+                    .append(!or.isEmpty() ? ", " + or.size() + " extra OR condition(s)" : "")
+                    .append(debouncing ? ", debouncing" : "")
+                    .append(isTaskMuted || taskToRun.isMuted() ? ", task status muted" : "");
+            return out.toString();
         }
     }
 }

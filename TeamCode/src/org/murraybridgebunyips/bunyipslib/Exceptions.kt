@@ -28,7 +28,7 @@ object Exceptions {
     @Throws(InterruptedException::class)
     fun handle(e: Exception, stderr: (msg: String) -> Unit) {
         if (e is NullPointerException) {
-            for (component in Storage.unusableComponents) {
+            for (component in Storage.memory().unusableComponents) {
                 if (e.localizedMessage?.contains(component) == true) {
                     // This error is caused by a null component, which is handled by NullSafety
                     // As such, we can swallow it from appearing on the Driver Station

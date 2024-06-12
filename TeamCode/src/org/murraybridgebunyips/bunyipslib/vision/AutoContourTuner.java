@@ -24,7 +24,7 @@ import org.opencv.core.Rect;
  *
  * @author Lucas Bubner, 2024
  */
-public abstract class AutoContourTuner extends BunyipsOpMode {
+abstract class AutoContourTuner extends BunyipsOpMode {
     private RectangleAid aid;
     private ColourThreshold processor;
     private Vision vision;

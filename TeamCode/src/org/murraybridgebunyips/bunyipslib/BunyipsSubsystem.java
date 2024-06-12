@@ -26,7 +26,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
     @Override
     @NonNull
     public String toString() {
-        return formatString("%%(%): %", assertionFailed ? "[error] " : "", getClass().getSimpleName(), shouldRun ? "enabled" : "disabled", getCurrentTask());
+        return formatString("%%(%) <=> %", assertionFailed ? "[error] " : "", getClass().getSimpleName(), shouldRun ? "enabled" : "disabled", getCurrentTask());
     }
 
     /**

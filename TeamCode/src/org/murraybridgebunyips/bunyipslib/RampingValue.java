@@ -36,7 +36,7 @@ public class RampingValue implements RampingFunction {
     /**
      * Set the ramping parameters of the value.
      *
-     * @param time the time it takes for the value to reach the target value.
+     * @param time  the time it takes for the value to reach the target value.
      * @param delta the maximum change in value per second
      * @return this
      */
@@ -74,7 +74,7 @@ public class RampingValue implements RampingFunction {
      * Must be called regularly to update the SmoothDamp velocities.
      *
      * @param current the current value
-     * @param target the target value
+     * @param target  the target value
      * @return a result
      */
     public double get(double current, double target) {
@@ -94,7 +94,7 @@ public class RampingValue implements RampingFunction {
      * Must be called regularly to update the SmoothDamp velocities.
      *
      * @param current the current value
-     * @param target the target value
+     * @param target  the target value
      * @return a result
      */
     public float get(float current, float target) {

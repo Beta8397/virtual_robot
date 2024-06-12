@@ -114,4 +114,18 @@ data class AprilTagData(
      * Timestamp of when the image in which this detection was found was acquired.
      */
     val frameAcquisitionNanoTime: Long
-) : VisionData()
+) : VisionData() {
+    /**
+     * Check if the metadata is available.
+     */
+    fun isMetadataAvailable(): Boolean {
+        return tagsize != null && fieldPosition != null && fieldOrientation != null && distanceUnit != null
+    }
+
+    /**
+     * Check if the pose is available.
+     */
+    fun isFtcPoseAvailable(): Boolean {
+        return x != null && y != null && z != null && pitch != null && roll != null && yaw != null && range != null && bearing != null && elevation != null
+    }
+}

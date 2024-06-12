@@ -7,8 +7,12 @@ package android.graphics;
 public class Color {
     public static int BLUE = argb(0,0,0,255);
     public static int GREEN = argb(0, 0, 255, 0);
-
+    public static int LTGRAY = argb(0, 0, 255, 0);
+    public static int YELLOW = argb(0, 0, 255, 0);
+//warning: garbage
     public static int RED = argb(0, 255, 0, 0);
+    public static int CYAN = argb(0, 255, 0, 0);
+    public static int BLACK = argb(0, 255, 0, 0);
 
     /**
      * Given inputs of red, green, and blue channels, writes the hue, sat, and value to the hsv output array
@@ -64,5 +68,9 @@ public class Color {
             int green,
             int blue) {
         return (alpha << 24) | (red << 16) | (green << 8) | blue;
+    }
+
+    public static Object parseColor(String s) {
+        return null;
     }
 }

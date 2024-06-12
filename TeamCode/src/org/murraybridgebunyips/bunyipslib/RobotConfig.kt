@@ -39,21 +39,21 @@ abstract class RobotConfig {
      * @return the instance of the RobotConfig
      */
     fun init(opMode: OpMode): RobotConfig {
-        Storage.hardwareErrors.clear()
+        Storage.memory().hardwareErrors.clear()
         this.hardwareMap = opMode.hardwareMap
         onRuntime()
         if (opMode is BunyipsOpMode) {
             opMode.t.add(
-                "<b>${this.javaClass.simpleName}</b>: Completed with ${if (Storage.hardwareErrors.size > 0) "<font color='red'>${Storage.hardwareErrors.size} error(s)</font>" else "<font color='green'>0 errors</font>"}.",
+                "<b>${this.javaClass.simpleName}</b>: Completed with ${if (Storage.memory().hardwareErrors.size > 0) "<font color='red'>${Storage.memory().hardwareErrors.size} error(s)</font>" else "<font color='green'>0 errors</font>"}.",
             )
         } else {
             opMode.telemetry.addData(
                 "",
-                "${this.javaClass.simpleName}: Completed with ${Storage.hardwareErrors.size} error(s).",
+                "${this.javaClass.simpleName}: Completed with ${Storage.memory().hardwareErrors.size} error(s).",
             )
         }
-        if (Storage.hardwareErrors.isNotEmpty()) {
-            for (error in Storage.hardwareErrors) {
+        if (Storage.memory().hardwareErrors.isNotEmpty()) {
+            for (error in Storage.memory().hardwareErrors) {
                 if (opMode is BunyipsOpMode) {
                     opMode.t.addRetained("<font color='red'><b>! MISSING_DEVICE</b></font>: $error")
                     opMode.t.addRetained("<font color='red'>error:</font> <i>$error</i> was not found in the current saved configuration.")
@@ -105,7 +105,7 @@ abstract class RobotConfig {
         var hardwareDevice: T? = null
         var ok = false
         try {
-            if (Storage.hardwareErrors.contains(name)) return null
+            if (Storage.memory().hardwareErrors.contains(name)) return null
             hardwareDevice = if (Deadwheel::class.java.isAssignableFrom(device)) {
                 // Deadwheel configuration needs to use the hardwareMap to fetch a DcMotorEx first
                 val motor = hardwareMap.get(DcMotorEx::class.java, name)
@@ -124,7 +124,7 @@ abstract class RobotConfig {
                 throw NullPointerException()
             ok = true
         } catch (e: Exception) {
-            Storage.hardwareErrors.add(name)
+            Storage.memory().hardwareErrors.add(name)
             e.localizedMessage?.let { Dbg.warn(it) }
         }
         // Run the user callback if the device was successfully configured, outside of the hardware device

@@ -116,6 +116,8 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
      */
     @Override
     protected void onStart() {
+        if (isStopRequested())
+            return;
         if (userSelection != null) {
             // UserSelection will internally check opMode.isInInit() to see if it should terminate itself
             // but we should wait here until it has actually terminated

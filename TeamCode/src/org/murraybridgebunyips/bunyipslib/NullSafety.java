@@ -60,8 +60,8 @@ public final class NullSafety {
                     opMode.telemetry.log("<font color='yellow'><b>warning!</b> % was disabled due to a null assertion fault.</font>", T.getSimpleName());
                 }
                 Dbg.warn(getCallingUserCodeFunction(), "Null object passed to % failed assertion, adding to unusable components...", T.getSimpleName());
-                if (!Storage.unusableComponents.contains(T.getSimpleName()))
-                    Storage.unusableComponents.add(T.getSimpleName());
+                if (!Storage.memory().unusableComponents.contains(T.getSimpleName()))
+                    Storage.memory().unusableComponents.add(T.getSimpleName());
             }
         }
         return true;

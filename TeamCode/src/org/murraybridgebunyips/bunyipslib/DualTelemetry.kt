@@ -50,7 +50,7 @@ class DualTelemetry @JvmOverloads constructor(
 
     private lateinit var overheadTelemetry: Item
     private val dashboardItems = Collections.synchronizedSet(mutableSetOf<Pair<ItemType, Reference<String>>>())
-    private val userPacket: TelemetryPacket = TelemetryPacket()
+    private var userPacket: TelemetryPacket = TelemetryPacket()
 
     @Volatile
     private var telemetryQueue = 0
@@ -329,7 +329,7 @@ class DualTelemetry @JvmOverloads constructor(
 
         // FtcDashboard
         val packet = TelemetryPacket()
-        packet.put(overheadTag ?: "status", overheadStatus)
+        packet.put("<small>STATUS</small>", overheadStatus)
 
         synchronized(dashboardItems) {
             // Index counters
@@ -364,16 +364,17 @@ class DualTelemetry @JvmOverloads constructor(
                     }
                 }
             }
+            dashboardItems.clear()
         }
 
         FtcDashboard.getInstance().sendTelemetryPacket(packet)
         synchronized(userPacket) {
             FtcDashboard.getInstance().sendTelemetryPacket(userPacket)
+            userPacket = TelemetryPacket()
         }
 
         if (opMode.telemetry.isAutoClear) {
             telemetryQueue = 0
-            clearTelemetryObjects()
         }
 
         return retVal
@@ -384,7 +385,9 @@ class DualTelemetry @JvmOverloads constructor(
      */
     override fun clear() {
         telemetryQueue = 0
-        clearTelemetryObjects()
+        synchronized(dashboardItems) {
+            dashboardItems.clear()
+        }
         opMode.telemetry.clear()
     }
 
@@ -859,16 +862,7 @@ class DualTelemetry @JvmOverloads constructor(
                 )
             }
         }
-        return HtmlItem(value, false, isOverflow, ref, opMode)
-    }
-
-    /**
-     * Clear all telemetry objects from the management queue just like a telemetry.clear() call.
-     */
-    private fun clearTelemetryObjects() {
-        synchronized(dashboardItems) {
-            dashboardItems.removeAll { it.first == ItemType.TELEMETRY }
-        }
+        return HtmlItem(value, retained, isOverflow, ref, opMode)
     }
 
     @Suppress("KDocMissingDocumentation")

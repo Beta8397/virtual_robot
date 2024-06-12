@@ -45,6 +45,11 @@ import com.qualcomm.robotcore.hardware.HardwareDevice;
 public class LynxModule implements HardwareDevice {
 
     BulkCachingMode bulkCachingMode = BulkCachingMode.OFF;
+    public Object pattern;
+
+    public void setConstant(Object parseColor) {
+        
+    }
 
     /**
      * Bulk caching mode that controls the behavior of certain read commands in the actual FTC SDK.
@@ -102,6 +107,8 @@ public class LynxModule implements HardwareDevice {
     public String getNullableFirmwareVersionString() {
         return null;
     }
+
+
 
 
 }

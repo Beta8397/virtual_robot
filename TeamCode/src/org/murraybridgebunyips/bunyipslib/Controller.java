@@ -109,6 +109,7 @@ public class Controller extends Gamepad {
      */
     public Controller(Gamepad gamepad) {
         sdk = gamepad;
+        update();
     }
 
     private void parseUnmanagedControllerBuffer() {
@@ -313,5 +314,4 @@ public class Controller extends Gamepad {
         }
         return false;
     }
-
 }

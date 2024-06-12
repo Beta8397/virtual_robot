@@ -16,14 +16,16 @@ public interface RampingFunction {
      * @param enabled whether the ramping function is enabled, default is on
      */
     RampingFunction setRampingEnabled(boolean enabled);
+
     /**
      * Set the ramping parameters of the value.
      *
-     * @param time the time it takes for the value to reach the target value.
+     * @param time  the time it takes for the value to reach the target value.
      * @param delta the maximum change in value per second
      * @return this
      */
     RampingFunction setRampingParameters(Measure<Time> time, double delta);
+
     /**
      * Set the time it takes for the value to reach the target.
      *
@@ -31,6 +33,7 @@ public interface RampingFunction {
      * @return this
      */
     RampingFunction setRampingTime(Measure<Time> smoothTime);
+
     /**
      * Set the maximum change in units per second.
      *

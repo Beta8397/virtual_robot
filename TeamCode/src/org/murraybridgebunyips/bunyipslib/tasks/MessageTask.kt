@@ -10,7 +10,7 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.RobotTask
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task
 
 /**
- * Relay a message to the driver station for a specific time.
+ * Relay a message in telemetry for a specific amount of time.
  */
 class MessageTask(time: Measure<Time>, private val message: String) :
     Task(time), RobotTask {

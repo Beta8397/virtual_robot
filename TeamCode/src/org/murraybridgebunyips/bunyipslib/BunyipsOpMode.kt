@@ -1,7 +1,9 @@
 package org.murraybridgebunyips.bunyipslib
 
+import android.graphics.Color
 import com.acmerobotics.dashboard.canvas.Canvas
 import com.qualcomm.hardware.lynx.LynxModule
+import com.qualcomm.robotcore.hardware.Blinker
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.HardwareDevice
@@ -18,6 +20,7 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.RobotTask
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task
 import org.murraybridgebunyips.deps.BuildConfig
 import java.util.concurrent.ExecutorService
+import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
 
@@ -81,10 +84,16 @@ abstract class BunyipsOpMode : BOMInternal() {
      */
     var loopSpeed: Measure<Time> = Seconds.zero()
 
+    /**
+     * A list of all LynxModules (Control + Expansion Hub) modules on the robot.
+     */
+    val robotControllers: List<LynxModule> by lazy { hardwareMap.getAll(LynxModule::class.java) }
+
     private var operationsCompleted = false
     private var operationsPaused = false
     private var safeHaltHardwareOnStop = false
 
+    private val runnables = mutableListOf<Runnable>()
     private var gamepadExecutor: ExecutorService? = null
     private var initTask: RobotTask? = null
 
@@ -196,11 +205,12 @@ abstract class BunyipsOpMode : BOMInternal() {
             resetFields()
             Dbg.log("=============== BunyipsLib v${BuildConfig.SEMVER} BunyipsOpMode ${BuildConfig.GIT_COMMIT}-${BuildConfig.BUILD_TIME} uid:${BuildConfig.ID} ===============")
             LynxModuleUtil.ensureMinimumFirmwareVersion(hardwareMap)
-            hardwareMap.getAll(LynxModule::class.java).forEach { module ->
-                module.bulkCachingMode = LynxModule.BulkCachingMode.AUTO
+            robotControllers.forEach { module ->
+                module.bulkCachingMode = LynxModule.BulkCachingMode.MANUAL
+                module.setConstant(Color.parseColor("#3300FF00"))
             }
 
-            Dbg.logd("BunyipsOpMode: setting up...")
+            Dbg.logv("BunyipsOpMode: setting up...")
             // Ring-buffer timing utility
             timer = MovingAverageTimer()
             // Telemetry
@@ -228,7 +238,7 @@ abstract class BunyipsOpMode : BOMInternal() {
             telemetry.update()
 
             telemetry.opModeStatus = "<b><font color='yellow'></b>static_init</font>"
-            Dbg.logd("BunyipsOpMode: firing onInit()...")
+            Dbg.logv("BunyipsOpMode: firing onInit()...")
             // Store telemetry objects raised by onInit() by turning off auto-clear
             telemetry.isAutoClear = false
             telemetry.update()
@@ -247,7 +257,7 @@ abstract class BunyipsOpMode : BOMInternal() {
 
             telemetry.opModeStatus = "<font color='aqua'>dynamic_init</font>"
             telemetry.update()
-            Dbg.logd("BunyipsOpMode: starting onInitLoop()...")
+            Dbg.logv("BunyipsOpMode: starting onInitLoop()...")
             if (initTask != null) {
                 Dbg.logd(
                     "BunyipsOpMode: running initTask -> % ...",
@@ -255,10 +265,17 @@ abstract class BunyipsOpMode : BOMInternal() {
                 )
                 telemetry.log("<font color='gray'>running init-task:</font> %", initTask)
             }
+            robotControllers.forEach { module ->
+                module.pattern = listOf(
+                    Blinker.Step(Color.CYAN, 300, TimeUnit.MILLISECONDS),
+                    Blinker.Step(Color.BLACK, 300, TimeUnit.MILLISECONDS)
+                )
+            }
             // Run user-defined dynamic initialisation
             do {
                 val curr = System.nanoTime()
                 try {
+                    robotControllers.forEach { m -> m.clearBulkCache() }
                     // Run the user's init task, if it isn't null
                     initTask?.run()
                     // Run until onInitLoop returns true, and the initTask is done, or the OpMode is continued
@@ -289,13 +306,19 @@ abstract class BunyipsOpMode : BOMInternal() {
                 telemetry.log("<font color='gray'>init-task finished.</font>")
             }
             telemetry.update()
-            Dbg.logd("BunyipsOpMode: firing onInitDone()...")
+            Dbg.logv("BunyipsOpMode: firing onInitDone()...")
             // Run user-defined final initialisation
             try {
                 onInitDone()
+                robotControllers.forEach { module ->
+                    module.setConstant(Color.GREEN)
+                }
             } catch (e: Exception) {
                 telemetry.overrideStatus = "<font color='red'><b>error</b></font>"
                 Exceptions.handle(e, telemetry::log)
+                robotControllers.forEach { module ->
+                    module.setConstant(Color.YELLOW)
+                }
             }
 
             // Ready to go.
@@ -317,7 +340,7 @@ abstract class BunyipsOpMode : BOMInternal() {
             telemetry.opModeStatus = "<font color='yellow'>starting</font>"
             telemetry.isAutoClear = true
             telemetry.clear()
-            Dbg.logd("BunyipsOpMode: firing onStart()...")
+            Dbg.logv("BunyipsOpMode: firing onStart()...")
             try {
                 // Run user-defined start operations
                 onStart()
@@ -329,9 +352,15 @@ abstract class BunyipsOpMode : BOMInternal() {
             telemetry.update()
             timer.reset()
             telemetry.logBracketColor = "green"
+            robotControllers.forEach { module ->
+                module.pattern = listOf(
+                    Blinker.Step(Color.GREEN, 300, TimeUnit.MILLISECONDS),
+                    Blinker.Step(Color.BLACK, 300, TimeUnit.MILLISECONDS)
+                )
+            }
 
             telemetry.opModeStatus = "<font color='green'><b>running</b></font>"
-            Dbg.logd("BunyipsOpMode: starting activeLoop()...")
+            Dbg.logv("BunyipsOpMode: starting activeLoop()...")
             while (opModeIsActive() && !operationsCompleted) {
                 if (operationsPaused) {
                     // If the OpMode is paused, skip the loop and wait for the next hardware cycle
@@ -342,8 +371,10 @@ abstract class BunyipsOpMode : BOMInternal() {
                     continue
                 }
                 val curr = System.nanoTime()
+                robotControllers.forEach { m -> m.clearBulkCache() }
                 try {
                     // Run user-defined active loop
+                    runnables.forEach { it.run() }
                     activeLoop()
                 } catch (e: Exception) {
                     telemetry.overrideStatus = "<font color='red'><b>error</b></font>"
@@ -367,6 +398,9 @@ abstract class BunyipsOpMode : BOMInternal() {
             timer.update()
             telemetry.update()
             Dbg.logd("BunyipsOpMode: all tasks finished.")
+            robotControllers.forEach { module ->
+                module.setConstant(Color.LTGRAY)
+            }
             // Wait for user to hit stop or for the OpMode to be terminated
             // We will continue running the OpMode as there might be some other user threads
             // under Threads that can still run, so we will wait indefinitely and simulate
@@ -404,7 +438,7 @@ abstract class BunyipsOpMode : BOMInternal() {
             telemetry.opModeStatus = "<font color='red'>terminating</font>"
             Dbg.logd("BunyipsOpMode: active cycle completed in ${timer.elapsedTime().inUnit(Seconds)} secs")
             telemetry.update()
-            Dbg.logd("BunyipsOpMode: exiting...")
+            Dbg.logv("BunyipsOpMode: exiting...")
         }
     }
 
@@ -427,6 +461,17 @@ abstract class BunyipsOpMode : BOMInternal() {
             Dbg.warn(javaClass, "Init-task has already been set to %, overriding it with %...", initTask, task)
         }
         initTask = task
+    }
+
+    /**
+     * Add a [Runnable] to the list of runnables to be executed just before the [activeLoop].
+     * This is useful for running code that needs to be executed on the main thread, but is not
+     * a subsystem or task.
+     *
+     * This method is called before the [activeLoop] method, and will run the runnables in the order they were added.
+     */
+    protected fun onActiveLoop(vararg runnables: Runnable) {
+        this.runnables.addAll(runnables)
     }
 
     // These telemetry methods exist for continuity as they used to be the primary way to use telemetry in BunyipsLib,

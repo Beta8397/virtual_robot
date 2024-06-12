@@ -217,6 +217,44 @@ object Dbg {
     }
 
     /**
+     * Log a verbose message.
+     * Used from always-messages that can be omitted, such as the firing notifications of methods
+     * @param stck StackTraceElement with information about where this log was called (see Text.getCallingUserCodeFunction())
+     * @param format An object string to add to telemetry
+     * @param args The objects to format into the object format string
+     */
+    @JvmStatic
+    fun logv(stck: StackTraceElement, format: Any, vararg args: Any?) {
+        RobotLog.vv(TAG, "[$stck] ${formatString(format.toString(), *args)}")
+    }
+
+    /**
+     * Log a verbose message.
+     * Used from always-messages that can be omitted, such as the firing notifications of methods
+     * @param obj Class where this log was called (name will be prepended to message)
+     * @param format An object string to add to telemetry
+     * @param args The objects to format into the object format string
+     */
+    @JvmStatic
+    fun logv(obj: Class<*>, format: Any, vararg args: Any?) {
+        RobotLog.vv(
+            TAG,
+            "[${obj.simpleName}] ${formatString(format.toString(), *args)}"
+        )
+    }
+
+    /**
+     * Log a verbose message.
+     * Used from always-messages that can be omitted, such as the firing notifications of methods
+     * @param format An object string to add to telemetry
+     * @param args The objects to format into the object format string
+     */
+    @JvmStatic
+    fun logv(format: Any, vararg args: Any?) {
+        RobotLog.vv(TAG, formatString(format.toString(), *args))
+    }
+
+    /**
      * Log a user message temporarily.
      * This method is marked as 'deprecated' to remind you to remove it before committing your code and for it
      * to be picked up as part of static code analysis. It serves the same as a regular log() call.

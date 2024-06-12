@@ -137,7 +137,7 @@ public class TankDrive extends BunyipsSubsystem implements RoadRunnerDrive {
                 round(Math.toDegrees(instance.getPoseEstimate().getHeading()), 1)).color("gray");
 
         instance.update();
-        Storage.lastKnownPosition = instance.getPoseEstimate();
+        Storage.memory().lastKnownPosition = instance.getPoseEstimate();
     }
 
     @Override
