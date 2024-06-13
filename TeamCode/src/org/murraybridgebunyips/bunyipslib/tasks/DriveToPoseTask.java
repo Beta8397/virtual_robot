@@ -76,12 +76,12 @@ public class DriveToPoseTask extends Task {
         drive.stop();
     }
 
-    private boolean vectorNear() {
-        return Math.abs(drive.getPoseEstimate().vec().distTo(targetPose.vec())) < vectorTolerance.in(Inches);
+    public boolean isVectorNear() {
+        return Mathf.isNear(0, drive.getPoseEstimate().vec().distTo(targetPose.vec()), vectorTolerance.in(Inches));
     }
 
-    private boolean headingNear() {
-        return Math.abs(drive.getPoseEstimate().getHeading() - targetPose.getHeading()) < headingTolerance.in(Radians);
+    public boolean isHeadingNear() {
+        return Mathf.isNear(targetPose.getHeading(), drive.getPoseEstimate().getHeading(), headingTolerance.in(Radians));
     }
 
     @Override
@@ -112,6 +112,6 @@ public class DriveToPoseTask extends Task {
 
     @Override
     protected boolean isTaskFinished() {
-        return vectorNear() && headingNear();
+        return isVectorNear() && isHeadingNear();
     }
 }
