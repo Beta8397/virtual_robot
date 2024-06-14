@@ -102,7 +102,11 @@ public abstract class CommandBasedBunyipsOpMode extends BunyipsOpMode {
 
     @Override
     protected final void onInit() {
-        onInitialise();
+        try {
+            onInitialise();
+        } catch (Exception e) {
+            Exceptions.handle(e, telemetry::log);
+        }
         scheduler = new Scheduler();
         boolean error = managedSubsystems == null || managedSubsystems.isEmpty();
         if (!error)
@@ -139,7 +143,11 @@ public abstract class CommandBasedBunyipsOpMode extends BunyipsOpMode {
 
     @Override
     protected final void activeLoop() {
-        periodic();
+        try {
+            periodic();
+        } catch (Exception e) {
+            Exceptions.handle(e, telemetry::log);
+        }
         scheduler.run();
     }
 

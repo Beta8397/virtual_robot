@@ -3,12 +3,12 @@ package org.murraybridgebunyips.bunyipslib.tasks;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.hardware.Gamepad;
-import com.qualcomm.robotcore.hardware.PIDCoefficients;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 import org.murraybridgebunyips.bunyipslib.Controls;
 import org.murraybridgebunyips.bunyipslib.EmergencyStop;
-import org.murraybridgebunyips.bunyipslib.external.pid.PIDController;
+import org.murraybridgebunyips.bunyipslib.external.pid.PIDFController;
 import org.murraybridgebunyips.bunyipslib.external.units.Measure;
 import org.murraybridgebunyips.bunyipslib.external.units.Time;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
@@ -27,13 +27,13 @@ import java.util.function.DoubleSupplier;
 @Config
 public class AlignToContourTask extends Task {
     /**
-     * PID coefficients for the alignment controller.
+     * PIDF coefficients for the alignment controller.
      */
-    public static PIDCoefficients PID = new PIDCoefficients();
+    public static PIDFCoefficients PIDF = new PIDFCoefficients();
 
     private final RoadRunnerDrive drive;
     private final MultiColourThreshold processors;
-    private final PIDController controller;
+    private final PIDFController controller;
     private DoubleSupplier x;
     private DoubleSupplier y;
     private DoubleSupplier r;
@@ -48,7 +48,7 @@ public class AlignToContourTask extends Task {
      * @param processors the vision processor to use
      * @param controller the PID controller to use for aligning to a target
      */
-    public AlignToContourTask(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier rSupplier, BunyipsSubsystem drive, MultiColourThreshold processors, PIDController controller) {
+    public AlignToContourTask(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier rSupplier, BunyipsSubsystem drive, MultiColourThreshold processors, PIDFController controller) {
         super(INFINITE_TIMEOUT, drive, false);
         if (!(drive instanceof RoadRunnerDrive))
             throw new EmergencyStop("AlignToContourTask must be used with a drivetrain with X forward Pose/IMU info");
@@ -58,7 +58,7 @@ public class AlignToContourTask extends Task {
         y = ySupplier;
         r = rSupplier;
         this.controller = controller;
-        controller.updatePID(PID);
+        controller.updatePIDF(PIDF);
         withName("Align To Contour");
     }
 
@@ -70,7 +70,7 @@ public class AlignToContourTask extends Task {
      * @param processors the vision processor to use
      * @param controller the PID controller to use for aligning to a target
      */
-    public AlignToContourTask(Gamepad driver, BunyipsSubsystem drive, MultiColourThreshold processors, PIDController controller) {
+    public AlignToContourTask(Gamepad driver, BunyipsSubsystem drive, MultiColourThreshold processors, PIDFController controller) {
         this(() -> driver.left_stick_x, () -> driver.left_stick_y, () -> driver.right_stick_x, drive, processors, controller);
     }
 
@@ -82,14 +82,14 @@ public class AlignToContourTask extends Task {
      * @param processors the vision processor to use
      * @param controller the PID controller to use for aligning to a target
      */
-    public AlignToContourTask(Measure<Time> timeout, BunyipsSubsystem drive, MultiColourThreshold processors, PIDController controller) {
+    public AlignToContourTask(Measure<Time> timeout, BunyipsSubsystem drive, MultiColourThreshold processors, PIDFController controller) {
         super(timeout, drive, false);
         if (!(drive instanceof RoadRunnerDrive))
             throw new EmergencyStop("AlignToContourTask must be used with a drivetrain with X forward Pose/IMU info");
         this.drive = (RoadRunnerDrive) drive;
         this.processors = processors;
         this.controller = controller;
-        controller.updatePID(PID);
+        controller.updatePIDF(PIDF);
         withName("Align To Contour");
     }
 
@@ -102,7 +102,7 @@ public class AlignToContourTask extends Task {
     @Override
     protected void periodic() {
         // FtcDashboard live tuning
-        controller.setPID(PID);
+        controller.setPIDF(PIDF);
 
         Pose2d pose = new Pose2d(0, 0, 0);
         if (x != null)

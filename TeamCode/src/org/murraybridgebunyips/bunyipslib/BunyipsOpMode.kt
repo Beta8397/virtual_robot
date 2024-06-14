@@ -207,7 +207,7 @@ abstract class BunyipsOpMode : BOMInternal() {
             LynxModuleUtil.ensureMinimumFirmwareVersion(hardwareMap)
             robotControllers.forEach { module ->
                 module.bulkCachingMode = LynxModule.BulkCachingMode.MANUAL
-                module.setConstant(Color.parseColor("#3300FF00"))
+                module.setConstant(Color.CYAN)
             }
 
             Dbg.logv("BunyipsOpMode: setting up...")
@@ -245,12 +245,14 @@ abstract class BunyipsOpMode : BOMInternal() {
             if (!gamepad1.atRest() || !gamepad2.atRest()) {
                 telemetry.log("<b><font color='yellow'>WARNING!</font></b> a gamepad was not zeroed during init. please ensure controllers zero out correctly.")
             }
+            var ok = true
             // Run user-defined setup
             try {
                 onInit()
             } catch (e: Exception) {
                 // Catch all exceptions, log them, and continue running the OpMode
                 // All InterruptedExceptions are handled by the FTC SDK and are raised in the Exceptions handler
+                ok = false
                 telemetry.overrideStatus = "<font color='red'><b>error</b></font>"
                 Exceptions.handle(e, telemetry::log)
             }
@@ -267,8 +269,8 @@ abstract class BunyipsOpMode : BOMInternal() {
             }
             robotControllers.forEach { module ->
                 module.pattern = listOf(
-                    Blinker.Step(Color.CYAN, 300, TimeUnit.MILLISECONDS),
-                    Blinker.Step(Color.BLACK, 300, TimeUnit.MILLISECONDS)
+                    Blinker.Step(Color.CYAN, 400, TimeUnit.MILLISECONDS),
+                    Blinker.Step(Color.BLACK, 400, TimeUnit.MILLISECONDS)
                 )
             }
             // Run user-defined dynamic initialisation
@@ -281,6 +283,7 @@ abstract class BunyipsOpMode : BOMInternal() {
                     // Run until onInitLoop returns true, and the initTask is done, or the OpMode is continued
                     if (onInitLoop() && (initTask == null || initTask?.pollFinished() == true)) break
                 } catch (e: Exception) {
+                    ok = false
                     telemetry.overrideStatus = "<font color='red'><b>error</b></font>"
                     Exceptions.handle(e, telemetry::log)
                 }
@@ -310,15 +313,10 @@ abstract class BunyipsOpMode : BOMInternal() {
             // Run user-defined final initialisation
             try {
                 onInitDone()
-                robotControllers.forEach { module ->
-                    module.setConstant(Color.GREEN)
-                }
             } catch (e: Exception) {
+                ok = false
                 telemetry.overrideStatus = "<font color='red'><b>error</b></font>"
                 Exceptions.handle(e, telemetry::log)
-                robotControllers.forEach { module ->
-                    module.setConstant(Color.YELLOW)
-                }
             }
 
             // Ready to go.
@@ -328,6 +326,9 @@ abstract class BunyipsOpMode : BOMInternal() {
             // DS only telemetry
             telemetry.addDS("<b>Init <font color='green'>complete</font>. Press play to start.</b>")
             Dbg.logd("BunyipsOpMode: ready.")
+            robotControllers.forEach { module ->
+                module.setConstant(if (ok) Color.GREEN else Color.YELLOW)
+            }
 
             // Wait for start
             do {
@@ -353,9 +354,11 @@ abstract class BunyipsOpMode : BOMInternal() {
             timer.reset()
             telemetry.logBracketColor = "green"
             robotControllers.forEach { module ->
+                // Limitation, flashing here and the OpMode ending will leave the light flashing,
+                // but we can't control LynxModules after the OpMode ends.
                 module.pattern = listOf(
-                    Blinker.Step(Color.GREEN, 300, TimeUnit.MILLISECONDS),
-                    Blinker.Step(Color.BLACK, 300, TimeUnit.MILLISECONDS)
+                    Blinker.Step(Color.GREEN, 200, TimeUnit.MILLISECONDS),
+                    Blinker.Step(Color.BLACK, 200, TimeUnit.MILLISECONDS)
                 )
             }
 
@@ -416,6 +419,9 @@ abstract class BunyipsOpMode : BOMInternal() {
         } catch (t: Throwable) {
             Dbg.error("BunyipsOpMode: unhandled throwable! <${t.message}>")
             Dbg.sendStacktrace(t)
+            robotControllers.forEach { module ->
+                module.setConstant(Color.RED)
+            }
             // As this error occurred somewhere not inside user code, we should not swallow it.
             // There is also a chance this error is an instance of Error, in which case we should
             // exit immediately as something has gone very wrong

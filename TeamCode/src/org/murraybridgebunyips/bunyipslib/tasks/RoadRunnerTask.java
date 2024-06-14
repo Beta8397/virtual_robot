@@ -1,5 +1,6 @@
 package org.murraybridgebunyips.bunyipslib.tasks;
 
+import static org.murraybridgebunyips.bunyipslib.Text.formatString;
 import static org.murraybridgebunyips.bunyipslib.Text.round;
 import static org.murraybridgebunyips.bunyipslib.external.units.Units.Centimeters;
 import static org.murraybridgebunyips.bunyipslib.external.units.Units.Inches;
@@ -43,7 +44,7 @@ public class RoadRunnerTask extends Task {
         super(time.magnitude() != 0.0 ? time : Seconds.of(trajectory.duration()));
         this.drive = drive;
         this.trajectory = trajectory;
-        withName("RoadRunner Trajectory");
+        withName(formatString("RoadRunner Trajectory % -> %", trajectory.start(), trajectory.end()));
     }
 
     /**
@@ -57,7 +58,7 @@ public class RoadRunnerTask extends Task {
         super(time.magnitude() != 0.0 ? time : Seconds.of(trajectorySequence.duration()));
         this.drive = drive;
         this.trajectorySequence = trajectorySequence;
-        withName("RoadRunner Trajectory");
+        withName(formatString("RoadRunner Trajectory % -> %", trajectorySequence.start(), trajectorySequence.end()));
     }
 
     /**
@@ -73,6 +74,7 @@ public class RoadRunnerTask extends Task {
         super(time.magnitude() != 0.0 ? time : Seconds.of(trajectory.duration()));
         this.drive = drive;
         this.trajectory = trajectory;
+        withName(formatString("RoadRunner Trajectory % -> %", trajectory.start(), trajectory.end()));
     }
 
     /**
@@ -88,6 +90,7 @@ public class RoadRunnerTask extends Task {
         super(time, dependency, override);
         this.drive = drive;
         this.trajectorySequence = trajectorySequence;
+        withName(formatString("RoadRunner Trajectory % -> %", trajectorySequence.start(), trajectorySequence.end()));
     }
 
     @Override

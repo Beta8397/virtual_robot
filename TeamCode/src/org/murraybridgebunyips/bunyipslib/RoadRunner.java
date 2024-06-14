@@ -125,22 +125,48 @@ public interface RoadRunner {
     }
 
     /**
+     * Set the current pose estimate of the drive. This method is useful when parsing the user-selected start
+     * position, so field-relative trajectories can be built.
+     *
+     * @param poseEstimateInchRad The pose estimate to set (in, in, rad)
+     */
+    default void setPose(Pose2d poseEstimateInchRad) {
+        Pose2d curr = getDrive().getPoseEstimate();
+        getDrive().setPoseEstimate(poseEstimateInchRad);
+        Dbg.logd(getClass(), "Pose estimate updated: % -> %", curr, poseEstimateInchRad);
+    }
+
+    /**
+     * Set the current pose estimate of the drive. This method is useful when parsing the user-selected start
+     * position, so field-relative trajectories can be built.
+     *
+     * @param poseEstimate The pose estimate to set
+     * @param inUnit       The unit of the end pose vector (will be converted to inches)
+     * @param angleUnit    The unit of the end pose heading (will be converted to radians)
+     */
+    default void setPose(Pose2d poseEstimate, Distance inUnit, Angle angleUnit) {
+        double x = Inches.convertFrom(poseEstimate.getX(), inUnit);
+        double y = Inches.convertFrom(poseEstimate.getY(), inUnit);
+        double r = Radians.convertFrom(poseEstimate.getHeading(), angleUnit);
+        setPose(new Pose2d(x, y, r));
+    }
+
+    /**
      * Use this method to build a new RoadRunner trajectory or to add a RoadRunner trajectory to the task queue.
      *
-     * @param startPoseInchRad Starting pose of the trajectory, <b>WILL SET DRIVE POSE ESTIMATE TO THIS POSE</b>, (in, in, radians)
+     * @param startPoseInchRad Starting pose of the trajectory to be built starting at (in, in, rad). This pose will consequently used as the next implicit pose.
      * @return Builder for the trajectory
      */
     default RoadRunnerTrajectoryTaskBuilder makeTrajectory(Pose2d startPoseInchRad) {
         // noinspection rawtypes
         TrajectorySequenceBuilder builder = getDrive().trajectorySequenceBuilder(startPoseInchRad);
-        getDrive().setPoseEstimate(startPoseInchRad);
         return new RoadRunnerTrajectoryTaskBuilder(getDrive(), startPoseInchRad, builder.getBaseVelConstraint(), builder.getBaseAccelConstraint(), builder.getBaseTurnConstraintMaxAngVel(), builder.getBaseTurnConstraintMaxAngAccel());
     }
 
     /**
      * Use this method to build a new RoadRunner trajectory or to add a RoadRunner trajectory to the task queue.
      *
-     * @param startPose Starting pose of the trajectory, <b>WILL SET DRIVE POSE ESTIMATE TO THIS POSE</b>
+     * @param startPose Starting pose of the trajectory to be built starting at. This pose will consequently used as the next implicit pose.
      * @param inUnit    The unit of the end pose vector (will be converted to inches)
      * @param angleUnit The unit of the end pose heading (will be converted to radians)
      * @return Builder for the trajectory
@@ -154,7 +180,7 @@ public interface RoadRunner {
 
     /**
      * Use this method to build a new RoadRunner trajectory or to add a RoadRunner trajectory to the task queue.
-     * Without arguments, will use the current pose estimate of the drive or the last spliced pose as the starting
+     * Without arguments, the start pose will use the current pose estimate of the drive *or* the last spliced pose as the starting
      * pose of the trajectory. If there is no buffered spliced pose, the current pose estimate will be used.
      *
      * @return Builder for the trajectory
@@ -163,10 +189,11 @@ public interface RoadRunner {
     default RoadRunnerTrajectoryTaskBuilder makeTrajectory() {
         // If we're using an implicit start pose in the presence of a lastKnownPosition, it is likely the case that
         // we don't want to use the lastKnownPosition as the implicit pose, so we'll reset the pose info here
-        if (Storage.memory().lastKnownPosition != null && splicedPose.isNull()) {
+        Pose2d dp = getDrive().getPoseEstimate();
+        Pose2d lastKnown = Storage.memory().lastKnownPosition;
+        if (lastKnown != null && splicedPose.isNull() && dp.epsilonEquals(lastKnown))
             resetPoseInfo();
-        }
-        Pose2d implicitPose = splicedPose.isNotNull() ? splicedPose.get() : getDrive().getPoseEstimate();
+        Pose2d implicitPose = splicedPose.isNotNull() ? splicedPose.get() : dp;
         // noinspection rawtypes
         TrajectorySequenceBuilder builder = getDrive().trajectorySequenceBuilder(implicitPose);
         return new RoadRunnerTrajectoryTaskBuilder(getDrive(), implicitPose, builder.getBaseVelConstraint(), builder.getBaseAccelConstraint(), builder.getBaseTurnConstraintMaxAngVel(), builder.getBaseTurnConstraintMaxAngAccel());
@@ -857,7 +884,6 @@ public interface RoadRunner {
          */
         public RoadRunnerTrajectoryTaskBuilder runSequence(TrajectorySequence sequence) {
             overrideSequence = sequence;
-            drive.setPoseEstimate(sequence.start());
             return this;
         }
 

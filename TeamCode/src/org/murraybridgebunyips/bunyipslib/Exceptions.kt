@@ -3,6 +3,7 @@ package org.murraybridgebunyips.bunyipslib
 import com.acmerobotics.dashboard.config.Config
 import java.io.PrintWriter
 import java.io.StringWriter
+import java.util.function.Consumer
 
 /**
  * Util to prevent unhandled exceptions from crashing the app.
@@ -25,8 +26,8 @@ object Exceptions {
      * @param e The exception to handle.
      * @param stderr The function to print logging to the Driver Station or other stderr outputs that support HTML parsing.
      */
-    @Throws(InterruptedException::class)
-    fun handle(e: Exception, stderr: (msg: String) -> Unit) {
+    @JvmStatic
+    fun handle(e: Exception, stderr: Consumer<String>) {
         if (e is NullPointerException) {
             for (component in Storage.memory().unusableComponents) {
                 if (e.localizedMessage?.contains(component) == true) {
@@ -37,9 +38,9 @@ object Exceptions {
                 }
             }
         }
-        stderr("<font color='red'><b>exception caught! &lt;${e.localizedMessage}&gt;</b></font>")
+        stderr.accept("<font color='red'><b>exception caught! &lt;${e.localizedMessage}&gt;</b></font>")
         if (e.cause != null) {
-            stderr("caused by: ${e.cause}")
+            stderr.accept("caused by: ${e.cause}")
         }
         val sw = StringWriter()
         e.printStackTrace(PrintWriter(sw))
@@ -48,7 +49,7 @@ object Exceptions {
             stack = stack.substring(0, MAX_DS_STACKTRACE_CHARS - 4)
             stack += " ..."
         }
-        stderr("<small>$stack</small>")
+        stderr.accept("<small>$stack</small>")
         Dbg.error("Exception caught! Stacktrace:")
         Dbg.sendStacktrace(e)
         if (e is InterruptedException) {

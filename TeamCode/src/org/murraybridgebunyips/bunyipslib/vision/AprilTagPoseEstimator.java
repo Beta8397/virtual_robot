@@ -24,7 +24,7 @@ public class AprilTagPoseEstimator {
      * Constructor for AprilTagPoseEstimator.
      *
      * @param processor AprilTag processor to use for pose estimation, must be attached to Vision and running
-     * @param drive RoadRunner drive
+     * @param drive     RoadRunner drive
      */
     public AprilTagPoseEstimator(AprilTag processor, RoadRunnerDrive drive) {
         this.processor = processor;

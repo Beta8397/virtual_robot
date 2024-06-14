@@ -60,7 +60,11 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
         if (isStopRequested())
             return;
         safeToAddTasks = true;
-        onReady(selectedOpMode, userSelection != null ? userSelection.getSelectedButton() : null);
+        try {
+            onReady(selectedOpMode, userSelection != null ? userSelection.getSelectedButton() : null);
+        } catch (Exception e) {
+            Exceptions.handle(e, telemetry::log);
+        }
         // Add any queued tasks
         for (RobotTask task : postQueue) {
             addTask(task);
@@ -88,7 +92,11 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     @Override
     protected final void onInit() {
         // Run user-defined hardware initialisation
-        onInitialise();
+        try {
+            onInitialise();
+        } catch (Exception e) {
+            Exceptions.handle(e, telemetry::log);
+        }
         // Convert user defined OpModeSelections to varargs
         Reference<?>[] varargs = opModes.toArray(new Reference[0]);
         if (varargs.length == 0) {
@@ -133,7 +141,11 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     @Override
     protected final void activeLoop() {
         // Run any code defined by the user
-        periodic();
+        try {
+            periodic();
+        } catch (Exception e) {
+            Exceptions.handle(e, telemetry::log);
+        }
 
         // Run the queue of tasks
         synchronized (tasks) {
@@ -149,23 +161,31 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
                             this.currentTask, taskCount, currentTask, getApproximateTimeLeft())
             );
 
-            // AutonomousBunyipsOpMode is handling all task completion checks, manual checks not required
-            if (currentTask.pollFinished()) {
-                tasks.removeFirst();
-                double runTime = 0;
-                if (currentTask instanceof Task) {
-                    runTime = ((Task) currentTask).getDeltaTime().in(Seconds);
+            try {
+                // AutonomousBunyipsOpMode is handling all task completion checks, manual checks not required
+                if (currentTask.pollFinished()) {
+                    tasks.removeFirst();
+                    double runTime = 0;
+                    if (currentTask instanceof Task) {
+                        runTime = ((Task) currentTask).getDeltaTime().in(Seconds);
+                    }
+                    Dbg.logd("[AutonomousBunyipsOpMode] task %/% (%) finished%", this.currentTask, taskCount, currentTask, runTime != 0 ? " -> " + runTime + "s" : "");
+                    this.currentTask++;
                 }
-                Dbg.logd("[AutonomousBunyipsOpMode] task %/% (%) finished%", this.currentTask, taskCount, currentTask, runTime != 0 ? " -> " + runTime + "s" : "");
-                this.currentTask++;
-            }
 
-            currentTask.run();
+                currentTask.run();
+            } catch (Exception e) {
+                Exceptions.handle(e, telemetry::log);
+            }
         }
 
         // Update all subsystems
         for (BunyipsSubsystem subsystem : updatedSubsystems) {
-            subsystem.update();
+            try {
+                subsystem.update();
+            } catch (Exception e) {
+                Exceptions.handle(e, telemetry::log);
+            }
         }
     }
 

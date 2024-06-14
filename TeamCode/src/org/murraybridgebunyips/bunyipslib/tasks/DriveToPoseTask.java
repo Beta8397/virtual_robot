@@ -1,21 +1,23 @@
 package org.murraybridgebunyips.bunyipslib.tasks;
 
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Centimeters;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Degrees;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Inches;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Radians;
+
 import androidx.annotation.NonNull;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
-import org.murraybridgebunyips.bunyipslib.Dbg;
 import org.murraybridgebunyips.bunyipslib.external.Mathf;
-import org.murraybridgebunyips.bunyipslib.external.pid.PIDController;
+import org.murraybridgebunyips.bunyipslib.external.pid.PIDFController;
 import org.murraybridgebunyips.bunyipslib.external.units.Angle;
 import org.murraybridgebunyips.bunyipslib.external.units.Distance;
 import org.murraybridgebunyips.bunyipslib.external.units.Measure;
 import org.murraybridgebunyips.bunyipslib.external.units.Time;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
-
-import static org.murraybridgebunyips.bunyipslib.external.units.Units.*;
 
 /**
  * Drive to a pose using RoadRunner.
@@ -27,9 +29,9 @@ import static org.murraybridgebunyips.bunyipslib.external.units.Units.*;
 public class DriveToPoseTask extends Task {
     private final RoadRunnerDrive drive;
     private final Pose2d targetPose;
-    private final PIDController forwardController;
-    private final PIDController strafeController;
-    private final PIDController headingController;
+    private final PIDFController forwardController;
+    private final PIDFController strafeController;
+    private final PIDFController headingController;
 
     private Measure<Angle> headingTolerance = Degrees.of(2);
     private Measure<Distance> vectorTolerance = Centimeters.of(5);
@@ -37,15 +39,15 @@ public class DriveToPoseTask extends Task {
     /**
      * Run the Drive To Pose Task on a drive subsystem.
      *
-     * @param timeout The maximum time the task can run for.
-     * @param driveSubsystem The drive subsystem to run the task on.
-     * @param targetPose The target pose to drive to.
+     * @param timeout           The maximum time the task can run for.
+     * @param driveSubsystem    The drive subsystem to run the task on.
+     * @param targetPose        The target pose to drive to.
      * @param forwardController The PID controller for x.
-     * @param strafeController The PID controller for y.
+     * @param strafeController  The PID controller for y.
      * @param headingController The PID controller for heading.
      */
     public DriveToPoseTask(@NonNull Measure<Time> timeout, @NonNull BunyipsSubsystem driveSubsystem,
-                           Pose2d targetPose, PIDController forwardController, PIDController strafeController, PIDController headingController) {
+                           Pose2d targetPose, PIDFController forwardController, PIDFController strafeController, PIDFController headingController) {
         super(timeout, driveSubsystem, true);
         if (!(driveSubsystem instanceof RoadRunnerDrive))
             throw new IllegalArgumentException("DriveToPoseTask requires a RoadRunnerDrive subsystem");
@@ -60,13 +62,13 @@ public class DriveToPoseTask extends Task {
     /**
      * Set the tolerances for the task.
      *
-     * @param headingTolerance The tolerance for heading.
-     * @param vectorTolerance The tolerance for the translation vector.
+     * @param heading     The tolerance for heading.
+     * @param translation The tolerance for the translation vector.
      * @return this
      */
-    public DriveToPoseTask withTolerances(Measure<Angle> headingTolerance, Measure<Distance> vectorTolerance) {
-        this.headingTolerance = headingTolerance;
-        this.vectorTolerance = vectorTolerance;
+    public DriveToPoseTask withTolerances(Measure<Angle> heading, Measure<Distance> translation) {
+        headingTolerance = heading;
+        vectorTolerance = translation;
         return this;
     }
 
@@ -88,16 +90,19 @@ public class DriveToPoseTask extends Task {
     protected void periodic() {
         Pose2d estimatedPose = drive.getPoseEstimate();
         Pose2d error = targetPose.minus(estimatedPose);
+
         // Twist the error vector to be relative to the robot's heading, as rotations of the robot are not
         // accounted for in the RoadRunner pose estimate
         double cos = Math.cos(estimatedPose.getHeading());
         double sin = Math.sin(estimatedPose.getHeading());
-        // Wrap angle between -pi and pi for optimal turns
+
+        // Wrap target angle between -pi and pi for optimal turns
         double angle = Mathf.inputModulus(error.getHeading(), -Math.PI, Math.PI);
         // When the angle is near the modulus boundary, lock towards a definitive full rotation to avoid oscillations
         if (Mathf.isNear(Math.abs(angle), Math.PI, 0.1))
             angle = -Math.PI * Math.signum(error.getHeading());
-        // Apply PID
+
+        // Apply PID and twist
         drive.setWeightedDrivePower(new Pose2d(
                 -forwardController.calculate(error.getX()) * cos - forwardController.calculate(error.getY()) * sin,
                 -strafeController.calculate(error.getY()) * cos + strafeController.calculate(error.getX()) * sin,
