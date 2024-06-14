@@ -871,19 +871,43 @@ public interface RoadRunner {
         /**
          * Run a sequence of trajectories, useful if you do not need to build a trajectory but
          * run one directly. This method will override and void any previous trajectory added to this builder,
-         * but will still accept task settings and construction. This will also set the drive pose
-         * estimate to the start of this sequence.
+         * but will still accept task settings and construction.
+         * <p>
+         * By default, with no extra boolean parameter, this method will also set the Pose Estimate of the drive to
+         * the start pose of the sequence. Pass in false to disable this behavior.
          * <p>
          * Example usage:
          * {@code
-         * makeTrajectory().runSequence(sequence).withName("pre-built sequence").addTask();
+         * makeTrajectory([optional pose estimate to set to on task build]).runSequence(sequence).withName("pre-built sequence").addTask();
          * }
          *
          * @param sequence The sequence to run
          * @return The builder
          */
         public RoadRunnerTrajectoryTaskBuilder runSequence(TrajectorySequence sequence) {
+            return runSequence(sequence, true);
+        }
+        /**
+         * Run a sequence of trajectories, useful if you do not need to build a trajectory but
+         * run one directly. This method will override and void any previous trajectory added to this builder,
+         * but will still accept task settings and construction.
+         * <p>
+         * This method can optionally also set the Pose Estimate of the drive to
+         * the start pose of the sequence. Pass in false to disable this behavior.
+         * <p>
+         * Example usage:
+         * {@code
+         * makeTrajectory([optional pose estimate to set to on task build]).runSequence(sequence).withName("pre-built sequence").addTask();
+         * }
+         *
+         * @param sequence The sequence to run
+         * @param setDrivePoseToStart Whether to set the drive pose estimate to the start of the sequence (immediately)
+         * @return The builder
+         */
+        public RoadRunnerTrajectoryTaskBuilder runSequence(TrajectorySequence sequence, boolean setDrivePoseToStart) {
             overrideSequence = sequence;
+            if (setDrivePoseToStart)
+                drive.setPoseEstimate(sequence.start());
             return this;
         }
 
