@@ -78,6 +78,41 @@ public interface RoadRunner {
         getDrive().setPoseEstimate(new Pose2d());
     }
 
+
+    /**
+     * Convert a Pose2d of specified units to inches and radians.
+     * Convenient for having unit-defined poses that need to be of the same unit of default RoadRunner poses, such
+     * as adding vectors for relative movement.
+     *
+     * @param pose The pose to convert
+     * @param distanceUnit The unit of the pose's distance
+     * @param angleUnit The unit of the pose's angle
+     * @return The converted pose
+     */
+    default Pose2d unitPose(Pose2d pose, Distance distanceUnit, Angle angleUnit) {
+        return new Pose2d(
+                Inches.convertFrom(pose.getX(), distanceUnit),
+                Inches.convertFrom(pose.getY(), distanceUnit),
+                Radians.convertFrom(pose.getHeading(), angleUnit)
+        );
+    }
+
+    /**
+     * Convert a Vector2d of specified units to inches and radians.
+     * Convenient for having unit-defined poses that need to be of the same unit of default RoadRunner poses, such
+     * as adding vectors for relative movement.
+     *
+     * @param vector The vector to convert
+     * @param unit The unit of the vector
+     * @return The converted vector
+     */
+    default Vector2d unitVec(Vector2d vector, Distance unit) {
+        return new Vector2d(
+                Inches.convertFrom(vector.getX(), unit),
+                Inches.convertFrom(vector.getY(), unit)
+        );
+    }
+
     /**
      * Make a translation velocity constraint.
      *
@@ -874,7 +909,7 @@ public interface RoadRunner {
          * but will still accept task settings and construction.
          * <p>
          * By default, with no extra boolean parameter, this method will also set the Pose Estimate of the drive to
-         * the start pose of the sequence. Pass in false to disable this behavior.
+         * the start pose of the sequence immediately. Pass in false to disable this behavior.
          * <p>
          * Example usage:
          * {@code
@@ -893,7 +928,7 @@ public interface RoadRunner {
          * but will still accept task settings and construction.
          * <p>
          * This method can optionally also set the Pose Estimate of the drive to
-         * the start pose of the sequence. Pass in false to disable this behavior.
+         * the start pose of the sequence immediately. Pass in false to disable this behavior.
          * <p>
          * Example usage:
          * {@code

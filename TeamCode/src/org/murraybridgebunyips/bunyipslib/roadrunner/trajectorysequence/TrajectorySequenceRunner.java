@@ -264,15 +264,15 @@ public class TrajectorySequenceRunner {
         }
 
         if (opMode != null) {
-            opMode.addDashboardTelemetry("x", poseEstimate.getX());
-            opMode.addDashboardTelemetry("y", poseEstimate.getY());
-            opMode.addDashboardTelemetry("heading (deg)", Math.toDegrees(poseEstimate.getHeading()));
+            opMode.telemetry.addDashboard("x", poseEstimate.getX());
+            opMode.telemetry.addDashboard("y", poseEstimate.getY());
+            opMode.telemetry.addDashboard("heading (deg)", Math.toDegrees(poseEstimate.getHeading()));
 
-            opMode.addDashboardTelemetry("xError", lastPoseError.getX());
-            opMode.addDashboardTelemetry("yError", lastPoseError.getY());
-            opMode.addDashboardTelemetry("headingError (deg)", Math.toDegrees(lastPoseError.getHeading()));
+            opMode.telemetry.addDashboard("xError", lastPoseError.getX());
+            opMode.telemetry.addDashboard("yError", lastPoseError.getY());
+            opMode.telemetry.addDashboard("headingError (deg)", Math.toDegrees(lastPoseError.getHeading()));
 
-            draw(opMode.dashboardFieldOverlay(), currentTrajectorySequence, currentSegment, targetPose, poseEstimate);
+            draw(opMode.telemetry.dashboardFieldOverlay(), currentTrajectorySequence, currentSegment, targetPose, poseEstimate);
         } else {
             // Using normal OpMode, we can send packets directly
             TelemetryPacket packet = new TelemetryPacket();
