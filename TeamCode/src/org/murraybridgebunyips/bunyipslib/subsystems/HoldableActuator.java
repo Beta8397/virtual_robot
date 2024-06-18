@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
+import org.murraybridgebunyips.bunyipslib.Dbg;
 import org.murraybridgebunyips.bunyipslib.external.Mathf;
 import org.murraybridgebunyips.bunyipslib.external.units.Current;
 import org.murraybridgebunyips.bunyipslib.external.units.Measure;
@@ -386,6 +387,8 @@ public class HoldableActuator extends BunyipsSubsystem {
             @Override
             public void init() {
                 motor.setTargetPosition(targetPosition);
+                // Motor power is controlled in the periodic method
+                motor.setPower(0);
                 inputMode = Mode.AUTO;
             }
 
@@ -420,6 +423,8 @@ public class HoldableActuator extends BunyipsSubsystem {
             public void init() {
                 target = motor.getCurrentPosition() + deltaPosition;
                 motor.setTargetPosition(target);
+                // Motor power is controlled in the periodic method
+                motor.setPower(0);
                 inputMode = Mode.AUTO;
             }
 
