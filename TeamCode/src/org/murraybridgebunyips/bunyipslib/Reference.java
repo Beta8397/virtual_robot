@@ -13,7 +13,7 @@ import java.util.function.Consumer;
  */
 public class Reference<V> {
     @Nullable
-    private V value;
+    private volatile V value;
 
     /**
      * Creates a new reference with a null value.

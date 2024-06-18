@@ -41,7 +41,7 @@ public class RoadRunnerTask extends Task {
      * @param trajectory The trajectory to follow
      */
     public RoadRunnerTask(Measure<Time> time, RoadRunnerDrive drive, Trajectory trajectory) {
-        super(time.magnitude() != 0.0 ? time : Seconds.of(trajectory.duration()));
+        super(time.magnitude() != 0.0 ? time : Seconds.of(trajectory.duration()), (BunyipsSubsystem) drive, true);
         this.drive = drive;
         this.trajectory = trajectory;
         withName(formatString("RoadRunner Trajectory %::%", trajectory.start(), trajectory.end()));
@@ -55,7 +55,7 @@ public class RoadRunnerTask extends Task {
      * @param trajectorySequence The trajectory sequence to follow
      */
     public RoadRunnerTask(Measure<Time> time, RoadRunnerDrive drive, TrajectorySequence trajectorySequence) {
-        super(time.magnitude() != 0.0 ? time : Seconds.of(trajectorySequence.duration()));
+        super(time.magnitude() != 0.0 ? time : Seconds.of(trajectorySequence.duration()), (BunyipsSubsystem) drive, true);
         this.drive = drive;
         this.trajectorySequence = trajectorySequence;
         withName(formatString("RoadRunner Trajectory %::%", trajectorySequence.start(), trajectorySequence.end()));
@@ -71,7 +71,7 @@ public class RoadRunnerTask extends Task {
      * @param override   Whether this task should override conflicting tasks
      */
     public RoadRunnerTask(Measure<Time> time, RoadRunnerDrive drive, Trajectory trajectory, BunyipsSubsystem dependency, boolean override) {
-        super(time.magnitude() != 0.0 ? time : Seconds.of(trajectory.duration()));
+        super(time.magnitude() != 0.0 ? time : Seconds.of(trajectory.duration()), dependency, true);
         this.drive = drive;
         this.trajectory = trajectory;
         withName(formatString("RoadRunner Trajectory %::%", trajectory.start(), trajectory.end()));
@@ -87,7 +87,7 @@ public class RoadRunnerTask extends Task {
      * @param override           Whether this task should override conflicting tasks
      */
     public RoadRunnerTask(Measure<Time> time, RoadRunnerDrive drive, TrajectorySequence trajectorySequence, BunyipsSubsystem dependency, boolean override) {
-        super(time, dependency, override);
+        super(time.magnitude() != 0.0 ? time : Seconds.of(trajectorySequence.duration()), dependency, true);
         this.drive = drive;
         this.trajectorySequence = trajectorySequence;
         withName(formatString("RoadRunner Trajectory %::%", trajectorySequence.start(), trajectorySequence.end()));

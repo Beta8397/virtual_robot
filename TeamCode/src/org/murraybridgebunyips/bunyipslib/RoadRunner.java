@@ -228,6 +228,7 @@ public interface RoadRunner {
         Pose2d lastKnown = Storage.memory().lastKnownPosition;
         if (lastKnown != null && splicedPose.isNull() && dp.epsilonEquals(lastKnown))
             resetPoseInfo();
+        dp = getDrive().getPoseEstimate();
         Pose2d implicitPose = splicedPose.isNotNull() ? splicedPose.get() : dp;
         // noinspection rawtypes
         TrajectorySequenceBuilder builder = getDrive().trajectorySequenceBuilder(implicitPose);
