@@ -14,8 +14,8 @@ import org.murraybridgebunyips.bunyipslib.external.units.Measure;
 import org.murraybridgebunyips.bunyipslib.external.units.Time;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
+import org.murraybridgebunyips.bunyipslib.vision.Processor;
 import org.murraybridgebunyips.bunyipslib.vision.data.ContourData;
-import org.murraybridgebunyips.bunyipslib.vision.processors.MultiColourThreshold;
 
 import java.util.List;
 import java.util.function.DoubleSupplier;
@@ -41,7 +41,7 @@ public class MoveToContourTask extends Task {
     public static double PITCH_TARGET = 0.0;
 
     private final RoadRunnerDrive drive;
-    private final MultiColourThreshold processors;
+    private final Processor<ContourData> processor;
     private final PIDFController translationController;
     private final PIDFController rotationController;
     private DoubleSupplier x;
@@ -55,16 +55,16 @@ public class MoveToContourTask extends Task {
      * @param ySupplier             y (forward) value
      * @param rSupplier             r (rotate) value
      * @param drive                 the drivetrain to use, must be a RoadRunnerDrive
-     * @param processors            the vision processors to use
+     * @param processor             the vision processor to use
      * @param translationController the PID controller for the translational movement
      * @param rotationController    the PID controller for the rotational movement
      */
-    public MoveToContourTask(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier rSupplier, BunyipsSubsystem drive, MultiColourThreshold processors, PIDFController translationController, PIDFController rotationController) {
+    public MoveToContourTask(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier rSupplier, BunyipsSubsystem drive, Processor<ContourData> processor, PIDFController translationController, PIDFController rotationController) {
         super(INFINITE_TIMEOUT, drive, false);
         if (!(drive instanceof RoadRunnerDrive))
             throw new EmergencyStop("MoveToContourTask must be used with a drivetrain with X forward Pose/IMU info");
         this.drive = (RoadRunnerDrive) drive;
-        this.processors = processors;
+        this.processor = processor;
         x = xSupplier;
         y = ySupplier;
         r = rSupplier;
@@ -80,12 +80,12 @@ public class MoveToContourTask extends Task {
      *
      * @param driver                the gamepad to use for driving
      * @param drive                 the drivetrain to use, must be a RoadRunnerDrive
-     * @param processors            the vision processor to use
+     * @param processor             the vision processor to use
      * @param translationController the PID controller for the translational movement
      * @param rotationController    the PID controller for the rotational movement
      */
-    public MoveToContourTask(Gamepad driver, BunyipsSubsystem drive, MultiColourThreshold processors, PIDFController translationController, PIDFController rotationController) {
-        this(() -> driver.left_stick_x, () -> driver.left_stick_y, () -> driver.right_stick_x, drive, processors, translationController, rotationController);
+    public MoveToContourTask(Gamepad driver, BunyipsSubsystem drive, Processor<ContourData> processor, PIDFController translationController, PIDFController rotationController) {
+        this(() -> driver.left_stick_x, () -> driver.left_stick_y, () -> driver.right_stick_x, drive, processor, translationController, rotationController);
     }
 
     /**
@@ -93,16 +93,16 @@ public class MoveToContourTask extends Task {
      *
      * @param timeout               the maximum timeout for the task
      * @param drive                 the drivetrain to use, must be a RoadRunnerDrive
-     * @param processors            the vision processors to use
+     * @param processor             the vision processor to use
      * @param translationController the PID controller for the translational movement
      * @param rotationController    the PID controller for the rotational movement
      */
-    public MoveToContourTask(Measure<Time> timeout, BunyipsSubsystem drive, MultiColourThreshold processors, PIDFController translationController, PIDFController rotationController) {
+    public MoveToContourTask(Measure<Time> timeout, BunyipsSubsystem drive, Processor<ContourData> processor, PIDFController translationController, PIDFController rotationController) {
         super(timeout, drive, false);
         if (!(drive instanceof RoadRunnerDrive))
             throw new EmergencyStop("MoveToContourTask must be used with a drivetrain with X forward Pose/IMU info");
         this.drive = (RoadRunnerDrive) drive;
-        this.processors = processors;
+        this.processor = processor;
         this.translationController = translationController;
         this.rotationController = rotationController;
         translationController.updatePIDF(TRANSLATIONAL_PIDF);
@@ -123,7 +123,7 @@ public class MoveToContourTask extends Task {
 
     @Override
     protected void init() {
-        if (!processors.isAttached())
+        if (!processor.isAttached())
             throw new RuntimeException("Vision processor was initialised without being attached to the vision system");
     }
 
@@ -137,7 +137,7 @@ public class MoveToContourTask extends Task {
         if (x != null)
             pose = Controls.makeRobotPose(x.getAsDouble(), y.getAsDouble(), r.getAsDouble());
 
-        List<ContourData> data = processors.getData();
+        List<ContourData> data = processor.getData();
         ContourData biggestContour = ContourData.getLargest(data);
 
         if (biggestContour != null) {

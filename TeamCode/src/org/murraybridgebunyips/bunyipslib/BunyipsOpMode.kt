@@ -83,6 +83,11 @@ abstract class BunyipsOpMode : BOMInternal() {
      * Measures of less than or equal to zero will be ignored, and the OpMode will run as fast as possible.
      */
     var loopSpeed: Measure<Time> = Seconds.zero()
+        set(value) {
+            // Warn the user if their target loop speed cannot be achieved
+            telemetry.loopSpeedSlowAlert = field
+            field = value
+        }
 
     /**
      * A list of all LynxModules (Control + Expansion Hub) modules on the robot.

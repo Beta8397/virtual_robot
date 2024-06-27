@@ -16,6 +16,7 @@ import org.murraybridgebunyips.bunyipslib.external.units.Units.Milliseconds
 import org.murraybridgebunyips.bunyipslib.external.units.Units.Second
 import org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds
 import java.util.Collections
+import java.util.function.BooleanSupplier
 import kotlin.math.roundToInt
 
 /**
@@ -117,6 +118,14 @@ class DualTelemetry @JvmOverloads constructor(
     }
 
     /**
+     * Add a new line to the telemetry object.
+     * This is an alias for `add("")`, to signify that a new line is intended.
+     */
+    fun addNewLine(): HtmlItem {
+        return add("")
+    }
+
+    /**
      * Add data to the telemetry object for the Driver Station and FtcDashboard, with integrated formatting.
      * @param format An object string to add to telemetry
      * @param args The objects to format into the object format string
@@ -184,9 +193,12 @@ class DualTelemetry @JvmOverloads constructor(
             // This means all RT objects on the dashboard are permanent, and will respect their
             // last updated value. This is not a problem as retained objects are usually important
             // and can serve as a debugging tool.
-            val res = opMode.telemetry.removeItem(item)
+            var rem = item
+            if (item is HtmlItem && item.item != null)
+                rem = item.item!!
+            val res = opMode.telemetry.removeItem(rem)
             if (!res) {
-                Dbg.logd("Could not find telemetry item to remove: $item")
+                Dbg.logd("Could not find telemetry item to remove: $rem")
                 ok = false
             }
         }
@@ -312,7 +324,7 @@ class DualTelemetry @JvmOverloads constructor(
                 overheadStatus.append("?ms")
             }
         } else {
-            if (loopTime >= loopSpeedSlowAlert.inUnit(Milliseconds)) {
+            if (loopTime > loopSpeedSlowAlert.inUnit(Milliseconds)) {
                 overheadStatus.append("<font color='yellow'>").append(loopTime).append("ms</font>")
             } else {
                 overheadStatus.append(loopTime).append("ms")
@@ -495,10 +507,15 @@ class DualTelemetry @JvmOverloads constructor(
         private val dashboardRef: Reference<String>,
         opMode: OpMode
     ) : Item {
-        private var item: Item? = null
+        /**
+         * The underlying telemetry item added to the DS that this HTML item is wrapping.
+         */
+        var item: Item? = null
+            private set
         private val tags = mutableSetOf<String>()
         private var color: String? = null
         private var bgColor: String? = null
+        private var applyOnlyIf: BooleanSupplier? = null
 
         init {
             if (!isOverflow) {
@@ -511,6 +528,11 @@ class DualTelemetry @JvmOverloads constructor(
 
         private fun build(): String {
             // im david heath, and this is cs50
+            if (applyOnlyIf != null && applyOnlyIf?.asBoolean == false) {
+                // If the condition evaluates false, we will not apply the HTML formatting
+                dashboardRef.set(value)
+                return value
+            }
             var out = ""
             for (tag in tags)
                 out += "<$tag>"
@@ -528,6 +550,14 @@ class DualTelemetry @JvmOverloads constructor(
             // Synchronise the FtcDashboard reference
             dashboardRef.set(out)
             return out
+        }
+
+        /**
+         * Apply the HTML formatting to the string only if if this condition is true.
+         */
+        fun applyStylesIf(condition: BooleanSupplier): HtmlItem {
+            applyOnlyIf = condition
+            return this
         }
 
         /**
@@ -691,7 +721,10 @@ class DualTelemetry @JvmOverloads constructor(
          * @see setCaption
          * @see addData
          */
-        @Deprecated("Captions are not used with DualTelemetry and should always be an empty string.")
+        @Deprecated(
+            "Captions are not used with DualTelemetry and should always be an empty string.",
+            ReplaceWith("")
+        )
         override fun getCaption(): String? {
             return item?.caption
         }
@@ -704,7 +737,8 @@ class DualTelemetry @JvmOverloads constructor(
          */
         @Deprecated(
             "Captions are not used with DualTelemetry and should always be left as an empty string",
-            level = DeprecationLevel.ERROR
+            level = DeprecationLevel.ERROR,
+            replaceWith = ReplaceWith("")
         )
         override fun setCaption(caption: String): Item? {
             return item?.setCaption(caption)
@@ -786,7 +820,8 @@ class DualTelemetry @JvmOverloads constructor(
          */
         @Deprecated(
             "This method is not used with DualTelemetry. Split data into separate items or use a single item value with a newline.",
-            level = DeprecationLevel.ERROR
+            level = DeprecationLevel.ERROR,
+            replaceWith = ReplaceWith("")
         )
         override fun addData(caption: String, format: String, vararg args: Any): Item? {
             return item?.addData(caption, format, args)
@@ -798,7 +833,8 @@ class DualTelemetry @JvmOverloads constructor(
          */
         @Deprecated(
             "This method is not used with DualTelemetry. Split data into separate items or use a single item value with a newline.",
-            level = DeprecationLevel.ERROR
+            level = DeprecationLevel.ERROR,
+            replaceWith = ReplaceWith("")
         )
         override fun addData(caption: String, value: Any): Item? {
             return item?.addData(caption, value)
@@ -810,7 +846,8 @@ class DualTelemetry @JvmOverloads constructor(
          */
         @Deprecated(
             "This method is not used with DualTelemetry. Split data into separate items or use a single item value with a newline.",
-            level = DeprecationLevel.ERROR
+            level = DeprecationLevel.ERROR,
+            replaceWith = ReplaceWith("")
         )
         override fun <T : Any> addData(caption: String, valueProducer: Func<T>): Item? {
             return item?.addData(caption, valueProducer)
@@ -822,7 +859,8 @@ class DualTelemetry @JvmOverloads constructor(
          */
         @Deprecated(
             "This method is not used with DualTelemetry. Split data into separate items or use a single item value with a newline.",
-            level = DeprecationLevel.ERROR
+            level = DeprecationLevel.ERROR,
+            replaceWith = ReplaceWith("")
         )
         override fun <T : Any> addData(caption: String, format: String, valueProducer: Func<T>): Item? {
             return item?.addData(caption, format, valueProducer)

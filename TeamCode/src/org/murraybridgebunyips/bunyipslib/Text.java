@@ -73,6 +73,31 @@ public final class Text {
     }
 
     /**
+     * Format a string using only '%' placeholders.
+     * Differs from String.format() as type can be omitted.
+     * <p>
+     * {@code format("Hello %!", "world")} -> {@code "Hello world!"}
+     *
+     * @param fstring The string to format
+     * @param objs    The objects to insert into the string
+     * @return The formatted string
+     */
+    public static String format(@NonNull String fstring, @Nullable List<Object> objs) {
+        return formatString(fstring, objs);
+    }
+
+    /**
+     * Format a string using only '%' placeholders.
+     *
+     * @param fstring The string to format
+     * @param objs    The objects to insert into the string
+     * @return The formatted string
+     */
+    public static String format(@NonNull String fstring, @Nullable Object... objs) {
+        return formatString(fstring, Arrays.asList(objs));
+    }
+
+    /**
      * Round a number to a certain number of decimal points.
      *
      * @param num      The number to round

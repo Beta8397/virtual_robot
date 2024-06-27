@@ -84,9 +84,9 @@ public interface RoadRunner {
      * Convenient for having unit-defined poses that need to be of the same unit of default RoadRunner poses, such
      * as adding vectors for relative movement.
      *
-     * @param pose The pose to convert
+     * @param pose         The pose to convert
      * @param distanceUnit The unit of the pose's distance
-     * @param angleUnit The unit of the pose's angle
+     * @param angleUnit    The unit of the pose's angle
      * @return The converted pose
      */
     default Pose2d unitPose(Pose2d pose, Distance distanceUnit, Angle angleUnit) {
@@ -103,7 +103,7 @@ public interface RoadRunner {
      * as adding vectors for relative movement.
      *
      * @param vector The vector to convert
-     * @param unit The unit of the vector
+     * @param unit   The unit of the vector
      * @return The converted vector
      */
     default Vector2d unitVec(Vector2d vector, Distance unit) {
@@ -923,6 +923,7 @@ public interface RoadRunner {
         public RoadRunnerTrajectoryTaskBuilder runSequence(TrajectorySequence sequence) {
             return runSequence(sequence, true);
         }
+
         /**
          * Run a sequence of trajectories, useful if you do not need to build a trajectory but
          * run one directly. This method will override and void any previous trajectory added to this builder,
@@ -936,7 +937,7 @@ public interface RoadRunner {
          * makeTrajectory([optional pose estimate to set to on task build]).runSequence(sequence).withName("pre-built sequence").addTask();
          * }
          *
-         * @param sequence The sequence to run
+         * @param sequence            The sequence to run
          * @param setDrivePoseToStart Whether to set the drive pose estimate to the start of the sequence (immediately)
          * @return The builder
          */

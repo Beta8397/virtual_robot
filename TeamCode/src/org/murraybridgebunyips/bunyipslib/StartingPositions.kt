@@ -1,7 +1,6 @@
 package org.murraybridgebunyips.bunyipslib
 
 import com.acmerobotics.roadrunner.geometry.Pose2d
-import com.acmerobotics.roadrunner.geometry.Vector2d
 
 /**
  * Enum for determining where the robot is starting on the field. This can be used to determine
@@ -46,8 +45,27 @@ enum class StartingPositions(
      *
      * Units: Inches
      */
-    val vector: Vector2d
-        get() = pose.vec()
+    val vector by lazy { pose.vec() }
+
+    /**
+     * Whether the starting position is on the red alliance side of the field.
+     */
+    val isRed by lazy { this == STARTING_RED_LEFT || this == STARTING_RED_RIGHT }
+
+    /**
+     * Whether the starting position is on the blue alliance side of the field.
+     */
+    val isBlue by lazy { this == STARTING_BLUE_LEFT || this == STARTING_BLUE_RIGHT }
+
+    /**
+     * Whether the starting position is on the left side of the field.
+     */
+    val isLeft by lazy { this == STARTING_RED_LEFT || this == STARTING_BLUE_LEFT }
+
+    /**
+     * Whether the starting position is on the right side of the field.
+     */
+    val isRight by lazy { this == STARTING_RED_RIGHT || this == STARTING_BLUE_RIGHT }
 
     companion object {
         /**

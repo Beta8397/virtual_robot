@@ -4,7 +4,6 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
-import org.murraybridgebunyips.bunyipslib.EmergencyStop;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
 import org.murraybridgebunyips.bunyipslib.vision.data.AprilTagData;
 import org.murraybridgebunyips.bunyipslib.vision.processors.AprilTag;
@@ -19,6 +18,7 @@ import java.util.ArrayList;
 public class AprilTagPoseEstimator {
     private final AprilTag processor;
     private final RoadRunnerDrive drive;
+    private boolean active;
 
     /**
      * Constructor for AprilTagPoseEstimator.
@@ -28,9 +28,16 @@ public class AprilTagPoseEstimator {
      */
     public AprilTagPoseEstimator(AprilTag processor, RoadRunnerDrive drive) {
         this.processor = processor;
-        if (!this.processor.isRunning())
-            throw new EmergencyStop("AprilTag processor is not attached to a Vision instance");
         this.drive = drive;
+    }
+
+    /**
+     * Whether to set the drive pose to the vision estimate. Default is on.
+     *
+     * @param setPoseAutomatically whether AprilTagPoseEstimator is on
+     */
+    public void setActive(boolean setPoseAutomatically) {
+        active = setPoseAutomatically;
     }
 
     /**
@@ -38,6 +45,9 @@ public class AprilTagPoseEstimator {
      * available by the SDK. This method will no-op if insufficient information is available.
      */
     public void update() {
+        if (!active || !processor.isRunning())
+            return;
+
         ArrayList<AprilTagData> data = processor.getData();
         if (data.isEmpty())
             return;

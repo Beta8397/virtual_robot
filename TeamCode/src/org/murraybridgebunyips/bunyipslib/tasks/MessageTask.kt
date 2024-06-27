@@ -14,7 +14,7 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.Task
  */
 class MessageTask(time: Measure<Time>, private val message: String) :
     Task(time), RobotTask {
-    private lateinit var item: Item
+    private var item: Item? = null
 
     init {
         withName("Message")
@@ -25,11 +25,11 @@ class MessageTask(time: Measure<Time>, private val message: String) :
     }
 
     override fun init() {
-        item = opMode.telemetry.addRetained(buildString())
+        item = opMode.telemetry.addRetained(buildString()).item
     }
 
     override fun periodic() {
-        item.setValue(buildString())
+        item?.setValue(buildString())
     }
 
     override fun isTaskFinished(): Boolean {
@@ -37,6 +37,7 @@ class MessageTask(time: Measure<Time>, private val message: String) :
     }
 
     override fun onFinish() {
-        opMode.telemetry.remove(item)
+        if (item != null)
+            opMode.telemetry.remove(item!!)
     }
 }

@@ -251,6 +251,16 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     }
 
     /**
+     * Implicitly construct a new {@link RunTask} and add it to the run queue with a custom name
+     *
+     * @param runnable the code to add to the run queue to run once
+     * @param name     the name of the task
+     */
+    public final void addTask(@NotNull Runnable runnable, String name) {
+        addTask(new RunTask(runnable).withName(name));
+    }
+
+    /**
      * Insert a task at a specific index in the queue. This is useful for adding tasks that should be run
      * at a specific point in the autonomous sequence. Note that this function immediately produces side effects,
      * and subsequent calls will not be able to insert tasks at the same index due to the shifting of tasks.

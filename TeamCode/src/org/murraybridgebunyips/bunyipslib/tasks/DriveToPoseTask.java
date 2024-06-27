@@ -33,6 +33,10 @@ public class DriveToPoseTask extends Task {
     private final PIDFController strafeController;
     private final PIDFController headingController;
 
+    private double MAX_FORWARD_SPEED = 1.0;
+    private double MAX_STRAFE_SPEED = 1.0;
+    private double MAX_ROTATION_SPEED = 1.0;
+
     private Measure<Angle> headingTolerance = Degrees.of(2);
     private Measure<Distance> vectorTolerance = Centimeters.of(5);
 
@@ -72,6 +76,39 @@ public class DriveToPoseTask extends Task {
         return this;
     }
 
+    /**
+     * Set the maximum forward (x) speed (motor power) that the robot can move at.
+     *
+     * @param speed The maximum forward speed.
+     * @return this
+     */
+    public DriveToPoseTask withMaxForwardSpeed(double speed) {
+        MAX_FORWARD_SPEED = speed;
+        return this;
+    }
+
+    /**
+     * Set the maximum strafe (y) speed (motor power) that the robot can move at.
+     *
+     * @param speed The maximum strafe speed.
+     * @return this
+     */
+    public DriveToPoseTask withMaxStrafeSpeed(double speed) {
+        MAX_STRAFE_SPEED = speed;
+        return this;
+    }
+
+    /**
+     * Set the maximum rotation speed (motor power) that the robot can move at.
+     *
+     * @param speed The maximum rotation speed.
+     * @return this
+     */
+    public DriveToPoseTask withMaxRotationSpeed(double speed) {
+        MAX_ROTATION_SPEED = speed;
+        return this;
+    }
+
     @Override
     protected void init() {
         drive.cancelTrajectory();
@@ -96,6 +133,10 @@ public class DriveToPoseTask extends Task {
         double cos = Math.cos(estimatedPose.getHeading());
         double sin = Math.sin(estimatedPose.getHeading());
 
+        // Transform error vector to robot's coordinate frame
+        double twistedXError = error.getX() * cos + error.getY() * sin;
+        double twistedYError = -error.getX() * sin + error.getY() * cos;
+
         // Wrap target angle between -pi and pi for optimal turns
         double angle = Mathf.inputModulus(error.getHeading(), -Math.PI, Math.PI);
         // When the angle is near the modulus boundary, lock towards a definitive full rotation to avoid oscillations
@@ -103,11 +144,17 @@ public class DriveToPoseTask extends Task {
             angle = -Math.PI * Math.signum(error.getHeading());
 
         // Apply PID and twist
-        drive.setWeightedDrivePower(new Pose2d(
-                -forwardController.calculate(error.getX()) * cos - forwardController.calculate(error.getY()) * sin,
-                -strafeController.calculate(error.getY()) * cos + strafeController.calculate(error.getX()) * sin,
-                -headingController.calculate(angle)
-        ));
+        double forwardPower = -forwardController.calculate(twistedXError);
+        double strafePower = -strafeController.calculate(twistedYError);
+        double headingPower = -headingController.calculate(angle);
+
+        drive.setWeightedDrivePower(
+                new Pose2d(
+                        Mathf.clamp(forwardPower, -MAX_FORWARD_SPEED, MAX_FORWARD_SPEED),
+                        Mathf.clamp(strafePower, -MAX_STRAFE_SPEED, MAX_STRAFE_SPEED),
+                        Mathf.clamp(headingPower, -MAX_ROTATION_SPEED, MAX_ROTATION_SPEED)
+                )
+        );
     }
 
     @Override

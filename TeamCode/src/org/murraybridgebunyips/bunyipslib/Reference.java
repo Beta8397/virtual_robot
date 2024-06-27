@@ -70,10 +70,11 @@ public class Reference<V> {
      */
     @NonNull
     public V require() {
-        if (value == null) {
+        V val = value;
+        if (val == null) {
             throw new NullPointerException("Reference value is null");
         }
-        return value;
+        return val;
     }
 
     /**
@@ -187,7 +188,8 @@ public class Reference<V> {
     @NonNull
     @Override
     public String toString() {
-        return value == null ? "null" : value.toString();
+        V val = value;
+        return val == null ? "null" : val.toString();
     }
 
     @Override
@@ -206,6 +208,7 @@ public class Reference<V> {
      */
     @Override
     public int hashCode() {
-        return value == null ? 0 : value.hashCode();
+        V val = value;
+        return val == null ? 0 : val.hashCode();
     }
 }

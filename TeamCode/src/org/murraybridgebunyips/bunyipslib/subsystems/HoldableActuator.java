@@ -14,7 +14,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
-import org.murraybridgebunyips.bunyipslib.Dbg;
 import org.murraybridgebunyips.bunyipslib.external.Mathf;
 import org.murraybridgebunyips.bunyipslib.external.units.Current;
 import org.murraybridgebunyips.bunyipslib.external.units.Measure;
@@ -43,6 +42,8 @@ public class HoldableActuator extends BunyipsSubsystem {
     private Measure<Current> OVERCURRENT = Amps.of(4);
     // Time of which the Home Task Overcurrent needs to be exceeded
     private Measure<Time> OVERCURRENT_TIME = Seconds.of(1.0);
+    // Maximum time spent in the Home Task before it is assumed completed
+    private Measure<Time> HOMING_TIMEOUT = Seconds.of(5);
     // Name of the actuator for telemetry
     private String NAME = "Actuator";
     // Encoder lower limit in ticks
@@ -148,6 +149,26 @@ public class HoldableActuator extends BunyipsSubsystem {
      */
     public HoldableActuator disableHomingOvercurrent() {
         return withHomingOvercurrent(Amps.of(0), Seconds.of(0));
+    }
+
+    /**
+     * Set the timeout for the Home Task.
+     *
+     * @param timeout the time to set for the Home Task to complete. Default is 5s.
+     * @return this
+     */
+    public HoldableActuator withHomingTimeout(Measure<Time> timeout) {
+        HOMING_TIMEOUT = timeout;
+        return this;
+    }
+
+    /**
+     * Disable the timeout for the Home Task.
+     *
+     * @return this
+     */
+    public HoldableActuator disableHomingTimeout() {
+        return withHomingTimeout(Task.INFINITE_TIMEOUT);
     }
 
     /**
@@ -328,7 +349,7 @@ public class HoldableActuator extends BunyipsSubsystem {
      * @return a task to home the actuator
      */
     public Task homeTask() {
-        return new NoTimeoutTask() {
+        return new Task(HOMING_TIMEOUT) {
             private ElapsedTime overcurrentTimer;
             private double previousAmpAlert;
             private double zeroHits;
