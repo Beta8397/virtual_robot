@@ -3,6 +3,8 @@ package org.murraybridgebunyips.bunyipslib.vision;
 import static org.murraybridgebunyips.bunyipslib.Text.round;
 import static org.murraybridgebunyips.bunyipslib.external.units.Units.Milliseconds;
 
+import androidx.annotation.NonNull;
+
 import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraName;
 import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
 import org.murraybridgebunyips.bunyipslib.Controller;
@@ -19,12 +21,12 @@ import org.opencv.core.Scalar;
  *
  * @author Lucas Bubner, 2024
  */
-public abstract class ContourTuner extends BunyipsOpMode {
+public abstract class ColourTuner extends BunyipsOpMode {
     private final double[] scalars = new double[6];
+    private final String[] channelNames = new String[3];
     private ColourThreshold[] processors;
     private int processorIdx;
     private int scalarIdx;
-    private String[] channelNames;
     private Vision vision;
 
     /**
@@ -32,6 +34,7 @@ public abstract class ContourTuner extends BunyipsOpMode {
      *
      * @return the camera to use
      */
+    @NonNull
     protected abstract CameraName setCamera();
 
     /**
@@ -39,6 +42,7 @@ public abstract class ContourTuner extends BunyipsOpMode {
      *
      * @return the processors to tune, will be able to switch between them during runtime
      */
+    @NonNull
     protected abstract ColourThreshold[] setThresholdsToTune();
 
     @Override
@@ -70,11 +74,9 @@ public abstract class ContourTuner extends BunyipsOpMode {
         vision.start(processors[index]);
         vision.setPreview(processors[index]);
         // Cache the namespaces of the channel (e.g. "Red", "Green", "Blue")
-        channelNames = new String[]{
-                processors[index].colourSpace.getChannelName(0),
-                processors[index].colourSpace.getChannelName(1),
-                processors[index].colourSpace.getChannelName(2)
-        };
+        for (int i = 0; i < 3; i++) {
+            channelNames[i] = processors[index].colourSpace.getChannelName(i);
+        }
     }
 
     @Override
@@ -104,7 +106,7 @@ public abstract class ContourTuner extends BunyipsOpMode {
         }
 
         // Scalar adjustment
-        scalars[scalarIdx] -= gamepad1.lsy / 8.0;
+        scalars[scalarIdx] -= gamepad1.lsy / 6.0;
         scalars[scalarIdx] = Mathf.clamp(round(scalars[scalarIdx], 2), 0, 255);
 
         telemetry.add("LB/RB: Select processor to tune").small();

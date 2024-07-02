@@ -55,6 +55,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     private int currentTask = 1;
     private volatile boolean callbackReceived;
     private boolean safeToAddTasks;
+    private boolean hardwareStopOnFinish = true;
 
     private void callback(@Nullable Reference<?> selectedOpMode) {
         if (isStopRequested())
@@ -152,7 +153,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
             RobotTask currentTask = tasks.peekFirst();
             if (currentTask == null) {
                 telemetry.log("<font color='gray'>auto:</font> tasks done -> finishing");
-                finish();
+                finish(hardwareStopOnFinish);
                 return;
             }
 
@@ -197,6 +198,14 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     @Override
     protected final boolean onInitLoop() {
         return userSelection == null || !Threads.isRunning(userSelection);
+    }
+
+    /**
+     * Call to disable the automatic stopping of the hardware when the OpMode finishes after no tasks are left.
+     * This does not impact the automated stopping of the hardware when the OpMode is requested to stop.
+     */
+    public void disableHardwareStopOnFinish() {
+        hardwareStopOnFinish = false;
     }
 
     /**

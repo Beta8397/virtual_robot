@@ -43,6 +43,17 @@ package com.qualcomm.hardware.lynx;
 import com.qualcomm.robotcore.hardware.HardwareDevice;
 
 public class LynxModule implements HardwareDevice {
+    public static BlinkerPolicy blinkerPolicy = new BlinkerPolicy();
+
+    public static class BlinkerPolicy {
+        public Object getIdlePattern(LynxModule c) {
+            return null;
+        }
+    }
+
+    public void setPattern(Object pattern) {
+        this.pattern = pattern;
+    }
 
     BulkCachingMode bulkCachingMode = BulkCachingMode.OFF;
     public Object pattern;

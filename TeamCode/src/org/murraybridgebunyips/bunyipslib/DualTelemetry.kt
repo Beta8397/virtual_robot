@@ -59,7 +59,7 @@ class DualTelemetry @JvmOverloads constructor(
     /**
      * A string to display the current 'status' of the OpMode, used for overhead telemetry.
      */
-    var opModeStatus = "idle"
+    var opModeStatus = ""
 
     /**
      * A string that overrules the status message in the overhead telemetry, such as a warning or error message.
@@ -93,7 +93,6 @@ class DualTelemetry @JvmOverloads constructor(
 
     init {
         clearAll()
-        opModeStatus = "setup"
         opMode.telemetry.setDisplayFormat(DisplayFormat.HTML)
         opMode.telemetry.log().displayOrder = Telemetry.Log.DisplayOrder.OLDEST_FIRST
         opMode.telemetry.captionValueSeparator = ""
@@ -311,9 +310,9 @@ class DualTelemetry @JvmOverloads constructor(
             if (!loopsPerSec.isNaN()) Text.round(loopsPerSec, 1) else 0.0
         } ?: 0.0
         val elapsedTime = movingAverageTimer?.elapsedTime()?.inUnit(Seconds)?.roundToInt()?.toString() ?: "?"
+        val status = if (overrideStatus != null) overrideStatus.toString() else opModeStatus
         val overheadStatus = StringBuilder()
-        overheadStatus.append(if (overrideStatus != null) overrideStatus else opModeStatus)
-        overheadStatus.append("\n")
+        overheadStatus.append(status).append("\n")
         if (overheadSubtitle.isNotEmpty())
             overheadStatus.append(overheadSubtitle).append("\n")
         overheadStatus.append("<small>T+").append(elapsedTime).append("s | ")
@@ -336,7 +335,7 @@ class DualTelemetry @JvmOverloads constructor(
             .append(Controls.movementString(opMode.gamepad2))
             .append("</small>\n")
         if (overheadTag != null)
-            overheadStatus.insert(0, "$overheadTag | ")
+            overheadStatus.insert(0, overheadTag + if (status.isNotEmpty()) " | " else "")
         overheadTelemetry.setValue(overheadStatus.toString())
 
         // FtcDashboard

@@ -1,4 +1,4 @@
-package org.murraybridgebunyips.bunyipslib.tests;
+package org.murraybridgebunyips.bunyipslib.integrated;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -22,9 +22,9 @@ import org.murraybridgebunyips.bunyipslib.vision.processors.centerstage.WhitePix
  *
  * @author Lucas Bubner, 2023
  */
-@TeleOp(name = "Vision Test")
+@TeleOp(name = "Vision Test", group = "BunyipsLib")
 @Disabled
-public class VisionTest extends BunyipsOpMode {
+public final class VisionTest extends BunyipsOpMode {
     private Vision vision;
     private Telemetry.Item cameraStreamNotification;
     private final UserSelection<Procs> procChooser = new UserSelection<>(this, this::callback, Procs.values());
@@ -54,7 +54,7 @@ public class VisionTest extends BunyipsOpMode {
         vision.start(chosenProcessor, vision.raw);
         vision.startPreview();
 
-        cameraStreamNotification = telemetry.addRetained("Camera Stream available.").getItem();
+        cameraStreamNotification = telemetry.addRetained("Camera Stream available.");
     }
 
     @Override
