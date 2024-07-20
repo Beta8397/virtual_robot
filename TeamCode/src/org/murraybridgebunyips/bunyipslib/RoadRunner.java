@@ -78,7 +78,6 @@ public interface RoadRunner {
         getDrive().setPoseEstimate(new Pose2d());
     }
 
-
     /**
      * Convert a Pose2d of specified units to inches and radians.
      * Convenient for having unit-defined poses that need to be of the same unit of default RoadRunner poses, such
@@ -649,91 +648,6 @@ public interface RoadRunner {
         }
 
         /**
-         * Add a temporal marker at the current duration to run a callback at that time.
-         *
-         * @param callback The callback to run
-         * @return The builder
-         */
-        public RoadRunnerTrajectoryTaskBuilder addTemporalMarker(MarkerCallback callback) {
-            mirroredBuilder.addTemporalMarker(callback);
-            return super.addTemporalMarker(callback);
-        }
-
-        /**
-         * Add a temporal marker at the current duration plus an offset to run a callback at that time.
-         *
-         * @param offset   The offset to add to the current duration (seconds)
-         * @param callback The callback to run
-         * @return The builder
-         */
-        public RoadRunnerTrajectoryTaskBuilder UNSTABLE_addTemporalMarkerOffset(double offset, MarkerCallback callback) {
-            mirroredBuilder.UNSTABLE_addTemporalMarkerOffset(offset, callback);
-            return super.UNSTABLE_addTemporalMarkerOffset(offset, callback);
-        }
-
-        /**
-         * Add a temporal marker at the current duration plus an offset to run a callback at that time.
-         *
-         * @param offset   The offset to add to the current duration
-         * @param callback The callback to run
-         * @return The builder
-         */
-        public RoadRunnerTrajectoryTaskBuilder UNSTABLE_addTemporalMarkerOffset(Measure<Time> offset, MarkerCallback callback) {
-            mirroredBuilder.UNSTABLE_addTemporalMarkerOffset(offset, callback);
-            return super.UNSTABLE_addTemporalMarkerOffset(offset, callback);
-        }
-
-        /**
-         * Add a temporal marker at a given time to run a callback at that time.
-         *
-         * @param time     The time to run the callback (seconds)
-         * @param callback The callback to run
-         * @return The builder
-         */
-        public RoadRunnerTrajectoryTaskBuilder addTemporalMarker(double time, MarkerCallback callback) {
-            mirroredBuilder.addTemporalMarker(time, callback);
-            return super.addTemporalMarker(time, callback);
-        }
-
-        /**
-         * Add a temporal marker at a given time to run a callback at that time.
-         *
-         * @param time     The time to run the callback
-         * @param callback The callback to run
-         * @return The builder
-         */
-        public RoadRunnerTrajectoryTaskBuilder addTemporalMarker(Measure<Time> time, MarkerCallback callback) {
-            mirroredBuilder.addTemporalMarker(time, callback);
-            return super.addTemporalMarker(time, callback);
-        }
-
-        /**
-         * Add a temporal marker at a given time to run a callback at that time.
-         *
-         * @param scale    A multiplicative scale to apply to the time
-         * @param offset   The offset to add to the time (seconds)
-         * @param callback The callback to run
-         * @return The builder
-         */
-        public RoadRunnerTrajectoryTaskBuilder addTemporalMarker(double scale, double offset, MarkerCallback callback) {
-            mirroredBuilder.addTemporalMarker(scale, offset, callback);
-            return super.addTemporalMarker(scale, offset, callback);
-        }
-
-        /**
-         * Add a temporal marker at a given time to run a callback at that time.
-         *
-         * @param scale    A multiplicative scale to apply to the time
-         * @param offset   The offset to add to the time
-         * @param callback The callback to run
-         * @return The builder
-         */
-        public RoadRunnerTrajectoryTaskBuilder addTemporalMarker(double scale, Measure<Time> offset, MarkerCallback callback) {
-            mirroredBuilder.addTemporalMarker(scale, offset, callback);
-            return super.addTemporalMarker(scale, offset, callback);
-        }
-
-        /**
          * Add a temporal marker at a given time to run a callback at that time.
          *
          * @param time     The time to run the callback (seconds)
@@ -755,54 +669,6 @@ public interface RoadRunner {
         public RoadRunnerTrajectoryTaskBuilder addSpatialMarker(Vector2d pointInches, MarkerCallback callback) {
             mirroredBuilder.addSpatialMarker(mirror(pointInches), callback);
             return super.addSpatialMarker(pointInches, callback);
-        }
-
-        /**
-         * Add a displacement marker at the current displacement to run a callback at that displacement.
-         *
-         * @param callback The callback to run
-         * @return The builder
-         */
-        public RoadRunnerTrajectoryTaskBuilder addDisplacementMarker(MarkerCallback callback) {
-            mirroredBuilder.addDisplacementMarker(callback);
-            return super.addDisplacementMarker(callback);
-        }
-
-        /**
-         * Add a displacement marker at the current displacement plus an offset to run a callback at that displacement.
-         *
-         * @param offsetInches The offset to add to the current displacement (inches)
-         * @param callback     The callback to run
-         * @return The builder
-         */
-        public RoadRunnerTrajectoryTaskBuilder UNSTABLE_addDisplacementMarkerOffset(double offsetInches, MarkerCallback callback) {
-            mirroredBuilder.UNSTABLE_addDisplacementMarkerOffset(offsetInches, callback);
-            return super.UNSTABLE_addDisplacementMarkerOffset(offsetInches, callback);
-        }
-
-        /**
-         * Add a displacement marker at a given displacement to run a callback at that displacement.
-         *
-         * @param displacementInches The displacement to run the callback (inches)
-         * @param callback           The callback to run
-         * @return The builder
-         */
-        public RoadRunnerTrajectoryTaskBuilder addDisplacementMarker(double displacementInches, MarkerCallback callback) {
-            mirroredBuilder.addDisplacementMarker(displacementInches, callback);
-            return super.addDisplacementMarker(displacementInches, callback);
-        }
-
-        /**
-         * Add a displacement marker at a given displacement to run a callback at that displacement.
-         *
-         * @param scale        A multiplicative scale to apply to the displacement
-         * @param offsetInches The offset to add to the displacement (inches)
-         * @param callback     The callback to run
-         * @return The builder
-         */
-        public RoadRunnerTrajectoryTaskBuilder addDisplacementMarker(double scale, double offsetInches, MarkerCallback callback) {
-            mirroredBuilder.addDisplacementMarker(scale, offsetInches, callback);
-            return super.addDisplacementMarker(scale, offsetInches, callback);
         }
 
         /**

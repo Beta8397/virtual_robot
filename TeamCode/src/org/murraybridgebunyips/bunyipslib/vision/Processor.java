@@ -2,6 +2,7 @@ package org.murraybridgebunyips.bunyipslib.vision;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.util.Size;
 
 import androidx.annotation.NonNull;
 
@@ -10,7 +11,9 @@ import org.firstinspires.ftc.robotcore.external.function.Continuation;
 import org.firstinspires.ftc.robotcore.external.stream.CameraStreamSource;
 import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
 import org.firstinspires.ftc.vision.VisionProcessor;
+import org.murraybridgebunyips.bunyipslib.Dbg;
 import org.murraybridgebunyips.bunyipslib.vision.data.VisionData;
+import org.murraybridgebunyips.bunyipslib.vision.processors.MultiColourThreshold;
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -32,7 +35,6 @@ import java.util.concurrent.atomic.AtomicReference;
  * @author Lucas Bubner, 2023
  */
 public abstract class Processor<T extends VisionData> implements VisionProcessor, CameraStreamSource {
-
     /**
      * List of all vision data detected since the last stateful update
      */
@@ -46,13 +48,46 @@ public abstract class Processor<T extends VisionData> implements VisionProcessor
 
     private volatile Mat currentFrame = new Mat();
 
-    /**
-     * Whether the camera stream should be processed with a vertical and horizontal flip
-     */
     private boolean isFlipped;
-
-    private boolean isAttached;
+    // Camera dimensions are used as a measure to determine if a camera is attached to this processor
+    private Size cameraDimensions = null;
     private boolean isRunning;
+
+    // Package-private, set internally by Vision
+    void detach() {
+        cameraDimensions = null;
+        isRunning = false;
+    }
+
+    void attach(Size size) {
+        cameraDimensions = size;
+        onAttach();
+    }
+
+    /**
+     * Delegate this processor to another processor. This will mimic setting the resolution to the one of the parent processor,
+     * thereby forcing the enabled and attached states to true. Ensure your parent processor is attached prior to delegation,
+     * as resolution data will be available. Note that status checks to this delegated processor may not represent actual camera operation,
+     * as these properties are now proxied but not updated.
+     * <p>
+     * This method is not designed to be used by the end-user. Only use if you're absolutely sure what you're doing.
+     *
+     * @param delegateTo The parent class that this processor should delegate to
+     * @see MultiColourThreshold MultiColourThreshold - line 41
+     */
+    @SuppressWarnings("rawtypes")
+    public void delegate(@NonNull Processor delegateTo) {
+        if (!delegateTo.isAttached()) {
+            Dbg.error(getClass(), "Delegation failed, parent processor (%) is not attached to a Vision instance.", delegateTo);
+            return;
+        }
+        Dbg.logd(getClass(), "Processor has been delegated via %.", delegateTo);
+        cameraDimensions = delegateTo.cameraDimensions;
+        // We will also set the running status to true as well, since we need to delegate the processor status to the class
+        // that is managing this processor. This ensures any checks that rely on these types of checks pass, as they are
+        // technically running but by the proxy class.
+        isRunning = true;
+    }
 
     /**
      * Determine whether the processor is attached to a Vision instance.
@@ -60,12 +95,7 @@ public abstract class Processor<T extends VisionData> implements VisionProcessor
      * be checked by looking directly at the vision system.
      */
     public boolean isAttached() {
-        return isAttached;
-    }
-
-    // Package-private, set internally by Processor
-    void setAttached(boolean attached) {
-        isAttached = attached;
+        return cameraDimensions != null;
     }
 
     /**
@@ -76,19 +106,40 @@ public abstract class Processor<T extends VisionData> implements VisionProcessor
      * be checked by looking directly at the vision system.
      */
     public boolean isRunning() {
-        return isAttached && isRunning;
+        return cameraDimensions != null && isRunning;
     }
 
     void setRunning(boolean running) {
+        if (running)
+            onRunning();
         isRunning = running;
     }
 
+    /**
+     * Whether the camera stream should be processed with a vertical and horizontal flip
+     *
+     * @return whether {@link #setFlipped} was called and the camera was flipped
+     */
     public boolean isFlipped() {
         return isFlipped;
     }
 
+    /**
+     * Rotate and flip the vision processor.
+     *
+     * @param flipped whether to flip the processor.
+     */
     public void setFlipped(boolean flipped) {
         isFlipped = flipped;
+    }
+
+    /**
+     * Get the attached camera dimensions/resolution.
+     *
+     * @return the dimensions in pixels of the attached camera instance, or null if there is no attached instance
+     */
+    protected Size getCameraDimensions() {
+        return cameraDimensions;
     }
 
     /**
@@ -121,6 +172,22 @@ public abstract class Processor<T extends VisionData> implements VisionProcessor
         synchronized (data) {
             data.clear();
         }
+    }
+
+    /**
+     * Override this method to run any additional code that will be executed when
+     * this processor is attached (via init()) by a Vision instance.
+     */
+    protected void onAttach() {
+        // no-op
+    }
+
+    /**
+     * Override this method to run any additional code that will be executed when
+     * this processor starts streaming (via start()) on a Vision instance.
+     */
+    protected void onRunning() {
+        // no-op
     }
 
     /**
@@ -185,7 +252,7 @@ public abstract class Processor<T extends VisionData> implements VisionProcessor
      * be instead acquired by updating the data list in {@link #update()}. If this is not possible,
      * you can simply hold a copy of the userContext when supplied to you in {@link #onProcessFrame(Mat, long)}.
      * <p>
-     * Width and height should be accessed with Vision.CAMERA_WIDTH and Vision.CAMERA_HEIGHT, and
+     * Width and height should be accessed with {@link #getCameraDimensions()}, and
      * scaleBmpPxToCanvasPx and scaleCanvasDensity should be assumed as 1.0f.
      */
     @Override

@@ -1,12 +1,15 @@
 package org.murraybridgebunyips.bunyipslib.vision;
 
 
+import androidx.annotation.NonNull;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 
 import org.firstinspires.ftc.robotcore.external.stream.CameraStreamServer;
 import org.murraybridgebunyips.bunyipslib.Dbg;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -35,23 +38,33 @@ public class SwitchableVisionSender implements Runnable {
      */
     public static String CURRENT_PROCESSOR_NAME = "";
     /**
+     * Can be changed dynamically via FtcDashboard. This is the current Vision instance index
+     * that will be used for the {@link #CURRENT_PROCESSOR_NAME}. This index is represented by the array of vision instances
+     * that have called {@link Vision#startPreview()} (or have been added to this sender manually).
+     */
+    public static int CURRENT_PREVIEWING_VISION_INSTANCE_INDEX = 0;
+    /**
      * The maximum FPS to send to FtcDashboard.
      */
     public static int MAX_FPS;
-    private final Vision vision;
+    private final ArrayList<Vision> instances = new ArrayList<>();
+
     private String lastProcessorName;
+    private int lastInstanceIdx = -1;
 
     /**
-     * Create a new SwitchableVisionSender with a Vision system.
+     * Create a new SwitchableVisionSender.
      *
-     * @param vision The Vision system to send to FtcDashboard
+     * @param firstInstance The base (index 0) vision instance to use with this sender. Additional vision instances
+     *                      can be added through {@link #addInstance}.
      */
-    public SwitchableVisionSender(Vision vision) {
-        FtcDashboard.getInstance().stopCameraStream();
-        // CameraStreamServer will be supplying a raw feed to the DS without this thread
-        this.vision = vision;
+    public SwitchableVisionSender(@NonNull Vision firstInstance) {
+        instances.add(firstInstance);
 
-        List<Processor> processors = vision.getAttachedProcessors();
+        // CameraStreamServer will be supplying a raw feed to the DS without this thread
+        FtcDashboard.getInstance().stopCameraStream();
+
+        List<Processor> processors = firstInstance.getAttachedProcessors();
         if (processors.isEmpty())
             return;
 
@@ -65,7 +78,18 @@ public class SwitchableVisionSender implements Runnable {
             }
         }
 
-        CURRENT_PROCESSOR_NAME = vision.getAttachedProcessors().get(0).toString();
+        CURRENT_PROCESSOR_NAME = firstInstance.getAttachedProcessors().get(0).toString();
+    }
+
+    /**
+     * Add an instance that can later be accessed dynamically for selection through {@link #CURRENT_PREVIEWING_VISION_INSTANCE_INDEX}.
+     *
+     * @param instance The instance to add.
+     * @return The index that can be used to set the previewing instance index.
+     */
+    public int addInstance(@NonNull Vision instance) {
+        instances.add(instance);
+        return instances.size() - 1;
     }
 
     /**
@@ -77,22 +101,53 @@ public class SwitchableVisionSender implements Runnable {
         CURRENT_PROCESSOR_NAME = processorName;
     }
 
+    /**
+     * Set the instance to use for vision previews.
+     *
+     * @param instance the vision instance, if it has already been added via {@link #addInstance}.
+     */
+    public void setInstance(@NonNull Vision instance) {
+        if (!instances.contains(instance))
+            throw new IllegalArgumentException("Instances does not contain this instance! It must be added prior through addInstance()");
+        CURRENT_PREVIEWING_VISION_INSTANCE_INDEX = instances.indexOf(instance);
+    }
+
+    /**
+     * Set the index to use for vision previews.
+     *
+     * @param index the index to use and to send to FtcDashboard
+     */
+    public void setInstance(int index) {
+        CURRENT_PREVIEWING_VISION_INSTANCE_INDEX = index;
+    }
+
     @Override
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
-            if (Objects.equals(CURRENT_PROCESSOR_NAME, "") || CURRENT_PROCESSOR_NAME.equals(lastProcessorName))
+            if ((Objects.equals(CURRENT_PROCESSOR_NAME, "") || CURRENT_PROCESSOR_NAME.equals(lastProcessorName))
+                    && (CURRENT_PREVIEWING_VISION_INSTANCE_INDEX == lastInstanceIdx))
                 continue;
 
-            Processor currentProcessor = vision.getAttachedProcessors().stream()
+            if (CURRENT_PREVIEWING_VISION_INSTANCE_INDEX < 0 || CURRENT_PREVIEWING_VISION_INSTANCE_INDEX >= instances.size()) {
+                Dbg.error(getClass(), "Current vision index is out of bounds, FtcDashboard sending cancelled.");
+                FtcDashboard.getInstance().stopCameraStream();
+                CameraStreamServer.getInstance().setSource(null);
+                continue;
+            }
+
+            Processor currentProcessor = instances.get(CURRENT_PREVIEWING_VISION_INSTANCE_INDEX).getAttachedProcessors().stream()
                     .filter(p -> p.toString().equals(CURRENT_PROCESSOR_NAME))
                     .findFirst()
                     .orElse(null);
 
+            Dbg.logd(getClass(), "Preview processor updated (instance #%->#%), %->%", lastInstanceIdx, CURRENT_PREVIEWING_VISION_INSTANCE_INDEX, lastProcessorName, currentProcessor);
+            lastInstanceIdx = CURRENT_PREVIEWING_VISION_INSTANCE_INDEX;
             lastProcessorName = CURRENT_PROCESSOR_NAME;
 
             if (currentProcessor == null) {
-                Dbg.error(getClass(), "Unable to find a processor '%' to attached to a Vision system, FtcDashboard sending cancelled.", CURRENT_PROCESSOR_NAME);
+                Dbg.error(getClass(), "Unable to find a processor '%' to attached to the #% Vision instance, FtcDashboard sending cancelled.", CURRENT_PROCESSOR_NAME, CURRENT_PREVIEWING_VISION_INSTANCE_INDEX);
                 FtcDashboard.getInstance().stopCameraStream();
+                CameraStreamServer.getInstance().setSource(null);
                 continue;
             }
 

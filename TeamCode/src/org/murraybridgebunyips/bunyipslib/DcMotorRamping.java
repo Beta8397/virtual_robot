@@ -12,7 +12,16 @@ import org.murraybridgebunyips.bunyipslib.external.units.Time;
  * @author Lucas Bubner, 2024
  */
 public class DcMotorRamping extends DcMotorImplEx implements RampingFunction {
-    private final RampingSupplier v = new RampingSupplier(this::getPower);
+    ////// VIRTUAL ROBOT CHANGES //////
+    private DcMotor __VIRTUAL_MOTOR_NOT_USED_IN_REAL_ROBOT;
+    private void virtualShenanigans(DcMotor m) {
+        this.__VIRTUAL_MOTOR_NOT_USED_IN_REAL_ROBOT = m;
+        v = new RampingSupplier(m::getPower);
+    }
+    private RampingSupplier v;
+    @Override public double getPower() { return __VIRTUAL_MOTOR_NOT_USED_IN_REAL_ROBOT.getPower(); }
+    @Override public void setDirection(Direction d) { __VIRTUAL_MOTOR_NOT_USED_IN_REAL_ROBOT.setDirection(d); }
+    ///////////////////////////////////
 
     /**
      * Create a new DcMotorRamping object, wrapping a DcMotor object and
@@ -23,6 +32,7 @@ public class DcMotorRamping extends DcMotorImplEx implements RampingFunction {
      */
     public DcMotorRamping(DcMotor motor) {
         super(motor.getController(), motor.getPortNumber());
+        virtualShenanigans(motor);
     }
 
     /**
@@ -35,6 +45,7 @@ public class DcMotorRamping extends DcMotorImplEx implements RampingFunction {
      */
     public DcMotorRamping(DcMotor motor, Measure<Time> smoothTime, double maxDelta) {
         super(motor.getController(), motor.getPortNumber());
+        virtualShenanigans(motor);
         v.setRampingParameters(smoothTime, maxDelta);
     }
 
@@ -93,14 +104,18 @@ public class DcMotorRamping extends DcMotorImplEx implements RampingFunction {
      */
     @Override
     public void setPower(double power) {
-        super.setPower(v.get(power));
+        //// VIRTUAL ROBOT CHANGES ////
+        __VIRTUAL_MOTOR_NOT_USED_IN_REAL_ROBOT.setPower(v.get(power));
+        ///////////////////////////////
     }
 
     /**
      * Instantly set the power level of the motor, bypassing the SmoothDamp function.
      */
     public void setPowerInstant(double power) {
-        super.setPower(power);
+        //// VIRTUAL ROBOT CHANGES ////
+        __VIRTUAL_MOTOR_NOT_USED_IN_REAL_ROBOT.setPower(power);
+        ///////////////////////////////
     }
 
     /**

@@ -113,9 +113,12 @@ public class Controller extends Gamepad {
     }
 
     private void parseUnmanagedControllerBuffer() {
-        ByteBuffer byteBuffer = ByteBuffer.wrap(sdk.toByteArray());
+        byte[] buf = sdk.toByteArray();
+        // Size of the Robocol header length is 5, minus 2 to skip the sequence number
+        ByteBuffer byteBuffer = ByteBuffer.wrap(buf, 3, buf.length - 3);
+        // Skip over the sequence number as we don't need it, but still need to read the next bytes
+        byteBuffer.getShort();
 
-        int buttons;
         byte version = byteBuffer.get();
 
         if (version >= 1) {
@@ -126,7 +129,9 @@ public class Controller extends Gamepad {
                 byteBuffer.getFloat();
             }
 
-            buttons = byteBuffer.getInt();
+            int buttons = byteBuffer.getInt();
+            // These controls are not handled by Controller, and we can just pass them through,
+            // while ignoring values we will update ourselves
             touchpad_finger_1 = (buttons & 0x20000) != 0;
             touchpad_finger_2 = (buttons & 0x10000) != 0;
             touchpad = (buttons & 0x08000) != 0;
@@ -149,6 +154,7 @@ public class Controller extends Gamepad {
         }
 
         if (version >= 5) {
+            // These values are also not managed by Controller
             touchpad_finger_1_x = byteBuffer.getFloat();
             touchpad_finger_1_y = byteBuffer.getFloat();
             touchpad_finger_2_x = byteBuffer.getFloat();
@@ -165,7 +171,8 @@ public class Controller extends Gamepad {
     public void update() {
 //        parseUnmanagedControllerBuffer();
 
-        // Recalculate all custom inputs
+        // Recalculate all custom inputs, these accommodate for the custom functions set by the user
+        // and are the same controls that we intentionally didn't update in parseUnmanagedControllerBuffer().
         left_stick_x = get(Controls.Analog.LEFT_STICK_X);
         left_stick_y = get(Controls.Analog.LEFT_STICK_Y);
         right_stick_x = get(Controls.Analog.RIGHT_STICK_X);
@@ -297,7 +304,7 @@ public class Controller extends Gamepad {
 
     /**
      * Check if a button is currently pressed on a gamepad, with debounce to ignore a press that was already detected
-     * upon the first call of this function and button.
+     * upon the first call of this function and button. This is also known as "rising edge detection".
      *
      * @param button The button to check
      * @return True if the button is pressed and not debounced

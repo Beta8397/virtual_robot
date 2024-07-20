@@ -491,7 +491,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     /**
      * Runs upon the pressing of the INIT button on the Driver Station.
      * This is where your hardware should be initialised. You may also add specific tasks to the queue
-     * here, but it is recommended to use {@link #setInitTask(Task)} or {@link #onReady(Reference, Controls)} instead.
+     * here, but it is recommended to use {@link #setInitTask(RobotTask)} or {@link #onReady(Reference, Controls)} instead.
      */
     protected abstract void onInitialise();
 

@@ -1,6 +1,6 @@
 package org.murraybridgebunyips.bunyipslib.vision.data
 
-import org.murraybridgebunyips.bunyipslib.vision.Vision
+import android.util.Size
 import org.opencv.core.Rect
 
 /**
@@ -40,15 +40,15 @@ data class ContourData(
      */
     val pitch: Double
 ) : VisionData() {
-    constructor(boundingRect: Rect) : this(
+    constructor(cameraResolution: Size, boundingRect: Rect) : this(
         boundingRect,
         boundingRect.area(),
-        boundingRect.area() / (Vision.CAMERA_WIDTH * Vision.CAMERA_HEIGHT) * 100.0,
+        boundingRect.area() / (cameraResolution.width * cameraResolution.height) * 100.0,
         boundingRect.width.toDouble() / boundingRect.height.toDouble(),
         boundingRect.x + boundingRect.width / 2.0,
         boundingRect.y + boundingRect.height / 2.0,
-        (((boundingRect.x + boundingRect.width / 2.0) - Vision.CAMERA_WIDTH / 2.0) / (Vision.CAMERA_WIDTH / 2.0)),
-        -(((boundingRect.y + boundingRect.height / 2.0) - Vision.CAMERA_HEIGHT / 2.0) / (Vision.CAMERA_HEIGHT / 2.0))
+        (((boundingRect.x + boundingRect.width / 2.0) - cameraResolution.width / 2.0) / (cameraResolution.width / 2.0)),
+        -(((boundingRect.y + boundingRect.height / 2.0) - cameraResolution.height / 2.0) / (cameraResolution.height / 2.0))
     )
 
     companion object {

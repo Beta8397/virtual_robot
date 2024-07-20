@@ -20,9 +20,10 @@ import java.util.stream.Collectors;
 /**
  * Extended math utility functions.
  * <p>
- * This class is a combination of WPILib's
+ * This class is effectively a combination of the math found in WPILib's
  * <a href="https://github.com/wpilibsuite/allwpilib/blob/dc4c63568a2adbc2acfb5d6a420750236074b6aa/wpimath/src/main/java/edu/wpi/first/math/MathUtil.java">MathUtil</a>
- * and Unity's <a href="https://github.com/Unity-Technologies/UnityCsReference/blob/22a9cc4540dc5efa28ad9f02cd12b37b4b1a21c7/Runtime/Export/Math/Mathf.cs">Mathf</a>.
+ * and Unity's <a href="https://github.com/Unity-Technologies/UnityCsReference/blob/22a9cc4540dc5efa28ad9f02cd12b37b4b1a21c7/Runtime/Export/Math/Mathf.cs">Mathf</a> features,
+ * adjusted to use WPIUnits and custom classes.
  *
  * @see Math
  */

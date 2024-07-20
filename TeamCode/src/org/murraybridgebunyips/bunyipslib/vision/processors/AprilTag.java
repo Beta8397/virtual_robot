@@ -1,6 +1,7 @@
 package org.murraybridgebunyips.bunyipslib.vision.processors;
 
 import android.graphics.Canvas;
+import android.util.Size;
 
 import androidx.annotation.NonNull;
 
@@ -9,7 +10,6 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.murraybridgebunyips.bunyipslib.cameras.CameraType;
 import org.murraybridgebunyips.bunyipslib.vision.Processor;
-import org.murraybridgebunyips.bunyipslib.vision.Vision;
 import org.murraybridgebunyips.bunyipslib.vision.data.AprilTagData;
 import org.opencv.core.Mat;
 
@@ -17,7 +17,9 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Extension wrapper for AprilTag to interop with the Vision system
+ * AprilTag Detection Processor
+ * <p>
+ * This is an extension wrapper for the SDK-provided AprilTagProcessor to interop with the Vision system.
  *
  * @author Lucas Bubner, 2023
  */
@@ -109,6 +111,7 @@ public class AprilTag extends Processor<AprilTagData> {
 
     @Override
     protected void onFrameDraw(Canvas canvas) {
-        instance.onDrawFrame(canvas, Vision.CAMERA_WIDTH, Vision.CAMERA_HEIGHT, 1.0f, 1.0f, atCtx);
+        Size dimensions = getCameraDimensions();
+        instance.onDrawFrame(canvas, dimensions.getWidth(), dimensions.getHeight(), 1.0f, 1.0f, atCtx);
     }
 }

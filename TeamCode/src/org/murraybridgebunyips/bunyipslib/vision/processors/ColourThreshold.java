@@ -137,7 +137,7 @@ public abstract class ColourThreshold extends Processor<ContourData> {
     @Override
     protected final void update() {
         for (MatOfPoint contour : contours) {
-            ContourData newData = new ContourData(Imgproc.boundingRect(contour));
+            ContourData newData = new ContourData(getCameraDimensions(), Imgproc.boundingRect(contour));
             // Min-max bounding
             if (newData.getAreaPercent() < getContourAreaMinPercent() || newData.getAreaPercent() > getContourAreaMaxPercent())
                 continue;

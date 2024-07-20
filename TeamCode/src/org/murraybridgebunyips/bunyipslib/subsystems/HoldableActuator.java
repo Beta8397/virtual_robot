@@ -356,10 +356,15 @@ public class HoldableActuator extends BunyipsSubsystem {
 
             @Override
             protected void init() {
+                previousAmpAlert = motor.getCurrentAlert(CurrentUnit.AMPS);
+                // Stop now if the switch is already pressed
+                if (bottomSwitch != null && bottomSwitch.isPressed()) {
+                    finishNow();
+                    return;
+                }
+                motor.setCurrentAlert(OVERCURRENT.in(Amps), CurrentUnit.AMPS);
                 zeroHits = 0;
                 inputMode = Mode.HOMING;
-                previousAmpAlert = motor.getCurrentAlert(CurrentUnit.AMPS);
-                motor.setCurrentAlert(OVERCURRENT.in(Amps), CurrentUnit.AMPS);
             }
 
             @Override

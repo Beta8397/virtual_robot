@@ -42,15 +42,16 @@ import java.util.stream.Collectors;
 @Config
 public class Vision extends BunyipsSubsystem {
     /**
-     * Camera width resolution to use.
+     * Default camera width resolution to use.
      */
-    public static int CAMERA_WIDTH = 640;
+    public static int DEFAULT_CAMERA_WIDTH = 640;
     /**
-     * Camera height resolution to use.
+     * Default camera height resolution to use.
      */
-    public static int CAMERA_HEIGHT = 480;
-    // Static: only one sender can be active at a time
-    private static SwitchableVisionSender visionSender;
+    public static int DEFAULT_CAMERA_HEIGHT = 480;
+    // Singleton: Additional instances are managed internally by SwitchableVisionSender
+    private static SwitchableVisionSender visionSender = null;
+    private final Size preferredResolution;
     @SuppressWarnings("rawtypes")
     private final List<Processor> processors = new ArrayList<>();
     private final CameraName camera;
@@ -58,9 +59,10 @@ public class Vision extends BunyipsSubsystem {
      * A built-in raw feed Processor that will do nothing but provide the raw camera feed.
      * Useful for debugging and testing, pass this raw field (vision.raw) to init() and start() to use it.
      *
-     * @noinspection ClassEscapesDefinedScope (should never be used outside of this class)
+     * @noinspection ClassEscapesDefinedScope (should never be used outside of this class, and checks exist for usage in other classes)
      */
     public Raw raw = new Raw();
+    private int senderIdx = -1;
     private VisionPortal visionPortal = null;
 
     /**
@@ -74,8 +76,7 @@ public class Vision extends BunyipsSubsystem {
         assertParamsNotNull(camera);
         this.camera = camera;
         // Allow the user to set the camera resolution if they want
-        CAMERA_WIDTH = cameraWidth;
-        CAMERA_HEIGHT = cameraHeight;
+        preferredResolution = new Size(cameraWidth, cameraHeight);
     }
 
     /**
@@ -84,7 +85,25 @@ public class Vision extends BunyipsSubsystem {
      * @param camera The camera to use
      */
     public Vision(CameraName camera) {
-        this(camera, CAMERA_WIDTH, CAMERA_HEIGHT);
+        this(camera, DEFAULT_CAMERA_WIDTH, DEFAULT_CAMERA_HEIGHT);
+    }
+
+    /**
+     * Stop the VisionSender thread to stop sending all processor data to FtcDashboard/DS.
+     * The DS will return to a raw unprocessed feed, and FtcDashboard feed will be disabled.
+     * This method is effectively called automatically when the OpMode is no longer active.
+     * <p>
+     * If you don't need to use a preview from a particular camera anymore, consider switching the index away
+     * from the camera to one that you still need a preview for, else call this method to free unused resources.
+     *
+     * @see SwitchableVisionSender
+     */
+    public static void stopAllPreviews() {
+        if (visionSender != null) {
+            // This method will be automatically called as part of the BunyipsOpMode cleanup process
+            Threads.stop(visionSender);
+            visionSender = null;
+        }
     }
 
     /**
@@ -107,7 +126,7 @@ public class Vision extends BunyipsSubsystem {
     @SuppressWarnings("rawtypes")
     public Vision init(Processor... newProcessors) {
         if (visionPortal != null) {
-            Dbg.logd(getClass(), "WARNING: Vision already initialised! Tearing down...");
+            Dbg.warn(getClass(), "instance already initialised! tearing down...");
             terminate();
         }
 
@@ -127,13 +146,17 @@ public class Vision extends BunyipsSubsystem {
             if (processor.toString().isEmpty()) {
                 throw new IllegalStateException("Vision: Processor name cannot be empty!");
             }
+            if (processor instanceof Raw && processor != raw) {
+                throw new IllegalStateException("Vision: Processor is using a Raw instance from a different vision instance!");
+            }
             for (Processor otherProcessor : processors) {
                 if (otherProcessor != processor && otherProcessor.toString().equals(processor.toString())) {
                     throw new IllegalStateException("Vision: Processor name must be unique!");
                 }
             }
+            // An exception will be thrown if this processor is already attached to another Vision instance
             builder.addProcessor(processor);
-            processor.setAttached(true);
+            processor.attach(preferredResolution);
             Dbg.logd(getClass(), "vision processor '%' initialised.", processor.toString());
         }
 
@@ -145,7 +168,7 @@ public class Vision extends BunyipsSubsystem {
 
         visionPortal = builder
                 .setCamera(camera)
-                .setCameraResolution(new Size(CAMERA_WIDTH, CAMERA_HEIGHT))
+                .setCameraResolution(new Size(DEFAULT_CAMERA_WIDTH, DEFAULT_CAMERA_HEIGHT))
                 // "Live View" does not affect how the DS/Dashboard stream is handled, as these previews
                 // are not connected to the Live View. As such, to save resources, it is
                 // better we leave the live view off, as this will not reflect the DS/Dashboard stream.
@@ -269,7 +292,7 @@ public class Vision extends BunyipsSubsystem {
     public HashMap<String, List<VisionData>> getAllData() {
         HashMap<String, List<VisionData>> data = new HashMap<>();
         for (Processor processor : processors) {
-            if (Objects.equals(processor.toString(), "rawfeed")) continue;
+            if (Objects.equals(processor.toString(), "raw")) continue;
             data.put(processor.toString(), processor.getData());
         }
         return data;
@@ -295,8 +318,7 @@ public class Vision extends BunyipsSubsystem {
             throw new IllegalStateException("Vision: VisionPortal is not initialised from init()!");
         }
         for (Processor processor : processors) {
-            processor.setAttached(false);
-            processor.setRunning(false);
+            processor.detach();
         }
         visionPortal.close();
         visionPortal = null;
@@ -398,56 +420,44 @@ public class Vision extends BunyipsSubsystem {
      * Activating this sender will set both FtcDashboard and the DS streams to be of a processor
      * of your choosing, by changing a processor's name with setPreview() or via FtcDashboard.
      *
-     * @return the vision instance
      * @see SwitchableVisionSender
      */
-    public Vision startPreview() {
-        visionSender = new SwitchableVisionSender(this);
-        Threads.start(visionSender);
-        return this;
+    public void startPreview() {
+        if (visionSender == null || !Threads.isRunning(visionSender)) {
+            visionSender = new SwitchableVisionSender(this);
+            Threads.start(visionSender);
+            senderIdx = 0;
+        } else {
+            senderIdx = visionSender.addInstance(this);
+        }
     }
 
     /**
      * Set the processor to display on FtcDashboard/DS from startPreview().
+     * This will automatically switch the instance index, allowing an instant stream of this camera and processor combo.
+     * Will no-op if this processor name is invalid.
      *
      * @param processorName the name of the processor to display on FtcDashboard
      * @see SwitchableVisionSender
      */
-    public Vision setPreview(String processorName) {
-        if (visionSender != null) {
+    public void setPreview(String processorName) {
+        if (senderIdx != -1 && visionSender != null && processors.stream().anyMatch((p) -> processorName.equals(p.toString()))) {
+            visionSender.setInstance(senderIdx);
             visionSender.setStreamingProcessor(processorName);
         }
-        return this;
     }
 
     /**
      * Set the processor to display on FtcDashboard/DS from startPreview().
+     * This will automatically switch the instance index, allowing an instant stream of this camera and processor combo.
+     * Will no-op if this processor is invalid.
      *
      * @param processor the processor to display on FtcDashboard
      * @see SwitchableVisionSender
      */
     @SuppressWarnings("rawtypes")
-    public Vision setPreview(Processor processor) {
-        if (visionSender != null) {
-            visionSender.setStreamingProcessor(processor.toString());
-        }
-        return this;
-    }
-
-    /**
-     * Stop the VisionSender thread to stop sending all processor data to FtcDashboard/DS.
-     * The DS will return to a raw unprocessed feed, and FtcDashboard feed will be disabled.
-     * This method is effectively called automatically when the OpMode is no longer active.
-     *
-     * @return the vision instance
-     * @see SwitchableVisionSender
-     */
-    public Vision stopPreview() {
-        if (visionSender != null) {
-            Threads.stop(visionSender);
-            visionSender = null;
-        }
-        return this;
+    public void setPreview(Processor processor) {
+        setPreview(processor.toString());
     }
 
     /**
@@ -456,10 +466,11 @@ public class Vision extends BunyipsSubsystem {
     @Override
     protected void periodic() {
         if (visionPortal != null) {
+            VisionPortal.CameraState state = visionPortal.getCameraState();
             opMode.telemetry.add(
                     "Vision: <font color='%'>%</font> | % fps | %/% processors",
-                    visionPortal.getCameraState() == VisionPortal.CameraState.STREAMING ? "green" : "yellow",
-                    visionPortal.getCameraState(),
+                    state == VisionPortal.CameraState.STREAMING ? "green" : state == VisionPortal.CameraState.ERROR ? "red" : "yellow",
+                    state,
                     (int) round(visionPortal.getFps(), 0),
                     processors.stream().filter((p) -> visionPortal.getProcessorEnabled(p)).count(),
                     processors.size()

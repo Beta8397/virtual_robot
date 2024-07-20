@@ -13,8 +13,10 @@ import org.murraybridgebunyips.bunyipslib.UserSelection;
 import org.murraybridgebunyips.bunyipslib.vision.Processor;
 import org.murraybridgebunyips.bunyipslib.vision.Vision;
 import org.murraybridgebunyips.bunyipslib.vision.processors.AprilTag;
-import org.murraybridgebunyips.bunyipslib.vision.processors.TFOD;
+import org.murraybridgebunyips.bunyipslib.vision.processors.centerstage.GreenPixel;
+import org.murraybridgebunyips.bunyipslib.vision.processors.centerstage.PurplePixel;
 import org.murraybridgebunyips.bunyipslib.vision.processors.centerstage.WhitePixel;
+import org.murraybridgebunyips.bunyipslib.vision.processors.centerstage.YellowPixel;
 
 /**
  * Test Vision processor detections and data throughput
@@ -31,22 +33,29 @@ public final class VisionTest extends BunyipsOpMode {
 
     @SuppressWarnings("rawtypes")
     private void callback(Procs selection) {
-        if (selection == null) {
+        if (selection == null || selection == Procs.RAW) {
             vision.init(vision.raw);
             vision.start(vision.raw);
             vision.startPreview();
             return;
         }
+
         Processor chosenProcessor = null;
         switch (selection) {
-            case TFOD:
-                chosenProcessor = new TFOD();
-                break;
             case APRILTAG:
                 chosenProcessor = new AprilTag();
                 break;
-            case WHITE_PIXEL:
+            case CENTERSTAGE_WHITE_PIXEL:
                 chosenProcessor = new WhitePixel();
+                break;
+            case CENTERSTAGE_PURPLE_PIXEL:
+                chosenProcessor = new PurplePixel();
+                break;
+            case CENTERSTAGE_YELLOW_PIXEL:
+                chosenProcessor = new YellowPixel();
+                break;
+            case CENTERSTAGE_GREEN_PIXEL:
+                chosenProcessor = new GreenPixel();
                 break;
         }
 
@@ -94,8 +103,11 @@ public final class VisionTest extends BunyipsOpMode {
     }
 
     private enum Procs {
-        TFOD,
+        RAW,
         APRILTAG,
-        WHITE_PIXEL
+        CENTERSTAGE_WHITE_PIXEL,
+        CENTERSTAGE_PURPLE_PIXEL,
+        CENTERSTAGE_YELLOW_PIXEL,
+        CENTERSTAGE_GREEN_PIXEL,
     }
 }

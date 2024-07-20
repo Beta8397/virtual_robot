@@ -244,9 +244,7 @@ class DualTelemetry @JvmOverloads constructor(
         var prepend = ""
         if (movingAverageTimer != null)
             prepend = "<small><font color='$logBracketColor'>[</font>T+${
-                Math.round(
-                    movingAverageTimer.elapsedTime().inUnit(Seconds)
-                )
+                Math.round(movingAverageTimer.elapsedTime().inUnit(Seconds))
             }s<font color='$logBracketColor'>]</font></small> "
         opMode.telemetry.log().add(prepend + msg)
         synchronized(dashboardItems) {

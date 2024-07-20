@@ -35,6 +35,8 @@
 package com.qualcomm.robotcore.util;
 
 import android.util.Log;
+import org.murraybridgebunyips.bunyipslib.Dbg;
+
 import java.util.Calendar;
 
 /**
@@ -341,4 +343,7 @@ public class RobotLog {
     public static void setGlobalErrorMsg(String format, Object... args) {}
 
 
+    public static void addGlobalWarningMessage(String s) {
+        Dbg.error("RobotLog.addGlobalWarningMessage: " + s);
+    }
 }

@@ -8,6 +8,7 @@ import static org.murraybridgebunyips.bunyipslib.tasks.bases.Task.INFINITE_TIMEO
 
 import androidx.annotation.NonNull;
 
+import org.firstinspires.ftc.robotcore.internal.ui.GamepadUser;
 import org.murraybridgebunyips.bunyipslib.external.units.Measure;
 import org.murraybridgebunyips.bunyipslib.external.units.Time;
 import org.murraybridgebunyips.bunyipslib.tasks.RunTask;
@@ -690,8 +691,8 @@ public class Scheduler extends BunyipsComponent {
                 out.append(" (overriding)");
             if (originalRunCondition instanceof ControllerStateHandler) {
                 ControllerStateHandler handler = (ControllerStateHandler) originalRunCondition;
-                out.append(" when c")
-                        .append(handler.controller.id)
+                out.append(" when GP")
+                        .append(handler.controller.getUser() == GamepadUser.ONE ? 1 : 2)
                         .append("->")
                         .append(handler.button)
                         .append(" is ")

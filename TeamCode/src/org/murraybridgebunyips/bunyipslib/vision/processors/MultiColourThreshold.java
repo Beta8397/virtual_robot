@@ -9,7 +9,6 @@ import androidx.annotation.NonNull;
 import com.acmerobotics.dashboard.config.Config;
 
 import org.murraybridgebunyips.bunyipslib.vision.Processor;
-import org.murraybridgebunyips.bunyipslib.vision.Vision;
 import org.murraybridgebunyips.bunyipslib.vision.data.ContourData;
 import org.opencv.core.Mat;
 
@@ -39,6 +38,12 @@ public class MultiColourThreshold extends Processor<ContourData> {
     public MultiColourThreshold(ColourThreshold... thresholdProcessors) {
         for (ColourThreshold processor : thresholdProcessors) {
             colourProcessors.add(new Pair<>(processor, new Mat()));
+        }
+    }
+
+    protected void onAttach() {
+        for (Pair<ColourThreshold, Mat> processor : colourProcessors) {
+            processor.first.delegate(this);
         }
     }
 
@@ -78,7 +83,7 @@ public class MultiColourThreshold extends Processor<ContourData> {
         canvas.drawText(
                 MASK >= 1 && MASK <= colourProcessors.size() ? colourProcessors.get(MASK - 1).first.toString() : "",
                 10,
-                Vision.CAMERA_HEIGHT - 10,
+                getCameraDimensions().getHeight() - 10,
                 new Paint() {{
                     setColor(0xFFFFFFFF);
                     setStrokeWidth(30);

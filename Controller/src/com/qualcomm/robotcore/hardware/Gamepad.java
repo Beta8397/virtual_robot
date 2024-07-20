@@ -43,6 +43,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import org.firstinspires.ftc.robotcore.internal.ui.GamepadUser;
 import virtual_robot.controller.VirtualGamePadController;
 
 /**
@@ -51,6 +52,8 @@ import virtual_robot.controller.VirtualGamePadController;
  * Note: the fields in the class are all public, but they should not be changed from the OpMode code.
  */
 public class Gamepad {
+
+    public GamepadUser getUser() { return GamepadUser.ONE; }
 
     //for ps4
     public volatile boolean circle = false;

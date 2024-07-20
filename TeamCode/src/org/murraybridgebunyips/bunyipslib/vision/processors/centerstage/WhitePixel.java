@@ -9,6 +9,8 @@ import org.opencv.core.Scalar;
 
 /**
  * White pixel processor
+ * These values may not be tuned for your specific camera, lighting, or field conditions, and are tuned
+ * based on our own testing. You may need to adjust these values to get the best results for your own robot.
  */
 @Config
 public class WhitePixel extends ColourThreshold {
