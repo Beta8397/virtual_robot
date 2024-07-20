@@ -2,10 +2,15 @@ package org.murraybridgebunyips.bunyipslib.tasks;
 
 import androidx.annotation.Nullable;
 
+import org.murraybridgebunyips.bunyipslib.Dbg;
+import org.murraybridgebunyips.bunyipslib.external.units.Measure;
+import org.murraybridgebunyips.bunyipslib.external.units.Time;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.NoTimeoutTask;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
 import java.util.function.Supplier;
+
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds;
 
 /**
  * Represents a task that is constructed at runtime. This is useful for tasks that have runtime requirements
@@ -39,8 +44,11 @@ public class DynamicTask extends NoTimeoutTask {
     @Override
     protected void init() {
         builtTask = lazyTask.get();
-        setTimeout(builtTask.getTimeout());
-        withName(builtTask.toString());
+        String name = builtTask.toString();
+        Measure<Time> timeout = builtTask.getTimeout();
+        Dbg.logd(getClass(), "built -> % (t=%)", name, timeout.magnitude() <= 0 ? "inf" : timeout.in(Seconds) + "s");
+        withName(name);
+        setTimeout(timeout);
     }
 
     @Override
