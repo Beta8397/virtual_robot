@@ -11,6 +11,7 @@ import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.util.Angle;
 
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
+import org.murraybridgebunyips.bunyipslib.Dbg;
 import org.murraybridgebunyips.bunyipslib.external.units.Measure;
 import org.murraybridgebunyips.bunyipslib.external.units.Time;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
@@ -131,8 +132,9 @@ public class RoadRunnerTask extends Task {
 
     @Override
     protected void onFinish() {
-        drive.stop();
         taskStartedRunning = false;
+        drive.cancelTrajectory();
+        drive.stop();
     }
 
     @Override

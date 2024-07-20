@@ -35,7 +35,8 @@ public class ImposterAugmented extends CommandBasedBunyipsOpMode implements Road
                         makeTrajectory(drive.getPoseEstimate())
                                 .lineTo(new Vector2d())
                                 .buildTask(false))
-                );
+                )
+                .finishingIf(() -> !gamepad1.atRest());
     }
 
     @NotNull

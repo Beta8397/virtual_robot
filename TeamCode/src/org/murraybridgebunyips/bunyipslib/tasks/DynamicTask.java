@@ -51,7 +51,8 @@ public class DynamicTask extends NoTimeoutTask {
 
     @Override
     protected void onFinish() {
-        // no-op
+        if (builtTask == null) return;
+        builtTask.finishNow();
     }
 
     @Override
