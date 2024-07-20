@@ -77,7 +77,14 @@ public class Scheduler extends BunyipsComponent {
     }
 
     /**
-     * Add subsystems to the scheduler. This will ensure the update() method of the subsystems is called.
+     * Add subsystems to the scheduler. This will ensure the update() method of the subsystems is called, and that
+     * commands can be scheduled on these subsystems.
+     * This is <b>REQUIRED</b> to be called if using a base implementation of Scheduler. If you are using a
+     * {@link CommandBasedBunyipsOpMode}, see the {@code useSubsystems()} method or rely on the automatic features during
+     * construction that will add subsystems at construction with no need to call this method.
+     * <p>
+     * The base implementation of Scheduler does not access this implicit construction for finer-grain control for
+     * implementations that don't want this behaviour.
      *
      * @param dispatch The subsystems to add.
      */

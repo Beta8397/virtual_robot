@@ -4,6 +4,7 @@ import static org.murraybridgebunyips.bunyipslib.Text.formatString;
 import static org.murraybridgebunyips.bunyipslib.Text.round;
 import static org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import org.jetbrains.annotations.NotNull;
@@ -49,7 +50,8 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     // Pre and post queues cannot have their tasks removed, so we can rely on their .size() methods
     private final ArrayDeque<RobotTask> postQueue = new ArrayDeque<>();
     private final ArrayDeque<RobotTask> preQueue = new ArrayDeque<>();
-    private final HashSet<BunyipsSubsystem> updatedSubsystems = new HashSet<>();
+    @NonNull
+    private HashSet<BunyipsSubsystem> updatedSubsystems = new HashSet<>();
     private int taskCount;
     private UserSelection<Reference<?>> userSelection;
     private int currentTask = 1;
@@ -98,6 +100,8 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
         } catch (Exception e) {
             Exceptions.handle(e, telemetry::log);
         }
+        if (updatedSubsystems.isEmpty())
+            updatedSubsystems = BunyipsSubsystem.instances;
         // Convert user defined OpModeSelections to varargs
         Reference<?>[] varargs = opModes.toArray(new Reference[0]);
         if (varargs.length == 0) {
@@ -209,12 +213,16 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     }
 
     /**
-     * Call to add subsystems that should be updated by AutonomousBunyipsOpMode. This is required to be called
-     * as some subsystems rely on their {@code update()} method to dispatch tasks.
+     * Call to manually add the subsystems that should be managed by AutonomousBunyipsOpMode. Using this method will override
+     * the automatic collection of {@link BunyipsSubsystem}s, and allows you to determine which subsystems will be managed for
+     * this OpMode.
+     * <p>
+     * For most cases, using this method is not required and all you need to do is construct your subsystems and they
+     * will be managed automatically. This method is for advanced cases where you don't want this behaviour to happen.
      *
-     * @param subsystems the subsystems to be periodically called for their {@code update()} method.
+     * @param subsystems the restrictive list of subsystems to be managed and updated by ABOM
      */
-    public final void addSubsystems(BunyipsSubsystem... subsystems) {
+    public final void useSubsystems(BunyipsSubsystem... subsystems) {
         if (!NullSafety.assertNotNull(Arrays.stream(subsystems).toArray())) {
             throw new RuntimeException("Null subsystems were added in the addSubsystems() method!");
         }

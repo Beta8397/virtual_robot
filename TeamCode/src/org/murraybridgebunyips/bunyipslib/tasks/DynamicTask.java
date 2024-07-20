@@ -55,6 +55,13 @@ public class DynamicTask extends NoTimeoutTask {
     }
 
     @Override
+    protected void onReset() {
+        if (builtTask == null) return;
+        builtTask.reset();
+        builtTask = null;
+    }
+
+    @Override
     protected boolean isTaskFinished() {
         if (builtTask == null) return false;
         return builtTask.pollFinished();

@@ -31,7 +31,6 @@ public class ImposterPoseAlignmentTest extends AutonomousBunyipsOpMode implement
     protected void onInitialise() {
         config.init();
         drive = new MecanumDrive(config.driveConstants, config.mecanumCoefficients, hardwareMap.voltageSensor, config.imu, config.front_left_motor, config.front_right_motor, config.back_left_motor, config.back_right_motor);
-        addSubsystems(drive);
     }
 
     @Override

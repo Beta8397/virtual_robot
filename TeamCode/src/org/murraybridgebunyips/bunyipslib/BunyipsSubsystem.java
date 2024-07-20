@@ -10,6 +10,8 @@ import androidx.annotation.Nullable;
 import org.murraybridgebunyips.bunyipslib.tasks.IdleTask;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
+import java.util.HashSet;
+
 /**
  * Base class for all robot subsystems.
  * Integrates with the Task system to allow for task-based command scheduling.
@@ -18,10 +20,17 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
  * @see Scheduler
  */
 public abstract class BunyipsSubsystem extends BunyipsComponent {
+    // Package-private, accessed through implicit constructions
+    static final HashSet<BunyipsSubsystem> instances = new HashSet<>();
+
     private Task currentTask;
     private Task defaultTask = new IdleTask();
     private boolean shouldRun = true;
     private boolean assertionFailed = false;
+
+    protected BunyipsSubsystem() {
+        instances.add(this);
+    }
 
     @Override
     @NonNull

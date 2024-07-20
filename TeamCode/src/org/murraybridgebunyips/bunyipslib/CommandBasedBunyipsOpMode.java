@@ -1,5 +1,7 @@
 package org.murraybridgebunyips.bunyipslib;
 
+import androidx.annotation.NonNull;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -15,7 +17,8 @@ import java.util.function.BooleanSupplier;
  * @see BunyipsOpMode
  */
 public abstract class CommandBasedBunyipsOpMode extends BunyipsOpMode {
-    private final HashSet<BunyipsSubsystem> managedSubsystems = new HashSet<>();
+    @NonNull
+    private HashSet<BunyipsSubsystem> managedSubsystems = new HashSet<>();
 
     // Components can't be final due to runtime instantiation, so we cannot expose the scheduler directly and must use a getter.
     // This is for consistency with the driver() and operator() methods, which are also accessed through a getter.
@@ -88,12 +91,16 @@ public abstract class CommandBasedBunyipsOpMode extends BunyipsOpMode {
     }
 
     /**
-     * Call to add subsystems that should be managed by the Scheduler. This is required to be
-     * called in the onInitialise() method, otherwise your subsystems will not be updated.
+     * Call to manually add the subsystems that should be managed by the scheduler. Using this method will override
+     * the automatic collection of {@link BunyipsSubsystem}s, and allows you to determine which subsystems will be managed for
+     * this OpMode.
+     * <p>
+     * For most cases, using this method is not required and all you need to do is construct your subsystems and they
+     * will be managed automatically. This method is for advanced cases where you don't want this behaviour to happen.
      *
-     * @param subsystems the subsystems to be managed and updated by the Scheduler
+     * @param subsystems the restrictive list of subsystems to be managed and updated by the scheduler
      */
-    public void addSubsystems(BunyipsSubsystem... subsystems) {
+    public void useSubsystems(BunyipsSubsystem... subsystems) {
         if (!NullSafety.assertNotNull(Arrays.stream(subsystems).toArray())) {
             throw new RuntimeException("Null subsystems were added in the addSubsystems() method!");
         }
@@ -108,9 +115,10 @@ public abstract class CommandBasedBunyipsOpMode extends BunyipsOpMode {
             Exceptions.handle(e, telemetry::log);
         }
         scheduler = new Scheduler();
-        boolean error = managedSubsystems == null || managedSubsystems.isEmpty();
-        if (!error)
-            scheduler.addSubsystems(managedSubsystems.toArray(new BunyipsSubsystem[0]));
+        if (managedSubsystems.isEmpty()) {
+            managedSubsystems = BunyipsSubsystem.instances;
+        }
+        scheduler.addSubsystems(managedSubsystems.toArray(new BunyipsSubsystem[0]));
         assignCommands();
         Scheduler.ConditionalTask[] tasks = scheduler.getAllocatedTasks();
         BunyipsSubsystem[] subsystems = scheduler.getManagedSubsystems();
@@ -136,9 +144,10 @@ public abstract class CommandBasedBunyipsOpMode extends BunyipsOpMode {
             out.append("  | %\n", task);
         }
         Dbg.logd(out.toString());
-        // Ensure to always run assignCommands() even if no subsystems are added, since it may be used for other purposes
-        if (error)
-            throw new RuntimeException("No BunyipsSubsystems were added in the addSubsystems() method!");
+        // Ensure to always run assignCommands() even if no subsystems are made, since it may be used for other purposes
+        if (managedSubsystems.isEmpty()) {
+            throw new RuntimeException("No BunyipsSubsystems were constructed!");
+        }
     }
 
     @Override

@@ -20,7 +20,6 @@ public class ImposterHATest extends AutonomousBunyipsOpMode {
     protected void onInitialise() {
         robot.init();
         arm = new HoldableActuator(robot.back_left_motor);
-        addSubsystems(arm);
         onActiveLoop(() -> telemetry.add("arm power: %", robot.back_left_motor.getPower()));
     }
 

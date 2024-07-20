@@ -23,7 +23,6 @@ public class ImposterTeleOpCmd extends CommandBasedBunyipsOpMode {
         config.init();
         drive = new TriDeadwheelMecanumDrive(config.driveConstants, config.mecanumCoefficients, hardwareMap.voltageSensor, config.imu, config.front_left_motor, config.front_right_motor, config.back_left_motor, config.back_right_motor, config.localizerCoefficients, config.enc_left, config.enc_right, config.enc_x);
         backServo = new Switch(config.back_servo);
-        addSubsystems(drive, backServo);
         drive.disable();
         setLoopSpeed(Milliseconds.of(100));
     }
