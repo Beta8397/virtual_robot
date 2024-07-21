@@ -1,9 +1,7 @@
 # A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
 
-New:  CenterStage field image added. Physics set up for backdrops and truss legs so that they serve as barriers to 
-robot motion.
-
-Also: A Kiwi-Drive robot configuration with three omni wheels arranged around a 16 inch diameter circular chassis.
+New:  SparFunOTOS Odometry Sensor added. It is included in the robot configurations with Mecanum drivetrains,
+but can be easily added to other drivetrains.
 
 Want to use virtual_robot to try out AcmeRobotics RoadRunner? Refer to the 
 [Road-Runner-Quickstart-Instructions](Road-Runner-Quickstart-Instructions.pdf) pdf.
