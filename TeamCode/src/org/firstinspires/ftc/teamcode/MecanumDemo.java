@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.*;
@@ -37,6 +38,9 @@ public class MecanumDemo extends LinearOpMode {
         IMU imu = hardwareMap.get(IMU.class, "imu");
 
         ColorSensor colorSensor = hardwareMap.colorSensor.get("color_sensor");
+
+        SparkFunOTOS myOTOS = hardwareMap.get(SparkFunOTOS.class, "sensor_otos");
+
         telemetry.addData("Press Start When Ready","");
         telemetry.update();
 
@@ -74,6 +78,8 @@ public class MecanumDemo extends LinearOpMode {
             telemetry.addData("Back Distance", " %.1f", backDistance.getDistance(DistanceUnit.CM));
             telemetry.addData("Encoders"," %d %d %d %d", m1.getCurrentPosition(), m2.getCurrentPosition(),
                     m3.getCurrentPosition(), m4.getCurrentPosition());
+            SparkFunOTOS.Pose2D pose2D = myOTOS.getPosition();
+            telemetry.addData("Pose", "x=%.1f  y=%.1f  h=%.1f", pose2D.x, pose2D.y, pose2D.h);
             telemetry.update();
         }
         m1.setPower(0);

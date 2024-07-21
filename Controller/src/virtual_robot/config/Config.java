@@ -47,7 +47,7 @@ public class Config {
      * Define the game.  This must match the forGame attribute of the GameElementConfig annotation
      * on the VirtualGameElement implementations.
      */
-    public static final Game GAME = new CenterStage();
+    public static final Game GAME = new NoGame();
 
     /**
      * Friction coefficient between field and robot wheels. A very high value will minimize the effect
