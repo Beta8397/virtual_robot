@@ -498,8 +498,12 @@ public class SparkFunOTOS implements HardwareDevice {
      * the sensor, the OTOS will return the position of the robot
      * @param pose Offset of the sensor relative to the center of the robot
      */
-    public void setOffsetMR(Pose2D pose) {
-        offsetMR = new Pose2D(pose.x, pose.y, pose.h);
+    public void setOffset(Pose2D pose) {
+        offsetMR = new Pose2D(
+                DistanceUnit.METER.fromUnit(_distanceUnit, pose.x),
+                DistanceUnit.METER.fromUnit(_distanceUnit, pose.y),
+                _angularUnit==AngleUnit.RADIANS? pose.h : Math.toRadians(pose.h)
+        );
     }
 
     /**
