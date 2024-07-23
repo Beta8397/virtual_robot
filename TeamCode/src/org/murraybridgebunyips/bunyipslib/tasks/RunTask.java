@@ -1,6 +1,5 @@
 package org.murraybridgebunyips.bunyipslib.tasks;
 
-import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.OnceTask;
 
 /**
@@ -28,19 +27,6 @@ public class RunTask extends OnceTask {
         this(() -> {
         });
         withName("Run Nothing");
-    }
-
-    /**
-     * Run the given callback immediately, with a dependency on the given subsystem.
-     *
-     * @param callback            The callback to run.
-     * @param dependencySubsystem The subsystem to run this on.
-     * @param override            Whether to override conflicting tasks.
-     */
-    public RunTask(Runnable callback, BunyipsSubsystem dependencySubsystem, boolean override) {
-        super(dependencySubsystem, override);
-        this.callback = callback;
-        withName("Run");
     }
 
     @Override

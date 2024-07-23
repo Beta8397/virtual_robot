@@ -1,6 +1,6 @@
 package org.murraybridgebunyips.bunyipslib.tasks;
 
-import org.murraybridgebunyips.bunyipslib.tasks.bases.NoTimeoutTask;
+import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 import org.murraybridgebunyips.bunyipslib.vision.Vision;
 import org.murraybridgebunyips.bunyipslib.vision.data.TfodData;
 import org.murraybridgebunyips.bunyipslib.vision.processors.TFOD;
@@ -21,7 +21,7 @@ import java.util.List;
  * specific tasks will be kept, this one will be archived as breaking changes will be made to the Vision system.
  */
 @Deprecated
-public class GetWhitePixelTask extends NoTimeoutTask {
+public class GetWhitePixelTask extends Task {
     /**
      * For use in CAPTURE mode, lock in the spike detection if it is detected for this many frames
      */

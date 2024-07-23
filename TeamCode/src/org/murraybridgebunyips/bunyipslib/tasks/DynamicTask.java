@@ -1,16 +1,18 @@
 package org.murraybridgebunyips.bunyipslib.tasks;
 
+import static org.murraybridgebunyips.bunyipslib.Text.getCallingUserCodeFunction;
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 import org.murraybridgebunyips.bunyipslib.Dbg;
 import org.murraybridgebunyips.bunyipslib.external.units.Measure;
 import org.murraybridgebunyips.bunyipslib.external.units.Time;
-import org.murraybridgebunyips.bunyipslib.tasks.bases.NoTimeoutTask;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
 import java.util.function.Supplier;
-
-import static org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds;
 
 /**
  * Represents a task that is constructed at runtime. This is useful for tasks that have runtime requirements
@@ -23,7 +25,7 @@ import static org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds;
  *
  * @author Lucas Bubner, 2024
  */
-public class DynamicTask extends NoTimeoutTask {
+public class DynamicTask extends Task {
     private final Supplier<Task> lazyTask;
 
     @Nullable
@@ -49,30 +51,43 @@ public class DynamicTask extends NoTimeoutTask {
         Dbg.logd(getClass(), "built -> % (t=%)", name, timeout.magnitude() <= 0 ? "inf" : timeout.in(Seconds) + "s");
         withName(name);
         setTimeout(timeout);
+        builtTask.getDependency().ifPresent((dep) ->
+                dep.setHighPriorityCurrentTask(builtTask));
     }
 
     @Override
     protected void periodic() {
         if (builtTask == null) return;
-        builtTask.run();
+        if (!builtTask.hasDependency())
+            builtTask.run();
     }
 
     @Override
     protected void onFinish() {
         if (builtTask == null) return;
         builtTask.finishNow();
+        builtTask.getDependency().ifPresent(BunyipsSubsystem::cancelCurrentTask);
     }
 
     @Override
     protected void onReset() {
         if (builtTask == null) return;
         builtTask.reset();
+        withName("Dynamic (Pending construction)");
+        withTimeout(INFINITE_TIMEOUT);
         builtTask = null;
     }
 
     @Override
     protected boolean isTaskFinished() {
         if (builtTask == null) return false;
-        return builtTask.pollFinished();
+        return builtTask.hasDependency() ? builtTask.isFinished() : builtTask.pollFinished();
+    }
+
+    @NonNull
+    @Override
+    public final Task onSubsystem(@NonNull BunyipsSubsystem subsystem, boolean override) {
+        Dbg.error(getCallingUserCodeFunction(), "Dynamic tasks are not designed to be attached to a subsystem, as the internal task will be scheduled to subsystems instead.");
+        return this;
     }
 }

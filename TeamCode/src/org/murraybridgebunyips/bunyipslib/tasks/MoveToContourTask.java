@@ -44,6 +44,7 @@ public class MoveToContourTask extends Task {
     private final Processor<ContourData> processor;
     private final PIDFController translationController;
     private final PIDFController rotationController;
+    private boolean hasCalculated;
     private DoubleSupplier x;
     private DoubleSupplier y;
     private DoubleSupplier r;
@@ -60,9 +61,9 @@ public class MoveToContourTask extends Task {
      * @param rotationController    the PID controller for the rotational movement
      */
     public MoveToContourTask(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier rSupplier, BunyipsSubsystem drive, Processor<ContourData> processor, PIDFController translationController, PIDFController rotationController) {
-        super(INFINITE_TIMEOUT, drive, false);
         if (!(drive instanceof RoadRunnerDrive))
             throw new EmergencyStop("MoveToContourTask must be used with a drivetrain with X forward Pose/IMU info");
+        onSubsystem(drive, false);
         this.drive = (RoadRunnerDrive) drive;
         this.processor = processor;
         x = xSupplier;
@@ -98,9 +99,10 @@ public class MoveToContourTask extends Task {
      * @param rotationController    the PID controller for the rotational movement
      */
     public MoveToContourTask(Measure<Time> timeout, BunyipsSubsystem drive, Processor<ContourData> processor, PIDFController translationController, PIDFController rotationController) {
-        super(timeout, drive, false);
+        super(timeout);
         if (!(drive instanceof RoadRunnerDrive))
             throw new EmergencyStop("MoveToContourTask must be used with a drivetrain with X forward Pose/IMU info");
+        onSubsystem(drive, false);
         this.drive = (RoadRunnerDrive) drive;
         this.processor = processor;
         this.translationController = translationController;
@@ -123,6 +125,7 @@ public class MoveToContourTask extends Task {
 
     @Override
     protected void init() {
+        hasCalculated = false;
         if (!processor.isAttached())
             throw new RuntimeException("Vision processor was initialised without being attached to the vision system");
     }
@@ -148,6 +151,7 @@ public class MoveToContourTask extends Task {
                             rotationController.calculate(biggestContour.getYaw(), 0.0)
                     )
             );
+            hasCalculated = true;
         } else {
             drive.setWeightedDrivePower(pose);
         }
@@ -160,6 +164,6 @@ public class MoveToContourTask extends Task {
 
     @Override
     protected boolean isTaskFinished() {
-        return x == null && translationController.atSetPoint() && rotationController.atSetPoint();
+        return x == null && hasCalculated && translationController.atSetPoint() && rotationController.atSetPoint();
     }
 }

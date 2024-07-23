@@ -504,8 +504,15 @@ public class Scheduler extends BunyipsComponent {
         }
 
         /**
-         * Run a task when the condition is met.
-         * This task will run (and self-reset if finished) while the condition is met.
+         * Queue a task when the condition is met.
+         * This task will run (and self-reset if finished) for as long as the condition is met.
+         * <p>
+         * Note this means that the task provided will run from start-to-finish when the condition is true, which means
+         * it <i>won't execute exclusively while the condition is met</i>, rather have the capability to be started when
+         * the condition is met. This means continuous iterations of a true condition will try to keep this task queued
+         * at all times, resetting the task internally when it is completed. Keep this in mind if working with
+         * looping/long tasks, as you might experience runaway tasks.
+         * See {@link #finishingIf} for fine-grain "run exclusively if" control.
          * <p>
          * This method can only be called once per ConditionalTask.
          * If you do not mention timing control, this task will be run immediately when the condition is met,
@@ -570,7 +577,8 @@ public class Scheduler extends BunyipsComponent {
         }
 
         /**
-         * Run a task when the condition is met, debouncing the task from running more than once the condition is met.
+         * Queue a task when the condition is met, debouncing the task from queueing more than once the condition is met.
+         * This effectively does the same as {@link #run}, however only a single queue is permitted per rising edge.
          * <p>
          * This method can only be called once per ConditionalTask.
          * If you do not mention timing control, this task will be run immediately when the condition is met,
@@ -586,6 +594,7 @@ public class Scheduler extends BunyipsComponent {
 
         /**
          * Implicitly make a new RunTask to run once the condition is met, debouncing the task from running more than once the condition is met.
+         * This effectively will run this code block once when the condition is met at the rising edge.
          * <p>
          * This method can only be called once per ConditionalTask.
          * If you do not mention timing control, this task will be run immediately when the condition is met,

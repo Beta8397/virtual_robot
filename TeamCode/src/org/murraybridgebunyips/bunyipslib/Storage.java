@@ -12,7 +12,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 //import com.google.gson.JsonSerializer;
 //import com.google.gson.JsonSyntaxException;
 //import com.google.gson.reflect.TypeToken;
-//
+
 //import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
 
@@ -32,38 +32,78 @@ import java.util.List;
  * @author Lucas Bubner, 2024
  */
 public final class Storage {
+    private static Memory memory = null;
+//    private static Filesystem filesystem = null;
+
     private Storage() {
     }
+
+    /**
+     * Global method to clear all static state for an OpMode.
+     * Called internally by {@link BunyipsOpMode}.
+     */
+    public static void resetAllStaticFieldsForOpMode() {
+        // All static field resets go here
+        RoadRunner.resetForOpMode();
+        BunyipsSubsystem.resetForOpMode();
+        Tasks.resetForOpMode();
+    }
+
+    /**
+     * Get the global volatile (cleared after restart) memory storage for the robot.
+     *
+     * @return Instance for volatile memory storage
+     */
+    public static Memory memory() {
+        if (memory == null)
+            memory = new Memory();
+        return memory;
+    }
+
+//    /**
+//     * Get the global persistent (saved after restart) filesystem storage for the robot.
+//     * Storage information is saved in the robot controller internal storage.
+//     *
+//     * @return Instance for persistent storage
+//     */
+//    public static Filesystem filesystem() {
+//        if (filesystem == null)
+//            filesystem = new Filesystem();
+//        return filesystem;
+//    }
 
     /**
      * Represents in-memory storage for the robot.
      */
     public static class Memory {
-        private Memory() {
-        }
-
-        private final HashMap<String, Object> store = new HashMap<>();
-
         /**
          * Static array of hardware errors stored via hardware name.
          *
          * @see RobotConfig
          */
         public final ArrayList<String> hardwareErrors = new ArrayList<>();
-
         /**
          * Components that are unusable and should not have their errors logged.
          *
          * @see NullSafety
          */
         public final List<String> unusableComponents = new ArrayList<>();
-
+        private final HashMap<String, Object> store = new HashMap<>();
+        /**
+         * The last known player Alliance.
+         *
+         * @see StartingPositions
+         */
+        public StartingPositions lastKnownAlliance = null;
         /**
          * The last known position of the robot from odometry.
          *
          * @see RoadRunnerDrive
          */
         public Pose2d lastKnownPosition = null;
+
+        private Memory() {
+        }
 
         /**
          * Clear all volatile memory related to the robot.
@@ -72,6 +112,7 @@ public final class Storage {
             store.clear();
             hardwareErrors.clear();
             unusableComponents.clear();
+            lastKnownAlliance = null;
             lastKnownPosition = null;
         }
 
@@ -106,19 +147,6 @@ public final class Storage {
         }
     }
 
-    private static Memory memory = null;
-
-    /**
-     * Get the global volatile (cleared after restart) memory storage for the robot.
-     *
-     * @return Instance for volatile memory storage
-     */
-    public static Memory memory() {
-        if (memory == null)
-            memory = new Memory();
-        return memory;
-    }
-
 //    /**
 //     * Represents persistent, file-saved storage for the robot.
 //     */
@@ -129,7 +157,8 @@ public final class Storage {
 //                .registerTypeAdapter(Class.class, new ClassTypeAdapter())
 //                .setPrettyPrinting()
 //                .create();
-//        private final Type storeType = new TypeToken<HashMap<String, Object>>() {}.getType();
+//        private final Type storeType = new TypeToken<HashMap<String, Object>>() {
+//        }.getType();
 //
 //        private Filesystem() {
 //            File dir = file.getParentFile();
@@ -142,22 +171,6 @@ public final class Storage {
 //                store.putAll(gson.fromJson(reader, storeType));
 //            } catch (IOException | JsonSyntaxException e) {
 //                Dbg.error("Failed to load storage file: " + e.getMessage());
-//            }
-//        }
-//
-//        private static class ClassTypeAdapter implements JsonSerializer<Class<?>>, JsonDeserializer<Class<?>> {
-//            @Override
-//            public JsonElement serialize(Class<?> src, Type typeOfSrc, JsonSerializationContext context) {
-//                return new JsonPrimitive(src.getName());
-//            }
-//            @Override
-//            public Class<?> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-//                    throws JsonParseException {
-//                try {
-//                    return Class.forName(json.getAsString());
-//                } catch (ClassNotFoundException e) {
-//                    throw new RuntimeException(e);
-//                }
 //            }
 //        }
 //
@@ -194,19 +207,22 @@ public final class Storage {
 //                Dbg.error("Failed to save storage file: " + e.getMessage());
 //            }
 //        }
-//    }
 //
-//    private static Filesystem filesystem = null;
+//        private static class ClassTypeAdapter implements JsonSerializer<Class<?>>, JsonDeserializer<Class<?>> {
+//            @Override
+//            public JsonElement serialize(Class<?> src, Type typeOfSrc, JsonSerializationContext context) {
+//                return new JsonPrimitive(src.getName());
+//            }
 //
-//    /**
-//     * Get the global persistent (saved after restart) filesystem storage for the robot.
-//     * Storage information is saved in the robot controller internal storage.
-//     *
-//     * @return Instance for persistent storage
-//     */
-//    public static Filesystem filesystem() {
-//        if (filesystem == null)
-//            filesystem = new Filesystem();
-//        return filesystem;
+//            @Override
+//            public Class<?> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+//                    throws JsonParseException {
+//                try {
+//                    return Class.forName(json.getAsString());
+//                } catch (ClassNotFoundException e) {
+//                    throw new RuntimeException(e);
+//                }
+//            }
+//        }
 //    }
 }

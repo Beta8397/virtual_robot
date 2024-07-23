@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.util.Size;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import org.firstinspires.ftc.robotcore.external.function.Consumer;
 import org.firstinspires.ftc.robotcore.external.function.Continuation;
@@ -138,6 +139,7 @@ public abstract class Processor<T extends VisionData> implements VisionProcessor
      *
      * @return the dimensions in pixels of the attached camera instance, or null if there is no attached instance
      */
+    @Nullable
     protected Size getCameraDimensions() {
         return cameraDimensions;
     }

@@ -10,7 +10,8 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.ForeverTask;
 public class IdleTask extends ForeverTask {
     @Override
     protected void init() {
-        // no-op
+        // Ensure the name remains the same for telemetry ignoring
+        withName("IdleTask");
     }
 
     @Override

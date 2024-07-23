@@ -6,14 +6,12 @@ import org.murraybridgebunyips.bunyipslib.Text.round
 import org.murraybridgebunyips.bunyipslib.external.units.Measure
 import org.murraybridgebunyips.bunyipslib.external.units.Time
 import org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds
-import org.murraybridgebunyips.bunyipslib.tasks.bases.RobotTask
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task
 
 /**
  * Relay a message in telemetry for a specific amount of time.
  */
-class MessageTask(time: Measure<Time>, private val message: String) :
-    Task(time), RobotTask {
+class MessageTask(time: Measure<Time>, private val message: String) : Task(time) {
     private var item: Item? = null
 
     init {

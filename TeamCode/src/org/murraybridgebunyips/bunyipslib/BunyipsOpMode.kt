@@ -18,7 +18,6 @@ import org.murraybridgebunyips.bunyipslib.external.units.Measure
 import org.murraybridgebunyips.bunyipslib.external.units.Time
 import org.murraybridgebunyips.bunyipslib.external.units.Units.*
 import org.murraybridgebunyips.bunyipslib.roadrunner.util.LynxModuleUtil
-import org.murraybridgebunyips.bunyipslib.tasks.bases.RobotTask
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task
 import org.murraybridgebunyips.deps.BuildConfig
 import java.util.concurrent.ExecutorService
@@ -103,7 +102,7 @@ abstract class BunyipsOpMode : BOMInternal() {
 
     private val runnables = mutableListOf<Runnable>()
     private var gamepadExecutor: ExecutorService? = null
-    private var initTask: RobotTask? = null
+    private var initTask: Runnable? = null
 
     companion object {
         private var _instance: BunyipsOpMode? = null
@@ -296,7 +295,7 @@ abstract class BunyipsOpMode : BOMInternal() {
                     // Run the user's init task, if it isn't null
                     initTask?.run()
                     // Run until onInitLoop returns true, and the initTask is done, or the OpMode is continued
-                    if (onInitLoop() && (initTask == null || initTask?.pollFinished() == true)) break
+                    if (onInitLoop() && (initTask == null || initTask !is Task || (initTask as Task).pollFinished())) break
                 } catch (e: Exception) {
                     ok = false
                     telemetry.overrideStatus = "<font color='red'><b>error</b></font>"
@@ -312,14 +311,10 @@ abstract class BunyipsOpMode : BOMInternal() {
             // We can only finish Task objects, as the RobotTask interface does not have a finish method
             // Most tasks will inherit from Task, so this should be safe, but this is to ensure maximum compatibility
             try {
-                if (initTask is Task && initTask?.isFinished() == false) {
+                if (initTask is Task && !(initTask as Task).isFinished()) {
                     Dbg.log("BunyipsOpMode: initTask did not finish in time, early finishing -> % ...", initTask)
                     telemetry.log("<font color='gray'>init-task interrupted by start request.</font>")
                     (initTask as Task).finishNow()
-                } else if (initTask?.isFinished() == false) {
-                    // If we can't finish the task, log a warning and continue
-                    Dbg.warn("BunyipsOpMode: initTask did not finish during the init-phase!", initTask)
-                    telemetry.log("<b><font color='yellow'>WARNING!</font></b> <font color='gray'>init-task did not finish.</font>")
                 } else if (initTask != null) {
                     Dbg.logd("BunyipsOpMode: initTask finished -> % ...", initTask)
                     telemetry.log("<font color='gray'>init-task finished.</font>")
@@ -490,7 +485,7 @@ abstract class BunyipsOpMode : BOMInternal() {
      *
      * @see onInitDone
      */
-    protected fun setInitTask(task: RobotTask?) {
+    protected fun setInitTask(task: Runnable) {
         if (initTask != null) {
             Dbg.warn(javaClass, "Init-task has already been set to %, overriding it with %...", initTask, task)
         }
@@ -633,8 +628,7 @@ abstract class BunyipsOpMode : BOMInternal() {
         operationsPaused = false
         safeHaltHardwareOnStop = false
         gamepadExecutor = null
-        RoadRunner.resetForOpMode()
-        BunyipsSubsystem.instances.clear()
+        Storage.resetAllStaticFieldsForOpMode()
     }
 
     /**

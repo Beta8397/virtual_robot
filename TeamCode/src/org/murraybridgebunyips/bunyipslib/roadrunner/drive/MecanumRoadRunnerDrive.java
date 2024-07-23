@@ -20,7 +20,7 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
+import org.murraybridgebunyips.bunyipslib.DualTelemetry;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.TrajectorySequence;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.TrajectorySequenceBuilder;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.TrajectorySequenceRunner;
@@ -53,7 +53,7 @@ public class MecanumRoadRunnerDrive extends com.acmerobotics.roadrunner.drive.Me
     /**
      * Constructor for the MecanumRoadRunnerDrive class.
      *
-     * @param opMode        The opMode to use for logging.
+     * @param telemetry     The (optional) DualTelemetry instance to use for telemetry.
      * @param constants     The drive constants for the robot.
      * @param coefficients  The coefficients for the mecanum drive.
      * @param voltageSensor The voltage sensor for the robot from hardwareMap.
@@ -63,7 +63,7 @@ public class MecanumRoadRunnerDrive extends com.acmerobotics.roadrunner.drive.Me
      * @param bl            The back left motor.
      * @param br            The back right motor.
      */
-    public MecanumRoadRunnerDrive(@Nullable BunyipsOpMode opMode, DriveConstants constants, MecanumCoefficients coefficients, HardwareMap.DeviceMapping<VoltageSensor> voltageSensor, IMU imu, DcMotorEx fl, DcMotorEx fr, DcMotorEx bl, DcMotorEx br) {
+    public MecanumRoadRunnerDrive(@Nullable DualTelemetry telemetry, DriveConstants constants, MecanumCoefficients coefficients, HardwareMap.DeviceMapping<VoltageSensor> voltageSensor, IMU imu, DcMotorEx fl, DcMotorEx fr, DcMotorEx bl, DcMotorEx br) {
         super(constants.kV, constants.kA, constants.kStatic, constants.TRACK_WIDTH, constants.TRACK_WIDTH, coefficients.LATERAL_MULTIPLIER);
 
         follower = new HolonomicPIDVAFollower(coefficients.TRANSLATIONAL_PID, coefficients.TRANSLATIONAL_PID, coefficients.HEADING_PID,
@@ -109,7 +109,7 @@ public class MecanumRoadRunnerDrive extends com.acmerobotics.roadrunner.drive.Me
         List<Integer> lastTrackingEncVels = new ArrayList<>();
 
         trajectorySequenceRunner = new TrajectorySequenceRunner(
-                opMode, constants.RUN_USING_ENCODER, follower, coefficients.HEADING_PID, batteryVoltageSensor,
+                telemetry, constants.RUN_USING_ENCODER, follower, coefficients.HEADING_PID, batteryVoltageSensor,
                 lastEncPositions, lastEncVels, lastTrackingEncPositions, lastTrackingEncVels
         );
     }

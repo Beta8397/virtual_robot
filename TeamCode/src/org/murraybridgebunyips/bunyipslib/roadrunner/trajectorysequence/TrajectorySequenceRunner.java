@@ -16,7 +16,7 @@ import com.acmerobotics.roadrunner.trajectory.TrajectoryMarker;
 import com.acmerobotics.roadrunner.util.NanoClock;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
-import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
+import org.murraybridgebunyips.bunyipslib.DualTelemetry;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.sequencesegment.SequenceSegment;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.sequencesegment.TrajectorySegment;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.sequencesegment.TurnSegment;
@@ -68,7 +68,7 @@ public class TrajectorySequenceRunner {
     private final TrajectoryFollower follower;
 
     private final PIDFController turnController;
-    private final BunyipsOpMode opMode;
+    private final DualTelemetry telemetry;
 
     private final NanoClock clock;
     private final FtcDashboard dashboard;
@@ -89,7 +89,7 @@ public class TrajectorySequenceRunner {
     /**
      * Create a new trajectory sequence runner.
      *
-     * @param opMode                        The OpMode to use for logging.
+     * @param telemetry                     The (optional) DualTelemetry instance to use for telemetry.
      * @param driveConstantsRunUsingEncoder Whether the drive constants are run using encoders.
      * @param follower                      The trajectory follower to use.
      * @param headingPIDCoefficients        The PID coefficients for the heading controller.
@@ -100,10 +100,10 @@ public class TrajectorySequenceRunner {
      * @param lastTrackingEncVels           The last tracking encoder velocities.
      */
     public TrajectorySequenceRunner(
-            @Nullable BunyipsOpMode opMode, boolean driveConstantsRunUsingEncoder, TrajectoryFollower follower, PIDCoefficients headingPIDCoefficients, VoltageSensor voltageSensor,
+            @Nullable DualTelemetry telemetry, boolean driveConstantsRunUsingEncoder, TrajectoryFollower follower, PIDCoefficients headingPIDCoefficients, VoltageSensor voltageSensor,
             List<Integer> lastDriveEncPositions, List<Integer> lastDriveEncVels, List<Integer> lastTrackingEncPositions, List<Integer> lastTrackingEncVels
     ) {
-        this.opMode = opMode;
+        this.telemetry = telemetry;
         this.follower = follower;
         this.driveConstantsRunUsingEncoder = driveConstantsRunUsingEncoder;
 
@@ -263,16 +263,16 @@ public class TrajectorySequenceRunner {
             );
         }
 
-        if (opMode != null) {
-            opMode.telemetry.addDashboard("x", poseEstimate.getX());
-            opMode.telemetry.addDashboard("y", poseEstimate.getY());
-            opMode.telemetry.addDashboard("heading (deg)", Math.toDegrees(poseEstimate.getHeading()));
+        if (telemetry != null) {
+            telemetry.addDashboard("x", poseEstimate.getX());
+            telemetry.addDashboard("y", poseEstimate.getY());
+            telemetry.addDashboard("heading (deg)", Math.toDegrees(poseEstimate.getHeading()));
 
-            opMode.telemetry.addDashboard("xError", lastPoseError.getX());
-            opMode.telemetry.addDashboard("yError", lastPoseError.getY());
-            opMode.telemetry.addDashboard("headingError (deg)", Math.toDegrees(lastPoseError.getHeading()));
+            telemetry.addDashboard("xError", lastPoseError.getX());
+            telemetry.addDashboard("yError", lastPoseError.getY());
+            telemetry.addDashboard("headingError (deg)", Math.toDegrees(lastPoseError.getHeading()));
 
-            draw(opMode.telemetry.dashboardFieldOverlay(), currentTrajectorySequence, currentSegment, targetPose, poseEstimate);
+            draw(telemetry.dashboardFieldOverlay(), currentTrajectorySequence, currentSegment, targetPose, poseEstimate);
         } else {
             // Using normal OpMode, we can send packets directly
             TelemetryPacket packet = new TelemetryPacket();

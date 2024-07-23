@@ -28,12 +28,17 @@ object Exceptions {
      */
     @JvmStatic
     fun handle(e: Exception, stderr: Consumer<String>) {
+        Dbg.error("Exception caught! Stacktrace:")
+        Dbg.sendStacktrace(e)
+        val sw = StringWriter()
+        e.printStackTrace(PrintWriter(sw))
+        var stack = sw.toString()
         if (e is NullPointerException) {
             for (component in Storage.memory().unusableComponents) {
-                if (e.localizedMessage?.contains(component) == true) {
+                if (stack.contains(component)) {
                     // This error is caused by a null component, which is handled by NullSafety
                     // As such, we can swallow it from appearing on the Driver Station
-                    Dbg.warn("Attempted to utilise null-aware unusable object: $component")
+                    // Logcat will still receive this log, so we can just early exit.
                     return
                 }
             }
@@ -42,16 +47,11 @@ object Exceptions {
         if (e.cause != null) {
             stderr.accept("caused by: ${e.cause}")
         }
-        val sw = StringWriter()
-        e.printStackTrace(PrintWriter(sw))
-        var stack = sw.toString()
         if (stack.length > MAX_DS_STACKTRACE_CHARS) {
             stack = stack.substring(0, MAX_DS_STACKTRACE_CHARS - 4)
             stack += " ..."
         }
         stderr.accept("<small>$stack</small>")
-        Dbg.error("Exception caught! Stacktrace:")
-        Dbg.sendStacktrace(e)
         if (e is InterruptedException) {
             Dbg.error("Interrupted exception called, raising to superclass...")
             // FTC SDK must handle this

@@ -15,6 +15,7 @@ import org.opencv.core.Mat;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * AprilTag Detection Processor
@@ -45,9 +46,33 @@ public class AprilTag extends Processor<AprilTagData> {
         instance = makeBuilderWithCommonSettings().build();
     }
 
+    /**
+     * Create an AprilTag instance with the additional builder settings as provided.
+     * Will rely on the SDK to provide camera intrinsics for this overload.
+     *
+     * @param customBuilderSettings additional settings that will be attached to the builder
+     */
+    public AprilTag(Function<AprilTagProcessor.Builder, AprilTagProcessor.Builder> customBuilderSettings) {
+        instance = customBuilderSettings.apply(makeBuilderWithCommonSettings()).build();
+    }
+
+    /**
+     * Create an AprilTag instance with the additional builder settings as provided.
+     * Will use the provided camera calibration.
+     *
+     * @param customBuilderSettings additional settings that will be attached to the builder
+     * @param camInfo               CameraType instance with the camera calibration
+     */
+    public AprilTag(Function<AprilTagProcessor.Builder, AprilTagProcessor.Builder> customBuilderSettings, CameraType camInfo) {
+        instance = customBuilderSettings.apply(
+                makeBuilderWithCommonSettings()
+                        .setLensIntrinsics(camInfo.getFx(), camInfo.getFy(), camInfo.getCx(), camInfo.getCy())
+        ).build();
+    }
+
     private AprilTagProcessor.Builder makeBuilderWithCommonSettings() {
         return new AprilTagProcessor.Builder()
-                // Specify custom AprilTag settings here, season assets and units are automatic
+                // Common (always enabled) settings
                 .setDrawAxes(true)
                 .setDrawCubeProjection(true);
     }
@@ -71,26 +96,15 @@ public class AprilTag extends Processor<AprilTagData> {
     protected void update() {
         List<AprilTagDetection> detections = instance.getDetections();
         for (AprilTagDetection detection : detections) {
+            // Need to wrap the AprilTagDetection in an extension of VisionData for consistency
             data.add(new AprilTagData(
                     detection.id,
                     detection.hamming,
                     detection.decisionMargin,
                     detection.center,
                     Arrays.asList(detection.corners),
-                    detection.metadata != null ? detection.metadata.name : null,
-                    detection.metadata != null ? detection.metadata.tagsize : null,
-                    detection.metadata != null ? detection.metadata.fieldPosition : null,
-                    detection.metadata != null ? detection.metadata.fieldOrientation : null,
-                    detection.metadata != null ? detection.metadata.distanceUnit : null,
-                    detection.ftcPose != null ? detection.ftcPose.x : null,
-                    detection.ftcPose != null ? detection.ftcPose.y : null,
-                    detection.ftcPose != null ? detection.ftcPose.z : null,
-                    detection.ftcPose != null ? detection.ftcPose.pitch : null,
-                    detection.ftcPose != null ? detection.ftcPose.roll : null,
-                    detection.ftcPose != null ? detection.ftcPose.yaw : null,
-                    detection.ftcPose != null ? detection.ftcPose.range : null,
-                    detection.ftcPose != null ? detection.ftcPose.bearing : null,
-                    detection.ftcPose != null ? detection.ftcPose.elevation : null,
+                    detection.metadata != null ? detection.metadata : null,
+                    detection.ftcPose,
                     detection.rawPose,
                     detection.frameAcquisitionNanoTime
             ));
@@ -112,6 +126,7 @@ public class AprilTag extends Processor<AprilTagData> {
     @Override
     protected void onFrameDraw(Canvas canvas) {
         Size dimensions = getCameraDimensions();
+        if (dimensions == null) return;
         instance.onDrawFrame(canvas, dimensions.getWidth(), dimensions.getHeight(), 1.0f, 1.0f, atCtx);
     }
 }

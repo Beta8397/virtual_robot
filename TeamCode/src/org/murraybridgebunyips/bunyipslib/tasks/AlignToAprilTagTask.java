@@ -42,6 +42,7 @@ public class AlignToAprilTagTask extends Task {
     private DoubleSupplier x;
     private DoubleSupplier y;
     private DoubleSupplier r;
+    private boolean hasCalculated;
 
     /**
      * Autonomous constructor.
@@ -53,9 +54,10 @@ public class AlignToAprilTagTask extends Task {
      * @param controller the PID controller to use for aligning to a target
      */
     public AlignToAprilTagTask(Measure<Time> timeout, BunyipsSubsystem drive, AprilTag at, int targetTag, PIDFController controller) {
-        super(timeout, drive, false);
+        super(timeout);
         if (!(drive instanceof RoadRunnerDrive))
             throw new EmergencyStop("AlignToAprilTagTask must be used with a drivetrain with X forward Pose/IMU info");
+        onSubsystem(drive, false);
         this.drive = (RoadRunnerDrive) drive;
         this.at = at;
         TARGET_TAG = targetTag;
@@ -76,9 +78,10 @@ public class AlignToAprilTagTask extends Task {
      * @param controller the PID controller to use for aligning to a target
      */
     public AlignToAprilTagTask(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier rSupplier, BunyipsSubsystem drive, AprilTag at, int targetTag, PIDFController controller) {
-        super(INFINITE_TIMEOUT, drive, false);
+        super(INFINITE_TIMEOUT);
         if (!(drive instanceof RoadRunnerDrive))
             throw new EmergencyStop("AlignToAprilTagTask must be used with a drivetrain with X forward Pose/IMU info");
+        onSubsystem(drive, false);
         this.drive = (RoadRunnerDrive) drive;
         this.at = at;
         TARGET_TAG = targetTag;
@@ -105,6 +108,7 @@ public class AlignToAprilTagTask extends Task {
 
     @Override
     protected void init() {
+        hasCalculated = false;
         if (!at.isAttached())
             throw new RuntimeException("Vision processor was initialised without being attached to the vision system");
     }
@@ -122,8 +126,7 @@ public class AlignToAprilTagTask extends Task {
 
         Optional<AprilTagData> target = data.stream().filter(p -> TARGET_TAG == -1 || p.getId() == TARGET_TAG).findFirst();
 
-        Double bearing;
-        if (!target.isPresent() || (bearing = target.get().getBearing()) == null) {
+        if (!target.isPresent()) {
             drive.setWeightedDrivePower(pose);
             return;
         }
@@ -132,9 +135,10 @@ public class AlignToAprilTagTask extends Task {
                 new Pose2d(
                         pose.getX(),
                         pose.getY(),
-                        -controller.calculate(bearing, 0.0)
+                        -controller.calculate(target.get().getFtcPose().bearing, 0.0)
                 )
         );
+        hasCalculated = true;
     }
 
     @Override
@@ -144,6 +148,6 @@ public class AlignToAprilTagTask extends Task {
 
     @Override
     protected boolean isTaskFinished() {
-        return x == null && controller.atSetPoint();
+        return x == null && hasCalculated && controller.atSetPoint();
     }
 }

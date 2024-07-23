@@ -43,9 +43,10 @@ public class ExampleCommandBasedTeleOp extends BunyipsOpMode {
         // This is because the scheduler will be responsible for running the subsystems, and will
         // need to know what subsystems to call their update() methods on
         scheduler.addSubsystems(drive);
-        // CommandBasedBunyipsOpMode has a method to ensure your subsystems are added to the scheduler,
-        // by requiring it be passed a vararg or array of subsystems in the addSubsystems() method call,
-        // similar to just using the scheduler.addSubsystems() method.
+        // NOTE: CommandBasedBunyipsOpMode will handle this for you, by looking at all the constructed BunyipsSubsystems
+        // and adding them automatically. If you don't want this behaviour, set your own subsystems that will be updated
+        // through useSubsystems(), although you will receive warnings as a cleaner alternative is to call disable() on
+        // all subsystems that don't want to be updated.
 
         // Here is where you will assign your commands. In CommandBasedBunyipsOpMode, you will have access to the
         // assignCommands() method, which internally is simply a function that is called after onInit(). Putting them
@@ -82,7 +83,7 @@ public class ExampleCommandBasedTeleOp extends BunyipsOpMode {
 
         scheduler.operator().whenReleased(Controls.X)
                 // This will replace the default DifferentialDriveTask with this task, until X is pressed again
-                .run(new ContinuousTask(() -> telemetry.add("X was released on gamepad2 and the drive system has been stopped."), drive, false))
+                .run(new ContinuousTask(() -> telemetry.add("X was released on gamepad2 and the drive system has been stopped.")).onSubsystem(drive, false))
                 .finishingIf(() -> Controls.isSelected(gamepad2, Controls.X));
 
         scheduler.when(() -> drive.isBusy())

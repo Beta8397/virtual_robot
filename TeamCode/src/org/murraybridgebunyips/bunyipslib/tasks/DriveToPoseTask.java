@@ -52,9 +52,10 @@ public class DriveToPoseTask extends Task {
      */
     public DriveToPoseTask(@NonNull Measure<Time> timeout, @NonNull BunyipsSubsystem driveSubsystem,
                            Pose2d targetPose, PIDFController forwardController, PIDFController strafeController, PIDFController headingController) {
-        super(timeout, driveSubsystem, true);
+        super(timeout);
         if (!(driveSubsystem instanceof RoadRunnerDrive))
             throw new IllegalArgumentException("DriveToPoseTask requires a RoadRunnerDrive subsystem");
+        onSubsystem(driveSubsystem, true);
         drive = (RoadRunnerDrive) driveSubsystem;
         this.targetPose = targetPose;
         this.forwardController = forwardController;

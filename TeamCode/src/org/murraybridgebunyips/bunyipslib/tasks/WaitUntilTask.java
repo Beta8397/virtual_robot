@@ -1,6 +1,8 @@
 package org.murraybridgebunyips.bunyipslib.tasks;
 
-import org.murraybridgebunyips.bunyipslib.tasks.bases.NoTimeoutTask;
+import org.murraybridgebunyips.bunyipslib.external.units.Measure;
+import org.murraybridgebunyips.bunyipslib.external.units.Time;
+import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
 import java.util.function.BooleanSupplier;
 
@@ -9,8 +11,20 @@ import java.util.function.BooleanSupplier;
  *
  * @author Lucas Bubner, 2024
  */
-public class WaitUntilTask extends NoTimeoutTask {
+public class WaitUntilTask extends Task {
     private final BooleanSupplier condition;
+
+    /**
+     * Create a new WaitUntilTask with a maximum timeout and given condition.
+     *
+     * @param timeout   max timeout
+     * @param condition the condition to wait for true
+     */
+    public WaitUntilTask(Measure<Time> timeout, BooleanSupplier condition) {
+        super(timeout);
+        this.condition = condition;
+        withName("Wait Until");
+    }
 
     /**
      * Create a new WaitUntilTask with the given condition.
@@ -23,17 +37,7 @@ public class WaitUntilTask extends NoTimeoutTask {
     }
 
     @Override
-    protected void init() {
-        // no-op
-    }
-
-    @Override
     protected void periodic() {
-        // no-op
-    }
-
-    @Override
-    protected void onFinish() {
         // no-op
     }
 

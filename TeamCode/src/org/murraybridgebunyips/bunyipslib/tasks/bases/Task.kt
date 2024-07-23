@@ -12,15 +12,28 @@ import java.util.Optional
  * A task, or command is an action that can be performed by a robot. This has been designed
  * to reflect closely the command-based programming style used in FRC, while still being
  * reflective of the past nature of how the Task system was implemented in BunyipsLib.
+ *
+ * The task system in BunyipsLib has been constructed from the ground-up with a more lightweight ecosystem
+ * where Tasks are at their core stripped into running some code for some time, somewhere. The original behaviour of tasks running
+ * outright used to be the legacy roots of how Tasks worked, and since has adopted some command-based structures that work
+ * alongside the lightweight premise of a Task being "a Runnable with a timeout" with a run implementation left to the user.
+ *
+ * Some different implementations on how Tasks are interpreted are demonstrated in these classes:
+ * - Scheduler
+ * - BunyipsOpMode
+ * - AutonomousBunyipsOpMode
+ * - BunyipsSubsystem
+ * - Tasks
+ *
  * @author Lucas Bubner, 2024
  */
 abstract class Task(
     /**
-     * Maximum timeout of the task. If set to 0 magnitude this will serve as an indefinite task, and
-     * will only finish when isTaskFinished() returns true.
+     * Maximum timeout of the task. If set to 0 magnitude (or a timeout-less constructor) this will serve as an indefinite task, and
+     * will only finish when isTaskFinished() returns true, or this task is manually interrupted via [finish].
      */
     var timeout: Measure<Time>
-) : BunyipsComponent(), RobotTask {
+) : BunyipsComponent(), Runnable {
     private var overrideDependency: Boolean = false
     private var dependency: BunyipsSubsystem? = null
     private var mutedReport = false
@@ -28,14 +41,28 @@ abstract class Task(
     private var name = this.javaClass.simpleName
 
     /**
-     * Return whether this task has a dependency on a subsystem or not.
+     * Set the subsystem you want to elect this task to run on, notifying the runner that this task should run there.
+     *
+     * @param subsystem The subsystem to elect as the runner of this task
+     * @param override  Whether this task should override conflicting tasks on this subsystem (not incl. default tasks)
+     * @return this task
+     */
+    @JvmOverloads
+    open fun onSubsystem(subsystem: BunyipsSubsystem, override: Boolean = false): Task {
+        dependency = subsystem
+        overrideDependency = override
+        return this
+    }
+
+    /**
+     * Return whether this task has elected a dependency on a subsystem or not.
      */
     fun hasDependency(): Boolean {
         return dependency != null
     }
 
     /**
-     * Get the subsystem reference that this task is dependent on.
+     * Get the subsystem reference that this task has elected a dependency on.
      * Will return an Optional where if it is not present, this task is not dependent on any subsystem.
      */
     fun getDependency(): Optional<BunyipsSubsystem> {
@@ -59,20 +86,16 @@ abstract class Task(
 
     /**
      * @return Whether this task should override other tasks in the queue if they conflict with this task. Will only
-     *         apply if this task has a dependency (see hasDependency, getDependency).
+     *         apply if this task has a dependency (see [hasDependency], [getDependency]).
      */
     fun isOverriding(): Boolean {
         return overrideDependency
     }
 
-    constructor(
-        timeout: Measure<Time>,
-        dependencySubsystem: BunyipsSubsystem,
-        override: Boolean
-    ) : this(timeout) {
-        dependency = dependencySubsystem
-        overrideDependency = override
-    }
+    /**
+     * A task that does not have an integrated timeout, and will rely on manual intervention and [isTaskFinished].
+     */
+    constructor() : this(INFINITE_TIMEOUT)
 
     /**
      * Set the name of this task to be displayed in the OpMode.
@@ -99,7 +122,7 @@ abstract class Task(
      * Get a verbose string representation of this task, including all of its properties.
      */
     fun toVerboseString(): String {
-        return name + "[${if (taskFinished) "FINISHED" else "READY"}, ${if (isRunning) deltaTime else "NOT RUNNING"}/${if (timeout.magnitude() == 0.0) "INDEFINITE" else "$timeout"}, ${if (dependency != null) "DEPENDENT ON <${dependency?.javaClass?.simpleName}>" else "INDEPENDENT"}, ${if (overrideDependency) "OVERRIDING" else "NON-OVERRIDING"}, ${if (mutedReport) "MUTED" else "REPORTING"}]"
+        return name + "[${if (taskFinished) "FINISHED" else "READY"}, ${if (isRunning) deltaTime else "NOT RUNNING"}/${if (timeout.magnitude() == 0.0) "INDEFINITE" else "$timeout"}, ${if (dependency != null) "DEPENDENT ON <${dependency?.toString()}>" else "INDEPENDENT"}, ${if (overrideDependency) "OVERRIDING" else "NON-OVERRIDING"}, ${if (mutedReport) "MUTED" else "REPORTING"}]"
     }
 
     /**
@@ -123,8 +146,11 @@ abstract class Task(
 
     /**
      * Define code to run once, when the task is started.
+     * Override to implement.
      */
-    protected abstract fun init()
+    protected open fun init() {
+        // no-op
+    }
 
     /**
      * To run as an active loop during this task's duration.
@@ -145,6 +171,8 @@ abstract class Task(
         // updated with latest finish information at the user's discretion (excluding the first-call requirement)
         if (taskFinished && !finisherFired) {
             onFinish()
+            if (!isTaskFinished())
+                onInterrupt()
             finisherFired = true
         }
         // Don't run the task if it is finished as a safety guard
@@ -153,9 +181,22 @@ abstract class Task(
     }
 
     /**
-     * Finalising function to run once the task is finished.
+     * Finalising function to run once the task is finished. This will always run regardless of whether
+     * the task was ended because of an interrupt or the task naturally finishing.
+     * Override to add your own callback.
      */
-    protected abstract fun onFinish()
+    protected open fun onFinish() {
+        // no-op
+    }
+
+    /**
+     * Finalising function that will be called after [onFinish] in the event this task is finished via
+     * a call to [finish] or [finishNow].
+     * Override to add your own callback.
+     */
+    protected open fun onInterrupt() {
+        // no-op
+    }
 
     /**
      * Return a boolean to this method to add custom criteria if a task should be considered finished.
@@ -168,13 +209,14 @@ abstract class Task(
      * internal state variables such as iterators or lists.
      */
     protected open fun onReset() {
+        // no-op
     }
 
     /**
      * Query (but not update) the finished state of the task. This will return true if the task is finished and the
      * finisher has been fired.
      */
-    final override fun isFinished(): Boolean {
+    fun isFinished(): Boolean {
         return taskFinished && finisherFired
     }
 
@@ -182,7 +224,7 @@ abstract class Task(
      * Update and query the state of the task if it is finished. This will return true if the task is finished and the
      * finisher has been fired.
      */
-    final override fun pollFinished(): Boolean {
+    fun pollFinished(): Boolean {
         // Early return
         if (taskFinished) return finisherFired
 
@@ -221,8 +263,10 @@ abstract class Task(
      */
     fun finishNow() {
         taskFinished = true
-        if (!finisherFired)
+        if (!finisherFired) {
             onFinish()
+            onInterrupt()
+        }
         finisherFired = true
     }
 

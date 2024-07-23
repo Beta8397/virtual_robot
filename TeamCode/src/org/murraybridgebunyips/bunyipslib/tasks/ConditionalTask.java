@@ -1,6 +1,5 @@
 package org.murraybridgebunyips.bunyipslib.tasks;
 
-import org.murraybridgebunyips.bunyipslib.tasks.bases.NoTimeoutTask;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
 import java.util.function.BooleanSupplier;
@@ -10,7 +9,7 @@ import java.util.function.BooleanSupplier;
  *
  * @author Lucas Bubner, 2024
  */
-public class ConditionalTask extends NoTimeoutTask {
+public class ConditionalTask extends Task {
     private final Task trueTask;
     private final Task falseTask;
     private final BooleanSupplier condition;
@@ -56,11 +55,6 @@ public class ConditionalTask extends NoTimeoutTask {
         } else {
             falseTask.run();
         }
-    }
-
-    @Override
-    protected void onFinish() {
-        // no-op
     }
 
     @Override

@@ -29,7 +29,7 @@ import org.murraybridgebunyips.bunyipslib.vision.processors.centerstage.YellowPi
 public final class VisionTest extends BunyipsOpMode {
     private Vision vision;
     private Telemetry.Item cameraStreamNotification;
-    private final UserSelection<Procs> procChooser = new UserSelection<>(this, this::callback, Procs.values());
+    private final UserSelection<Procs> procChooser = new UserSelection<>(this::callback, Procs.values());
 
     @SuppressWarnings("rawtypes")
     private void callback(Procs selection) {

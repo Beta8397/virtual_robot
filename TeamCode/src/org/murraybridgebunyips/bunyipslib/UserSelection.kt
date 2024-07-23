@@ -8,7 +8,7 @@ import java.util.function.Consumer
 
 /**
  * Async thread to ask for user input from a controller in order to determine a pre-determined
- * set of instructions before an OpMode starts.
+ * set of instructions before a [BunyipsOpMode] starts (`dynamic_init`).
  *
  * You really should only be running one of these threads at a time, preferably using the Threads
  * class to start and manage it to allow for logging and OpMode management.
@@ -56,13 +56,12 @@ import java.util.function.Consumer
  * @author Lucas Bubner, 2023
  */
 class UserSelection<T : Any>(
-    private val opMode: BunyipsOpMode,
     /**
      * Runs once the user has made a selection or the thread is interrupted. The result will be the selection made by the user.
      */
     private val callback: Consumer<T?>,
     private vararg val opmodes: T
-) : Runnable {
+) : BunyipsComponent(), Runnable {
     private val timer = ElapsedTime()
 
     /**
@@ -93,9 +92,6 @@ class UserSelection<T : Any>(
         }
 
         val buttons: HashMap<T, Controls> = Controls.mapArgs(opmodes)
-
-        // Default options for button selection and operation mode
-        var selectedOpMode: T? = null
 
         // Disable auto clear if it is enabled, we might accidentally clear out static telemetry
         opMode.telemetry.isAutoClear = false
@@ -132,11 +128,11 @@ class UserSelection<T : Any>(
         opMode.telemetry.update()
 
         var flash = false
-        while (selectedOpMode == null && opMode.opModeInInit() && !Thread.currentThread().isInterrupted) {
+        while (result == null && opMode.opModeInInit() && !Thread.currentThread().isInterrupted) {
             for ((str, button) in buttons) {
                 if (Controls.isSelected(opMode.gamepad1, button)) {
                     selectedButton = button
-                    selectedOpMode = str
+                    result = str
                     break
                 }
             }
@@ -153,15 +149,15 @@ class UserSelection<T : Any>(
             }
         }
 
-        result = selectedOpMode
-        val opModeName = selectedOpMode.toString()
+        val opModeName = result.toString()
 
         if (result == null) {
             opMode.telemetry.log("<font color='yellow'>No user OpMode selection was made.</font>")
         } else {
-            opMode.telemetry.log(
-                "Running OpMode: <font color='#caabff'>${selectedButton.name} -> <b>$opModeName</b></font>",
-            )
+            opMode.telemetry.log("Running OpMode: <font color='#caabff'>${selectedButton.name} -> <b>$opModeName</b></font>")
+            if (result is StartingPositions) {
+                Storage.memory().lastKnownAlliance = result as StartingPositions
+            }
         }
 
         opMode.telemetry.addDashboard(
@@ -181,7 +177,7 @@ class UserSelection<T : Any>(
         opMode.telemetry.isAutoClear = true
 
         try {
-            callback.accept(selectedOpMode)
+            callback.accept(result)
         } catch (e: Exception) {
             Exceptions.handle(e, opMode.telemetry::log)
         }

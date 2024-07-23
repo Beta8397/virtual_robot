@@ -3,6 +3,7 @@ package org.murraybridgebunyips.bunyipslib.vision.processors;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.Pair;
+import android.util.Size;
 
 import androidx.annotation.NonNull;
 
@@ -79,11 +80,13 @@ public class MultiColourThreshold extends Processor<ContourData> {
         for (Pair<ColourThreshold, Mat> processor : colourProcessors) {
             processor.first.onFrameDraw(canvas);
         }
+        Size cameraDimensions = getCameraDimensions();
+        if (cameraDimensions == null) return;
         // Display mask name on camera feed
         canvas.drawText(
                 MASK >= 1 && MASK <= colourProcessors.size() ? colourProcessors.get(MASK - 1).first.toString() : "",
                 10,
-                getCameraDimensions().getHeight() - 10,
+                cameraDimensions.getHeight() - 10,
                 new Paint() {{
                     setColor(0xFFFFFFFF);
                     setStrokeWidth(30);

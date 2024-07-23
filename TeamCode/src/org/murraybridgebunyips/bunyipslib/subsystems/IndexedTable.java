@@ -13,8 +13,6 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
  */
 public class IndexedTable extends BunyipsSubsystem {
     private final double[] tableValues;
-    // Name of the table for telemetry, default "Index Table"
-    private String NAME = null;
     private int index = 0;
 
     /**
@@ -24,17 +22,6 @@ public class IndexedTable extends BunyipsSubsystem {
      */
     public IndexedTable(double... tableValues) {
         this.tableValues = tableValues;
-    }
-
-    /**
-     * Set the name of the IndexedTable to display in telemetry.
-     *
-     * @param displayName the name to set
-     * @return this
-     */
-    public IndexedTable withName(String displayName) {
-        NAME = displayName;
-        return this;
     }
 
     /**
@@ -64,7 +51,7 @@ public class IndexedTable extends BunyipsSubsystem {
      * @return the task
      */
     public Task incrementTask() {
-        return new RunTask(this::increment, this, false).withName("Increment Index");
+        return new RunTask(this::increment).onSubsystem(this, false).withName("Increment Index");
     }
 
     /**
@@ -81,7 +68,7 @@ public class IndexedTable extends BunyipsSubsystem {
      * @return the task
      */
     public Task decrementTask() {
-        return new RunTask(this::decrement, this, false).withName("Decrement Index");
+        return new RunTask(this::decrement).onSubsystem(this, false).withName("Decrement Index");
     }
 
     /**
@@ -112,7 +99,7 @@ public class IndexedTable extends BunyipsSubsystem {
     protected void periodic() {
         opMode.telemetry.add(
                 "%: % <font color='gray'>(%/%)</font>",
-                NAME != null ? "Idx-" + NAME : "Index Table",
+                name,
                 tableValues[index],
                 index + 1,
                 tableValues.length

@@ -1,9 +1,14 @@
 package org.murraybridgebunyips.bunyipslib.tasks.groups;
 
+import static org.murraybridgebunyips.bunyipslib.Text.getCallingUserCodeFunction;
 import static org.murraybridgebunyips.bunyipslib.Text.round;
 import static org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds;
 
+import androidx.annotation.NonNull;
+
 import org.murraybridgebunyips.bunyipslib.AutonomousBunyipsOpMode;
+import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
+import org.murraybridgebunyips.bunyipslib.Dbg;
 import org.murraybridgebunyips.bunyipslib.EmergencyStop;
 import org.murraybridgebunyips.bunyipslib.Scheduler;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
@@ -79,18 +84,27 @@ public abstract class TaskGroup extends Task {
 
     protected final void finishAllTasks() {
         for (Task task : tasks) {
+            if (!task.isFinished())
+                task.getDependency().ifPresent(BunyipsSubsystem::cancelCurrentTask);
             task.finishNow();
         }
     }
 
     @Override
-    public final void init() {
+    protected final void init() {
         // no-op
     }
 
     @Override
-    public final void onFinish() {
-        // no-op
+    protected final void onFinish() {
+        finishAllTasks();
+    }
+
+    @NonNull
+    @Override
+    public final Task onSubsystem(@NonNull BunyipsSubsystem subsystem, boolean override) {
+        Dbg.error(getCallingUserCodeFunction(), "Task groups are not designed to be attached to a subsystem, as the internal tasks will be scheduled to subsystems instead.");
+        return this;
     }
 
     @Override

@@ -102,7 +102,7 @@ public abstract class CommandBasedBunyipsOpMode extends BunyipsOpMode {
      */
     public void useSubsystems(BunyipsSubsystem... subsystems) {
         if (!NullSafety.assertNotNull(Arrays.stream(subsystems).toArray())) {
-            throw new RuntimeException("Null subsystems were added in the addSubsystems() method!");
+            throw new RuntimeException("Null subsystems were added in the useSubsystems() method!");
         }
         Collections.addAll(managedSubsystems, subsystems);
     }
@@ -116,7 +116,7 @@ public abstract class CommandBasedBunyipsOpMode extends BunyipsOpMode {
         }
         scheduler = new Scheduler();
         if (managedSubsystems.isEmpty()) {
-            managedSubsystems = BunyipsSubsystem.instances;
+            managedSubsystems = BunyipsSubsystem.getInstances();
         }
         scheduler.addSubsystems(managedSubsystems.toArray(new BunyipsSubsystem[0]));
         assignCommands();
@@ -132,7 +132,7 @@ public abstract class CommandBasedBunyipsOpMode extends BunyipsOpMode {
                 Arrays.stream(tasks).filter(task -> !task.taskToRun.hasDependency()).count()
         );
         for (BunyipsSubsystem subsystem : subsystems) {
-            out.append("  | %\n", subsystem);
+            out.append("  | %\n", subsystem.toVerboseString());
             for (Scheduler.ConditionalTask task : tasks) {
                 Optional<BunyipsSubsystem> dep = task.taskToRun.getDependency();
                 if (!dep.isPresent() || !dep.get().equals(subsystem)) continue;

@@ -25,15 +25,10 @@ public class DifferentialDriveTask extends ForeverTask {
      * @param drive   the drive to control
      */
     public DifferentialDriveTask(Gamepad gamepad, @NotNull TankDrive drive) {
-        super(drive, false);
         this.drive = drive;
         this.gamepad = gamepad;
+        onSubsystem(drive, false);
         withName("Differential Drive Control");
-    }
-
-    @Override
-    protected void init() {
-        // no-op
     }
 
     @Override

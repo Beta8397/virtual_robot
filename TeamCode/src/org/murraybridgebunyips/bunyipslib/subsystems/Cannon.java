@@ -18,8 +18,6 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 public class Cannon extends BunyipsSubsystem {
     private final double FIRED;
     private final double RESET;
-    // Name of the cannon for telemetry
-    private String NAME = "Cannon";
     private Servo prolong;
     private double target;
 
@@ -53,17 +51,6 @@ public class Cannon extends BunyipsSubsystem {
      */
     public Cannon(Servo prolong) {
         this(prolong, 1.0, 0.0);
-    }
-
-    /**
-     * Set the name of the cannon to display in telemetry.
-     *
-     * @param newName the name to set
-     * @return this
-     */
-    public Cannon withName(String newName) {
-        NAME = newName;
-        return this;
     }
 
     /**
@@ -110,7 +97,7 @@ public class Cannon extends BunyipsSubsystem {
      * @return Fire cannon task
      */
     public Task fireTask() {
-        return new RunTask(this::fire, this, true).withName("Fire");
+        return new RunTask(this::fire).onSubsystem(this, true).withName("Fire");
     }
 
     /**
@@ -119,12 +106,12 @@ public class Cannon extends BunyipsSubsystem {
      * @return Reset cannon task
      */
     public Task resetTask() {
-        return new RunTask(this::reset, this, true).withName("Reset");
+        return new RunTask(this::reset).onSubsystem(this, true).withName("Reset");
     }
 
     @Override
     protected void periodic() {
-        opMode.telemetry.add("%: %", NAME, target == FIRED ? "<font color='red'><b>FIRED</b></font>" : "<font color='green'>READY</font>");
+        opMode.telemetry.add("%: %", name, target == FIRED ? "<font color='red'><b>FIRED</b></font>" : "<font color='green'>READY</font>");
         prolong.setPosition(target);
     }
 }

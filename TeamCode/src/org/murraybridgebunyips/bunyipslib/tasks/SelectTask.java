@@ -1,6 +1,5 @@
 package org.murraybridgebunyips.bunyipslib.tasks;
 
-import org.murraybridgebunyips.bunyipslib.tasks.bases.NoTimeoutTask;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
 import java.util.HashMap;
@@ -11,7 +10,7 @@ import java.util.function.Supplier;
  *
  * @param <T> the type of the state
  */
-public class SelectTask<T> extends NoTimeoutTask {
+public class SelectTask<T> extends Task {
     private final Supplier<T> stateSupplier;
     private final HashMap<T, Task> tasks = new HashMap<>();
 
@@ -51,11 +50,6 @@ public class SelectTask<T> extends NoTimeoutTask {
         if (task != null) {
             task.run();
         }
-    }
-
-    @Override
-    protected void onFinish() {
-        // no-op
     }
 
     @Override

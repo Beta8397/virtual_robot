@@ -24,8 +24,8 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
 import org.murraybridgebunyips.bunyipslib.Controls;
+import org.murraybridgebunyips.bunyipslib.DualTelemetry;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.TrajectorySequence;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.TrajectorySequenceBuilder;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.TrajectorySequenceRunner;
@@ -59,7 +59,7 @@ public class TankRoadRunnerDrive extends com.acmerobotics.roadrunner.drive.TankD
     /**
      * Create a new TankRoadRunnerDrive with the given parameters.
      *
-     * @param opMode        The opMode to use
+     * @param telemetry     The (optional) DualTelemetry instance to use for telemetry.
      * @param constants     The drive constants
      * @param coefficients  The tank coefficients
      * @param voltageSensor The voltage sensor
@@ -69,7 +69,7 @@ public class TankRoadRunnerDrive extends com.acmerobotics.roadrunner.drive.TankD
      * @param bl            The back left motor
      * @param br            The back right motor
      */
-    public TankRoadRunnerDrive(@Nullable BunyipsOpMode opMode, DriveConstants constants, TankCoefficients coefficients, HardwareMap.DeviceMapping<VoltageSensor> voltageSensor, IMU imu, DcMotorEx fl, DcMotorEx fr, DcMotorEx bl, DcMotorEx br) {
+    public TankRoadRunnerDrive(@Nullable DualTelemetry telemetry, DriveConstants constants, TankCoefficients coefficients, HardwareMap.DeviceMapping<VoltageSensor> voltageSensor, IMU imu, DcMotorEx fl, DcMotorEx fr, DcMotorEx bl, DcMotorEx br) {
         super(constants.kV, constants.kA, constants.kStatic, constants.TRACK_WIDTH);
 
         follower = new TankPIDVAFollower(coefficients.AXIAL_PID, coefficients.CROSS_TRACK_PID,
@@ -109,7 +109,7 @@ public class TankRoadRunnerDrive extends com.acmerobotics.roadrunner.drive.TankD
         }
 
         trajectorySequenceRunner = new TrajectorySequenceRunner(
-                opMode, constants.RUN_USING_ENCODER, follower, coefficients.HEADING_PID, batteryVoltageSensor,
+                telemetry, constants.RUN_USING_ENCODER, follower, coefficients.HEADING_PID, batteryVoltageSensor,
                 new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()
         );
     }

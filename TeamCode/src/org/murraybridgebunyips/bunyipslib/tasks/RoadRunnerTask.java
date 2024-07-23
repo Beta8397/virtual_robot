@@ -11,7 +11,6 @@ import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.util.Angle;
 
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
-import org.murraybridgebunyips.bunyipslib.Dbg;
 import org.murraybridgebunyips.bunyipslib.external.units.Measure;
 import org.murraybridgebunyips.bunyipslib.external.units.Time;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
@@ -38,60 +37,32 @@ public class RoadRunnerTask extends Task {
      * Create a new RoadRunnerTask with a time, drive, and trajectory.
      *
      * @param time       The time to run the task for
-     * @param drive      The drive to use
+     * @param drive      The drive to use. Will be casted to a BunyipsSubsystem and used as the dependency if possible.
      * @param trajectory The trajectory to follow
      */
     public RoadRunnerTask(Measure<Time> time, RoadRunnerDrive drive, Trajectory trajectory) {
-        super(time.magnitude() != 0.0 ? time : Seconds.of(trajectory.duration()), (BunyipsSubsystem) drive, true);
+        super(time.magnitude() != 0.0 ? time : Seconds.of(trajectory.duration()));
         this.drive = drive;
         this.trajectory = trajectory;
         withName(formatString("RoadRunner Trajectory %::%", trajectory.start(), trajectory.end()));
+        if (drive instanceof BunyipsSubsystem)
+            onSubsystem((BunyipsSubsystem) drive, true);
     }
 
     /**
      * Create a new RoadRunnerTask with a time, drive, and trajectory sequence.
      *
      * @param time               The time to run the task for
-     * @param drive              The drive to use
+     * @param drive              The drive to use. Will be casted to a BunyipsSubsystem and used as the dependency if possible.
      * @param trajectorySequence The trajectory sequence to follow
      */
     public RoadRunnerTask(Measure<Time> time, RoadRunnerDrive drive, TrajectorySequence trajectorySequence) {
-        super(time.magnitude() != 0.0 ? time : Seconds.of(trajectorySequence.duration()), (BunyipsSubsystem) drive, true);
+        super(time.magnitude() != 0.0 ? time : Seconds.of(trajectorySequence.duration()));
         this.drive = drive;
         this.trajectorySequence = trajectorySequence;
         withName(formatString("RoadRunner Trajectory %::%", trajectorySequence.start(), trajectorySequence.end()));
-    }
-
-    /**
-     * Create a new RoadRunnerTask with a time, drive, trajectory, and dependency.
-     *
-     * @param time       The time to run the task for
-     * @param drive      The drive to use
-     * @param trajectory The trajectory to follow
-     * @param dependency The subsystem to run this task on
-     * @param override   Whether this task should override conflicting tasks
-     */
-    public RoadRunnerTask(Measure<Time> time, RoadRunnerDrive drive, Trajectory trajectory, BunyipsSubsystem dependency, boolean override) {
-        super(time.magnitude() != 0.0 ? time : Seconds.of(trajectory.duration()), dependency, true);
-        this.drive = drive;
-        this.trajectory = trajectory;
-        withName(formatString("RoadRunner Trajectory %::%", trajectory.start(), trajectory.end()));
-    }
-
-    /**
-     * Create a new RoadRunnerTask with a time, drive, trajectory sequence, and dependency.
-     *
-     * @param time               The time to run the task for
-     * @param drive              The drive to use
-     * @param trajectorySequence The trajectory sequence to follow
-     * @param dependency         The subsystem to run this task on
-     * @param override           Whether this task should override conflicting tasks
-     */
-    public RoadRunnerTask(Measure<Time> time, RoadRunnerDrive drive, TrajectorySequence trajectorySequence, BunyipsSubsystem dependency, boolean override) {
-        super(time.magnitude() != 0.0 ? time : Seconds.of(trajectorySequence.duration()), dependency, true);
-        this.drive = drive;
-        this.trajectorySequence = trajectorySequence;
-        withName(formatString("RoadRunner Trajectory %::%", trajectorySequence.start(), trajectorySequence.end()));
+        if (drive instanceof BunyipsSubsystem)
+            onSubsystem((BunyipsSubsystem) drive, true);
     }
 
     @Override
@@ -133,8 +104,12 @@ public class RoadRunnerTask extends Task {
     @Override
     protected void onFinish() {
         taskStartedRunning = false;
-        drive.cancelTrajectory();
         drive.stop();
+    }
+
+    @Override
+    protected void onInterrupt() {
+        drive.cancelTrajectory();
     }
 
     @Override

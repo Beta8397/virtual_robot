@@ -2,6 +2,7 @@ package org.murraybridgebunyips.bunyipslib.vision.processors;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.util.Size;
 
 import com.acmerobotics.dashboard.config.Config;
 
@@ -136,8 +137,10 @@ public abstract class ColourThreshold extends Processor<ContourData> {
 
     @Override
     protected final void update() {
+        Size cameraDimensions = getCameraDimensions();
+        if (cameraDimensions == null) return;
         for (MatOfPoint contour : contours) {
-            ContourData newData = new ContourData(getCameraDimensions(), Imgproc.boundingRect(contour));
+            ContourData newData = new ContourData(cameraDimensions, Imgproc.boundingRect(contour));
             // Min-max bounding
             if (newData.getAreaPercent() < getContourAreaMinPercent() || newData.getAreaPercent() > getContourAreaMaxPercent())
                 continue;

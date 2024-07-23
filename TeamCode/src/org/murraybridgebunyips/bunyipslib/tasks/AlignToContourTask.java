@@ -34,6 +34,7 @@ public class AlignToContourTask extends Task {
     private final RoadRunnerDrive drive;
     private final Processor<ContourData> processor;
     private final PIDFController controller;
+    private boolean hasCalculated;
     private DoubleSupplier x;
     private DoubleSupplier y;
     private DoubleSupplier r;
@@ -49,9 +50,9 @@ public class AlignToContourTask extends Task {
      * @param controller the PID controller to use for aligning to a target
      */
     public AlignToContourTask(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier rSupplier, BunyipsSubsystem drive, Processor<ContourData> processor, PIDFController controller) {
-        super(INFINITE_TIMEOUT, drive, false);
         if (!(drive instanceof RoadRunnerDrive))
             throw new EmergencyStop("AlignToContourTask must be used with a drivetrain with X forward Pose/IMU info");
+        onSubsystem(drive, false);
         this.drive = (RoadRunnerDrive) drive;
         this.processor = processor;
         x = xSupplier;
@@ -83,9 +84,10 @@ public class AlignToContourTask extends Task {
      * @param controller the PID controller to use for aligning to a target
      */
     public AlignToContourTask(Measure<Time> timeout, BunyipsSubsystem drive, Processor<ContourData> processor, PIDFController controller) {
-        super(timeout, drive, false);
+        super(timeout);
         if (!(drive instanceof RoadRunnerDrive))
             throw new EmergencyStop("AlignToContourTask must be used with a drivetrain with X forward Pose/IMU info");
+        onSubsystem(drive, false);
         this.drive = (RoadRunnerDrive) drive;
         this.processor = processor;
         this.controller = controller;
@@ -95,6 +97,7 @@ public class AlignToContourTask extends Task {
 
     @Override
     protected void init() {
+        hasCalculated = false;
         if (!processor.isAttached())
             throw new RuntimeException("Vision processor was initialised without being attached to the vision system");
     }
@@ -119,6 +122,7 @@ public class AlignToContourTask extends Task {
                             controller.calculate(biggestContour.getYaw(), 0.0)
                     )
             );
+            hasCalculated = true;
         } else {
             drive.setWeightedDrivePower(pose);
         }
@@ -131,6 +135,6 @@ public class AlignToContourTask extends Task {
 
     @Override
     protected boolean isTaskFinished() {
-        return x == null && controller.atSetPoint();
+        return x == null && hasCalculated && controller.atSetPoint();
     }
 }

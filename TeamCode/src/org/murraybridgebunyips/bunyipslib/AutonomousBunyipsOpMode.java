@@ -1,6 +1,7 @@
 package org.murraybridgebunyips.bunyipslib;
 
 import static org.murraybridgebunyips.bunyipslib.Text.formatString;
+import static org.murraybridgebunyips.bunyipslib.Text.html;
 import static org.murraybridgebunyips.bunyipslib.Text.round;
 import static org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds;
 
@@ -11,7 +12,6 @@ import org.jetbrains.annotations.NotNull;
 import org.murraybridgebunyips.bunyipslib.external.units.Measure;
 import org.murraybridgebunyips.bunyipslib.external.units.Time;
 import org.murraybridgebunyips.bunyipslib.tasks.RunTask;
-import org.murraybridgebunyips.bunyipslib.tasks.bases.RobotTask;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 import org.murraybridgebunyips.bunyipslib.tasks.groups.TaskGroup;
 
@@ -46,10 +46,10 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
      * @see #setOpModes(Object...)
      */
     private final ArrayList<Reference<?>> opModes = new ArrayList<>();
-    private final ConcurrentLinkedDeque<RobotTask> tasks = new ConcurrentLinkedDeque<>();
+    private final ConcurrentLinkedDeque<Task> tasks = new ConcurrentLinkedDeque<>();
     // Pre and post queues cannot have their tasks removed, so we can rely on their .size() methods
-    private final ArrayDeque<RobotTask> postQueue = new ArrayDeque<>();
-    private final ArrayDeque<RobotTask> preQueue = new ArrayDeque<>();
+    private final ArrayDeque<Task> postQueue = new ArrayDeque<>();
+    private final ArrayDeque<Task> preQueue = new ArrayDeque<>();
     @NonNull
     private HashSet<BunyipsSubsystem> updatedSubsystems = new HashSet<>();
     private int taskCount;
@@ -69,10 +69,10 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
             Exceptions.handle(e, telemetry::log);
         }
         // Add any queued tasks
-        for (RobotTask task : postQueue) {
+        for (Task task : postQueue) {
             addTask(task);
         }
-        for (RobotTask task : preQueue) {
+        for (Task task : preQueue) {
             addTaskFirst(task);
         }
         preQueue.clear();
@@ -84,9 +84,8 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
                 taskCount,
                 timeLeft.isEmpty() ? "" : timeLeft + " to complete"
         );
-        for (RobotTask task : tasks) {
-            if (!(task instanceof Task)) continue;
-            out.append("   -> %\n", ((Task) task).toVerboseString());
+        for (Task task : tasks) {
+            out.append("   -> %\n", task.toVerboseString());
         }
         Dbg.logd(out.toString());
         callbackReceived = true;
@@ -101,7 +100,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
             Exceptions.handle(e, telemetry::log);
         }
         if (updatedSubsystems.isEmpty())
-            updatedSubsystems = BunyipsSubsystem.instances;
+            updatedSubsystems = BunyipsSubsystem.getInstances();
         // Convert user defined OpModeSelections to varargs
         Reference<?>[] varargs = opModes.toArray(new Reference[0]);
         if (varargs.length == 0) {
@@ -111,7 +110,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
             // Run task allocation if OpModeSelections are defined
             // This will run asynchronously, and the callback will be called
             // when the user has selected an OpMode
-            userSelection = new UserSelection<>(this, this::callback, varargs);
+            userSelection = new UserSelection<>(this::callback, varargs);
             Threads.start(userSelection);
         } else {
             // There are no OpMode selections, so just run the callback with the default OpMode
@@ -154,7 +153,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
 
         // Run the queue of tasks
         synchronized (tasks) {
-            RobotTask currentTask = tasks.peekFirst();
+            Task currentTask = tasks.peekFirst();
             if (currentTask == null) {
                 telemetry.log("<font color='gray'>auto:</font> tasks done -> finishing");
                 finish(hardwareStopOnFinish);
@@ -170,10 +169,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
                 // AutonomousBunyipsOpMode is handling all task completion checks, manual checks not required
                 if (currentTask.pollFinished()) {
                     tasks.removeFirst();
-                    double runTime = 0;
-                    if (currentTask instanceof Task) {
-                        runTime = ((Task) currentTask).getDeltaTime().in(Seconds);
-                    }
+                    double runTime = currentTask.getDeltaTime().in(Seconds);
                     Dbg.logd("[AutonomousBunyipsOpMode] task %/% (%) finished%", this.currentTask, taskCount, currentTask, runTime != 0 ? " -> " + runTime + "s" : "");
                     this.currentTask++;
                 }
@@ -224,7 +220,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
      */
     public final void useSubsystems(BunyipsSubsystem... subsystems) {
         if (!NullSafety.assertNotNull(Arrays.stream(subsystems).toArray())) {
-            throw new RuntimeException("Null subsystems were added in the addSubsystems() method!");
+            throw new RuntimeException("Null subsystems were added in the useSubsystems() method!");
         }
         Collections.addAll(updatedSubsystems, subsystems);
     }
@@ -235,7 +231,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
      * @param newTask task to add to the run queue
      * @param ack     suppress the warning that a task was added manually before onReady
      */
-    public final void addTask(@NotNull RobotTask newTask, boolean ack) {
+    public final void addTask(@NotNull Task newTask, boolean ack) {
         checkTaskForDependency(newTask);
         if (!safeToAddTasks && !ack) {
             telemetry.log("<font color='gray'>auto:</font> <font color='yellow'>caution!</font> a task was added manually before the onReady callback");
@@ -254,7 +250,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
      *
      * @param newTask task to add to the run queue
      */
-    public final void addTask(@NotNull RobotTask newTask) {
+    public final void addTask(@NotNull Task newTask) {
         addTask(newTask, false);
     }
 
@@ -285,12 +281,18 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
      * @param index   the index to insert the task at, starting from 0
      * @param newTask the task to add to the run queue
      */
-    public final void addTaskAtIndex(int index, @NotNull RobotTask newTask) {
+    public final void addTaskAtIndex(int index, @NotNull Task newTask) {
         checkTaskForDependency(newTask);
-        ArrayDeque<RobotTask> tmp = new ArrayDeque<>();
+        ArrayDeque<Task> tmp = new ArrayDeque<>();
         synchronized (tasks) {
-            if (index < 0 || index > tasks.size())
+            if (index < 0) {
                 throw new IllegalArgumentException("Cannot insert task at index " + index + ", out of bounds");
+            } else if (index > tasks.size()) {
+                telemetry.log(getClass(), html().color("red", "task index % is out of bounds. task was added to the end."), index);
+                Dbg.error(getClass(), "Task index % out of bounds to insert task, appending task to end...", index);
+                addTaskLast(newTask);
+                return;
+            }
             // Deconstruct the queue to insert the new task
             while (tasks.size() > index) {
                 tmp.add(tasks.removeLast());
@@ -327,7 +329,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
      *
      * @param newTask task to add to the run queue
      */
-    public final void addTaskLast(@NotNull RobotTask newTask) {
+    public final void addTaskLast(@NotNull Task newTask) {
         checkTaskForDependency(newTask);
         if (!callbackReceived) {
             postQueue.add(newTask);
@@ -350,7 +352,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
      *
      * @param newTask task to add to the run queue
      */
-    public final void addTaskFirst(@NotNull RobotTask newTask) {
+    public final void addTaskFirst(@NotNull Task newTask) {
         checkTaskForDependency(newTask);
         if (!callbackReceived) {
             preQueue.add(newTask);
@@ -366,16 +368,13 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
         telemetry.log("<font color='gray'>auto:</font> %<i>(t=%)</i> -> added 1/%", newTask, getTaskTimeout(newTask), taskCount);
     }
 
-    private String getTaskTimeout(RobotTask task) {
-        if (task instanceof Task) {
-            // Try to extract the timeout of the task, as RobotTask does not have a timeout
-            Measure<Time> timeout = ((Task) task).getTimeout();
-            // INFINITE_TASK is defined as Seconds.zero()
-            return timeout.magnitude() != 0.0
-                    ? round(timeout.in(Seconds), 1) + "s"
-                    : "∞";
-        }
-        return "?";
+    private String getTaskTimeout(Task task) {
+        // Try to extract the timeout of the task, as Task does not have a timeout
+        Measure<Time> timeout = task.getTimeout();
+        // INFINITE_TASK is defined as Seconds.zero()
+        return timeout.magnitude() != 0.0
+                ? round(timeout.in(Seconds), 1) + "s"
+                : "∞";
     }
 
     private String getApproximateTimeLeft() {
@@ -385,8 +384,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
         double timeLeft = tasks.stream().mapToDouble(task -> {
             // We cannot extract the duration of a task that is not a Task, we will return zero instead of the assumption
             // as they are completely out of our control and we don't even know how they function
-            if (!(task instanceof Task)) return 0;
-            Measure<Time> timeout = ((Task) task).getTimeout();
+            Measure<Time> timeout = task.getTimeout();
             // We have to approximate and guess as we cannot determine the duration of a task that is infinite
             if (timeout.magnitude() == 0.0) {
                 // We also adjust the approx flag so we can notify the user that the time is an estimate with a tilde
@@ -396,16 +394,11 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
             return timeout.in(Seconds);
         }).sum();
         // Determine the time left for all tasks
-        RobotTask curr = tasks.peekFirst();
-        if (curr instanceof Task) {
-            Measure<Time> timeout = ((Task) curr).getDeltaTime();
-            // Offset by the current task's time left to interpolate between tasks
-            timeLeft -= timeout.in(Seconds);
-        } else {
-            // This task is low resolution and we cannot determine the time left, we'll let the user know that the
-            // time is now inaccurate
-            approx.set(true);
-        }
+        Task curr = tasks.peekFirst();
+        if (curr == null) return "";
+        Measure<Time> timeout = curr.getDeltaTime();
+        // Offset by the current task's time left to interpolate between tasks
+        timeLeft -= timeout.in(Seconds);
         // If we get negative time, our guess was very wrong so we'll return a blank string
         return timeLeft > 0 ? " | " + (approx.get() ? "~" : "") + round(timeLeft, 1) + "s" : "";
     }
@@ -429,7 +422,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
              *      calling .next() on your car will move it one down the array
              *      then if you call .remove() on your car it will remove the element wherever it is
              */
-            Iterator<RobotTask> iterator = tasks.iterator();
+            Iterator<Task> iterator = tasks.iterator();
 
             int counter = 0;
             while (iterator.hasNext()) {
@@ -453,7 +446,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
      *
      * @param task the task to be removed
      */
-    public final void removeTask(@NotNull RobotTask task) {
+    public final void removeTask(@NotNull Task task) {
         synchronized (tasks) {
             if (tasks.contains(task)) {
                 tasks.remove(task);
@@ -487,19 +480,17 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
         telemetry.log("<font color='gray'>auto:</font> task at index 0 -> removed");
     }
 
-    private void checkTaskForDependency(RobotTask task) {
-        if (task instanceof Task) {
-            ((Task) task).getDependency().ifPresent((s) -> {
-                if (!updatedSubsystems.contains(s))
-                    Dbg.warn(getClass(), "Task % has a dependency on %, but it is not being updated by the AutonomousBunyipsOpMode. Please ensure it is being updated properly through addSubsystems().", task, s);
-            });
-        }
+    private void checkTaskForDependency(Task task) {
+        task.getDependency().ifPresent((s) -> {
+            if (!updatedSubsystems.contains(s))
+                Dbg.warn(getClass(), "Task % has a dependency on %, but it is not being updated by the AutonomousBunyipsOpMode. This is due to a call to useSubsystems() that is not including this subsystem. Please ensure this is intended behaviour. A clearer alternative is to disable() the subsystem(s) you don't wish to update.", task, s);
+        });
     }
 
     /**
      * Runs upon the pressing of the INIT button on the Driver Station.
      * This is where your hardware should be initialised. You may also add specific tasks to the queue
-     * here, but it is recommended to use {@link #setInitTask(RobotTask)} or {@link #onReady(Reference, Controls)} instead.
+     * here, but it is recommended to use {@link #setInitTask} or {@link #onReady(Reference, Controls)} instead.
      */
     protected abstract void onInitialise();
 
@@ -558,7 +549,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
      * @param selectedOpMode the OpMode selected by the user, if applicable. Will be NULL if the user does not select an OpMode (and OpModes were available).
      *                       Will be an empty reference if {@link #setOpModes(Object...)} returned null (no OpModes to select).
      * @param selectedButton the button selected by the user. Will be Controls.NONE if no selection is made or given.
-     * @see #addTask(RobotTask)
+     * @see #addTask(Task)
      */
     protected abstract void onReady(@Nullable Reference<?> selectedOpMode, Controls selectedButton);
 

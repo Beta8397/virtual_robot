@@ -2,7 +2,6 @@ package org.murraybridgebunyips.bunyipslib.tasks
 
 import com.qualcomm.robotcore.util.ElapsedTime
 import org.murraybridgebunyips.bunyipslib.Direction
-import org.murraybridgebunyips.bunyipslib.tasks.bases.RobotTask
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task
 import org.murraybridgebunyips.bunyipslib.vision.Vision
 import org.murraybridgebunyips.bunyipslib.vision.processors.AprilTag
@@ -12,8 +11,7 @@ import org.murraybridgebunyips.bunyipslib.vision.processors.AprilTag
  * Updated 26/12/23 to use the new Vision class.
  * @author Lucas Bubner, 2022
  */
-class GetSignalTask(private val vision: Vision) : Task(INFINITE_TIMEOUT),
-    RobotTask {
+class GetSignalTask(private val vision: Vision) : Task(INFINITE_TIMEOUT) {
     private lateinit var at: AprilTag
     private val lockTimer = ElapsedTime()
 //    private var noDetections = 0
@@ -61,10 +59,6 @@ class GetSignalTask(private val vision: Vision) : Task(INFINITE_TIMEOUT),
         }
         // Ensure the signal remains constant for 3 seconds before locking in
         return lockTimer.seconds() >= 3.0
-    }
-
-    override fun onFinish() {
-        // no-op
     }
 
     override fun periodic() {

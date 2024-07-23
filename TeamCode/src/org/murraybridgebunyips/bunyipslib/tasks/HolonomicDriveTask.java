@@ -38,9 +38,9 @@ public class HolonomicDriveTask extends ForeverTask {
      *                            drive switching, such as the RoadRunner-integrated MecanumDrive
      */
     public HolonomicDriveTask(Supplier<Float> xSupplier, Supplier<Float> ySupplier, Supplier<Float> rSupplier, @NotNull BunyipsSubsystem mecanumDrive, BooleanSupplier fieldCentricEnabled) {
-        super(mecanumDrive, false);
         if (!(mecanumDrive instanceof MecanumDrive) && !(mecanumDrive instanceof CartesianMecanumDrive))
             throw new EmergencyStop("HolonomicDriveTask must be used with a holonomic drivetrain");
+        onSubsystem(mecanumDrive, false);
         drive = mecanumDrive;
         x = xSupplier;
         y = ySupplier;
@@ -48,7 +48,6 @@ public class HolonomicDriveTask extends ForeverTask {
         this.fieldCentricEnabled = fieldCentricEnabled;
         withName("Holonomic Drive Control");
     }
-
 
     /**
      * Constructor for HolonomicDriveTask using a default Mecanum binding.
@@ -61,11 +60,6 @@ public class HolonomicDriveTask extends ForeverTask {
      */
     public HolonomicDriveTask(Gamepad driver, @NotNull BunyipsSubsystem mecanumDrive, BooleanSupplier fieldCentricEnabled) {
         this(() -> driver.left_stick_x, () -> driver.left_stick_y, () -> driver.right_stick_x, mecanumDrive, fieldCentricEnabled);
-    }
-
-    @Override
-    protected void init() {
-        // no-op
     }
 
     @Override
