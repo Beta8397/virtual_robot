@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.digitalchickenlabs.OctoQuad;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -41,6 +42,8 @@ public class MecanumDemo extends LinearOpMode {
 
         SparkFunOTOS myOTOS = hardwareMap.get(SparkFunOTOS.class, "sensor_otos");
 
+        OctoQuad octoQuad = hardwareMap.get(OctoQuad.class, "octoquad");
+
         telemetry.addData("Press Start When Ready","");
         telemetry.update();
 
@@ -78,6 +81,9 @@ public class MecanumDemo extends LinearOpMode {
             telemetry.addData("Back Distance", " %.1f", backDistance.getDistance(DistanceUnit.CM));
             telemetry.addData("Encoders"," %d %d %d %d", m1.getCurrentPosition(), m2.getCurrentPosition(),
                     m3.getCurrentPosition(), m4.getCurrentPosition());
+            telemetry.addData("Octoquad", "%d %d %d %d", octoQuad.readSinglePosition(0),
+                    octoQuad.readSinglePosition(1), octoQuad.readSinglePosition(2),
+                    octoQuad.readSinglePosition(3));
             SparkFunOTOS.Pose2D pose2D = myOTOS.getPosition();
             telemetry.addData("Pose", "x=%.1f  y=%.1f  h=%.1f", pose2D.x, pose2D.y, pose2D.h);
             telemetry.update();

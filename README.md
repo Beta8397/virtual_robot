@@ -1,7 +1,14 @@
 # A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
 
-New:  SparFunOTOS Odometry Sensor added. It is included in the robot configurations with Mecanum drivetrains,
+New:  
+
+SparFunOTOS Odometry Sensor added. It is included in the robot configurations with Mecanum drivetrains,
 but can be easily added to other drivetrains.
+
+OctoQuad Encoder Sensor added. It is included in the Mecanum and XDrive robot configurations, with channels
+assigned as follows: 0->back left drive motor; 1->front left drive motor; 2->front right drive motor;
+3->back right motor; 4->left deadwheel encoder; 5->right deadwheel encoder; 6-> perpendicular deadwheel
+encoder. You can still use the traditional way of working with the encoders, as well.
 
 Want to use virtual_robot to try out AcmeRobotics RoadRunner? Refer to the 
 [Road-Runner-Quickstart-Instructions](Road-Runner-Quickstart-Instructions.pdf) pdf.
