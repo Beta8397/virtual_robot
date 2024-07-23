@@ -2,6 +2,7 @@ package virtual_robot.robots.classes;
 
 import com.qualcomm.hardware.bosch.BNO055IMUImpl;
 import com.qualcomm.hardware.bosch.BNO055IMUNew;
+import com.qualcomm.hardware.digitalchickenlabs.OctoQuadImpl;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOSInternal;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -34,6 +35,7 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
     private SparkFunOTOSInternal sparkFunOTOSInternal = null;
     private VirtualRobotController.ColorSensorImpl colorSensor = null;
     private VirtualRobotController.DistanceSensorImpl[] distanceSensors = null;
+    protected OctoQuadImpl octoQuad = null;
 
     /*
      * Gear ratio for any external gears added in drive train. For now, this is just 1.0. Could easily
@@ -94,6 +96,11 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
 
         sparkFunOTOSInternal = hardwareMap.get(SparkFunOTOSInternal.class, "sensor_otos");
 
+        octoQuad = hardwareMap.get(OctoQuadImpl.class, "octoquad");
+        for (int i=0; i<4; i++){
+            octoQuad.setEncoder(i, motors[i]);
+        }
+
         wheelCircumference = Math.PI * botWidth / 4.5;
         interWheelWidth = botWidth * 8.0 / 9.0;
         interWheelLength = botWidth * 7.0 / 9.0;
@@ -150,6 +157,7 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
         hardwareMap.put("imu", new BNO055IMUNew(this, 10));
         hardwareMap.put("color_sensor", controller.new ColorSensorImpl());
         hardwareMap.put("sensor_otos", new SparkFunOTOSInternal());
+        hardwareMap.put("octoquad", new OctoQuadImpl());
     }
 
     /**

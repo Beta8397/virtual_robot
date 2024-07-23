@@ -62,6 +62,10 @@ public class XDriveBot extends XDrivePhysicsBase {
         rightEncoder = hardwareMap.get(DeadWheelEncoder.class, "enc_right");
         xEncoder = hardwareMap.get(DeadWheelEncoder.class, "enc_x");
 
+        octoQuad.setEncoder(4, leftEncoder);
+        octoQuad.setEncoder(5, rightEncoder);
+        octoQuad.setEncoder(6, xEncoder);
+
         //Dimensions in pixels
         encoderWheelRadius = 0.5 * ENCODER_WHEEL_DIAMETER * botWidth / 18.0;
         leftEncoderX = LEFT_ENCODER_X * botWidth / 18.0;
