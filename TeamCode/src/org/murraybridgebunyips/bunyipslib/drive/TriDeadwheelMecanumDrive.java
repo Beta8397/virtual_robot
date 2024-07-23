@@ -66,6 +66,7 @@ public class TriDeadwheelMecanumDrive extends MecanumDrive {
         super(constants, mecanumCoefficients, voltageSensor, imu, frontLeft, frontRight, backLeft, backRight);
         if (!assertParamsNotNull(localizerCoefficients, enc_left, enc_right, enc_x)) return;
         setLocalizer(new ThreeWheelTrackingLocalizer(localizerCoefficients, enc_left, enc_right, enc_x, new ArrayList<>(), new ArrayList<>()));
+        updatePoseFromMemory();
     }
 
     /**

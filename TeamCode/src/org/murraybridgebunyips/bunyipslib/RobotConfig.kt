@@ -40,6 +40,7 @@ abstract class RobotConfig {
      */
     fun init(opMode: OpMode): RobotConfig {
         Storage.memory().hardwareErrors.clear()
+        Storage.memory().unusableComponents.clear()
         this.hardwareMap = opMode.hardwareMap
         onRuntime()
         if (opMode is BunyipsOpMode) {

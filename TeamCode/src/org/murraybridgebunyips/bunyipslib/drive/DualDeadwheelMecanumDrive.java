@@ -38,6 +38,7 @@ public class DualDeadwheelMecanumDrive extends MecanumDrive {
         super(constants, mecanumCoefficients, voltageSensor, imu, frontLeft, frontRight, backLeft, backRight);
         if (!assertParamsNotNull(localizerCoefficients, parallel, perpendicular)) return;
         setLocalizer(new TwoWheelTrackingLocalizer(localizerCoefficients, parallel, perpendicular, getInstance()));
+        updatePoseFromMemory();
     }
 
     /**

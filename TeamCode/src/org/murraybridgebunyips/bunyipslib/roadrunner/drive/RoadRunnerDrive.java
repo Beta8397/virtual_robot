@@ -14,6 +14,7 @@ import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryVelocityCons
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
+import org.murraybridgebunyips.bunyipslib.Storage;
 import org.murraybridgebunyips.bunyipslib.drive.MecanumDrive;
 import org.murraybridgebunyips.bunyipslib.drive.TankDrive;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.TrajectorySequence;
@@ -29,6 +30,16 @@ import java.util.List;
  * @author Lucas Bubner, 2023
  */
 public interface RoadRunnerDrive {
+    /**
+     * Set a remembered pose from memory in another OpMode.
+     */
+    default void updatePoseFromMemory() {
+        // Important to set this after the localizer is configured, as the localizer change will reset the pose estimate
+        if (Storage.memory().lastKnownPosition != null) {
+            setPoseEstimate(Storage.memory().lastKnownPosition);
+        }
+    }
+
     /**
      * Get a velocity constraint for the drive.
      * Override this method to use a custom velocity constraint.
