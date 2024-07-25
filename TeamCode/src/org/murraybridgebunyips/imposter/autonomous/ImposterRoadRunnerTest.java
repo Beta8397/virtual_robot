@@ -15,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 import static org.murraybridgebunyips.bunyipslib.external.units.Units.*;
 
-@Autonomous(name = "RoadRunnerTest", group = "VIRTUAL_BUNYIPSFTC")
+@Autonomous
 public class ImposterRoadRunnerTest extends AutonomousBunyipsOpMode implements RoadRunner {
     private final ImposterConfig config = new ImposterConfig();
     private MecanumDrive drive;

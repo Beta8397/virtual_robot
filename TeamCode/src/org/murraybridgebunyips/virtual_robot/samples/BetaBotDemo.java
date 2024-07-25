@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 /**
  * Example OpMode. Demonstrates use of gyro, color sensor, encoders, and telemetry.
  */
-@TeleOp(name = "beta bot demo", group = "BetaBot")
+@TeleOp(name = "beta bot demo", group = "z")
 public class BetaBotDemo extends LinearOpMode {
 
     private DcMotorEx m1, m2, m3, m4;

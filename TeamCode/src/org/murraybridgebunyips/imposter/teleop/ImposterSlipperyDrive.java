@@ -10,7 +10,7 @@ import org.murraybridgebunyips.imposter.components.ImposterConfig;
 import static org.murraybridgebunyips.bunyipslib.Text.round;
 import static org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds;
 
-@TeleOp(name = "Slippery Drive", group = "VIRTUAL_BUNYIPSFTC")
+@TeleOp
 public class ImposterSlipperyDrive extends BunyipsOpMode {
     private final ImposterConfig config = new ImposterConfig();
     private CartesianMecanumDrive d;

@@ -5,32 +5,21 @@ import androidx.annotation.Nullable;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
-import org.firstinspires.ftc.vision.apriltag.AprilTagMetadata;
 import org.murraybridgebunyips.bunyipslib.*;
-import org.murraybridgebunyips.bunyipslib.drive.DualDeadwheelMecanumDrive;
 import org.murraybridgebunyips.bunyipslib.drive.MecanumDrive;
-import org.murraybridgebunyips.bunyipslib.drive.TriDeadwheelMecanumDrive;
 import org.murraybridgebunyips.bunyipslib.external.pid.PIDController;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
 import org.murraybridgebunyips.bunyipslib.roadrunner.trajectorysequence.TrajectorySequence;
-import org.murraybridgebunyips.bunyipslib.subsystems.DualServos;
-import org.murraybridgebunyips.bunyipslib.subsystems.HoldableActuator;
 import org.murraybridgebunyips.bunyipslib.tasks.DriveToPoseTask;
-import org.murraybridgebunyips.bunyipslib.tasks.GetTriPositionContourTask;
 import org.murraybridgebunyips.bunyipslib.tasks.RoadRunnerTask;
 import org.murraybridgebunyips.bunyipslib.tasks.WaitTask;
 import org.murraybridgebunyips.bunyipslib.tasks.groups.ParallelTaskGroup;
-import org.murraybridgebunyips.bunyipslib.vision.AprilTagPoseEstimator;
-import org.murraybridgebunyips.bunyipslib.vision.Vision;
-import org.murraybridgebunyips.bunyipslib.vision.processors.AprilTag;
-import org.murraybridgebunyips.bunyipslib.vision.processors.ColourThreshold;
-import org.murraybridgebunyips.bunyipslib.vision.processors.centerstage.SpikeMarkBackdropId;
 import org.murraybridgebunyips.imposter.components.ImposterConfig;
 
 import static org.murraybridgebunyips.bunyipslib.external.units.Units.*;
 
 @Autonomous
-public class ImposterOneTest extends AutonomousBunyipsOpMode implements RoadRunner {
+public class ImposterCompositeOneTest extends AutonomousBunyipsOpMode implements RoadRunner {
     /**
      * Multiplicative scale for all RoadRunner distances.
      */

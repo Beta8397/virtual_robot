@@ -10,7 +10,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 @Disabled
-@TeleOp(name = "Square Omni Demo", group = "Square Omni")
+@TeleOp(name = "Square Omni Demo", group = "z")
 public class SquareOmniDemo extends LinearOpMode {
 
     private DcMotorEx left, right, front, back;

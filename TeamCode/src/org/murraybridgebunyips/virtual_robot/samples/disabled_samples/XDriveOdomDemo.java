@@ -14,7 +14,7 @@ import virtual_robot.util.Vector2D;
  * Example OpMode. Demonstrates use of gyro, color sensor, encoders, and telemetry.
  */
 @Disabled
-@TeleOp(name = "XDriveOdom demo", group = "XBot")
+@TeleOp(name = "XDriveOdom demo", group = "z")
 public class XDriveOdomDemo extends LinearOpMode {
     private final double ENCODER_WHEEL_DIAMETER = 2.0;
     //Distances of right and left encoder wheels from robot centerline (i.e., the robot-X coordinates of the wheels)

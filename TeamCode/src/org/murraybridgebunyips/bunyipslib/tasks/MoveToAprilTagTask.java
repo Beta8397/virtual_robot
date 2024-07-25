@@ -233,12 +233,13 @@ public class MoveToAprilTagTask extends Task {
         List<AprilTagData> data = aprilTag.getData();
 
         Optional<AprilTagData> target = data.stream().filter(p -> TARGET_TAG == -1 || p.getId() == TARGET_TAG).findFirst();
-        if (!target.isPresent()) {
+        if (!target.isPresent() || !target.get().isInLibrary()) {
             drive.setWeightedDrivePower(pose);
             return;
         }
 
-        AprilTagPoseFtc camPose = target.get().getFtcPose();
+        assert target.get().getFtcPose().isPresent();
+        AprilTagPoseFtc camPose = target.get().getFtcPose().get();
         rangeError = (camPose.range - DESIRED_DISTANCE.in(Inches)) * SPEED_GAIN;
         yawError = -camPose.yaw * STRAFE_GAIN;
         headingError = camPose.bearing * TURN_GAIN;

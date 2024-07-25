@@ -1,7 +1,6 @@
 package org.murraybridgebunyips.bunyipslib
 
 import com.qualcomm.robotcore.util.ElapsedTime
-import org.firstinspires.ftc.robotcore.external.Telemetry.Item
 import org.murraybridgebunyips.bunyipslib.Text.round
 import org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds
 import java.util.function.Consumer
@@ -96,32 +95,30 @@ class UserSelection<T : Any>(
         // Disable auto clear if it is enabled, we might accidentally clear out static telemetry
         opMode.telemetry.isAutoClear = false
 
-        val retainedObjects = mutableListOf<Item>()
-        retainedObjects.add(opMode.telemetry.addDS("<b>---------<font color='red'>!!!</font>--------</b>"))
-        retainedObjects.add(
-            opMode.telemetry.addDS(
-                "<font color='yellow'><b>ACTION REQUIRED</b></font>: INIT OPMODE WITH GAMEPAD 1"
-            )
+        val attentionBorders = arrayOf(
+            "<b>---------<font color='red'>!!!</font>--------</b>",
+            "<b><font color='red'>---------</font><font color='white'>!!!</font><font color='red'>--------</font></b>"
         )
-        var packetString = "<font color='gray'>|</font> "
+
+        val driverStation =
+            Text.builder("<font color='yellow'><b>ACTION REQUIRED</b></font>: INIT OPMODE WITH GAMEPAD 1\n")
+        val dashboard = Text.builder("<font color='gray'>|</font> ")
+
         for ((name, button) in buttons) {
-            val selection = String.format(
-                "%s: %s",
+            dashboard.append("%: % <font color='gray'>|</font> ", button.name, name)
+            driverStation.append(
+                "| %: <b>%</b>\n",
                 button.name,
-                name.toString()
-            )
-            packetString += "$selection <font color='gray'>|</font> "
-            retainedObjects.add(
-                opMode.telemetry.addDS(
-                    "| %: <b>%</b>",
-                    button.name,
-                    StartingPositions.getHTMLIfAvailable(name)
-                )
+                StartingPositions.getHTMLIfAvailable(name),
             )
         }
-        retainedObjects.add(opMode.telemetry.addDS("<b>---------<font color='red'>!!!</font>--------</b>"))
 
-        opMode.telemetry.addDashboard("<small>USR</small>", packetString)
+        driverStation.delete(driverStation.length - 1, driverStation.length)
+
+        val topBorder = opMode.telemetry.addDS(attentionBorders[0])
+        val mainText = opMode.telemetry.addDS(driverStation)
+        val bottomBorder = opMode.telemetry.addDS(attentionBorders[0])
+        opMode.telemetry.addDashboard("<small>USR</small>", dashboard)
 
         // Must manually call telemetry push as the BOM may not be handling them
         // This will not clear out any other telemetry as auto clear is disabled
@@ -141,12 +138,14 @@ class UserSelection<T : Any>(
                 timer.reset()
             }
             if (flash) {
-                retainedObjects[0].setValue("<b>---------<font color='red'>!!!</font>--------</b>")
-                retainedObjects[retainedObjects.size - 1].setValue("<b>---------<font color='red'>!!!</font>--------</b>")
+                topBorder.setValue(attentionBorders[1])
+                bottomBorder.setValue(attentionBorders[1])
             } else {
-                retainedObjects[0].setValue("<b><font color='red'>---------</font><font color='white'>!!!</font><font color='red'>--------</font></b>")
-                retainedObjects[retainedObjects.size - 1].setValue("<b><font color='red'>---------</font><font color='white'>!!!</font><font color='red'>--------</font></b>")
+                topBorder.setValue(attentionBorders[0])
+                bottomBorder.setValue(attentionBorders[0])
             }
+            // Updates will be handled by the main telemetry loop, the initial call was to ensure the options did
+            // eventually make their way there in some quantity
         }
 
         val opModeName = result.toString()
@@ -173,7 +172,7 @@ class UserSelection<T : Any>(
         // - Sorayya, hijacker of laptops
 
         // Clean up telemetry and reset auto clear
-        opMode.telemetry.remove(retainedObjects)
+        opMode.telemetry.remove(topBorder, mainText, bottomBorder)
         opMode.telemetry.isAutoClear = true
 
         try {

@@ -2,8 +2,6 @@ package org.murraybridgebunyips.imposter.autonomous;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import org.murraybridgebunyips.bunyipslib.Direction;
-import org.murraybridgebunyips.bunyipslib.subsystems.DualServos;
 import org.murraybridgebunyips.bunyipslib.tasks.WaitTask;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 import org.murraybridgebunyips.bunyipslib.tasks.groups.ParallelTaskGroup;
@@ -14,7 +12,7 @@ import static org.murraybridgebunyips.bunyipslib.external.units.Units.*;
 import static org.murraybridgebunyips.bunyipslib.external.units.Units.Degrees;
 
 @Autonomous
-public class ImposterTwoTest extends ImposterOneTest {
+public class ImposterCompositeTwoTest extends ImposterCompositeOneTest {
     /** extension/retraction ticks */
     public static int ARM_DELTA = 2000;
     /** angled spike mark, move forward initially, field tiles */

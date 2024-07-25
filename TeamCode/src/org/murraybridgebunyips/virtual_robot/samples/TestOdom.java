@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
  * TeleOp op mode to test odometry with three "dead-wheel" encoders. This op mode will work with
  * either the MecBot or the XDriveBot robot configuration.
  */
-@TeleOp(name = "TestOdom", group = "OdomBot")
+@TeleOp(name = "TestOdom", group = "z")
 public class TestOdom extends LinearOpMode {
 
     EncBot bot = new EncBot();

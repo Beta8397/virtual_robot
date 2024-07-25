@@ -15,6 +15,7 @@ import org.opencv.core.Mat;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -103,9 +104,9 @@ public class AprilTag extends Processor<AprilTagData> {
                     detection.decisionMargin,
                     detection.center,
                     Arrays.asList(detection.corners),
-                    detection.metadata != null ? detection.metadata : null,
-                    detection.ftcPose,
-                    detection.rawPose,
+                    Optional.ofNullable(detection.metadata),
+                    Optional.ofNullable(detection.ftcPose),
+                    Optional.ofNullable(detection.rawPose),
                     detection.frameAcquisitionNanoTime
             ));
         }

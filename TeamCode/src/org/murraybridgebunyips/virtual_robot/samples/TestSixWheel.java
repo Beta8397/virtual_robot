@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.*;
 
-@TeleOp(name = "six wheel demo opmode", group = "Six Wheel")
+@TeleOp(name = "six wheel demo opmode", group = "z")
 public class TestSixWheel extends OpMode {
 
     private DcMotor leftFront = null;

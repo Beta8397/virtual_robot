@@ -9,7 +9,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.*;
 /**
  * Example OpMode. Demonstrates use of gyro, color sensor, encoders, and telemetry.
  */
-@TeleOp(name = "freight bot demo", group = "FreightBot")
+@TeleOp(name = "freight bot demo", group = "z")
 public class FreightBotDemo extends LinearOpMode {
 
     DcMotorEx m1, m2, m3, m4, arm, rotor;

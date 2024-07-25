@@ -12,7 +12,7 @@ import org.murraybridgebunyips.imposter.components.ImposterConfig;
 import static org.murraybridgebunyips.bunyipslib.external.units.Units.Milliseconds;
 
 /** bunyipslib virtual testing ground */
-@TeleOp(name = "TeleOp w/ Cmd", group = "VIRTUAL_BUNYIPSFTC")
+@TeleOp
 public class ImposterTeleOpCmd extends CommandBasedBunyipsOpMode {
     private final ImposterConfig config = new ImposterConfig();
     private Switch backServo;

@@ -1,18 +1,15 @@
 package org.murraybridgebunyips.imposter.autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.murraybridgebunyips.bunyipslib.AutonomousBunyipsOpMode;
 import org.murraybridgebunyips.bunyipslib.Controls;
 import org.murraybridgebunyips.bunyipslib.Reference;
-import org.murraybridgebunyips.bunyipslib.RoadRunner;
-import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
 import org.murraybridgebunyips.bunyipslib.subsystems.HoldableActuator;
 import org.murraybridgebunyips.imposter.components.ImposterConfig;
 
-@Autonomous(name = "ImposterHATest", group = "VIRTUAL_BUNYIPSFTC")
-public class ImposterHATest extends AutonomousBunyipsOpMode {
+@Autonomous
+public class ImposterHoldableActuatorTest extends AutonomousBunyipsOpMode {
     private final ImposterConfig robot = new ImposterConfig();
     private HoldableActuator arm;
 

@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.*;
 
-@TeleOp(name = "two wheel demo opmode", group = "TwoWheel")
+@TeleOp(name = "two wheel demo opmode", group = "z")
 public class TwoWheelDemoOpMode extends OpMode {
 
     private DcMotor left = null;

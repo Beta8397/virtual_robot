@@ -12,7 +12,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.*;
 /**
  * Example OpMode. Demonstrates use of gyro, color sensor, encoders, and telemetry.
  */
-@TeleOp(name = "arm bot demo", group = "ArmBot")
+@TeleOp(name = "arm bot demo", group = "z")
 public class ArmBotDemo extends LinearOpMode {
 
     public void runOpMode() {

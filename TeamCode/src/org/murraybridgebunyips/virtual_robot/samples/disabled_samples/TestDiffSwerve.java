@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @Disabled
-@TeleOp(name = "Test Differential Swerve", group = "Test")
+@TeleOp(name = "Test Differential Swerve", group = "z")
 public class TestDiffSwerve extends OpMode {
 
     DiffSwerveDrive bot = new DiffSwerveDrive();

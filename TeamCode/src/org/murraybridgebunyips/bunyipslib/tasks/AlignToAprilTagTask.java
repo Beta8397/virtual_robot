@@ -126,16 +126,17 @@ public class AlignToAprilTagTask extends Task {
 
         Optional<AprilTagData> target = data.stream().filter(p -> TARGET_TAG == -1 || p.getId() == TARGET_TAG).findFirst();
 
-        if (!target.isPresent()) {
+        if (!target.isPresent() || !target.get().isInLibrary()) {
             drive.setWeightedDrivePower(pose);
             return;
         }
 
+        assert target.get().getFtcPose().isPresent();
         drive.setWeightedDrivePower(
                 new Pose2d(
                         pose.getX(),
                         pose.getY(),
-                        -controller.calculate(target.get().getFtcPose().bearing, 0.0)
+                        -controller.calculate(target.get().getFtcPose().get().bearing, 0.0)
                 )
         );
         hasCalculated = true;

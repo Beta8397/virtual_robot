@@ -7,7 +7,7 @@ import org.murraybridgebunyips.imposter.components.ImposterConfig;
 
 import static org.murraybridgebunyips.bunyipslib.Text.round;
 
-@TeleOp(name = "Standard Drive", group = "VIRTUAL_BUNYIPSFTC")
+@TeleOp
 public class ImposterDrive extends BunyipsOpMode {
     private final ImposterConfig config = new ImposterConfig();
     private CartesianMecanumDrive drive;

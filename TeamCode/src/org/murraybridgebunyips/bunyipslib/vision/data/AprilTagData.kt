@@ -4,6 +4,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagMetadata
 import org.firstinspires.ftc.vision.apriltag.AprilTagPoseFtc
 import org.firstinspires.ftc.vision.apriltag.AprilTagPoseRaw
 import org.opencv.core.Point
+import java.util.Optional
 
 /**
  * Utility data structure for AprilTag Detections.
@@ -30,34 +31,45 @@ data class AprilTagData(
      */
     val corners: List<Point>,
     /**
-     * Metadata pertaining to this AprilTag as specified by the FTC SDK. May be null depending
-     * on the used AprilTag Library.
+     * Metadata pertaining to this AprilTag as specified by the FTC SDK.
+     * Optional value may be `null` depending on the used AprilTag Library.
      *
-     * `metadata.id` the ID of the tag
+     * *Properties:*
      *
-     * `metadata.name` a text name for the tag
+     * `id` the ID of the tag
      *
-     * `metadata.tagsize` the physical size of the tag in the real world (measured black edge to black edge)
+     * `name` a text name for the tag
      *
-     * `metadata.fieldPosition` a vector describing the tag's 3d translation on the field
+     * `tagsize` the physical size of the tag in the real world (measured black edge to black edge)
      *
-     * `metadata.distanceUnit` the units used for size and fieldPosition
+     * `fieldPosition` a vector describing the tag's 3d translation on the field
      *
-     * `metadata.fieldOrientation` a quaternion describing the tag's orientation on the field
+     * `distanceUnit` the units used for size and fieldPosition
+     *
+     * `fieldOrientation` a quaternion describing the tag's orientation on the field
      */
-    val metadata: AprilTagMetadata?,
+    val metadata: Optional<AprilTagMetadata>,
     /**
      * 6DOF pose data formatted in useful ways for FTC gameplay.
+     * Optional value may be `null` depending on the used AprilTag Library.
      * Units from this pose will be in *inches* and *degrees*.
      */
-    val ftcPose: AprilTagPoseFtc,
+    val ftcPose: Optional<AprilTagPoseFtc>,
     /**
      * Raw translation vector and orientation matrix returned by the pose solver.
-     * This is not useful for most FTC applications, but can be used to compute custom projections.
+     * Optional value may be `null` depending on the used AprilTag Library.
+     * This is the backing pose that [ftcPose] uses internally.
      */
-    val rawPose: AprilTagPoseRaw,
+    val rawPose: Optional<AprilTagPoseRaw>,
     /**
      * Timestamp of when the image in which this detection was found was acquired.
      */
     val frameAcquisitionNanoTime: Long
-) : VisionData()
+) : VisionData() {
+    /**
+     * Check if this AprilTag has metadata and pose information available, as it is present in the currently used library.
+     */
+    fun isInLibrary(): Boolean {
+        return metadata.isPresent && ftcPose.isPresent && rawPose.isPresent
+    }
+}

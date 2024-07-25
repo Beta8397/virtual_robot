@@ -8,7 +8,7 @@ import org.murraybridgebunyips.bunyipslib.roadrunner.PathRecorder;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
 import org.murraybridgebunyips.imposter.components.ImposterConfig;
 
-@TeleOp(name = "Recorder", group = "VIRTUAL_BUNYIPSFTC")
+@TeleOp
 public class ImposterRecorder extends PathRecorder {
     private ImposterConfig config = new ImposterConfig();
 

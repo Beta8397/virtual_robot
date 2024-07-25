@@ -12,7 +12,7 @@ import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
 import org.murraybridgebunyips.imposter.components.ImposterConfig;
 
 @Autonomous
-public class ImposterQA extends AutonomousBunyipsOpMode implements RoadRunner {
+public class ImposterBatchRRTaskQA extends AutonomousBunyipsOpMode implements RoadRunner {
     private final ImposterConfig config = new ImposterConfig();
     private MecanumDrive drive;
     @Override

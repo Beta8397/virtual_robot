@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
-@TeleOp()
+@TeleOp(group ="z")
 public class GamepadLedRumbleDemo extends OpMode {
     Gamepad.LedEffect customLedEffect;
     boolean wasDown;

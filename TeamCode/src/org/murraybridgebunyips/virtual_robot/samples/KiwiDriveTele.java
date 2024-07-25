@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-@TeleOp(name = "Kiwi Drive Teleop", group = "Kiwi")
+@TeleOp(name = "Kiwi Drive Teleop", group = "z")
 public class KiwiDriveTele extends LinearOpMode {
 
     DcMotorEx mFront, mBackLeft, mBackRight;

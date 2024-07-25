@@ -12,7 +12,7 @@ import org.murraybridgebunyips.bunyipslib.subsystems.IMUOp;
 import org.murraybridgebunyips.bunyipslib.tasks.HolonomicDriveTask;
 import org.murraybridgebunyips.imposter.components.ImposterConfig;
 
-@TeleOp(name = "TeleOp", group = "VIRTUAL_BUNYIPSFTC")
+@TeleOp
 public class ImposterTeleOpSimple extends BunyipsOpMode {
     private final ImposterConfig config = new ImposterConfig();
     private CartesianMecanumDrive drive;
