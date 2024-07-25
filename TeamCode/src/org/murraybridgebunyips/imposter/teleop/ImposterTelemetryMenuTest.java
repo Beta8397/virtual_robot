@@ -9,12 +9,14 @@ import org.murraybridgebunyips.bunyipslib.external.TelemetryMenu.StaticClickable
 @TeleOp
 public class ImposterTelemetryMenuTest extends BunyipsOpMode {
     TelemetryMenu.MenuElement root = new TelemetryMenu.MenuElement("main", true);
+    TelemetryMenu.MenuElement sub = new TelemetryMenu.MenuElement("sub", false);
     StaticClickableOption o = new StaticClickableOption("a") {
         @Override
         protected void onClick() {
             Dbg.log("clicked!");
         }
     };
+    TelemetryMenu.StaticItem o2 = new TelemetryMenu.StaticItem("THING");
 
     private TelemetryMenu menu;
 
@@ -22,6 +24,9 @@ public class ImposterTelemetryMenuTest extends BunyipsOpMode {
     protected void onInit() {
         menu = new TelemetryMenu(telemetry, root);
         root.addChild(o);
+        root.addChild(o2);
+        root.addChild(sub);
+        sub.addChild(o);
     }
 
     @Override
