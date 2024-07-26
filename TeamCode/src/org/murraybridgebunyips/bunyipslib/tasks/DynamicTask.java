@@ -49,8 +49,10 @@ public class DynamicTask extends Task {
         String name = builtTask.toString();
         Measure<Time> timeout = builtTask.getTimeout();
         Dbg.logd(getClass(), "built -> % (t=%)", name, timeout.magnitude() <= 0 ? "inf" : timeout.in(Seconds) + "s");
-        withName(name);
-        setTimeout(timeout);
+        if ("Dynamic (Pending construction)".equals(toString()))
+            withName(name);
+        if (getTimeout().equals(INFINITE_TIMEOUT))
+            setTimeout(timeout);
         builtTask.getDependency().ifPresent((dep) ->
                 dep.setHighPriorityCurrentTask(builtTask));
     }

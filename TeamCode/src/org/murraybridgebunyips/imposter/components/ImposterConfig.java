@@ -67,7 +67,7 @@ public class ImposterConfig extends RobotConfig {
 
         mecanumCoefficients = new MecanumCoefficients.Builder()
                 .setTranslationalPID(new PIDCoefficients(2, 0, 0))
-                .setHeadingPID(new PIDCoefficients(1, 0, 0))
+                .setHeadingPID(new PIDCoefficients(2.33, 0, 0))
                 .build();
 
         localizerCoefficients = new ThreeWheelTrackingLocalizerCoefficients.Builder()
