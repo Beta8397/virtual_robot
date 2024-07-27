@@ -83,11 +83,7 @@ class UserSelection<T : Any>(
      */
     override fun run() {
         if (opmodes.isEmpty()) {
-            try {
-                callback.accept(null)
-            } catch (e: Exception) {
-                Exceptions.handle(e, opMode.telemetry::log)
-            }
+            Exceptions.runUserMethod({ callback.accept(null) }, opMode)
         }
 
         val buttons: HashMap<T, Controls> = Controls.mapArgs(opmodes)
@@ -175,10 +171,6 @@ class UserSelection<T : Any>(
         opMode.telemetry.remove(topBorder, mainText, bottomBorder)
         opMode.telemetry.isAutoClear = true
 
-        try {
-            callback.accept(result)
-        } catch (e: Exception) {
-            Exceptions.handle(e, opMode.telemetry::log)
-        }
+        Exceptions.runUserMethod({ callback.accept(result) }, opMode)
     }
 }

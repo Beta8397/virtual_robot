@@ -56,19 +56,17 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     private UserSelection<Reference<?>> userSelection;
     private int currentTask = 1;
     private volatile boolean callbackReceived;
-    private boolean safeToAddTasks;
     private boolean hardwareStopOnFinish = true;
 
     private void callback(@Nullable Reference<?> selectedOpMode) {
+        // Safety as the OpMode may not be running anymore (due to it being on another thread)
         if (isStopRequested())
             return;
-        safeToAddTasks = true;
-        try {
-            onReady(selectedOpMode, userSelection != null ? userSelection.getSelectedButton() : null);
-        } catch (Exception e) {
-            Exceptions.handle(e, telemetry::log);
-        }
-        // Add any queued tasks
+
+        Controls selectedButton = userSelection != null ? userSelection.getSelectedButton() : null;
+        Exceptions.runUserMethod(() -> onReady(selectedOpMode, selectedButton), this);
+
+        // Add any queued tasks that were delayed previously and we can do now
         for (Task task : postQueue) {
             addTask(task);
         }
@@ -77,6 +75,9 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
         }
         preQueue.clear();
         postQueue.clear();
+
+        callbackReceived = true;
+
         String timeLeft = getApproximateTimeLeft();
         Text.Builder out = Text.builder();
         out.append("[AutonomousBunyipsOpMode] onReady() called | %% task(s) queued%\n",
@@ -88,19 +89,20 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
             out.append("   -> %\n", task.toVerboseString());
         }
         Dbg.logd(out.toString());
-        callbackReceived = true;
     }
 
     @Override
     protected final void onInit() {
         // Run user-defined hardware initialisation
-        try {
-            onInitialise();
-        } catch (Exception e) {
-            Exceptions.handle(e, telemetry::log);
-        }
-        if (updatedSubsystems.isEmpty())
+        Exceptions.runUserMethod(this::onInitialise, this);
+        if (updatedSubsystems.isEmpty()) {
+            // We might be using an implicit subsystem initialisation schema, look for static instances instead
             updatedSubsystems = BunyipsSubsystem.getInstances();
+        }
+        if (updatedSubsystems.isEmpty()) {
+            Dbg.warn(getClass(), "Caution: No subsystems are attached to AutonomousBunyipsOpMode that can be updated.");
+        }
+
         // Convert user defined OpModeSelections to varargs
         Reference<?>[] varargs = opModes.toArray(new Reference[0]);
         if (varargs.length == 0) {
@@ -145,10 +147,12 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     @Override
     protected final void activeLoop() {
         // Run any code defined by the user
-        try {
-            periodic();
-        } catch (Exception e) {
-            Exceptions.handle(e, telemetry::log);
+        Exceptions.runUserMethod(this::periodic, this);
+
+        // Update all subsystems which may also contain user routines
+        // This also ensures the subsystems are ready to accept incoming tasks
+        for (BunyipsSubsystem subsystem : updatedSubsystems) {
+            subsystem.update();
         }
 
         // Run the queue of tasks
@@ -175,15 +179,6 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
                 }
 
                 currentTask.run();
-            } catch (Exception e) {
-                Exceptions.handle(e, telemetry::log);
-            }
-        }
-
-        // Update all subsystems
-        for (BunyipsSubsystem subsystem : updatedSubsystems) {
-            try {
-                subsystem.update();
             } catch (Exception e) {
                 Exceptions.handle(e, telemetry::log);
             }
@@ -233,7 +228,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
      */
     public final void addTask(@NotNull Task newTask, boolean ack) {
         checkTaskForDependency(newTask);
-        if (!safeToAddTasks && !ack) {
+        if (!callbackReceived && !ack) {
             telemetry.log("<font color='gray'>auto:</font> <font color='yellow'>caution!</font> a task was added manually before the onReady callback");
         }
         synchronized (tasks) {
@@ -482,8 +477,10 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
 
     private void checkTaskForDependency(Task task) {
         task.getDependency().ifPresent((s) -> {
-            if (!updatedSubsystems.contains(s))
+            if (!updatedSubsystems.contains(s)) {
                 Dbg.warn(getClass(), "Task % has a dependency on %, but it is not being updated by the AutonomousBunyipsOpMode. This is due to a call to useSubsystems() that is not including this subsystem. Please ensure this is intended behaviour. A clearer alternative is to disable() the subsystem(s) you don't wish to update.", task, s);
+                telemetry.log(html().color("yellow", "auto: ").text("dependency % for task % has not been updated"), s, task);
+            }
         });
     }
 

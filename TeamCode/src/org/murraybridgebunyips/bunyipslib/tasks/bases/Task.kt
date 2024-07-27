@@ -2,6 +2,7 @@ package org.murraybridgebunyips.bunyipslib.tasks.bases
 
 import org.murraybridgebunyips.bunyipslib.BunyipsComponent
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem
+import org.murraybridgebunyips.bunyipslib.Exceptions
 import org.murraybridgebunyips.bunyipslib.external.units.Measure
 import org.murraybridgebunyips.bunyipslib.external.units.Time
 import org.murraybridgebunyips.bunyipslib.external.units.Units.Nanoseconds
@@ -99,8 +100,9 @@ abstract class Task(
 
     /**
      * Set the name of this task to be displayed in the OpMode.
+     * You may override this method if required to enforce a naming convention/prefix.
      */
-    fun withName(name: String?): Task {
+    open fun withName(name: String?): Task {
         if (name == null) {
             return this
         }
@@ -109,7 +111,7 @@ abstract class Task(
     }
 
     /**
-     * Get the name of this task. By default, it will be the class simple name, but you can call withName() to set a
+     * Get the name of this task. By default, it will be the class simple name, but you can call [withName] to set a
      * custom name.
      *
      * @return String representing the name of this task.
@@ -162,7 +164,7 @@ abstract class Task(
      */
     final override fun run() {
         if (startTime == 0L) {
-            init()
+            Exceptions.runUserMethod(::init, opMode)
             startTime = System.nanoTime()
             // Must poll finished on the first iteration to ensure that the task does not overrun
             pollFinished()
@@ -170,14 +172,14 @@ abstract class Task(
         // Here we check the taskFinished condition but don't call pollFinished(), to ensure that the task is only
         // updated with latest finish information at the user's discretion (excluding the first-call requirement)
         if (taskFinished && !finisherFired) {
-            onFinish()
-            if (!isTaskFinished())
-                onInterrupt()
+            Exceptions.runUserMethod(::onFinish, opMode)
+            if (!isFinished())
+                Exceptions.runUserMethod(::onInterrupt, opMode)
             finisherFired = true
         }
         // Don't run the task if it is finished as a safety guard
         if (isFinished()) return
-        periodic()
+        Exceptions.runUserMethod(::periodic, opMode)
     }
 
     /**
@@ -205,7 +207,7 @@ abstract class Task(
     protected abstract fun isTaskFinished(): Boolean
 
     /**
-     * Called when the task is reset. Override this method to add custom reset behaviour, such as resetting any
+     * Called when the task is resetting now. Override this method to add custom reset behaviour, such as resetting any
      * internal state variables such as iterators or lists.
      */
     protected open fun onReset() {
@@ -230,7 +232,8 @@ abstract class Task(
 
         val startCalled = startTime != 0L
         val timeoutFinished = timeout.magnitude() != 0.0 && System.nanoTime() > startTime + timeout.inUnit(Nanoseconds)
-        val userCondition = isTaskFinished()
+        var userCondition = false
+        Exceptions.runUserMethod({ userCondition = isTaskFinished() }, opMode)
 
         taskFinished = startCalled && (timeoutFinished || userCondition)
 
@@ -242,10 +245,10 @@ abstract class Task(
      * Reset a task to an uninitialised and unfinished state.
      */
     fun reset() {
+        Exceptions.runUserMethod(::onReset, opMode)
         startTime = 0L
         taskFinished = false
         finisherFired = false
-        onReset()
     }
 
     /**
@@ -264,8 +267,8 @@ abstract class Task(
     fun finishNow() {
         taskFinished = true
         if (!finisherFired) {
-            onFinish()
-            onInterrupt()
+            Exceptions.runUserMethod(::onFinish, opMode)
+            Exceptions.runUserMethod(::onInterrupt, opMode)
         }
         finisherFired = true
     }

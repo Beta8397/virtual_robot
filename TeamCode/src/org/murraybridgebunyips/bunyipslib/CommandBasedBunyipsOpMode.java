@@ -109,17 +109,16 @@ public abstract class CommandBasedBunyipsOpMode extends BunyipsOpMode {
 
     @Override
     protected final void onInit() {
-        try {
-            onInitialise();
-        } catch (Exception e) {
-            Exceptions.handle(e, telemetry::log);
-        }
+        Exceptions.runUserMethod(this::onInitialise, this);
+
         scheduler = new Scheduler();
         if (managedSubsystems.isEmpty()) {
             managedSubsystems = BunyipsSubsystem.getInstances();
         }
         scheduler.addSubsystems(managedSubsystems.toArray(new BunyipsSubsystem[0]));
-        assignCommands();
+
+        Exceptions.runUserMethod(this::assignCommands, this);
+
         Scheduler.ConditionalTask[] tasks = scheduler.getAllocatedTasks();
         BunyipsSubsystem[] subsystems = scheduler.getManagedSubsystems();
         Text.Builder out = Text.builder();
@@ -152,11 +151,7 @@ public abstract class CommandBasedBunyipsOpMode extends BunyipsOpMode {
 
     @Override
     protected final void activeLoop() {
-        try {
-            periodic();
-        } catch (Exception e) {
-            Exceptions.handle(e, telemetry::log);
-        }
+        Exceptions.runUserMethod(this::periodic, this);
         scheduler.run();
     }
 

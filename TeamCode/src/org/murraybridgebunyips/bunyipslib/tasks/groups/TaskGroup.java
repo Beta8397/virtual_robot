@@ -1,6 +1,7 @@
 package org.murraybridgebunyips.bunyipslib.tasks.groups;
 
 import static org.murraybridgebunyips.bunyipslib.Text.getCallingUserCodeFunction;
+import static org.murraybridgebunyips.bunyipslib.Text.html;
 import static org.murraybridgebunyips.bunyipslib.Text.round;
 import static org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds;
 
@@ -104,6 +105,7 @@ public abstract class TaskGroup extends Task {
     @Override
     public final Task onSubsystem(@NonNull BunyipsSubsystem subsystem, boolean override) {
         Dbg.error(getCallingUserCodeFunction(), "Task groups are not designed to be attached to a subsystem, as the internal tasks will be scheduled to subsystems instead.");
+        opMode.telemetry.log(getCallingUserCodeFunction(), html().color("red", "error: ").text("task groups cannot be attached to subsystems!"));
         return this;
     }
 

@@ -63,25 +63,6 @@ public interface RoadRunner {
     }
 
     /**
-     * Get the drive instance reference to be used for RoadRunner trajectories.
-     * <b>Do NOT instantiate a new drive instance here, use the reference from your subsystems in your OpMode.</b>
-     * (e.g. {@code return drive;}) instead of ({@code return new MecanumDrive(...);})
-     *
-     * @return Drive instance reference
-     */
-    @NonNull
-    RoadRunnerDrive getDrive();
-
-    /**
-     * Reset pose info back to default.
-     */
-    default void resetPoseInfo() {
-        resetForOpMode();
-        Storage.memory().lastKnownPosition = null;
-        getDrive().setPoseEstimate(new Pose2d());
-    }
-
-    /**
      * Convert a Pose2d of specified units to inches and radians.
      * Convenient for having unit-defined poses that need to be of the same unit of default RoadRunner poses, such
      * as adding vectors for relative movement.
@@ -165,6 +146,25 @@ public interface RoadRunner {
     }
 
     /**
+     * Get the drive instance reference to be used for RoadRunner trajectories.
+     * <b>Do NOT instantiate a new drive instance here, use the reference from your subsystems in your OpMode.</b>
+     * (e.g. {@code return drive;}) instead of ({@code return new MecanumDrive(...);})
+     *
+     * @return Drive instance reference
+     */
+    @NonNull
+    RoadRunnerDrive getDrive();
+
+    /**
+     * Reset pose info back to default.
+     */
+    default void resetPoseInfo() {
+        resetForOpMode();
+        Storage.memory().lastKnownPosition = null;
+        getDrive().setPoseEstimate(new Pose2d());
+    }
+
+    /**
      * Make a translation velocity constraint.
      *
      * @param translation The translation velocity
@@ -236,6 +236,11 @@ public interface RoadRunner {
         double r = Radians.convertFrom(poseEstimate.getHeading(), angleUnit);
         setPose(new Pose2d(x, y, r));
     }
+
+    // Unfortunately, we need so many overrides for makeTrajectory as there are different unit constructions plus an additional parameter
+    // to whether this pose should be mirrored if used in a mirrorToRef. We can't ask for this information later as we need it now, so
+    // this is our best solution. Fortunately, the builder can defer this in a nice sequence of .disableMirroring().enableMirroring(),
+    // but at least this extra parameter gives us the option to control the mirroring of every different path segment.
 
     /**
      * Use this method to build a new RoadRunner trajectory or to add a RoadRunner trajectory to the task queue.
@@ -411,8 +416,8 @@ public interface RoadRunner {
          * in the mirrored trajectory. This disabling is done automatically in the constructor and can be enabled with a parameter, whereas actual segments
          * are enabled to be mirrored and can be temporarily disabled through this method.
          *
-         * @see #enableMirroring()
          * @return The builder
+         * @see #enableMirroring()
          */
         public RoadRunnerTrajectoryTaskBuilder disableMirroring() {
             mirroring = false;
@@ -423,8 +428,8 @@ public interface RoadRunner {
          * Turn ref mirroring on for the following builder instructions. This reverses {@link #disableMirroring()}.
          * Note that mirroring for trajectory segments is enabled by default.
          *
-         * @see #disableMirroring()
          * @return The builder
+         * @see #disableMirroring()
          */
         public RoadRunnerTrajectoryTaskBuilder enableMirroring() {
             mirroring = true;

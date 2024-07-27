@@ -1,6 +1,7 @@
 package org.murraybridgebunyips.bunyipslib;
 
 import static org.murraybridgebunyips.bunyipslib.Text.formatString;
+import static org.murraybridgebunyips.bunyipslib.Text.html;
 import static org.murraybridgebunyips.bunyipslib.Text.round;
 import static org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds;
 
@@ -118,6 +119,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
         if (!shouldRun) {
             assertionFailed = true;
             Dbg.error(getClass(), "%Subsystem has been disabled as assertParamsNotNull() failed.", isDefaultName() ? "" : "(" + name + ") ");
+            opMode.telemetry.log(getClass(), html().color("red", "disabled: ").text("check logcat for more info."));
             onDisable();
         }
         return shouldRun;
@@ -130,6 +132,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
         if (!shouldRun) return;
         shouldRun = false;
         Dbg.logv(getClass(), "%Subsystem disabled via disable() call.", isDefaultName() ? "" : "(" + name + ") ");
+        opMode.telemetry.log(getClass(), html().color("yellow", "disabled: ").text("check logcat for more info."));
         onDisable();
     }
 
@@ -141,6 +144,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
         if (shouldRun || assertionFailed) return;
         shouldRun = true;
         Dbg.logv(getClass(), "%Subsystem enabled via enable() call.", isDefaultName() ? "" : "(" + name + ") ");
+        opMode.telemetry.log(getClass(), html().color("green", "enabled. ").text("check logcat for more info."));
         onEnable();
     }
 
@@ -149,6 +153,8 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
      */
     public final void cancelCurrentTask() {
         if (shouldRun && currentTask != defaultTask) {
+            Dbg.warn(getClass(), "Task % running on % was force cancelled and reverted to the default task.", currentTask, name);
+            opMode.telemetry.log(getClass(), html().color("yellow", "current task force cancelled: ").text("check logcat for more info."));
             currentTask.finishNow();
             currentTask = defaultTask;
         }
@@ -166,8 +172,10 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
         if (currentTask == null || currentTask.isFinished()) {
             if (currentTask == null) {
                 Dbg.logv(getClass(), "%Subsystem awake.", isDefaultName() ? "" : "(" + name + ") ");
+                opMode.telemetry.log(getClass(), html().color("green", "enabled. ").text("check logcat for more info."));
                 onEnable();
             } else {
+                // Task changes are repetitive to log, will just leave the DS with the check logcat message
                 Dbg.logv(getClass(), "%Task changed: %<-%", isDefaultName() ? "" : "(" + name + ") ", defaultTask, currentTask);
             }
             currentTask = defaultTask;
@@ -276,6 +284,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
             if (task == defaultTask && defaultTask.pollFinished()) {
                 throw new EmergencyStop("Default task (of " + getClass().getSimpleName() + ") should never finish!");
             }
+            // Run the task on our subsystem
             task.run();
             // Update the state of isFinished() after running the task as it may have changed
             task.pollFinished();
@@ -290,7 +299,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
             }
         }
         // This should be the only place where periodic() is called for this subsystem
-        periodic();
+        Exceptions.runUserMethod(this::periodic, opMode);
     }
 
     /**

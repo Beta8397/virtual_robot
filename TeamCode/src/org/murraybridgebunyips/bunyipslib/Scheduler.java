@@ -90,6 +90,10 @@ public class Scheduler extends BunyipsComponent {
      */
     public void addSubsystems(BunyipsSubsystem... dispatch) {
         subsystems.addAll(Arrays.asList(dispatch));
+        if (subsystems.isEmpty())
+            Dbg.warn(getClass(), "Caution: No subsystems were added for the Scheduler to update.");
+        else
+            Dbg.logv(getClass(), "Added % subsystems to update.", dispatch.length);
     }
 
     /**
@@ -134,6 +138,10 @@ public class Scheduler extends BunyipsComponent {
      * in {@link CommandBasedBunyipsOpMode}.
      */
     public void run() {
+        for (BunyipsSubsystem subsystem : subsystems) {
+            subsystem.update();
+        }
+
         if (!isMuted) {
             // Task count will account for tasks on subsystems that are not IdleTasks
             int taskCount = (int) (allocatedTasks.size() + subsystems.size() - subsystems.stream().filter(BunyipsSubsystem::isIdle).count());
@@ -214,10 +222,6 @@ public class Scheduler extends BunyipsComponent {
                 task.lastState = false;
                 task.activeSince = -1;
             }
-        }
-
-        for (BunyipsSubsystem subsystem : subsystems) {
-            subsystem.update();
         }
     }
 
