@@ -100,11 +100,11 @@ public class ImposterCompositeOneTest extends AutonomousBunyipsOpMode implements
                 .build();
         TrajectorySequence redRight = makeTrajectory()
                 .lineToLinearHeading(startingPosition.getPose()
-                        .plus(unitPose(new Pose2d(1 * FIELD_TILE_SCALE, 1 * FIELD_TILE_SCALE, -90), FieldTiles, Degrees)))
+                        .plus(RoadRunner.unitPose(new Pose2d(1 * FIELD_TILE_SCALE, 1 * FIELD_TILE_SCALE, -90), FieldTiles, Degrees)))
                 .build();
         TrajectorySequence blueLeft = makeTrajectory()
                 .lineToLinearHeading(startingPosition.getPose()
-                        .plus(unitPose(new Pose2d(1 * FIELD_TILE_SCALE, -1 * FIELD_TILE_SCALE, 90), FieldTiles, Degrees)))
+                        .plus(RoadRunner.unitPose(new Pose2d(1 * FIELD_TILE_SCALE, -1 * FIELD_TILE_SCALE, 90), FieldTiles, Degrees)))
                 .build();
 
         TrajectorySequence targetSequence = null;

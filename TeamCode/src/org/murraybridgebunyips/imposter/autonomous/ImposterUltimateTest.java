@@ -171,12 +171,10 @@ public class ImposterUltimateTest extends AutonomousBunyipsOpMode implements Roa
             RoadRunnerTrajectoryTaskBuilder redBuilder = makeTrajectory().mirrorToRef(blue);
 
             // Recenter to facing forward to restore a known state
-            Pose2d currentPos = drive.getPoseEstimate();
-            double mult = startingPosition.isBlue() ? -1 : 1;
-            redBuilder.splineTo(
-                    new Vector2d(currentPos.getX(), currentPos.getY() * mult),
-                    startingPosition.getPose().getHeading() * mult
-            );
+            redBuilder
+                    .disableMirroring()
+                    .splineTo(drive.getPoseEstimate().vec(), startingPosition.getPose().getHeading())
+                    .enableMirroring();
 
             // Far side backdrop navigation
             if (startingPosition == StartingPositions.STARTING_RED_LEFT || startingPosition == StartingPositions.STARTING_BLUE_RIGHT) {

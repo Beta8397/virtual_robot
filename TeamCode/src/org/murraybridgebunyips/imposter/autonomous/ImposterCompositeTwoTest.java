@@ -2,6 +2,7 @@ package org.murraybridgebunyips.imposter.autonomous;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import org.murraybridgebunyips.bunyipslib.RoadRunner;
 import org.murraybridgebunyips.bunyipslib.tasks.WaitTask;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 import org.murraybridgebunyips.bunyipslib.tasks.groups.ParallelTaskGroup;
@@ -38,7 +39,7 @@ public class ImposterCompositeTwoTest extends ImposterCompositeOneTest {
         ).withName("Move to Spike Marks");
 
         Task taskTwo = null;
-        taskTwo = makeTrajectory(startingPosition.getPose().plus(unitPose(new Pose2d(ANGLED_INITIAL_FORWARD_DIST_FT, 0, 0), FieldTile, Degrees)))
+        taskTwo = makeTrajectory(startingPosition.getPose().plus(RoadRunner.unitPose(new Pose2d(ANGLED_INITIAL_FORWARD_DIST_FT, 0, 0), FieldTile, Degrees)))
                 .turn(M_RIGHT_TURN_DEG, Degrees)
                 .withName("Rotate to Right Mark")
                 .buildTask();

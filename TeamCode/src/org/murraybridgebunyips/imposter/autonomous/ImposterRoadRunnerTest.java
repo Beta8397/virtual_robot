@@ -48,7 +48,7 @@ public class ImposterRoadRunnerTest extends AutonomousBunyipsOpMode implements R
                 .build();
 
         TrajectorySequence redRight = makeTrajectory()
-                .lineToLinearHeading(startingPosition.getPose().plus(unitPose(new Pose2d(FIELD_TILE_SCALE, FIELD_TILE_SCALE, -90), FieldTiles, Degrees)))
+                .lineToLinearHeading(startingPosition.getPose().plus(RoadRunner.unitPose(new Pose2d(FIELD_TILE_SCALE, FIELD_TILE_SCALE, -90), FieldTiles, Degrees)))
                 .mirrorToRef(blueLeft)
                 .build();
 
