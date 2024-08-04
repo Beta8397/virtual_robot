@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane fx:id="borderPane" onKeyPressed="#handleKeyEvents" onKeyReleased="#handleKeyEvents" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="virtual_robot.controller.VirtualRobotController">
+<BorderPane fx:id="borderPane" onKeyPressed="#handleKeyEvents" onKeyReleased="#handleKeyEvents" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="virtual_robot.controller.VirtualRobotController">
    <center>
       <Pane fx:id="fieldPane" maxHeight="0.0" maxWidth="0.0" minHeight="0.0" minWidth="0.0" onMouseDragged="#handleFieldMouseClick" onMousePressed="#handleFieldMouseClick" prefHeight="0.0" prefWidth="0.0" BorderPane.alignment="CENTER">
          <children>
@@ -40,16 +40,6 @@
                   <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
                </VBox.margin></Button>
             <TextArea fx:id="txtTelemetry" editable="false" prefHeight="250.0" prefWidth="250.0" />
-            <Label text="Random Motor Error">
-               <VBox.margin>
-                  <Insets top="10.0" />
-               </VBox.margin>
-            </Label>
-            <Slider fx:id="sldRandomMotorError" blockIncrement="0.05" majorTickUnit="0.05" max="0.25" minorTickCount="0" />
-            <Label text="Systematic Motor Error" />
-            <Slider fx:id="sldSystematicMotorError" blockIncrement="0.02" majorTickUnit="0.02" max="0.1" minorTickCount="0" />
-            <Label text="Motor Inertia" />
-            <Slider fx:id="sldMotorInertia" blockIncrement="0.1" majorTickUnit="0.1" max="2.0" minorTickCount="0" />
             <HBox fx:id="hbxGamePads" prefWidth="200.0">
                <children>
                   <CheckBox fx:id="checkBoxGamePad1" mnemonicParsing="false" text="GamePad1">
@@ -110,6 +100,16 @@
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                </VBox.margin>
             </Label>
+            <Label text="Random Motor Error">
+               <VBox.margin>
+                  <Insets top="10.0" />
+               </VBox.margin>
+            </Label>
+            <Slider fx:id="sldRandomMotorError" blockIncrement="0.05" majorTickUnit="0.05" max="0.25" minorTickCount="0" />
+            <Label text="Systematic Motor Error" />
+            <Slider fx:id="sldSystematicMotorError" blockIncrement="0.02" majorTickUnit="0.02" max="0.1" minorTickCount="0" />
+            <Label text="Motor Inertia" />
+            <Slider fx:id="sldMotorInertia" blockIncrement="0.1" majorTickUnit="0.1" max="2.0" minorTickCount="0" />
          </children>
       </VBox>
    </left>
