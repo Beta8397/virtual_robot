@@ -15,22 +15,16 @@ import static org.murraybridgebunyips.bunyipslib.external.units.Units.Millisecon
 @TeleOp
 public class ImposterTeleOpCmd extends CommandBasedBunyipsOpMode {
     private final ImposterConfig config = new ImposterConfig();
-    private Switch backServo;
     private MecanumDrive drive;
 
     @Override
     protected void onInitialise() {
         config.init();
         drive = new TriDeadwheelMecanumDrive(config.driveConstants, config.mecanumCoefficients, hardwareMap.voltageSensor, config.imu, config.front_left_motor, config.front_right_motor, config.back_left_motor, config.back_right_motor, config.localizerCoefficients, config.enc_left, config.enc_right, config.enc_x);
-        backServo = new Switch(config.back_servo);
-        drive.disable();
-        setLoopSpeed(Milliseconds.of(100));
     }
 
     @Override
     protected void assignCommands() {
-        scheduler().when(backServo::isOpen).runDebounced(drive::enable);
-        driver().whenPressed(Controls.A).run(backServo.openTask());
-        drive.setDefaultTask(new HolonomicDriveTask(gamepad1, drive, () -> false));
+        drive.setDefaultTask(new HolonomicVectorDriveTask(gamepad1, drive, () -> true));
     }
 }
