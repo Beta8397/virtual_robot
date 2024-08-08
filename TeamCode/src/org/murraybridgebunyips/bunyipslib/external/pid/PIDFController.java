@@ -55,8 +55,8 @@ public class PIDFController {
      * @param kd The value of kD for the coefficients.
      * @param kf The value of kF for the coefficients.
      * @param sp The setpoint of the pid control loop.
-     * @param pv The measured value of he pid control loop. We want sp = pv, or to the degree
-     *           such that sp - pv, or e(t) < tolerance.
+     * @param pv The measured value of the pid control loop. We want sp = pv, or to the degree
+     *           such that sp - pv, or e(t) is less than the tolerance.
      */
     public PIDFController(double kp, double ki, double kd, double kf, double sp, double pv) {
         kP = kp;

@@ -172,9 +172,9 @@ public class ImposterUltimateTest extends AutonomousBunyipsOpMode implements Roa
 
             // Recenter to facing forward to restore a known state
             redBuilder
-                    .disableMirroring()
+                    .setRefMirroring(false)
                     .splineTo(drive.getPoseEstimate().vec(), startingPosition.getPose().getHeading())
-                    .enableMirroring();
+                    .setRefMirroring(true);
 
             // Far side backdrop navigation
             if (startingPosition == StartingPositions.STARTING_RED_LEFT || startingPosition == StartingPositions.STARTING_BLUE_RIGHT) {

@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
+import org.murraybridgebunyips.bunyipslib.Dbg;
 import org.murraybridgebunyips.bunyipslib.external.Mathf;
 import org.murraybridgebunyips.bunyipslib.external.units.Current;
 import org.murraybridgebunyips.bunyipslib.external.units.Measure;
@@ -471,7 +472,7 @@ public class HoldableActuator extends BunyipsSubsystem {
                     break;
                 }
                 motorPower = MOVING_POWER;
-                opMode.telemetry.add("%: <font color='#FF5F1F'>MOVING -> %/% ticks</font> [%rps]", name, motor.getTargetPosition(), motor.getCurrentPosition(), round(DegreesPerSecond.of(motor.getVelocity(AngleUnit.DEGREES)).in(RevolutionsPerSecond), 1));
+                opMode.telemetry.add("%: <font color='#FF5F1F'>MOVING -> %/% ticks</font> [%rps]", name, motor.getCurrentPosition(), motor.getTargetPosition(), round(DegreesPerSecond.of(motor.getVelocity(AngleUnit.DEGREES)).in(RevolutionsPerSecond), 1));
                 break;
             case HOMING:
                 motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -520,6 +521,10 @@ public class HoldableActuator extends BunyipsSubsystem {
         if (topSwitch != null && topSwitch.isPressed() && motorPower > 0) {
             inputMode = Mode.USER;
             motorPower = 0;
+        }
+
+        if (topSwitch != null && bottomSwitch != null && topSwitch.isPressed() && bottomSwitch.isPressed()) {
+            Dbg.warn(getClass(), "%Warning: Both limit switches were pressed at the same time. This indicates an impossible system state.", isDefaultName() ? "" : "(" + name + ") ");
         }
 
         if ((motor.getCurrentPosition() < MIN_LIMIT && motorPower < 0.0) || (motor.getCurrentPosition() > MAX_LIMIT && motorPower > 0.0)) {

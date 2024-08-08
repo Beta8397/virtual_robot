@@ -145,7 +145,7 @@ public class Scheduler extends BunyipsComponent {
         if (!isMuted) {
             // Task count will account for tasks on subsystems that are not IdleTasks
             int taskCount = (int) (allocatedTasks.size() + subsystems.size() - subsystems.stream().filter(BunyipsSubsystem::isIdle).count());
-            opMode.telemetry.add("Managing % task% (%s, %c) on % subsystem%",
+            opMode.telemetry.add("\nManaging % task% (%s, %c) on % subsystem%",
                     taskCount,
                     taskCount == 1 ? "" : "s",
                     allocatedTasks.stream().filter(task -> task.taskToRun.hasDependency()).count() + taskCount - allocatedTasks.size(),
@@ -172,8 +172,6 @@ public class Scheduler extends BunyipsComponent {
                         deltaTime == 0.0 ? "active" : deltaTime + "s"
                 );
             }
-            // Blank line to separate Scheduler information from addTelemetry()
-            opMode.telemetry.add("");
             reports.clear();
         }
 

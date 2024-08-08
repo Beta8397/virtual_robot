@@ -5,6 +5,9 @@ import static org.murraybridgebunyips.bunyipslib.external.units.Units.InchesPerS
 import static org.murraybridgebunyips.bunyipslib.external.units.Units.RadiansPerSecond;
 import static org.murraybridgebunyips.bunyipslib.external.units.Units.Second;
 
+import android.util.Pair;
+
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.murraybridgebunyips.bunyipslib.external.units.Angle;
@@ -103,6 +106,11 @@ public class DriveConstants {
      * The maximum angular acceleration of the robot in radians per second squared.
      */
     public double MAX_ANG_ACCEL = Math.toRadians(60);
+    /**
+     * The admissible error and timeout for the attached PIDVA trajectory follower.
+     * Default settings are usually adequate.
+     */
+    public Pair<Pose2d, Double> admissibleError = new Pair<>(new Pose2d(0.5, 0.5, Math.toRadians(5.0)), 0.5);
 
     /**
      * Get the motor velocity feedforward gain.
@@ -306,6 +314,19 @@ public class DriveConstants {
          */
         public Builder setMaxAngAccel(Measure<Velocity<Velocity<Angle>>> maxAngAccel) {
             driveConstants.MAX_ANG_ACCEL = maxAngAccel.in(RadiansPerSecond.per(Second));
+            return this;
+        }
+
+        /**
+         * Set the admissible error for the PIDVA controller for trajectory following. Usually, you won't have
+         * to call this method, as the default error is adequate.
+         *
+         * @param admissibleError   admissible/satisfactory pose error at the end of each move (default 0.5in 5deg)
+         * @param admissibleTimeout max time to wait for the error to be admissible (default 0.5 sec)
+         * @return this
+         */
+        public Builder setAdmissibleError(Pose2d admissibleError, double admissibleTimeout) {
+            driveConstants.admissibleError = new Pair<>(admissibleError, admissibleTimeout);
             return this;
         }
 

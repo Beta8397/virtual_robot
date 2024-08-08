@@ -15,7 +15,8 @@ import java.util.function.Consumer
  * Keep in mind this thread runs in the background so it is not guaranteed to be ready during any
  * specific phase of your init-cycle. It is recommended to check if this thread is running using
  * `Threads.isRunning(selector)` in your `onInitLoop()` to ensure BOM knows it has to wait for the
- * user to make a selection. If you do not do this, the OpMode will assume it is ready to run regardless.
+ * user to make a selection. Alternatively, you can set an init-task that is a `WaitForTask`.
+ * If you do not do this, the OpMode will assume it is ready to run regardless.
  *
  * The result of this thread will be stored in the `result` property, which you can access yourself
  * or you can attach a callback to the `callback` property to be run once the thread is complete.

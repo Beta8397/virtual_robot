@@ -1,23 +1,29 @@
 package org.murraybridgebunyips.bunyipslib.drive;
 
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Radians;
+
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.Range;
 
 import org.murraybridgebunyips.bunyipslib.BunyipsSubsystem;
 import org.murraybridgebunyips.bunyipslib.Controls;
+import org.murraybridgebunyips.bunyipslib.external.units.Angle;
+import org.murraybridgebunyips.bunyipslib.external.units.Measure;
 
 import java.util.Locale;
 
 /**
- * Base class for a Cartesian drive system that uses Mecanum wheels.
+ * Class for a Cartesian drive system that uses Mecanum wheels.
  * Includes all the common math done across all Mecanum drive systems.
+ * <p>
  * This system is deprecated by RoadRunner, but remains for legacy/non-RoadRunner purposes.
+ * Coordinates used in Cartesian drives include a Cartesian speed mapping, where X is the horizontal axis, and
+ * Y is the forward axis. This is rotated differently within RoadRunner-derived drive bases.
  *
  * @author Lucas Bubner, 2023
  * @see MecanumDrive
  */
 public class CartesianMecanumDrive extends BunyipsSubsystem {
-
     /**
      * Horizontal speed of the robot.
      */
@@ -51,6 +57,7 @@ public class CartesianMecanumDrive extends BunyipsSubsystem {
         this.backLeft = backLeft;
         this.frontRight = frontRight;
         this.backRight = backRight;
+        setToBrake();
     }
 
     // Setters for the prioritisation of the drive system
@@ -80,9 +87,7 @@ public class CartesianMecanumDrive extends BunyipsSubsystem {
      * @see Controls#Companion
      */
     public CartesianMecanumDrive setSpeedUsingController(double left_stick_x, double left_stick_y, double right_stick_x) {
-        speedX = Range.clip(left_stick_x, -1.0, 1.0);
-        speedY = Range.clip(-left_stick_y, -1.0, 1.0);
-        speedR = Range.clip(right_stick_x, -1.0, 1.0);
+        setSpeedXYR(left_stick_x, -left_stick_y, right_stick_x);
         return this;
     }
 
@@ -110,16 +115,17 @@ public class CartesianMecanumDrive extends BunyipsSubsystem {
     /**
      * Set a polar speed at which the Mecanum drive assembly should move.
      *
-     * @param speed             speed at which the motors will operate
-     * @param direction_degrees direction at which the motors will move toward
-     * @param rSpeed            rotation speed - positive: clockwise
+     * @param speed     speed at which the motors will operate
+     * @param direction direction at which the motors will move toward
+     * @param rSpeed    rotation speed - positive: clockwise
      * @return this
      */
-    public CartesianMecanumDrive setSpeedPolarR(double speed, double direction_degrees, double rSpeed) {
-        double radians = Math.toRadians(direction_degrees);
-        speedX = Range.clip(speed * Math.cos(radians), -1.0, 1.0);
-        speedY = Range.clip(speed * Math.sin(radians), -1.0, 1.0);
-        speedR = Range.clip(rSpeed, -1.0, 1.0);
+    public CartesianMecanumDrive setSpeedPolarR(double speed, Measure<Angle> direction, double rSpeed) {
+        setSpeedXYR(
+                speed * Math.cos(direction.in(Radians)),
+                speed * Math.sin(direction.in(Radians)),
+                rSpeed
+        );
         return this;
     }
 

@@ -33,6 +33,14 @@ public class ThreeWheelTrackingLocalizerCoefficients {
      * Forward offset of the lateral wheel to the center of rotation.
      */
     public double FORWARD_OFFSET = 4; // in; offset of the lateral wheel
+    /**
+     * Multiplicative scale of the ticks from the x (forward) axis.
+     */
+    public double X_MULTIPLIER = 1;
+    /**
+     * Multiplicative scale of the ticks from the y (strafe) axis.
+     */
+    public double Y_MULTIPLIER = 1;
 
     /**
      * Utility builder for creating new coefficients.
@@ -100,6 +108,28 @@ public class ThreeWheelTrackingLocalizerCoefficients {
          */
         public Builder setForwardOffset(Measure<Distance> forwardOffset) {
             trackingWheelCoefficients.FORWARD_OFFSET = forwardOffset.in(Inches);
+            return this;
+        }
+
+        /**
+         * Set the forward (x) multiplier for the ticks reported by the forward deadwheels.
+         *
+         * @param forwardMul the multiplier
+         * @return The builder
+         */
+        public Builder setXMultiplier(double forwardMul) {
+            trackingWheelCoefficients.X_MULTIPLIER = forwardMul;
+            return this;
+        }
+
+        /**
+         * Set the strafe (y) multiplier for the ticks reported by the side deadwheel.
+         *
+         * @param strafeMul the multiplier
+         * @return The builder
+         */
+        public Builder setYMultiplier(double strafeMul) {
+            trackingWheelCoefficients.Y_MULTIPLIER = strafeMul;
             return this;
         }
 

@@ -5,6 +5,8 @@ import static org.murraybridgebunyips.bunyipslib.external.units.Units.Millisecon
 
 import androidx.annotation.NonNull;
 
+import com.acmerobotics.dashboard.config.Config;
+
 import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraName;
 import org.murraybridgebunyips.bunyipslib.BunyipsOpMode;
 import org.murraybridgebunyips.bunyipslib.Controller;
@@ -18,11 +20,19 @@ import org.opencv.core.Scalar;
 
 /**
  * A tuning OpMode for calibrating the vision system's colour thresholding using controller input.
+ * <p>
+ * Note that if you want to tune a processor using FtcDashboard, you have to use the static fields
+ * offered by ColourTuner, not the processor (as it will be overridden and controlled by the controllers)
  *
  * @author Lucas Bubner, 2024
  */
+@Config
 public abstract class ColourTuner extends BunyipsOpMode {
-    private final double[] scalars = new double[6];
+    /**
+     * The scalars used for the current processor.
+     */
+    public static double[] scalars = new double[6];
+
     private final String[] channelNames = new String[3];
     private ColourThreshold[] processors;
     private int processorIdx;

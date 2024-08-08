@@ -1,5 +1,10 @@
 package org.murraybridgebunyips.bunyipslib;
 
+import static org.murraybridgebunyips.bunyipslib.external.units.Units.Milliseconds;
+
+import org.murraybridgebunyips.bunyipslib.external.units.Measure;
+import org.murraybridgebunyips.bunyipslib.external.units.Time;
+
 import java.util.HashMap;
 
 /**
@@ -32,14 +37,21 @@ public final class Threads {
      * Start a new thread with the given infinite loop task.
      * This thread will auto end when the task is interrupted.
      *
-     * @param task the infinite loop task to run on the new thread
-     * @param name the name of the thread to access it later and to log as
+     * @param task              the infinite loop task to run on the new thread
+     * @param name              the name of the thread to access it later and to log as
+     * @param loopSleepDuration the duration to sleep this thread after every loop to save resources
      */
-    public static void startLoop(Runnable task, String name) {
-        Dbg.logd(Threads.class, "starting new loop thread: % ...", name);
+    public static void startLoop(Runnable task, String name, Measure<Time> loopSleepDuration) {
+        Dbg.logd(Threads.class, "starting new loop thread: % at % ms interval ...", name, loopSleepDuration.in(Milliseconds));
         Thread thread = new Thread(() -> {
             while (!Thread.currentThread().isInterrupted()) {
                 task.run();
+                try {
+                    //noinspection BusyWait
+                    Thread.sleep((long) Math.abs(loopSleepDuration.in(Milliseconds)));
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
         thread.setName(name);
@@ -48,7 +60,7 @@ public final class Threads {
     }
 
     /**
-     * Start a new thread with the given task.
+     * Start a new thread with the given task. The thread name will be defined by the class of the Runnable.
      *
      * @param task the runnable task to run on the new thread
      */
@@ -58,12 +70,13 @@ public final class Threads {
 
     /**
      * Start a new thread with the given infinite loop task.
-     * This thread will auto end when the task is interrupted.
+     * This thread will auto end when the task is interrupted, with a name defined by the class of the Runnable.
      *
-     * @param task the infinite loop task to run on the new thread
+     * @param task              the infinite loop task to run on the new thread
+     * @param loopSleepDuration the duration to sleep this thread after every loop to save resources
      */
-    public static void startLoop(Runnable task) {
-        startLoop(task, task.getClass().getSimpleName());
+    public static void startLoop(Runnable task, Measure<Time> loopSleepDuration) {
+        startLoop(task, task.getClass().getSimpleName(), loopSleepDuration);
     }
 
     /**

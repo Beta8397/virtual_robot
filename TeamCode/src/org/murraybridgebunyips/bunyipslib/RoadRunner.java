@@ -410,29 +410,17 @@ public interface RoadRunner {
         }
 
         /**
-         * Turn off ref mirroring for the following builder instructions.
+         * Toggle {@link #mirrorToRef} mirroring for the following builder instructions.
          * <p>
          * This is useful when you want to temporarily rely on a global field coordinate, instead of having it flip
          * in the mirrored trajectory. This disabling is done automatically in the constructor and can be enabled with a parameter, whereas actual segments
-         * are enabled to be mirrored and can be temporarily disabled through this method.
+         * are enabled to be mirrored by default and can be temporarily toggled with this method.
          *
+         * @param shouldMirror whether the mirror reference should mirror the following builder instructions, by default this is on
          * @return The builder
-         * @see #enableMirroring()
          */
-        public RoadRunnerTrajectoryTaskBuilder disableMirroring() {
-            mirroring = false;
-            return this;
-        }
-
-        /**
-         * Turn ref mirroring on for the following builder instructions. This reverses {@link #disableMirroring()}.
-         * Note that mirroring for trajectory segments is enabled by default.
-         *
-         * @return The builder
-         * @see #disableMirroring()
-         */
-        public RoadRunnerTrajectoryTaskBuilder enableMirroring() {
-            mirroring = true;
+        public RoadRunnerTrajectoryTaskBuilder setRefMirroring(boolean shouldMirror) {
+            mirroring = shouldMirror;
             return this;
         }
 

@@ -55,6 +55,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
     private int taskCount;
     private UserSelection<Reference<?>> userSelection;
     private int currentTask = 1;
+    private volatile boolean safeToAddTasks;
     private volatile boolean callbackReceived;
     private boolean hardwareStopOnFinish = true;
 
@@ -62,6 +63,8 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
         // Safety as the OpMode may not be running anymore (due to it being on another thread)
         if (isStopRequested())
             return;
+
+        safeToAddTasks = true;
 
         Controls selectedButton = userSelection != null ? userSelection.getSelectedButton() : null;
         Exceptions.runUserMethod(() -> onReady(selectedOpMode, selectedButton), this);
@@ -228,7 +231,7 @@ public abstract class AutonomousBunyipsOpMode extends BunyipsOpMode {
      */
     public final void addTask(@NotNull Task newTask, boolean ack) {
         checkTaskForDependency(newTask);
-        if (!callbackReceived && !ack) {
+        if (!safeToAddTasks && !ack) {
             telemetry.log("<font color='gray'>auto:</font> <font color='yellow'>caution!</font> a task was added manually before the onReady callback");
         }
         synchronized (tasks) {

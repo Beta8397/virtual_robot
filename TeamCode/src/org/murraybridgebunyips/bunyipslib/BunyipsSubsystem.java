@@ -8,6 +8,8 @@ import static org.murraybridgebunyips.bunyipslib.external.units.Units.Seconds;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import org.murraybridgebunyips.bunyipslib.external.units.Measure;
+import org.murraybridgebunyips.bunyipslib.external.units.Time;
 import org.murraybridgebunyips.bunyipslib.tasks.IdleTask;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
@@ -30,9 +32,11 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
     // Kept protected for legacy purposes where BunyipsSubsystems would reference name
     protected String name = getClass().getSimpleName();
 
-    private Task currentTask;
-    private Task defaultTask = new IdleTask();
-    private boolean shouldRun = true;
+    private volatile Task currentTask;
+    private volatile Task defaultTask = new IdleTask();
+    private volatile boolean shouldRun = true;
+    @Nullable
+    private String threadName = null;
     private boolean assertionFailed = false;
 
     protected BunyipsSubsystem() {
@@ -66,7 +70,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
      */
     @NonNull
     public final String toVerboseString() {
-        return formatString("%% (%) <=> %", assertionFailed ? "[error] " : "", name, shouldRun ? "enabled" : "disabled", getCurrentTask());
+        return formatString("%%% (%) <=> %", assertionFailed ? "[error] " : "", threadName != null ? "[async]" : "", name, shouldRun ? "enabled" : "disabled", getCurrentTask());
     }
 
     /**
@@ -119,7 +123,6 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
         if (!shouldRun) {
             assertionFailed = true;
             Dbg.error(getClass(), "%Subsystem has been disabled as assertParamsNotNull() failed.", isDefaultName() ? "" : "(" + name + ") ");
-            opMode.telemetry.log(getClass(), html().color("red", "disabled: ").text("check logcat for more info."));
             onDisable();
         }
         return shouldRun;
@@ -132,7 +135,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
         if (!shouldRun) return;
         shouldRun = false;
         Dbg.logv(getClass(), "%Subsystem disabled via disable() call.", isDefaultName() ? "" : "(" + name + ") ");
-        opMode.telemetry.log(getClass(), html().color("yellow", "disabled: ").text("check logcat for more info."));
+        opMode.telemetry.log(getClass(), html().color("yellow", "disabled. ").small("check logcat for more info."));
         onDisable();
     }
 
@@ -144,7 +147,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
         if (shouldRun || assertionFailed) return;
         shouldRun = true;
         Dbg.logv(getClass(), "%Subsystem enabled via enable() call.", isDefaultName() ? "" : "(" + name + ") ");
-        opMode.telemetry.log(getClass(), html().color("green", "enabled. ").text("check logcat for more info."));
+        opMode.telemetry.log(getClass(), html().color("green", "enabled. ").small("check logcat for more info."));
         onEnable();
     }
 
@@ -153,8 +156,7 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
      */
     public final void cancelCurrentTask() {
         if (shouldRun && currentTask != defaultTask) {
-            Dbg.warn(getClass(), "Task % running on % was force cancelled and reverted to the default task.", currentTask, name);
-            opMode.telemetry.log(getClass(), html().color("yellow", "current task force cancelled: ").text("check logcat for more info."));
+            Dbg.logv(getClass(), "Task % running on % was force cancelled and reverted to the default task.", currentTask, name);
             currentTask.finishNow();
             currentTask = defaultTask;
         }
@@ -172,7 +174,6 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
         if (currentTask == null || currentTask.isFinished()) {
             if (currentTask == null) {
                 Dbg.logv(getClass(), "%Subsystem awake.", isDefaultName() ? "" : "(" + name + ") ");
-                opMode.telemetry.log(getClass(), html().color("green", "enabled. ").text("check logcat for more info."));
                 onEnable();
             } else {
                 // Task changes are repetitive to log, will just leave the DS with the check logcat message
@@ -278,7 +279,11 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
      * Alternatively all subsystems that were instantiated can be statically updated via {@link #updateAll()}.
      */
     public final void update() {
-        if (!shouldRun) return;
+        if (!shouldRun || threadName != null) return;
+        internalUpdate();
+    }
+
+    private void internalUpdate() {
         Task task = getCurrentTask();
         if (task != null) {
             if (task == defaultTask && defaultTask.pollFinished()) {
@@ -300,6 +305,32 @@ public abstract class BunyipsSubsystem extends BunyipsComponent {
         }
         // This should be the only place where periodic() is called for this subsystem
         Exceptions.runUserMethod(this::periodic, opMode);
+    }
+
+    /**
+     * Call to delegate all updates of this subsystem to a thread that will begin execution on this method call.
+     * <b>WARNING: You must ensure you know what you're doing before you multithread.</b>
+     * <p>
+     * Improper usage of threading subsystems will result in unexpected and potentially dangerous robot behaviour.
+     * Ensure you know the consequences of multithreading, especially over hardware on a Robot Controller.
+     * <p>
+     * When this subsystem is being multithreaded, manual calls to {@link #update()} will be ignored.
+     *
+     * @param loopSleepDuration the duration to sleep the external thread by after every iteration
+     */
+    public final void startThread(Measure<Time> loopSleepDuration) {
+        if (threadName != null) return;
+        threadName = formatString("Async-%-%-%", getClass().getSimpleName(), name, hashCode());
+        Threads.startLoop(this::internalUpdate, threadName, loopSleepDuration);
+    }
+
+    /**
+     * Call to stop delegating updates of this subsystem to a thread. This reverses {@link #startThread} and no-ops
+     * if the subsystem update thread is not running.
+     */
+    public final void stopThread() {
+        Threads.stop(threadName);
+        threadName = null;
     }
 
     /**

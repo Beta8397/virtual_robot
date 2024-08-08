@@ -57,17 +57,17 @@ public class MecanumRoadRunnerDrive extends com.acmerobotics.roadrunner.drive.Me
      * @param constants     The drive constants for the robot.
      * @param coefficients  The coefficients for the mecanum drive.
      * @param voltageSensor The voltage sensor for the robot from hardwareMap.
-     * @param imu           The IMU for the robot.
+     * @param imu           The IMU for the robot. May be nullable if you are using three-wheel odometry.
      * @param fl            The front left motor.
      * @param fr            The front right motor.
      * @param bl            The back left motor.
      * @param br            The back right motor.
      */
-    public MecanumRoadRunnerDrive(@Nullable DualTelemetry telemetry, DriveConstants constants, MecanumCoefficients coefficients, HardwareMap.DeviceMapping<VoltageSensor> voltageSensor, IMU imu, DcMotorEx fl, DcMotorEx fr, DcMotorEx bl, DcMotorEx br) {
+    public MecanumRoadRunnerDrive(@Nullable DualTelemetry telemetry, DriveConstants constants, MecanumCoefficients coefficients, HardwareMap.DeviceMapping<VoltageSensor> voltageSensor, @Nullable IMU imu, DcMotorEx fl, DcMotorEx fr, DcMotorEx bl, DcMotorEx br) {
         super(constants.kV, constants.kA, constants.kStatic, constants.TRACK_WIDTH, constants.TRACK_WIDTH, coefficients.LATERAL_MULTIPLIER);
 
         follower = new HolonomicPIDVAFollower(coefficients.TRANSLATIONAL_PID, coefficients.TRANSLATIONAL_PID, coefficients.HEADING_PID,
-                new Pose2d(0.5, 0.5, Math.toRadians(5.0)), 0.5);
+                constants.admissibleError.first, constants.admissibleError.second);
 
         VEL_CONSTRAINT = getVelocityConstraint(constants.MAX_VEL, constants.MAX_ANG_VEL, constants.TRACK_WIDTH);
         ACCEL_CONSTRAINT = getAccelerationConstraint(constants.MAX_ACCEL);
@@ -292,12 +292,12 @@ public class MecanumRoadRunnerDrive extends com.acmerobotics.roadrunner.drive.Me
 
     @Override
     public double getRawExternalHeading() {
-        return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        return imu != null ? imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS) : 0.0;
     }
 
     @Override
     public Double getExternalHeadingVelocity() {
-        return (double) imu.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate;
+        return imu != null ? imu.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate : 0.0;
     }
 
     @Override

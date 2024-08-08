@@ -32,6 +32,9 @@ abstract class Task(
     /**
      * Maximum timeout of the task. If set to 0 magnitude (or a timeout-less constructor) this will serve as an indefinite task, and
      * will only finish when isTaskFinished() returns true, or this task is manually interrupted via [finish].
+     *
+     * It is encouraged unless it is for systems that require infinite tasks, that you add timeouts to ensure your tasks
+     * don't get stuck, making tasks have a focus on timeout conditions.
      */
     var timeout: Measure<Time>
 ) : BunyipsComponent(), Runnable {

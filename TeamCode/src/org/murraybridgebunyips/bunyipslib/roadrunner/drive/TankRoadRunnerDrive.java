@@ -73,7 +73,7 @@ public class TankRoadRunnerDrive extends com.acmerobotics.roadrunner.drive.TankD
         super(constants.kV, constants.kA, constants.kStatic, constants.TRACK_WIDTH);
 
         follower = new TankPIDVAFollower(coefficients.AXIAL_PID, coefficients.CROSS_TRACK_PID,
-                new Pose2d(0.5, 0.5, Math.toRadians(5.0)), 0.5);
+                constants.admissibleError.first, constants.admissibleError.second);
 
         VEL_CONSTRAINT = getVelocityConstraint(constants.MAX_VEL, constants.MAX_ANG_VEL, constants.TRACK_WIDTH);
         accelConstraint = getAccelerationConstraint(constants.MAX_ACCEL);

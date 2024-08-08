@@ -2,6 +2,9 @@ package org.murraybridgebunyips.bunyipslib
 
 import com.acmerobotics.roadrunner.geometry.Pose2d
 import com.acmerobotics.roadrunner.geometry.Vector2d
+import org.murraybridgebunyips.bunyipslib.external.units.Angle
+import org.murraybridgebunyips.bunyipslib.external.units.Measure
+import org.murraybridgebunyips.bunyipslib.external.units.Units.Radians
 
 /**
  * Represents relative positions in 2D space.
@@ -39,11 +42,8 @@ enum class Direction(
         ANTICLOCKWISE(Pose2d(0.0, 0.0, Math.toRadians(90.0)));
     }
 
-    val degrees: Double
-        get() = Math.toDegrees(vector.angle())
-
-    val radians: Double
-        get() = vector.angle()
+    val angle: Measure<Angle>
+        get() = Radians.of(vector.angle())
 
     companion object {
         /**

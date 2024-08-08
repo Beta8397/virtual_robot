@@ -338,7 +338,7 @@ class DualTelemetry @JvmOverloads constructor(
 
         // FtcDashboard
         val packet = TelemetryPacket()
-        packet.put("<small>STATUS</small>", overheadStatus)
+        packet.put("STATUS", overheadStatus)
 
         synchronized(dashboardItems) {
             // Index counters
@@ -352,12 +352,12 @@ class DualTelemetry @JvmOverloads constructor(
                 val (type, ref) = pair
                 when (type) {
                     ItemType.TELEMETRY -> packet.put(
-                        "<small>DS${String.format("%0${padding}d", t++)}</small>",
+                        "DS${String.format("%0${padding}d", t++)}",
                         ref.get()
                     )
 
                     ItemType.RETAINED_TELEMETRY -> packet.put(
-                        "<small>RT${String.format("%0${padding}d", r++)}</small>",
+                        "RT${String.format("%0${padding}d", r++)}",
                         ref.get()
                     )
 
@@ -366,10 +366,10 @@ class DualTelemetry @JvmOverloads constructor(
                             // BunyipsLib info, this is an always log and will always
                             // be the first log in the list as it is added at the start
                             // of the init cycle
-                            packet.put("<small>INFO</small>", ref.get())
+                            packet.put("INFO", ref.get())
                             return@forEach
                         }
-                        packet.put("<small>LOG${String.format("%0${padding}d", l++)}</small>", ref.get())
+                        packet.put("LOG${String.format("%0${padding}d", l++)}", ref.get())
                     }
                 }
             }

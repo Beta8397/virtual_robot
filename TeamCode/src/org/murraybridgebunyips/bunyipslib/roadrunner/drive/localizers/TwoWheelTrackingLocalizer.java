@@ -42,6 +42,8 @@ public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
     // Perpendicular is perpendicular to the forward axis
     private final Deadwheel parallelDeadwheel;
     private final Deadwheel perpendicularDeadwheel;
+    private final double xMul;
+    private final double yMul;
     private final RoadRunnerDrive drive;
     private boolean usingOverflowCompensation;
 
@@ -64,6 +66,9 @@ public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
 
         this.parallelDeadwheel = parallelDeadwheel;
         this.perpendicularDeadwheel = perpendicularDeadwheel;
+
+        xMul = coefficients.X_MULTIPLIER;
+        yMul = coefficients.Y_MULTIPLIER;
     }
 
     /**
@@ -104,8 +109,8 @@ public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
     @Override
     public List<Double> getWheelPositions() {
         return Arrays.asList(
-                encoderTicksToInches(parallelDeadwheel.getCurrentPosition()),
-                encoderTicksToInches(perpendicularDeadwheel.getCurrentPosition())
+                encoderTicksToInches(parallelDeadwheel.getCurrentPosition()) * xMul,
+                encoderTicksToInches(perpendicularDeadwheel.getCurrentPosition()) * yMul
         );
     }
 
@@ -115,8 +120,8 @@ public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
         // If your encoder velocity can exceed 32767 counts / second (such as the REV Through Bore and other
         // high resolution encoders), enable overflow compensation with enableOverflowCompensation.
         return Arrays.asList(
-                encoderTicksToInches(usingOverflowCompensation ? parallelDeadwheel.getCorrectedVelocity() : parallelDeadwheel.getRawVelocity()),
-                encoderTicksToInches(usingOverflowCompensation ? perpendicularDeadwheel.getCorrectedVelocity() : perpendicularDeadwheel.getRawVelocity())
+                encoderTicksToInches(usingOverflowCompensation ? parallelDeadwheel.getCorrectedVelocity() : parallelDeadwheel.getRawVelocity()) * xMul,
+                encoderTicksToInches(usingOverflowCompensation ? perpendicularDeadwheel.getCorrectedVelocity() : perpendicularDeadwheel.getRawVelocity()) * yMul
         );
     }
 }

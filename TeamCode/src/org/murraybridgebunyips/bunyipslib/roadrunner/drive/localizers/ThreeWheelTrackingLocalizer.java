@@ -30,6 +30,8 @@ public class ThreeWheelTrackingLocalizer extends ThreeTrackingWheelLocalizer {
     private final Deadwheel frontDeadwheel;
     private final List<Integer> lastEncPositions;
     private final List<Integer> lastEncVels;
+    private final double xMul;
+    private final double yMul;
     private boolean usingOverflowCompensation;
 
     /**
@@ -59,6 +61,9 @@ public class ThreeWheelTrackingLocalizer extends ThreeTrackingWheelLocalizer {
         this.leftDeadwheel = leftDeadwheel;
         this.rightDeadwheel = rightDeadwheel;
         this.frontDeadwheel = frontDeadwheel;
+
+        xMul = coefficients.X_MULTIPLIER;
+        yMul = coefficients.Y_MULTIPLIER;
     }
 
     /**
@@ -98,9 +103,9 @@ public class ThreeWheelTrackingLocalizer extends ThreeTrackingWheelLocalizer {
         lastEncPositions.add(frontPos);
 
         return Arrays.asList(
-                encoderTicksToInches(leftPos),
-                encoderTicksToInches(rightPos),
-                encoderTicksToInches(frontPos)
+                encoderTicksToInches(leftPos) * xMul,
+                encoderTicksToInches(rightPos) * xMul,
+                encoderTicksToInches(frontPos) * yMul
         );
     }
 
@@ -117,9 +122,9 @@ public class ThreeWheelTrackingLocalizer extends ThreeTrackingWheelLocalizer {
         lastEncVels.add(frontVel);
 
         return Arrays.asList(
-                encoderTicksToInches(leftVel),
-                encoderTicksToInches(rightVel),
-                encoderTicksToInches(frontVel)
+                encoderTicksToInches(leftVel) * xMul,
+                encoderTicksToInches(rightVel) * xMul,
+                encoderTicksToInches(frontVel) * yMul
         );
     }
 }

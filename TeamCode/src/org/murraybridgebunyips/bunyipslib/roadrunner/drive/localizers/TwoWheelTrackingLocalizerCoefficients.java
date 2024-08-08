@@ -42,6 +42,14 @@ public class TwoWheelTrackingLocalizerCoefficients {
      * Position in the strafe direction of the perpendicular wheel in inches
      */
     public double PERPENDICULAR_Y;
+    /**
+     * Multiplicative scale of the ticks from the x (forward) axis.
+     */
+    public double X_MULTIPLIER = 1;
+    /**
+     * Multiplicative scale of the ticks from the y (strafe) axis.
+     */
+    public double Y_MULTIPLIER = 1;
 
     /**
      * Utility class for building TwoWheelTrackingLocalizerCoefficients
@@ -131,6 +139,28 @@ public class TwoWheelTrackingLocalizerCoefficients {
          */
         public Builder setPerpendicularY(Measure<Distance> perpendicularY) {
             twoWheelTrackingCoefficients.PERPENDICULAR_Y = perpendicularY.in(Inches);
+            return this;
+        }
+
+        /**
+         * Set the forward (x) multiplier for the ticks reported by the forward deadwheels.
+         *
+         * @param forwardMul the multiplier
+         * @return The builder
+         */
+        public Builder setXMultiplier(double forwardMul) {
+            twoWheelTrackingCoefficients.X_MULTIPLIER = forwardMul;
+            return this;
+        }
+
+        /**
+         * Set the strafe (y) multiplier for the ticks reported by the side deadwheel.
+         *
+         * @param strafeMul the multiplier
+         * @return The builder
+         */
+        public Builder setYMultiplier(double strafeMul) {
+            twoWheelTrackingCoefficients.Y_MULTIPLIER = strafeMul;
             return this;
         }
 

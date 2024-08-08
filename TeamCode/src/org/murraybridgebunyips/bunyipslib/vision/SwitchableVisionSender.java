@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Utility component to switch between different feeds and processors with FtcDashboard & the DS "Camera Stream".
+ * Utility component to switch between different feeds and processors with FtcDashboard and the DS "Camera Stream".
  * The Driver Station usually culminates all processors into a single feed preview, and it is not very helpful
  * to see the same feed when debugging across different processors. All processors in BunyipsLib
  * automatically make their own feeds, and we can use this to send different processors as previews.
