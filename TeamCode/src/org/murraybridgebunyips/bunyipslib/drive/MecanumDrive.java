@@ -60,10 +60,6 @@ public class MecanumDrive extends BunyipsSubsystem implements RoadRunnerDrive {
         updatePoseFromMemory();
     }
 
-    public MecanumCoefficients getCoefficients() {
-        return drive.getCoefficients();
-    }
-
     /**
      * Reset the IMU's yaw to 0.
      */
@@ -93,6 +89,10 @@ public class MecanumDrive extends BunyipsSubsystem implements RoadRunnerDrive {
     @Override
     public DriveConstants getConstants() {
         return drive.getConstants();
+    }
+
+    public MecanumCoefficients getCoefficients() {
+        return drive.getCoefficients();
     }
 
     /**

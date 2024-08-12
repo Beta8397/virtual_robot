@@ -178,7 +178,7 @@ abstract class BunyipsOpMode : BOMInternal() {
     /**
      * Perform one time clean-up operations after the [activeLoop] finishes all intentions gracefully.
      * This method is called after a [finish] or [exit] call, but may not
-     * be called if the OpMode is terminated by an *unhandled fatal* exception. This method is useful for
+     * be called if the OpMode is terminated by an *unhandled fatal* exception/early stop. This method is useful for
      * ensuring the robot is in a safe state after the OpMode has finished. In an exception-less OpMode,
      * this method will be called before [onStop].
      * @see onStop
@@ -357,7 +357,11 @@ abstract class BunyipsOpMode : BOMInternal() {
                 telemetry.update()
                 // Save some CPU cycles
                 sleep(200)
+                idle()
             } while (!isStarted)
+
+            if (isStopRequested)
+                return
 
             // Play button has been pressed
             telemetry.opModeStatus = "<font color='yellow'>starting</font>"
@@ -387,13 +391,14 @@ abstract class BunyipsOpMode : BOMInternal() {
 
             telemetry.opModeStatus = "<font color='green'><b>running</b></font>"
             Dbg.logv("BunyipsOpMode: starting activeLoop()...")
-            while (opModeIsActive() && !operationsCompleted) {
+            while (!isStopRequested && isStarted && !operationsCompleted) {
                 if (operationsPaused) {
                     // If the OpMode is paused, skip the loop and wait for the next hardware cycle
                     timer.update()
                     telemetry.update()
                     // Slow down the OpMode as this is all we're doing
                     sleep(100)
+                    idle()
                     continue
                 }
                 val curr = System.nanoTime()

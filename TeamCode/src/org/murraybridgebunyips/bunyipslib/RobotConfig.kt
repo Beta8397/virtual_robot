@@ -1,7 +1,6 @@
 package org.murraybridgebunyips.bunyipslib
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
-import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.HardwareDevice
 import com.qualcomm.robotcore.hardware.HardwareMap
@@ -53,15 +52,13 @@ abstract class RobotConfig {
                 "${this.javaClass.simpleName}: Completed with ${Storage.memory().hardwareErrors.size} error(s).",
             )
         }
-        if (Storage.memory().hardwareErrors.isNotEmpty()) {
-            for (error in Storage.memory().hardwareErrors) {
-                if (opMode is BunyipsOpMode) {
-                    opMode.t.addRetained("<font color='red'><b>! MISSING_DEVICE</b></font>: $error")
-                    opMode.t.addRetained("<font color='red'>error:</font> <i>$error</i> was not found in the current saved configuration.")
-                } else {
-                    opMode.telemetry.addData("", "! MISSING_DEVICE: $error").setRetained(true)
-                    opMode.telemetry.log().add("error: '$error' was not found in the current saved configuration.")
-                }
+        for (error in Storage.memory().hardwareErrors) {
+            if (opMode is BunyipsOpMode) {
+                opMode.t.addRetained("<font color='red'><b>! MISSING_DEVICE</b></font>: $error")
+                opMode.t.addRetained("<font color='red'>error:</font> <i>$error</i> was not found in the current saved configuration.")
+            } else {
+                opMode.telemetry.addData("", "! MISSING_DEVICE: $error").setRetained(true)
+                opMode.telemetry.log().add("error: '$error' was not found in the current saved configuration.")
             }
         }
         return this
@@ -88,6 +85,21 @@ abstract class RobotConfig {
         return this
     }
 
+    private val dcMotorCastable = listOf(Deadwheel::class.java, DcMotorRamping::class.java, Motor::class.java)
+
+    @Suppress("UNCHECKED_CAST")
+    private fun <T : HardwareDevice> getAndDynamicCast(name: String, device: Class<T>): T? {
+        // These devices are known to replicate DcMotor functionality, and we can auto-fetch and safely cast
+        // to the new type for use by the user. We can ignore any unchecked cast warnings as these are checked.
+        dcMotorCastable.forEach {
+            if (it.isAssignableFrom(device)) {
+                val motor = hardwareMap.get(DcMotorEx::class.java, name)
+                return it.getConstructor(DcMotorEx::class.java).newInstance(motor) as T
+            }
+        }
+        return hardwareMap.get(device, name)
+    }
+
     /**
      * Convenience method for reading the device from the hardwareMap without having to check for exceptions.
      * This method can be passed a Runnable to run if the device is successfully configured, useful for setting up
@@ -100,26 +112,17 @@ abstract class RobotConfig {
      * @param onSuccess a Runnable to run if the device is successfully configured, useful for setting up motor configs
      *                  without having to check for null explicitly.
      */
-    @Suppress("UNCHECKED_CAST")
     @JvmOverloads
-    fun <T : HardwareDevice> getHardware(name: String, device: Class<T>, onSuccess: Consumer<T> = Consumer { }): T? {
+    protected fun <T : HardwareDevice> getHardware(
+        name: String,
+        device: Class<T>,
+        onSuccess: Consumer<T> = Consumer { }
+    ): T? {
         var hardwareDevice: T? = null
         var ok = false
         try {
             if (Storage.memory().hardwareErrors.contains(name)) return null
-            hardwareDevice = if (Deadwheel::class.java.isAssignableFrom(device)) {
-                // Deadwheel configuration needs to use the hardwareMap to fetch a DcMotorEx first
-                val motor = hardwareMap.get(DcMotorEx::class.java, name)
-                // We can safely create a new Deadwheel instance, and we can ignore unchecked cast warnings since
-                // we have already checked the class type.
-                Deadwheel(motor) as T
-            } else if (DcMotorRamping::class.java.isAssignableFrom(device)) {
-                // Same applies to a DcMotorRamping instance
-                val motor = hardwareMap.get(DcMotor::class.java, name)
-                DcMotorRamping(motor) as T
-            } else {
-                hardwareMap.get(device, name)
-            }
+            hardwareDevice = getAndDynamicCast(name, device)
             // Paranoia check as custom device classes may not throw exceptions when not found
             if (hardwareDevice == null)
                 throw NullPointerException()

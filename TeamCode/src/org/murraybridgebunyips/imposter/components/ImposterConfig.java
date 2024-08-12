@@ -8,7 +8,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.murraybridgebunyips.bunyipslib.RobotConfig;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.DriveConstants;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.MecanumCoefficients;
-import org.murraybridgebunyips.bunyipslib.roadrunner.drive.localizers.ThreeWheelTrackingLocalizerCoefficients;
+import org.murraybridgebunyips.bunyipslib.roadrunner.drive.localizers.ThreeWheelLocalizer;
+import org.murraybridgebunyips.bunyipslib.roadrunner.drive.localizers.ThreeWheelLocalizer.Coefficients;
 import org.murraybridgebunyips.bunyipslib.roadrunner.util.Deadwheel;
 
 import static org.murraybridgebunyips.bunyipslib.external.units.Units.*;
@@ -31,7 +32,7 @@ public class ImposterConfig extends RobotConfig {
 
     public DriveConstants driveConstants;
     public MecanumCoefficients mecanumCoefficients;
-    public ThreeWheelTrackingLocalizerCoefficients localizerCoefficients;
+    public ThreeWheelLocalizer.Coefficients localizerCoefficients;
 
     @Override
     protected void onRuntime() {
@@ -70,7 +71,7 @@ public class ImposterConfig extends RobotConfig {
                 .setHeadingPID(new PIDCoefficients(2.33, 0, 0))
                 .build();
 
-        localizerCoefficients = new ThreeWheelTrackingLocalizerCoefficients.Builder()
+        localizerCoefficients = new ThreeWheelLocalizer.Coefficients.Builder()
                 .setTicksPerRev(2000)
                 .setWheelRadius(Inches.of(2.0))
                 .setGearRatio(1)

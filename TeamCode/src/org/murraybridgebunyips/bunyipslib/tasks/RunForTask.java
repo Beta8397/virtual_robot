@@ -11,9 +11,10 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
  */
 public class RunForTask extends Task {
     private final Runnable callback;
+    private Runnable finishCallback;
 
     /**
-     * Subsystem-independent task.
+     * A runnable that will run until timeout.
      *
      * @param timeout  The time to run the task for
      * @param callback The callback to run every loop
@@ -24,9 +25,29 @@ public class RunForTask extends Task {
         withName("Run For");
     }
 
+    /**
+     * A runnable that will run until timeout, with a finish callback.
+     *
+     * @param timeout        The time to run the task for
+     * @param callback       The callback to run every loop
+     * @param finishCallback The callback to run after this task finishes
+     */
+    public RunForTask(Measure<Time> timeout, Runnable callback, Runnable finishCallback) {
+        super(timeout);
+        this.callback = callback;
+        this.finishCallback = finishCallback;
+        withName("Run For");
+    }
+
     @Override
     protected void periodic() {
-        // no-op
+        callback.run();
+    }
+
+    @Override
+    protected void onFinish() {
+        if (finishCallback != null)
+            finishCallback.run();
     }
 
     @Override

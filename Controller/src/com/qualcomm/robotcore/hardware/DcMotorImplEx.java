@@ -1,8 +1,10 @@
 package com.qualcomm.robotcore.hardware;
 
 import com.qualcomm.robotcore.hardware.configuration.MotorType;
+import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+import org.murraybridgebunyips.bunyipslib.Motor;
 
 /**
  * A very limited implementation of DcMotorEx.
@@ -21,6 +23,11 @@ public class DcMotorImplEx extends DcMotorImpl implements DcMotorEx{
     }
 
     public DcMotorImplEx(DcMotorController controller, int port) {
+        super(MotorType.RevUltraPlanetaryOneToOne);
+    }
+    // bleh
+    protected MotorConfigurationType motorType = new MotorConfigurationType(MotorType.Gobilda137);
+    public DcMotorImplEx(DcMotorController controller, int port, Direction direction, MotorConfigurationType type) {
         super(MotorType.RevUltraPlanetaryOneToOne);
     }
 

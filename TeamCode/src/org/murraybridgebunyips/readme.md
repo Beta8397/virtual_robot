@@ -11,7 +11,7 @@ When copying BunyipsLib to org.murraybridgebunyips, you will need to do the foll
 1. Copy the `bunyipslib` folder to `TeamCode/src/org/murraybridgebunyips/`
 2. Import `deps/BuildConfig` in `bunyipslib/BunyipsOpMode.kt`
 3. Delete `bunyipslib/roadrunner/util/android/`, ignore warnings
-4. Remove deleted import from `bunyipslib/roadrunner/drive/tuning/AutomaticFeedforwardTuner.java` and import `deps/LoggingUtil`
+4. Remove deleted import from `bunyipslib/roadrunner/drive/tuning/opmodes/AutomaticFeedforwardTuner.java` and import `deps/LoggingUtil`
 5. Remove deleted import from `bunyipslib/roadrunner/trajectorysequence/TrajectorySequenceRunner.java` and import `deps/LogFiles`
 6. Revert any changes done to `bunyipslib/DcMotorRamping.java`
 7. Comment out the `parseUnmanagedControllerBuffer()` method call in `bunyipslib/Controller.java, ln ~162

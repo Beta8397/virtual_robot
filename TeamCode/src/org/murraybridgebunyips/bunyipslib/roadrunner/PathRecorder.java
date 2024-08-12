@@ -31,10 +31,10 @@ import java.util.ArrayList;
 public abstract class PathRecorder extends BunyipsOpMode {
     private final ArrayList<Pose2d> path = new ArrayList<>();
     private final ElapsedTime timer = new ElapsedTime();
-    protected RoadRunnerDrive drive;
-    protected int snapshotDuration;
-    protected Vector2d deltaThreshold;
-    protected Pose2d startPose;
+    private RoadRunnerDrive drive;
+    private int snapshotDuration;
+    private Vector2d deltaThreshold;
+    private Pose2d startPose;
     private Pose2d currentPose;
 
     /**

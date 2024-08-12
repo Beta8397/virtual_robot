@@ -57,7 +57,7 @@ public abstract class LinearOpMode extends OpMode {
      *
      * Note: during this pause, the motors will continue running at their previous power settings.
      */
-    protected void sleep(long milliseconds){
+    public void sleep(long milliseconds){
         if (Thread.currentThread().isInterrupted()) return;
         try{
             Thread.sleep(milliseconds);

@@ -7,9 +7,8 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.DriveConstants;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.MecanumCoefficients;
-import org.murraybridgebunyips.bunyipslib.roadrunner.drive.localizers.ThreeWheelTrackingLocalizer;
-import org.murraybridgebunyips.bunyipslib.roadrunner.drive.localizers.TwoWheelTrackingLocalizer;
-import org.murraybridgebunyips.bunyipslib.roadrunner.drive.localizers.TwoWheelTrackingLocalizerCoefficients;
+import org.murraybridgebunyips.bunyipslib.roadrunner.drive.localizers.ThreeWheelLocalizer;
+import org.murraybridgebunyips.bunyipslib.roadrunner.drive.localizers.TwoWheelLocalizer;
 import org.murraybridgebunyips.bunyipslib.roadrunner.util.Deadwheel;
 
 /**
@@ -34,10 +33,10 @@ public class DualDeadwheelMecanumDrive extends MecanumDrive {
      * @param parallel              the parallel deadwheel encoder
      * @param perpendicular         the perpendicular deadwheel encoder
      */
-    public DualDeadwheelMecanumDrive(DriveConstants constants, MecanumCoefficients mecanumCoefficients, HardwareMap.DeviceMapping<VoltageSensor> voltageSensor, IMU imu, DcMotorEx frontLeft, DcMotorEx frontRight, DcMotorEx backLeft, DcMotorEx backRight, TwoWheelTrackingLocalizerCoefficients localizerCoefficients, Deadwheel parallel, Deadwheel perpendicular) {
+    public DualDeadwheelMecanumDrive(DriveConstants constants, MecanumCoefficients mecanumCoefficients, HardwareMap.DeviceMapping<VoltageSensor> voltageSensor, IMU imu, DcMotorEx frontLeft, DcMotorEx frontRight, DcMotorEx backLeft, DcMotorEx backRight, TwoWheelLocalizer.Coefficients localizerCoefficients, Deadwheel parallel, Deadwheel perpendicular) {
         super(constants, mecanumCoefficients, voltageSensor, imu, frontLeft, frontRight, backLeft, backRight);
         if (!assertParamsNotNull(localizerCoefficients, parallel, perpendicular)) return;
-        setLocalizer(new TwoWheelTrackingLocalizer(localizerCoefficients, parallel, perpendicular, getInstance()));
+        setLocalizer(new TwoWheelLocalizer(localizerCoefficients, parallel, perpendicular, getInstance()));
         updatePoseFromMemory();
     }
 
@@ -47,7 +46,7 @@ public class DualDeadwheelMecanumDrive extends MecanumDrive {
      * @return this
      */
     public DualDeadwheelMecanumDrive enableOverflowCompensation() {
-        ThreeWheelTrackingLocalizer localizer = (ThreeWheelTrackingLocalizer) getLocalizer();
+        ThreeWheelLocalizer localizer = (ThreeWheelLocalizer) getLocalizer();
         if (localizer != null)
             localizer.enableOverflowCompensation();
         return this;

@@ -14,7 +14,6 @@ import java.util.function.Supplier;
 
 /**
  * Standard gamepad drive for all holonomic drivetrains.
- * Left stick controls translation, right stick controls rotation.
  * This task is designed to be used as a default task, other tasks will override it.
  *
  * @author Lucas Bubner, 2024
@@ -30,7 +29,7 @@ public class HolonomicDriveTask extends ForeverTask {
      * Constructor for HolonomicDriveTask.
      *
      * @param xSupplier           The supplier for the x-axis input
-     * @param ySupplier           The supplier for the y-axis input
+     * @param ySupplier           The supplier for the y-axis input, <i>note that this will be inverted</i>
      * @param rSupplier           The supplier for the rotation input
      * @param mecanumDrive        The MecanumDrive to use for driving, must be a MecanumDrive or CartesianMecanumDrive
      * @param fieldCentricEnabled A BooleanSupplier that returns whether field centric drive is enabled,
@@ -51,6 +50,7 @@ public class HolonomicDriveTask extends ForeverTask {
 
     /**
      * Constructor for HolonomicDriveTask using a default Mecanum binding.
+     * Left stick controls translation, right stick controls rotation.
      *
      * @param driver              The gamepad to use for driving
      * @param mecanumDrive        The MecanumDrive to use for driving, must be a MecanumDrive or CartesianMecanumDrive

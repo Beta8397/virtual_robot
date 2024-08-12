@@ -1,7 +1,7 @@
-package org.murraybridgebunyips.bunyipslib.roadrunner.drive.tuning;
+package org.murraybridgebunyips.bunyipslib.roadrunner.drive.tuning.opmodes;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import static org.murraybridgebunyips.bunyipslib.Text.round;
+
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.localization.Localizer;
 import com.acmerobotics.roadrunner.util.Angle;
@@ -9,10 +9,10 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.MovingStatistics;
 import com.qualcomm.robotcore.util.RobotLog;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.internal.system.Misc;
+import org.murraybridgebunyips.bunyipslib.DualTelemetry;
+import org.murraybridgebunyips.bunyipslib.TriConsumer;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
-import org.murraybridgebunyips.bunyipslib.roadrunner.drive.localizers.ThreeWheelTrackingLocalizer;
+import org.murraybridgebunyips.bunyipslib.roadrunner.drive.localizers.ThreeWheelLocalizer;
 
 /**
  * This routine determines the effective forward offset for the lateral tracking wheel.
@@ -33,47 +33,42 @@ import org.murraybridgebunyips.bunyipslib.roadrunner.drive.localizers.ThreeWheel
  * for the forward offset. You can run this procedure as many times as necessary until a
  * satisfactory result is produced.
  */
-//@Config
-public abstract class TrackingWheelForwardOffsetTuner extends LinearOpMode {
+public class TrackingWheelForwardOffsetTuner implements TriConsumer<LinearOpMode, DualTelemetry, RoadRunnerDrive> {
     /**
      * The angle to turn for the forward offset tuning procedure.
      */
-    public static double ANGLE = 180; // deg
+    public double ANGLE_DEGREES = 180;
     /**
      * The number of trials to run for the forward offset tuning procedure.
      */
-    public static int NUM_TRIALS = 5;
+    public int NUM_TRIALS = 5;
     /**
      * The delay in milliseconds between each trial.
      */
-    public static int DELAY = 1000; // ms
-    protected RoadRunnerDrive drive;
+    public int DELAY_MILLIS = 1000;
 
     @Override
-    public void runOpMode() {
-        Telemetry telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
-        if (drive == null) throw new NullPointerException("drive is null!");
-
+    public void accept(LinearOpMode opMode, DualTelemetry telemetry, RoadRunnerDrive drive) {
         // Must set localizer to a StandardTrackingWheelLocalizer, at the moment this will not run
         Localizer localizer = drive.getLocalizer();
 
-        if (!(localizer instanceof ThreeWheelTrackingLocalizer)) {
+        if (!(localizer instanceof ThreeWheelLocalizer)) {
             RobotLog.setGlobalErrorMsg("StandardTrackingWheelLocalizer is not being set in the "
                     + "drive class. Ensure that \"setLocalizer(new StandardTrackingWheelLocalizer"
                     + "(...));\" is called somewhere else.");
         }
-        assert localizer instanceof ThreeWheelTrackingLocalizer;
+        assert localizer instanceof ThreeWheelLocalizer;
 
-        telemetry.addLine("Press play to begin the forward offset tuner");
-        telemetry.addLine("Make sure your robot has enough clearance to turn smoothly");
+        telemetry.add("Press play to begin the forward offset tuner");
+        telemetry.add("Make sure your robot has enough clearance to turn smoothly");
         telemetry.update();
 
-        waitForStart();
+        opMode.waitForStart();
 
-        if (isStopRequested()) return;
+        if (opMode.isStopRequested()) return;
 
-        telemetry.clearAll();
-        telemetry.addLine("Running...");
+        telemetry.clear();
+        telemetry.add("Running...");
         telemetry.update();
 
         MovingStatistics forwardOffsetStats = new MovingStatistics(NUM_TRIALS);
@@ -84,9 +79,9 @@ public abstract class TrackingWheelForwardOffsetTuner extends LinearOpMode {
             double headingAccumulator = 0;
             double lastHeading = 0;
 
-            drive.turnAsync(Math.toRadians(ANGLE));
+            drive.turnAsync(Math.toRadians(ANGLE_DEGREES));
 
-            while (!isStopRequested() && drive.isBusy()) {
+            while (!opMode.isStopRequested() && drive.isBusy()) {
                 double heading = drive.getPoseEstimate().getHeading();
                 headingAccumulator += Angle.norm(heading - lastHeading);
                 lastHeading = heading;
@@ -94,22 +89,20 @@ public abstract class TrackingWheelForwardOffsetTuner extends LinearOpMode {
                 drive.update();
             }
 
-            double forwardOffset = ((ThreeWheelTrackingLocalizer) localizer).getCoefficients().FORWARD_OFFSET +
+            double forwardOffset = ((ThreeWheelLocalizer) localizer).getCoefficients().FORWARD_OFFSET +
                     drive.getPoseEstimate().getY() / headingAccumulator;
             forwardOffsetStats.add(forwardOffset);
 
-            sleep(DELAY);
+            opMode.sleep(DELAY_MILLIS);
         }
 
-        telemetry.clearAll();
-        telemetry.addLine("Tuning complete");
-        telemetry.addLine(Misc.formatInvariant("Effective forward offset = %.2f (SE = %.3f)",
-                forwardOffsetStats.getMean(),
-                forwardOffsetStats.getStandardDeviation() / Math.sqrt(NUM_TRIALS)));
+        telemetry.clear();
+        telemetry.add("Tuning complete");
+        telemetry.add("Effective forward offset = % (SE = %)",
+                round(forwardOffsetStats.getMean(), 2),
+                round(forwardOffsetStats.getStandardDeviation() / Math.sqrt(NUM_TRIALS), 3));
         telemetry.update();
 
-        while (!isStopRequested()) {
-            idle();
-        }
+        while (!opMode.isStopRequested()) opMode.idle();
     }
 }

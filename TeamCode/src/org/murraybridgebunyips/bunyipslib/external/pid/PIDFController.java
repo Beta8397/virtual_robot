@@ -2,6 +2,8 @@ package org.murraybridgebunyips.bunyipslib.external.pid;
 
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
+import org.murraybridgebunyips.bunyipslib.external.SystemController;
+
 /**
  * This is a PID controller (https://en.wikipedia.org/wiki/PID_controller)
  * for your robot. Internally, it performs all the calculations for you.
@@ -15,7 +17,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
  * int(0,t)[e(t')dt'] is the total error and e'(t) is the velocity error.
  * <a href="https://github.com/FTCLib/FTCLib/blob/cedc52cee1bb549324c1ca5059c5feec3c054902/core/src/main/java/com/arcrobotics/ftclib/controller/PIDFController.java">Source</a>
  */
-public class PIDFController {
+public class PIDFController implements SystemController {
     private double kP, kI, kD, kF;
     private double setPoint;
     private double measuredValue;
@@ -80,6 +82,7 @@ public class PIDFController {
     /**
      * Resets the PIDF controller.
      */
+    @Override
     public void reset() {
         totalError = 0;
         prevErrorVal = 0;
@@ -135,6 +138,17 @@ public class PIDFController {
         return new double[]{kP, kI, kD, kF};
     }
 
+    @Override
+    public void setCoefficients(double... coeffs) {
+        if (coeffs.length < 1) {
+            throw new IllegalArgumentException("expected >1 coefficients, got " + coeffs.length);
+        }
+        double i = coeffs.length > 1 ? coeffs[1] : 0;
+        double d = coeffs.length > 2 ? coeffs[2] : 0;
+        double f = coeffs.length > 3 ? coeffs[3] : 0;
+        setPIDF(coeffs[0], i, d, f);
+    }
+
     /**
      * @return the positional error e(t)
      */
@@ -183,6 +197,7 @@ public class PIDFController {
      * @return the next output using the given measured value via
      * {@link #calculate(double)}.
      */
+    @Override
     public double calculate(double pv, double sp) {
         // Set the setpoint to the provided value
         setSetPoint(sp);

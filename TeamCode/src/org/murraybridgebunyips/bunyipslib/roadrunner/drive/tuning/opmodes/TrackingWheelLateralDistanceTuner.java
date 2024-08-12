@@ -1,4 +1,4 @@
-package org.murraybridgebunyips.bunyipslib.roadrunner.drive.tuning;
+package org.murraybridgebunyips.bunyipslib.roadrunner.drive.tuning.opmodes;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.localization.Localizer;
@@ -6,8 +6,10 @@ import com.acmerobotics.roadrunner.util.Angle;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.RobotLog;
 
+import org.murraybridgebunyips.bunyipslib.DualTelemetry;
+import org.murraybridgebunyips.bunyipslib.TriConsumer;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
-import org.murraybridgebunyips.bunyipslib.roadrunner.drive.localizers.ThreeWheelTrackingLocalizer;
+import org.murraybridgebunyips.bunyipslib.roadrunner.drive.localizers.ThreeWheelLocalizer;
 
 /**
  * Opmode designed to assist the user in tuning the `StandardTrackingWheelLocalizer`'s
@@ -60,40 +62,36 @@ import org.murraybridgebunyips.bunyipslib.roadrunner.drive.localizers.ThreeWheel
  * slightly but your heading will still be fine. This does not affect your overall tracking
  * precision. The heading should still line up.
  */
-//@Config
-public abstract class TrackingWheelLateralDistanceTuner extends LinearOpMode {
+public class TrackingWheelLateralDistanceTuner implements TriConsumer<LinearOpMode, DualTelemetry, RoadRunnerDrive> {
     /**
      * The number of turns to make during the tuning routine.
      */
-    public static int NUM_TURNS = 10;
-    protected RoadRunnerDrive drive;
+    public int NUM_TURNS = 10;
 
     @Override
-    public void runOpMode() {
-        if (drive == null) throw new NullPointerException("drive is null!");
-
+    public void accept(LinearOpMode opMode, DualTelemetry telemetry, RoadRunnerDrive drive) {
         // Must set localizer to a StandardTrackingWheelLocalizer, at the moment this will not run
         Localizer localizer = drive.getLocalizer();
 
-        if (!(localizer instanceof ThreeWheelTrackingLocalizer)) {
+        if (!(localizer instanceof ThreeWheelLocalizer)) {
             RobotLog.setGlobalErrorMsg("StandardTrackingWheelLocalizer is not being set in the "
                     + "drive class. Ensure that \"setLocalizer(new StandardTrackingWheelLocalizer"
-                    + "(hardwareMap));\" is called in SampleMecanumDrive.java");
+                    + "(hardwareMap));\" is called in your drive.");
         }
-        assert localizer instanceof ThreeWheelTrackingLocalizer;
+        assert localizer instanceof ThreeWheelLocalizer;
 
-        telemetry.addLine("Prior to beginning the routine, please read the directions "
+        telemetry.add("Prior to beginning the routine, please read the directions "
                 + "located in the comments of the opmode file.");
-        telemetry.addLine("Press play to begin the tuning routine.");
-        telemetry.addLine("");
-        telemetry.addLine("Press Y/△ to stop the routine.");
+        telemetry.add("Press play to begin the tuning routine.");
+        telemetry.addNewLine();
+        telemetry.add("Press Y/△ to stop the routine.");
         telemetry.update();
 
-        waitForStart();
+        opMode.waitForStart();
 
-        if (isStopRequested()) return;
+        if (opMode.isStopRequested()) return;
 
-        telemetry.clearAll();
+        telemetry.clear();
         telemetry.update();
 
         double headingAccumulator = 0;
@@ -101,8 +99,8 @@ public abstract class TrackingWheelLateralDistanceTuner extends LinearOpMode {
 
         boolean tuningFinished = false;
 
-        while (!isStopRequested() && !tuningFinished) {
-            Pose2d vel = new Pose2d(0, 0, -gamepad1.right_stick_x);
+        while (!opMode.isStopRequested() && !tuningFinished) {
+            Pose2d vel = new Pose2d(0, 0, -opMode.gamepad1.right_stick_x);
             drive.setDrivePower(vel);
 
             drive.update();
@@ -113,24 +111,24 @@ public abstract class TrackingWheelLateralDistanceTuner extends LinearOpMode {
             headingAccumulator += Angle.normDelta(deltaHeading);
             lastHeading = heading;
 
-            telemetry.clearAll();
-            telemetry.addLine("Total Heading (deg): " + Math.toDegrees(headingAccumulator));
-            telemetry.addLine("Raw Heading (deg): " + Math.toDegrees(heading));
-            telemetry.addLine();
-            telemetry.addLine("Press Y/△ to conclude routine");
+            telemetry.clear();
+            telemetry.add("Total Heading (deg): " + Math.toDegrees(headingAccumulator));
+            telemetry.add("Raw Heading (deg): " + Math.toDegrees(heading));
+            telemetry.addNewLine();
+            telemetry.add("Press Y/△ to conclude routine");
             telemetry.update();
 
-            if (gamepad1.y)
+            if (opMode.gamepad1.y)
                 tuningFinished = true;
         }
 
-        telemetry.clearAll();
-        telemetry.addLine("Localizer's total heading: " + Math.toDegrees(headingAccumulator) + "°");
-        telemetry.addLine("Effective LATERAL_DISTANCE: " +
-                (headingAccumulator / (NUM_TURNS * Math.PI * 2)) * ((ThreeWheelTrackingLocalizer) localizer).getCoefficients().LATERAL_DISTANCE);
+        telemetry.clear();
+        telemetry.add("Localizer's total heading: " + Math.toDegrees(headingAccumulator) + "°");
+        telemetry.add("Effective LATERAL_DISTANCE: " +
+                (headingAccumulator / (NUM_TURNS * Math.PI * 2)) * ((ThreeWheelLocalizer) localizer).getCoefficients().LATERAL_DISTANCE);
 
         telemetry.update();
 
-        while (!isStopRequested()) idle();
+        while (!opMode.isStopRequested()) opMode.idle();
     }
 }

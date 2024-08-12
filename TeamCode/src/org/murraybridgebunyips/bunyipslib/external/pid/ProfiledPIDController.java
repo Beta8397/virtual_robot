@@ -7,13 +7,14 @@
 
 package org.murraybridgebunyips.bunyipslib.external.pid;
 
+import org.murraybridgebunyips.bunyipslib.external.SystemController;
 import org.murraybridgebunyips.bunyipslib.external.TrapezoidProfile;
 
 /**
  * Implements a PID control loop whose setpoint is constrained by a trapezoid profile.
  * <a href="https://github.com/FTCLib/FTCLib/blob/1c8995d09413b406e0f4aff238ea4edc2bb860c4/core/src/main/java/com/arcrobotics/ftclib/controller/wpilibcontroller/ProfiledPIDController.java">Source</a>
  */
-public class ProfiledPIDController {
+public class ProfiledPIDController implements SystemController {
     private final PIDController controller;
     private TrapezoidProfile.State goal = new TrapezoidProfile.State();
     private TrapezoidProfile.State setpoint = new TrapezoidProfile.State();
@@ -241,6 +242,7 @@ public class ProfiledPIDController {
      * @param newGoal     The new goal of the controller.
      * @return The next output of the PID controller.
      */
+    @Override
     public double calculate(double measurement, double newGoal) {
         setGoal(newGoal);
         return calculate(measurement);
@@ -297,4 +299,8 @@ public class ProfiledPIDController {
         reset(measuredPosition, 0.0);
     }
 
+    @Override
+    public void setCoefficients(double... coeffs) {
+        controller.setCoefficients(coeffs);
+    }
 }

@@ -1,7 +1,5 @@
-package org.murraybridgebunyips.bunyipslib.roadrunner.drive.tuning;
+package org.murraybridgebunyips.bunyipslib.roadrunner.drive.tuning.opmodes;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.profile.MotionProfile;
 import com.acmerobotics.roadrunner.profile.MotionProfileGenerator;
@@ -11,7 +9,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.RobotLog;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.murraybridgebunyips.bunyipslib.DualTelemetry;
+import org.murraybridgebunyips.bunyipslib.TriConsumer;
 import org.murraybridgebunyips.bunyipslib.roadrunner.drive.RoadRunnerDrive;
 
 import java.util.List;
@@ -19,7 +18,9 @@ import java.util.List;
 /**
  * This routine is designed to tune the PID coefficients used by the REV Expansion Hubs for closed-
  * loop velocity control. Although it may seem unnecessary, tuning these coefficients is just as
- * important as the positional parameters. Like the other manual tuning routines, this op mode
+ * important as the positional parameters.
+ * <p>
+ * Like the other manual tuning routines, this op mode
  * relies heavily upon the dashboard. To access the dashboard, connect your computer to the RC's
  * WiFi network. In your browser, navigate to https://192.168.49.1:8080/dash if you're using the RC
  * phone or https://192.168.43.1:8080/dash if you are using the Control Hub. Once you've successfully
@@ -28,40 +29,35 @@ import java.util.List;
  * coefficients (note: the tuning variable will not appear until the op mode finishes initializing).
  * Once you've found a satisfactory set of gains, add them to the DriveConstants.java file under the
  * MOTOR_VELO_PID field.
- * Recommended tuning process:
+ * <p>
+ * Recommended tuning process:<br>
  * 1. Increase kP until any phase lag is eliminated. Concurrently increase kD as necessary to
- * mitigate oscillations.
- * 2. Add kI (or adjust kF) until the steady state/constant velocity plateaus are reached.
+ * mitigate oscillations.<br>
+ * 2. Add kI (or adjust kF) until the steady state/constant velocity plateaus are reached.<br>
  * 3. Back off kP and kD a little until the response is less oscillatory (but without lag).
+ * <p>
  * Pressing Y/Δ (Xbox/PS4) will pause the tuning process and enter driver override, allowing the
- * user to reset the position of the bot in the event that it drifts off the path.
+ * user to reset the position of the bot in the event that it drifts off the path.<br>
  * Pressing B/O (Xbox/PS4) will cede control back to the tuning process.
  */
-//@Config
-public abstract class DriveVelocityPIDTuner extends LinearOpMode {
+public class DriveVelocityPIDTuner implements TriConsumer<LinearOpMode, DualTelemetry, RoadRunnerDrive> {
     /**
      * The distance the bot will travel back and forth.
      */
-    public static double DISTANCE = 72; // in
-    protected RoadRunnerDrive drive;
+    public double DISTANCE_INCHES = 72;
 
-    private MotionProfile generateProfile(boolean movingForward) {
-        MotionState start = new MotionState(movingForward ? 0 : DISTANCE, 0, 0, 0);
-        MotionState goal = new MotionState(movingForward ? DISTANCE : 0, 0, 0, 0);
+    private MotionProfile generateProfile(RoadRunnerDrive drive, boolean movingForward) {
+        MotionState start = new MotionState(movingForward ? 0 : DISTANCE_INCHES, 0, 0, 0);
+        MotionState goal = new MotionState(movingForward ? DISTANCE_INCHES : 0, 0, 0, 0);
         return MotionProfileGenerator.generateSimpleMotionProfile(start, goal, drive.getConstants().MAX_VEL, drive.getConstants().MAX_ACCEL);
     }
 
     @Override
-    public void runOpMode() {
-        if (drive == null) throw new NullPointerException("drive is null!");
-
-
+    public void accept(LinearOpMode opMode, DualTelemetry telemetry, RoadRunnerDrive drive) {
         if (!drive.getConstants().RUN_USING_ENCODER) {
             RobotLog.setGlobalErrorMsg("%s does not need to be run if the built-in motor velocity" +
                     "PID is not in use", getClass().getSimpleName());
         }
-
-        Telemetry telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
 
         Mode mode = Mode.TUNING_MODE;
 
@@ -74,25 +70,25 @@ public abstract class DriveVelocityPIDTuner extends LinearOpMode {
 
         NanoClock clock = NanoClock.system();
 
-        telemetry.addLine("Ready!");
+        telemetry.add("Ready!");
         telemetry.update();
-        telemetry.clearAll();
+        telemetry.clear();
 
-        waitForStart();
+        opMode.waitForStart();
 
-        if (isStopRequested()) return;
+        if (opMode.isStopRequested()) return;
 
         boolean movingForwards = true;
-        MotionProfile activeProfile = generateProfile(true);
+        MotionProfile activeProfile = generateProfile(drive, true);
         double profileStart = clock.seconds();
 
-
-        while (!isStopRequested()) {
-            telemetry.addData("mode", mode);
+        while (!opMode.isStopRequested()) {
+            telemetry.addDS("You must access FtcDashboard to use this tuning OpMode.");
+            telemetry.addDashboard("mode", mode);
 
             switch (mode) {
                 case TUNING_MODE:
-                    if (gamepad1.y) {
+                    if (opMode.gamepad1.y) {
                         mode = Mode.DRIVER_MODE;
                         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     }
@@ -103,7 +99,7 @@ public abstract class DriveVelocityPIDTuner extends LinearOpMode {
                     if (profileTime > activeProfile.duration()) {
                         // generate a new profile
                         movingForwards = !movingForwards;
-                        activeProfile = generateProfile(movingForwards);
+                        activeProfile = generateProfile(drive, movingForwards);
                         profileStart = clock.seconds();
                     }
 
@@ -114,30 +110,30 @@ public abstract class DriveVelocityPIDTuner extends LinearOpMode {
                     List<Double> velocities = drive.getWheelVelocities();
 
                     // update telemetry
-                    telemetry.addData("targetVelocity", motionState.getV());
+                    telemetry.addDashboard("targetVelocity", motionState.getV());
                     for (int i = 0; i < velocities.size(); i++) {
-                        telemetry.addData("measuredVelocity" + i, velocities.get(i));
-                        telemetry.addData(
+                        telemetry.addDashboard("measuredVelocity" + i, velocities.get(i));
+                        telemetry.addDashboard(
                                 "error" + i,
                                 motionState.getV() - velocities.get(i)
                         );
                     }
                     break;
                 case DRIVER_MODE:
-                    if (gamepad1.b) {
+                    if (opMode.gamepad1.b) {
                         drive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
                         mode = Mode.TUNING_MODE;
                         movingForwards = true;
-                        activeProfile = generateProfile(true);
+                        activeProfile = generateProfile(drive, true);
                         profileStart = clock.seconds();
                     }
 
                     drive.setWeightedDrivePower(
                             new Pose2d(
-                                    -gamepad1.left_stick_y,
-                                    -gamepad1.left_stick_x,
-                                    -gamepad1.right_stick_x
+                                    -opMode.gamepad1.left_stick_y,
+                                    -opMode.gamepad1.left_stick_x,
+                                    -opMode.gamepad1.right_stick_x
                             )
                     );
                     break;
@@ -157,7 +153,7 @@ public abstract class DriveVelocityPIDTuner extends LinearOpMode {
         }
     }
 
-    enum Mode {
+    private enum Mode {
         DRIVER_MODE,
         TUNING_MODE
     }

@@ -24,6 +24,7 @@ import java.util.Locale;
  * @see MecanumDrive
  */
 public class CartesianMecanumDrive extends BunyipsSubsystem {
+    // Fields left public for legacy reasons
     /**
      * Horizontal speed of the robot.
      */
@@ -36,13 +37,12 @@ public class CartesianMecanumDrive extends BunyipsSubsystem {
      * Rotational speed of the robot.
      */
     public double speedR;
-    private DcMotor frontLeft;
 
-    // Axial translation speeds
+    private DcMotor frontLeft;
     private DcMotor backLeft;
     private DcMotor frontRight;
     private DcMotor backRight;
-    // Store and declare prioritisation when given instruction to calculate motor powers
+
     private Priority priority = Priority.NORMALISED;
 
     /**

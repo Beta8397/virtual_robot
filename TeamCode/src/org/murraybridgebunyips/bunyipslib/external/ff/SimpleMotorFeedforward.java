@@ -7,24 +7,17 @@
 
 package org.murraybridgebunyips.bunyipslib.external.ff;
 
+import org.murraybridgebunyips.bunyipslib.external.SystemController;
+
 /**
  * A helper class that computes feedforward outputs for a simple permanent-magnet DC motor.
  * Units of this class are determined by the inputs to the gains.
  * <a href="https://github.com/FTCLib/FTCLib/blob/1c8995d09413b406e0f4aff238ea4edc2bb860c4/core/src/main/java/com/arcrobotics/ftclib/controller/wpilibcontroller/SimpleMotorFeedforward.java">Source</a>
  */
-public class SimpleMotorFeedforward {
-    /**
-     * Static gain.
-     */
-    public final double kS;
-    /**
-     * Velocity gain.
-     */
-    public final double kV;
-    /**
-     * Acceleration gain.
-     */
-    public final double kA;
+public class SimpleMotorFeedforward implements SystemController {
+    private double kS;
+    private double kV;
+    private double kA;
 
     /**
      * Creates a new SimpleMotorFeedforward with the specified gains.  Units of the gain values
@@ -52,14 +45,41 @@ public class SimpleMotorFeedforward {
     }
 
     /**
+     * Static gain.
+     */
+    public double getS() {
+        return kS;
+    }
+
+    /**
+     * Velocity gain.
+     */
+    public double getV() {
+        return kV;
+    }
+
+    /**
+     * Acceleration gain.
+     */
+    public double getA() {
+        return kA;
+    }
+
+    /**
      * Calculates the feedforward from the gains and setpoints.
      *
      * @param velocity     The velocity setpoint.
      * @param acceleration The acceleration setpoint.
      * @return The computed feedforward.
      */
+    @Override
     public double calculate(double velocity, double acceleration) {
         return kS * Math.signum(velocity) + kV * velocity + kA * acceleration;
+    }
+
+    @Override
+    public void reset() {
+        // no-op
     }
 
     // Rearranging the main equation from the calculate() method yields the
@@ -136,5 +156,15 @@ public class SimpleMotorFeedforward {
      */
     public double minAchievableAcceleration(double maxVoltage, double velocity) {
         return maxAchievableAcceleration(-maxVoltage, velocity);
+    }
+
+    @Override
+    public void setCoefficients(double... coeffs) {
+        if (coeffs.length != 3) {
+            throw new IllegalArgumentException("expected 3 coefficients, got " + coeffs.length);
+        }
+        kS = coeffs[0];
+        kV = coeffs[1];
+        kA = coeffs[2];
     }
 }
