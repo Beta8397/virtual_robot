@@ -34,10 +34,10 @@ import java.util.Collections;
  * <pre>
  * {@code
  *     // init-phase, index-based registration
- *     Tasks.register(arm.homeTask(), claw.openTask(), ...);
+ *     Tasks.register(arm.tasks.home(), claw.openTask(), ...);
  *     // active phase
  *     if (condition) {
- *       Tasks.run(0); // runs arm.homeTask() one iteration, if it is finished it will no-op forever
+ *       Tasks.run(0); // runs arm.tasks.home() one iteration, if it is finished it will no-op forever
  *       Tasks.runRepeatedly(1); // runs claw.openTask(), if it is finished it will be auto-reset and can run again
  *     }
  * }
@@ -45,12 +45,12 @@ import java.util.Collections;
  * <pre>
  * {@code
  *     // init-phase, instance-based registration
- *     Task homeTask = arm.homeTask();
+ *     Task homeTask = arm.tasks.home();
  *     Task openTask = claw.openTask();
  *     Tasks.register(homeTask, openTask);
  *     // active phase
  *     if (condition) {
- *         Tasks.run(homeTask); // runs arm.homeTask() one iteration, if it is finished it will no-op until a reset
+ *         Tasks.run(homeTask); // runs arm.tasks.home() one iteration, if it is finished it will no-op until a reset
  *         Tasks.run(1); // index-based from above still works, the only difference with this approach is that
  *                       // you have additional control over your tasks.
  *     }

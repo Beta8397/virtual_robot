@@ -23,8 +23,8 @@ public class ImposterHoldableActuatorTest extends AutonomousBunyipsOpMode {
     @Override
     protected void onReady(@Nullable Reference<?> selectedOpMode, Controls selectedButton) {
         for (int i = 0; i < 10; i++) {
-            addTask(arm.deltaTask(10000));
-            addTask(arm.deltaTask(-10000));
+            addTask(arm.tasks.delta(10000));
+            addTask(arm.tasks.delta(-10000));
         }
     }
 }

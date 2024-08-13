@@ -32,7 +32,7 @@ public class Motor extends DcMotorImplEx {
     private SystemController rueController;
     private RunMode mode = RunMode.RUN_WITHOUT_ENCODER;
 
-    // TODO: virtual robot will not work with this class
+    // TODO: virtual robot will not work with this class, will need to work out motor controllers to also fix DcMotorRamping
 
     /**
      * Wrap a DcMotor to use in the Motor class.
@@ -122,7 +122,7 @@ public class Motor extends DcMotorImplEx {
     }
 
     /**
-     * @return the estimated acceleration of this motor.
+     * @return the estimated acceleration of this motor. Ticks per second.
      */
     public double getAcceleration() {
         return encoder.getAcceleration();
@@ -137,7 +137,7 @@ public class Motor extends DcMotorImplEx {
     }
 
     /**
-     * @return the current velocity of this motor as specified by your settings
+     * @return the current velocity of this motor as specified by your settings. Ticks per second.
      */
     @Override
     public double getVelocity() {

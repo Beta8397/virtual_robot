@@ -2,6 +2,7 @@ package org.murraybridgebunyips.bunyipslib.subsystems;
 
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.murraybridgebunyips.bunyipslib.tasks.RunTask;
 import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
 /**
@@ -11,6 +12,11 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
  * @see Cannon
  */
 public class Switch extends Cannon {
+    /**
+     * Tasks for Cannon.
+     */
+    public final Tasks tasks = new Tasks();
+
     /**
      * Constructs a new Switch.
      *
@@ -66,20 +72,29 @@ public class Switch extends Cannon {
     }
 
     /**
-     * Open the switch.
-     *
-     * @return a task that opens the switch
+     * Tasks for Switch, access with {@link #tasks}.
      */
-    public Task openTask() {
-        return fireTask().withName("Open");
-    }
+    public class Tasks {
+        /**
+         * Open the switch.
+         *
+         * @return Open switch task.
+         */
+        public Task open() {
+            return new RunTask(Switch.this::open)
+                    .onSubsystem(Switch.this, true)
+                    .withName("Open");
+        }
 
-    /**
-     * Close the switch.
-     *
-     * @return a task that closes the switch
-     */
-    public Task closeTask() {
-        return resetTask().withName("Close");
+        /**
+         * Close the switch.
+         *
+         * @return Close switch task.
+         */
+        public Task close() {
+            return new RunTask(Switch.this::close)
+                    .onSubsystem(Switch.this, true)
+                    .withName("Close");
+        }
     }
 }

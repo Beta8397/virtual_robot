@@ -16,6 +16,10 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
  * @author Lucas Bubner, 2023
  */
 public class Cannon extends BunyipsSubsystem {
+    /**
+     * Tasks for Cannon.
+     */
+    public final Tasks tasks = new Tasks();
     private final double FIRED;
     private final double RESET;
     private Servo prolong;
@@ -91,27 +95,32 @@ public class Cannon extends BunyipsSubsystem {
         return target == RESET;
     }
 
-    /**
-     * Fire the cannon.
-     *
-     * @return Fire cannon task
-     */
-    public Task fireTask() {
-        return new RunTask(this::fire).onSubsystem(this, true).withName("Fire");
-    }
-
-    /**
-     * Reset the cannon.
-     *
-     * @return Reset cannon task
-     */
-    public Task resetTask() {
-        return new RunTask(this::reset).onSubsystem(this, true).withName("Reset");
-    }
-
     @Override
     protected void periodic() {
         opMode.telemetry.add("%: %", name, target == FIRED ? "<font color='red'><b>FIRED</b></font>" : "<font color='green'>READY</font>");
         prolong.setPosition(target);
+    }
+
+    /**
+     * Tasks for Cannon, access through {@link #tasks}.
+     */
+    public class Tasks {
+        /**
+         * Fire the cannon.
+         *
+         * @return Fire cannon task
+         */
+        public Task fire() {
+            return new RunTask(Cannon.this::fire).onSubsystem(Cannon.this, true).withName("Fire");
+        }
+
+        /**
+         * Reset the cannon.
+         *
+         * @return Reset cannon task
+         */
+        public Task reset() {
+            return new RunTask(Cannon.this::reset).onSubsystem(Cannon.this, true).withName("Reset");
+        }
     }
 }

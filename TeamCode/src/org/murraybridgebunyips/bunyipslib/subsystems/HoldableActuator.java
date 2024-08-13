@@ -32,6 +32,11 @@ import java.util.function.DoubleSupplier;
  * @author Lucas Bubner, 2024
  */
 public class HoldableActuator extends BunyipsSubsystem {
+    /**
+     * Tasks for HoldableActuator.
+     */
+    public final Tasks tasks = new Tasks();
+
     // Power to hold the actuator in place
     private double HOLDING_POWER = 1.0;
     // Power to move the actuator when in auto mode
@@ -274,188 +279,14 @@ public class HoldableActuator extends BunyipsSubsystem {
     }
 
     /**
-     * Move the actuator with a supplier of power. Should be a default task.
+     * Instantaneously set the user input power for the actuator.
      *
-     * @param powerSupplier the power value supplier
-     * @return a task to move the actuator
+     * @param p power level in domain [-1.0, 1.0], will be clamped
+     * @return this
      */
-    public Task controlTask(DoubleSupplier powerSupplier) {
-        return new ContinuousTask(() -> setPower(powerSupplier.getAsDouble())).onSubsystem(this, false).withName("Joystick Control");
-    }
-
     public HoldableActuator setPower(double p) {
         userPower = Mathf.clamp(p, LOWER_POWER, UPPER_POWER);
         return this;
-    }
-
-    /**
-     * Set the power of the actuator.
-     *
-     * @param p the power to set
-     * @return a task to set the power
-     */
-    public Task setPowerTask(double p) {
-        return new RunTask(() -> setPower(p)).onSubsystem(this, false).withName("Set Power");
-    }
-
-    /**
-     * Run the actuator for a certain amount of time.
-     *
-     * @param p    the power to run at
-     * @param time the time to run for
-     * @return a task to run the actuator
-     */
-    public Task runForTask(double p, Measure<Time> time) {
-        return new Task(time) {
-            @Override
-            public void init() {
-                inputMode = Mode.USER;
-            }
-
-            @Override
-            public void periodic() {
-                // Will hijack the user power by constantly setting it
-                userPower = p;
-            }
-
-            @Override
-            public void onFinish() {
-                userPower = 0;
-            }
-
-            @Override
-            public boolean isTaskFinished() {
-                return false;
-            }
-        }.onSubsystem(this, true).withName("Run For Time");
-    }
-
-    /**
-     * Home the actuator based on encoders against a hard stop or limit switch.
-     *
-     * @return a task to home the actuator
-     */
-    public Task homeTask() {
-        return new Task(HOMING_TIMEOUT) {
-            private ElapsedTime overcurrentTimer;
-            private double previousAmpAlert;
-            private double zeroHits;
-
-            @Override
-            protected void init() {
-                previousAmpAlert = motor.getCurrentAlert(CurrentUnit.AMPS);
-                // Stop now if the switch is already pressed
-                if (bottomSwitch != null && bottomSwitch.isPressed()) {
-                    finishNow();
-                    return;
-                }
-                motor.setCurrentAlert(OVERCURRENT.in(Amps), CurrentUnit.AMPS);
-                zeroHits = 0;
-                inputMode = Mode.HOMING;
-            }
-
-            @Override
-            protected void periodic() {
-                if (ZERO_HIT_THRESHOLD <= 0) return;
-                if (motor.getVelocity() >= 0) {
-                    zeroHits++;
-                } else {
-                    zeroHits = 0;
-                }
-            }
-
-            @Override
-            protected void onFinish() {
-                motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                motor.setCurrentAlert(previousAmpAlert, CurrentUnit.AMPS);
-                inputMode = Mode.USER;
-            }
-
-            @Override
-            protected boolean isTaskFinished() {
-                boolean bottomedOut = bottomSwitch != null && bottomSwitch.isPressed();
-                boolean velocityZeroed = ZERO_HIT_THRESHOLD > 0 && zeroHits >= ZERO_HIT_THRESHOLD;
-                boolean overCurrent = OVERCURRENT.magnitude() > 0 && motor.isOverCurrent();
-                if (OVERCURRENT_TIME.magnitude() > 0 && overCurrent && overcurrentTimer == null) {
-                    overcurrentTimer = new ElapsedTime();
-                } else if (!overCurrent) {
-                    overcurrentTimer = null;
-                }
-                boolean sustainedOvercurrent = overcurrentTimer != null && overcurrentTimer.seconds() >= OVERCURRENT_TIME.in(Seconds);
-                return inputMode != Mode.HOMING || (bottomedOut || velocityZeroed || sustainedOvercurrent);
-            }
-        }.onSubsystem(this, true).withName("Return To Home");
-    }
-
-    /**
-     * Set the position of the actuator.
-     * <p></p>
-     * Informally known as the Doinky-Rubber-Bandy Task
-     *
-     * @param targetPosition the position to set
-     * @return a task to set the position
-     */
-    public Task gotoTask(int targetPosition) {
-        return new Task() {
-            @Override
-            public void init() {
-                motor.setTargetPosition(targetPosition);
-                // Motor power is controlled in the periodic method
-                motor.setPower(0);
-                inputMode = Mode.AUTO;
-            }
-
-            @Override
-            public void periodic() {
-                // no-op
-            }
-
-            @Override
-            public void onFinish() {
-                inputMode = Mode.USER;
-            }
-
-            @Override
-            public boolean isTaskFinished() {
-                return inputMode != Mode.AUTO || (!motor.isBusy() && Mathf.isNear(targetPosition, motor.getCurrentPosition(), TOLERANCE));
-            }
-        }.onSubsystem(this, true).withName("Run To Position");
-    }
-
-    /**
-     * Delta the position of the actuator.
-     *
-     * @param deltaPosition the delta to add to the current position of the actuator
-     * @return a task to delta the position
-     */
-    public Task deltaTask(int deltaPosition) {
-        return new Task() {
-            private int target;
-
-            @Override
-            public void init() {
-                target = motor.getCurrentPosition() + deltaPosition;
-                motor.setTargetPosition(target);
-                // Motor power is controlled in the periodic method
-                motor.setPower(0);
-                inputMode = Mode.AUTO;
-            }
-
-            @Override
-            public void periodic() {
-                // no-op
-            }
-
-            @Override
-            public void onFinish() {
-                inputMode = Mode.USER;
-            }
-
-            @Override
-            public boolean isTaskFinished() {
-                return inputMode != Mode.AUTO || (!motor.isBusy() && Mathf.isNear(target, motor.getCurrentPosition(), TOLERANCE));
-            }
-        }.onSubsystem(this, true).withName("Run To Delta");
     }
 
     @Override
@@ -540,5 +371,194 @@ public class HoldableActuator extends BunyipsSubsystem {
         AUTO,
         HOMING,
         USER
+    }
+
+    /**
+     * Tasks for HoldableActuator, access with {@link #tasks}.
+     */
+    public class Tasks {
+        /**
+         * Move the actuator with a supplier of power. Should be a default task.
+         *
+         * @param powerSupplier the power value supplier
+         * @return a task to move the actuator
+         */
+        public Task control(DoubleSupplier powerSupplier) {
+            return new ContinuousTask(() -> setPower(powerSupplier.getAsDouble()))
+                    .onSubsystem(HoldableActuator.this, false)
+                    .withName("Supplier Control");
+        }
+
+        /**
+         * Set the power of the actuator.
+         *
+         * @param p the power to set
+         * @return a task to set the power
+         */
+        public Task setPower(double p) {
+            return new RunTask(() -> setPower(p))
+                    .onSubsystem(HoldableActuator.this, false)
+                    .withName("Set Power");
+        }
+
+        /**
+         * Run the actuator for a certain amount of time.
+         *
+         * @param time the time to run for
+         * @param p    the power to run at
+         * @return a task to run the actuator
+         */
+        public Task runFor(Measure<Time> time, double p) {
+            return new Task(time) {
+                @Override
+                public void init() {
+                    inputMode = Mode.USER;
+                }
+
+                @Override
+                public void periodic() {
+                    // Will hijack the user power by constantly setting it
+                    userPower = p;
+                }
+
+                @Override
+                public void onFinish() {
+                    userPower = 0;
+                }
+
+                @Override
+                public boolean isTaskFinished() {
+                    return false;
+                }
+            }.onSubsystem(HoldableActuator.this, true).withName("Run For Time");
+        }
+
+        /**
+         * Home the actuator based on encoders against a hard stop or limit switch.
+         *
+         * @return a task to home the actuator
+         */
+        public Task home() {
+            return new Task(HOMING_TIMEOUT) {
+                private ElapsedTime overcurrentTimer;
+                private double previousAmpAlert;
+                private double zeroHits;
+
+                @Override
+                protected void init() {
+                    previousAmpAlert = motor.getCurrentAlert(CurrentUnit.AMPS);
+                    // Stop now if the switch is already pressed
+                    if (bottomSwitch != null && bottomSwitch.isPressed()) {
+                        finishNow();
+                        return;
+                    }
+                    motor.setCurrentAlert(OVERCURRENT.in(Amps), CurrentUnit.AMPS);
+                    zeroHits = 0;
+                    inputMode = Mode.HOMING;
+                }
+
+                @Override
+                protected void periodic() {
+                    if (ZERO_HIT_THRESHOLD <= 0) return;
+                    if (motor.getVelocity() >= 0) {
+                        zeroHits++;
+                    } else {
+                        zeroHits = 0;
+                    }
+                }
+
+                @Override
+                protected void onFinish() {
+                    motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    motor.setCurrentAlert(previousAmpAlert, CurrentUnit.AMPS);
+                    inputMode = Mode.USER;
+                }
+
+                @Override
+                protected boolean isTaskFinished() {
+                    boolean bottomedOut = bottomSwitch != null && bottomSwitch.isPressed();
+                    boolean velocityZeroed = ZERO_HIT_THRESHOLD > 0 && zeroHits >= ZERO_HIT_THRESHOLD;
+                    boolean overCurrent = OVERCURRENT.magnitude() > 0 && motor.isOverCurrent();
+                    if (OVERCURRENT_TIME.magnitude() > 0 && overCurrent && overcurrentTimer == null) {
+                        overcurrentTimer = new ElapsedTime();
+                    } else if (!overCurrent) {
+                        overcurrentTimer = null;
+                    }
+                    boolean sustainedOvercurrent = overcurrentTimer != null && overcurrentTimer.seconds() >= OVERCURRENT_TIME.in(Seconds);
+                    return inputMode != Mode.HOMING || (bottomedOut || velocityZeroed || sustainedOvercurrent);
+                }
+            }.onSubsystem(HoldableActuator.this, true).withName("Return To Home");
+        }
+
+        /**
+         * Set the position of the actuator.
+         * <p></p>
+         * Informally known as the Doinky-Rubber-Bandy Task
+         *
+         * @param targetPosition the position to set
+         * @return a task to set the position
+         */
+        public Task goTo(int targetPosition) {
+            return new Task() {
+                @Override
+                public void init() {
+                    motor.setTargetPosition(targetPosition);
+                    // Motor power is controlled in the periodic method
+                    motor.setPower(0);
+                    inputMode = Mode.AUTO;
+                }
+
+                @Override
+                public void periodic() {
+                    // no-op
+                }
+
+                @Override
+                public void onFinish() {
+                    inputMode = Mode.USER;
+                }
+
+                @Override
+                public boolean isTaskFinished() {
+                    return inputMode != Mode.AUTO || (!motor.isBusy() && Mathf.isNear(targetPosition, motor.getCurrentPosition(), TOLERANCE));
+                }
+            }.onSubsystem(HoldableActuator.this, true).withName("Run To Position");
+        }
+
+        /**
+         * Delta the position of the actuator.
+         *
+         * @param deltaPosition the delta to add to the current position of the actuator
+         * @return a task to delta the position
+         */
+        public Task delta(int deltaPosition) {
+            return new Task() {
+                private int target;
+
+                @Override
+                public void init() {
+                    target = motor.getCurrentPosition() + deltaPosition;
+                    motor.setTargetPosition(target);
+                    // Motor power is controlled in the periodic method
+                    motor.setPower(0);
+                    inputMode = Mode.AUTO;
+                }
+
+                @Override
+                public void periodic() {
+                    // no-op
+                }
+
+                @Override
+                public void onFinish() {
+                    inputMode = Mode.USER;
+                }
+
+                @Override
+                public boolean isTaskFinished() {
+                    return inputMode != Mode.AUTO || (!motor.isBusy() && Mathf.isNear(target, motor.getCurrentPosition(), TOLERANCE));
+                }
+            }.onSubsystem(HoldableActuator.this, true).withName("Run To Delta");
+        }
     }
 }

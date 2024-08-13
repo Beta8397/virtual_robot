@@ -6,6 +6,8 @@ import org.murraybridgebunyips.bunyipslib.external.units.Distance
 import org.murraybridgebunyips.bunyipslib.external.units.Measure
 import org.murraybridgebunyips.bunyipslib.external.units.Units.Degrees
 import org.murraybridgebunyips.bunyipslib.external.units.Units.Meters
+import org.murraybridgebunyips.bunyipslib.external.units.Units.Second
+import org.murraybridgebunyips.bunyipslib.external.units.Velocity
 
 /**
  * Utility class for converting between SI units and encoder ticks.
@@ -138,11 +140,52 @@ object EncoderTicks {
         }
 
         /**
+         * Get the angular velocity of the encoder.
+         */
+        fun getAngularVelocity(): Measure<Velocity<Angle>> {
+            return toAngle(motor.velocity.toInt(), ticksPerRevolution, reduction).per(Second)
+        }
+
+        /**
+         * Get the angular acceleration of the encoder.
+         * Note that the motor attached to this generator *must* be an instance of [Motor], or an exception will be thrown.
+         */
+        fun getAngularAcceleration(): Measure<Velocity<Velocity<Angle>>> {
+            if (motor !is Motor) {
+                throw IllegalStateException("Motor attached to this generator is not a Motor instance. Acceleration information is not available.")
+            }
+            return toAngle(motor.acceleration.toInt(), ticksPerRevolution, reduction).per(Second).per(Second)
+        }
+
+        /**
          * Get the current encoder ticks in a distance.
          * @return the distance, else null if the wheel diameter is not provided.
          */
         fun getDistance(): Measure<Distance>? {
             return wheelDiameter?.let { toDistance(motor.currentPosition, ticksPerRevolution, it, reduction) }
+        }
+
+        /**
+         * Get the current encoder velocity in a distance.
+         * @return the distance, else null if the wheel diameter is not provided.
+         */
+        fun getVelocity(): Measure<Distance>? {
+            return wheelDiameter?.let { toDistance(motor.velocity.toInt(), ticksPerRevolution, it, reduction) }
+        }
+
+        /**
+         * Get the current encoder acceleration in a distance.
+         * Note that the motor attached to this generator *must* be an instance of [Motor], or an exception will be thrown.
+         */
+        fun getAcceleration(): Measure<Velocity<Velocity<Distance>>>? {
+            if (motor !is Motor) {
+                throw IllegalStateException("Motor attached to this generator is not a Motor instance. Acceleration information is not available.")
+            }
+            return wheelDiameter?.let {
+                toDistance(motor.acceleration.toInt(), ticksPerRevolution, it, reduction).per(
+                    Second
+                ).per(Second)
+            }
         }
 
         /**

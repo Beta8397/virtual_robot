@@ -10,6 +10,10 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
  * Control a set of two servos together.
  */
 public class DualServos extends BunyipsSubsystem {
+    /**
+     * Tasks for DualServos.
+     */
+    public final Tasks tasks = new Tasks();
     private final double LEFT_SERVO_CLOSED_POSITION;
     private final double LEFT_SERVO_OPEN_POSITION;
     private final double RIGHT_SERVO_CLOSED_POSITION;
@@ -69,16 +73,6 @@ public class DualServos extends BunyipsSubsystem {
     }
 
     /**
-     * Create a task to toggle the state of the servos.
-     *
-     * @param servo the servo to toggle
-     * @return the task
-     */
-    public Task toggleTask(ServoSide servo) {
-        return new RunTask(() -> toggle(servo)).onSubsystem(this, true).withName("Toggle:" + servo);
-    }
-
-    /**
      * Open the servos.
      *
      * @param servo the servo to open
@@ -98,15 +92,6 @@ public class DualServos extends BunyipsSubsystem {
         return this;
     }
 
-    /**
-     * Create a task to open the servos.
-     *
-     * @param servo the servo to open
-     * @return the task
-     */
-    public Task openTask(ServoSide servo) {
-        return new RunTask(() -> open(servo)).onSubsystem(this, true).withName("Open:" + servo);
-    }
 
     /**
      * Close the servos.
@@ -126,16 +111,6 @@ public class DualServos extends BunyipsSubsystem {
         leftServoPosition = LEFT_SERVO_CLOSED_POSITION;
         rightServoPosition = RIGHT_SERVO_CLOSED_POSITION;
         return this;
-    }
-
-    /**
-     * Create a task to close the servos.
-     *
-     * @param servo the servo to close
-     * @return the task
-     */
-    public Task closeTask(ServoSide servo) {
-        return new RunTask(() -> close(servo)).onSubsystem(this, true).withName("Close:" + servo);
     }
 
     /**
@@ -184,5 +159,118 @@ public class DualServos extends BunyipsSubsystem {
          * Both servos.
          */
         BOTH
+    }
+
+    /**
+     * DualServo tasks, access with {@link #tasks}.
+     */
+    public class Tasks {
+        /**
+         * Create a task to open the left servo.
+         *
+         * @return the task
+         */
+        public Task openLeft() {
+            return new RunTask(() -> open(ServoSide.LEFT))
+                    .onSubsystem(DualServos.this, true)
+                    .withName("Open:LEFT");
+        }
+
+        /**
+         * Create a task to open the right servo.
+         *
+         * @return the task
+         */
+        public Task openRight() {
+            return new RunTask(() -> open(ServoSide.RIGHT))
+                    .onSubsystem(DualServos.this, true)
+                    .withName("Open:RIGHT");
+        }
+
+        /**
+         * Create a task to open both servos.
+         *
+         * @return the task
+         */
+        public Task openBoth() {
+            return new RunTask(() -> {
+                open(ServoSide.LEFT);
+                open(ServoSide.RIGHT);
+            })
+                    .onSubsystem(DualServos.this, true)
+                    .withName("Open:BOTH");
+        }
+
+        /**
+         * Create a task to close the left servo.
+         *
+         * @return the task
+         */
+        public Task closeLeft() {
+            return new RunTask(() -> close(ServoSide.LEFT))
+                    .onSubsystem(DualServos.this, true)
+                    .withName("Close:LEFT");
+        }
+
+        /**
+         * Create a task to close the right servo.
+         *
+         * @return the task
+         */
+        public Task closeRight() {
+            return new RunTask(() -> close(ServoSide.RIGHT))
+                    .onSubsystem(DualServos.this, true)
+                    .withName("Close:RIGHT");
+        }
+
+        /**
+         * Create a task to close both servos.
+         *
+         * @return the task
+         */
+        public Task closeBoth() {
+            return new RunTask(() -> {
+                close(ServoSide.LEFT);
+                close(ServoSide.RIGHT);
+            })
+                    .onSubsystem(DualServos.this, true)
+                    .withName("Close:BOTH");
+        }
+
+        /**
+         * Create a task to toggle the left servo.
+         *
+         * @return the task
+         */
+        public Task toggleLeft() {
+            return new RunTask(() -> toggle(ServoSide.LEFT))
+                    .onSubsystem(DualServos.this, true)
+                    .withName("Toggle:LEFT");
+        }
+
+        /**
+         * Create a task to toggle the right servo.
+         *
+         * @return the task
+         */
+        public Task toggleRight() {
+            return new RunTask(() -> toggle(ServoSide.RIGHT))
+                    .onSubsystem(DualServos.this, true)
+                    .withName("Toggle:RIGHT");
+        }
+
+        /**
+         * Create a task to toggle both servos.
+         *
+         * @return the task
+         */
+        public Task toggleBoth() {
+            return new RunTask(() -> {
+                toggle(ServoSide.LEFT);
+                toggle(ServoSide.RIGHT);
+            })
+                    .onSubsystem(DualServos.this, true)
+                    .withName("Toggle:BOTH");
+        }
     }
 }

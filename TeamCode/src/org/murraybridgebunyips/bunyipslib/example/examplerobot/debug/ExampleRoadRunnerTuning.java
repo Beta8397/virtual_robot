@@ -11,6 +11,7 @@ import org.murraybridgebunyips.bunyipslib.roadrunner.drive.tuning.RoadRunnerTuni
  * Example of how to use the RoadRunner tuning clas.
  * You will simply need to extend RoadRunnerTuning and the selection for tuning procedure will be selected at runtime.
  * Note that these OpModes will not extend BunyipsOpMode, but uses a variant class which handles it for you.
+ *
  * @noinspection UnnecessaryLocalVariable
  */
 // It's more useful to annotate as TeleOp so the timer is off by default. You don't want to have an OpMode that stops
@@ -24,6 +25,7 @@ public class ExampleRoadRunnerTuning extends RoadRunnerTuning {
     protected RoadRunnerDrive getBaseRoadRunnerDrive() {
         // Initialise your configuration as normal
         ExampleConfig config = new ExampleConfig();
+        // Must pass `this` as a parameter as we are not in a BunyipsOpMode.
         config.init(this);
 
         // You can instantiate your drive here.

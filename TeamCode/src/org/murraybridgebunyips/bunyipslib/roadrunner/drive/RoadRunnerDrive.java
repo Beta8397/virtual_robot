@@ -67,6 +67,11 @@ public interface RoadRunnerDrive {
         return new ProfileAccelerationConstraint(maxAccel);
     }
 
+    /**
+     * Get the attached TrajectorySequenceRunner for this drive.
+     *
+     * @return the trajectory sequence runner in use
+     */
     TrajectorySequenceRunner getTrajectorySequenceRunner();
 
     /**
@@ -75,10 +80,15 @@ public interface RoadRunnerDrive {
     void stop();
 
     /**
-     * Run current trajectory blocking until it is complete.
+     * Run current trajectory blocking until it is complete. Usually not recommended as it is fully blocking.
      */
     void waitForIdle();
 
+    /**
+     * Get the drive constants related to this drive.
+     *
+     * @return the drive constants used in constructing this drive
+     */
     DriveConstants getConstants();
 
     /**
@@ -108,7 +118,7 @@ public interface RoadRunnerDrive {
     TrajectoryBuilder trajectoryBuilder(Pose2d startPose, double startHeading);
 
     /**
-     * Get a trajectory builder for the drive.
+     * Get a trajectory sequence builder for the drive.
      *
      * @param startPose The starting pose of the drive.
      * @return A trajectory builder for the drive.
@@ -124,7 +134,7 @@ public interface RoadRunnerDrive {
     void turnAsync(double angle);
 
     /**
-     * Turn the drive.
+     * Turn the drive. Note this is blocking.
      *
      * @param angle The angle to turn the drive in radians.
      */
@@ -158,10 +168,15 @@ public interface RoadRunnerDrive {
      */
     void followTrajectorySequence(TrajectorySequence trajectorySequence);
 
+    /**
+     * Get the last reported pose error from the drive.
+     *
+     * @return odometry pose error as reported last update
+     */
     Pose2d getLastError();
 
     /**
-     * Update the drive with latest motor powers.
+     * Update the drive with latest motor powers and odometry.
      */
     void update();
 
@@ -175,8 +190,18 @@ public interface RoadRunnerDrive {
      */
     void cancelTrajectory();
 
+    /**
+     * Set the run mode of all motors.
+     *
+     * @param runMode new run mode to apply to all motors on this drive.
+     */
     void setMode(DcMotor.RunMode runMode);
 
+    /**
+     * Set the zero power behaviour of all motors.
+     *
+     * @param zeroPowerBehavior new zero power behaviour to apply to all motors on this drive.
+     */
     void setZeroPowerBehavior(DcMotor.ZeroPowerBehavior zeroPowerBehavior);
 
     /**
@@ -187,31 +212,75 @@ public interface RoadRunnerDrive {
      */
     void setPIDFCoefficients(DcMotor.RunMode runMode, PIDFCoefficients coefficients);
 
+    /**
+     * Set a drive power with axial weights. Feedforward is not applied.
+     *
+     * @param drivePower the robot-centric pose to travel in.
+     */
     void setWeightedDrivePower(Pose2d drivePower);
 
+    /**
+     * @return the encoder report of wheel positions
+     */
     List<Double> getWheelPositions();
 
+    /**
+     * @return the encoder report of wheel velocities
+     */
     List<Double> getWheelVelocities();
 
     // Must be implemented manually due to different numbers of motors
     // void setMotorPowers(...);
 
+    /**
+     * @return the current heading as dictated by an external source (gyro, etc)
+     */
     double getRawExternalHeading();
 
+    /**
+     * @return the current heading velocity as dictated by an external source (gyro, etc)
+     */
     Double getExternalHeadingVelocity();
 
+    /**
+     * @return the localizer in use by this drive
+     */
     Localizer getLocalizer();
 
+    /**
+     * Set the new localizer to use. Note that pose estimates from the old localizer may be discarded.
+     *
+     * @param localizer the new localizer
+     */
     void setLocalizer(Localizer localizer);
 
+    /**
+     * @return the current heading of the robot
+     */
     double getExternalHeading();
 
+    /**
+     * Assert the heading of the robot.
+     *
+     * @param value the new heading that should be considered as the current heading
+     */
     void setExternalHeading(double value);
 
+    /**
+     * @return the currently calculated pose from the localizer of where the robot is on the field
+     */
     Pose2d getPoseEstimate();
 
+    /**
+     * Assert the position of the robot.
+     *
+     * @param value the new pose that should be considered the current pose
+     */
     void setPoseEstimate(Pose2d value);
 
+    /**
+     * @return the change of pose (pose delta since last update)
+     */
     Pose2d getPoseVelocity();
 
     /**
@@ -219,9 +288,24 @@ public interface RoadRunnerDrive {
      */
     void updatePoseEstimate();
 
+    /**
+     * Set a drive velocity and/or acceleration target. Feedforward is applied.
+     *
+     * @param driveSignal the velocity and acceleration that should be commanded
+     */
     void setDriveSignal(DriveSignal driveSignal);
 
+    /**
+     * Set a drive power. Feedforward and axial weights are not applied.
+     *
+     * @param drivePower the robot-centric pose to apply to the drive
+     */
     void setDrivePower(Pose2d drivePower);
 
+    /**
+     * Set a drive power with axial weights and in a field-centric frame of reference.
+     *
+     * @param pose the robot-centric pose to apply to the drive, will be rotated to be field-centric internally
+     */
     void setWeightedDrivePowerFieldCentric(Pose2d pose);
 }

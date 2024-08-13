@@ -12,6 +12,11 @@ import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
  * @author Lucas Bubner, 2024
  */
 public class IndexedTable extends BunyipsSubsystem {
+    /**
+     * Tasks for IndexedTable.
+     */
+    public final Tasks tasks = new Tasks();
+
     private final double[] tableValues;
     private int index = 0;
 
@@ -25,7 +30,7 @@ public class IndexedTable extends BunyipsSubsystem {
     }
 
     /**
-     * Set the default index of the indexed table.
+     * Set the default index of the indexed table. Implicit default of zero.
      *
      * @param defaultIndex the index to set
      * @return this
@@ -46,29 +51,11 @@ public class IndexedTable extends BunyipsSubsystem {
     }
 
     /**
-     * Create a task to increment the table index.
-     *
-     * @return the task
-     */
-    public Task incrementTask() {
-        return new RunTask(this::increment).onSubsystem(this, false).withName("Increment Index");
-    }
-
-    /**
      * Decrement the table index.
      */
     public void decrement() {
         if (index <= 0) return;
         index--;
-    }
-
-    /**
-     * Create a task to decrement the table index.
-     *
-     * @return the task
-     */
-    public Task decrementTask() {
-        return new RunTask(this::decrement).onSubsystem(this, false).withName("Decrement Index");
     }
 
     /**
@@ -104,5 +91,32 @@ public class IndexedTable extends BunyipsSubsystem {
                 index + 1,
                 tableValues.length
         );
+    }
+
+    /**
+     * Tasks for IndexedTable, access with {@link #tasks}.
+     */
+    public class Tasks {
+        /**
+         * Create a task to decrement the table index.
+         *
+         * @return the task
+         */
+        public Task decrement() {
+            return new RunTask(IndexedTable.this::decrement)
+                    .onSubsystem(IndexedTable.this, false)
+                    .withName("Decrement Index");
+        }
+
+        /**
+         * Create a task to increment the table index.
+         *
+         * @return the task
+         */
+        public Task increment() {
+            return new RunTask(IndexedTable.this::increment)
+                    .onSubsystem(IndexedTable.this, false)
+                    .withName("Increment Index");
+        }
     }
 }

@@ -17,10 +17,12 @@ import org.murraybridgebunyips.bunyipslib.external.Mathf;
 import org.murraybridgebunyips.bunyipslib.external.units.Angle;
 import org.murraybridgebunyips.bunyipslib.external.units.Measure;
 import org.murraybridgebunyips.bunyipslib.external.units.Velocity;
+import org.murraybridgebunyips.bunyipslib.tasks.bases.Task;
 
 /**
  * IMU utility class that will wrap an Inertial Measurement Unit to provide data and automatic updates
- * of the IMU angles as part of a subsystem.
+ * of the IMU angles as part of a subsystem. This subsystem has no meaningful {@link Task} to schedule.
+ * <p>
  * This class, alike the old IMUOp also supports different readings of IMU measurement, such as an unrestricted domain
  * on heading reads, while also being able to provide IMU units in terms of WPIUnits.
  * <p>

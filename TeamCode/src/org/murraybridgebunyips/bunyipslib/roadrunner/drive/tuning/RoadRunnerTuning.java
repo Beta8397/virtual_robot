@@ -157,7 +157,7 @@ public abstract class RoadRunnerTuning extends LinearOpMode {
         };
         TelemetryMenu.StaticClickableOption[] opModes = new TelemetryMenu.StaticClickableOption[modes.length];
         // Have to use array access due to inner class variable mutation
-        Object[] selection = { null };
+        Object[] selection = {null};
         for (int i = 0; i < modes.length; i++) {
             // Must be considered final as it is used in the inner class
             int finalI = i;
@@ -173,7 +173,7 @@ public abstract class RoadRunnerTuning extends LinearOpMode {
 
         while (selection[0] == null && opModeInInit()) {
             menu.loop(gamepad1);
-            out.add("\nSelect an option above to run tuning for using gamepad1. Restart the OpMode to pick a different mode.");
+            out.add("Select an option above to run tuning for using gamepad1. Restart the OpMode to pick a different mode.");
             out.update();
         }
 
