@@ -17,7 +17,7 @@ Includes Programming Board configuration to serve as a companion to the book "Le
 PDF can be [downloaded for free](https://github.com/alan412/LearnJavaForFTC) or you can purchase the paperback on
 [Amazon](https://www.amazon.com/dp/B08DBVKXLZ).
     
-![](/readme_image.JPG)
+![](/readme_image.jpg)
 
 This is a JavaFX application developed using the (free) IntelliJ IDEA Community Edition IDE. The repository can be downloaded
 and unzipped, then opened with IntelliJ. It can also be run using Android Studio 
