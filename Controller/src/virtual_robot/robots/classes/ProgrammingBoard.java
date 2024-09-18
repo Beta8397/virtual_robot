@@ -125,7 +125,7 @@ public class ProgrammingBoard extends VirtualBot {
 
     protected void createHardwareMap(){
         hardwareMap = new HardwareMap();
-        hardwareMap.put("motor", new DcMotorExImpl(MOTOR_TYPE));
+        hardwareMap.put("motor", new DcMotorExImpl(MOTOR_TYPE, motorController0, 0));
         hardwareMap.put("imu", new BNO055IMUImpl(this, 10));
         hardwareMap.put("imu", new BNO055IMUNew(this, 10));
         hardwareMap.put("sensor_color_distance", new PassiveColorSensorImpl());

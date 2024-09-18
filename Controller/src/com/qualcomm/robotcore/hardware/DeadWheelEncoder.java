@@ -9,6 +9,8 @@ public class DeadWheelEncoder implements DcMotorEx {
 
     public final MotorType MOTOR_TYPE;
     private final MotorConfigurationType MOTOR_CONFIGURATION_TYPE;
+    public final DcMotorControllerImpl controller;
+    public final int portNumber;
 
     RunMode mode = RunMode.RUN_WITHOUT_ENCODER;
 
@@ -29,9 +31,12 @@ public class DeadWheelEncoder implements DcMotorEx {
 
     private ZeroPowerBehavior zeroPowerBehavior = ZeroPowerBehavior.BRAKE;
 
-    public DeadWheelEncoder(MotorType motorType) {
+    public DeadWheelEncoder(MotorType motorType, DcMotorControllerImpl controller, int portNumber) {
         MOTOR_TYPE = motorType;
         MOTOR_CONFIGURATION_TYPE = new MotorConfigurationType(motorType);
+        this.controller = controller;
+        this.portNumber = portNumber;
+        controller.setMotor(portNumber, this);
     }
 
     @Override
@@ -227,5 +232,9 @@ public class DeadWheelEncoder implements DcMotorEx {
     public MotorConfigurationType getMotorType(){
         return MOTOR_CONFIGURATION_TYPE;
     }
+
+    public DcMotorController getController() { return controller; }
+
+    public int getPortNumber(){ return portNumber; }
 
 }

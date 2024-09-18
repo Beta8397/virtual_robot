@@ -191,7 +191,7 @@ public class ArmBot extends MecanumPhysicsBase {
         super.createHardwareMap();
 
         //Add the arm motor using HardwareMap.put(...) method
-        hardwareMap.put("arm_motor", new DcMotorExImpl(MotorType.Neverest40));
+        hardwareMap.put("arm_motor", new DcMotorExImpl(MotorType.Neverest40, motorController1, 0));
 
         //Add the ServoImpl object
         hardwareMap.put("hand_servo", new ServoImpl());

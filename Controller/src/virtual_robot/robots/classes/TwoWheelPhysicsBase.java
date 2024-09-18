@@ -65,8 +65,8 @@ public class TwoWheelPhysicsBase extends VirtualBot {
 
     protected void createHardwareMap(){
         hardwareMap = new HardwareMap();
-        hardwareMap.put("left_motor", new DcMotorExImpl(MOTOR_TYPE));
-        hardwareMap.put("right_motor", new DcMotorExImpl(MOTOR_TYPE));
+        hardwareMap.put("left_motor", new DcMotorExImpl(MOTOR_TYPE, motorController0, 0));
+        hardwareMap.put("right_motor", new DcMotorExImpl(MOTOR_TYPE, motorController0, 1));
         String[] distNames = new String[]{"front_distance", "left_distance", "back_distance", "right_distance"};
         for (String name: distNames) hardwareMap.put(name, controller.new DistanceSensorImpl());
         hardwareMap.put("imu", new BNO055IMUImpl(this, 10));

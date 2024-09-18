@@ -116,6 +116,18 @@ public interface DcMotor extends DcMotorSimple {
 
     default void setMotorType(MotorConfigurationType type) {}
 
-    default int getPortNumber(){ return 0; }
 
+    /**
+     * Returns the underlying motor controller on which this motor is situated.
+     * @return the underlying motor controller on which this motor is situated.
+     * @see #getPortNumber()
+     */
+    DcMotorController getController();
+
+    /**
+     * Returns the port number on the underlying motor controller on which this motor is situated.
+     * @return the port number on the underlying motor controller on which this motor is situated.
+     * @see #getController()
+     */
+    int getPortNumber();
 }
