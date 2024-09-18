@@ -11,7 +11,7 @@ public class DcMotorControllerImpl implements DcMotorController{
     }
 
     public DcMotorControllerImpl(){
-        for (int n = 0; n<4; n++){
+        for (int n = 0; n<motors.length; n++){
             motors[n] = null;
         }
     }
