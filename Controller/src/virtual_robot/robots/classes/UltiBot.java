@@ -158,9 +158,9 @@ public class UltiBot extends MecanumPhysicsBase implements ControlsElements {
     protected void createHardwareMap(){
         super.createHardwareMap();
         hardwareMap.put("kicker_servo", new ServoImpl());
-        hardwareMap.put("intake_motor", new DcMotorExImpl(MotorType.Neverest40));
-        hardwareMap.put("shooter_motor", new DcMotorExImpl(MotorType.Neverest40));
-        hardwareMap.put("scoop_motor", new DcMotorExImpl(MotorType.Neverest40));
+        hardwareMap.put("intake_motor", new DcMotorExImpl(MotorType.Neverest40, motorController1, 0));
+        hardwareMap.put("shooter_motor", new DcMotorExImpl(MotorType.Neverest40, motorController1, 1));
+        hardwareMap.put("scoop_motor", new DcMotorExImpl(MotorType.Neverest40, motorController1, 2));
     }
 
     public synchronized void updateStateAndSensors(double millis){

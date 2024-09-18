@@ -116,9 +116,13 @@ public class SwerveBot extends VirtualBot {
         String[] motorNames = new String[] {"back_left_motor", "front_left_motor", "front_right_motor", "back_right_motor"};
         String[] encoderNames = new String[] {"back_left_encoder", "front_left_encoder", "front_right_encoder", "back_right_encoder"};
         String[] crservoNames = new String[] {"back_left_crservo", "front_left_crservo", "front_right_crservo", "back_right_crservo"};
-        for (String name: motorNames) hardwareMap.put(name, new DcMotorExImpl(MOTOR_TYPE));
+        for (int i=0; i<4; i++){
+            hardwareMap.put(motorNames[i], new DcMotorExImpl(MOTOR_TYPE, motorController0, i));
+        }
         for (String name: crservoNames) hardwareMap.put(name, new CRServoImpl(360));
-        for (String name: encoderNames) hardwareMap.put(name, new DeadWheelEncoder(MOTOR_TYPE));
+        for (int i=0; i<4; i++){
+            hardwareMap.put(encoderNames[i], new DeadWheelEncoder(MOTOR_TYPE, motorController1, i));
+        }
         String[] distNames = new String[]{"front_distance", "left_distance", "back_distance", "right_distance"};
         for (String name: distNames) hardwareMap.put(name, controller.new DistanceSensorImpl());
         hardwareMap.put("imu", new BNO055IMUImpl(this, 10));

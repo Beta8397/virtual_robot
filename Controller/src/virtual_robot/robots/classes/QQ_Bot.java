@@ -66,13 +66,14 @@ public class QQ_Bot extends MecanumPhysicsBase {
         hardwareMap.put("claw", new ServoImpl());
         hardwareMap.put("horizontal", new ServoImpl());
 
-        hardwareMap.put("right_lift_motor", new DcMotorExImpl(MotorType.Gobilda137));
-        hardwareMap.put("left_lift_motor", new DcMotorExImpl(MotorType.Gobilda137));
+        hardwareMap.put("right_lift_motor", new DcMotorExImpl(MotorType.Gobilda137, motorController1, 3));
+        hardwareMap.put("left_lift_motor", new DcMotorExImpl(MotorType.Gobilda137, motorController1, 4));
         hardwareMap.put("cone_detector", controller.new ColorSensorImpl());
         hardwareMap.put("lift_switch", new DigitalChannelImpl());
         String[] encoderNames = new String[]{"enc_right", "enc_left", "enc_x"};
-        for (String name : encoderNames)
-            hardwareMap.put(name, new DeadWheelEncoder(encoderMotorType));
+        for (int i=0; i<3; i++){
+            hardwareMap.put(encoderNames[i], new DeadWheelEncoder(MOTOR_TYPE, motorController1, i));
+        }
     }
 
     public synchronized void updateStateAndSensors(double millis) {

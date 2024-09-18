@@ -16,8 +16,8 @@ public class DcMotorExImpl extends DcMotorImpl implements DcMotorEx{
      * For internal use only.
      * @param motorType
      */
-    public DcMotorExImpl(MotorType motorType){
-        super(motorType);
+    public DcMotorExImpl(MotorType motorType, DcMotorControllerImpl controller, int portNumber){
+        super(motorType, controller, portNumber);
     }
 
     @Override

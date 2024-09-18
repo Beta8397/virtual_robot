@@ -91,7 +91,9 @@ public class DiffSwerveBot extends VirtualBot {
     protected void createHardwareMap(){
         hardwareMap = new HardwareMap();
         String[] motorNames = new String[] {"bottom_left_motor", "top_left_motor", "bottom_right_motor", "top_right_motor"};
-        for (String name: motorNames) hardwareMap.put(name, new DcMotorExImpl(MOTOR_TYPE));
+        for (int i=0; i<4; i++){
+            hardwareMap.put(motorNames[i], new DcMotorExImpl(MOTOR_TYPE, motorController0, i));
+        }
         String[] distNames = new String[]{"front_distance", "left_distance", "back_distance", "right_distance"};
         for (String name: distNames) hardwareMap.put(name, controller.new DistanceSensorImpl());
         hardwareMap.put("imu", new BNO055IMUImpl(this, 10));
