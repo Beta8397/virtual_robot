@@ -38,7 +38,7 @@ public class SparkFunOTOS implements HardwareDevice {
      */
 
     // Raw pose in Meters, Radians
-    protected Pose2D rawPoseMR = new Pose2D(0,0,Math.PI/2.0);
+    protected Pose2D rawPoseMR = new Pose2D(0,0,0);
     // Raw velocity in Meters/sec, Radians/sec
     protected Pose2D rawVelMR = new Pose2D(0,0,0);
     // Raw accelearation in Meters/sec2, Radians/sec2
@@ -60,6 +60,7 @@ public class SparkFunOTOS implements HardwareDevice {
      * sensor function in the simulator.
      */
     protected Pose2D offsetMR = new Pose2D(0,0,0);
+
     // position relative to basePoseMR, in Meters, Radians
     protected Pose2D positionMR = new Pose2D(0, 0, 0);
     // velocity relative to basePoseMR (m/s, radians/s)
