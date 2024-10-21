@@ -68,6 +68,18 @@ public abstract class LinearOpMode extends OpMode {
     }
 
     /**
+     * Determine whether this OpMode is still in the Init phase (indicating that the play button has
+     * not been pressed and the OpMode has not been stopped).
+     * <p>
+     * Can be used to break out of an Init loop when false is returned.
+     *
+     * @return Whether the OpMode is currently in the Init phase.
+     */
+    public final boolean opModeInInit() {
+        return !isStarted() && !isStopRequested();
+    }
+
+    /**
      * Answer as to whether this opMode is active and the robot should continue onwards. If the
      * opMode is not active, the OpMode should terminate at its earliest convenience.
      *
