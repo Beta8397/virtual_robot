@@ -1,9 +1,12 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.*;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.*;
 
 /**
@@ -15,6 +18,8 @@ public class XDriveBotDemo extends LinearOpMode {
 
     DcMotor m1, m2, m3, m4;
     CRServo backServo;
+    IMU imu = null;
+    SparkFunOTOS otos = null;
 
     public void runOpMode(){
         m1 = hardwareMap.dcMotor.get("back_left_motor");
@@ -32,32 +37,31 @@ public class XDriveBotDemo extends LinearOpMode {
         m3.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         m4.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        //GyroSensor gyro = hardwareMap.gyroSensor.get("gyro_sensor");
-        BNO055IMU imu = hardwareMap.get(BNO055IMU.class, "imu");
+        imu = hardwareMap.get(IMU.class, "imu");
+
+        imu.initialize(new IMU.Parameters(
+                new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.UP, RevHubOrientationOnRobot.UsbFacingDirection.FORWARD)));
+        ElapsedTime et = new ElapsedTime();
+        // Add brief delay for IMU initialization to complete
+        while (et.milliseconds() < 150 && !Thread.currentThread().isInterrupted()) continue;
+
+        otos = hardwareMap.get(SparkFunOTOS.class, "sensor_otos");
+        otos.setAngularUnit(AngleUnit.DEGREES);
+        otos.setLinearUnit(DistanceUnit.INCH);
+        otos.resetTracking();
 
         backServo = hardwareMap.crservo.get("back_crservo");
         DistanceSensor frontDistance = hardwareMap.get(DistanceSensor.class, "front_distance");
         DistanceSensor leftDistance = hardwareMap.get(DistanceSensor.class, "left_distance");
         DistanceSensor rightDistance = hardwareMap.get(DistanceSensor.class, "right_distance");
         DistanceSensor backDistance = hardwareMap.get(DistanceSensor.class, "back_distance");
-        //gyro.init();
-
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.accelerationIntegrationAlgorithm = null;
-        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-        parameters.calibrationData = null;
-        parameters.calibrationDataFile = "";
-        parameters.loggingEnabled = false;
-        parameters.loggingTag = "Who cares.";
-
-        imu.initialize(parameters);
 
         ColorSensor colorSensor = hardwareMap.colorSensor.get("color_sensor");
         telemetry.addData("Press Start When Ready","");
         telemetry.update();
         waitForStart();
         while (opModeIsActive()){
+
             double px = gamepad1.left_stick_x;
             if (Math.abs(px) < 0.05) px = 0;
             double py = -gamepad1.left_stick_y;
@@ -80,18 +84,25 @@ public class XDriveBotDemo extends LinearOpMode {
             m2.setPower(p2);
             m3.setPower(p3);
             m4.setPower(p4);
+
             double psrv = gamepad1.right_trigger;
-            if (Math.abs(psrv) < 0.05) psrv = 0.0;
             backServo.setPower(psrv);
+
+            if (gamepad1.a) {
+                otos.resetTracking();
+            }
+
             telemetry.addData("Color","R %d  G %d  B %d", colorSensor.red(), colorSensor.green(), colorSensor.blue());
-            Orientation orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
-            telemetry.addData("Heading", " %.1f", orientation.firstAngle * 180.0 / Math.PI);
+            double heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+            telemetry.addData("Heading (IMU)", "%.1f degrees", heading);
             telemetry.addData("Front Distance", " %.1f", frontDistance.getDistance(DistanceUnit.CM));
             telemetry.addData("Left Distance", " %.1f", leftDistance.getDistance(DistanceUnit.CM));
             telemetry.addData("Right Distance", " %.1f", rightDistance.getDistance(DistanceUnit.CM));
             telemetry.addData("Back Distance", " %.1f", backDistance.getDistance(DistanceUnit.CM));
             telemetry.addData("Encoders"," %d %d %d %d", m1.getCurrentPosition(), m2.getCurrentPosition(),
                     m3.getCurrentPosition(), m4.getCurrentPosition());
+            SparkFunOTOS.Pose2D pose2D = otos.getPosition();
+            telemetry.addData("OTOS pose2d", "x %.1f  y %.1f  h %.1f", pose2D.x, pose2D.y, pose2D.h);
             telemetry.update();
         }
         m1.setPower(0);

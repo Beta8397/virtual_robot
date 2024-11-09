@@ -46,13 +46,12 @@ public class SparkFunOTOS implements HardwareDevice {
 
     /*
      * The Base Pose is the pose of the User Coordinate System relative to the
-     * Raw Coordinate System. For a new instance of SparkFunOTOS, the user coordinate system
-     * defaults to X-Up, Y-Left, origin at center of the field. Because a new robot starts
-     * pointed upward, this means that a new robot will start with a pose of (0,0,0)
-     * in SparkFunOTOS. When the user calls setPosition, a new instance of Pose2D is
-     * assigned to basePoseMR.
+     * Raw Coordinate System. The raw coordinate system for virtual_robot is X-Right,
+     * Y-UP. The robot starts facing upward. Therefore, setting the base heading to
+     * PI/2 results in a starting User Heading of 0. When the user calls setPosition,
+     * a new instance of Pose2D is assigned to basePoseMR.
      */
-    protected Pose2D basePoseMR = new Pose2D(0, 0, 0);
+    protected Pose2D basePoseMR = new Pose2D(0, 0, Math.PI/2);
 
     /*
      * Offset of the sensor from the robot center, in meters, radians. NOTE:  this
