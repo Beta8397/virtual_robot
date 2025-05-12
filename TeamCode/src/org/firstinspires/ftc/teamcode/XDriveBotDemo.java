@@ -1,8 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.*;
@@ -19,7 +17,6 @@ public class XDriveBotDemo extends LinearOpMode {
     DcMotor m1, m2, m3, m4;
     CRServo backServo;
     IMU imu = null;
-    SparkFunOTOS otos = null;
 
     public void runOpMode(){
         m1 = hardwareMap.dcMotor.get("back_left_motor");
@@ -44,11 +41,6 @@ public class XDriveBotDemo extends LinearOpMode {
         ElapsedTime et = new ElapsedTime();
         // Add brief delay for IMU initialization to complete
         while (et.milliseconds() < 150 && !Thread.currentThread().isInterrupted()) continue;
-
-        otos = hardwareMap.get(SparkFunOTOS.class, "sensor_otos");
-        otos.setAngularUnit(AngleUnit.DEGREES);
-        otos.setLinearUnit(DistanceUnit.INCH);
-        otos.resetTracking();
 
         backServo = hardwareMap.crservo.get("back_crservo");
         DistanceSensor frontDistance = hardwareMap.get(DistanceSensor.class, "front_distance");
@@ -88,9 +80,6 @@ public class XDriveBotDemo extends LinearOpMode {
             double psrv = gamepad1.right_trigger;
             backServo.setPower(psrv);
 
-            if (gamepad1.a) {
-                otos.resetTracking();
-            }
 
             telemetry.addData("Color","R %d  G %d  B %d", colorSensor.red(), colorSensor.green(), colorSensor.blue());
             double heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
@@ -101,8 +90,6 @@ public class XDriveBotDemo extends LinearOpMode {
             telemetry.addData("Back Distance", " %.1f", backDistance.getDistance(DistanceUnit.CM));
             telemetry.addData("Encoders"," %d %d %d %d", m1.getCurrentPosition(), m2.getCurrentPosition(),
                     m3.getCurrentPosition(), m4.getCurrentPosition());
-            SparkFunOTOS.Pose2D pose2D = otos.getPosition();
-            telemetry.addData("OTOS pose2d", "x %.1f  y %.1f  h %.1f", pose2D.x, pose2D.y, pose2D.h);
             telemetry.update();
         }
         m1.setPower(0);

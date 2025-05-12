@@ -1,8 +1,10 @@
 package virtual_robot.robots.classes;
 
+import com.qualcomm.hardware.CommonOdometry;
 import com.qualcomm.hardware.bosch.BNO055IMUImpl;
 import com.qualcomm.hardware.bosch.BNO055IMUNew;
 import com.qualcomm.hardware.digitalchickenlabs.OctoQuadImpl;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriverInternal;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOSInternal;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -18,6 +20,8 @@ import org.firstinspires.ftc.robotcore.external.matrices.GeneralMatrixF;
 import org.firstinspires.ftc.robotcore.external.matrices.MatrixF;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import virtual_robot.config.Config;
 import virtual_robot.controller.*;
 import virtual_robot.util.AngleUtils;
@@ -32,7 +36,9 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
     private DcMotorExImpl[] motors = null;
     private BNO055IMUImpl imu = null;
     BNO055IMUNew imuNew = null;
+    private CommonOdometry odo = new CommonOdometry();
     private SparkFunOTOSInternal sparkFunOTOSInternal = null;
+    private GoBildaPinpointDriverInternal goBildaPinpointDriverInternal = null;
     private VirtualRobotController.ColorSensorImpl colorSensor = null;
     private VirtualRobotController.DistanceSensorImpl[] distanceSensors = null;
     protected OctoQuadImpl octoQuad = null;
@@ -95,6 +101,7 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
         colorSensor = (VirtualRobotController.ColorSensorImpl) hardwareMap.colorSensor.get("color_sensor");
 
         sparkFunOTOSInternal = hardwareMap.get(SparkFunOTOSInternal.class, "sensor_otos");
+        goBildaPinpointDriverInternal = hardwareMap.get(GoBildaPinpointDriverInternal.class, "pinpoint");
 
         octoQuad = hardwareMap.get(OctoQuadImpl.class, "octoquad");
         for (int i=0; i<4; i++){
@@ -158,7 +165,8 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
         hardwareMap.put("imu", new BNO055IMUImpl(this, 10));
         hardwareMap.put("imu", new BNO055IMUNew(this, 10));
         hardwareMap.put("color_sensor", controller.new ColorSensorImpl());
-        hardwareMap.put("sensor_otos", new SparkFunOTOSInternal());
+        hardwareMap.put("sensor_otos", new SparkFunOTOSInternal(odo));
+        hardwareMap.put("pinpoint", new GoBildaPinpointDriverInternal(odo));
         hardwareMap.put("octoquad", new OctoQuadImpl());
     }
 
@@ -215,6 +223,7 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
             }
         }
 
+
         robotTargetSpd[0] /= VirtualField.PIXELS_PER_METER;
         robotTargetSpd[1] /= VirtualField.PIXELS_PER_METER;
 
@@ -235,6 +244,7 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
                 robotTargetSpd[0]*sinFinal + robotTargetSpd[1]*cosFinal
         );
 
+
         /*
          * Compute the force and torque that would be required to achieve the target changes in robot velocity and
          * angular speed (F = ma,  tau = I*alpha)
@@ -254,6 +264,7 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
         // VectorF containing total force and torque required on bot to achieve the tentative position change,
         // in robot coordinate system
         VectorF totalForce = new VectorF(fXR, fYR, (float)torque, 0);
+
 
         // Required friction force from floor to achieve the tentative position change. For now, this will
         // be the same as totalForce, but may want to add offsets to collision forces
@@ -308,11 +319,14 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
          */
         imu.updateHeadingRadians(headingRadians);
         imuNew.updateHeadingRadians(headingRadians);
-        sparkFunOTOSInternal.update(
-                new SparkFunOTOS.Pose2D(xMeters, yMeters, headingRadians),
-                new SparkFunOTOS.Pose2D(velocityMetersPerSec.x, velocityMetersPerSec.y, angularVelocityRadiansPerSec),
-                new SparkFunOTOS.Pose2D(accelMetersPerSecSqr.x, accelMetersPerSecSqr.y, angularAccelRadiansPerSecSqr)
+        odo.update(
+                new Pose2D(DistanceUnit.METER, xMeters, yMeters, AngleUnit.RADIANS, headingRadians),
+                new Pose2D(DistanceUnit.METER, velocityMetersPerSec.x, velocityMetersPerSec.y, AngleUnit.RADIANS, angularVelocityRadiansPerSec),
+                new Pose2D(DistanceUnit.METER, accelMetersPerSecSqr.x, accelMetersPerSecSqr.y, AngleUnit.RADIANS, angularAccelRadiansPerSecSqr)
         );
+        sparkFunOTOSInternal.update();
+
+        // It isn't necessary to update the Pinpoint here; it is the responsibility of the user to update it.
 
         colorSensor.updateColor(x, y);
 
@@ -336,10 +350,12 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
     public void powerDownAndReset() {
         for (int i = 0; i < 4; i++) motors[i].stopAndReset();
         imu.close();
-        sparkFunOTOSInternal.update(new SparkFunOTOS.Pose2D(x/VirtualField.PIXELS_PER_METER,
-                        y/VirtualField.PIXELS_PER_METER,headingRadians),
-                new SparkFunOTOS.Pose2D(0,0,0), new SparkFunOTOS.Pose2D(0,0,0));
-        sparkFunOTOSInternal.resetTracking();
+        odo.update(
+                new Pose2D(DistanceUnit.METER, x/VirtualField.PIXELS_PER_METER, y/VirtualField.PIXELS_PER_METER, AngleUnit.RADIANS, headingRadians),
+                new Pose2D(DistanceUnit.METER, 0, 0, AngleUnit.RADIANS, 0), new Pose2D(DistanceUnit.METER, 0, 0, AngleUnit.RADIANS, 0)
+        );
+        sparkFunOTOSInternal.update();
+        goBildaPinpointDriverInternal.update();
         chassisBody.setAngularVelocity(0);
         chassisBody.setLinearVelocity(0,0);
     }
@@ -370,11 +386,14 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
     @Override
     public synchronized void positionWithMouseClick(MouseEvent arg) {
         super.positionWithMouseClick(arg);
-        sparkFunOTOSInternal.update(
-                new SparkFunOTOS.Pose2D(x / VirtualField.PIXELS_PER_METER, y / VirtualField.PIXELS_PER_METER, headingRadians),
-                new SparkFunOTOS.Pose2D(0, 0, 0), new SparkFunOTOS.Pose2D(0, 0, 0)
+        odo.update(
+                new Pose2D(DistanceUnit.METER, x/VirtualField.PIXELS_PER_METER, y/VirtualField.PIXELS_PER_METER, AngleUnit.RADIANS, headingRadians),
+                new Pose2D(DistanceUnit.METER, 0, 0, AngleUnit.RADIANS, 0), new Pose2D(DistanceUnit.METER, 0, 0, AngleUnit.RADIANS, 0)
         );
-        sparkFunOTOSInternal.resetTracking();
+        odo.setPosition(new Pose2D(DistanceUnit.METER, 0, 0, AngleUnit.RADIANS, 0));
+        sparkFunOTOSInternal.update();
+        goBildaPinpointDriverInternal.internalUpdate(false, false);
+        goBildaPinpointDriverInternal.resetEncoders();
     }
 
 }

@@ -8,6 +8,7 @@
  */
 package com.qualcomm.hardware.sparkfun;
 
+import com.qualcomm.hardware.CommonOdometry;
 import com.qualcomm.robotcore.hardware.HardwareDevice;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -20,6 +21,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * @see <a href="https://github.com/sparkfun/SparkFun_Qwiic_OTOS_Arduino_Library/">Arduino Library</a>
  */
 public class SparkFunOTOS implements HardwareDevice {
+
+    protected CommonOdometry odo;
+
     // Default I2C addresses of the Qwiic OTOS
     public static final byte DEFAULT_ADDRESS = 0x17;
     // Minimum scalar value for the linear and angular scalars
@@ -32,48 +36,16 @@ public class SparkFunOTOS implements HardwareDevice {
     protected double linearScalar = 1.0;
     protected double angularScalar = 1.0;
 
-    /*
-     * Save everything in METERS, RADIANS, and only convert to inches and/or
-     * degrees when the user requests values.
-     */
-
-    // Raw pose in Meters, Radians
-    protected Pose2D rawPoseMR = new Pose2D(0,0,0);
-    // Raw velocity in Meters/sec, Radians/sec
-    protected Pose2D rawVelMR = new Pose2D(0,0,0);
-    // Raw accelearation in Meters/sec2, Radians/sec2
-    protected Pose2D rawAccelMR = new Pose2D(0,0,0);
-
-    /*
-     * The Base Pose is the pose of the User Coordinate System relative to the
-     * Raw Coordinate System. The raw coordinate system for virtual_robot is X-Right,
-     * Y-UP. The robot starts facing upward. Therefore, setting the base heading to
-     * PI/2 results in a starting User Heading of 0. When the user calls setPosition,
-     * a new instance of Pose2D is assigned to basePoseMR.
-     */
-    protected Pose2D basePoseMR = new Pose2D(0, 0, Math.PI/2);
-
-    /*
-     * Offset of the sensor from the robot center, in meters, radians. NOTE:  this
-     * is only for API compatibility with the FTC SDK. It will have no effect on
-     * sensor function in the simulator.
-     */
-    protected Pose2D offsetMR = new Pose2D(0,0,0);
-
-    // position relative to basePoseMR, in Meters, Radians
-    protected Pose2D positionMR = new Pose2D(0, 0, 0);
-    // velocity relative to basePoseMR (m/s, radians/s)
-    protected Pose2D velocityMR = new Pose2D(0,0,0);
-    // acceleration relative to basePoseMR (m/s2, radians/s)
-    protected Pose2D accelMR = new Pose2D(0, 0, 0);
 
     protected DistanceUnit _distanceUnit = DistanceUnit.INCH;
     protected AngleUnit _angularUnit = AngleUnit.DEGREES;
     protected int calibrationCyclesRemaining = 0;
 
-    protected void printDebug(){
-        System.out.printf("Base Pose: x = %.3f  y = %.3f  h = %.3f", basePoseMR.x, basePoseMR.y, basePoseMR.h);
-    }
+    protected Pose2D position = new Pose2D(0, 0, 0);
+    protected Pose2D velocity = new Pose2D(0, 0, 0);
+    protected Pose2D acceleration = new Pose2D(0, 0, 0);
+
+    private Pose2D offset;
 
     // 2D pose structure, including x and y coordinates and heading angle.
     // Although pose is traditionally used for position and orientation, this
@@ -206,51 +178,10 @@ public class SparkFunOTOS implements HardwareDevice {
         }
     }
 
-    protected Pose2D rawPoseToPose(Pose2D rawPose){
-        double cos = Math.cos(basePoseMR.h);
-        double sin = Math.sin(basePoseMR.h);
-        double poseX = (rawPose.x-basePoseMR.x)*cos + (rawPose.y-basePoseMR.y)*sin;
-        double poseY = -(rawPose.x-basePoseMR.x)*sin + (rawPose.y-basePoseMR.y)*cos;
-        return new Pose2D(poseX, poseY, AngleUnit.normalizeRadians(rawPose.h-basePoseMR.h+Math.PI/2.0));
+    public SparkFunOTOS(CommonOdometry odo){
+        this.odo = odo;
     }
 
-    protected Pose2D rawVelToVel(Pose2D rawVel){
-        double cos = Math.cos(basePoseMR.h);
-        double sin = Math.sin(basePoseMR.h);
-        double velX = rawVel.x*cos + rawVel.y*sin;
-        double velY = -rawVel.x*sin + rawVel.y*cos;
-        return new Pose2D(velX, velY, AngleUnit.normalizeRadians(rawVel.h-basePoseMR.h+Math.PI/2));
-    }
-
-    protected Pose2D rawAccelToAccel(Pose2D rawAccel){
-        return rawVelToVel(rawAccel);
-    }
-
-    protected Pose2D poseToRawPose(Pose2D pose){
-        double cos = Math.cos(basePoseMR.h);
-        double sin = Math.sin(basePoseMR.h);
-        double rawX = basePoseMR.x + pose.x*cos - pose.y*sin;
-        double rawY = basePoseMR.y + pose.x*sin + pose.y*cos;
-        return new Pose2D(rawX, rawY, AngleUnit.normalizeRadians(pose.h+basePoseMR.h-Math.PI/2.0));
-    }
-
-    protected Pose2D velToRawVel(Pose2D vel){
-        double cos = Math.cos(basePoseMR.h);
-        double sin = Math.sin(basePoseMR.h);
-        double rawVX = vel.x*cos - vel.y*sin;
-        double rawVY = vel.x*sin + vel.y*cos;
-        return new Pose2D(rawVX, rawVY, AngleUnit.normalizeRadians(vel.h+basePoseMR.h-Math.PI/2));
-    }
-
-    protected Pose2D accelToRawAccel(Pose2D accel){
-        return velToRawVel(accel);
-    }
-
-    protected synchronized void internalUpdate(){
-        positionMR = rawPoseToPose(rawPoseMR);
-        velocityMR = rawVelToVel(rawVelMR);
-        accelMR = rawAccelToAccel(rawAccelMR);
-    }
 
     @Override
     public Manufacturer getManufacturer()
@@ -485,25 +416,13 @@ public class SparkFunOTOS implements HardwareDevice {
     }
 
     /**
-     * Gets the offset of the OTOS
-     * @return Offset of the sensor relative to the center of the robot
-     */
-    public Pose2D getOffsetMR() {
-        return offsetMR;
-    }
-
-    /**
      * Sets the offset of the OTOS. This is useful if your sensor is
      * mounted off-center from a robot. Rather than returning the position of
      * the sensor, the OTOS will return the position of the robot
      * @param pose Offset of the sensor relative to the center of the robot
      */
     public void setOffset(Pose2D pose) {
-        offsetMR = new Pose2D(
-                DistanceUnit.METER.fromUnit(_distanceUnit, pose.x),
-                DistanceUnit.METER.fromUnit(_distanceUnit, pose.y),
-                _angularUnit==AngleUnit.RADIANS? pose.h : Math.toRadians(pose.h)
-        );
+        this.offset = pose;
     }
 
     /**
@@ -511,12 +430,7 @@ public class SparkFunOTOS implements HardwareDevice {
      * @return Position measured by the OTOS
      */
     public synchronized Pose2D getPosition() {
-        Pose2D pos = new Pose2D(
-                _distanceUnit.fromUnit(DistanceUnit.METER, positionMR.x),
-                _distanceUnit.fromUnit(DistanceUnit.METER, positionMR.y),
-                _angularUnit == AngleUnit.RADIANS? positionMR.h : Math.toDegrees(positionMR.h)
-        );
-        return pos;
+        return position;
     }
 
     /**
@@ -527,19 +441,14 @@ public class SparkFunOTOS implements HardwareDevice {
      * @param pose New position for the OTOS to track from
      */
     public synchronized void setPosition(Pose2D pose) {
-        // Convert pose to meters and radians.
-        pose = new Pose2D(
-                DistanceUnit.METER.fromUnit(_distanceUnit, pose.x),
-                DistanceUnit.METER.fromUnit(_distanceUnit, pose.y),
-                _angularUnit == AngleUnit.RADIANS? pose.h : Math.toRadians(pose.h)
-        );
-        double hBase = AngleUnit.normalizeRadians(rawPoseMR.h-pose.h+Math.PI/2.0);
-        double cos = Math.cos(hBase);
-        double sin = Math.sin(hBase);
-        double xBase = rawPoseMR.x - pose.x*cos + pose.y*sin;
-        double yBase = rawPoseMR.y - pose.x*sin - pose.y*cos;
-        basePoseMR = new Pose2D(xBase, yBase, hBase);
-        internalUpdate();
+        org.firstinspires.ftc.robotcore.external.navigation.Pose2D odoPose2D =
+                new org.firstinspires.ftc.robotcore.external.navigation.Pose2D(
+                        DistanceUnit.METER, DistanceUnit.METER.fromUnit(_distanceUnit, pose.x),
+                        DistanceUnit.METER.fromUnit(_distanceUnit, pose.y), AngleUnit.RADIANS,
+                        AngleUnit.RADIANS.fromUnit(_angularUnit, pose.h)
+                );
+        odo.setPosition(odoPose2D);
+        position = pose;
     }
 
     /**
@@ -547,12 +456,7 @@ public class SparkFunOTOS implements HardwareDevice {
      * @return Velocity measured by the OTOS
      */
     public synchronized Pose2D getVelocity() {
-        Pose2D vel = new Pose2D(
-                _distanceUnit.fromUnit(DistanceUnit.METER, velocityMR.x),
-                _distanceUnit.fromUnit(DistanceUnit.METER, velocityMR.y),
-                _angularUnit == AngleUnit.RADIANS? velocityMR.h : Math.toDegrees(velocityMR.h)
-        );
-        return vel;
+        return velocity;
     }
 
     /**
@@ -560,13 +464,7 @@ public class SparkFunOTOS implements HardwareDevice {
      * @return Acceleration measured by the OTOS
      */
     public synchronized Pose2D getAcceleration() {
-        Pose2D acc = new Pose2D(
-                _distanceUnit.fromUnit(DistanceUnit.METER, accelMR.x),
-                _distanceUnit.fromUnit(DistanceUnit.METER, accelMR.y),
-                _angularUnit == AngleUnit.RADIANS? accelMR.h : Math.toDegrees(accelMR.h)
-        );
-        return acc;
-
+        return acceleration;
     }
 
     /**

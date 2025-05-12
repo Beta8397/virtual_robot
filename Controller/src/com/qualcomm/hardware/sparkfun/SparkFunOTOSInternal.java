@@ -1,22 +1,26 @@
 package com.qualcomm.hardware.sparkfun;
 
+import com.qualcomm.hardware.CommonOdometry;
+
 /**
- * Extend SparkFunOTOS, adding methods that are to be used only internally
+ *   SparkFunOTOS methods for internal use only
  */
-public class SparkFunOTOSInternal extends SparkFunOTOS {
+public class SparkFunOTOSInternal extends SparkFunOTOS{
+
+    public SparkFunOTOSInternal(CommonOdometry odo){
+        super(odo);
+    }
+
 
     /**
-     * Update the OTOS sensor to reflect current robot Pose. Parameters passed to this method are
-     * in the RAW coordinate system (origin is center of field, X-Right, Y-Up), in MKS units.
-     * @param posM    Raw pose in meters, radians
-     * @param velM      Raw velocity in meters/sec, radians/sec
-     * @param accelM    Raw acceleration in meters/sec2, radians/sec2
+     * Internal use only: update position, velocity, and acceleration from CommonOdometry
      */
-    public synchronized void update(Pose2D posM, Pose2D velM, Pose2D accelM){
-        rawPoseMR = posM;
-        rawVelMR = velM;
-        rawAccelMR = accelM;
-        internalUpdate();
+
+    public void update(){
+        CommonOdometry.PoseVelAccel pva = odo.getPoseVelAccel(_distanceUnit, _angularUnit);
+        position = new Pose2D(pva.pos.getX(_distanceUnit), pva.pos.getY(_distanceUnit), pva.pos.getHeading(_angularUnit));
+        velocity = new Pose2D(pva.vel.getX(_distanceUnit), pva.vel.getY(_distanceUnit), pva.vel.getHeading(_angularUnit));
+        acceleration = new Pose2D(pva.acc.getX(_distanceUnit), pva.acc.getY(_distanceUnit), pva.acc.getHeading(_angularUnit));
     }
 
 }
