@@ -2,9 +2,9 @@
 
 New: 
 
-GoBilda Pinpoint odometry sensor added. It is included in Mecanum and XDrive robots.
+GoBilda Pinpoint odometry sensor added. It is included in Mecanum and XDrive robots. ("pinpoint" in config file)
 
-SparFunOTOS Odometry Sensor added. It is included in Mecanum and XDrive robots.
+SparFunOTOS Odometry Sensor added. It is included in Mecanum and XDrive robots. ("sensor_otos" in config file)
 
 OctoQuad Encoder Sensor added. It is included in the Mecanum and XDrive robot configurations, with channels
 assigned as follows: 0->back left drive motor; 1->front left drive motor; 2->front right drive motor;
