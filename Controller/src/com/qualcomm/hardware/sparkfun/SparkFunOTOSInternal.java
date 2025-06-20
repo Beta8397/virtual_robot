@@ -7,11 +7,6 @@ import com.qualcomm.hardware.CommonOdometry;
  */
 public class SparkFunOTOSInternal extends SparkFunOTOS{
 
-    public SparkFunOTOSInternal(CommonOdometry odo){
-        super(odo);
-    }
-
-
     /**
      * Internal use only: update position, velocity, and acceleration from CommonOdometry
      */

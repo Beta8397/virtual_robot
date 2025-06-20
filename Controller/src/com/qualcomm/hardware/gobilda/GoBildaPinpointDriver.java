@@ -67,8 +67,8 @@ public class GoBildaPinpointDriver implements HardwareDevice {
 
     protected CommonOdometry odo;
 
-    public GoBildaPinpointDriver(CommonOdometry odo){
-        this.odo = odo;
+    public GoBildaPinpointDriver(){
+        this.odo = CommonOdometry.getInstance();
     }
 
     @Override

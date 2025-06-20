@@ -20,10 +20,9 @@
  */
 // Modified by Team Beta 8397 for use in the virtual_robot simulator
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.disabled_samples;
 
 import com.qualcomm.hardware.digitalchickenlabs.OctoQuad;
-import com.qualcomm.hardware.digitalchickenlabs.OctoQuadBase;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -59,6 +58,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
  *
  * See the sensor's product page: https://www.tindie.com/products/digitalchickenlabs/octoquad-8ch-quadrature-pulse-width-decoder/
  */
+@Disabled
 @TeleOp(name = "OctoQuad Basic", group="OctoQuad")
 //@Disabled
 public class SensorOctoQuad extends LinearOpMode {

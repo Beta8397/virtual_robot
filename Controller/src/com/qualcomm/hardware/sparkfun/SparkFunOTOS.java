@@ -178,8 +178,8 @@ public class SparkFunOTOS implements HardwareDevice {
         }
     }
 
-    public SparkFunOTOS(CommonOdometry odo){
-        this.odo = odo;
+    public SparkFunOTOS(){
+        odo = CommonOdometry.getInstance();
     }
 
 

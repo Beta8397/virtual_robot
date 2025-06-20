@@ -21,6 +21,15 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
  */
 public class CommonOdometry {
 
+    private static CommonOdometry theInstance = null;
+
+    private CommonOdometry(){}
+
+    public static CommonOdometry getInstance(){
+        if (theInstance == null) theInstance = new CommonOdometry();
+        return theInstance;
+    }
+
     /*
      * Save everything in METERS, RADIANS, and only convert to inches and/or
      * degrees when the user requests values.

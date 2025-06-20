@@ -32,5 +32,7 @@ Virtual Robot, Copyright 2019 Team Beta
 
    OpenCV Library, v4.5.3 (included in the EasyOpenCV Library), Licensed under Apache License, Version 2.0
 
+   PedroPathing (Copyright 2024, Pedro Pathing), Licensed under BSD 3-clause license
+
 
 
