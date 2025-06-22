@@ -34,9 +34,7 @@
           <root url="jar://$MODULE_DIR$/../lib/pedro_modified.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES>
-          <root url="jar://$MODULE_DIR$/../lib/pedro_modified.jar!/" />
-        </SOURCES>
+        <SOURCES />
       </library>
     </orderEntry>
   </component>
