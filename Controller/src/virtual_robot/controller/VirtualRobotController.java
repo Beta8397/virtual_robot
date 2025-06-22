@@ -114,7 +114,6 @@ public class VirtualRobotController {
     ScheduledExecutorService executorService = null;
     public static final double TIME_INTERVAL_MILLISECONDS = 20;
 
-
     //Random Number Generator
     private final Random random = new Random();
 
@@ -393,8 +392,8 @@ public class VirtualRobotController {
     }
 
     private void setupCbxOpModes(){
-//        Reflections reflections = new Reflections("");
-        Reflections reflections = new Reflections("org.firstinspires.ftc.teamcode");
+        Reflections reflections = new Reflections("");
+//        Reflections reflections = new Reflections("org.firstinspires.ftc.teamcode");
         Set<Class<?>> opModes = new HashSet<>();
         opModes.addAll(reflections.getTypesAnnotatedWith(TeleOp.class));
         opModes.addAll(reflections.getTypesAnnotatedWith(Autonomous.class));//Lists of OpMode classes and OpMode Names
@@ -600,6 +599,13 @@ public class VirtualRobotController {
             long opModeStartNanos = System.nanoTime();
 
             while (opModeStarted && !Thread.currentThread().isInterrupted()) {
+
+                try {
+                    Thread.sleep(20, 0);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+
                 // Update the run time display
                 final long opModeRunNanos = System.nanoTime() - opModeStartNanos;
                 Platform.runLater(()->lblRunTime.setText(String.format("%.2f", opModeRunNanos/1000000000.0)));

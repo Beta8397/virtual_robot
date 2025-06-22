@@ -36,7 +36,7 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
     private DcMotorExImpl[] motors = null;
     private BNO055IMUImpl imu = null;
     BNO055IMUNew imuNew = null;
-    private CommonOdometry odo = new CommonOdometry();
+    private CommonOdometry odo = CommonOdometry.getInstance();
     private SparkFunOTOSInternal sparkFunOTOSInternal = null;
     private GoBildaPinpointDriverInternal goBildaPinpointDriverInternal = null;
     private VirtualRobotController.ColorSensorImpl colorSensor = null;
@@ -165,8 +165,8 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
         hardwareMap.put("imu", new BNO055IMUImpl(this, 10));
         hardwareMap.put("imu", new BNO055IMUNew(this, 10));
         hardwareMap.put("color_sensor", controller.new ColorSensorImpl());
-        hardwareMap.put("sensor_otos", new SparkFunOTOSInternal(odo));
-        hardwareMap.put("pinpoint", new GoBildaPinpointDriverInternal(odo));
+        hardwareMap.put("sensor_otos", new SparkFunOTOSInternal());
+        hardwareMap.put("pinpoint", new GoBildaPinpointDriverInternal());
         hardwareMap.put("octoquad", new OctoQuadImpl());
     }
 

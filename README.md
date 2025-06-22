@@ -2,6 +2,9 @@
 
 New: 
 
+Support for Pedro-Pathing added. Currently set up to use Pinpoint localization. Recommendation: set the 
+"Motor Inertia" slider to about 25% to mitigate oscillations.
+
 GoBilda Pinpoint odometry sensor added. It is included in Mecanum and XDrive robots. ("pinpoint" in config file)
 
 SparFunOTOS Odometry Sensor added. It is included in Mecanum and XDrive robots. ("sensor_otos" in config file)
