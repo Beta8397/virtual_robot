@@ -71,7 +71,7 @@ public class TestBezier extends OpMode {
                 .setReversed(true)
                 .build();
 
-        follower.followPath(forwards, true);
+        follower.followPath(forwards);
 
     }
 
