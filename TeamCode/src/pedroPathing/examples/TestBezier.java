@@ -33,7 +33,11 @@ public class TestBezier extends OpMode {
 
     private Follower follower;
 
-    private PathChain bezier;
+    private PathChain forwards;
+
+    private PathChain backwards;
+
+    boolean forward = true;
 
     /**
      * This initializes the Follower and creates the PathChain for the "circle". Additionally, this
@@ -42,21 +46,32 @@ public class TestBezier extends OpMode {
     @Override
     public void init() {
 
-        Constants.setConstants(FConstants.class, LConstants.class);
-
         follower = new Follower(hardwareMap, FConstants.class, LConstants.class);
 
-        Pose startPose = new Pose(24, 24, Math.toRadians(90));
-        Pose endPose = new Pose(120, 120, 0);
-        Point point1 = new Point(24, 120);
+        follower.setStartingPose(new Pose(48, 48, Math.toRadians(90)));
 
-        follower.setStartingPose(startPose);
-
-        bezier = follower.pathBuilder()
-                .addPath( new BezierCurve(new Point(startPose), point1, new Point(endPose)))
+        forwards = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                        new Point(48.000, 48.000, Point.CARTESIAN),
+                        new Point(47.241, 79.399, Point.CARTESIAN),
+                        new Point(96.759, 65.170, Point.CARTESIAN),
+                        new Point(96.000, 96.000, Point.CARTESIAN)
+                ))
+                .setTangentHeadingInterpolation()
                 .build();
 
-        follower.followPath(bezier, true);
+        backwards = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                        new Point(96.000, 96.000, Point.CARTESIAN),
+                        new Point(95.336, 66.877, Point.CARTESIAN),
+                        new Point(47.241, 78.545, Point.CARTESIAN),
+                        new Point(48.000, 48.000, Point.CARTESIAN)
+                ))
+                .setTangentHeadingInterpolation()
+                .setReversed(true)
+                .build();
+
+        follower.followPath(forwards, true);
 
     }
 
@@ -67,6 +82,14 @@ public class TestBezier extends OpMode {
     @Override
     public void loop() {
         follower.update();
-        System.out.println(follower.getPose());
+        if (!follower.isBusy()) {
+            if (forward) {
+                forward = false;
+                follower.followPath(backwards);
+            } else {
+                forward = true;
+                follower.followPath(forwards);
+            }
+        }
     }
 }
