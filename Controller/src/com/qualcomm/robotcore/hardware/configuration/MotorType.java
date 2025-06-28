@@ -15,22 +15,23 @@ package com.qualcomm.robotcore.hardware.configuration;
  *
  */
 public enum MotorType {
-    Neverest40(1120, 2500, false, 40, 0.85),
-    Neverest20(560, 2500, false, 20, 0.85),
-    NeverestOrbital20(560, 2500, true, 20, 0.85),
-    Neverest60(1680, 2500, false, 60, 0.85),
-    Gobilda192(537.6,2500,false,19.2,0.85),
-    Gobilda137(383.6, 2500, false, 13.7, 0.85),
-    RevUltraPlanetaryOneToOne(28, 2800, false, 1, 1.0);
+    Neverest40(1120, 2500, false, 40, 0.85, 2.475),
+    Neverest20(560, 2500, false, 20, 0.85, 1.237),
+    NeverestOrbital20(537.6, 2500, true, 19.2, 0.85, 1.188),
+    Neverest60(1680, 2500, false, 60, 0.85, 3.713),
+    Gobilda192(537.6,2500,false,19.2,0.85, 1.188),
+    Gobilda137(383.6, 2500, false, 13.7, 0.85, 0.8476),
+    RevUltraPlanetaryOneToOne(28, 2800, false, 1, 1.0, 0.1050);
 
     MotorType(double ticksPerRotation, double maxTicksPerSecond, boolean reversed, double gearing,
-              double achievableMaxRPMFraction){
+              double achievableMaxRPMFraction, double maxTorque){
         TICKS_PER_ROTATION = ticksPerRotation;
         MAX_TICKS_PER_SECOND = maxTicksPerSecond;
         REVERSED = reversed;
         GEARING = gearing;
         ACHIEVABLE_MAX_RPM_FRACTION = achievableMaxRPMFraction;
-        MAX_RPM = 60.0 * MAX_TICKS_PER_SECOND / (TICKS_PER_ROTATION * ACHIEVABLE_MAX_RPM_FRACTION);
+        MAX_RPM = 60.0 * MAX_TICKS_PER_SECOND / TICKS_PER_ROTATION;
+        MAX_TORQUE = maxTorque; // Newton-meter (weird units but works well)
     }
 
     public final double TICKS_PER_ROTATION;
@@ -39,4 +40,5 @@ public enum MotorType {
     public final double GEARING;
     public final double ACHIEVABLE_MAX_RPM_FRACTION;
     public final double MAX_RPM;                    // Max RPM in RUN_WITHOUT_ENCODER mode
+    public final double MAX_TORQUE;
 }
