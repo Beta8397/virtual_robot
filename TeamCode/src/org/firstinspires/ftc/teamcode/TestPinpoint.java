@@ -18,6 +18,7 @@ public class TestPinpoint extends LinearOpMode {
     GoBildaPinpointDriver pinPoint;
     DcMotorEx bl, fl, fr, br;
 
+
     public void runOpMode(){
 
         pinPoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
@@ -49,6 +50,9 @@ public class TestPinpoint extends LinearOpMode {
 
         waitForStart();
 
+        double vxOld = 0;
+        long nanosOld = System.nanoTime();
+
         while (opModeIsActive()){
 
             if (gamepad1.a){
@@ -66,6 +70,12 @@ public class TestPinpoint extends LinearOpMode {
             double pinVY = pinPoint.getVelY(DistanceUnit.INCH);
             double pinVH = pinPoint.getHeadingVelocity(UnnormalizedAngleUnit.DEGREES);
 
+            double velX = pinPoint.getVelX(DistanceUnit.METER);
+            long nanos = System.nanoTime();
+            double accelX = (velX - vxOld) / ((nanos - nanosOld)/1.0e9);
+            vxOld = velX;
+            nanosOld = nanos;
+            System.out.println("AccelX " + accelX);
 
             telemetry.addData("Pinpoint Pos", "x: %.1f  y: %.1f  h: %.1f", pinPose.getX(DistanceUnit.INCH),
                     pinPose.getY(DistanceUnit.INCH), pinPose.getHeading(AngleUnit.DEGREES));
@@ -76,7 +86,6 @@ public class TestPinpoint extends LinearOpMode {
             telemetry.addData("Pinpoint Encoders", "X: %d  Y: %d", pinPoint.getEncoderX(), pinPoint.getEncoderY());
 
             telemetry.update();
-
 
             double pFwd = -gamepad1.left_stick_y;
             double pRight = gamepad1.left_stick_x;

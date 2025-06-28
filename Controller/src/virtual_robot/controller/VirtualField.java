@@ -2,6 +2,7 @@ package virtual_robot.controller;
 
 import javafx.scene.layout.StackPane;
 import org.dyn4j.geometry.Vector2;
+import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import virtual_robot.config.Config;
 
 /**
@@ -45,6 +46,18 @@ public class VirtualField {
             default:
                 return 1.0;
         }
+    }
+
+    public static VectorF robotToField(VectorF vec, double heading){
+        float cos = (float)Math.cos(heading);
+        float sin = (float)Math.sin(heading);
+        return new VectorF(vec.get(0)*cos - vec.get(1)*sin, vec.get(0)*sin + vec.get(1)*cos);
+    }
+
+    public static VectorF fieldToRobot(VectorF vec, double heading){
+        float cos = (float)Math.cos(heading);
+        float sin = (float)Math.sin(heading);
+        return new VectorF(vec.get(0)*cos + vec.get(1)*sin, -vec.get(0)*sin + vec.get(1)*cos);
     }
 
 }

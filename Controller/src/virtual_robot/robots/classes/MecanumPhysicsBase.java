@@ -195,8 +195,6 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
          * Get updated velocities (for use by the SparkFunOTOS sensor)
          */
         Vector2 velocityMetersPerSec = chassisBody.getLinearVelocity();
-        double vxMetersPerSec = velocityMetersPerSec.x;
-        double vyMetersPerSec = velocityMetersPerSec.y;
         double angularVelocityRadiansPerSec = chassisBody.getAngularVelocity();
 
         // Compute new wheel speeds in pixel units per second
@@ -287,7 +285,7 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
         }
 
         //Based on the adjusted forces at each wheel, determine net frictional force and torque on the bot,
-        //Force is in ROBOT COORDINATE system
+        //Force is in ROBOT COORDINATE system (This can also be used in updating Odometry sensors)
 
         frictionForces = M_ForceWheelToRobot.multiplied(wheel_X_Forces);
 
@@ -308,6 +306,7 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
         chassisBody.applyForce(force);
         chassisBody.applyTorque(torque);
 
+
         /*
          * Compute linear and angular acceleration for use by SparkFunOTOS (World Coordinates)
          */
@@ -325,6 +324,7 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
                 new Pose2D(DistanceUnit.METER, accelMetersPerSecSqr.x, accelMetersPerSecSqr.y, AngleUnit.RADIANS, angularAccelRadiansPerSecSqr)
         );
         sparkFunOTOSInternal.update();
+
 
         // It isn't necessary to update the Pinpoint here; it is the responsibility of the user to update it.
 
@@ -381,6 +381,8 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
         chassisFixture.setFilter(Filters.CHASSIS_FILTER);
         chassisBody.setMass(MassType.NORMAL);
         world.addBody(chassisBody);
+        System.out.printf("\nchassis: mass = %.3f  inertia = %.3f\n",
+                chassisBody.getMass().getMass(), chassisBody.getMass().getInertia());
     }
 
     @Override
