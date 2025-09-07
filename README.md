@@ -2,6 +2,8 @@
 
 New: 
 
+Changed field to Decode.
+
 Support for Pedro-Pathing added. Currently set up to use Pinpoint localization with either
 the Mecanum Bot configuration or the new MecDynamic Bot configuration. If using Mecanum Bot
 config, behavior may be improved by adding a little inertia (~25%) with the inertia slider.
