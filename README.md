@@ -2,7 +2,11 @@
 
 New: 
 
-Changed field to Decode.
+Changed field to Decode. Added decode goals and ramps, which serve as obstacles to robot
+travel. If you don't want these obstacles, then in the Config.java file, change the 
+assignment statement for GAME to:
+
+public static final Game GAME = new NoGame().
 
 Support for Pedro-Pathing added. Currently set up to use Pinpoint localization with either
 the Mecanum Bot configuration or the new MecDynamic Bot configuration. If using Mecanum Bot

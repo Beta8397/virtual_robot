@@ -75,7 +75,6 @@ public class TestPinpoint extends LinearOpMode {
             double accelX = (velX - vxOld) / ((nanos - nanosOld)/1.0e9);
             vxOld = velX;
             nanosOld = nanos;
-            System.out.println("AccelX " + accelX);
 
             telemetry.addData("Pinpoint Pos", "x: %.1f  y: %.1f  h: %.1f", pinPose.getX(DistanceUnit.INCH),
                     pinPose.getY(DistanceUnit.INCH), pinPose.getHeading(AngleUnit.DEGREES));
