@@ -40,6 +40,7 @@ import com.studiohartman.jamepad.ControllerState;
 import org.firstinspires.ftc.robotcore.internal.collections.EvictingBlockingQueue;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import virtual_robot.controller.VirtualGamePadController;
@@ -81,6 +82,31 @@ public class Gamepad {
     public volatile boolean right_stick_button = false;
     public volatile float left_trigger = 0;
     public volatile float right_trigger = 0;
+
+    public static int x_bit = 1;
+    public static int y_bit = 1 << 1;
+    public static int a_bit = 1 << 2;
+    public static int b_bit = 1 << 3;
+    public static int dpad_up_bit = 1 << 4;
+    public static int dpad_down_bit = 1 << 5;
+    public static int dpad_left_bit = 1 << 6;
+    public static int dpad_right_bit = 1 << 7;
+    public static int back_bit = 1 << 8;
+    public static int guide_bit = 1 << 9;
+    public static int start_bit = 1 << 10;
+    public static int left_bumper_bit = 1 << 11;
+    public static int right_bumper_bit = 1 << 12;
+    public static int left_stick_button_bit = 1 << 13;
+    public static int right_stick_button_bit = 1 << 14;
+    public static int circle_bit = b_bit;
+    public static int cross_bit = a_bit;
+    public static int triangle_bit = y_bit;
+    public static int square_bit = x_bit;
+    public static int share_bit = back_bit;
+    public static int options_bit = start_bit;
+    public static int ps_bit = guide_bit;
+
+    private int previous_bits = 0;
 
     /*
      * NOTE CHANGE IN DEADZONE TO MATCH NEW BEHAVIOR IN FTC SDK v. 7.0
@@ -147,6 +173,7 @@ public class Gamepad {
         right_stick_button = state.rightStickClick;
         left_trigger = setWithDeadzone(state.leftTrigger);
         right_trigger = setWithDeadzone(state.rightTrigger);
+        updateButtonAliases();
     }
 
     public void update(VirtualGamePadController.ControllerState state){
@@ -495,5 +522,394 @@ public class Gamepad {
             time += overhead;
             return time;
         }
+    }
+
+    public int buttonToBit(boolean val, int bit){
+        if (val) return bit;
+        else return 0;
+    }
+
+    public int buttonsToInt(){
+        int result = 0;
+        boolean[] buttons = new boolean[]{x, y, a, b, dpad_up, dpad_down, dpad_left, dpad_right,
+                back, guide, start, left_bumper, right_bumper, left_stick_button, right_stick_button};
+        for (int i=0; i<buttons.length; i++){
+            result |= buttonToBit(buttons[i], 1<<i);
+        }
+        return result;
+    }
+
+    public synchronized void resetEdgeDetection() {
+        previous_bits = buttonsToInt();
+    }
+
+    public synchronized boolean wasButtonPressed(boolean val, int bit) {
+        boolean result = val &&  (previous_bits & bit) == 0;
+        if (result) {
+            previous_bits |= bit;
+        }
+        return result;
+    }
+
+    public synchronized boolean wasButtonReleased(boolean val, int bit) {
+        boolean result = !val && (previous_bits & bit) != 0;
+        if (result) {
+            previous_bits &= ~bit;
+        }
+        return result;
+    }
+
+
+    /**
+     * Checks if dpad_up was pressed since the last call of this method
+     * @return true if dpad_up was pressed since the last call of this method; otherwise false
+     */
+    public boolean dpadUpWasPressed() {
+        return wasButtonPressed(dpad_up, dpad_up_bit);
+    }
+
+    /**
+     * Checks if dpad_up was released since the last call of this method
+     * @return true if dpad_up was released since the last call of this method; otherwise false
+     */
+    public boolean dpadUpWasReleased() {
+        return wasButtonReleased(dpad_up, dpad_up_bit);
+    }
+
+    /**
+     * Checks if dpad_down was pressed since the last call of this method
+     * @return true if dpad_down was pressed since the last call of this method; otherwise false
+     */
+    public boolean dpadDownWasPressed() {
+        return wasButtonPressed(dpad_down, dpad_down_bit);
+    }
+
+    /**
+     * Checks if dpad_down was released since the last call of this method
+     * @return true if dpad_down was released since the last call of this method; otherwise false
+     */
+    public boolean dpadDownWasReleased() {
+        return wasButtonReleased(dpad_down, dpad_down_bit);
+    }
+
+    /**
+     * Checks if dpad_left was pressed since the last call of this method
+     * @return true if dpad_left was pressed since the last call of this method; otherwise false
+     */
+    public boolean dpadLeftWasPressed() {
+        return wasButtonPressed(dpad_left, dpad_left_bit);
+    }
+
+    /**
+     * Checks if dpad_left was released since the last call of this method
+     * @return true if dpad_left was released since the last call of this method; otherwise false
+     */
+    public boolean dpadLeftWasReleased() {
+        return wasButtonReleased(dpad_left, dpad_left_bit);
+    }
+
+    /**
+     * Checks if dpad_right was pressed since the last call of this method
+     * @return true if dpad_right was pressed since the last call of this method; otherwise false
+     */
+    public boolean dpadRightWasPressed() {
+        return wasButtonPressed(dpad_right, dpad_right_bit);
+    }
+
+    /**
+     * Checks if dpad_right was released since the last call of this methmethodod
+     * @return true if dpad_right was released since the last call of this ; otherwise false
+     */
+    public boolean dpadRightWasReleased() {
+        return wasButtonReleased(dpad_right, dpad_right_bit);
+    }
+
+    /**
+     * Checks if a was pressed since the last call of this method
+     * @return true if a was pressed since the last call of this method; otherwise false
+     */
+    public boolean aWasPressed() {
+        return wasButtonPressed(a, a_bit);
+    }
+
+    /**
+     * Checks if a was released since the last call of this method
+     * @return true if a was released since the last call of this method; otherwise false
+     */
+    public boolean aWasReleased() {
+        return wasButtonReleased(a, a_bit);
+    }
+
+    /**
+     * Checks if b was pressed since the last call of this method
+     * @return true if b was pressed since the last call of this method; otherwise false
+     */
+    public boolean bWasPressed() {
+        return wasButtonPressed(b, b_bit);
+    }
+
+    /**
+     * Checks if b was released since the last call of this method
+     * @return true if b was released since the last call of this method; otherwise false
+     */
+    public boolean bWasReleased() {
+        return wasButtonReleased(b, b_bit);
+    }
+
+    /**
+     * Checks if x was pressed since the last call of this method
+     * @return true if x was pressed since the last call of this method; otherwise false
+     */
+    public boolean xWasPressed() {
+        return wasButtonPressed(x, x_bit);
+    }
+
+    /**
+     * Checks if x was released since the last call of this method
+     * @return true if x was released since the last call of this method; otherwise false
+     */
+    public boolean xWasReleased() {
+        return wasButtonReleased(x, x_bit);
+    }
+
+    /**
+     * Checks if y was pressed since the last call of this method
+     * @return true if y was pressed since the last call of this method; otherwise false
+     */
+    public boolean yWasPressed() {
+        return wasButtonPressed(y, y_bit);
+    }
+
+    /**
+     * Checks if y was released since the last call of this method
+     * @return true if y was released since the last call of this method; otherwise false
+     */
+    public boolean yWasReleased() {
+        return wasButtonReleased(y, y_bit);
+    }
+
+    /**
+     * Checks if guide was pressed since the last call of this method
+     * @return true if guide was pressed since the last call of this method; otherwise false
+     */
+    public boolean guideWasPressed() {
+        return wasButtonPressed(guide, guide_bit);
+    }
+
+    /**
+     * Checks if guide was released since the last call of this method
+     * @return true if guide was released since the last call of this method; otherwise false
+     */
+    public boolean guideWasReleased() {
+        return wasButtonReleased(guide, guide_bit);
+    }
+
+    /**
+     * Checks if start was pressed since the last call of this method
+     * @return true if start was pressed since the last call of this method; otherwise false
+     */
+    public boolean startWasPressed() {
+        return wasButtonPressed(start, start_bit);
+    }
+
+    /**
+     * Checks if start was released since the last call of this method
+     * @return true if start was released since the last call of this method; otherwise false
+     */
+    public boolean startWasReleased() {
+        return wasButtonReleased(start, start_bit);
+    }
+
+    /**
+     * Checks if back was pressed since the last call of this method
+     * @return true if back was pressed since the last call of this method; otherwise false
+     */
+    public boolean backWasPressed() {
+        return wasButtonPressed(back, back_bit);
+    }
+
+    /**
+     * Checks if back was released since the last call of this method
+     * @return true if back was released since the last call of this method; otherwise false
+     */
+    public boolean backWasReleased() {
+        return wasButtonReleased(back, back_bit);
+    }
+
+    /**
+     * Checks if left_bumper was pressed since the last call of this method
+     * @return true if left_bumper was pressed since the last call of this method; otherwise false
+     */
+    public boolean leftBumperWasPressed() {
+        return wasButtonPressed(left_bumper, left_bumper_bit);
+    }
+
+    /**
+     * Checks if left_bumper was released since the last call of this method
+     * @return true if left_bumper was released since the last call of this method; otherwise false
+     */
+    public boolean leftBumperWasReleased() {
+        return wasButtonReleased(left_bumper, left_bumper_bit);
+    }
+
+    /**
+     * Checks if right_bumper was pressed since the last call of this method
+     * @return true if right_bumper was pressed since the last call of this method; otherwise false
+     */
+    public boolean rightBumperWasPressed() {
+        return wasButtonPressed(right_bumper, right_bumper_bit);
+    }
+
+    /**
+     * Checks if right_bumper was released since the last call of this method
+     * @return true if right_bumper was released since the last call of this method; otherwise false
+     */
+    public boolean rightBumperWasReleased() {
+        return wasButtonReleased(right_bumper, right_bumper_bit);
+    }
+
+    /**
+     * Checks if left_stick_button was pressed since the last call of this method
+     * @return true if left_stick_button was pressed since the last call of this method; otherwise false
+     */
+    public boolean leftStickButtonWasPressed() {
+        return wasButtonPressed(left_stick_button, left_stick_button_bit);
+    }
+
+    /**
+     * Checks if left_stick_button was released since the last call of this method
+     * @return true if left_stick_button was released since the last call of this method; otherwise false
+     */
+    public boolean leftStickButtonWasReleased() {
+        return wasButtonReleased(left_stick_button, left_stick_button_bit);
+    }
+
+    /**
+     * Checks if right_stick_button was pressed since the last call of this method
+     * @return true if right_stick_button was pressed since the last call of this method; otherwise false
+     */
+    public boolean rightStickButtonWasPressed() {
+        return wasButtonPressed(right_stick_button, right_stick_button_bit);
+    }
+
+    /**
+     * Checks if right_stick_button was released since the last call of this method
+     * @return true if right_stick_button was released since the last call of this method; otherwise false
+     */
+    public boolean rightStickButtonWasReleased() {
+        return wasButtonReleased(right_stick_button, right_stick_button_bit);
+    }
+
+    /**
+     * Checks if circle was pressed since the last call of this method
+     * @return true if circle was pressed since the last call of this method; otherwise false
+     */
+    public boolean circleWasPressed() {
+        return wasButtonPressed(circle, circle_bit);
+    }
+
+    /**
+     * Checks if circle was released since the last call of this method
+     * @return true if circle was released since the last call of this method; otherwise false
+     */
+    public boolean circleWasReleased() {
+        return wasButtonReleased(circle, circle_bit);
+    }
+
+    /**
+     * Checks if cross was pressed since the last call of this method
+     * @return true if cross was pressed since the last call of this method; otherwise false
+     */
+    public boolean crossWasPressed() {
+        return wasButtonPressed(cross, cross_bit);
+    }
+
+    /**
+     * Checks if cross was released since the last call of this method
+     * @return true if cross was released since the last call of this method; otherwise false
+     */
+    public boolean crossWasReleased() {
+        return wasButtonReleased(cross, cross_bit);
+    }
+
+    /**
+     * Checks if triangle was pressed since the last call of this method
+     * @return true if triangle was pressed since the last call of this method; otherwise false
+     */
+    public boolean triangleWasPressed() {
+        return wasButtonPressed(triangle, triangle_bit);
+    }
+
+    /**
+     * Checks if triangle was released since the last call of this method
+     * @return true if triangle was released since the last call of this method; otherwise false
+     */
+    public boolean triangleWasReleased() {
+        return wasButtonReleased(triangle, triangle_bit);
+    }
+
+    /**
+     * Checks if square was pressed since the last call of this method
+     * @return true if square was pressed since the last call of this method; otherwise false
+     */
+    public boolean squareWasPressed() {
+        return wasButtonPressed(square, square_bit);
+    }
+
+    /**
+     * Checks if square was released since the last call of this method
+     * @return true if square was released since the last call of this method; otherwise false
+     */
+    public boolean squareWasReleased() {
+        return wasButtonReleased(square, square_bit);
+    }
+
+    /**
+     * Checks if share was pressed since the last call of this method
+     * @return true if share was pressed since the last call of this method; otherwise false
+     */
+    public boolean shareWasPressed() {
+        return wasButtonPressed(share, share_bit);
+    }
+
+    /**
+     * Checks if share was released since the last call of this method
+     * @return true if share was released since the last call of this method; otherwise false
+     */
+    public boolean shareWasReleased() {
+        return wasButtonReleased(share, share_bit);
+    }
+
+    /**
+     * Checks if options was pressed since the last call of this method
+     * @return true if options was pressed since the last call of this method; otherwise false
+     */
+    public boolean optionsWasPressed() {
+        return wasButtonPressed(options, options_bit);
+    }
+
+    /**
+     * Checks if options was released since the last call of this method
+     * @return true if options was released since the last call of this method; otherwise false
+     */
+    public boolean optionsWasReleased() {
+        return wasButtonReleased(options, options_bit);
+    }
+
+
+    /**
+     * Checks if ps was pressed since the last call of this method
+     * @return true if ps was pressed since the last call of this method; otherwise false
+     */
+    public boolean psWasPressed() {
+        return wasButtonPressed(ps, ps_bit);
+    }
+
+    /**
+     * Checks if ps was released since the last call of this method
+     * @return true if ps was released since the last call of this method; otherwise false
+     */
+    public boolean psWasReleased() {
+        return wasButtonReleased(ps, ps_bit);
     }
 }
