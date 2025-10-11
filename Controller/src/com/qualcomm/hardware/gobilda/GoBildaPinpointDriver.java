@@ -217,20 +217,6 @@ public class GoBildaPinpointDriver implements HardwareDevice {
     /**
      * Sets the odometry pod positions relative to the point that the odometry computer tracks around.<br><br>
      * The most common tracking position is the center of the robot. <br> <br>
-     * The X pod offset refers to how far sideways (in mm) from the tracking point the X (forward) odometry pod is. Left of the center is a positive number, right of center is a negative number. <br>
-     * the Y pod offset refers to how far forwards (in mm) from the tracking point the Y (strafe) odometry pod is. forward of center is a positive number, backwards is a negative number.<br>
-     * @param xOffset how sideways from the center of the robot is the X (forward) pod? Left increases
-     * @param yOffset how far forward from the center of the robot is the Y (Strafe) pod? forward increases
-     * @deprecated The overflow for this function has a DistanceUnit, which can reduce the chance of unit confusion.
-     */
-    public synchronized void setOffsets(double xOffset, double yOffset){
-        this.xOffset = xOffset;
-        this.yOffset = yOffset;
-    }
-
-    /**
-     * Sets the odometry pod positions relative to the point that the odometry computer tracks around.<br><br>
-     * The most common tracking position is the center of the robot. <br> <br>
      * The X pod offset refers to how far sideways from the tracking point the X (forward) odometry pod is. Left of the center is a positive number, right of center is a negative number. <br>
      * the Y pod offset refers to how far forwards from the tracking point the Y (strafe) odometry pod is. forward of center is a positive number, backwards is a negative number.<br>
      * @param xOffset how sideways from the center of the robot is the X (forward) pod? Left increases
@@ -238,7 +224,8 @@ public class GoBildaPinpointDriver implements HardwareDevice {
      * @param distanceUnit the unit of distance used for offsets.
      */
     public synchronized void setOffsets(double xOffset, double yOffset, DistanceUnit distanceUnit){
-        setOffsets(distanceUnit.toMm(xOffset), distanceUnit.toMm(yOffset));
+        this.xOffset = distanceUnit.toMm(xOffset);
+        this.yOffset = distanceUnit.toMm(yOffset);
     }
 
     /**
@@ -282,16 +269,6 @@ public class GoBildaPinpointDriver implements HardwareDevice {
 
     /**
      * Sets the encoder resolution in ticks per mm of the odometry pods. <br>
-     * You can find this number by dividing the counts-per-revolution of your encoder by the circumference of the wheel.
-     * @param ticks_per_mm should be somewhere between 10 ticks/mm and 100 ticks/mm a goBILDA Swingarm pod is ~13.26291192
-     * @deprecated The overflow for this function has a DistanceUnit, which can reduce the chance of unit confusion.
-     */
-    public synchronized void setEncoderResolution(double ticks_per_mm){
-        encoderResolution = ticks_per_mm;
-    }
-
-    /**
-     * Sets the encoder resolution in ticks per mm of the odometry pods. <br>
      *
      * NOTE: the corresponding method in the original GoBilda driver has an error and won't work.
      *
@@ -311,10 +288,10 @@ public class GoBildaPinpointDriver implements HardwareDevice {
      * You can tune this variable by rotating the robot a large amount (10 full turns is a good starting place) and comparing the amount that the robot rotated to the amount measured.
      * Rotating the robot exactly 10 times should measure 3600°. If it measures more or less, divide moved amount by the measured amount and apply that value to the Yaw Offset.<br><br>
      * If you find that to get an accurate heading number you need to apply a scalar of more than 1.05, or less than 0.95, your device may be bad. Please reach out to tech@gobilda.com
-     * @param yawOffset A scalar for the robot's heading.
+     * @param yawScalar A scalar for the robot's heading.
      */
-    public synchronized void setYawScalar(double yawOffset){
-        yawScalar = yawOffset;
+    public synchronized void setYawScalar(double yawScalar){
+        this.yawScalar = yawScalar;
     }
 
     /**
@@ -339,12 +316,11 @@ public class GoBildaPinpointDriver implements HardwareDevice {
      * relative to that new, more accurate position.
      * @param pos a Pose2D describing the robot's new position.
      */
-    public synchronized Pose2D setPosition(Pose2D pos){
+    public synchronized void setPosition(Pose2D pos){
         xPosition = (float)pos.getX(DistanceUnit.MM);
         yPosition = (float)pos.getY(DistanceUnit.MM);
         hOrientation = (float)(pos.getHeading(AngleUnit.RADIANS));
         odo.setPosition(pos);
-        return pos;
     }
 
     /**
@@ -445,27 +421,11 @@ public class GoBildaPinpointDriver implements HardwareDevice {
     public synchronized int getEncoderY(){return (int)Math.floor(yEncoderValue); }
 
     /**
-     * @return the estimated X (forward) position of the robot in mm
-     * @deprecated The overflow for this function has a DistanceUnit, which can reduce the chance of unit confusion.
-     */
-    public synchronized double getPosX(){
-        return xPosition;
-    }
-
-    /**
      * @return the estimated X (forward) position of the robot in specified unit
      * @param distanceUnit the unit that the estimated position will return in
      */
     public synchronized double getPosX(DistanceUnit distanceUnit){
         return distanceUnit.fromMm(xPosition);
-    }
-
-    /**
-     * @return the estimated Y (Strafe) position of the robot in mm
-     * @deprecated The overflow for this function has a DistanceUnit, which can reduce the chance of unit confusion.
-     */
-    public synchronized double getPosY(){
-        return yPosition;
     }
 
     /**
@@ -477,51 +437,18 @@ public class GoBildaPinpointDriver implements HardwareDevice {
     }
 
     /**
-     * @return the unnormalized estimated H (heading) position of the robot in radians
-     * unnormalized heading is not constrained from -180° to 180°. It will continue counting multiple rotations.
-     * @deprecated two overflows for this function exist with AngleUnit parameter. These minimize the possibility of unit confusion.
-     */
-    public synchronized double getHeading(){
-        return hOrientation;
-    }
-
-
-    /**
-     * @return the estimated X (forward) velocity of the robot in mm/sec
-     * @deprecated The overflow for this function has a DistanceUnit, which can reduce the chance of unit confusion.
-     */
-    public synchronized double getVelX(){
-        return xVelocity;
-    }
-
-    /**
      * @return the estimated X (forward) velocity of the robot in specified unit/sec
      */
     public synchronized double getVelX(DistanceUnit distanceUnit){
         return distanceUnit.fromMm(xVelocity);
     }
 
-    /**
-     * @return the estimated Y (strafe) velocity of the robot in mm/sec
-     * @deprecated The overflow for this function has a DistanceUnit, which can reduce the chance of unit confusion.
-     */
-    public synchronized double getVelY(){
-        return yVelocity;
-    }
 
     /**
      * @return the estimated Y (strafe) velocity of the robot in specified unit/sec
      */
     public synchronized double getVelY(DistanceUnit distanceUnit){
         return distanceUnit.fromMm(yVelocity);
-    }
-
-    /**
-     * @return the estimated H (heading) velocity of the robot in radians/sec
-     * @deprecated The overflow for this function has an AngleUnit, which can reduce the chance of unit confusion.
-     */
-    public synchronized double getHeadingVelocity() {
-        return hVelocity;
     }
 
     /**
@@ -578,18 +505,6 @@ public class GoBildaPinpointDriver implements HardwareDevice {
                 ((hOrientation + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI);
     }
 
-    /**
-     * @deprecated This function is not recommended, as velocity is wrapped from -180° to 180°.
-     * instead use individual getters.
-     * @return a Pose2D containing the estimated velocity of the robot, velocity is unit per second
-     */
-    public synchronized Pose2D getVelocity(){
-        return new Pose2D(DistanceUnit.MM,
-                xVelocity,
-                yVelocity,
-                AngleUnit.RADIANS,
-                ((hVelocity + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI);
-    }
 }
 
 

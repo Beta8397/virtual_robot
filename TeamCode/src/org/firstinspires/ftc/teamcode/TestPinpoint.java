@@ -23,7 +23,7 @@ public class TestPinpoint extends LinearOpMode {
 
         pinPoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
         pinPoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
-        pinPoint.setOffsets(100, 100);
+        pinPoint.setOffsets(100, 100, DistanceUnit.MM);
         pinPoint.setEncoderResolution(336.88, DistanceUnit.INCH);
 
         bl = hardwareMap.get(DcMotorEx.class, "back_left_motor");
@@ -38,13 +38,14 @@ public class TestPinpoint extends LinearOpMode {
         fl.setDirection(DcMotorSimple.Direction.REVERSE);
 
         Pose2D pinPose = pinPoint.getPosition();
-        Pose2D pinVel = pinPoint.getVelocity();
+        double velXInch = pinPoint.getVelX(DistanceUnit.INCH);
+        double velYInch = pinPoint.getVelY(DistanceUnit.INCH);
+        double headingVelDegrees = pinPoint.getHeadingVelocity(UnnormalizedAngleUnit.DEGREES);
         telemetry.addData("Pinpoint Offsets", "xOff: %.1f  yOff: %.1f",
                 pinPoint.getXOffset(DistanceUnit.INCH), pinPoint.getYOffset(DistanceUnit.INCH));
         telemetry.addData("Pinpoint Pos", "x: %.1f  y: %.1f  h: %.1f", pinPose.getX(DistanceUnit.INCH),
                 pinPose.getY(DistanceUnit.INCH), pinPose.getHeading(AngleUnit.DEGREES));
-        telemetry.addData("Pinpoint Vel", "x: %.1f  y: %.1f  h: %.1f", pinVel.getX(DistanceUnit.INCH),
-                pinVel.getY(DistanceUnit.INCH), pinVel.getHeading(AngleUnit.DEGREES));
+        telemetry.addData("Pinpoint Vel", "x: %.1f  y: %.1f  h: %.1f", velXInch, velYInch, headingVelDegrees);
         telemetry.addData("Pinpoint Encoders", "X: %d  Y: %d", pinPoint.getEncoderX(), pinPoint.getEncoderY());
         telemetry.update();
 
@@ -62,7 +63,6 @@ public class TestPinpoint extends LinearOpMode {
             pinPoint.update();
 
             pinPose = pinPoint.getPosition();
-            pinVel = pinPoint.getVelocity();
             double pinX = pinPoint.getPosX(DistanceUnit.INCH);
             double pinY = pinPoint.getPosY(DistanceUnit.INCH);
             double pinH = pinPoint.getHeading(AngleUnit.DEGREES);
@@ -70,16 +70,8 @@ public class TestPinpoint extends LinearOpMode {
             double pinVY = pinPoint.getVelY(DistanceUnit.INCH);
             double pinVH = pinPoint.getHeadingVelocity(UnnormalizedAngleUnit.DEGREES);
 
-            double velX = pinPoint.getVelX(DistanceUnit.METER);
-            long nanos = System.nanoTime();
-            double accelX = (velX - vxOld) / ((nanos - nanosOld)/1.0e9);
-            vxOld = velX;
-            nanosOld = nanos;
-
             telemetry.addData("Pinpoint Pos", "x: %.1f  y: %.1f  h: %.1f", pinPose.getX(DistanceUnit.INCH),
                     pinPose.getY(DistanceUnit.INCH), pinPose.getHeading(AngleUnit.DEGREES));
-            telemetry.addData("Pinpoint Vel", "x: %.1f  y: %.1f  h: %.1f", pinVel.getX(DistanceUnit.INCH),
-                    pinVel.getY(DistanceUnit.INCH), pinVel.getHeading(AngleUnit.DEGREES));
             telemetry.addData("Pinpoint Pos", "x: %.1f  y: %.1f  h: %.1f", pinX, pinY, pinH);
             telemetry.addData("Pinpoint Vel", "x: %.1f  y: %.1f  h: %.1f", pinVX, pinVY, pinVH);
             telemetry.addData("Pinpoint Encoders", "X: %d  Y: %d", pinPoint.getEncoderX(), pinPoint.getEncoderY());
