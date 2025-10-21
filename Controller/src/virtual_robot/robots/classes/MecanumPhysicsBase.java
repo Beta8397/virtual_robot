@@ -1,6 +1,5 @@
 package virtual_robot.robots.classes;
 
-import com.pedropathing.localization.PedroPinpointDriverInternal;
 import com.qualcomm.hardware.CommonOdometry;
 import com.qualcomm.hardware.bosch.BNO055IMUImpl;
 import com.qualcomm.hardware.bosch.BNO055IMUNew;
@@ -40,7 +39,6 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
     private CommonOdometry odo = CommonOdometry.getInstance();
     private SparkFunOTOSInternal sparkFunOTOSInternal = null;
     private GoBildaPinpointDriverInternal goBildaPinpointDriverInternal = null;
-    private PedroPinpointDriverInternal pedroPinpointDriverInternal = null;
     private VirtualRobotController.ColorSensorImpl colorSensor = null;
     private VirtualRobotController.DistanceSensorImpl[] distanceSensors = null;
     protected OctoQuadImpl octoQuad = null;
@@ -104,7 +102,6 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
 
         sparkFunOTOSInternal = hardwareMap.get(SparkFunOTOSInternal.class, "sensor_otos");
         goBildaPinpointDriverInternal = hardwareMap.get(GoBildaPinpointDriverInternal.class, "pinpoint");
-        pedroPinpointDriverInternal = hardwareMap.get(PedroPinpointDriverInternal.class, "pedro_pinpoint");
 
         octoQuad = hardwareMap.get(OctoQuadImpl.class, "octoquad");
         for (int i=0; i<4; i++){
@@ -170,7 +167,6 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
         hardwareMap.put("color_sensor", controller.new ColorSensorImpl());
         hardwareMap.put("sensor_otos", new SparkFunOTOSInternal());
         hardwareMap.put("pinpoint", new GoBildaPinpointDriverInternal());
-        hardwareMap.put("pedro_pinpoint", new PedroPinpointDriverInternal());
         hardwareMap.put("octoquad", new OctoQuadImpl());
     }
 
@@ -360,7 +356,6 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
         );
         sparkFunOTOSInternal.update();
         goBildaPinpointDriverInternal.update();
-        pedroPinpointDriverInternal.update();
         chassisBody.setAngularVelocity(0);
         chassisBody.setLinearVelocity(0,0);
     }
@@ -401,8 +396,6 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
         sparkFunOTOSInternal.update();
         goBildaPinpointDriverInternal.internalUpdate(false, false);
         goBildaPinpointDriverInternal.resetEncoders();
-        pedroPinpointDriverInternal.internalUpdate(false, false);
-        pedroPinpointDriverInternal.resetEncoders();
     }
 
 }

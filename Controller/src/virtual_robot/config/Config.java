@@ -23,7 +23,7 @@ public class Config {
     /**
      *  Width of the field, in pixels
      */
-    public static final double FIELD_WIDTH = 648;
+    public static final double FIELD_WIDTH = 504;
 
     /**
      * Whether to use "Virtual Gamepad" (true -> Virtual gamepad, false -> Real gamepad)
@@ -33,7 +33,7 @@ public class Config {
     /**
      * The image object for the field.
      */
-    public static final Image BACKGROUND = new Image("/virtual_robot/assets/decode648.bmp");
+    public static final Image BACKGROUND = new Image("/virtual_robot/assets/decode504.bmp");
 
     /**
      * If true, Virtual Gamepad joysticks and triggers will stay in the position where they were

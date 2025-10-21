@@ -1,0 +1,17 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="PedroPathing:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/PedroPathing_jar</output-path>
+    <root id="archive" name="PedroPathing.jar">
+      <element id="module-output" name="PedroPathing" />
+      <element id="module-output" name="Controller" />
+      <element id="module-output" name="TeamCode" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/road-runner-core-0.5.6.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/dyn4j-4.1.4.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/reflections-0.9.11.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/guava-20.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/javassist-3.21.0-GA.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/EasyOpenCV_v1.5.0_OBJ_bundle.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/Jamepad.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
