@@ -2,15 +2,22 @@
 
 New: 
 
+Updated to use PedroPathing 2. The MecDynamic Bot configuration was changed to use 
+GoBilda 192 motors (drives faster), and Pedropathing Constants are set for this, 
+and for use with GoBilda Pinpoint localizer. Since the regular Mecanum Bot configuration 
+uses Neverest 40 motors, the Pedro Constants for xVelocity and yVelocity should be 
+changed to 26.99 (from 49.88) if Mecanum Bot is to be used with PedroPathing.
+
+If you want to continue using PedroPathing 1, you can use git to clone the repository, 
+then reset to commit #eca722d, as follows:
+
+git reset --hard eca722d
+
 Changed field to Decode. Added decode goals and ramps, which serve as obstacles to robot
 travel. If you don't want these obstacles, then in the Config.java file, change the 
 assignment statement for GAME to:
 
 public static final Game GAME = new NoGame().
-
-Support for Pedro-Pathing added. Currently set up to use Pinpoint localization with either
-the Mecanum Bot configuration or the new MecDynamic Bot configuration. If using Mecanum Bot
-config, behavior may be improved by adding a little inertia (~25%) with the inertia slider.
 
 New MecDynamic Bot configuration: a mecanum configuration with a more realistic dynamics 
 model than the existing Mecanum configuration. This is added to provide more realistic behavior 

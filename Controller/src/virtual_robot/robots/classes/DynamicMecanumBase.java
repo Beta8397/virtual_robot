@@ -1,6 +1,5 @@
 package virtual_robot.robots.classes;
 
-import com.pedropathing.localization.PedroPinpointDriverInternal;
 import com.qualcomm.hardware.CommonOdometry;
 import com.qualcomm.hardware.bosch.BNO055IMUImpl;
 import com.qualcomm.hardware.bosch.BNO055IMUNew;
@@ -35,7 +34,6 @@ public abstract class DynamicMecanumBase extends VirtualBot {
     BNO055IMUNew imuNew = null;
     private CommonOdometry odo = CommonOdometry.getInstance();
     private GoBildaPinpointDriverInternal goBildaPinpointDriverInternal = null;
-    private PedroPinpointDriverInternal pedroPinpointDriverInternal = null;
     private VirtualRobotController.ColorSensorImpl colorSensor = null;
     private VirtualRobotController.DistanceSensorImpl[] distanceSensors = null;
 
@@ -89,7 +87,6 @@ public abstract class DynamicMecanumBase extends VirtualBot {
         colorSensor = (VirtualRobotController.ColorSensorImpl) hardwareMap.colorSensor.get("color_sensor");
 
         goBildaPinpointDriverInternal = hardwareMap.get(GoBildaPinpointDriverInternal.class, "pinpoint");
-        pedroPinpointDriverInternal = hardwareMap.get(PedroPinpointDriverInternal.class, "pedro_pinpoint");
 
         hardwareMap.setActive(false);
 
@@ -138,7 +135,6 @@ public abstract class DynamicMecanumBase extends VirtualBot {
         hardwareMap.put("imu", new BNO055IMUNew(this, 10));
         hardwareMap.put("color_sensor", controller.new ColorSensorImpl());
         hardwareMap.put("pinpoint", new GoBildaPinpointDriverInternal());
-        hardwareMap.put("pedro_pinpoint", new PedroPinpointDriverInternal());
     }
 
     /**
@@ -280,7 +276,6 @@ public abstract class DynamicMecanumBase extends VirtualBot {
                 new Pose2D(DistanceUnit.METER, 0, 0, AngleUnit.RADIANS, 0), new Pose2D(DistanceUnit.METER, 0, 0, AngleUnit.RADIANS, 0)
         );
         goBildaPinpointDriverInternal.update();
-        pedroPinpointDriverInternal.update();
         chassisBody.setAngularVelocity(0);
         chassisBody.setLinearVelocity(0,0);
     }
@@ -320,8 +315,6 @@ public abstract class DynamicMecanumBase extends VirtualBot {
         odo.setPosition(new Pose2D(DistanceUnit.METER, 0, 0, AngleUnit.RADIANS, 0));
         goBildaPinpointDriverInternal.internalUpdate(false, false);
         goBildaPinpointDriverInternal.resetEncoders();
-        pedroPinpointDriverInternal.internalUpdate(false, false);
-        pedroPinpointDriverInternal.resetEncoders();
     }
 
 }

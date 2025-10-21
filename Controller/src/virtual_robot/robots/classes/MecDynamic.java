@@ -25,7 +25,7 @@ public class MecDynamic extends DynamicMecanumBase {
     @FXML Rectangle backServoArm;
 
     public MecDynamic(){
-        super();
+        super(MotorType.Gobilda192);
     }
 
     public void initialize(){
