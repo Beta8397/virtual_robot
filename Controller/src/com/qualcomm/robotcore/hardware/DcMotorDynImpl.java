@@ -198,14 +198,12 @@ public class DcMotorDynImpl implements DcMotor {
         rawPower = Range.clip(rawPower, -1, 1);
 
         double torque;
+
         if (power == 0) {
             torque = -actualSpeed * ZERO_POWER_COEFF_PROPORTIONATE;
-        } else if (rawPower >= 0){
-            torque = rawPower * MOTOR_TYPE.MAX_TORQUE * (1 - actualSpeed / Math.abs(rawPower));
-            torque = Range.clip(torque, 0, MOTOR_TYPE.MAX_TORQUE);
         } else {
-            torque = rawPower * MOTOR_TYPE.MAX_TORQUE * (1 + actualSpeed / Math.abs(rawPower));
-            torque = Range.clip(torque, -MOTOR_TYPE.MAX_TORQUE, 0);
+            torque = (rawPower - actualSpeed) * MOTOR_TYPE.MAX_TORQUE;
+            torque = Range.clip(torque, -MOTOR_TYPE.MAX_TORQUE, MOTOR_TYPE.MAX_TORQUE);
         }
 
         return torque;
@@ -287,7 +285,7 @@ public class DcMotorDynImpl implements DcMotor {
 
     public synchronized void setZeroPowerBehavior(ZeroPowerBehavior beh) {
         zeroPowerBehavior = beh;
-        ZERO_POWER_COEFF_PROPORTIONATE = beh == ZeroPowerBehavior.BRAKE? 1.0 : 0.1;
+        ZERO_POWER_COEFF_PROPORTIONATE = beh == ZeroPowerBehavior.BRAKE? 1.0 : 0.2; // was 0.1
     }
 
     public synchronized ZeroPowerBehavior getZeroPowerBehavior() { return zeroPowerBehavior; }
