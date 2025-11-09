@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotorExImpl;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.configuration.MotorType;
 
+import virtual_robot.config.Config;
 import virtual_robot.controller.VirtualBot;
 import virtual_robot.controller.VirtualRobotController;
 import virtual_robot.util.AngleUtils;
@@ -38,7 +39,7 @@ public class MechanumBase extends VirtualBot {
      */
     public MechanumBase() {
         super();
-        MOTOR_TYPE = MotorType.Neverest40;
+        MOTOR_TYPE = Config.DEFAULT_DRIVE_MOTOR_TYPE;
     }
 
     public MechanumBase(MotorType driveMotorType){

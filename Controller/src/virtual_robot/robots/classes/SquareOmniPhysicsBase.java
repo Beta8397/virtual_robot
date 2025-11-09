@@ -63,7 +63,7 @@ public abstract class SquareOmniPhysicsBase extends VirtualBot {
      */
     public SquareOmniPhysicsBase() {
         super();
-        MOTOR_TYPE = MotorType.NeverestOrbital20;
+        MOTOR_TYPE = Config.DEFAULT_DRIVE_MOTOR_TYPE;
     }
 
     public SquareOmniPhysicsBase(MotorType driveMotorType){

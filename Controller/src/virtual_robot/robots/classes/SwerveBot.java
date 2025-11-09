@@ -26,7 +26,7 @@ import virtual_robot.util.Vector2D;
 //@BotConfig(name = "Swerve Bot", filename = "swerve_bot")
 public class SwerveBot extends VirtualBot {
 
-    private final MotorType MOTOR_TYPE = MotorType.Neverest40;
+    private final MotorType MOTOR_TYPE;
     private DcMotorExImpl[] motors = null;
     private CRServoImpl[] crServos = null;
     private DeadWheelEncoder[] steerEncoders = null;
@@ -58,6 +58,12 @@ public class SwerveBot extends VirtualBot {
 
     public SwerveBot(){
         super();
+        MOTOR_TYPE = Config.DEFAULT_DRIVE_MOTOR_TYPE;
+    }
+
+    public SwerveBot(MotorType driveMotorType){
+        super();
+        MOTOR_TYPE = driveMotorType;
     }
 
     public void initialize(){

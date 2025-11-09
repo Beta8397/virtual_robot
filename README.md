@@ -2,11 +2,22 @@
 
 New: 
 
-Updated to use PedroPathing 2. The MecDynamic Bot configuration was changed to use 
-GoBilda 192 motors (drives faster), and Pedropathing Constants are set for this, 
-and for use with GoBilda Pinpoint localizer. Since the regular Mecanum Bot configuration 
-uses Neverest 40 motors, the Pedro Constants for xVelocity and yVelocity should be 
-changed to 26.99 (from 49.88) if Mecanum Bot is to be used with PedroPathing.
+Now supports RoadRunner v1.0.1 AND PedroPathing v2.0.4, including facsimiles of the 
+Quickstart teamcode for each. For both RR and PP, tuning has been done for 
+virtual_robot's MecDynamic robot configuration. This is the most physically realistic 
+robot configuration; the other configurations aren't expected to work well 
+with RR or PP. Example opmodes are included.
+
+Two new items are added to the Config.java class. You can change these if you'd 
+prefer that you favorite robot configuration use a different drive motor type, 
+or if you would prefer to have a different robot configuration appear when you 
+first run the app.
+
+Config.DEFAULT_DRIVE_MOTOR_TYPE is the default drive motor type for all robots, and 
+is currently set to MotorType.Gobilda192.
+
+Config.DEFAULT_BOT is the default robot configuration, which will appear first when
+you run the app.
 
 If you want to continue using PedroPathing 1, you can use git to clone the repository, 
 then reset to commit #eca722d, as follows:

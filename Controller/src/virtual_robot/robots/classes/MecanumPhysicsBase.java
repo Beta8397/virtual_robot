@@ -73,7 +73,7 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
      */
     public MecanumPhysicsBase() {
         super();
-        MOTOR_TYPE = MotorType.Neverest40;
+        MOTOR_TYPE = Config.DEFAULT_DRIVE_MOTOR_TYPE;
     }
 
     public MecanumPhysicsBase(MotorType driveMotorType){
@@ -381,8 +381,6 @@ public abstract class MecanumPhysicsBase extends VirtualBot {
         chassisFixture.setFilter(Filters.CHASSIS_FILTER);
         chassisBody.setMass(MassType.NORMAL);
         world.addBody(chassisBody);
-        System.out.printf("\nchassis: mass = %.3f  inertia = %.3f\n",
-                chassisBody.getMass().getMass(), chassisBody.getMass().getInertia());
     }
 
     @Override

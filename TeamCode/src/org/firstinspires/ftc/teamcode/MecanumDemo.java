@@ -1,10 +1,13 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.digitalchickenlabs.OctoQuad;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.*;
+import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.*;
+import org.firstinspires.ftc.teamcode.roadrunner.PinpointLocalizer;
 
 /**
  * Example OpMode. Demonstrates use of gyro, color sensor, encoders, and telemetry.
@@ -37,12 +40,21 @@ public class MecanumDemo extends LinearOpMode {
         IMU imu = hardwareMap.get(IMU.class, "imu");
 
         ColorSensor colorSensor = hardwareMap.colorSensor.get("color_sensor");
-        OctoQuad octoQuad = hardwareMap.get(OctoQuad.class, "octoquad");
+//        OctoQuad octoQuad = hardwareMap.get(OctoQuad.class, "octoquad");
+        GoBildaPinpointDriver pinpoint = hardwareMap.get(GoBildaPinpointDriver.class,
+                "pinpoint");
+        pinpoint.setPosition(new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.RADIANS, 0));
 
         telemetry.addData("Press Start When Ready","");
         telemetry.update();
 
         waitForStart();
+        VectorF oldVel = new VectorF(0,0);
+        double oldSecs = getRuntime();
+        double maxVel = 0;
+        double maxAccel = 0;
+        double minAccel = 0;
+
         while (opModeIsActive()){
             double px = gamepad1.left_stick_x;
             double py = -gamepad1.left_stick_y;
@@ -65,6 +77,25 @@ public class MecanumDemo extends LinearOpMode {
             m2.setPower(p2);
             m3.setPower(p3);
             m4.setPower(p4);
+
+            pinpoint.update();
+            Pose2D pose = pinpoint.getPosition();
+            double secs = getRuntime();
+            VectorF vel = new VectorF((float)pinpoint.getVelX(DistanceUnit.INCH),
+                    (float)pinpoint.getVelY(DistanceUnit.INCH));
+            VectorF accel = vel.subtracted(oldVel).multiplied(1.0f/((float)secs - (float)oldSecs));
+
+            if (vel.get(0) > maxVel) maxVel = vel.get(0);
+            if (accel.get(0) > maxAccel) maxAccel = accel.get(0);
+            if (accel.get(0) < minAccel) minAccel = accel.get(0);
+
+            oldVel = vel;
+            oldSecs = secs;
+
+            telemetry.addData("maxVel", maxVel);
+            telemetry.addData("maxAccel", maxAccel);
+            telemetry.addData("minAccel", minAccel);
+
             telemetry.addData("Color","R %d  G %d  B %d", colorSensor.red(), colorSensor.green(), colorSensor.blue());
 //            Orientation orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
             Orientation orientation = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
@@ -76,9 +107,9 @@ public class MecanumDemo extends LinearOpMode {
             telemetry.addData("Back Distance", " %.1f", backDistance.getDistance(DistanceUnit.CM));
             telemetry.addData("Encoders"," %d %d %d %d", m1.getCurrentPosition(), m2.getCurrentPosition(),
                     m3.getCurrentPosition(), m4.getCurrentPosition());
-            telemetry.addData("Octoquad", "%d %d %d %d", octoQuad.readSinglePosition(0),
-                    octoQuad.readSinglePosition(1), octoQuad.readSinglePosition(2),
-                    octoQuad.readSinglePosition(3));
+//            telemetry.addData("Octoquad", "%d %d %d %d", octoQuad.readSinglePosition(0),
+//                    octoQuad.readSinglePosition(1), octoQuad.readSinglePosition(2),
+//                    octoQuad.readSinglePosition(3));
             telemetry.update();
         }
         m1.setPower(0);

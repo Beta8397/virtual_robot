@@ -16,6 +16,7 @@ import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import virtual_robot.config.Config;
 import virtual_robot.controller.Filters;
 import virtual_robot.controller.VirtualBot;
 import virtual_robot.controller.VirtualField;
@@ -59,7 +60,7 @@ public abstract class DynamicMecanumBase extends VirtualBot {
      */
     public DynamicMecanumBase() {
         super();
-        MOTOR_TYPE = MotorType.Neverest40;
+        MOTOR_TYPE = Config.DEFAULT_DRIVE_MOTOR_TYPE;
     }
 
     public DynamicMecanumBase(MotorType driveMotorType){

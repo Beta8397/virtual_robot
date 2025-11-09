@@ -22,7 +22,7 @@ import virtual_robot.util.AngleUtils;
  */
 public class TwoWheelPhysicsBase extends VirtualBot {
 
-    private final MotorType MOTOR_TYPE = MotorType.Neverest40;
+    private final MotorType MOTOR_TYPE;
     private DcMotorExImpl leftMotor = null;
     private DcMotorExImpl rightMotor = null;
     private BNO055IMUImpl imu = null;
@@ -37,6 +37,7 @@ public class TwoWheelPhysicsBase extends VirtualBot {
 
     public TwoWheelPhysicsBase(){
         super();
+        MOTOR_TYPE = Config.DEFAULT_DRIVE_MOTOR_TYPE;
     }
 
     public void initialize(){
