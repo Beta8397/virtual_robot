@@ -60,7 +60,7 @@ public abstract class XDrivePhysicsBase extends VirtualBot {
      */
     public XDrivePhysicsBase() {
         super();
-        MOTOR_TYPE = MotorType.Neverest40;
+        MOTOR_TYPE = Config.DEFAULT_DRIVE_MOTOR_TYPE;
     }
 
     public XDrivePhysicsBase(MotorType driveMotorType){

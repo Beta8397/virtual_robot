@@ -307,7 +307,8 @@ public class VirtualRobotController {
                 validConfigClasses.add(c);
         }
         cbxConfig.setItems(validConfigClasses);
-        cbxConfig.setValue(MecanumBot.class);
+//        cbxConfig.setValue(MecanumBot.class);
+        cbxConfig.setValue(Config.DEFAULT_BOT);
 
         cbxConfig.setCellFactory(new Callback<ListView<Class<?>>, ListCell<Class<?>>>() {
             @Override

@@ -543,4 +543,14 @@ public class SparkFunOTOS implements HardwareDevice {
         velStdDev.set(new Pose2D(0,0,0));
         accStdDev.set(new Pose2D(0,0,0));
     }
+
+    /**
+     * For compatibility with RoadRunner only. In FTC SDK, SparkFunOTOS extends
+     * I2cDeviceSynchDevice<DEVICE_CLIENT extends I2cDeviceSynchSimple>,
+     * and that class has an initialize() method that returns boolean.
+     * @return
+     */
+    public boolean initialize(){
+        return true;
+    }
 }

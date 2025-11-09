@@ -26,7 +26,7 @@ import virtual_robot.util.AngleUtils;
  */
 public class SixWheelPhysicsBase extends VirtualBot {
 
-    private final MotorType MOTOR_TYPE = MotorType.Gobilda137;
+    private final MotorType MOTOR_TYPE;
     private DcMotorExImpl leftMotorFront = null;
     private DcMotorExImpl leftMotorBack = null;
     private DcMotorExImpl rightMotorFront = null;
@@ -43,6 +43,12 @@ public class SixWheelPhysicsBase extends VirtualBot {
 
     public SixWheelPhysicsBase() {
         super();
+        MOTOR_TYPE = Config.DEFAULT_DRIVE_MOTOR_TYPE;
+    }
+
+    public SixWheelPhysicsBase(MotorType driveMotorType){
+        super();
+        MOTOR_TYPE = driveMotorType;
     }
 
     public void initialize() {
