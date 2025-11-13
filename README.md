@@ -1,7 +1,5 @@
 # A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
 
-New: 
-
 Now supports RoadRunner v1.0.1 AND PedroPathing v2.0.4, including facsimiles of the 
 Quickstart teamcode for each. For both RR and PP, tuning has been done for 
 virtual_robot's MecDynamic robot configuration. This is the most physically realistic 
@@ -44,19 +42,21 @@ Multiple robot configurations are available in the "Configurations" dropdown men
 (SwerveBot, DiffSwerveBot, etc) are available, but are currently disabled. They can be enabled by un-commenting 
 the @Botconfig annotations in their configuration classes (package virtual_robot.robots.classes).
 
-Each robot can be thought of as 18 inches wide.  There is a downward-facing color sensor in the center of each robot. 
-A BNO055 IMU is also included. Each robot also has distance sensors on the front, left, right and back sides. 
-A small green rectangle indicates the front of each robot. Wheel diameters are all 4 inches. For the robots with 
-dead-wheel encoders (MecanumBot and XDriveBot), the forward-reverse encoder wheels are mounted 6 inches to the right and 
-left of center, while the X-direction (i.e., right-left) encoder wheel is mounted at the center. The dead-wheels are 
-two inches in diameter. Positioning of the dead-wheels can be changed easily in the robot configuration classes.
+There is a downward-facing color sensor in the center of each robot. A BNO055 IMU is also included. Each robot also 
+has distance sensors on the front, left, right and back sides. A small green rectangle indicates the front of each 
+robot. Drive diameters are all 4 inches. For the robots with dead-wheel encoders (MecanumBot and XDriveBot), 
+the forward-reverse encoder wheels are mounted 6 inches to the right and left of center, while the X-direction 
+(i.e., right-left) encoder wheel is mounted at the center. The dead-wheels are two inches in diameter. Positioning of 
+the dead-wheels can be changed easily in the robot configuration classes.
 
-The field can be thought of as 12 feet wide. The field graphic (currently the Freight Frenzy field)
+The field can be thought of as 12 feet wide. The field graphic (currently the Decode field)
 is obtained from a bitmap (.bmp) image. The color sensor detects the field color beneath the center of the
 robot. The field graphic is easily changed by providing a different .bmp image in the virtual_robot.config.Config class.
-The .bmp image is the freight_field648.bmp file in the virtual_robot.assets folder. If a different .bmp image is used,
-it must be at least as wide and as tall as the field dimensions (currently 648 x 648 pixels to fit on the screen of
-most laptops). The Config class also allows selection between the use of "real" hardware gamepads versus a
+The .bmp image is the decode648.bmp file in the virtual_robot.assets folder. Current field size is 648x648 pixels.
+If you need a smaller field size to fit on a laptop screen, go to the Config.java file and change both the FIELD_WIDTH 
+and BACKGROUND values to reflect one of the other available field sizes (576, 504, 432).
+
+The Config class also allows selection between the use of "real" hardware gamepads versus a
 "virtual gamepad".
 
 In addition to the robot configurations described above, there is an additional configuration called
@@ -95,12 +95,6 @@ To use:
      and right-mouse-clicking (for robot orientation).
   10. Use the INIT/START/STOP button as you would on the FTC Driver Station.
   11. If desired use the sliders to introduce random and systematic motor error, and inertia.
-
-    NOTE: OpModes copied directly from Android Studio to Virtual Robot may not automatically compile when pasted into
-    Virtual Robot in IntelliJ, and won't show up in the OpModes dropdown box until they are compiled. Two different
-    methods to force compilation are: 1) From the "Build" menu, select "Rebuild Project"; or, 2) Make any change at all 
-    to the OpMode file (e.g., add a comment). Any one of these
-    methods is sufficient.
 
 Acknowledgement: Thanks to Alan Smith for a contribution in 2019 for a contribution that provides compatibility with
 a wider variety of OpModes ("iterative" opmodes in addition to the original "linear" opmode support).
