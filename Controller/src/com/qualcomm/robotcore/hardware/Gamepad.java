@@ -545,15 +545,19 @@ public class Gamepad {
 
     public synchronized boolean wasButtonPressed(boolean val, int bit) {
         boolean result = val &&  (previous_bits & bit) == 0;
-        if (result) {
+        if (val){
             previous_bits |= bit;
+        } else {
+            previous_bits &= ~bit;
         }
         return result;
     }
 
     public synchronized boolean wasButtonReleased(boolean val, int bit) {
         boolean result = !val && (previous_bits & bit) != 0;
-        if (result) {
+        if (val){
+            previous_bits |= bit;
+        } else {
             previous_bits &= ~bit;
         }
         return result;
