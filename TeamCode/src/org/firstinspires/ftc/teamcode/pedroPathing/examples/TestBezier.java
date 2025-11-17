@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.pedroPathing.examples;
 
 
+import com.pedropathing.control.PIDFCoefficients;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.Pose;
@@ -8,6 +9,10 @@ import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.pedroPathing.tuning.tuning_util.Adjuster;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Autonomous(group="Pedro")
 public class TestBezier extends OpMode {
@@ -21,6 +26,9 @@ public class TestBezier extends OpMode {
     boolean forward = true;
 
     boolean turning = false;
+
+    List<Adjuster> adjusters;
+    Adjuster adjuster;
 
     /**
      * This initializes the Follower and creates the PathChain for the "circle". Additionally, this
@@ -53,6 +61,19 @@ public class TestBezier extends OpMode {
                 .setTangentHeadingInterpolation()
 //                .setReversed()
                 .build();
+
+        adjusters = new ArrayList<>();
+        adjusters.add(new Adjuster("P", ()->follower.getConstants().getCoefficientsDrivePIDF().P,
+                (double p)->follower.getConstants().getCoefficientsDrivePIDF().P = p, gamepad1));
+        adjusters.add(new Adjuster("D", ()->follower.getConstants().getCoefficientsDrivePIDF().D,
+                (double d)->follower.getConstants().getCoefficientsDrivePIDF().D = d, gamepad1));
+        adjusters.add(new Adjuster("F", ()->follower.getConstants().getCoefficientsDrivePIDF().F,
+                (double f)->follower.getConstants().getCoefficientsDrivePIDF().F = f, gamepad1));
+        adjusters.add(new Adjuster("Breaking Strength", ()->follower.getConstraints().getBrakingStrength(),
+                (double bStrength)->follower.getConstraints().setBrakingStrength(bStrength), gamepad1));
+        adjusters.add(new Adjuster("Braking Start", ()->follower.getConstraints().getBrakingStart(),
+                (double bStart)->follower.getConstraints().setBrakingStart(bStart), gamepad1));
+        adjuster = adjusters.get(0);
     }
 
     @Override
@@ -83,5 +104,15 @@ public class TestBezier extends OpMode {
                 follower.turnTo(targetAngle);
             }
         }
+
+        if (gamepad1.rightBumperWasPressed()){
+            adjuster = adjusters.get((adjusters.indexOf(adjuster)+1)%adjusters.size());
+        }
+
+        double val = adjuster.update();
+        PIDFCoefficients pidf = follower.getConstants().getCoefficientsTranslationalPIDF();
+        telemetry.addData("PIDF", "%s = %.6f", adjuster.getName(), val);
+        telemetry.addData("Use D_Pad to change parameter value.","");
+        telemetry.addData("Rt Bumper for next parameter","");
     }
 }

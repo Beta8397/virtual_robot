@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.pedroPathing.tuning;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.CoordinateSystem;
 import com.pedropathing.geometry.Pose;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
@@ -19,6 +20,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
  * Adapted by J. Kenney for use in virtual_robot.
  */
 @TeleOp(group="Pedro")
+@Disabled
 public class LocalizationTest extends OpMode {
 
     Follower follower;

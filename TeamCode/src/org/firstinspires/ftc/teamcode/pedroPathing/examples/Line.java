@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.pedroPathing.examples;
 
+import com.pedropathing.control.PIDFCoefficients;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -7,6 +8,10 @@ import com.pedropathing.paths.Path;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.pedroPathing.tuning.tuning_util.Adjuster;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This is the Line Test Tuner OpMode. It will drive the robot forward and back
@@ -31,9 +36,26 @@ public class Line extends OpMode {
     private Path forwards;
     private Path backwards;
 
+    List<Adjuster> adjusters;
+    Adjuster adjuster;
+
     @Override
     public void init() {
         follower = Constants.createFollower(hardwareMap);
+        adjusters = new ArrayList<>();
+
+        adjusters.add(new Adjuster("P", ()->follower.getConstants().getCoefficientsDrivePIDF().P,
+                (double p)->follower.getConstants().getCoefficientsDrivePIDF().P = p, gamepad1));
+        adjusters.add(new Adjuster("D", ()->follower.getConstants().getCoefficientsDrivePIDF().D,
+                (double d)->follower.getConstants().getCoefficientsDrivePIDF().D = d, gamepad1));
+        adjusters.add(new Adjuster("F", ()->follower.getConstants().getCoefficientsDrivePIDF().F,
+                (double f)->follower.getConstants().getCoefficientsDrivePIDF().F = f, gamepad1));
+        adjusters.add(new Adjuster("Breaking Strength", ()->follower.getConstraints().getBrakingStrength(),
+                (double bStrength)->follower.getConstraints().setBrakingStrength(bStrength), gamepad1));
+        adjusters.add(new Adjuster("Braking Start", ()->follower.getConstraints().getBrakingStart(),
+                (double bStart)->follower.getConstraints().setBrakingStart(bStart), gamepad1));
+        adjuster = adjusters.get(0);
+
     }
 
     /** This initializes the Follower and creates the forward and backward Paths. */
@@ -68,6 +90,17 @@ public class Line extends OpMode {
                 follower.followPath(forwards);
             }
         }
+
+
+        if (gamepad1.rightBumperWasPressed()){
+            adjuster = adjusters.get((adjusters.indexOf(adjuster)+1)%adjusters.size());
+        }
+
+        double val = adjuster.update();
+        PIDFCoefficients pidf = follower.getConstants().getCoefficientsTranslationalPIDF();
+        telemetry.addData("PIDF", "%s = %.6f", adjuster.getName(), val);
+        telemetry.addData("Use D_Pad to change parameter value.","");
+        telemetry.addData("Rt Bumper for next parameter","");
 
     }
 }
