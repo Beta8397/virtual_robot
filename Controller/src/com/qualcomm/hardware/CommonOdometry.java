@@ -13,11 +13,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
 /**
- * {@link CommonOdometry} is the Java driver for the SparkFun Qwiic Optical Tracking Odometry Sensor
- * (OTOS). This is a port of the Arduino library.
- *
- * @see <a href="https://www.sparkfun.com/products/24904">SparkFun OTOS Product Page</a>
- * @see <a href="https://github.com/sparkfun/SparkFun_Qwiic_OTOS_Arduino_Library/">Arduino Library</a>
+ *  INTERNAL USE ONLY
+ *  Utility class for incorporating odometry sensors into virtual robot
+ *  configurations
  */
 public class CommonOdometry {
 
@@ -28,6 +26,13 @@ public class CommonOdometry {
     public static CommonOdometry getInstance(){
         if (theInstance == null) theInstance = new CommonOdometry();
         return theInstance;
+    }
+
+    /**
+     * Internal use only
+     */
+    public static void internalReset(){
+        theInstance = null;
     }
 
     /*

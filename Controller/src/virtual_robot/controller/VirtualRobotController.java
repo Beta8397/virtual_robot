@@ -1,5 +1,6 @@
 package virtual_robot.controller;
 
+import com.qualcomm.hardware.CommonOdometry;
 import com.qualcomm.robotcore.eventloop.opmode.*;
 import com.qualcomm.robotcore.hardware.*;
 import com.qualcomm.robotcore.util.Range;
@@ -467,6 +468,7 @@ public class VirtualRobotController {
             bot.removeFromWorld();
             bot.removeFromDisplay(fieldPane);
         }
+        CommonOdometry.internalReset();
         bot = getVirtualBotInstance(cbxConfig.getValue());
         if (bot == null) System.out.println("Unable to get VirtualBot Object");
         hardwareMap = bot.getHardwareMap();
