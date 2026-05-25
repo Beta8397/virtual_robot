@@ -1,0 +1,25 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Launch Virtual Robot",
+            "request": "launch",
+            "mainClass": "virtual_robot.controller.VirtualRobotApplication",
+            "classPaths": [
+                "${workspaceFolder}/out",
+                "${workspaceFolder}/lib/dyn4j-4.1.4.jar",
+                "${workspaceFolder}/lib/guava-20.0.jar",
+                "${workspaceFolder}/lib/javassist-3.21.0-GA.jar",
+                "${workspaceFolder}/lib/reflections-0.9.11.jar",
+                "${workspaceFolder}/lib/RoadRunner.jar",
+                "${workspaceFolder}/lib/PedroPathing.jar",
+                "${workspaceFolder}/lib/Jamepad.jar",
+                "${workspaceFolder}/lib/EasyOpenCV_v1.5.0_OBJ_bundle.jar"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "vmArgs": "-Dprism.order=sw"
+        }
+    ]
+}

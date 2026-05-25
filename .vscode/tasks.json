@@ -1,0 +1,23 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Verify Java Installation",
+            "type": "shell",
+            "command": "java -version && echo '' && echo 'JavaFX Modules:' && java --list-modules | grep javafx",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            }
+        },
+        {
+            "label": "Check DISPLAY",
+            "type": "shell",
+            "command": "echo \"DISPLAY=$DISPLAY\" && echo \"JAVA_HOME=$JAVA_HOME\"",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            }
+        }
+    ]
+}
