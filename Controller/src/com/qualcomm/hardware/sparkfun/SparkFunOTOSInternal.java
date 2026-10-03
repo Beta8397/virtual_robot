@@ -1,6 +1,7 @@
 package com.qualcomm.hardware.sparkfun;
 
 import com.qualcomm.hardware.CommonOdometry;
+import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
 
 /**
  *   SparkFunOTOS methods for internal use only
@@ -12,10 +13,12 @@ public class SparkFunOTOSInternal extends SparkFunOTOS{
      */
 
     public void update(){
-        CommonOdometry.PoseVelAccel pva = odo.getPoseVelAccel(_distanceUnit, _angularUnit);
-        position = new Pose2D(pva.pos.getX(_distanceUnit), pva.pos.getY(_distanceUnit), pva.pos.getHeading(_angularUnit));
-        velocity = new Pose2D(pva.vel.getX(_distanceUnit), pva.vel.getY(_distanceUnit), pva.vel.getHeading(_angularUnit));
-        acceleration = new Pose2D(pva.acc.getX(_distanceUnit), pva.acc.getY(_distanceUnit), pva.acc.getHeading(_angularUnit));
+        CommonOdometry.PoseVelAccel pvaMR = odo.getPoseVelAccel();
+        UnnormalizedAngleUnit unnormalizedAngleUnit = _angularUnit.getUnnormalized();
+
+        position = new Pose2D(pvaMR.pos.getX(_distanceUnit), pvaMR.pos.getY(_distanceUnit), pvaMR.pos.getHeading(_angularUnit));
+        velocity = new Pose2D(pvaMR.vel.getX(_distanceUnit), pvaMR.vel.getY(_distanceUnit), pvaMR.vel.getHeading(unnormalizedAngleUnit));
+        acceleration = new Pose2D(pvaMR.acc.getX(_distanceUnit), pvaMR.acc.getY(_distanceUnit), pvaMR.acc.getHeading(unnormalizedAngleUnit));
     }
 
 }

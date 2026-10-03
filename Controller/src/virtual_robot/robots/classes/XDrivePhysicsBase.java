@@ -21,12 +21,14 @@ import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
 import virtual_robot.config.Config;
 import virtual_robot.controller.Filters;
 import virtual_robot.controller.VirtualBot;
 import virtual_robot.controller.VirtualField;
 import virtual_robot.controller.VirtualRobotController;
 import virtual_robot.util.AngleUtils;
+import virtual_robot.util.Vel2D;
 
 /**
  * For internal use only. Base class for a physics-based robot with four Omni wheels, color sensor,
@@ -280,8 +282,8 @@ public abstract class XDrivePhysicsBase extends VirtualBot {
         imuNew.updateHeadingRadians(headingRadians);
         odo.update(
                 new Pose2D(DistanceUnit.METER, xMeters, yMeters, AngleUnit.RADIANS, headingRadians),
-                new Pose2D(DistanceUnit.METER, velocityMetersPerSec.x, velocityMetersPerSec.y, AngleUnit.RADIANS, angularVelocityRadiansPerSec),
-                new Pose2D(DistanceUnit.METER, accelMetersPerSecSqr.x, accelMetersPerSecSqr.y, AngleUnit.RADIANS, angularAccelRadiansPerSecSqr)
+                new Vel2D(DistanceUnit.METER, velocityMetersPerSec.x, velocityMetersPerSec.y, UnnormalizedAngleUnit.RADIANS, angularVelocityRadiansPerSec),
+                new Vel2D(DistanceUnit.METER, accelMetersPerSecSqr.x, accelMetersPerSecSqr.y, UnnormalizedAngleUnit.RADIANS, angularAccelRadiansPerSecSqr)
         );
         sparkFunOTOSInternal.update();
 
@@ -306,7 +308,7 @@ public abstract class XDrivePhysicsBase extends VirtualBot {
         imu.close();
         odo.update(
                 new Pose2D(DistanceUnit.METER, x/VirtualField.PIXELS_PER_METER, y/VirtualField.PIXELS_PER_METER, AngleUnit.RADIANS, headingRadians),
-                new Pose2D(DistanceUnit.METER, 0, 0, AngleUnit.RADIANS, 0), new Pose2D(DistanceUnit.METER, 0, 0, AngleUnit.RADIANS, 0)
+                new Vel2D(DistanceUnit.METER, 0, 0, UnnormalizedAngleUnit.RADIANS, 0), new Vel2D(DistanceUnit.METER, 0, 0, UnnormalizedAngleUnit.RADIANS, 0)
         );
         sparkFunOTOSInternal.update();
         goBildaPinpointDriverInternal.update();
@@ -343,7 +345,7 @@ public abstract class XDrivePhysicsBase extends VirtualBot {
         super.positionWithMouseClick(arg);
         odo.update(
                 new Pose2D(DistanceUnit.METER, x/VirtualField.PIXELS_PER_METER, y/VirtualField.PIXELS_PER_METER, AngleUnit.RADIANS, headingRadians),
-                new Pose2D(DistanceUnit.METER, 0, 0, AngleUnit.RADIANS, 0), new Pose2D(DistanceUnit.METER, 0, 0, AngleUnit.RADIANS, 0)
+                new Vel2D(DistanceUnit.METER, 0, 0, UnnormalizedAngleUnit.RADIANS, 0), new Vel2D(DistanceUnit.METER, 0, 0, UnnormalizedAngleUnit.DEGREES.RADIANS, 0)
         );
         odo.setPosition(new Pose2D(DistanceUnit.METER, 0, 0, AngleUnit.RADIANS, 0));
         sparkFunOTOSInternal.update();

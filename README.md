@@ -1,14 +1,13 @@
 # A 2D simulator to help beginning Java programmers learn to program for FTC Robotics.
 
-Now supports RoadRunner v1.0.1 AND PedroPathing v2.1.12 (including Ivy v1.0.1), with facsimiles 
-of the quickstart teamcode provided for each. For both RR and PP, tuning has been done for 
-virtual_robot's MecDynamic robot configuration. This is the most physically realistic 
-robot configuration; the other configurations aren't expected to work well 
-with RR or PP. Example opmodes are included.
+Now supports RoadRunner v1.0.1 AND PedroPathing v3 (including Ivy), with facsimiles 
+of the quickstart teamcode provided for each. **For both Pedropathing and Roadrunner, 
+it is strongly recommended to use virtual_robot's MecDynamic robot configuration.** This is 
+the most physically realistic  robot configuration; the other configurations aren't expected 
+to work well with RR or PP. Example opmodes are included.
 
-Current game configuration is Decode. This includes goals and ramps, which serve as obstacles to robot
-travel. If you don't want these obstacles, then in the Config.java file, change the 
-assignment statement for GAME to: new NoGame()
+The current field image is Biobuzz, and the Game is set to NoGame(). As such, there are 
+no obstacles to robot travel on the field.
 
 GoBilda Pinpoint odometry sensor added. It is included in Mecanum and XDrive robots. ("pinpoint" in config file)
 

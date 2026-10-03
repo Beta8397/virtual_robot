@@ -188,7 +188,7 @@ public class GoBildaPinpointDriver implements HardwareDevice {
 
             xVelocity = (float) pva.vel.getX(DistanceUnit.MM);
             yVelocity = (float) pva.vel.getY(DistanceUnit.MM);
-            hVelocity = (float) pva.vel.getHeading(AngleUnit.RADIANS);
+            hVelocity = (float) pva.vel.getHeading(UnnormalizedAngleUnit.RADIANS);
         }
 
         if (updateEncoders) {
@@ -490,7 +490,8 @@ public class GoBildaPinpointDriver implements HardwareDevice {
      * NOTE: The corresponding method in the original GoBilda driver has an error and won't work.
      */
     public synchronized double getHeading(AngleUnit angleUnit){
-        return angleUnit.fromRadians(((hOrientation + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI);
+        return angleUnit.fromRadians(hOrientation);
+//        return angleUnit.fromRadians(((hOrientation + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI);
     }
 
     /**
