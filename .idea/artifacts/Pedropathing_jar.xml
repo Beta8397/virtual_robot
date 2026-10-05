@@ -1,9 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" name="Pedropathing:jar">
-    <output-path>$PROJECT_DIR$/out/artifacts/Pedropathing_jar</output-path>
-    <root id="archive" name="Pedropathing.jar">
-      <element id="module-output" name="Pedropathing" />
-      <element id="module-source" name="Pedropathing" />
-    </root>
-  </artifact>
-</component>
