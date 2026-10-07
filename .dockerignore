@@ -1,0 +1,26 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+*.iml
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# Build outputs
+out/
+*.class
+
+# Documentation
+*.pdf
+*.gif
+*.jpg
+*.md
+!.devcontainer/*.md
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,53 @@
+{
+	"name": "Virtual Robot Simulator",
+	"image": "mcr.microsoft.com/devcontainers/base:debian",
+	
+	"features": {
+		"ghcr.io/devcontainers/features/desktop-lite:1": {
+			"password": "vscode",
+			"webPort": "6080",
+			"vncPort": "5901"
+		}
+	},
+
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"vscjava.vscode-java-pack",
+				"vscjava.vscode-java-debug",
+				"redhat.java"
+			],
+			"settings": {
+				"java.configuration.runtimes": [
+					{
+						"name": "JavaSE-17",
+						"path": "/home/vscode/.sdkman/candidates/java/current",
+						"default": true
+					}
+				],
+				"java.jdt.ls.java.home": "/home/vscode/.sdkman/candidates/java/current"
+			}
+		}
+	},
+
+	"forwardPorts": [6080, 5901],
+	"portsAttributes": {
+		"6080": {
+			"label": "Desktop (noVNC)",
+			"onAutoForward": "notify"
+		},
+		"5901": {
+			"label": "VNC",
+			"onAutoForward": "ignore"
+		}
+	},
+
+	"postCreateCommand": "bash .devcontainer/setup.sh",
+
+	"remoteEnv": {
+		"DISPLAY": ":1",
+		"JAVA_HOME": "/home/vscode/.sdkman/candidates/java/current"
+	},
+
+	"remoteUser": "vscode"
+}

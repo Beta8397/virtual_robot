@@ -1,0 +1,27 @@
+{
+    "java.project.sourcePaths": [
+        "Controller/src",
+        "TeamCode/src",
+        "tmp_compile"
+    ],
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar"
+    ],
+    "java.project.outputPath": "out",
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.debug.settings.forceBuildBeforeLaunch": true,
+    "java.configuration.runtimes": [
+        {
+            "name": "JavaSE-17",
+            "path": "~/.sdkman/candidates/java/current",
+            "default": true
+        }
+    ],
+    "java.jdt.ls.java.home": "~/.sdkman/candidates/java/current",
+    "files.exclude": {
+        "**/.classpath": true,
+        "**/.project": true,
+        "**/.settings": true,
+        "**/.factorypath": true
+    }
+}

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+    <classpathentry kind="src" path="Controller/src"/>
+    <classpathentry kind="src" path="TeamCode/src"/>
+    <classpathentry kind="src" path="tmp_compile"/>
+    <classpathentry kind="lib" path="lib/Jamepad.jar"/>
+    <classpathentry kind="lib" path="lib/dyn4j-4.1.4.jar" sourcepath="lib/dyn4j-4.1.4-sources.jar"/>
+    <classpathentry kind="lib" path="lib/reflections-0.9.11.jar"/>
+    <classpathentry kind="lib" path="lib/guava-20.0.jar"/>
+    <classpathentry kind="lib" path="lib/javassist-3.21.0-GA.jar"/>
+    <classpathentry kind="lib" path="lib/EasyOpenCV_v1.5.0_OBJ_bundle.jar"/>
+    <classpathentry kind="lib" path="lib/PedroPathing.jar"/>
+    <classpathentry kind="lib" path="lib/RoadRunner.jar"/>
+    <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+    <classpathentry kind="output" path="out"/>
+</classpath>
